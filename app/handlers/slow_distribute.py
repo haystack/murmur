@@ -6,7 +6,8 @@ from lamson import view
 
 @route("(address)@(host)", address=".+")
 def START(message, address=None, host=None):
-    return NEW_USER
+	print "%s %s %s" %(message, address, host)
+	return
 
 
 @route_like(START)

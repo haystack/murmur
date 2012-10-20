@@ -1,0 +1,13 @@
+# Ignore all compiled python files.
+*.pyc
+
+# Ignore all emacs backup files
+*.*~
+
+
+# Ignore log files and locks
+logs/
+run/
+
+# Local Settings
+local_settings.py

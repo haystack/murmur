@@ -6,11 +6,11 @@ import logging
 # for secure connections.
 relay_config = {'host': 'localhost', 'port': 8825}
 
-receiver_config = {'host': 'localhost', 'port': 8823}
+receiver_config = {'host': 'slow.csail.mit.edu', 'port': 25}
 
-handlers = ['app.handlers.sample']
+handlers = ['app.handlers.sample', 'lamson.handlers.log']
 
-router_defaults = {'host': '.+'}
+router_defaults = {'host': 'localhost'}
 
 template_config = {'dir': 'app', 'module': 'templates'}
 
