@@ -1,25 +1,12 @@
 import logging
-from lamson.routing import route, stateless
-import logging
-import email
+from lamson.routing import route, route_like, stateless
+from config.settings import relay
 
 
-def get_first_text_block(email_message_instance):
-	maintype = email_message_instance.get_content_maintype()
-	if maintype == 'multipart':
-		for part in email_message_instance.get_payload():
-			if part.get_content_maintype() == 'text':
-				return part.get_payload()
-	elif maintype == 'text':
-		return email_message_instance.get_payload()
 
-
-@route("(address)@(host)", address=".+", host="slow.csail.mit.edu")
+@route("(address)@(host)", address=".+", host=".+")
 @stateless
 def START(message, address=None, host=None):
-    email_message = email.message_from_string(str(message))
-    body = get_first_text_block(email_message)   
-    logging.debug("%s %s %s" %(body, address, host))
-    return
-
-
+	logging.debug("%s" %(str(message)))
+	relay.reply(message, 'no-reply@slow.csail.mit.edu', 'Auto: ' + message['Subject'], message.body())
+	return

@@ -1,14 +1,41 @@
 A Proxy Email Server for slow-distribution
 
-To run this project:
-1: mkdir logs
-2: mkdir run
-3: lamson start
+##### Installation Instruction ####
+
+# setup a virtual environment
+virtualenv slow_email
+surce bin/activate
+
+# install required packages
+pip install lamson
+pip install django
+
+# install slow_email
+mkdir src
+cd src
+git clone git@github.com:abhardwaj/slow-email.git
 
 
-Packages Requirements:
-1: lamson
-2: django
+# edit configuration setting
+cd src/slow_email
+vi config/settings.py #configure your relay_server (exim4 or sendmail) on a port other than 25
+
+# run slow_email server
+cd src/slow_email
+mkdir logs
+mkdir run
+lamson start
+
+# to stop/restart
+cd src/slow_email
+lamson stop/restart
+
+# log files
+cd src/slow_email
+cat logs/server.log  #slow_email log
+cat lamson.out  #lamson stdio
+cat lamson.err #lamson stderr 
+
 
 
 
