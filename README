@@ -1,1 +1,14 @@
 A Proxy Email Server for slow-distribution
+
+To run this project:
+1: mkdir logs
+2: mkdir run
+3: lamson start
+
+
+Packages Requirements:
+1: lamson
+2: django
+
+
+
