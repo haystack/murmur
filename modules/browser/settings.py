@@ -1,4 +1,4 @@
-# Django settings for browser project.
+# Django settings for slow_email project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -116,7 +116,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'browser',
-    'handlers'
+    'handler'
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:

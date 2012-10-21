@@ -11,11 +11,11 @@ relay_config = {'host': 'localhost', 'port': 465}
 
 receiver_config = {'host': '0.0.0.0', 'port': 25}
 
-handlers = ['app.handlers.main']
+handlers = ['modules.handler.main']
 
 router_defaults = {'host': '\*\\.mit\\.edu'}
 
-template_config = {'dir': 'app', 'module': 'templates'}
+template_config = {'dir': 'modules', 'module': 'templates'}
 
 # hook django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "browser.settings")
