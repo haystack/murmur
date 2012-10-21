@@ -13,7 +13,7 @@ Slow_Email Main Handler
 @route("(address)@(host)", address=".+", host=".+")
 @stateless
 def START(message, address=None, host=None):
-	p = Post(from_addr = message['From'], post=str(message))
+	p = Post(from_addr = message['From'], message=str(message))
 	p.save()
 	relay.reply(message, 'no-reply@slow.csail.mit.edu', message['Subject'], message.body())
 	return
