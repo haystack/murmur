@@ -1,7 +1,7 @@
 # This file contains python variables that configure Lamson for email processing.
 import sys, os
 import logging
-sys.path.append('./app')
+sys.path.append('./modules')
 
 
 # You may add additional parameters such as `username' and `password' if your
