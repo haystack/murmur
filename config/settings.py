@@ -11,7 +11,7 @@ relay_config = {'host': 'localhost', 'port': 8825}
 
 receiver_config = {'host': 'slow.csail.mit.edu', 'port': 25}
 
-handlers = ['app.handlers.slow_distribute', 'lamson.handlers.log']
+handlers = ['app.handlers.slow_distribute']
 
 router_defaults = {'host': 'slow.csail.mit.edu'}
 
