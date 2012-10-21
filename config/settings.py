@@ -11,7 +11,7 @@ relay_config = {'host': 'localhost', 'port': 465}
 
 receiver_config = {'host': '0.0.0.0', 'port': 25}
 
-handlers = ['app.handlers.slow_distribute']
+handlers = ['app.handlers.main']
 
 router_defaults = {'host': '.+'}
 
