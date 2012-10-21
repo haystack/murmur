@@ -13,7 +13,7 @@ receiver_config = {'host': '0.0.0.0', 'port': 25}
 
 handlers = ['app.handlers.main']
 
-router_defaults = {'host': '.+'}
+router_defaults = {'host': '\*\\.mit\\.edu'}
 
 template_config = {'dir': 'app', 'module': 'templates'}
 

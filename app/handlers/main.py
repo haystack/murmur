@@ -10,7 +10,7 @@ Slow_Email Main Handler
 @date: Oct 20, 2012
 '''
 
-@route("(address)@(host)", address=".+", host=".+")
+@route("(address)@(host)", address=".+", host="slow.csail.mit.edu")
 @stateless
 def START(message, address=None, host=None):
 	p = Post(from_addr = message['From'], message=str(message))
