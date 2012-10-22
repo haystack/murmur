@@ -29,13 +29,51 @@ def create(message, group_name=None, host=None):
 		relay.reply(message, NO_REPLY, "Success", "Mailing group %s@slow.csail.mit.edu created" %(group_name))
         return
 
+
+@route("(group_name)-activate@(host)", group_name=".+", host=HOST)
+@stateless
+def activate(message, group_name=None, host=None):
+	group = None
+	name, addr = parseaddr(message['from'])
+	try:                    
+                group = Group.objects.get(name=group_name)
+		user = User.objects.get(email = addr, group = group, admin = True)
+		group.status = True
+		group.save()
+		relay.reply(message, NO_REPLY, "Success", "Activated: %s@slow.csail.mit.edu" %(group_name))
+	except User.DoesNotExist:
+		relay.reply(message, NO_REPLY, "Error", "You do not have the privilege to activate: %s@slow.csail.mit.edu" %(group_name))
+        except Group.DoesNotExist:
+       	 	relay.reply(message, NO_REPLY, "Error", "Could not locate %s@slow.csail.mit.edu group" %(group_name))
+        return
+
+
+@route("(group_name)-deactivate@(host)", group_name=".+", host=HOST)
+@stateless
+def deactivate(message, group_name=None, host=None):
+	group = None
+	name, addr = parseaddr(message['from'])
+	try:                    
+                group = Group.objects.get(name=group_name)
+		user = User.objects.get(email = addr, group = group, admin = True)
+		group.status = False
+		group.save()
+		relay.reply(message, NO_REPLY, "Success", "Deactivated: %s@slow.csail.mit.edu" %(group_name))
+	except User.DoesNotExist:
+		relay.reply(message, NO_REPLY, "Error", "You do not have the privilege to deactivate: %s@slow.csail.mit.edu" %(group_name))
+        except Group.DoesNotExist:
+       	 	relay.reply(message, NO_REPLY, "Error", "Could not locate %s@slow.csail.mit.edu group" %(group_name))
+        return
+
+
+
 @route("(group_name)-subscribe@(host)", group_name=".+", host=HOST)
 @stateless
 def subscribe(message, group_name=None, host=None):
 	group = None
 	name, addr = parseaddr(message['from'])
 	try:                    
-                group = Group.objects.get(name=group_name)
+                group = Group.objects.get(name=group_name, status = True)
 		user = User.objects.get(email = addr, group = group)
 		relay.reply(message, NO_REPLY, "Error", "You are already subscribed to: %s@slow.csail.mit.edu" %(group_name))
 	except User.DoesNotExist:
@@ -53,7 +91,7 @@ def unsubscribe(message, group_name=None, host=None):
 	group = None
 	name, addr = parseaddr(message['from'])
 	try:                    
-                group = Group.objects.get(name=group_name)
+                group = Group.objects.get(name=group_name, status = True)
 		user = User.objects.get(email = addr, group = group)
 		if(user.admin):
 			relay.reply(message, NO_REPLY, "Error", "Can't un-subscribe the group owner from: %s@slow.csail.mit.edu" %(group_name))
@@ -73,7 +111,7 @@ def info(message, group_name=None, host=None):
         try:
                 group = Group.objects.get(name=group_name)
 		members = User.objects.filter(group=group).values()
-                relay.reply(message, NO_REPLY, "Success", "Group Name: %s@slow.csail.mit.edu, Members: %s" %(group_name, str(members)))
+                relay.reply(message, NO_REPLY, "Success", "Group Name: %s@slow.csail.mit.edu, Status: %s, Members: %s" %(group_name, group.status, str(members)))
         except Group.DoesNotExist:
 		relay.reply(message, NO_REPLY, "Error", "Could not locate %s@slow.csail.mit.edu group" %(group_name))
         return
