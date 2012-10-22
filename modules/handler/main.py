@@ -31,6 +31,14 @@ def unsubscribe(message, address=None, host=None):
         relay.reply(message, NO_REPLY, "Success", "Unsubscribed from: %s@slow.csail.mit.edu" %(address))
         return
 
+
+@route("(address)-info@(host)", address=".+", host=HOST)
+@stateless
+def unsubscribe(message, address=None, host=None):
+        relay.reply(message, NO_REPLY, "Success", "List Info: %s@slow.csail.mit.edu" %(address))
+        return
+
+
 @route("(address)@(host)", address="ask", host=HOST)
 @stateless
 def handle(message, address=None, host=None):
