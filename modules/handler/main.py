@@ -69,8 +69,8 @@ def unsubscribe(message, group_name=None, host=None):
 def info(message, group_name=None, host=None):
         try:
                 group = Group.objects.get(name=group_name)
-		members = User.objects.filter(group=group)
-                relay.reply(message, NO_REPLY, "Success", "Grroup Name: %s@slow.csail.mit.edu, Members: %s" %(group_name, str(members)))
+		members = User.objects.filter(group=group).values()
+                relay.reply(message, NO_REPLY, "Success", "Group Name: %s@slow.csail.mit.edu, Members: %s" %(group_name, str(members)))
         except Group.DoesNotExist:
 		relay.reply(message, NO_REPLY, "Error", "Could not locate %s@slow.csail.mit.edu group" %(group_name))
         return
