@@ -35,7 +35,7 @@ def unsubscribe(message, address=None, host=None):
 
 @route("(address)-info@(host)", address=".+", host=HOST)
 @stateless
-def unsubscribe(message, address=None, host=None):
+def info(message, address=None, host=None):
         relay.reply(message, NO_REPLY, "Success", "List Info: %s@slow.csail.mit.edu" %(address))
         return
 
