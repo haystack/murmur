@@ -23,21 +23,24 @@ def add(message, group_name=None, host=None):
 	except Group.DoesNotExist:
 		name, addr = parseaddr(message['from'])
 		group = Group(name=group_name, status=True)
+		group.save()
 		user = User(email = addr, group = group, admin = True, status = True)
-        	relay.reply(message, NO_REPLY, "Success", "Mailing group %s@slow.csail.mit.edu created" %(group_name))
+        	user.save()
+		relay.reply(message, NO_REPLY, "Success", "Mailing group %s@slow.csail.mit.edu created" %(group_name))
         return
 
 @route("(group_name)-subscribe@(host)", group_name=".+", host=HOST)
 @stateless
-def subscribe(message, address=None, host=None):
+def subscribe(message, group_name=None, host=None):
 	group = None
 	name, addr = parseaddr(message['from'])
 	try:                    
                 group = Group.objects.get(name=group_name)
 		user = User.objects.get(email = addr, group = group)
 		relay.reply(message, NO_REPLY, "Error", "You are already subscribed to: %s@slow.csail.mit.edu" %(group_name))
-	except: User.DoesNotExist:
+	except User.DoesNotExist:
                 user = User(email = addr, group = group, admin = False, status = True)
+		user.save()
 		relay.reply(message, NO_REPLY, "Success", "You are now subscribed to: %s@slow.csail.mit.edu" %(group_name))
         except Group.DoesNotExist:
        	 	relay.reply(message, NO_REPLY, "Error", "Could not locate %s@slow.csail.mit.edu group" %(group_name))
