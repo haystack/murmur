@@ -2,6 +2,7 @@ import logging
 from lamson.routing import route, route_like, stateless
 from config.settings import relay
 from models import *
+from email.utils import *
 
 '''
 Slow_Email Main Handler
@@ -42,8 +43,8 @@ def unsubscribe(message, address=None, host=None):
 @route("(address)@(host)", address="ask", host=HOST)
 @stateless
 def handle(message, address=None, host=None):
-	name, address = parseaddr(message['from'])
-	p = Post(from_addr = address, message=str(message))
+	name, addr = parseaddr(message['from'])
+	p = Post(from_addr = addr, message=str(message))
 	p.save()
 	relay.reply(message, address + '@' + HOST, message['Subject'], message.body())
 	return
