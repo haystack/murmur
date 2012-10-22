@@ -14,9 +14,9 @@ Slow_Email Main Handler
 HOST = 'slow.csail.mit.edu'
 NO_REPLY = 'no-reply' + '@' + HOST
 
-@route("(group_name)-add@(host)", group_name=".+", host=HOST)
+@route("(group_name)-create@(host)", group_name=".+", host=HOST)
 @stateless
-def add(message, group_name=None, host=None):
+def create(message, group_name=None, host=None):
 	try:
 		group = Group.objects.get(name=group_name)
 		relay.reply(message, NO_REPLY, "Error", "Mailing group %s@slow.csail.mit.edu already exists" %(group_name))
@@ -55,8 +55,11 @@ def unsubscribe(message, group_name=None, host=None):
 	try:                    
                 group = Group.objects.get(name=group_name)
 		user = User.objects.get(email = addr, group = group)
-		user.delete()
-		relay.reply(message, NO_REPLY, "Success", "You are now un-subscribed from: %s@slow.csail.mit.edu" %(group_name))
+		if(user.admin):
+			relay.reply(message, NO_REPLY, "Error", "Can't un-subscribe the group owner from: %s@slow.csail.mit.edu" %(group_name))
+		else:
+			user.delete()
+			relay.reply(message, NO_REPLY, "Success", "You are now un-subscribed from: %s@slow.csail.mit.edu" %(group_name))
 	except User.DoesNotExist:
 		relay.reply(message, NO_REPLY, "Error", "You are not subscribed to: %s@slow.csail.mit.edu" %(group_name))
         except Group.DoesNotExist:
