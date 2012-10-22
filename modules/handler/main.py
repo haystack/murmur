@@ -10,26 +10,33 @@ Slow_Email Main Handler
 @date: Oct 20, 2012
 '''
 
-@route("(address)@(host)", address="ask", host="slow.csail.mit.edu")
+HOST = 'slow.csail.mit.edu'
+NO_REPLY = 'no-reply' + '@' + HOST
+
+@route("(address)-add@(host)", address=".+", host=HOST)
 @stateless
-def START(message, address=None, host=None):
-	p = Post(from_addr = message['From'], message=str(message))
-	p.save()
-	relay.reply(message, 'ask@slow.csail.mit.edu', message['Subject'], message.body())
-	return
-
-
-@route("(address)@(host)", address="some", host="slow.csail.mit.edu")
-@stateless
-def START(message, address=None, host=None):
-	p = Post(from_addr = message['From'], message=str(message))
-	p.save()
-	relay.reply(message, 'some@slow.csail.mit.edu', message['Subject'], message.body())
-	return
-
-
-@route("(address)-subscribe@(host)", address=".+", host="slow.csail.mit.edu")
-@stateless
-def START(message, address=None, host=None):
-        relay.reply(message, 'no-reply@slow.csail.mit.edu', "Success", "List Address: %s@slow.csail.mit.edu" %(address))
+def add(message, address=None, host=None):
+        relay.reply(message, NO_REPLY, "Success", "List Added: %s@slow.csail.mit.edu" %(address))
         return
+
+@route("(address)-subscribe@(host)", address=".+", host=HOST)
+@stateless
+def subscribe(message, address=None, host=None):
+        relay.reply(message, NO_REPLY, "Success", "Subscribed to: %s@slow.csail.mit.edu" %(address))
+        return
+
+@route("(address)-unsubscribe@(host)", address=".+", host=HOST)
+@stateless
+def unsubscribe(message, address=None, host=None):
+        relay.reply(message, NO_REPLY, "Success", "Unsubscribed from: %s@slow.csail.mit.edu" %(address))
+        return
+
+@route("(address)@(host)", address="ask", host=HOST)
+@stateless
+def handle(message, address=None, host=None):
+	p = Post(from_addr = message['From'], message=str(message))
+	p.save()
+	relay.reply(message, address + '@' + HOST, message['Subject'], message.body())
+	return
+
+
