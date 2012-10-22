@@ -14,22 +14,39 @@ Slow_Email Main Handler
 HOST = 'slow.csail.mit.edu'
 NO_REPLY = 'no-reply' + '@' + HOST
 
-@route("(address)-add@(host)", address=".+", host=HOST)
+@route("(group_name)-add@(host)", group_name=".+", host=HOST)
 @stateless
-def add(message, address=None, host=None):
-        relay.reply(message, NO_REPLY, "Success", "List Added: %s@slow.csail.mit.edu" %(address))
+def add(message, group_name=None, host=None):
+	try:
+		group = Group.objects.get(name=group_name)
+		relay.reply(message, NO_REPLY, "Error", "Mailing group %s@slow.csail.mit.edu already exists" %(group_name))
+	except Group.DoesNotExist:
+		name, addr = parseaddr(message['from'])
+		group = Group(name=group_name, status=True)
+		user = User(email = addr, group = group, admin = True, status = True)
+        	relay.reply(message, NO_REPLY, "Success", "Mailing group %s@slow.csail.mit.edu created" %(group_name))
         return
 
-@route("(address)-subscribe@(host)", address=".+", host=HOST)
+@route("(group_name)-subscribe@(host)", group_name=".+", host=HOST)
 @stateless
 def subscribe(message, address=None, host=None):
-        relay.reply(message, NO_REPLY, "Success", "Subscribed to: %s@slow.csail.mit.edu" %(address))
+	group = None
+	name, addr = parseaddr(message['from'])
+	try:                    
+                group = Group.objects.get(name=group_name)
+		user = User.objects.get(email = addr, group = group)
+		relay.reply(message, NO_REPLY, "Error", "You are already subscribed to: %s@slow.csail.mit.edu" %(group_name))
+	except: User.DoesNotExist:
+                user = User(email = addr, group = group, admin = False, status = True)
+		relay.reply(message, NO_REPLY, "Success", "You are now subscribed to: %s@slow.csail.mit.edu" %(group_name))
+        except Group.DoesNotExist:
+       	 	relay.reply(message, NO_REPLY, "Error", "Could not locate %s@slow.csail.mit.edu group" %(group_name))
         return
 
-@route("(address)-unsubscribe@(host)", address=".+", host=HOST)
+@route("(group_name)-unsubscribe@(host)", group_name=".+", host=HOST)
 @stateless
 def unsubscribe(message, address=None, host=None):
-        relay.reply(message, NO_REPLY, "Success", "Unsubscribed from: %s@slow.csail.mit.edu" %(address))
+        relay.reply(message, NO_REPLY, "Success", "You are now unsubscribed from: %s@slow.csail.mit.edu" %(group_name))
         return
 
 
