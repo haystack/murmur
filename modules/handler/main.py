@@ -46,17 +46,33 @@ def subscribe(message, group_name=None, host=None):
        	 	relay.reply(message, NO_REPLY, "Error", "Could not locate %s@slow.csail.mit.edu group" %(group_name))
         return
 
+
 @route("(group_name)-unsubscribe@(host)", group_name=".+", host=HOST)
 @stateless
-def unsubscribe(message, address=None, host=None):
-        relay.reply(message, NO_REPLY, "Success", "You are now unsubscribed from: %s@slow.csail.mit.edu" %(group_name))
+def unsubscribe(message, group_name=None, host=None):
+	group = None
+	name, addr = parseaddr(message['from'])
+	try:                    
+                group = Group.objects.get(name=group_name)
+		user = User.objects.get(email = addr, group = group)
+		user.delete()
+		relay.reply(message, NO_REPLY, "Success", "You are now un-subscribed from: %s@slow.csail.mit.edu" %(group_name))
+	except User.DoesNotExist:
+		relay.reply(message, NO_REPLY, "Error", "You are not subscribed to: %s@slow.csail.mit.edu" %(group_name))
+        except Group.DoesNotExist:
+       	 	relay.reply(message, NO_REPLY, "Error", "Could not locate %s@slow.csail.mit.edu group" %(group_name))
         return
 
 
-@route("(address)-info@(host)", address=".+", host=HOST)
+@route("(group_name)-info@(host)", group_name=".+", host=HOST)
 @stateless
-def info(message, address=None, host=None):
-        relay.reply(message, NO_REPLY, "Success", "List Info: %s@slow.csail.mit.edu" %(address))
+def info(message, group_name=None, host=None):
+        try:
+                group = Group.objects.get(name=group_name)
+		members = User.objects.filter(group=group)
+                relay.reply(message, NO_REPLY, "Success", "Grroup Name: %s@slow.csail.mit.edu, Members: %s" %(group_name, str(members)))
+        except Group.DoesNotExist:
+		relay.reply(message, NO_REPLY, "Error", "Could not locate %s@slow.csail.mit.edu group" %(group_name))
         return
 
 
