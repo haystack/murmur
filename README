@@ -16,9 +16,19 @@ cd src
 git clone git@github.com:abhardwaj/slow-email.git
 
 
-# edit configuration setting
+# edit lamson configuration setting
 cd src/slow_email
-vi config/settings.py #configure your relay_server (exim4 or sendmail) on a port other than 25
+vi config/settings.py    #configure your relay_server (exim4 or sendmail) on a port other than 25
+
+# edit django configuration settings
+vi modules/browser/settings.py 
+
+# setup postgres database
+create database slow_email
+
+# install schema
+cd src/slow_email/modules
+python manage.py syncdb
 
 # run slow_email server
 cd src/slow_email
