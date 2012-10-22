@@ -42,7 +42,8 @@ def unsubscribe(message, address=None, host=None):
 @route("(address)@(host)", address="ask", host=HOST)
 @stateless
 def handle(message, address=None, host=None):
-	p = Post(from_addr = message['From'], message=str(message))
+	name, address = parseaddr(message['from'])
+	p = Post(from_addr = address, message=str(message))
 	p.save()
 	relay.reply(message, address + '@' + HOST, message['Subject'], message.body())
 	return
