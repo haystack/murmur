@@ -10,6 +10,7 @@ Slow_Email Models
 class Post(models.Model):
 	id = models.CharField(max_length=50, primary_key=True)
 	from_email = models.CharField(max_length=50)
+	subject = models.TextField()
 	message = models.TextField()
 	timestamp = models.DateTimeField(auto_now=True)
 

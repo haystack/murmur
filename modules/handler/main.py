@@ -1,5 +1,5 @@
-import logging
-from lamson.routing import route, route_like, stateless
+import logging, time, base64
+from lamson.routing import route, stateless
 from config.settings import relay
 from models import *
 from email.utils import *
@@ -13,7 +13,8 @@ Slow_Email Main Handler
 
 HOST = 'slow.csail.mit.edu'
 NO_REPLY = 'no-reply' + '@' + HOST
-RESERVED = ['-create', '-activate', '-deactivate', '-subscribe', '-unsubscribe', '-info', 'help', 'no-reply']
+SUFFIX = '__POST__'
+RESERVED = ['-create', '-activate', '-deactivate', '-subscribe', '-unsubscribe', '-info', 'help', 'no-reply', SUFFIX]
 
 @route("(group_name)-create@(host)", group_name=".+", host=HOST)
 @stateless
@@ -129,11 +130,18 @@ def handle(message, address=None, host=None):
 	try:
 		group = Group.objects.get(name=group_name)
 		name, addr = parseaddr(message['from'])
-		#p = Post(from_addr = addr, message=str(message))
-		#p.save()
-		relay.reply(message, address + '@' + HOST, message['Subject'], message.body())
+		id = base64.b64encode(addr+str(time.time()))
+		p = Post(id = id, from_email = addr, subject = message['Subject'], message=str(message))
+		p.save()
+		post_addr = '%s <%s>' %(group_name + '@' + HOST, id + SUFFIX + '@' + HOST)
+		message['Subject'] = '[ %s ] -- %s' %(group_name, message['Subject'])
+		message['From'] = post_addr
+		message['To'] = addr
+		relay.deliver(message)
 	except Group.DoesNotExist:
 		relay.reply(message, NO_REPLY, "Error", "Invalid address: %s@%s" %(group_name, host))
+	except Exception, e:
+		logging.debug('Exception: %s' %(e))
 	return
 
 @route("(address)@(host)", address="help", host=HOST)
