@@ -1,4 +1,4 @@
-import logging, time, base64
+import logging, time, base64, email
 from lamson.routing import route, stateless
 from config.settings import relay
 from models import *
@@ -190,13 +190,18 @@ def handle_post(message, address=None, host=None):
 			to_send.append(addr)
 		post_addr = '%s <%s>' %(group_name, id + POST_SUFFIX + '@' + host)
 		follow_addr = '%s' %(id + FOLLOW_SUFFIX + '@' + host)
-		ps_blurb = "To follow this thread, send an email to: %s" %(follow_addr)
+		ps_blurb = "To follow this thread, send an email to: %s \r\n" %(follow_addr)
 		mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
-		if message.all_parts():
-        		mail.attach_all_parts(message)
-    		else:
-        		mail.Body  = message.body()
-		mail.attach(data=ps_blurb, content_type="text/plain")
+		msg_id = message['message-id']
+		if 'references' in message:
+        		mail['References'] = message['References']
+    		elif msg_id:
+        		mail['References'] = msg_id
+
+    		if msg_id:
+        		mail['message-id'] = msg_id
+        	mail.Body  = get_body(str(message)) + "\n----------------------------------------\n" + ps_blurb
+		
 		logging.debug('TO LIST: ' + str(to_send))
 		relay.deliver(mail, To = to_send)
 	except Group.DoesNotExist:
@@ -225,11 +230,17 @@ def handle_reply(message, post_id=None, suffix=None, host=None):
 			to_send.append(addr)
 		ps_blurb = "To un-follow this thread, send an email to: %s" %(unfollow_addr)
 		mail = MailResponse(From = message['From'], To = message['To'], Subject = message['Subject'])
-		if message.all_parts():
-			mail.attach_all_parts(message)
-		else:
-                        mail.Body = message.body()
-		mail.attach(data=ps_blurb, content_type="text/plain")
+		msg_id = message['message-id']
+		if 'references' in message:
+        		mail['References'] = message['References']
+    		elif msg_id:
+        		mail['References'] = msg_id
+
+    		if msg_id:
+        		mail['message-id'] = msg_id
+        	mail.Body  = get_body(str(message)) + "\n----------------------------------------\n" + ps_blurb
+		
+		logging.debug('TO LIST: ' + str(to_send))
 		relay.deliver(mail, To = to_send)
         except Post.DoesNotExist:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
@@ -310,4 +321,12 @@ def help(message, address=None, host=None):
 	return
 
 
-
+def get_body(message):
+	email_message = email.message_from_string(str(message))
+	maintype = email_message.get_content_maintype()
+	if maintype == 'multipart':
+		for part in email_message.get_payload():
+			if part.get_content_maintype() == 'text':
+				return part.get_payload()
+	elif maintype == 'text':
+		return email_message.get_payload()
