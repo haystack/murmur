@@ -36,7 +36,7 @@ def create(message, group_name=None, host=None):
 	
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 	relay.deliver(mail)
-        return
+	return
 
 
 @route("(group_name)-activate@(host)", group_name=".+", host=HOST)
@@ -45,7 +45,7 @@ def activate(message, group_name=None, host=None):
 	group = None
 	group_name = group_name.lower()
 	subject = "Activate Group -- Success"
-	body = "Activated: %s@%s" %(group_name, host))
+	body = "Activated: %s@%s" %(group_name, host)
 	name, addr = parseaddr(message['from'].lower())
 	try:                    
                 group = Group.objects.get(name=group_name)
@@ -184,7 +184,6 @@ def handle_post(message, address=None, host=None):
         		mail.attach_all_parts(message)
     		else:
         		mail.Body = message.body()
-		relay.deliver(mail)
 	except Group.DoesNotExist:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid address: %s@%s" %(group_name, host))
         
@@ -222,8 +221,9 @@ def help(message, address=None, host=None):
 	to_addr = message['From']
 	from_addr = address + '@' + HOST
 	subject = "Help"
-	body = "For creating a new post, simply send an email to the group email address. For replying to a post, reply to the from_address of the post (just hit the reply button in your email client). For administrative activities like creating, activating, deactivating, subscribing to, unsubscribing from, and viewing a group,  send an email to <group>-[create | activate | deactivate | subscribe | unsubscribe | info]@%s respectively." %(host) )
+	body = "For creating a new post, simply send an email to the group email address. For replying to a post, reply to the from_address of the post (just hit the reply button in your email client). For administrative activities like creating, activating, deactivating, subscribing to, unsubscribing from, and viewing a group,  send an email to <group>-[create | activate | deactivate | subscribe | unsubscribe | info]@%s respectively." %(host)
 	mail = MailResponse(From = from_addr, To = to_addr, Subject = subject, Body = body)
+	relay.deliver(mail)
 	return
 
 
