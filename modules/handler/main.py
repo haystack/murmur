@@ -3,6 +3,7 @@ from lamson.routing import route, stateless
 from config.settings import relay
 from models import *
 from email.utils import *
+from lamson.mail import MailResponse
 
 '''
 Slow_Email Main Handler
@@ -141,10 +142,12 @@ def handle_post(message, address=None, host=None):
 		p = Post(id = id, from_email = addr, subject = message['Subject'], message=str(message))
 		p.save()
 		post_addr = '%s <%s>' %(addr, id + SUFFIX + '@' + HOST)
-		message['Subject'] = '[ %s ] -- %s' %(group_name, message['Subject'])
-		message['From'] = post_addr
-		message['To'] = addr
-		relay.deliver(message)
+		mail = MailResponse( Subject  = '[ %s ] -- %s' %(group_name, message['Subject']), From = post_addr, To = addr)
+		if message.all_parts():
+        		mail.attach_all_parts(message)
+    		else:
+        		mail.Body = message.body()
+		relay.deliver(mail)
 	except Group.DoesNotExist:
 		relay.reply(message, NO_REPLY, "Error", "Invalid address: %s@%s" %(group_name, host))
 	except Exception, e:
@@ -161,9 +164,12 @@ def handle_reply(message, post_id=None, suffix=None, host=None):
                 post = Post.objects.get(id=post_id)
 		r = Reply(from_email = addr, message = post, reply = str(message))
 		r.save()
-                message['From'] = '%s <%s>' %(addr, post_id + SUFFIX + '@' + HOST)
-                message['To'] = addr
-                relay.deliver(message)
+		mail = MailResponse(From = '%s <%s>' %(addr, post_id + SUFFIX + '@' + HOST), To = addr, Subject = message['Subject'])
+		if message.all_parts():
+                        mail.attach_all_parts(message)
+                else:
+                        mail.Body = message.body()
+		relay.deliver(mail)
         except Post.DoesNotExist:
 		relay.reply(message, NO_REPLY, "Error", "Invalid post:%s" %(post_id))
         except Exception, e:
