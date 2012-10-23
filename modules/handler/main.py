@@ -117,12 +117,12 @@ def info(message, group_name=None, host=None):
         return
 
 
-@route("(address)@(host)", address="ask", host=HOST)
+@route("(address)@(host)", address="^.*[-create|-activate|-deactivate|-subscribe|-unsubscribe|-info|help]", host=HOST)
 @stateless
 def handle(message, address=None, host=None):
 	name, addr = parseaddr(message['from'])
-	p = Post(from_addr = addr, message=str(message))
-	p.save()
+	#p = Post(from_addr = addr, message=str(message))
+	#p.save()
 	relay.reply(message, address + '@' + HOST, message['Subject'], message.body())
 	return
 
