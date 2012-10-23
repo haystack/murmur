@@ -17,7 +17,7 @@ NO_REPLY = 'no-reply' + '@' + HOST
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
 UNFOLLOW_SUFFIX = '__unfollow__'
-RESERVED = ['-create', '-activate', '-deactivate', '-subscribe', '-unsubscribe', '-info', 'help', 'no-reply', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX]
+RESERVED = ['-create', '-activate', '-deactivate', '-subscribe', '-unsubscribe', '-info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX]
 
 @route("(group_name)-create@(host)", group_name=".+", host=HOST)
 @stateless
@@ -277,6 +277,24 @@ def handle_unfollow(message, post_id=None, suffix=None, host=None):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
         	relay.deliver(mail)
 	return
+
+
+
+@route("(address)@(host)", address="all", host=HOST)
+@stateless
+def all(message, address=None, host=None):
+	to_addr = message['From']
+	from_addr = address + '@' + HOST
+	subject = "Help"
+	groups = Group.objects.all()
+	body = "List of Available Groups \n\n"
+	body += "\tName\t\t Status\t\t\n\n"
+	for g in groups:
+		body= body + "\t" + g.name + "\t\t" + str(g.status) + "\n"  
+	mail = MailResponse(From = from_addr, To = to_addr, Subject = subject, Body = body)
+	relay.deliver(mail)
+	return
+
 
 
 
