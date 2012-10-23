@@ -304,7 +304,7 @@ def help(message, address=None, host=None):
 	to_addr = message['From']
 	from_addr = address + '@' + HOST
 	subject = "Help"
-	body = "For creating a new post, simply send an email to the group email address. For replying to a post, reply to the from_address of the post (just hit the reply button in your email client). For administrative activities like creating, activating, deactivating, subscribing to, unsubscribing from, and viewing a group,  send an email to <group>-[create | activate | deactivate | subscribe | unsubscribe | info]@%s respectively." %(host)
+	body = "For creating a new post, simply send an email to the group email address. For replying to a post, reply to the from_address of the post (just hit the reply button in your email client). For administrative activities like creating, activating, deactivating, subscribing to, unsubscribing from, and viewing a group,  send an email to <group>-[create | activate | deactivate | subscribe | unsubscribe | info]@%s respectively. To seel a list of all the groups, send an email to all@%s" %(host, host)
 	mail = MailResponse(From = from_addr, To = to_addr, Subject = subject, Body = body)
 	relay.deliver(mail)
 	return
