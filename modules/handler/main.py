@@ -178,16 +178,17 @@ def handle_post(message, address=None, host=None):
 		id = base64.b64encode(addr+str(time.time())).lower()
 		p = Post(id = id, from_email = addr, subject = message['Subject'], message=str(message))
 		p.save()
-		post_addr = '%s <%s>' %(addr, id + SUFFIX + '@' + HOST)
-		mail = MailResponse(From = post_addr, To = addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
+		to_addr = '%s <%s>' %(addr, id + SUFFIX + '@' + host)
+		from_addr = addr
+		mail = MailResponse(From = from_addr, To = to_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
 		if message.all_parts():
         		mail.attach_all_parts(message)
     		else:
         		mail.Body = message.body()
+		relay.deliver(mail, To = addr)
 	except Group.DoesNotExist:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid address: %s@%s" %(group_name, host))
-        
-	relay.deliver(mail)
+        	relay.deliver(mail)
 	return
 
 
@@ -201,15 +202,15 @@ def handle_reply(message, post_id=None, suffix=None, host=None):
                 post = Post.objects.get(id=post_id)
 		r = Reply(from_email = addr, message = post, reply = str(message))
 		r.save()
-		mail = MailResponse(From = '%s <%s>' %(addr, post_id + SUFFIX + '@' + HOST), To = addr, Subject = message['Subject'])
+		mail = MailResponse(From = addr, To = '%s <%s>' %(addr, post_id + SUFFIX + '@' + HOST), Subject = message['Subject'])
 		if message.all_parts():
                         mail.attach_all_parts(message)
                 else:
                         mail.Body = message.body()
+		relay.deliver(mail, To = addr)
         except Post.DoesNotExist:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
-        
-	relay.deliver(mail)
+        	relay.deliver(mail)
 	return
 
 
@@ -225,5 +226,6 @@ def help(message, address=None, host=None):
 	mail = MailResponse(From = from_addr, To = to_addr, Subject = subject, Body = body)
 	relay.deliver(mail)
 	return
+
 
 
