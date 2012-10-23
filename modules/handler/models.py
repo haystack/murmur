@@ -9,9 +9,9 @@ Slow_Email Models
 
 class Post(models.Model):
 	id = models.CharField(max_length=50, primary_key=True)
-	from_email = models.CharField(max_length=50)
+	email = models.CharField(max_length=50)
 	subject = models.TextField()
-	message = models.TextField()
+	post = models.TextField()
 	timestamp = models.DateTimeField(auto_now=True)
 
 	def __unicode__(self):
@@ -47,23 +47,23 @@ class User(models.Model):
                 db_table = "users"
 
 
-class Active_Members(models.Model):
+class Following(models.Model):
 	id = models.AutoField(primary_key=True)
-	message = models.ForeignKey('Post')
-	active_list = models.TextField()
+	post = models.ForeignKey('Post')
+	email = models.CharField(max_length=50)
 	timestamp = models.DateTimeField(auto_now=True)
 	def __unicode__(self):
 		return self.name
 
 	class Meta:
-		db_table = "active_members"
+		db_table = "following"
 
 
 
 class Reply(models.Model):
         id = models.AutoField(primary_key=True)
-	from_email = models.CharField(max_length=50)
-        message = models.ForeignKey('Post')
+	email = models.CharField(max_length=50)
+        post = models.ForeignKey('Post')
         reply = models.TextField()
         timestamp = models.DateTimeField(auto_now=True)
         def __unicode__(self):
