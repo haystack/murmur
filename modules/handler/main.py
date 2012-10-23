@@ -129,7 +129,7 @@ def handle(message, address=None, host=None):
 @route("(address)@(host)", address="help", host=HOST)
 @stateless
 def help(message, address=None, host=None):
-	relay.reply(message, address + '@' + HOST, "Help", "For creating a new post, simply send an email to the group address. For repling to a post, reply to the from_address of the post. For creating, activating, deactivating, subscribing to, unsubscribing from, and viewing a group,  send an email to <group-name>-[create | activate | deactivate | subscribe | unsubscribe | info]@%s." %(host) )
+	relay.reply(message, address + '@' + HOST, "Help", "For creating a new post, simply send an email to the group email address. For replying to a post, reply to the from_address of the post (just hit the reply button in your email client). For administrative activities like creating, activating, deactivating, subscribing to, unsubscribing from, and viewing a group,  send an email to <group>-[create | activate | deactivate | subscribe | unsubscribe | info]@%s respectively." %(host) )
 	return
 
 
