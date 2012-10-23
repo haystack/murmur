@@ -178,14 +178,20 @@ def handle_post(message, address=None, host=None):
 		id = base64.b64encode(addr+str(time.time())).lower()
 		p = Post(id = id, from_email = addr, subject = message['Subject'], message=str(message))
 		p.save()
-		to_addr = '%s <%s>' %(addr, id + SUFFIX + '@' + host)
-		from_addr = addr
-		mail = MailResponse(From = from_addr, To = to_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
+		group_members = User.objects.filter(group = group)
+		to_send = []
+		for m in group_members:
+			to_send.append(m.email)
+		if(addr not in to_send):
+			to_send.append(addr)
+		to_addr = '%s <%s>' %(group_name, id + SUFFIX + '@' + host)
+		mail = MailResponse(From = message['From'], To = to_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
 		if message.all_parts():
         		mail.attach_all_parts(message)
     		else:
         		mail.Body = message.body()
-		relay.deliver(mail, To = addr)
+		logging.debug('TO LIST: ' + str(to_send))
+		relay.deliver(mail, To = to_send)
 	except Group.DoesNotExist:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid address: %s@%s" %(group_name, host))
         	relay.deliver(mail)
@@ -202,7 +208,7 @@ def handle_reply(message, post_id=None, suffix=None, host=None):
                 post = Post.objects.get(id=post_id)
 		r = Reply(from_email = addr, message = post, reply = str(message))
 		r.save()
-		mail = MailResponse(From = addr, To = '%s <%s>' %(addr, post_id + SUFFIX + '@' + HOST), Subject = message['Subject'])
+		mail = MailResponse(From = message['From'], To = message['To'], Subject = message['Subject'])
 		if message.all_parts():
                         mail.attach_all_parts(message)
                 else:
