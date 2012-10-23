@@ -13,17 +13,18 @@ Slow_Email Main Handler
 
 HOST = 'slow.csail.mit.edu'
 NO_REPLY = 'no-reply' + '@' + HOST
-SUFFIX = '__POST__'
+SUFFIX = '__post__'
 RESERVED = ['-create', '-activate', '-deactivate', '-subscribe', '-unsubscribe', '-info', 'help', 'no-reply', SUFFIX]
 
 @route("(group_name)-create@(host)", group_name=".+", host=HOST)
 @stateless
 def create(message, group_name=None, host=None):
+	group_name = group_name.lower()
+	name, addr = parseaddr(message['from'].lower())
 	try:
 		group = Group.objects.get(name=group_name)
 		relay.reply(message, NO_REPLY, "Error", "Mailing group %s@%s already exists" %(group_name, host))
 	except Group.DoesNotExist:
-		name, addr = parseaddr(message['from'])
 		group = Group(name=group_name, status=True)
 		group.save()
 		user = User(email = addr, group = group, admin = True, status = True)
@@ -36,7 +37,8 @@ def create(message, group_name=None, host=None):
 @stateless
 def activate(message, group_name=None, host=None):
 	group = None
-	name, addr = parseaddr(message['from'])
+	group_name = group_name.lower()
+	name, addr = parseaddr(message['from'].lower())
 	try:                    
                 group = Group.objects.get(name=group_name)
 		user = User.objects.get(email = addr, group = group, admin = True)
@@ -54,7 +56,8 @@ def activate(message, group_name=None, host=None):
 @stateless
 def deactivate(message, group_name=None, host=None):
 	group = None
-	name, addr = parseaddr(message['from'])
+	group_name = group_name.lower()
+	name, addr = parseaddr(message['from'].lower())
 	try:                    
                 group = Group.objects.get(name=group_name)
 		user = User.objects.get(email = addr, group = group, admin = True)
@@ -73,7 +76,8 @@ def deactivate(message, group_name=None, host=None):
 @stateless
 def subscribe(message, group_name=None, host=None):
 	group = None
-	name, addr = parseaddr(message['from'])
+	group_name = group_name.lower()
+	name, addr = parseaddr(message['from'].lower())
 	try:                    
                 group = Group.objects.get(name=group_name, status = True)
 		user = User.objects.get(email = addr, group = group)
@@ -91,7 +95,8 @@ def subscribe(message, group_name=None, host=None):
 @stateless
 def unsubscribe(message, group_name=None, host=None):
 	group = None
-	name, addr = parseaddr(message['from'])
+	group_name = group_name.lower()
+	name, addr = parseaddr(message['from'].lower())
 	try:                    
                 group = Group.objects.get(name=group_name, status = True)
 		user = User.objects.get(email = addr, group = group)
@@ -110,6 +115,7 @@ def unsubscribe(message, group_name=None, host=None):
 @route("(group_name)-info@(host)", group_name=".+", host=HOST)
 @stateless
 def info(message, group_name=None, host=None):
+	group_name = group_name.lower()
         try:
                 group = Group.objects.get(name=group_name)
 		members = User.objects.filter(group=group).values()
@@ -121,7 +127,9 @@ def info(message, group_name=None, host=None):
 
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
-def handle(message, address=None, host=None):
+def handle_post(message, address=None, host=None):
+	address = address.lower()
+	name, addr = parseaddr(message['from'].lower())
 	reserved = filter(lambda x: address.endswith(x), RESERVED)
 	if(reserved):
 		return
@@ -129,11 +137,10 @@ def handle(message, address=None, host=None):
 	group = None
 	try:
 		group = Group.objects.get(name=group_name)
-		name, addr = parseaddr(message['from'])
-		id = base64.b64encode(addr+str(time.time()))
+		id = base64.b64encode(addr+str(time.time())).lower()
 		p = Post(id = id, from_email = addr, subject = message['Subject'], message=str(message))
 		p.save()
-		post_addr = '%s <%s>' %(group_name + '@' + HOST, id + SUFFIX + '@' + HOST)
+		post_addr = '%s <%s>' %(addr, id + SUFFIX + '@' + HOST)
 		message['Subject'] = '[ %s ] -- %s' %(group_name, message['Subject'])
 		message['From'] = post_addr
 		message['To'] = addr
@@ -143,6 +150,28 @@ def handle(message, address=None, host=None):
 	except Exception, e:
 		logging.debug('Exception: %s' %(e))
 	return
+
+
+@route("(post_id)(suffix)@(host)", post_id=".+", suffix=SUFFIX+"|"+SUFFIX.upper(), host=HOST)
+@stateless
+def handle_reply(message, post_id=None, suffix=None, host=None):
+	name, addr = parseaddr(message['from'].lower())
+	post_id = post_id.lower()
+        try:
+                post = Post.objects.get(id=post_id)
+		r = Reply(from_email = addr, message = post, reply = str(message))
+		r.save()
+                message['From'] = '%s <%s>' %(addr, post_id + SUFFIX + '@' + HOST)
+                message['To'] = addr
+                relay.deliver(message)
+        except Post.DoesNotExist:
+		relay.reply(message, NO_REPLY, "Error", "Invalid post:%s" %(post_id))
+        except Exception, e:
+                logging.debug('Exception: %s' %(e))
+	return
+
+
+
 
 @route("(address)@(host)", address="help", host=HOST)
 @stateless
