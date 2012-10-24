@@ -23,6 +23,10 @@ FETCH_SUFFIX = '__fetch__'
 
 RESERVED = ['-create', '-activate', '-deactivate', '-subscribe', '-unsubscribe', '-info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
 
+
+
+
+
 @route("(group_name)-create@(host)", group_name=".+", host=HOST)
 @stateless
 def create(message, group_name=None, host=None):
@@ -43,6 +47,9 @@ def create(message, group_name=None, host=None):
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 	relay.deliver(mail)
 	return
+
+
+
 
 
 @route("(group_name)-activate@(host)", group_name=".+", host=HOST)
@@ -68,6 +75,8 @@ def activate(message, group_name=None, host=None):
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
         relay.deliver(mail)
 	return
+
+
 
 
 @route("(group_name)-deactivate@(host)", group_name=".+", host=HOST)
@@ -96,6 +105,8 @@ def deactivate(message, group_name=None, host=None):
 
 
 
+
+
 @route("(group_name)-subscribe@(host)", group_name=".+", host=HOST)
 @stateless
 def subscribe(message, group_name=None, host=None):
@@ -119,6 +130,8 @@ def subscribe(message, group_name=None, host=None):
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
         relay.deliver(mail)
 	return
+
+
 
 
 @route("(group_name)-unsubscribe@(host)", group_name=".+", host=HOST)
@@ -150,6 +163,8 @@ def unsubscribe(message, group_name=None, host=None):
 	return
 
 
+
+
 @route("(group_name)-info@(host)", group_name=".+", host=HOST)
 @stateless
 def info(message, group_name=None, host=None):
@@ -171,6 +186,9 @@ def info(message, group_name=None, host=None):
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
         relay.deliver(mail)
 	return
+
+
+
 
 
 @route("(address)@(host)", address=".+", host=HOST)
@@ -219,6 +237,10 @@ def handle_post(message, address=None, host=None):
 	return
 
 
+
+
+
+
 @route("(post_id)(suffix)@(host)", post_id=".+", suffix=POST_SUFFIX+"|"+POST_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_reply(message, post_id=None, suffix=None, host=None):
@@ -258,6 +280,8 @@ def handle_reply(message, post_id=None, suffix=None, host=None):
 	return
 
 
+
+
 @route("(post_id)(suffix)@(host)", post_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_follow(message, post_id=None, suffix=None, host=None):
@@ -277,6 +301,10 @@ def handle_follow(message, post_id=None, suffix=None, host=None):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
         	relay.deliver(mail)
 	return
+
+
+
+
 
 @route("(post_id)(suffix)@(host)", post_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
@@ -300,6 +328,57 @@ def handle_unfollow(message, post_id=None, suffix=None, host=None):
 	return
 
 
+
+"""
+
+@route("(post_id)(suffix)@(host)", post_id=".+", suffix=UPVOTE_SUFFIX+"|"+UPVOTE_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_upvote(message, post_id=None, suffix=None, host=None):
+	name, addr = parseaddr(message['from'].lower())
+	post_id = post_id.lower()
+	mail = None
+	post = None
+        try:
+                post = Post.objects.get(id=post_id)
+		f = Like.objects.get(post = post, email=addr)
+	except Likes.DoesNotExist:
+		like = Like(post = post, email = addr)
+		like.save()
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Upvoted the  post:%s" %(post_id))
+                relay.deliver(mail)  
+        except Post.DoesNotExist:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
+        	relay.deliver(mail)
+	return
+
+
+
+
+@route("(post_id)(suffix)@(host)", post_id=".+", suffix=DOWNVOTE_SUFFIX+"|"+DOWNVOTE_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_downvote(message, post_id=None, suffix=None, host=None):
+	name, addr = parseaddr(message['from'].lower())
+	post_id = post_id.lower()
+	mail = None
+	post = None
+        try:
+                post = Post.objects.get(id=post_id)
+                dislike = Dislike.objects.get(post = post, email=addr)
+		like = Like.objects.get(post = post, email=addr)
+		like.delete()
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Downvoted the post:%s" %(post_id))
+                relay.deliver(mail)
+	except Dislike.DoesNotExist:
+		dislike = Disike(post = post, email = addr)
+                dislike.save()
+        	mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Downvoted the post:%s" %(post_id))
+                relay.deliver(mail)
+	except Post.DoesNotExist:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
+        	relay.deliver(mail)
+	return
+
+"""
 
 @route("(address)@(host)", address="all", host=HOST)
 @stateless
