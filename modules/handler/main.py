@@ -130,7 +130,7 @@ def unsubscribe(message, group_name=None, host=None):
         body = "You are now un-subscribed from: %s@%s" %(group_name, host)
 	name, addr = parseaddr(message['from'].lower())
 	try:                    
-                group = Group.objects.get(name=group_name, status = True)
+                group = Group.objects.get(name=group_name, active = True)
 		user = User.objects.get(email = addr, group = group)
 		if(user.admin):
 			subject = "Un-subscribe Error"
@@ -159,7 +159,7 @@ def info(message, group_name=None, host=None):
         try:
                 group = Group.objects.get(name=group_name)
 		members = User.objects.filter(group=group).values()
-                body = "Group Name: %s@%s, Status: %s\n\n" %(group_name, host, group.status)
+                body = "Group Name: %s@%s, Active: %s\n\n" %(group_name, host, group.active)
 		for member in members:
 			for k,v in member.iteritems():
 				body += "%s : %s\n" %(str(k), str(v))
@@ -306,12 +306,11 @@ def handle_unfollow(message, post_id=None, suffix=None, host=None):
 def all(message, address=None, host=None):
 	to_addr = message['From']
 	from_addr = address + '@' + HOST
-	subject = "Help"
+	subject = "All Groups"
 	groups = Group.objects.all()
-	body = "List of Available Groups \n\n"
-	body += "\tName\t\t Status\t\t\n\n"
+	body = "Listing all the groups \n\n"
 	for g in groups:
-		body= body + "\t" + g.name + "\t\t" + str(g.status) + "\n"  
+		body= body + "Name: " + g.name + "\t\tActive:" + str(g.active) + "\n"  
 	mail = MailResponse(From = from_addr, To = to_addr, Subject = subject, Body = body)
 	relay.deliver(mail)
 	return
@@ -325,7 +324,17 @@ def help(message, address=None, host=None):
 	to_addr = message['From']
 	from_addr = address + '@' + HOST
 	subject = "Help"
-	body = "For creating a new post, simply send an email to the group email address. For replying to a post, reply to the from_address of the post (just hit the reply button in your email client). For administrative activities like creating, activating, deactivating, subscribing to, unsubscribing from, and viewing a group,  send an email to <group>-[create | activate | deactivate | subscribe | unsubscribe | info]@%s respectively. To seel a list of all the groups, send an email to all@%s" %(host, host)
+	body = "Welcome to %s. Please find below a general help on managing a group mailing list.\n\n" %(host)
+	body += "To create a new group: <name>-create@%s\n" %(host)
+	body += "To activate/re-activate your group: <name>-activate@%s\n" %(host)
+	body += "To de-activate your group: <name>-deactivate@%s\n" %(host)
+	body += "To subscribe to a group: <name>-subscribe@%s\n" %(host)
+	body += "To unsubscribe from a group: <name>-unsubscribe@%s\n" %(host)
+	body += "To see details of a group: <name>-info@%s\n" %(host)
+	body += "To see a listing of all the groups: all@%s\n" %(host)
+	body += "To get help: help@%s\n" %(host)
+	body += "To post message to a group: <name>@%s\n\n" %(host)
+	body += "Please substitute '<name>' with your group name." 	
 	mail = MailResponse(From = from_addr, To = to_addr, Subject = subject, Body = body)
 	relay.deliver(mail)
 	return
