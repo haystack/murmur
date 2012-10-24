@@ -227,8 +227,13 @@ def handle_post(message, address=None, host=None):
 
     		if msg_id:
         		mail['message-id'] = msg_id
-        	mail.Body  = get_body(str(message)) + "\n----------------------------------------\n" + ps_blurb
+        	res  = get_body(str(message))
 		
+		if(res['type'] == 'html'):
+                        mail.Html = res['body'] + "<hr />" + ps_blurb
+                else:
+                        mail.Body = res['body'] + "\n.....................\n" + ps_blurb
+			
 		logging.debug('TO LIST: ' + str(to_send))
 		relay.deliver(mail, To = to_send)
 	except Group.DoesNotExist:
@@ -270,7 +275,11 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 
     		if msg_id:
         		mail['message-id'] = msg_id
-        	mail.Body  = get_body(str(message)) + "\n----------------------------------------\n" + ps_blurb
+        	res = get_body(str(message))
+		if(res['type'] == 'html'):
+			mail.Html = res['body'] + "<hr />" + ps_blurb
+		else:
+			mail.Body = res['body'] + "\n.....................\n" + ps_blurb
 		
 		logging.debug('TO LIST: ' + str(to_send))
 		relay.deliver(mail, To = to_send)
@@ -420,11 +429,25 @@ def help(message, address=None, host=None):
 
 
 def get_body(message):
+	res={}
 	email_message = email.message_from_string(str(message))
 	maintype = email_message.get_content_maintype()
+	subtype = email_message.get_content_maintype()
 	if maintype == 'multipart':
 		for part in email_message.get_payload():
 			if part.get_content_maintype() == 'text':
-				return part.get_payload()
+				if part.get_content_subtype() == 'html':
+					res['type']='html'
+                			res['body']=part.get_payload()
+					break
+				else:
+					res['type']='plain'
+                                	res['body']=part.get_payload()
 	elif maintype == 'text':
-		return email_message.get_payload()
+		if subtype == 'html':
+			res['type']='html'
+			res['body']=email_message.get_payload()
+		elif subtype == 'text':
+                	res['type']='plain'
+                	res['body']=email_message.get_payload()
+	return res
