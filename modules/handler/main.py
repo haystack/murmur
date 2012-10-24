@@ -17,7 +17,11 @@ NO_REPLY = 'no-reply' + '@' + HOST
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
 UNFOLLOW_SUFFIX = '__unfollow__'
-RESERVED = ['-create', '-activate', '-deactivate', '-subscribe', '-unsubscribe', '-info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX]
+UPVOTE_SUFFIX = '__upvote__'
+DOWNVOTE_SUFFIX = '__downvote__'
+FETCH_SUFFIX = '__fetch__'
+
+RESERVED = ['-create', '-activate', '-deactivate', '-subscribe', '-unsubscribe', '-info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
 
 @route("(group_name)-create@(host)", group_name=".+", host=HOST)
 @stateless

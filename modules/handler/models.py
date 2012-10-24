@@ -12,6 +12,7 @@ class Post(models.Model):
 	email = models.CharField(max_length=50)
 	subject = models.TextField()
 	post = models.TextField()
+	reply_to = models.ForeignKey('self', blank=False, null = True, related_name="replies")
 	timestamp = models.DateTimeField(auto_now=True)
 
 	def __unicode__(self):
@@ -38,8 +39,11 @@ class User(models.Model):
         id = models.AutoField(primary_key=True)
         email = models.CharField(max_length=50) 
         group = models.ForeignKey('Group')
-	admin = models.BooleanField()
-	status = models.BooleanField()
+	admin = models.BooleanField(default=False)
+	member = models.BooleanField(default=False)
+	moderator = models.BooleanField(default=False)
+	guest = models.BooleanField(default=False)
+	active = models.BooleanField(default=true)
         def __unicode__(self):
                 return self.name
 
@@ -59,15 +63,27 @@ class Following(models.Model):
 		db_table = "following"
 
 
-
-class Reply(models.Model):
-        id = models.AutoField(primary_key=True)
+class Like(models.Model):
+	id = models.AutoField(primary_key=True)
+	post = models.ForeignKey('Post')
 	email = models.CharField(max_length=50)
+	timestamp = models.DateTimeField(auto_now=True)
+	def __unicode__(self):
+		return self.name
+
+	class Meta:
+		db_table = "likes"
+
+
+
+class Dislke(models.Model):
+        id = models.AutoField(primary_key=True)
         post = models.ForeignKey('Post')
-        reply = models.TextField()
+        email = models.CharField(max_length=50)
         timestamp = models.DateTimeField(auto_now=True)
         def __unicode__(self):
                 return self.name
 
         class Meta:
-                db_table = "replies"
+                db_table = "dislikes"
+
