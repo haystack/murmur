@@ -21,13 +21,13 @@ UPVOTE_SUFFIX = '__upvote__'
 DOWNVOTE_SUFFIX = '__downvote__'
 FETCH_SUFFIX = '__fetch__'
 
-RESERVED = ['-create', '-activate', '-deactivate', '-subscribe', '-unsubscribe', '-info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
+RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe', '+info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
 
 
 
 
 
-@route("(group_name)-create@(host)", group_name=".+", host=HOST)
+@route("(group_name)\\+create@(host)", group_name=".+", host=HOST)
 @stateless
 def create(message, group_name=None, host=None):
 	group_name = group_name.lower()
@@ -52,7 +52,7 @@ def create(message, group_name=None, host=None):
 
 
 
-@route("(group_name)-activate@(host)", group_name=".+", host=HOST)
+@route("(group_name)\\+activate@(host)", group_name=".+", host=HOST)
 @stateless
 def activate(message, group_name=None, host=None):
 	group = None
@@ -79,7 +79,7 @@ def activate(message, group_name=None, host=None):
 
 
 
-@route("(group_name)-deactivate@(host)", group_name=".+", host=HOST)
+@route("(group_name)\\+deactivate@(host)", group_name=".+", host=HOST)
 @stateless
 def deactivate(message, group_name=None, host=None):
 	group = None
@@ -107,7 +107,7 @@ def deactivate(message, group_name=None, host=None):
 
 
 
-@route("(group_name)-subscribe@(host)", group_name=".+", host=HOST)
+@route("(group_name)\\+subscribe@(host)", group_name=".+", host=HOST)
 @stateless
 def subscribe(message, group_name=None, host=None):
 	group = None
@@ -134,7 +134,7 @@ def subscribe(message, group_name=None, host=None):
 
 
 
-@route("(group_name)-unsubscribe@(host)", group_name=".+", host=HOST)
+@route("(group_name)\\+unsubscribe@(host)", group_name=".+", host=HOST)
 @stateless
 def unsubscribe(message, group_name=None, host=None):
 	group = None
@@ -165,7 +165,7 @@ def unsubscribe(message, group_name=None, host=None):
 
 
 
-@route("(group_name)-info@(host)", group_name=".+", host=HOST)
+@route("(group_name)\\+info@(host)", group_name=".+", host=HOST)
 @stateless
 def info(message, group_name=None, host=None):
 	group_name = group_name.lower()
@@ -215,8 +215,8 @@ def handle_post(message, address=None, host=None):
 			to_send.append(m.email)
 		if(addr not in to_send):
 			to_send.append(addr)
-		post_addr = '%s <%s>' %(group_name, id + POST_SUFFIX + '@' + host)
-		follow_addr = '%s' %(id + FOLLOW_SUFFIX + '@' + host)
+		post_addr = '%s <%s>' %(group_name, group_name + '+' + id + POST_SUFFIX + '@' + host)
+		follow_addr = '%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
 		ps_blurb = "To follow this thread, send an email to: %s \r\n" %(follow_addr)
 		mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
 		msg_id = message['message-id']
@@ -241,9 +241,9 @@ def handle_post(message, address=None, host=None):
 
 
 
-@route("(post_id)(suffix)@(host)", post_id=".+", suffix=POST_SUFFIX+"|"+POST_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=POST_SUFFIX+"|"+POST_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_reply(message, post_id=None, suffix=None, host=None):
+def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
 	mail = None
@@ -253,7 +253,7 @@ def handle_reply(message, post_id=None, suffix=None, host=None):
 		r = Post(id=id, email = addr, subject=message['Subject'], post = str(message), reply_to = post)
 		r.save()
 		followers = Following.objects.filter(post = post)
-		unfollow_addr = '%s' %(post_id + UNFOLLOW_SUFFIX + '@' + host)
+		unfollow_addr = '%s' %(group_name + '+' + post_id + UNFOLLOW_SUFFIX + '@' + host)
 
 		to_send = []
 		for f in followers:
@@ -282,9 +282,9 @@ def handle_reply(message, post_id=None, suffix=None, host=None):
 
 
 
-@route("(post_id)(suffix)@(host)", post_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_follow(message, post_id=None, suffix=None, host=None):
+def handle_follow(message, group_name=None, post_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
 	mail = None
@@ -306,9 +306,9 @@ def handle_follow(message, post_id=None, suffix=None, host=None):
 
 
 
-@route("(post_id)(suffix)@(host)", post_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_unfollow(message, post_id=None, suffix=None, host=None):
+def handle_unfollow(message, group_name=None, post_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
 	mail = None
