@@ -230,9 +230,9 @@ def handle_post(message, address=None, host=None):
         	res  = get_body(str(message))
 		
 		if(res['type'] == 'html'):
-                        mail.Html = res['body'] + "<hr />" + ps_blurb
+                        mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
                 else:
-                        mail.Body = res['body'] + "\n.....................\n" + ps_blurb
+                        mail.Body = unicode(res['body'] + "\n.....................\n" + ps_blurb, "utf-8")
 			
 		logging.debug('TO LIST: ' + str(to_send))
 		relay.deliver(mail, To = to_send)
@@ -277,9 +277,9 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
         		mail['message-id'] = msg_id
         	res = get_body(str(message))
 		if(res['type'] == 'html'):
-			mail.Html = res['body'] + "<hr />" + ps_blurb
+			mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
 		else:
-			mail.Body = res['body'] + "\n.....................\n" + ps_blurb
+			mail.Body = unicode(res['body'] + "\n.....................\n" + ps_blurb, "utf-8")
 		
 		logging.debug('TO LIST: ' + str(to_send))
 		relay.deliver(mail, To = to_send)
