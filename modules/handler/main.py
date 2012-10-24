@@ -35,9 +35,9 @@ def create(message, group_name=None, host=None):
 		subject = "Create Group -- Error"
 		body = "Mailing group %s@%s already exists" %(group_name, host)
 	except Group.DoesNotExist:
-		group = Group(name=group_name, status=True)
+		group = Group(name=group_name, active=True)
 		group.save()
-		user = User(email = addr, group = group, admin = True, status = True)
+		user = User(email = addr, group = group, admin = True, member = True)
         	user.save()
 	
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
@@ -56,7 +56,7 @@ def activate(message, group_name=None, host=None):
 	try:                    
                 group = Group.objects.get(name=group_name)
 		user = User.objects.get(email = addr, group = group, admin = True)
-		group.status = True
+		group.active = True
 		group.save()
 	except User.DoesNotExist:
 		subject = "Activate Group -- Error"
@@ -81,7 +81,7 @@ def deactivate(message, group_name=None, host=None):
 	try:                    
                 group = Group.objects.get(name=group_name)
 		user = User.objects.get(email = addr, group = group, admin = True)
-		group.status = False
+		group.active = False
 		group.save()
 	except User.DoesNotExist:
 		subject = "De-activate Group -- Error"
@@ -105,12 +105,12 @@ def subscribe(message, group_name=None, host=None):
 	body = "You are now subscribed to: %s@%s" %(group_name, host)
 	name, addr = parseaddr(message['from'].lower())
 	try:                    
-                group = Group.objects.get(name=group_name, status = True)
+                group = Group.objects.get(name=group_name, active = True)
 		user = User.objects.get(email = addr, group = group)
-		subject = "Subscribe -- Error"
-		body = "You are already subscribed to: %s@%s" %(group_name, host)
+		user.member=True
+		user.save()
 	except User.DoesNotExist:
-                user = User(email = addr, group = group, admin = False, status = True)
+                user = User(email = addr, group = group, member = True)
 		user.save()
         except Group.DoesNotExist:
        	 	subject = "Subscribe -- Error"
@@ -136,7 +136,8 @@ def unsubscribe(message, group_name=None, host=None):
 			subject = "Un-subscribe Error"
 			body = "Can't un-subscribe the group owner from: %s@%s" %(group_name, host)
 		else:
-			user.delete()
+			user.member=False
+			user.save()
 	except User.DoesNotExist:
 		subject = "Un-subscribe -- Error"
                 body = "You are not subscribed to: %s@%s" %(group_name, host)
@@ -158,7 +159,11 @@ def info(message, group_name=None, host=None):
         try:
                 group = Group.objects.get(name=group_name)
 		members = User.objects.filter(group=group).values()
-                body = "Group Name: %s@%s, Status: %s, Members: %s" %(group_name, host, group.status, str(members))
+                body = "Group Name: %s@%s, Status: %s\n\n" %(group_name, host, group.status)
+		for member in members:
+			for k,v in member.iteritems():
+				body += "%s : %s\n" %(str(k), str(v))
+			body += "\n..........................\n"
         except Group.DoesNotExist:
 		subject = "Group Info -- Error"
 		body = "Could not locate the group: %s@%s" %(group_name, host)
@@ -221,8 +226,9 @@ def handle_reply(message, post_id=None, suffix=None, host=None):
 	post_id = post_id.lower()
 	mail = None
         try:
-                post = Post.objects.get(id=post_id)
-		r = Reply(email = addr, post = post, reply = str(message))
+                id = base64.b64encode(addr+str(time.time())).lower()
+		post = Post.objects.get(id=post_id)
+		r = Post(id=id, email = addr, subject=message['Subject'], post = str(message), reply_to = post)
 		r.save()
 		followers = Following.objects.filter(post = post)
 		unfollow_addr = '%s' %(post_id + UNFOLLOW_SUFFIX + '@' + host)

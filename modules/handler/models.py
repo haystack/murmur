@@ -24,7 +24,7 @@ class Post(models.Model):
 class Group(models.Model):
 	id = models.AutoField(primary_key=True)
 	name = models.CharField(max_length=20)
-	status = models.BooleanField()
+	active = models.BooleanField(default=False)
 	timestamp = models.DateTimeField(auto_now=True)
 	def __unicode__(self):
 		return self.name
@@ -43,7 +43,7 @@ class User(models.Model):
 	member = models.BooleanField(default=False)
 	moderator = models.BooleanField(default=False)
 	guest = models.BooleanField(default=False)
-	active = models.BooleanField(default=true)
+	active = models.BooleanField(default=False)
         def __unicode__(self):
                 return self.name
 
