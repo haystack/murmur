@@ -1,48 +1,48 @@
-A Proxy Email Server for slow-distribution
+MailX
 
-##### Installation Instruction ####
+##### Installation Instruction #####
 
 # setup a virtual environment
-virtualenv slow_email
+virtualenv mailx
 surce bin/activate
 
 # install required packages
 pip install lamson
 pip install django
 
-# install slow_email
+# install mailx
 mkdir src
 cd src
-git clone git@github.com:abhardwaj/slow-email.git
+git clone git@github.com:abhardwaj/mailx.git
 
 
 # edit lamson configuration setting
-cd src/slow_email
+cd src/mailx
 vi config/settings.py    #configure your relay_server (exim4 or sendmail) on a port other than 25
 
 # edit django configuration settings
 vi modules/browser/settings.py 
 
 # setup postgres database
-create database slow_email
+create database mailx
 
 # install schema
-cd src/slow_email/modules
+cd src/mailx/modules
 python manage.py syncdb
 
-# run slow_email server
-cd src/slow_email
+# run mailx server
+cd src/mailx
 mkdir logs
 mkdir run
 lamson start
 
 # to stop/restart
-cd src/slow_email
+cd src/mailx
 lamson stop/restart
 
 # log files
-cd src/slow_email
-cat logs/server.log  #slow_email log
+cd src/mailx
+cat logs/server.log  #mailx log
 cat lamson.out  #lamson stdio
 cat lamson.err #lamson stderr 
 
