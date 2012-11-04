@@ -1,7 +1,7 @@
 from django.db import models
 
 '''
-Slow_Email Models
+MailX Models
 
 @author: Anant Bhardwaj
 @date: Oct 20, 2012
