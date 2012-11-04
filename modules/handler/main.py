@@ -6,7 +6,7 @@ from email.utils import *
 from lamson.mail import MailResponse
 
 '''
-Slow_Email Main Handler
+MailX Main Handler
 
 @author: Anant Bhardwaj
 @date: Oct 20, 2012
