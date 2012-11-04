@@ -1,4 +1,4 @@
-# Django settings for slow_email project.
+# Django settings for mailx project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
