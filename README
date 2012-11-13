@@ -42,7 +42,7 @@ lamson stop/restart
 
 # log files
 cd src/mailx
-cat logs/server.log  #mailx log
+cat logs/mailx.log  #mailx log
 cat lamson.out  #lamson stdio
 cat lamson.err #lamson stderr 
 
