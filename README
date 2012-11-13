@@ -21,13 +21,13 @@ cd src/mailx
 vi config/settings.py    #configure your relay_server (exim4 or sendmail) on a port other than 25
 
 # edit django configuration settings
-vi modules/browser/settings.py 
+vi http_handler/settings.py 
 
 # setup postgres database
 create database mailx
 
 # install schema
-cd src/mailx/modules
+cd src/mailx
 python manage.py syncdb
 
 # run mailx server
