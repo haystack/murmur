@@ -1,7 +1,7 @@
 import logging, time, base64, email
 from lamson.routing import route, stateless
 from config.settings import relay
-from models import *
+from schema.models import *
 from email.utils import *
 from lamson.mail import MailResponse
 

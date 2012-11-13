@@ -1,7 +1,6 @@
 # This file contains python variables that configure Lamson for email processing.
 import sys, os
 import logging
-sys.path.append('./modules')
 
 
 # You may add additional parameters such as `username' and `password' if your
@@ -11,13 +10,13 @@ relay_config = {'host': 'localhost', 'port': 465}
 
 receiver_config = {'host': '0.0.0.0', 'port': 25}
 
-handlers = ['modules.handler.main']
+handlers = ['smtp_handler.main']
 
 router_defaults = {'host': '\*\\.mit\\.edu'}
 
 template_config = {'dir': 'modules', 'module': 'templates'}
 
 # hook django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "browser.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "http_handler.settings")
 
 # the config/boot.py will turn these values into variables set in settings
