@@ -14,7 +14,7 @@ handlers = ['smtp_handler.main']
 
 router_defaults = {'host': '\*\\.mit\\.edu'}
 
-template_config = {'dir': 'modules', 'module': 'templates'}
+template_config = {'dir': 'smtp_handler', 'module': 'templates'}
 
 # hook django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "http_handler.settings")
