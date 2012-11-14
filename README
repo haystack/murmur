@@ -1,21 +1,20 @@
 ##### MailX Installation Instruction #####
 
+## setup environment ##
+
 # install required linux packages
 sudo apt-get install postgresql
 sudo apt-get install rabbitmq-server
-
 
 # create rabbitmq user and vhost
 sudo rabbitmqctl add_user mailx mailx
 sudo rabbitmqctl add_vhost /mailx
 sudo rabbitmqctl set_permissions -p /mailx mailx ".*" ".*" ".*"
 
-
 # setup a virtual environment
 virtualenv mailx
 cd mailx
 source bin/activate
-
 
 # install required python packages
 pip install lamson
@@ -23,28 +22,42 @@ pip install django
 pip install psycopg2
 pip install djcelery
 
-
 # download mailx
 mkdir src
 cd src
 git clone git@github.com:abhardwaj/mailx.git
 
+
+
+
+
+## make configuration changes ##
+
 # edit lamson configuration setting
 cd src/mailx
-vi config/settings.py        #configure your relay_server (exim4 or sendmail) on a port other than 25
+vi config/settings.py        
+
+# configure your relay_server (exim4 or sendmail) on a port other than 25
 
 # edit django configuration settings
 vi http_handler/settings.py 
 
 # setup postgres database 
+psql -U postgres -W -h localhost
 create database mailx
 
 # install schema
 cd src/mailx
 python manage.py syncdb
 
-# start celeryd (development mode)
-python manage.py celeryd       #for production mode create a celeryd script in /etc/init.d
+
+
+
+
+## running in development mode ##
+
+# start celeryd
+python manage.py celeryd
 
 # run mailx server
 cd src/mailx
@@ -62,15 +75,22 @@ cat logs/mailx.log  #mailx log
 cat lamson.out  #lamson stdio
 cat lamson.err #lamson stderr 
 
-
-# for running the mailx browser (development mode)
+# for running the mailx browser
 python manage.py runserver
 
-# running the browser with apache (production version) 
+
+
+
+
+## running in production mode ##
 
 # add the following lines in /etc/apache2/httpd.conf
 WSGIDaemonProcess mailx python-path=/path/to/mailx
 WSGIScriptAlias /mailx /path/to/mailx/http_handler/wsgi.py process-group=mailx application-group=%{GLOBAL}
+
+# add celeryd /etc/init.d
+
+# add lamson in /etc/init.d
 
 # set defaults for /etc/defaults/celeryd
 CELERYD_CHDIR="/path/to/mailx/"
