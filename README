@@ -1,4 +1,4 @@
-##### Installation Instruction #####
+##### MailX Installation Instruction #####
 
 # install required linux packages
 sudo apt-get install postgresql
@@ -31,7 +31,7 @@ git clone git@github.com:abhardwaj/mailx.git
 
 # edit lamson configuration setting
 cd src/mailx
-vi config/settings.py    #configure your relay_server (exim4 or sendmail) on a port other than 25
+vi config/settings.py        #configure your relay_server (exim4 or sendmail) on a port other than 25
 
 # edit django configuration settings
 vi http_handler/settings.py 
@@ -44,7 +44,7 @@ cd src/mailx
 python manage.py syncdb
 
 # start celeryd (development mode)
-python manage.py celeryd # for production mode create a celeryd script in /etc/init.d
+python manage.py celeryd       #for production mode create a celeryd script in /etc/init.d
 
 # run mailx server
 cd src/mailx
