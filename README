@@ -67,6 +67,12 @@ cat lamson.err #lamson stderr
 python manage.py runserver
 
 # running the browser with apache (production version) 
+
 # add the following lines in /etc/apache2/httpd.conf
 WSGIDaemonProcess mailx python-path=/path/to/mailx
 WSGIScriptAlias /mailx /path/to/mailx/http_handler/wsgi.py process-group=mailx application-group=%{GLOBAL}
+
+# set defaults for /etc/defaults/celeryd
+CELERYD_CHDIR="/path/to/mailx/"
+CELERYD_OPTS="--time-limit=300"
+CELERY_CONFIG_MODULE="celeryconfig"
