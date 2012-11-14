@@ -29,8 +29,6 @@ git clone git@github.com:abhardwaj/mailx.git
 
 
 
-
-
 ## make configuration changes ##
 
 # edit lamson configuration setting
@@ -49,8 +47,6 @@ create database mailx
 # install schema
 cd src/mailx
 python manage.py syncdb
-
-
 
 
 
@@ -80,17 +76,15 @@ python manage.py runserver
 
 
 
-
-
 ## running in production mode ##
 
 # add the following lines in /etc/apache2/httpd.conf
 WSGIDaemonProcess mailx python-path=/path/to/mailx
 WSGIScriptAlias /mailx /path/to/mailx/http_handler/wsgi.py process-group=mailx application-group=%{GLOBAL}
 
-# add celeryd /etc/init.d
+# create a celeryd script in /etc/init.d
 
-# add lamson in /etc/init.d
+# create a lamson script in /etc/init.d
 
 # set defaults for /etc/defaults/celeryd
 CELERYD_CHDIR="/path/to/mailx/"
