@@ -1,6 +1,8 @@
-MailX
-
 ##### Installation Instruction #####
+
+# install required linux packages
+sudo apt-get install postgresql
+sudo apt-get install rabbitmq-server
 
 
 # create rabbitmq user and vhost
@@ -41,8 +43,8 @@ create database mailx
 cd src/mailx
 python manage.py syncdb
 
-# start celeryd (development mode), for production mode create a celeryd script in /etc/init.d
-python manage.py celeryd
+# start celeryd (development mode)
+python manage.py celeryd # for production mode create a celeryd script in /etc/init.d
 
 # run mailx server
 cd src/mailx
@@ -68,12 +70,3 @@ python manage.py runserver
 # add the following lines in /etc/apache2/httpd.conf
 WSGIDaemonProcess mailx python-path=/path/to/mailx
 WSGIScriptAlias /mailx /path/to/mailx/http_handler/wsgi.py process-group=mailx application-group=%{GLOBAL}
-
-
-
-
-
-
-
-
-
