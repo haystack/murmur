@@ -1,17 +1,19 @@
 from django.http import *
 from django.shortcuts import render_to_response
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
+from django.contrib.auth.views import login as auth_login
+from django.contrib.auth.views import logout as auth_logout
 
 '''
 @author: Anant Bhardwaj
 @date: Nov 9, 2012
 '''
-@login_required(login_url='/login/')
-def index(request):
-	return render_to_response("index.html")
-	
+
+def login(request, template_name='login.html'):
+	return auth_login(request, template_name = template_name)
+
+def register(request, template_name='logout.html'):
+	return render_to_response(template_name)
 
 def logout(request):
-	ajax.logout(request)
+	auth_logout(request)
 	return HttpResponseRedirect('/logout')

@@ -4,6 +4,7 @@ from django.conf.urls import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-     url(r'^login', 'django.contrib.auth.views.login', {'template_name':'login.html'}),
-	 url(r'^logout', 'http_handler.views.logout'),
+     url(r'^login', 'account.views.login'),
+	 url(r'^register', 'account.views.register'),
+	 url(r'^logout', 'account.views.logout'),
 )
