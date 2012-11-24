@@ -11,9 +11,9 @@ from django.contrib.auth.views import logout as auth_logout
 def login(request, template_name='login.html'):
 	return auth_login(request, template_name = template_name)
 
-def register(request, template_name='logout.html'):
+def register(request, template_name='register.html'):
 	return render_to_response(template_name)
 
 def logout(request):
 	auth_logout(request)
-	return HttpResponseRedirect('/logout')
+	return HttpResponseRedirect('/account/login')
