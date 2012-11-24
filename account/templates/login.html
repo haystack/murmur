@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block headlink-right %}
+<a href="/signup">Sign up</a>
+{% endblock %}
+{% block content %}
+<form action="login" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="/index" />
+  {{ form.non_field_errors }}
+  {% for field in form %}
+	<div class="field-wrapper">
+	  <div class="label-wrapper">
+		{% if field.name == "username" %}
+		  Email address
+		{% else %}
+		  {{ field.label_tag }}
+		{% endif %}
+		{% if field.field.required %}<span class="required">*</span>{% endif %}
+	  </div>
+	  <div class="value-wrapper">
+		{{ field }}
+		{{ field.errors }}
+	  </div>
+	</div>
+  {% endfor %}
+  <div class="submit-wrapper">
+	<input type="submit" value="Sign In" />
+  </div>
+</form>
+{% endblock %}
