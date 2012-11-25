@@ -4,5 +4,6 @@ msg_code={
 	'GROUP_NOT_FOUND_ERROR': 'Group not found',
 	'POST_NOT_FOUND_ERROR': 'Post not found',
 	'OWNER_UNSUBSCRIBE_ERROR': 'Can not unsubscribe the owner.',
+	'REQUEST_ERROR': 'Incorrect request parameters'
 	'UNKNOWN_ERROR': 'Unknown',
 }

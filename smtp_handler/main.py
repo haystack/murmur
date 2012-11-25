@@ -7,7 +7,7 @@ from lamson.mail import MailResponse
 from engine.main import *
 
 '''
-MailX Main Handler
+MailX Mail Interface Handler
 
 @author: Anant Bhardwaj
 @date: Oct 20, 2012
@@ -30,7 +30,7 @@ RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe',
 @route("(address)@(host)", address="all", host=HOST)
 @stateless
 def all(message, address=None, host=None):
-	res = get_all_groups()
+	res = list_groups()
 	subject = "Listing Groups -- Success"
 	body = "Listing all the groups \n\n"
 	if(res['status']):
@@ -138,7 +138,7 @@ def unsubscribe(message, group_name=None, host=None):
 @stateless
 def info(message, group_name=None, host=None):
 	group_name = group_name.lower()
-	res = get_group_info(group_name)
+	res = group_info(group_name)
 	subject = "Group Info -- Success"
 	body = "Group info for %s:\n" %(group_name)
 	if(res['status']):

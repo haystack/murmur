@@ -9,7 +9,7 @@ MailX Controller
 @date: Oct 20, 2012
 '''
 
-def get_all_groups():
+def list_groups():
 	res = {'status':False}
 	try:
 		groups = Group.objects.all()
@@ -124,7 +124,7 @@ def unsubscribe_group(group_name, requester_email):
 
 
 
-def get_group_info(group_name):
+def group_info(group_name):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
