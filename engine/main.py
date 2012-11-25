@@ -32,7 +32,7 @@ def create_group(group_name, requester_email):
 		group = Group(name=group_name, active=True)
 		group.save()
 		user = User(email = requester_email, group = group, admin = True, member = True)
-        user.save()
+		user.save()
 		res['status'] = True
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
