@@ -144,8 +144,7 @@ def unsubscribe(message, group_name=None, host=None):
 @stateless
 def info(message, group_name=None, host=None):
 	group_name = group_name.lower()
-	name, addr = parseaddr(message['from'].lower())
-	res = get_group_info(group_name, addr)
+	res = get_group_info(group_name)
 	subject = "Group Info -- Success"
 	body = "Group info for %s:\n" %(group_name)
 	if(res['status']):
