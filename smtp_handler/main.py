@@ -227,6 +227,7 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 		group = Group.objects.get(name=group_name)
 		res = insert_reply(group, message, addr, post_id)
 		id = res['id']
+		post = Post.objects.get(id=post_id)
 		followers = Following.objects.filter(post = post)
 		unfollow_addr = '%s' %(group_name + '+' + post_id + UNFOLLOW_SUFFIX + '@' + host)
 		to_send = []
