@@ -147,8 +147,8 @@ def info(message, group_name=None, host=None):
 	res = get_group_info(group_name, addr)
 	subject = "Group Info -- Success"
 	body = "Group info for %s:\n" %(group_name)
-	if(res['status']):     
-    	body = "Group Name: %s@%s, Active: %s\n\n" %(res['group_name'], host, res['active'])
+	if(res['status']):
+		body = "Group Name: %s@%s, Active: %s\n\n" %(res['group_name'], host, res['active'])
 		for member in res['members']:			
 			body += "%s : %s\n" %(member['name'], str(member['active']))
 		body += "\n..........................\n"       
