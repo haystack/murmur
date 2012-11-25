@@ -165,8 +165,8 @@ def handle_post(message, address=None, host=None):
 	reserved = filter(lambda x: address.endswith(x), RESERVED)
 	if(reserved):
 		return
-	group_name = address		
-	res = insert_post(group, message, addr)
+	group_name = address.lower()
+	res = insert_post(group_name, message, addr)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
 		relay.deliver(mail)
@@ -207,7 +207,7 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
 	group_name = group_name.lower()
-	res = insert_reply(group, message, addr, post_id)
+	res = insert_reply(group_name, message, addr, post_id)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
 		relay.deliver(mail)
