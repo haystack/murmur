@@ -184,7 +184,7 @@ def follow_post(post_id, requester_email):
 		f = Following.objects.get(post = post, email=requester_email)
 		res['status'] = True
 	except Following.DoesNotExist:
-		f = Following(post = post, email = addr)
+		f = Following(post = post, email = requester_email)
 		f.save()
 		res['status'] = True
 	except Post.DoesNotExist:
