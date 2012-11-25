@@ -213,7 +213,7 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 		relay.deliver(mail)
 		return
 	id = res['id']
-	to_send = res['following']
+	to_send =  res['recipients']
 	unfollow_addr = '%s' %(group_name + '+' + post_id + UNFOLLOW_SUFFIX + '@' + host)
 	ps_blurb = "To un-follow this thread, send an email to: %s" %(unfollow_addr)
 	mail = MailResponse(From = message['From'], To = message['To'], Subject = message['Subject'])
