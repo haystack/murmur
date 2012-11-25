@@ -7,6 +7,6 @@ from django.contrib.auth import logout
 @author: Anant Bhardwaj
 @date: Nov 9, 2012
 '''
-@login_required(login_url='/account/login/')
+
 def index(request):
 	return render_to_response("index.html")

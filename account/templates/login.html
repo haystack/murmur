@@ -3,28 +3,14 @@
 <a href="/account/register">Sign up</a>
 {% endblock %}
 {% block content %}
-<form action="login" method="post">
-  {% csrf_token %}
-  <input type="hidden" name="next" value="/index" />
-  {{ form.non_field_errors }}
-  {% for field in form %}
-	<div class="field-wrapper">
-	  <div class="label-wrapper">
-		{% if field.name == "username" %}
-		  Email address
-		{% else %}
-		  {{ field.label_tag }}
-		{% endif %}
-		{% if field.field.required %}<span class="required">*</span>{% endif %}
-	  </div>
-	  <div class="value-wrapper">
-		{{ field }}
-		{{ field.errors }}
-	  </div>
-	</div>
-  {% endfor %}
-  <div class="submit-wrapper">
-	<input type="submit" value="Sign In" />
-  </div>
+<form method="POST" action="/account/login">
+	{% csrf_token %}
+	Login
+	<hr />
+	<label for="login_email">Email</label><br />
+	<input type="text" name="email" id="login_email" /><br />
+	<label for="login_password">Password</label>
+	<input type="password" name="password" id="login_password"/> <br /> <br />
+	<input type="submit" value="Submit" />
 </form>
 {% endblock %}
