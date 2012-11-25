@@ -176,7 +176,7 @@ def insert_reply(group_name, message, poster_email, post_id):
 		r = Post(id=id, email = poster_email, subject=message['Subject'], post = str(message), reply_to = post)
 		r.save()
 		following = Following.objects.filter(post = post)
-		recipients = [following.email for f in following]
+		recipients = [f.email for f in following]
 		res['status'] = True
 		res['id'] = id
 		res['recipients'] = following
