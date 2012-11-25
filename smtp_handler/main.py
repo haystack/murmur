@@ -222,12 +222,13 @@ def handle_post(message, address=None, host=None):
 def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
+	group_name = group_name.lower()
 	mail = None
 	try:
 		group = Group.objects.get(name=group_name)
+		post = Post.objects.get(id=post_id)
 		res = insert_reply(group, message, addr, post_id)
 		id = res['id']
-		post = Post.objects.get(id=post_id)
 		followers = Following.objects.filter(post = post)
 		unfollow_addr = '%s' %(group_name + '+' + post_id + UNFOLLOW_SUFFIX + '@' + host)
 		to_send = []
