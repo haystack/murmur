@@ -219,13 +219,13 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 	mail = MailResponse(From = message['From'], To = message['To'], Subject = message['Subject'])
 	msg_id = message['message-id']
 	if 'references' in message:
-    		mail['References'] = message['References']
-		elif msg_id:
-    		mail['References'] = msg_id
+		mail['References'] = message['References']
+	elif msg_id:
+		mail['References'] = msg_id
 
-		if msg_id:
-    		mail['message-id'] = msg_id
-    	res = get_body(str(message))
+	if msg_id:
+		mail['message-id'] = msg_id
+	res = get_body(str(message))
 	if(res['type'] == 'html'):
 		mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
 	else:
