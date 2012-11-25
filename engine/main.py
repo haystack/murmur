@@ -145,8 +145,34 @@ def get_group_info(group_name):
 
 
 
+def insert_post(group_name, message, poster_email):
+	res = {'status':False}
+	try:
+		id = base64.b64encode(poster_email + str(time.time())).lower()
+		p = Post(id = id, email = poster_email, subject = message['Subject'], post=str(message))
+		p.save()
+		f = Following(email = poster_email, post = p)
+		f.save()
+		res['status'] = True
+		res['id'] = id
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	return res
+	
 
 
+def insert_reply(group_name, message, poster_email, post_id):
+	res = {'status':False}
+	try:
+		id = base64.b64encode(poster_email + str(time.time())).lower()
+		post = Post.objects.get(id=post_id)
+		r = Post(id=id, email = poster_email, subject=message['Subject'], post = str(message), reply_to = post)
+		r.save()
+		res['status'] = True
+		res['id'] = id
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	return res
 
 
 

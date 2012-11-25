@@ -36,19 +36,19 @@ class Group(models.Model):
 
 
 class User(models.Model):
-        id = models.AutoField(primary_key=True)
-        email = models.CharField(max_length=50) 
-        group = models.ForeignKey('Group')
+	id = models.AutoField(primary_key=True)
+	email = models.CharField(max_length=50)
+	group = models.ForeignKey('Group')
 	admin = models.BooleanField(default=False)
 	member = models.BooleanField(default=False)
 	moderator = models.BooleanField(default=False)
 	guest = models.BooleanField(default=False)
 	active = models.BooleanField(default=False)
         def __unicode__(self):
-                return self.name
+			return self.name
 
         class Meta:
-                db_table = "users"
+			db_table = "users"
 
 
 class Following(models.Model):
@@ -82,8 +82,8 @@ class Dislke(models.Model):
         email = models.CharField(max_length=50)
         timestamp = models.DateTimeField(auto_now=True)
         def __unicode__(self):
-                return self.name
+			return self.name
 
         class Meta:
-                db_table = "dislikes"
+			db_table = "dislikes"
 
