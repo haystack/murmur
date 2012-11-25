@@ -9,7 +9,7 @@ MailX Controller
 @date: Oct 20, 2012
 '''
 
-def get_all_groups(message, address=None, host=None):
+def get_all_groups():
 	res = {'status':False}
 	try:
 		groups = Group.objects.all()
@@ -23,7 +23,7 @@ def get_all_groups(message, address=None, host=None):
 	
 
 
-def create_group(group_name, owner):
+def create_group(group_name, requester_email):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
@@ -31,7 +31,7 @@ def create_group(group_name, owner):
 	except Group.DoesNotExist:
 		group = Group(name=group_name, active=True)
 		group.save()
-		user = User(email = owner, group = group, admin = True, member = True)
+		user = User(email = requester_email, group = group, admin = True, member = True)
         user.save()
 		res['status'] = True
 	except:
@@ -124,7 +124,7 @@ def unsubscribe_group(group_name, requester_email):
 
 
 
-def group_info(group_name):
+def get_group_info(group_name):
 	res = {'status':False}
     try:
 		group = Group.objects.get(name=group_name)
@@ -155,7 +155,7 @@ def follow_post(post_id, requester_email):
 	res = {'status':False}
 	try:
 		post = Post.objects.get(id=post_id)
-		f = Following.objects.get(post = post, email=addr)
+		f = Following.objects.get(post = post, email=requester_email)
 		res['status'] = True
 	except Following.DoesNotExist:
 		f = Following(post = post, email = addr)
@@ -175,7 +175,7 @@ def unfollow_post(post_id, requester_email):
 	res = {'status':False}
 	try:
         post = Post.objects.get(id=post_id)
-		f = Following.objects.get(post = post, email=addr)
+		f = Following.objects.get(post = post, email=requester_email)
 		f.delete()
 		res['status'] = True
 	except Following.DoesNotExist:

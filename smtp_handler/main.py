@@ -4,6 +4,7 @@ from config.settings import relay
 from schema.models import *
 from email.utils import *
 from lamson.mail import MailResponse
+from engine.main import *
 
 '''
 MailX Main Handler
@@ -26,24 +27,34 @@ RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe',
 
 
 
+@route("(address)@(host)", address="all", host=HOST)
+@stateless
+def all(message, address=None, host=None):
+	res = get_all_groups()
+	subject = "Listing Groups -- Success"
+	body = "Listing all the groups \n\n"
+	if(res['status']):
+		for g in res['groups']:
+			body= body + "Name: " + g['name'] + "\t\tActive:" + str(g['active']) + "\n"  
+	else:
+		subject = "Listing Groups -- Error"
+		body = "Error Message: %s" %(res['code'])
+	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
+	relay.deliver(mail)
+	return
+
 
 @route("(group_name)\\+create@(host)", group_name=".+", host=HOST)
 @stateless
 def create(message, group_name=None, host=None):
 	group_name = group_name.lower()
 	name, addr = parseaddr(message['from'].lower())
+	res = create_group(group_name, addr)
 	subject = "Create Group -- Success"
 	body = "Mailing group %s@%s created" %(group_name, host)
-	try:
-		group = Group.objects.get(name=group_name)
+	if(!res['status']):
 		subject = "Create Group -- Error"
-		body = "Mailing group %s@%s already exists" %(group_name, host)
-	except Group.DoesNotExist:
-		group = Group(name=group_name, active=True)
-		group.save()
-		user = User(email = addr, group = group, admin = True, member = True)
-        	user.save()
-	
+		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 	relay.deliver(mail)
 	return
@@ -57,23 +68,15 @@ def create(message, group_name=None, host=None):
 def activate(message, group_name=None, host=None):
 	group = None
 	group_name = group_name.lower()
+	name, addr = parseaddr(message['from'].lower())
+	res = activate_group(group_name, addr)
 	subject = "Activate Group -- Success"
 	body = "Activated: %s@%s" %(group_name, host)
-	name, addr = parseaddr(message['from'].lower())
-	try:                    
-                group = Group.objects.get(name=group_name)
-		user = User.objects.get(email = addr, group = group, admin = True)
-		group.active = True
-		group.save()
-	except User.DoesNotExist:
+	if(!res['status']):
 		subject = "Activate Group -- Error"
-		body = "You do not have the privilege to activate: %s@%s" %(group_name, host)
-        except Group.DoesNotExist:
-       	 	subject =  "Activate Group -- Error"
-		body = "Could not locate %s@%s group" %(group_name, host)
-        
+		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
-        relay.deliver(mail)
+	relay.deliver(mail)
 	return
 
 
@@ -84,23 +87,15 @@ def activate(message, group_name=None, host=None):
 def deactivate(message, group_name=None, host=None):
 	group = None
 	group_name = group_name.lower()
-	subject = "De-activate Group -- Success"
-        body = "De-activated: %s@%s" %(group_name, host)
 	name, addr = parseaddr(message['from'].lower())
-	try:                    
-                group = Group.objects.get(name=group_name)
-		user = User.objects.get(email = addr, group = group, admin = True)
-		group.active = False
-		group.save()
-	except User.DoesNotExist:
+	res = deactivate_group(group_name, addr)
+	subject = "De-activate Group -- Success"
+	body = "De-activated: %s@%s" %(group_name, host)
+	if(!res['status']):
 		subject = "De-activate Group -- Error"
-                body = "You do not have the privilege to de-activate: %s@%s" %(group_name, host)
-        except Group.DoesNotExist:
-		subject = "De-activate Group -- Error"
-                body = "You do not have the privilege to de-activate: %s@%s" %(group_name, host)
-        
+		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
-        relay.deliver(mail)
+	relay.deliver(mail)
 	return
 
 
@@ -112,23 +107,15 @@ def deactivate(message, group_name=None, host=None):
 def subscribe(message, group_name=None, host=None):
 	group = None
 	group_name = group_name.lower()
+	name, addr = parseaddr(message['from'].lower())
+	res = subscribe_group(group_name, addr)
 	subject = "Subscribe -- Success"
 	body = "You are now subscribed to: %s@%s" %(group_name, host)
-	name, addr = parseaddr(message['from'].lower())
-	try:                    
-                group = Group.objects.get(name=group_name, active = True)
-		user = User.objects.get(email = addr, group = group)
-		user.member=True
-		user.save()
-	except User.DoesNotExist:
-                user = User(email = addr, group = group, member = True)
-		user.save()
-        except Group.DoesNotExist:
-       	 	subject = "Subscribe -- Error"
-		body = "Could not locate the group: %s@%s" %(group_name, host)
-        
+	if(!res['status']):
+		subject = "Subscribe -- Error"
+		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
-        relay.deliver(mail)
+	relay.deliver(mail)
 	return
 
 
@@ -139,27 +126,15 @@ def subscribe(message, group_name=None, host=None):
 def unsubscribe(message, group_name=None, host=None):
 	group = None
 	group_name = group_name.lower()
-	subject = "Un-subscribe -- Success"
-        body = "You are now un-subscribed from: %s@%s" %(group_name, host)
 	name, addr = parseaddr(message['from'].lower())
-	try:                    
-                group = Group.objects.get(name=group_name, active = True)
-		user = User.objects.get(email = addr, group = group)
-		if(user.admin):
-			subject = "Un-subscribe Error"
-			body = "Can't un-subscribe the group owner from: %s@%s" %(group_name, host)
-		else:
-			user.member=False
-			user.save()
-	except User.DoesNotExist:
+	res = unsubscribe_group(group_name, addr)
+	subject = "Un-subscribe -- Success"
+	body = "You are now un-subscribed from: %s@%s" %(group_name, host)
+	if(!res['status']):
 		subject = "Un-subscribe -- Error"
-                body = "You are not subscribed to: %s@%s" %(group_name, host)
-        except Group.DoesNotExist:
-		subject = "Un-subscribe -- Error"
-                body = "Could not locate the group: %s@%s" %(group_name, host)
-        
-	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
-        relay.deliver(mail)
+		body = "Error Message: %s" %(res['code'])
+	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
+	relay.deliver(mail)
 	return
 
 
@@ -169,22 +144,20 @@ def unsubscribe(message, group_name=None, host=None):
 @stateless
 def info(message, group_name=None, host=None):
 	group_name = group_name.lower()
+	res = get_group_info(group_name, addr)
 	subject = "Group Info -- Success"
-	body = ""
-        try:
-                group = Group.objects.get(name=group_name)
-		members = User.objects.filter(group=group).values()
-                body = "Group Name: %s@%s, Active: %s\n\n" %(group_name, host, group.active)
-		for member in members:
-			for k,v in member.iteritems():
-				body += "%s : %s\n" %(str(k), str(v))
-			body += "\n..........................\n"
-        except Group.DoesNotExist:
+	body = "Group info for %s:\n" %(group_name)
+	if(res['status']):     
+    	body = "Group Name: %s@%s, Active: %s\n\n" %(res['group_name'], host, res['active'])
+		for member in res['members']:			
+			body += "%s : %s\n" %(member['name'], str(member['active']))
+		body += "\n..........................\n"       
+	else:
 		subject = "Group Info -- Error"
-		body = "Could not locate the group: %s@%s" %(group_name, host)
+		body = "Error Message: %s" %(res['code'])
         
-	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
-        relay.deliver(mail)
+	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
+	relay.deliver(mail)
 	return
 
 
@@ -296,19 +269,13 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 def handle_follow(message, group_name=None, post_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
-	mail = None
-	post = None
-        try:
-                post = Post.objects.get(id=post_id)
-		f = Following.objects.get(post = post, email=addr)
-	except Following.DoesNotExist:
-		f = Following(post = post, email = addr)
-		f.save()
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Follow added for  post:%s" %(post_id))
-                relay.deliver(mail)  
-        except Post.DoesNotExist:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
-        	relay.deliver(mail)
+	res = follow_post(post_id, addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Follow success (post:%s)" %(post_id))
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message: %s" %(res['code']))
+		relay.deliver(mail)
 	return
 
 
@@ -320,20 +287,13 @@ def handle_follow(message, group_name=None, post_id=None, suffix=None, host=None
 def handle_unfollow(message, group_name=None, post_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
-	mail = None
-	post = None
-        try:
-                post = Post.objects.get(id=post_id)
-		f = Following.objects.get(post = post, email=addr)
-		f.delete()
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Follow removed for  post:%s" %(post_id))
-                relay.deliver(mail)
-	except Following.DoesNotExist:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "You were not following the  post:%s" %(post_id))
-                relay.deliver(mail)  
-        except Post.DoesNotExist:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
-        	relay.deliver(mail)
+	res = unfollow_post(post_id, addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Unfollow success (post:%s)" %(post_id))
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message: %s" %(res['code']))
+		relay.deliver(mail)
 	return
 
 
@@ -388,21 +348,6 @@ def handle_downvote(message, post_id=None, suffix=None, host=None):
 	return
 
 """
-
-@route("(address)@(host)", address="all", host=HOST)
-@stateless
-def all(message, address=None, host=None):
-	to_addr = message['From']
-	from_addr = address + '@' + HOST
-	subject = "All Groups"
-	groups = Group.objects.all()
-	body = "Listing all the groups \n\n"
-	for g in groups:
-		body= body + "Name: " + g.name + "\t\tActive:" + str(g.active) + "\n"  
-	mail = MailResponse(From = from_addr, To = to_addr, Subject = subject, Body = body)
-	relay.deliver(mail)
-	return
-
 
 
 
