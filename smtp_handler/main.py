@@ -41,7 +41,6 @@ def all(message, address=None, host=None):
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 	relay.deliver(mail)
-	return
 
 
 @route("(group_name)\\+create@(host)", group_name=".+", host=HOST)
@@ -57,7 +56,6 @@ def create(message, group_name=None, host=None):
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 	relay.deliver(mail)
-	return
 
 
 
@@ -77,7 +75,6 @@ def activate(message, group_name=None, host=None):
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
 	relay.deliver(mail)
-	return
 
 
 
@@ -96,7 +93,6 @@ def deactivate(message, group_name=None, host=None):
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
 	relay.deliver(mail)
-	return
 
 
 
@@ -116,7 +112,6 @@ def subscribe(message, group_name=None, host=None):
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
 	relay.deliver(mail)
-	return
 
 
 
@@ -135,7 +130,6 @@ def unsubscribe(message, group_name=None, host=None):
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 	relay.deliver(mail)
-	return
 
 
 
@@ -158,7 +152,6 @@ def info(message, group_name=None, host=None):
         
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 	relay.deliver(mail)
-	return
 
 
 
@@ -172,45 +165,36 @@ def handle_post(message, address=None, host=None):
 	reserved = filter(lambda x: address.endswith(x), RESERVED)
 	if(reserved):
 		return
-	group_name = address
-	group = None
-	mail = None
-	try:
-		group = Group.objects.get(name=group_name)
-		res = insert_post(group, message, addr)
-		id = res['id']
-		group_members = User.objects.filter(group = group)
-		to_send = []
-		for m in group_members:
-			to_send.append(m.email)
-		if(addr not in to_send):
-			to_send.append(addr)
-		post_addr = '%s <%s>' %(group_name, group_name + '+' + id + POST_SUFFIX + '@' + host)
-		follow_addr = '%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
-		ps_blurb = "To follow this thread, send an email to: %s \r\n" %(follow_addr)
-		mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
-		msg_id = message['message-id']
+	group_name = address		
+	res = insert_post(group, message, addr)
+	if(not res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
+        relay.deliver(mail)
+		return
+	id = res['id']
+	to_send =  res['recipients']
+	post_addr = '%s <%s>' %(group_name, group_name + '+' + id + POST_SUFFIX + '@' + host)
+	follow_addr = '%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
+	ps_blurb = "To follow this thread, send an email to: %s \r\n" %(follow_addr)
+	mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
+	msg_id = message['message-id']
 		
-		if 'references' in message:
-			mail['References'] = message['References']
-		elif msg_id:
-			mail['References'] = msg_id
+	if 'references' in message:
+		mail['References'] = message['References']
+	elif msg_id:
+		mail['References'] = msg_id
 
-		if msg_id:
-			mail['message-id'] = msg_id
+	if msg_id:
+		mail['message-id'] = msg_id
 		
-		res = get_body(str(message))
-		if(res['type'] == 'html'):
-			mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
-		else:
-			mail.Body = unicode(res['body'] + "\n.....................\n" + ps_blurb, "utf-8")
+	res = get_body(str(message))
+	if(res['type'] == 'html'):
+		mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
+	else:
+		mail.Body = unicode(res['body'] + "\n.....................\n" + ps_blurb, "utf-8")
 			
-		logging.debug('TO LIST: ' + str(to_send))
-		relay.deliver(mail, To = to_send)
-	except Group.DoesNotExist:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid address: %s@%s" %(group_name, host))
-		relay.deliver(mail)
-	return
+	logging.debug('TO LIST: ' + str(to_send))
+	relay.deliver(mail, To = to_send)
 
 
 
@@ -223,41 +207,32 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
 	group_name = group_name.lower()
-	mail = None
-	try:
-		group = Group.objects.get(name=group_name)
-		post = Post.objects.get(id=post_id)
-		res = insert_reply(group, message, addr, post_id)
-		id = res['id']
-		followers = Following.objects.filter(post = post)
-		unfollow_addr = '%s' %(group_name + '+' + post_id + UNFOLLOW_SUFFIX + '@' + host)
-		to_send = []
-		for f in followers:
-			to_send.append(f.email)
-		if(addr not in followers):
-			to_send.append(addr)
-		ps_blurb = "To un-follow this thread, send an email to: %s" %(unfollow_addr)
-		mail = MailResponse(From = message['From'], To = message['To'], Subject = message['Subject'])
-		msg_id = message['message-id']
-		if 'references' in message:
-        		mail['References'] = message['References']
-    		elif msg_id:
-        		mail['References'] = msg_id
-
-    		if msg_id:
-        		mail['message-id'] = msg_id
-        	res = get_body(str(message))
-		if(res['type'] == 'html'):
-			mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
-		else:
-			mail.Body = unicode(res['body'] + "\n.....................\n" + ps_blurb, "utf-8")
-		
-		logging.debug('TO LIST: ' + str(to_send))
-		relay.deliver(mail, To = to_send)
-	except Post.DoesNotExist:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
+	res = insert_reply(group, message, addr, post_id)
+	if(not res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
         relay.deliver(mail)
-	return
+		return
+	id = res['id']
+	to_send = res['following']
+	unfollow_addr = '%s' %(group_name + '+' + post_id + UNFOLLOW_SUFFIX + '@' + host)
+	ps_blurb = "To un-follow this thread, send an email to: %s" %(unfollow_addr)
+	mail = MailResponse(From = message['From'], To = message['To'], Subject = message['Subject'])
+	msg_id = message['message-id']
+	if 'references' in message:
+    		mail['References'] = message['References']
+		elif msg_id:
+    		mail['References'] = msg_id
+
+		if msg_id:
+    		mail['message-id'] = msg_id
+    	res = get_body(str(message))
+	if(res['type'] == 'html'):
+		mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
+	else:
+		mail.Body = unicode(res['body'] + "\n.....................\n" + ps_blurb, "utf-8")
+		
+	logging.debug('TO LIST: ' + str(to_send))
+	relay.deliver(mail, To = to_send)
 
 
 
