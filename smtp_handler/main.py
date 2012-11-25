@@ -52,7 +52,7 @@ def create(message, group_name=None, host=None):
 	res = create_group(group_name, addr)
 	subject = "Create Group -- Success"
 	body = "Mailing group %s@%s created" %(group_name, host)
-	if(!res['status']):
+	if(not res['status']):
 		subject = "Create Group -- Error"
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
@@ -72,7 +72,7 @@ def activate(message, group_name=None, host=None):
 	res = activate_group(group_name, addr)
 	subject = "Activate Group -- Success"
 	body = "Activated: %s@%s" %(group_name, host)
-	if(!res['status']):
+	if(not res['status']):
 		subject = "Activate Group -- Error"
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
@@ -91,7 +91,7 @@ def deactivate(message, group_name=None, host=None):
 	res = deactivate_group(group_name, addr)
 	subject = "De-activate Group -- Success"
 	body = "De-activated: %s@%s" %(group_name, host)
-	if(!res['status']):
+	if(not res['status']):
 		subject = "De-activate Group -- Error"
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
@@ -111,7 +111,7 @@ def subscribe(message, group_name=None, host=None):
 	res = subscribe_group(group_name, addr)
 	subject = "Subscribe -- Success"
 	body = "You are now subscribed to: %s@%s" %(group_name, host)
-	if(!res['status']):
+	if(not res['status']):
 		subject = "Subscribe -- Error"
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
@@ -130,7 +130,7 @@ def unsubscribe(message, group_name=None, host=None):
 	res = unsubscribe_group(group_name, addr)
 	subject = "Un-subscribe -- Success"
 	body = "You are now un-subscribed from: %s@%s" %(group_name, host)
-	if(!res['status']):
+	if(not res['status']):
 		subject = "Un-subscribe -- Error"
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
