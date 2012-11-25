@@ -169,7 +169,7 @@ def handle_post(message, address=None, host=None):
 	res = insert_post(group, message, addr)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
-        relay.deliver(mail)
+		relay.deliver(mail)
 		return
 	id = res['id']
 	to_send =  res['recipients']
@@ -210,7 +210,7 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 	res = insert_reply(group, message, addr, post_id)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
-        relay.deliver(mail)
+		relay.deliver(mail)
 		return
 	id = res['id']
 	to_send = res['following']
