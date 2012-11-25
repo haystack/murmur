@@ -177,7 +177,8 @@ def handle_post(message, address=None, host=None):
 	mail = None
 	try:
 		group = Group.objects.get(name=group_name)
-		id = insert_post(group, message, addr)
+		res = insert_post(group, message, addr)
+		id = res['id']
 		group_members = User.objects.filter(group = group)
 		to_send = []
 		for m in group_members:
@@ -194,10 +195,11 @@ def handle_post(message, address=None, host=None):
 			mail['References'] = message['References']
 		elif msg_id:
 			mail['References'] = msg_id
+
 		if msg_id:
 			mail['message-id'] = msg_id
 		
-		res  = get_body(str(message))
+		res = get_body(str(message))
 		if(res['type'] == 'html'):
 			mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
 		else:
@@ -222,7 +224,8 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 	post_id = post_id.lower()
 	mail = None
 	try:
-		id = insert_reply(group, message, addr, post_id)
+		res = insert_reply(group, message, addr, post_id)
+		id = res['id']
 		followers = Following.objects.filter(post = post)
 		unfollow_addr = '%s' %(group_name + '+' + post_id + UNFOLLOW_SUFFIX + '@' + host)
 		to_send = []
