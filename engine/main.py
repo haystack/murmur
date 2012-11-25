@@ -179,7 +179,7 @@ def insert_reply(group_name, message, poster_email, post_id):
 		recipients = [f.email for f in following]
 		res['status'] = True
 		res['id'] = id
-		res['recipients'] = following
+		res['recipients'] = recipients
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except Post.DoesNotExist:
