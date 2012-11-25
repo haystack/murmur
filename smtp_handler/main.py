@@ -197,8 +197,7 @@ def handle_post(message, address=None, host=None):
 		if msg_id:
 			mail['message-id'] = msg_id
 		
-    	res  = get_body(str(message))
-		
+		res  = get_body(str(message))
 		if(res['type'] == 'html'):
 			mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
 		else:
