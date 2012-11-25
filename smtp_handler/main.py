@@ -177,11 +177,7 @@ def handle_post(message, address=None, host=None):
 	mail = None
 	try:
 		group = Group.objects.get(name=group_name)
-		id = base64.b64encode(addr+str(time.time())).lower()
-		p = Post(id = id, email = addr, subject = message['Subject'], post=str(message))
-		p.save()
-		f = Following(email = addr, post = p)
-		f.save()
+		id = insert_post(group, message, addr)
 		group_members = User.objects.filter(group = group)
 		to_send = []
 		for m in group_members:
@@ -194,24 +190,24 @@ def handle_post(message, address=None, host=None):
 		mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
 		msg_id = message['message-id']
 		if 'references' in message:
-        		mail['References'] = message['References']
-    		elif msg_id:
-        		mail['References'] = msg_id
+			mail['References'] = message['References']
+		elif msg_id:
+    		mail['References'] = msg_id
 
-    		if msg_id:
-        		mail['message-id'] = msg_id
-        	res  = get_body(str(message))
+		if msg_id:
+    		mail['message-id'] = msg_id
+    	res  = get_body(str(message))
 		
 		if(res['type'] == 'html'):
-                        mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
-                else:
-                        mail.Body = unicode(res['body'] + "\n.....................\n" + ps_blurb, "utf-8")
+			mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
+		else:
+			mail.Body = unicode(res['body'] + "\n.....................\n" + ps_blurb, "utf-8")
 			
 		logging.debug('TO LIST: ' + str(to_send))
 		relay.deliver(mail, To = to_send)
 	except Group.DoesNotExist:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid address: %s@%s" %(group_name, host))
-        	relay.deliver(mail)
+		relay.deliver(mail)
 	return
 
 
@@ -225,14 +221,10 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
 	mail = None
-        try:
-                id = base64.b64encode(addr+str(time.time())).lower()
-		post = Post.objects.get(id=post_id)
-		r = Post(id=id, email = addr, subject=message['Subject'], post = str(message), reply_to = post)
-		r.save()
+	try:
+		id = insert_reply(group, message, addr, post_id)
 		followers = Following.objects.filter(post = post)
 		unfollow_addr = '%s' %(group_name + '+' + post_id + UNFOLLOW_SUFFIX + '@' + host)
-
 		to_send = []
 		for f in followers:
 			to_send.append(f.email)
@@ -256,9 +248,9 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 		
 		logging.debug('TO LIST: ' + str(to_send))
 		relay.deliver(mail, To = to_send)
-        except Post.DoesNotExist:
+	except Post.DoesNotExist:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
-        	relay.deliver(mail)
+        relay.deliver(mail)
 	return
 
 
