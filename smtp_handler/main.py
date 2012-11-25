@@ -145,6 +145,7 @@ def unsubscribe(message, group_name=None, host=None):
 def info(message, group_name=None, host=None):
 	group_name = group_name.lower()
 	res = get_group_info(group_name, addr)
+	name, addr = parseaddr(message['from'].lower())
 	subject = "Group Info -- Success"
 	body = "Group info for %s:\n" %(group_name)
 	if(res['status']):

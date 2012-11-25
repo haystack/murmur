@@ -126,7 +126,7 @@ def unsubscribe_group(group_name, requester_email):
 
 def get_group_info(group_name):
 	res = {'status':False}
-    	try:
+	try:
 		group = Group.objects.get(name=group_name)
 		members = User.objects.filter(group=group).values()
 		res['status'] = True
@@ -174,7 +174,7 @@ def follow_post(post_id, requester_email):
 def unfollow_post(post_id, requester_email):
 	res = {'status':False}
 	try:
-        	post = Post.objects.get(id=post_id)
+		post = Post.objects.get(id=post_id)
 		f = Following.objects.get(post = post, email=requester_email)
 		f.delete()
 		res['status'] = True
