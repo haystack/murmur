@@ -224,6 +224,7 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 	post_id = post_id.lower()
 	mail = None
 	try:
+		group = Group.objects.get(name=group_name)
 		res = insert_reply(group, message, addr, post_id)
 		id = res['id']
 		followers = Following.objects.filter(post = post)
