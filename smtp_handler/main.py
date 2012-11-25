@@ -264,7 +264,7 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 @route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_follow(message, group_name=None, post_id=None, suffix=None, host=None):
-	name, addr = parseaddr(message['from'].lower())
+	name, addr = parseaddr(message['From'].lower())
 	post_id = post_id.lower()
 	res = follow_post(post_id, addr)
 	if(res['status']):
@@ -282,7 +282,7 @@ def handle_follow(message, group_name=None, post_id=None, suffix=None, host=None
 @route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_unfollow(message, group_name=None, post_id=None, suffix=None, host=None):
-	name, addr = parseaddr(message['from'].lower())
+	name, addr = parseaddr(message['From'].lower())
 	post_id = post_id.lower()
 	res = unfollow_post(post_id, addr)
 	if(res['status']):
