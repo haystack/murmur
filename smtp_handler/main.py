@@ -189,13 +189,14 @@ def handle_post(message, address=None, host=None):
 		ps_blurb = "To follow this thread, send an email to: %s \r\n" %(follow_addr)
 		mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
 		msg_id = message['message-id']
+		
 		if 'references' in message:
 			mail['References'] = message['References']
 		elif msg_id:
-    		mail['References'] = msg_id
-
+			mail['References'] = msg_id
 		if msg_id:
-    		mail['message-id'] = msg_id
+			mail['message-id'] = msg_id
+		
     	res  = get_body(str(message))
 		
 		if(res['type'] == 'html'):
