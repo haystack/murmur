@@ -31,7 +31,7 @@ def create_group(group_name, requester_email):
 	except Group.DoesNotExist:
 		group = Group(name=group_name, active=True)
 		group.save()
-		user = User(email = requester_email, group = group, admin = True, member = True)
+		user = User(email = requester_email, group = group, admin = True, active = True)
 		user.save()
 		res['status'] = True
 	except:
@@ -83,14 +83,15 @@ def deactivate_group(group_name, requester_email):
 
 def subscribe_group(group_name, requester_email):
 	res = {'status':False}
+	group = None
 	try:
 		group = Group.objects.get(name=group_name, active = True)
 		user = User.objects.get(email = requester_email, group = group)
-		user.member=True
+		user.active=True
 		user.save()
 		res['status'] = True
 	except User.DoesNotExist:
-		user = User(email = requester_email, group = group, member = True)
+		user = User(email = requester_email, group = group, active = True)
 		user.save()
 		res['status'] = True
 	except Group.DoesNotExist:
@@ -110,7 +111,7 @@ def unsubscribe_group(group_name, requester_email):
 		if(user.admin):
 			res['code'] = msg_code['OWNER_UNSUBSCRIBE_ERROR']
 		else:
-			user.member=False
+			user.active=False
 			user.save()
 			res['status'] = True
 	except User.DoesNotExist:
