@@ -64,7 +64,7 @@ def settings(request):
 		return login_form(request)
 	
 
-@csrf_exempt
+
 def list_groups(request):
 	try:
 		res = engine.main.list_groups()

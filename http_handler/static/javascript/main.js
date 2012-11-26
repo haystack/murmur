@@ -95,7 +95,7 @@ $(document).ready(function(){
 				curr = groups_table.fnAddData( [
 									res.groups[i].name
 								  ]);
-				var params = {'requester_email': 'anantb@csail.mit.edu', 
+				var params = {'requester_email': res.user, 
 							  'group_name': res.groups[i].name,
 							  'curr_row': curr
 							 }
