@@ -149,7 +149,10 @@ form input[type="text"]{
 	overflow: hidden;
 }
 
-
+table.dataTable{
+	width:100%;
+	border-spacing:0;
+}
 
 table.dataTable thead tr th {
 	color: #333;

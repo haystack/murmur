@@ -41,7 +41,9 @@ $(document).ready(function(){
 		function(params){
 			$.post('group_info', params, 
 				function(res){
-					populate_members_table(res, params.curr_row);
+					populate_group_options(res);
+					populate_members_table(res);
+					highlight_table_row(groups_table, params.curr_row);
 				}
 			);	
 		}
@@ -51,6 +53,7 @@ $(document).ready(function(){
 		function(params){
 			$.post('subscribe_group', params, 
 				function(res){
+					group_info(params);
 					notify(res);
 				}
 			);	
@@ -61,6 +64,7 @@ $(document).ready(function(){
 		function(params){
 			$.post('unsubscribe_group', params, 
 				function(res){
+					group_info(params);
 					notify(res);
 				}
 			);	
@@ -70,6 +74,7 @@ $(document).ready(function(){
 		function(params){
 			$.post('activate_group', params, 
 				function(res){
+					group_info(params);
 					notify(res);
 				}
 			);	
@@ -80,6 +85,7 @@ $(document).ready(function(){
 		function(params){
 			$.post('deactivate_group', params, 
 				function(res){
+					group_info(params);
 					notify(res);
 				}
 			);	
@@ -110,7 +116,8 @@ $(document).ready(function(){
 		}
 	}
 	
-	function populate_members_table(res, curr_row){
+	function populate_members_table(res){
+		$('#members-table').show()
 		members_table.fnClearTable();
 		for(var i = 0; i< res.members.length; i++){
 			curr = members_table.fnAddData( [
@@ -122,9 +129,33 @@ $(document).ready(function(){
 								res.members[i].guest
 							  ]);
 		}
+		
+	}
+	
+	function populate_group_options(res, curr_row){
+		var params = {'requester_email': res.user, 
+					  'group_name': res.group_name,
+					  'curr_row': curr_row
+					 }
+		var act_group = bind(activate_group, params);
+		var deact_group = bind(deactivate_group, params);
+		var sub_group = bind(subscribe_group, params);
+		var unsub_group = bind(unsubscribe_group, params);		 
+		html = '<button type="button" id="btn-act-group">Activate</button>'
+		html += '<button type="button" id="btn-deact-group">De-Activate</button>'
+		html += '<button type="button" id="btn-sub-group">Subscribe</button>'
+		html += '<button type="button" id="btn-unsub-group">Un-Subscribe</button>'
+		$("#group-options").html(html);
+		$("#btn-act-group").click(act_group);
+		$("#btn-deact-group").click(deact_group);
+		$("#btn-sub-group").click(sub_group);
+		$("#btn-unsub-group").click(unsub_group);
+	}
+	
+	function highlight_table_row(table, curr_row){
 		if(curr_row !== undefined){
-			$('td', groups_table.fnGetNodes()).css("background-color","white");
-			$('td', groups_table.fnGetNodes(curr_row)).css("background-color","lightyellow");
+			$('td', table.fnGetNodes()).css("background-color","white");
+			$('td', table.fnGetNodes(curr_row)).css("background-color","lightyellow");
 		}	
 	}
 	
