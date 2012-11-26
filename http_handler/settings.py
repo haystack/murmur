@@ -71,6 +71,7 @@ STATICFILES_DIRS = (
 
 
 SESSION_COOKIE_PATH = '/mailx'
+CSRF_COOKIE_PATH = '/mailx'
 
 # List of finder classes that know how to find static files in
 # various locations.
