@@ -8,5 +8,6 @@ MailX Web Interface Handler
 '''
 
 def index(request):
-	request.session.set_test_cookie()
-	return HttpResponseRedirect('browser/')
+	context = {}
+	context.update(csrf(request))
+	return HttpResponseRedirect('browser/', context)
