@@ -55,6 +55,8 @@ $(document).ready(function(){
 			params.group_name = $("#text-create-group").val()
 			$.post('create_group', params, 
 				function(res){
+					$("#text-create-group").val("");
+					$("#text-create-group").blur();
 					list_groups(params);
 				}
 			);	
