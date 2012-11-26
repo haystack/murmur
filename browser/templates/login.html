@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block headlink-right %}
+{% endblock %}
+{% block content %}
+<form method="POST" action="/login">
+	{% csrf_token %}
+	Login
+	<hr />
+	<label for="login_email">Email Address</label><br />
+	<input type="text" name="email" id="login_email" /><br /><br />
+	<input type="submit" value="Log In" />
+</form>
+{% endblock %}
