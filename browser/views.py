@@ -13,6 +13,8 @@ import json
 MailX Web Handler
 '''
 
+request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
+
 
 def index(request):
 	return render_to_response("index.html")

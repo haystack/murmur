@@ -6,7 +6,6 @@ from django.http import *
 
 MailX Web Interface Handler
 '''
-request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
 def index(request):
 	return HttpResponseRedirect('browser/')
