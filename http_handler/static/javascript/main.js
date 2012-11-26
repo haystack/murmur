@@ -48,6 +48,15 @@ $(document).ready(function(){
 			);	
 		}
 	
+	
+	create_group = 
+		function(params){
+			$.post('create_group', params, 
+				function(res){
+					list_groups(params);
+				}
+			);	
+		}
 
 	subscribe_group = 
 		function(params){
@@ -101,6 +110,9 @@ $(document).ready(function(){
 	function populate_groups_table(res){
 		groups_table.fnClearTable();
 		if(res.status){
+			var params = {'requester_email': res.user};
+			var crt_group = bind(create_group, params);
+			$("#btn-crt-group").click(crt_group);
 			for(var i = 0; i< res.groups.length; i++){
 				curr = groups_table.fnAddData( [
 									res.groups[i].name
@@ -117,7 +129,7 @@ $(document).ready(function(){
 	}
 	
 	function populate_members_table(res){
-		$('#members-table').show()
+		$('#main-area').show()
 		members_table.fnClearTable();
 		for(var i = 0; i< res.members.length; i++){
 			curr = members_table.fnAddData( [
@@ -140,12 +152,7 @@ $(document).ready(function(){
 		var act_group = bind(activate_group, params);
 		var deact_group = bind(deactivate_group, params);
 		var sub_group = bind(subscribe_group, params);
-		var unsub_group = bind(unsubscribe_group, params);		 
-		html = '<button type="button" id="btn-act-group">Activate</button>'
-		html += '<button type="button" id="btn-deact-group">De-Activate</button>'
-		html += '<button type="button" id="btn-sub-group">Subscribe</button>'
-		html += '<button type="button" id="btn-unsub-group">Un-Subscribe</button>'
-		$("#group-options").html(html);
+		var unsub_group = bind(unsubscribe_group, params);
 		$("#btn-act-group").click(act_group);
 		$("#btn-deact-group").click(deact_group);
 		$("#btn-sub-group").click(sub_group);
