@@ -26,7 +26,7 @@ def login_form(request):
 	c.update(csrf(request))
 	return render_to_response('login.html', c)
 
-def login(request, redirect_url='/'):
+def login(request, redirect_url=''):
 	if request.method == "POST":
 		try:
 			user = request.POST["email"]
@@ -45,7 +45,7 @@ def login(request, redirect_url='/'):
 
 def logout(request):
 	request.session.flush()
-	return HttpResponseRedirect('/')
+	return HttpResponseRedirect('')
 
 
 def index(request):
