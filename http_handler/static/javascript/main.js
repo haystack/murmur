@@ -41,7 +41,7 @@ $(document).ready(function(){
 		function(params){
 			$.post('group_info', params, 
 				function(res){
-					populate_group_options(res);
+					populate_group_info(res);
 					populate_members_table(res);
 					highlight_table_row(groups_table, params.curr_row);
 				}
@@ -146,7 +146,11 @@ $(document).ready(function(){
 		
 	}
 	
-	function populate_group_options(res, curr_row){
+	function populate_group_info(res, curr_row){
+		var info = "<h3>Group Info</h3><hr />";
+		info += "Group Name: " + res.group_name + "<br />";
+		info += "Active: " + res.active + "<br /> <br />";
+		$("#group-info").html(info)
 		var params = {'requester_email': res.user, 
 					  'group_name': res.group_name,
 					  'curr_row': curr_row

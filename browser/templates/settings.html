@@ -19,12 +19,21 @@
 	</table>	
 </div>
 <div id="main-area" style="display:none">
-	<div id="group-options">
-		<button type="button" id="btn-act-group">Activate</button>
-		<button type="button" id="btn-deact-group">De-Activate</button>
-		<button type="button" id="btn-sub-group">Subscribe</button>
-		<button type="button" id="btn-unsub-group">Un-Subscribe</button>
+	<div class="box">
+	<div id="group-info">
 	</div>
+	<h3>Actions</h3>
+	<hr />
+	<div id="group-options">
+		<a id="btn-act-group" href="#">Activate</a> <br />
+		<a id="btn-deact-group" href="#">De-Activate</a> <br />
+		<a id="btn-sub-group" href="#">Subscribe</a> <br />
+		<a id="btn-unsub-group" href="#">Un-Subscribe</a>
+	</div>
+	</div>
+	<br />
+	<h3>Members List</h3>
+	<hr />
 	<table id="members-table" class="dataTable">
 		<thead>
 			<tr>
@@ -37,6 +46,7 @@
 			</tr>
 		</thead>
 	</table>	
+	
 </div>
 {% endblock %}
 
