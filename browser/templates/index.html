@@ -7,13 +7,15 @@
 {% endblock %}
 {% block content %}
 <script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/javascript/main.js"></script>
 <div id="left-column-area">
-	<table id="dir-list-table" class="dataTable" cellpadding="0" cellspacing="0" width="100%">
+    <select name="group-name" id="list-create-group" style="width:60%; float:left;"></select>
+	<button type="button" id="btn-create-new-post" style="width:30%; float:right;">New Post</button>
+	<table id="msg-thread-list" class="dataTable">
 	</table>	
 </div>
-<div id="main-area">
-	<table id="thread-table" class="dataTable" cellpadding="0" cellspacing="0" width="100%">
-</table>	
+<div id="main-area" style="display:none">
+	
 </div>
 {% endblock %}
 

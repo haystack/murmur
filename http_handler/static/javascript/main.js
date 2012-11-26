@@ -208,6 +208,18 @@ $(document).ready(function(){
 	
 	if(window.location.pathname.indexOf('/settings')!=-1){
 		list_groups();
+	}else{
+		$.post('list_groups', {}, 
+			function(res){
+				for(var i = 0; i< res.groups.length; i++){
+					$("#list-create-group").append($("<option></option>")
+         		   .attr("value", res.groups[i].name)
+         		   .text(res.groups[i].name)); 
+					
+				}
+			} 
+		);	
+		list_threads();
 	}
 });
 
