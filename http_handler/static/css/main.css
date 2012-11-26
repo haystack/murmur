@@ -102,22 +102,31 @@ body {
 	border-right: #ccc solid 1px;
 }
 
-form{
+form, form.dialog{
 	margin:0px auto;
 	margin-top:30px; 
 	padding:30px; 
 	vertical-align:top;
 	background-color: #FFFFE0;
-	width:270px;
+	width:330px;
 }
 
-form label{
+form label, form.dialog label{
 	style="font-weight:bold; 
 	color:#666;
 }
 
-form input[type="text"]{
+form input[type="text"], form.dialog input[type="text"]{
 	width:250px;
+}
+
+
+.default-text {
+}
+
+.default-text-active { 
+	color: #a1a1a1; 
+	font-style: italic;
 }
 
 

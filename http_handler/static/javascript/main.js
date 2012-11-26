@@ -28,6 +28,7 @@ $(document).ready(function(){
 		]  
 	});
 	
+	
 	list_groups = 
 		function(params){
 			$.post('list_groups', params, 
@@ -51,6 +52,7 @@ $(document).ready(function(){
 	
 	create_group = 
 		function(params){
+			params.group_name = $("#text-create-group").val()
 			$.post('create_group', params, 
 				function(res){
 					list_groups(params);
@@ -62,8 +64,7 @@ $(document).ready(function(){
 		function(params){
 			$.post('subscribe_group', params, 
 				function(res){
-					var f = bind(group_info, params);
-					f();
+					group_info(params)
 					//notify(res);
 				}
 			);	
@@ -74,8 +75,7 @@ $(document).ready(function(){
 		function(params){
 			$.post('unsubscribe_group', params, 
 				function(res){
-					var f = bind(group_info, params);
-					f();
+					group_info(params)
 					//notify(res);
 				}
 			);	
@@ -113,8 +113,10 @@ $(document).ready(function(){
 		groups_table.fnClearTable();
 		if(res.status){
 			var params = {'requester_email': res.user};
+	 		$("#btn-create-group").unbind("click");
+	 		$("#btn-create-group").bind("click");
 			var crt_group = bind(create_group, params);
-			$("#btn-crt-group").click(crt_group);
+			$("#btn-create-group").click(crt_group);
 			for(var i = 0; i< res.groups.length; i++){
 				curr = groups_table.fnAddData( [
 									res.groups[i].name
@@ -179,6 +181,28 @@ $(document).ready(function(){
 			$('td', table.fnGetNodes(curr_row)).css("background-color","lightyellow");
 		}	
 	}
+	
+	
+
+	$(".default-text").focus(function(srcc)
+	{
+	    if ($(this).val() == $(this)[0].title)
+	    {
+	        $(this).removeClass("default-text-active");
+	        $(this).val("");
+	    }
+	});
+    
+	$(".default-text").blur(function()
+	{
+	    if ($(this).val() == "")
+	    {
+	        $(this).addClass("default-text-active");
+	        $(this).val($(this)[0].title);
+	    }
+	});
+    
+	$(".default-text").blur();
 	
 	if(window.location.pathname.indexOf('/settings')!=-1){
 		list_groups();

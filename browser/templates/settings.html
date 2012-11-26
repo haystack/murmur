@@ -9,7 +9,8 @@
 <script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="/static/javascript/main.js"></script>
 <div id="left-column-area">
-	<button type="button" id="btn-create-group">Create New Group</button>
+    <input type="text" name="group-name" id="text-create-group" style="width:60%; float:left;" class="default-text" title="New-Group"/>
+	<button type="button" id="btn-create-group" style="width:30%; float:right;">Create</button>
 	<table id="groups-table" class="dataTable">
 		<thead>
 			<tr>
@@ -25,10 +26,10 @@
 	<h3>Actions</h3>
 	<hr />
 	<div id="group-options">
-		<a id="btn-act-group" href="#">Activate</a> <br />
-		<a id="btn-deact-group" href="#">De-Activate</a> <br />
-		<a id="btn-sub-group" href="#">Subscribe</a> <br />
-		<a id="btn-unsub-group" href="#">Un-Subscribe</a>
+		<a id="btn-activate-group" href="#">Activate</a> <br />
+		<a id="btn-deactivate-group" href="#">De-Activate</a> <br />
+		<a id="btn-subscribe-group" href="#">Subscribe</a> <br />
+		<a id="btn-unsubscribe-group" href="#">Un-Subscribe</a>
 	</div>
 	</div>
 	<br />
@@ -37,7 +38,7 @@
 	<table id="members-table" class="dataTable">
 		<thead>
 			<tr>
-				<th>Member</th>
+				<th>Email</th>
 				<th>Active</th>
 				<th>Admin</th>
 				<th>Moderator</th>
