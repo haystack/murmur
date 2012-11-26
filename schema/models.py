@@ -23,8 +23,8 @@ class Post(models.Model):
 
 class Group(models.Model):
 	id = models.AutoField(primary_key=True)
-	name = models.CharField(max_length=20)
-	active = models.BooleanField(default=False)
+	name = models.CharField(max_length=20, unique = True)
+	active = models.BooleanField(default=True)
 	timestamp = models.DateTimeField(auto_now=True)
 	def __unicode__(self):
 		return self.name
@@ -43,12 +43,13 @@ class User(models.Model):
 	member = models.BooleanField(default=False)
 	moderator = models.BooleanField(default=False)
 	guest = models.BooleanField(default=False)
-	active = models.BooleanField(default=False)
-        def __unicode__(self):
-			return self.name
+	active = models.BooleanField(default=True)
+	def __unicode__(self):
+		return self.name
 
-        class Meta:
-			db_table = "users"
+	class Meta:
+		unique_together = ('email', 'group',)
+		db_table = "users"
 
 
 class Following(models.Model):
