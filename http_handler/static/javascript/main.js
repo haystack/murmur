@@ -20,7 +20,11 @@ $(document).ready(function(){
 		"sWidth": "100%",
 		"aoColumns": [                 
 			{"bSortable": false, "sWidth": "50%"},
-			{"bSortable": false, "sWidth": "50%"}
+			{"bSortable": false, "sWidth": "10%"},
+			{"bSortable": false, "sWidth": "10%"},
+			{"bSortable": false, "sWidth": "10%"},
+			{"bSortable": false, "sWidth": "10%"},
+			{"bSortable": false, "sWidth": "10%"}
 		]  
 	});
 	
@@ -111,7 +115,11 @@ $(document).ready(function(){
 		for(var i = 0; i< res.members.length; i++){
 			curr = members_table.fnAddData( [
 								res.members[i].email,
-								res.members[i].active
+								res.members[i].active,
+								res.members[i].admin,
+								res.members[i].moderator,
+								res.members[i].member,
+								res.members[i].guest
 							  ]);
 		}
 		if(curr_row !== undefined){
@@ -119,8 +127,10 @@ $(document).ready(function(){
 			$('td', groups_table.fnGetNodes(curr_row)).css("background-color","lightyellow");
 		}	
 	}
-
-	list_groups();
+	
+	if(window.location.pathname.indexOf('/settings')!=-1){
+		list_groups();
+	}
 });
 
 				

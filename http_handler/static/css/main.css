@@ -83,7 +83,7 @@ body {
 	position: absolute;
 	top: 40px;
 	right: 0px;
-	bottom: 50px;
+	bottom: 0px;
 	left: 0px;
 	width: 100%;
 }
@@ -99,6 +99,7 @@ body {
 	max-width: 50%;
 	width: 300px;
 	z-index:100;
+	border-right: #ccc solid 1px;
 }
 
 form{
@@ -149,43 +150,49 @@ form input[type="text"]{
 }
 
 
+
 table.dataTable thead tr th {
 	color: #333;
 	font-weight: bold;
 	text-shadow: 1px 1px 1px #fff;
 	padding: 10px 15px;
 	background: #d3d3d3;
-	border-bottom: #eee solid 1px;
-	}
+	border-bottom: #ccc solid 1px;
+	text-align:left;
+}
+
+
+
 table.dataTable tbody tr td {
 	padding: 15px;
 	border-bottom: #ccc solid 1px;
 	vertical-align: middle;
 	font-size: 13px;
-	}
+}
+
 table.dataTable tbody tr:hover td {
 	background: #f0f4f9;
-	}
+}
 	
 .dataTables_scroll {
 	border: #ccc solid 1px;
-	}
+}
 	
 .dataTables_filter {
 	background: #f6f6f6;
-	padding: 10px 15px;
+	padding: 15px 5px;
 	border: #ccc solid 1px;
-	-webkit-border-top-left-radius: 5px;
-	-moz-border-top-left-radius: 5px;
-	border-top-left-radius: 5px;
-	-webkit-border-top-right-radius: 5px;
-	-moz-border-top-right-radius: 5px;
-	border-top-right-radius: 5px;
-	}
+}
+
+
+.dataTables_filter label{
+	display:none;
+}
+
 .dataTables_wrapper .bottom {
 	background: #f6f6f6;
-	padding: 10px 15px;
-	border: #ccc solid 1px;
+	padding: 0px;
+	border-bottom: #ccc solid 1px;
 	color: #999;
 	}
 
