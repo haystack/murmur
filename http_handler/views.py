@@ -12,7 +12,7 @@ MailX Web Interface Handler
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
 def index(request):
-	return HttpResponseRedirect('/browser/')
+	return HttpResponseRedirect('browser/')
 	
 
 def list_groups(request):
