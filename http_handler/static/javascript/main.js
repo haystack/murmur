@@ -151,6 +151,14 @@ $(document).ready(function(){
 					  'group_name': res.group_name,
 					  'curr_row': curr_row
 					 }
+ 		$("#btn-act-group").unbind("click");
+ 		$("#btn-deact-group").unbind("click");
+ 		$("#btn-sub-group").unbind("click");
+ 		$("#btn-unsub-group").bind("click");
+ 		$("#btn-act-group").bind("click");
+ 		$("#btn-deact-group").bind("click");
+ 		$("#btn-sub-group").bind("click");
+ 		$("#btn-unsub-group").unbind("click");
 		var act_group = bind(activate_group, params);
 		var deact_group = bind(deactivate_group, params);
 		var sub_group = bind(subscribe_group, params);
