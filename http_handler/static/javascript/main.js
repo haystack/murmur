@@ -62,7 +62,8 @@ $(document).ready(function(){
 		function(params){
 			$.post('subscribe_group', params, 
 				function(res){
-					group_info(params);
+					var f = bind(group_info, params);
+					f();
 					//notify(res);
 				}
 			);	
@@ -73,7 +74,8 @@ $(document).ready(function(){
 		function(params){
 			$.post('unsubscribe_group', params, 
 				function(res){
-					group_info(params);
+					var f = bind(group_info, params);
+					f();
 					//notify(res);
 				}
 			);	
