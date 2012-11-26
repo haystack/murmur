@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block headlink-left %}
+<span class="name">Welcome, {{ email }}!</span>
+{% endblock %}
+{% block headlink-right %}
+ <a href="#" id="edit-profile-link">Profile</a> | <a href="/logout">Log out</a>
+{% endblock %}
+{% block content %}
+<script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/javascript/main.js"></script>
+<div id="left-column-area">
+	<table id="groups-table" class="dataTable" cellpadding="0" cellspacing="0" width="100%">
+	</table>	
+</div>
+<div id="main-area">
+	<table id="members-table" class="dataTable" cellpadding="0" cellspacing="0" width="100%">
+</table>	
+</div>
+{% endblock %}
+
+
+
+
+

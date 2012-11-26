@@ -90,7 +90,6 @@ $(document).ready(function(){
 
 	function populate_groups_table(res){
 		groups_table.fnClearTable();
-		console.log(res)
 		if(res.status){
 			for(var i = 0; i< res.groups.length; i++){
 				curr = groups_table.fnAddData( [
