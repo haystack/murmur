@@ -115,41 +115,10 @@ form label{
 	color:#666;
 }
 
-form input{
-	width:230px;
+form input[type="text"]{
+	width:250px;
 }
 
-form .submit{
-	width:100px; 
-	font-size:smaller;
-	margin-top: 10px;
-	padding:5px 5px 5px 5px;
-}
-
-form.dialog{
-	margin:0px auto;
-	margin-top:30px; 
-	padding:30px; 
-	vertical-align:top;
-	background-color: #FFFFE0;
-	width:80%;
-}
-
-form.dialog label{
-	style="font-weight:bold; 
-	color:#666;
-}
-
-form.dialog input{
-	width:90%;
-}
-
-form.dialog .submit{
-	width:100px; 
-	font-size:smaller;
-	margin-top: 10px;
-	padding:5px 5px 5px 5px;
-}
 
 
 

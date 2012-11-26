@@ -8,6 +8,7 @@ urlpatterns = patterns('',
      url(r'^$', 'browser.views.index'),
 	 url(r'^index', 'browser.views.index'),
 	 url(r'^settings', 'browser.views.settings'),
+	 
 	 url(r'^list_groups', 'browser.views.list_groups'),
 	 url(r'^create_group', 'browser.views.create_group'),
 	 url(r'^activate_group', 'browser.views.activate_group'),
@@ -19,4 +20,7 @@ urlpatterns = patterns('',
 	 url(r'^insert_reply', 'browser.views.insert_reply'),
 	 url(r'^follow_post', 'browser.views.follow_post'),
 	 url(r'^unfollow_post', 'browser.views.unfollow_post'),
+	 
+	 url(r'^login', 'browser.views.login'),
+	 url(r'^logout', 'browser.views.logout'),
 )

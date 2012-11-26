@@ -70,8 +70,6 @@ STATICFILES_DIRS = (
 )
 
 
-SESSION_COOKIE_PATH = '/mailx'
-CSRF_COOKIE_PATH = '/mailx'
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -123,7 +121,6 @@ INSTALLED_APPS = (
     'schema',
     'browser',
     'smtp_handler',
-	'account'
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:

@@ -1,10 +1,9 @@
 from django.http import *
 from django.shortcuts import render_to_response
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
 import engine.main
 from engine.msg_codes import *
 from django.views.decorators.csrf import csrf_exempt
+from django.core.context_processors import csrf
 import json
 
 '''
@@ -15,13 +14,55 @@ MailX Web Handler
 '''
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
+SESSION_KEY = 'USER'
+
+            
+
+def init_session(email):
+	pass
+
+def login_form(request):
+	c = {}
+	c.update(csrf(request))
+	return render_to_response('login.html', c)
+
+def login(request, redirect_url='/'):
+	if request.method == "POST":
+		try:
+			user = request.POST["email"]
+			if(user != ""):
+				request.session.flush()
+				request.session[SESSION_KEY] = user
+				return HttpResponseRedirect(redirect_url)
+			else:
+				return login_form(request)
+		except:
+			return login_form(request)
+	else:
+		return login_form(request)
+		
+
+
+def logout(request):
+	request.session.flush()
+	return HttpResponseRedirect('/')
 
 
 def index(request):
-	return render_to_response("index.html")
+	try:
+		user = request.session[SESSION_KEY]
+		return render_to_response("index.html", {'user': user})
+	except KeyError:
+		return login_form(request)
+		
 	
 def settings(request):
-	return render_to_response("settings.html")
+	try:
+		user = request.session[SESSION_KEY]
+		return render_to_response("settings.html", {'user': user})
+	except KeyError:
+		return login_form(request)
+	
 
 @csrf_exempt
 def list_groups(request):
