@@ -7,4 +7,4 @@ MailX Web Interface Handler
 '''
 
 def index(request):
-	return HttpResponseRedirect('browser/', context)
+	return HttpResponseRedirect('/mailx/browser/')
