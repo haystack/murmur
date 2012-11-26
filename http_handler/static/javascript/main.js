@@ -1,113 +1,131 @@
-$(document).ready(function(){    
-    dir_listing_table = $('#dir-listing-table').dataTable({
+$(document).ready(function(){ 
+	groups_table = $('#groups-table').dataTable({
 		"sDom": '<"top"f<"clear">>rt<"bottom"ilp<"clear">>',
-        "bPaginate": false,
-        "bInfo": false,
-        "bAutoWidth": false,
-        "bFilter": false,
-        "sWidth": "100%",
-        "aoColumns": [			
-        	{"bSortable": false, "sWidth": "100%"}
-        ]
-    
-    });
-    
-    
-    msg_body_table = $('#msg-body-table').dataTable({
+		"bPaginate": false,
+		"bInfo": false,
+		"bAutoWidth": false,
+		"bFilter": false,
+		"sWidth": "100%",
+		"aoColumns": [                 
+			{"bSortable": false, "sWidth": "100%"}
+		]  
+	});
+	
+	members_table = $('#members-table').dataTable({
 		"sDom": '<"top"f<"clear">>rt<"bottom"ilp<"clear">>',
-        "bPaginate": false,
-        "bInfo": false,
-        "bAutoWidth": false,
-        "bFilter": false,
-        "sWidth": "100%",
-        "aoColumns": [			
-        	{"bSortable": false, "sWidth": "20%"},
-        	{"bSortable": false, "sWidth": "60%"},
-        	{"bSortable": false, "sWidth": "20%"}
-        ]
-    
-    });
+		"bPaginate": false,
+		"bInfo": false,
+		"bAutoWidth": false,
+		"bFilter": false,
+		"sWidth": "100%",
+		"aoColumns": [                 
+			{"bSortable": false, "sWidth": "50%"},
+			{"bSortable": false, "sWidth": "50%"}
+		]  
+	});
 	
-    list_groups = function(params) {
-		var jaqxhr = $.post("list_groups",
-			params,
-			function(res){
-				console.log(res)
-			}); 			
-			
-	}
+	list_groups = 
+		function(params){
+			$.post('list_groups', params, 
+				function(res){
+					populate_groups_table(res);
+				}
+			);	
+		}	
 	
-    create_group = function(params) {
-		var jaqxhr = $.post("create_group",
-			params,
-			function(res){
-				console.log(res)
-			}); 			
-			
-	}
-    
-    get_dir_listing = function(params) {
-		var jaqxhr = $.post("/ajax/dir_listing/",
-			{},
-			function(data){
-				dir_listing_table.fnClearTable();
-				populate_dir_listing_table(data);
-			}); 			
-			
-	}
+	group_info = 
+		function(params){
+			$.post('group_info', params, 
+				function(res){
+					populate_members_table(res, params.curr_row);
+				}
+			);	
+		}
 	
+
+	subscribe_group = 
+		function(params){
+			$.post('subscribe_group', params, 
+				function(res){
+					notify(res);
+				}
+			);	
+		}
+		
+		
+	unsubscribe_group = 
+		function(params){
+			$.post('unsubscribe_group', params, 
+				function(res){
+					notify(res);
+				}
+			);	
+		}
+
+	activate_group = 
+		function(params){
+			$.post('activate_group', params, 
+				function(res){
+					notify(res);
+				}
+			);	
+		}
+		
 	
-	get_msg_thread = function(id) {
-		var jaqxhr = $.post("/ajax/msg_thread/",
-			{'id':id},
-			function(data){
-				msg_thread_table.fnClearTable();
-				populate_msg_thread_table(data);
-			}); 
-			
-			
-	}
-	
-	
-	
+	deactivate_group = 
+		function(params){
+			$.post('deactivate_group', params, 
+				function(res){
+					notify(res);
+				}
+			);	
+		}				  
+
+
 	function bind(fnc, val ) {
 		return function () {
 			return fnc(val);
 		};
 	}
-	
-	function populate_dir_listing_table(data){
-		var x = JSON.parse(data)
-		console.log(x)
-		for(var i = 0; i< x.projects.length; i++){
-			curr = projects_table.fnAddData( [
-								x.projects[i].title
-							  ]);	
-			var id = x.projects[i].id	
-			var f = bind(get_tasks, id)		  
-			curr_row = projects_table.fnGetNodes(curr);
-			$(curr_row).click(f);
+
+	function populate_groups_table(res){
+		groups_table.fnClearTable();
+		console.log(res)
+		if(res.status){
+			for(var i = 0; i< res.groups.length; i++){
+				curr = groups_table.fnAddData( [
+									res.groups[i].name
+								  ]);
+				var params = {'requester_email': 'anantb@csail.mit.edu', 
+							  'group_name': res.groups[i].name,
+							  'curr_row': curr
+							 }
+				var f = bind(group_info, params)
+				curr_row = groups_table.fnGetNodes(curr);
+				$(curr_row).click(f);
+			}
 		}
-		
 	}
 	
-	
-	function populate_msg_thread_table(data){
-		var x = JSON.parse(data)
-		for(var i = 0; i< x.tasks.length; i++){
-		curr = tasks_table.fnAddData( [
-       						x.tasks[i].desc,
-       						x.tasks[i].owner_id,
-       						x.tasks[i].step_deadline
-		                  ]);					
+	function populate_members_table(res, curr_row){
+		members_table.fnClearTable();
+		for(var i = 0; i< res.members.length; i++){
+			curr = members_table.fnAddData( [
+								res.members[i].email,
+								res.members[i].active
+							  ]);
+		}
+		if(curr_row !== undefined){
+			$('td', groups_table.fnGetNodes()).css("background-color","white");
+			$('td', groups_table.fnGetNodes(curr_row)).css("background-color","lightyellow");
 		}	
 	}
-	
-	
 
-	list_groups()
-	
+	list_groups();
 });
+
+				
+	
 
 
 

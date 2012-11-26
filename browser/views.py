@@ -19,6 +19,9 @@ request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
 def index(request):
 	return render_to_response("index.html")
+	
+def settings(request):
+	return render_to_response("settings.html")
 
 @csrf_exempt
 def list_groups(request):
@@ -81,7 +84,7 @@ def unsubscribe_group(request):
 @csrf_exempt
 def group_info(request):
 	try:
-		res = engine.main.group_info(request.POST['group_name'], request.POST['requester_email'])
+		res = engine.main.group_info(request.POST['group_name'])
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:
 		return HttpResponse(request_error, mimetype="application/json")

@@ -132,10 +132,9 @@ def group_info(group_name):
 		res['status'] = True
 		res['group_name'] = group_name
 		res['active'] = group.active
-		res['members'] = []   
+		res['members'] = []
 		for member in members:
-			for k,v in member.iteritems():
-				res['members'].append({'name':str(k), 'active': v})
+			res['members'].append({'email': member['email'], 'group_name':group_name, 'admin': member['admin'], 'member':member['member'], 'moderator':member['moderator'], 'guest':member['guest'], 'active':member['active']})
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']	
 	except:
