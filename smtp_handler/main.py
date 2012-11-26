@@ -144,7 +144,12 @@ def info(message, group_name=None, host=None):
 	if(res['status']):
 		body = "Group Name: %s@%s, Active: %s\n\n" %(res['group_name'], host, res['active'])
 		for member in res['members']:			
-			body += "%s : %s\n" %(member['name'], str(member['active']))
+			body += "%s : %s\n" %('Email: ', member['email'])
+			body += "%s : %s\n" %('Active: ', member['active'])
+			body += "%s : %s\n" %('Member: ', member['member'])
+			body += "%s : %s\n" %('Guest: ', member['guest'])
+			body += "%s : %s\n" %('Moderator: ', member['moderator'])
+			body += "%s : %s\n" %('Admin: ', member['admin'])
 		body += "\n..........................\n"       
 	else:
 		subject = "Group Info -- Error"
