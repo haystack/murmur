@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 import engine.main
 from engine.msg_codes import *
+from django.core.context_processors import csrf
 import json
 
 '''
@@ -17,6 +18,8 @@ request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
 
 def index(request):
+	context = {}
+	context.update(csrf(request))
 	return render_to_response("index.html")
 
 
