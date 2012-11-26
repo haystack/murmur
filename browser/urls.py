@@ -6,7 +6,4 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
      url(r'^$', 'browser.views.index'),
-	 url(r'^ajax/msg_list/', 'browser.ajax.msg_list'),
-	 url(r'^ajax/msg_thread/', 'brwser.ajax.msg_thread'),
-
 )

@@ -3,7 +3,7 @@ from schema.models import *
 from msg_codes import *
 
 '''
-MailX Controller
+MailX Main Controller
 
 @author: Anant Bhardwaj
 @date: Oct 20, 2012

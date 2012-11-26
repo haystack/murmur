@@ -27,6 +27,24 @@ $(document).ready(function(){
         ]
     
     });
+	
+    list_groups = function(params) {
+		var jaqxhr = $.post("/list_groups/",
+			params,
+			function(res){
+				console.log(res)
+			}); 			
+			
+	}
+	
+    create_group = function(params) {
+		var jaqxhr = $.post("/create_group/",
+			params,
+			function(res){
+				console.log(res)
+			}); 			
+			
+	}
     
     get_dir_listing = function(params) {
 		var jaqxhr = $.post("/ajax/dir_listing/",
@@ -87,7 +105,7 @@ $(document).ready(function(){
 	
 	
 
-	get_dir_listing()
+	list_groups()
 	
 });
 
