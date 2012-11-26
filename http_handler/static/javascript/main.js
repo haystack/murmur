@@ -63,7 +63,7 @@ $(document).ready(function(){
 			$.post('subscribe_group', params, 
 				function(res){
 					group_info(params);
-					notify(res);
+					//notify(res);
 				}
 			);	
 		}
@@ -74,7 +74,7 @@ $(document).ready(function(){
 			$.post('unsubscribe_group', params, 
 				function(res){
 					group_info(params);
-					notify(res);
+					//notify(res);
 				}
 			);	
 		}
@@ -84,7 +84,7 @@ $(document).ready(function(){
 			$.post('activate_group', params, 
 				function(res){
 					group_info(params);
-					notify(res);
+					//notify(res);
 				}
 			);	
 		}
@@ -95,7 +95,7 @@ $(document).ready(function(){
 			$.post('deactivate_group', params, 
 				function(res){
 					group_info(params);
-					notify(res);
+					//notify(res);
 				}
 			);	
 		}				  
