@@ -30,6 +30,12 @@ h2 {
 	display: inline;
 }
 
+hr{
+	background-color: #447EAC;
+	border: thin #447EAC solid;
+}
+
+
 ol, ul, li {
 	list-style: none;
 }
@@ -48,7 +54,7 @@ body {
 	background: #3D7AA6;
 	margin-bottom: 1px;
 	color: white;
-	border-bottom: 1px solid #C7C8C9;
+	border-bottom: 1px solid #447EAC;
 	width: 100%;
 }
 
@@ -78,6 +84,8 @@ body {
 }
 
 
+
+
 #page{
 	position: absolute;
 	top: 40px;
@@ -101,22 +109,34 @@ body {
 	border-right: #ccc solid 1px;
 }
 
-form, form.dialog{
+form{
 	margin:0px auto;
 	margin-top:30px; 
 	padding:30px; 
 	vertical-align:top;
-	background-color: #FFFFE0;
-	width:330px;
+	background-color: #D7ECFA;
+	width:310px;
+	border: solid thin #447EAC;
 }
 
-form label, form.dialog label{
-	style="font-weight:bold; 
+form label{
+	font-weight:bold; 
 	color:#666;
 }
 
-form input[type="text"], form.dialog input[type="text"]{
+form input[type="text"]{
 	width:250px;
+}
+
+input[type="text"]{
+	padding:5px 10px 5px 10px;
+	border: #447EAC solid thin;
+}
+button, input[type="button"], input[type="submit"]{
+	background-color: #3D7AA6;
+	color: #FFF;
+	border: #447EAC solid thin;
+	padding:5px 10px 5px 10px;
 }
 
 

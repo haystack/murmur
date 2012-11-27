@@ -1,6 +1,4 @@
 {% extends "base.html" %}
-{% block headlink-left %}
-{% endblock %}
 {% block headlink-right %}
  <a href="#" data-dropdown="#dropdown-nav">{{ user }} ▾ </a>
 {% endblock %}
@@ -8,8 +6,8 @@
 <script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="/static/javascript/main.js"></script>
 <div id="left-column-area">
-    <input type="text" name="group-name" id="text-create-group" style="width:60%; float:left;" class="default-text" title="New-Group"/>
-	<button type="button" id="btn-create-group" style="width:30%; float:right;">Create</button>
+    <input type="text" name="group-name" id="text-create-group" style="width:60%; float:left;" class="default-text" title="new-group-name"/>
+	<button type="button" id="btn-create-group" style="width:30%; float:right; margin-right:5px;">Create</button>
 	<table id="groups-table" class="dataTable">
 		<thead>
 			<tr>
