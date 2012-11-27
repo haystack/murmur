@@ -243,7 +243,11 @@ $(document).ready(function(){
 	function render_post(res){
 		$('#main-area').show()
 		if(res.status){
-			$("#main-area").html('<h3>' + res.subject + '</h3>' + '<h4 class="sub-heading">' + res.from + '</h4>' +  '<hr />' + res.text)
+			var content = '<h3>' + res.subject + '</h3>' + '<h4 class="sub-heading">' + res.from + '</h4>' +  '<hr />' + res.text;
+			content += '<input type="text" id="text-reply-thread" style="width:100%; class="default-text" title="write your reply here"/>'
+			$("#main-area").html(content)
+			
+			
 		}
 	}
 	
