@@ -128,12 +128,15 @@ body {
 	bottom: 0px;
 	left: 350px;
 	padding-right:50px;
+	padding top: 10px;
 	background-color: #FFF;
 	overflow: auto;
 }
 
 
-
+.subheading{
+	color: #737373;
+}
 
 .default-text {
 }
