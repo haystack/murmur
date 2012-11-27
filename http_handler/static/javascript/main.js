@@ -221,7 +221,7 @@ $(document).ready(function(){
 		if(res.status){
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.posts.length; i++){
-				curr = groups_table.fnAddData( [
+				curr = posts_table.fnAddData( [
 									res.posts[i].from + "<br />" + res.posts[i].subject
 								  ]);
 				var params = {'requester_email': res.user, 
