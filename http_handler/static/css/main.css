@@ -138,7 +138,7 @@ body {
 	color: #737373;
 }
 
-.ellipsis{}
+.ellipsis{
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
