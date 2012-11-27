@@ -151,7 +151,7 @@ def list_posts(group_name=None):
 		res['status'] = True
 		res['posts'] = []
 		for p in posts:
-			res['posts'].append({'id':p.id, 'from':p.email, 'subject':p.subject})
+			res['posts'].append({'id':p.id, 'from':p.email, 'to':p.group.name, 'subject':p.subject})
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	return res
@@ -166,6 +166,7 @@ def load_post(group_name, post_id):
 		res['from'] = p.email
 		res['subject'] = p.subject
 		res['text'] = p.post
+		res['to'] = p.group.name
 	except Post.DoesNotExist:
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 	except:
@@ -180,7 +181,7 @@ def insert_post(group_name, subject, message_text, poster_email):
 		group_members = User.objects.filter(group = group)
 		recipients = [m.email for m in group_members]
 		id = base64.b64encode(poster_email + str(time.time())).lower()
-		p = Post(id = id, email = poster_email, subject = subject, post=str(message_text))
+		p = Post(id = id, email = poster_email, subject = subject, post=str(message_text), group = group)
 		p.save()
 		f = Following(email = poster_email, post = p)
 		f.save()
@@ -201,7 +202,7 @@ def insert_reply(group_name, subject, message_text, poster_email, post_id):
 		group = Group.objects.get(name=group_name)
 		id = base64.b64encode(poster_email + str(time.time())).lower()
 		post = Post.objects.get(id=post_id)
-		r = Post(id=id, email = poster_email, subject=subject, post = str(message_text), reply_to = post)
+		r = Post(id=id, email = poster_email, subject=subject, post = str(message_text), reply_to = post, group = group)
 		r.save()
 		following = Following.objects.filter(post = post)
 		recipients = [f.email for f in following]

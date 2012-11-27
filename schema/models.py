@@ -12,6 +12,7 @@ class Post(models.Model):
 	email = models.CharField(max_length=50)
 	subject = models.TextField()
 	post = models.TextField()
+	group = models.ForeignKey('Group')
 	reply_to = models.ForeignKey('self', blank=False, null = True, related_name="replies")
 	timestamp = models.DateTimeField(auto_now=True)
 
@@ -19,7 +20,7 @@ class Post(models.Model):
 		return self.name
 	
 	class Meta:
-		db_table = "posts"
+		db_table = "mailx_posts"
 
 class Group(models.Model):
 	id = models.AutoField(primary_key=True)
@@ -30,7 +31,7 @@ class Group(models.Model):
 		return self.name
 
 	class Meta:
-		db_table = "groups"
+		db_table = "mailx_groups"
 
 
 
@@ -49,7 +50,7 @@ class User(models.Model):
 
 	class Meta:
 		unique_together = ('email', 'group',)
-		db_table = "users"
+		db_table = "mailx_users"
 
 
 class Following(models.Model):
@@ -61,7 +62,7 @@ class Following(models.Model):
 		return self.name
 
 	class Meta:
-		db_table = "following"
+		db_table = "mailx_following"
 
 
 class Like(models.Model):
@@ -73,7 +74,7 @@ class Like(models.Model):
 		return self.name
 
 	class Meta:
-		db_table = "likes"
+		db_table = "mailx_likes"
 
 
 
@@ -86,5 +87,5 @@ class Dislke(models.Model):
 			return self.name
 
         class Meta:
-			db_table = "dislikes"
+			db_table = "mailx_dislikes"
 
