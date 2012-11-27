@@ -222,7 +222,7 @@ $(document).ready(function(){
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.posts.length; i++){
 				curr = posts_table.fnAddData( [
-									'<h3>' + res.posts[i].from + '</h3>' + '<h4 class="subsection">' + res.posts[i].subject + '</h4>'
+									'<h3>' + res.posts[i].from + '</h3>' + '<h4 class="sub-heading">' + res.posts[i].subject + '</h4>'
 								  ]);
 				var params = {'requester_email': res.user, 
 							  'post_id': res.posts[i].id,
@@ -239,7 +239,7 @@ $(document).ready(function(){
 	function render_post(res){
 		$('#main-area').show()
 		if(res.status){
-			$("#main-area").html('<h3>' + res.subject + '</h3>' + '<h4 class="subsection">' + res.from + '</h4>' +  '<hr />' + res.text)
+			$("#main-area").html('<h3>' + res.subject + '</h3>' + '<h4 class="sub-heading">' + res.from + '</h4>' +  '<hr />' + res.text)
 		}
 	}
 	
