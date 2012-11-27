@@ -162,7 +162,7 @@ def load_post(group_name, post_id):
 	try:
 		p = Post.objects.get(id=post_id)
 		res['status'] = True
-		res['id'] = id
+		res['id'] = p.id
 		res['from'] = p.email
 		res['subject'] = p.subject
 		res['text'] = p.post
