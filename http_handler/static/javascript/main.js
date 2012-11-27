@@ -267,7 +267,7 @@ $(document).ready(function(){
 		$('#main-area').show()
 		if(res.status){
 			var content = '<h3>' + res.subject + '</h3>' + '<h4 class="sub-heading">' + res.from + '</h4>' +  '<hr />' + res.text;
-			content += '<div class="comment"><textarea></textarea><button type="button" id="btn-reply" style="margin:5px 5px 5px 5px;">Reply</button></div>';
+			content += '<div class="comment"><textarea></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 			$("#main-area").html(content);
 			
 		}
