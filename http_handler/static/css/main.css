@@ -118,6 +118,7 @@ body {
 	width: 300px;
 	z-index:100;
 	border-right: #ccc solid 1px;
+	overflow: auto;
 }
 
 #main-area{
