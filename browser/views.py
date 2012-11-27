@@ -62,7 +62,7 @@ def groups(request):
 		user = request.session[SESSION_KEY]
 		return render_to_response("groups.html", {'user': user})
 	except KeyError:
-		return login_form(request)
+		return HttpResponseRedirect('login')
 	
 
 
