@@ -297,7 +297,7 @@ $(document).ready(function(){
 			} 
 		);
 		*/	
-		list_posts();
+		setInterval(list_posts, 10000);
 	}
 });
 
