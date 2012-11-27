@@ -5,8 +5,8 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
      url(r'^$', 'browser.views.index'),
-	 url(r'^index', 'browser.views.index'),
-	 url(r'^settings', 'browser.views.settings'),
+	 url(r'^posts', 'browser.views.posts'),
+	 url(r'^groups', 'browser.views.groups'),
 	 
 	 url(r'^list_groups', 'browser.views.list_groups'),
 	 url(r'^create_group', 'browser.views.create_group'),

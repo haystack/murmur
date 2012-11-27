@@ -25,7 +25,7 @@ def login_form(request):
 	c.update(csrf(request))
 	return render_to_response('login.html', c)
 
-def login(request, redirect_url='index'):
+def login(request, redirect_url='posts'):
 	if request.method == "POST":
 		try:
 			user = request.POST["email"]
@@ -44,21 +44,23 @@ def login(request, redirect_url='index'):
 
 def logout(request):
 	request.session.flush()
-	return HttpResponseRedirect('index')
+	return HttpResponseRedirect('posts')
 
 
 def index(request):
-	try:
-		user = request.session[SESSION_KEY]
-		return render_to_response("index.html", {'user': user})
-	except KeyError:
-		return login_form(request)
+	return HttpResponseRedirect('posts')
 		
-	
-def settings(request):
+def posts(request):
 	try:
 		user = request.session[SESSION_KEY]
-		return render_to_response("settings.html", {'user': user})
+		return render_to_response("posts.html", {'user': user})
+	except KeyError:
+		return HttpResponseRedirect('login')
+	
+def groups(request):
+	try:
+		user = request.session[SESSION_KEY]
+		return render_to_response("groups.html", {'user': user})
 	except KeyError:
 		return login_form(request)
 	
