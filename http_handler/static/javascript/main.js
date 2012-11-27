@@ -171,6 +171,7 @@ $(document).ready(function(){
 				$(curr_row).click(f);
 			}
 		}
+		groups_table.fnGetNodes(0).click();
 	}
 	
 	function populate_members_table(res){
@@ -235,6 +236,7 @@ $(document).ready(function(){
 				$(curr_row).click(f);
 			}
 		}
+		posts_table.fnGetNodes(0).click();
 	}
 	
 	
@@ -296,7 +298,7 @@ $(document).ready(function(){
 		);
 		*/
 		list_posts();	
-		setInterval(list_posts, 10000);
+		//setInterval(list_posts, 10000);
 	}
 });
 
