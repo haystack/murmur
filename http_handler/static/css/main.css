@@ -12,22 +12,9 @@ html, body, div, span, h1, h2, h3, h4, h5, h6, p, pre, a, abbr, acronym, address
 	vertical-align: baseline;
 }
 
-h1 {
-	font-size: 20px;
-	line-height: 26px;
-	font-weight: bold;
-	color: black;
-	margin-bottom: 5px;
-	display: inline;
-}
 
-h2 {
-	font-size: 16px;
-	line-height: 24px;
-	font-weight: bold;
-	color: black;
-	margin-bottom: 5px;
-	display: inline;
+ol, ul, li {
+	list-style: none;
 }
 
 hr{
@@ -35,79 +22,6 @@ hr{
 	border: thin #447EAC solid;
 }
 
-
-ol, ul, li {
-	list-style: none;
-}
-
-body {
-	font-family: Calibri, "Gill Sans", "Gill Sans MT", "Lucida Grande", Lucida, Verdana, sans-serif;
-	font-size:10pt;
-	height: 100%;
-	overflow: auto;
-}
-
-#header {
-	position: relative;
-	height: 39px;
-	font-size:11pt;
-	background: #3D7AA6;
-	margin-bottom: 1px;
-	color: white;
-	border-bottom: 1px solid #447EAC;
-	width: 100%;
-}
-
-#headlink-right{
-	position:absolute;
-	top: 10px;
-	right:20px;
-	color: #FFF;
-}
-
-#headlink-left{
-	position:absolute;
-	top: 10px;
-	left:20px;
-	color: #FFF;
-}
-
-#headlink-right a, #headlink-left a{
-	font-weight: bold;
-	text-decoration: none;
-	color: #FFF;
-}
-
-.name{
-	font-weight: bolder;
-	color: #ccc;
-}
-
-
-
-
-#page{
-	position: absolute;
-	top: 40px;
-	right: 0px;
-	bottom: 0px;
-	left: 0px;
-	width: 100%;
-}
-
-#left-column-area{
-    position: absolute;    
-	top: 0px;
-	right: auto;
-	bottom: 0px;
-	left: 0px;
-	background-color: white;
-	color: #333;
-	max-width: 50%;
-	width: 300px;
-	z-index:100;
-	border-right: #ccc solid 1px;
-}
 
 form{
 	margin:0px auto;
@@ -140,16 +54,71 @@ button, input[type="button"], input[type="submit"]{
 }
 
 
-.default-text {
+
+
+body {
+	font-family: Calibri, "Gill Sans", "Gill Sans MT", "Lucida Grande", Lucida, Verdana, sans-serif;
+	font-size:10pt;
+	height: 100%;
+	overflow: auto;
 }
 
-.default-text-active { 
-	color: #a1a1a1; 
-	font-style: italic;
+
+
+#header {
+	position: relative;
+	height: 39px;
+	font-size:11pt;
+	background: #3D7AA6;
+	margin-bottom: 1px;
+	color: white;
+	border-bottom: 1px solid #447EAC;
+	width: 100%;
+}
+
+#headlink-right{
+	position:absolute;
+	top: 10px;
+	right:20px;
+	color: #FFF;
+}
+
+#headlink-left{
+	position:absolute;
+	top: 10px;
+	left:20px;
+	color: #FFF;
+}
+
+#headlink-right a, #headlink-left a{
+	font-weight: bold;
+	text-decoration: none;
+	color: #FFF;
 }
 
 
+#page{
+	position: absolute;
+	top: 40px;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+}
 
+#left-column-area{
+    position: absolute;    
+	top: 0px;
+	right: auto;
+	bottom: 0px;
+	left: 0px;
+	background-color: white;
+	color: #333;
+	max-width: 50%;
+	width: 300px;
+	z-index:100;
+	border-right: #ccc solid 1px;
+}
 
 #main-area{
     position:absolute;
@@ -159,23 +128,18 @@ button, input[type="button"], input[type="submit"]{
 	left: 350px;
 	padding-right:50px;
 	background-color: #FFF;
+	overflow: auto;
 }
 
 
-#footer {
-    position: absolute;
-	border-top: 1px solid #C7C8C9;
-	background-color: #DEE0E2;
-	margin:0px;	
-	padding:0px;
-	right: 0;
-	bottom: 0;
-	left: 0px;
-	font-size: 12px;
-	height: 49px;
-	line-height: 16px;
-	width: 100%;
-	overflow: hidden;
+
+
+.default-text {
+}
+
+.default-text-active { 
+	color: #a1a1a1; 
+	font-style: italic;
 }
 
 
@@ -184,6 +148,8 @@ button, input[type="button"], input[type="submit"]{
 	margin-top:10px;
 	padding:0px;
 }
+
+
 
 table.dataTable{
 	width:100%;
@@ -206,7 +172,6 @@ table.dataTable tbody tr td {
 	padding: 15px;
 	border-bottom: #ccc solid 1px;
 	vertical-align: middle;
-	font-size: 13px;
 }
 
 table.dataTable tbody tr:hover td {
