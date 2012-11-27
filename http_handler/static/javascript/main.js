@@ -246,7 +246,7 @@ $(document).ready(function(){
 			var content = '<h3>' + res.subject + '</h3>' + '<h4 class="sub-heading">' + res.from + '</h4>' +  '<hr />' + res.text;
 			content += '<input type="text" id="text-reply-thread" style="width:100%; class="default-text" title="write your reply here"/>'
 			$("#main-area").html(content)
-			
+			$(".default-text").blur();
 			
 		}
 	}
