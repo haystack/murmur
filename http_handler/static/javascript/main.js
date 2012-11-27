@@ -172,7 +172,6 @@ $(document).ready(function(){
 	}
 	
 	function populate_members_table(res){
-		$('#main-area').show()
 		members_table.fnClearTable();
 		for(var i = 0; i< res.members.length; i++){
 			curr = members_table.fnAddData( [
@@ -188,6 +187,7 @@ $(document).ready(function(){
 	}
 	
 	function populate_group_info(res, curr_row){
+		$('#main-area').show()
 		var info = "<h3>Group Info</h3><hr />";
 		info += "Group Name: " + res.group_name + "<br />";
 		info += "Active: " + res.active + "<br /> <br />";
@@ -237,6 +237,7 @@ $(document).ready(function(){
 	
 	
 	function render_post(res){
+		$('#main-area').show()
 		if(res.status){
 			$("#main-area").html(res.from + '<br />' + res.subject + '<hr />' + res.text)
 		}

@@ -171,7 +171,8 @@ def handle_post(message, address=None, host=None):
 	if(reserved):
 		return
 	group_name = address.lower()
-	res = insert_post(group_name, message, addr)
+	msg_text = get_body(str(message))
+	res = insert_post(group_name, msg_text['body'], addr)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
 		relay.deliver(mail)
@@ -192,11 +193,11 @@ def handle_post(message, address=None, host=None):
 	if msg_id:
 		mail['message-id'] = msg_id
 		
-	res = get_body(str(message))
-	if(res['type'] == 'html'):
-		mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
+	
+	if(msg_text['type'] == 'html'):
+		mail.Html = unicode(msg_text['body'] + "<hr />" + ps_blurb, "utf-8")
 	else:
-		mail.Body = unicode(res['body'] + "\n.....................\n" + ps_blurb, "utf-8")
+		msg_text.Body = unicode(msg_text['body'] + "\n.....................\n" + ps_blurb, "utf-8")
 			
 	logging.debug('TO LIST: ' + str(to_send))
 	relay.deliver(mail, To = to_send)
