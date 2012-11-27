@@ -161,13 +161,13 @@ body {
 .comment{
 	width: 100%;
 	height:30px;
+	background: #D7ECFA;
+	padding: 20px;
 }
 
 table.dataTable{
-	background: #D7ECFA;
 	width:100%;
 	border-spacing:0;
-	padding: 20px;
 }
 
 table.dataTable thead tr th {
