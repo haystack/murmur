@@ -166,13 +166,13 @@ def info(message, group_name=None, host=None):
 @stateless
 def handle_post(message, address=None, host=None):
 	address = address.lower()
-	name, addr = parseaddr(message['from'].lower())
+	name, addr = parseaddr(message['From'].lower())
 	reserved = filter(lambda x: address.endswith(x), RESERVED)
 	if(reserved):
 		return
 	group_name = address.lower()
 	msg_text = get_body(str(message))
-	res = insert_post(group_name, msg_text['body'], addr)
+	res = insert_post(group_name, message['Subject'], msg_text['body'], addr)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
 		relay.deliver(mail)

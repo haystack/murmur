@@ -173,14 +173,14 @@ def load_post(group_name, post_id):
 	return res
 
 
-def insert_post(group_name, message, poster_email):
+def insert_post(group_name, subject, message_text, poster_email):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
 		group_members = User.objects.filter(group = group)
 		recipients = [m.email for m in group_members]
 		id = base64.b64encode(poster_email + str(time.time())).lower()
-		p = Post(id = id, email = poster_email, subject = message['Subject'], post=str(message))
+		p = Post(id = id, email = poster_email, subject = subject, post=str(message_text))
 		p.save()
 		f = Following(email = poster_email, post = p)
 		f.save()
