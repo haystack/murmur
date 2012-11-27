@@ -195,13 +195,13 @@ def insert_post(group_name, subject, message_text, poster_email):
 	
 
 
-def insert_reply(group_name, message, poster_email, post_id):
+def insert_reply(group_name, subject, message, poster_email, post_id):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
 		id = base64.b64encode(poster_email + str(time.time())).lower()
 		post = Post.objects.get(id=post_id)
-		r = Post(id=id, email = poster_email, subject=message['Subject'], post = str(message), reply_to = post)
+		r = Post(id=id, email = poster_email, subject=subject, post = str(message_text), reply_to = post)
 		r.save()
 		following = Following.objects.filter(post = post)
 		recipients = [f.email for f in following]

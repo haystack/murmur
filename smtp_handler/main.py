@@ -213,7 +213,8 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
 	group_name = group_name.lower()
-	res = insert_reply(group_name, message, addr, post_id)
+	msg_text = get_body(str(message))
+	res = insert_reply(group_name, message['Subject'], msg_text['body'], addr, post_id)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
 		relay.deliver(mail)
@@ -231,11 +232,10 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 
 	if msg_id:
 		mail['message-id'] = msg_id
-	res = get_body(str(message))
-	if(res['type'] == 'html'):
-		mail.Html = unicode(res['body'] + "<hr />" + ps_blurb, "utf-8")
+	if(msg_text['type'] == 'html'):
+		mail.Html = unicode(msg_text['body'] + "<hr />" + ps_blurb, "utf-8")
 	else:
-		mail.Body = unicode(res['body'] + "\n.....................\n" + ps_blurb, "utf-8")
+		mail.Body = unicode(msg_text['body'] + "\n.....................\n" + ps_blurb, "utf-8")
 		
 	logging.debug('TO LIST: ' + str(to_send))
 	relay.deliver(mail, To = to_send)
