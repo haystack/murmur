@@ -138,6 +138,12 @@ body {
 	color: #737373;
 }
 
+.ellipsis{}
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
 .default-text {
 }
 

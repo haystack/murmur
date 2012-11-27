@@ -195,7 +195,7 @@ def insert_post(group_name, subject, message_text, poster_email):
 	
 
 
-def insert_reply(group_name, subject, message, poster_email, post_id):
+def insert_reply(group_name, subject, message_text, poster_email, post_id):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
