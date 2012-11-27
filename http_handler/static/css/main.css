@@ -59,6 +59,7 @@ textarea {
 	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
 	box-sizing: border-box;         /* Opera/IE 8+ */
 	width: 100%;
+	height:50px;
 }
 
 body {
@@ -160,7 +161,6 @@ body {
 
 .comment{
 	width: 100%;
-	height:30px;
 	background: #D7ECFA;
 	padding: 20px;
 }
