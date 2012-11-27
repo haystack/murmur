@@ -155,6 +155,22 @@ def list_posts(group_name=None):
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	return res
+	
+
+def load_post(group_name, post_id):
+	res = {'status':False}
+	try:
+		p = Post.objects.get(id=post_id)
+		res['status'] = True
+		res['id'] = id
+		res['from'] = p.email
+		res['subject'] = p.subject
+		res['text'] = p.post
+	except Post.DoesNotExist:
+		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	return res
 
 
 def insert_post(group_name, message, poster_email):

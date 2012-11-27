@@ -135,7 +135,7 @@ $(document).ready(function(){
 		function(params){
 			$.post('load_post', params, 
 				function(res){
-					//render_post(res);
+					render_post(res);
 					highlight_table_row(posts_table, params.curr_row);
 				}
 			);	
@@ -232,6 +232,13 @@ $(document).ready(function(){
 				curr_row = posts_table.fnGetNodes(curr);
 				$(curr_row).click(f);
 			}
+		}
+	}
+	
+	
+	function render_post(res){
+		if(res.status){
+			$("#main-area").html(res.from + '<br />' + res.subject + '<hr />' + res.text)
 		}
 	}
 	
