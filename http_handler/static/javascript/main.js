@@ -244,12 +244,12 @@ $(document).ready(function(){
 		$('#main-area').show()
 		if(res.status){
 			var content = '<h3>' + res.subject + '</h3>' + '<h4 class="sub-heading">' + res.from + '</h4>' +  '<hr />' + res.text;
-			content += '<input type="text" id="text-reply-thread" style="width:100%;" title="write your reply here" />';
+			content += '<input type="text" id="text-reply-thread" style="width:100%;" title="write your reply here"/>';
 			$("#main-area").html(content);
 			
 		}
-        $(this).addClass("default-text-active");
-        $(this).val($(this)[0].title);
+        $("#text-reply-thread").addClass("default-text-active");
+        $("#text-reply-thread").val($("#text-reply-thread")[0].title);
 		
 	}
 	
