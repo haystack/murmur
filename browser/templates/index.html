@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block headlink-left %}
-<span class="name">Welcome, {{ user }}!</span>
+MailX
 {% endblock %}
 {% block headlink-right %}
- <a href="settings">Settings</a> | <a href="logout">Log out</a>
+<a href="#" data-dropdown="#dropdown-nav">{{ user }} ▾ </a>
 {% endblock %}
 {% block content %}
 <script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>

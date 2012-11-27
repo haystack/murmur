@@ -219,7 +219,7 @@ $(document).ready(function(){
 				}
 			} 
 		);	
-		list_threads();
+		//list_threads();
 	}
 });
 
