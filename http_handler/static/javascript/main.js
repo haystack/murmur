@@ -45,6 +45,29 @@ $(document).ready(function(){
 	});
 	
 	
+	
+	/* Default blur effect in textbox */
+	
+	$(".default-text").focus(function(srcc)
+	{
+	    if ($(this).val() == $(this)[0].title)
+	    {
+	        $(this).removeClass("default-text-active");
+	        $(this).val("");
+	    }
+	});
+    
+	$(".default-text").blur(function()
+	{
+	    if ($(this).val() == "")
+	    {
+	        $(this).addClass("default-text-active");
+	        $(this).val($(this)[0].title);
+	    }
+	});
+    
+	
+	
 	/* All Group related AJAX calls */	
 	list_groups = 
 		function(params){
@@ -244,13 +267,12 @@ $(document).ready(function(){
 		$('#main-area').show()
 		if(res.status){
 			var content = '<h3>' + res.subject + '</h3>' + '<h4 class="sub-heading">' + res.from + '</h4>' +  '<hr />' + res.text;
-			content += '<input type="text" id="text-reply-thread" style="width:100%;" title="write your reply here"/>';
+			content += '<input type="text" id="text-reply-thread" style="width:100%;" class="default-text" title="write your reply here"/>';
 			$("#main-area").html(content);
 			
 		}
-        $("#text-reply-thread").addClass("default-text-active");
-        $("#text-reply-thread").val($("#text-reply-thread")[0].title);
-		
+        
+		$(".default-text").blur();
 	}
 	
 	
@@ -263,27 +285,6 @@ $(document).ready(function(){
 	}
 	
 	
-	/* Default blur effect in textbox */
-	
-	$(".default-text").focus(function(srcc)
-	{
-	    if ($(this).val() == $(this)[0].title)
-	    {
-	        $(this).removeClass("default-text-active");
-	        $(this).val("");
-	    }
-	});
-    
-	$(".default-text").blur(function()
-	{
-	    if ($(this).val() == "")
-	    {
-	        $(this).addClass("default-text-active");
-	        $(this).val($(this)[0].title);
-	    }
-	});
-    
-	$(".default-text").blur();
 	
 	
 	/* Handle based on URLs */
@@ -306,6 +307,7 @@ $(document).ready(function(){
 		list_posts();	
 		//setInterval(list_posts, 10000);
 	}
+	$(".default-text").blur();
 });
 
 				
