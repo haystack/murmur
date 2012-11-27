@@ -144,6 +144,18 @@ def group_info(group_name):
 
 
 
+def list_posts(group_name=None):
+	res = {'status':False}
+	try:
+		posts = Post.objects.all()
+		res['status'] = True
+		res['posts'] = []
+		for p in posts:
+			res['posts'].append({'id':p.id, 'from':p.email, 'subject':p.subject})
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	return res
+
 
 def insert_post(group_name, message, poster_email):
 	res = {'status':False}

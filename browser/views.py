@@ -146,6 +146,15 @@ def insert_post(request):
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:
 		return HttpResponse(request_error, mimetype="application/json")
+		
+
+def list_posts(request):
+	try:
+		res = engine.main.list_posts()
+		res.update({'user': request.session[SESSION_KEY]})
+		return HttpResponse(json.dumps(res), mimetype="application/json")
+	except:
+		return HttpResponse(request_error, mimetype="application/json")
 	
 
 

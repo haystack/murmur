@@ -6,9 +6,13 @@
 <script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="/static/javascript/main.js"></script>
 <div id="left-column-area">
-    <select name="group-name" id="list-create-group" style="width:60%; float:left;"></select>
-	<button type="button" id="btn-create-new-post" style="width:30%; float:right;">New Post</button>
-	<table id="msg-thread-list" class="dataTable">
+    <button type="button" id="btn-create-new-post" style="margin: 5px auto 5px auto; text-align:center; display:block;">+ New Post</button>
+	<table id="posts-table" class="dataTable">
+		<thead>
+			<tr>
+				<th>All Posts</th>
+			</tr>
+		</thead>
 	</table>	
 </div>
 <div id="main-area" style="display:none">

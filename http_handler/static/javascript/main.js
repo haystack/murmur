@@ -1,5 +1,19 @@
 $(document).ready(function(){ 
+	/* Dynamic Table Definitions */	
+	
 	groups_table = $('#groups-table').dataTable({
+		"sDom": '<"top"f<"clear">>rt<"bottom"ilp<"clear">>',
+		"bPaginate": false,
+		"bInfo": false,
+		"bAutoWidth": false,
+		"bFilter": false,
+		"sWidth": "100%",
+		"aoColumns": [                 
+			{"bSortable": false, "sWidth": "100%"}
+		]  
+	});
+	
+	posts_table = $('#posts-table').dataTable({
 		"sDom": '<"top"f<"clear">>rt<"bottom"ilp<"clear">>',
 		"bPaginate": false,
 		"bInfo": false,
@@ -29,6 +43,7 @@ $(document).ready(function(){
 	});
 	
 	
+	/* All Group related AJAX calls */	
 	list_groups = 
 		function(params){
 			$.post('list_groups', params, 
@@ -36,7 +51,9 @@ $(document).ready(function(){
 					populate_groups_table(res);
 				}
 			);	
-		}	
+		}
+	
+	
 	
 	group_info = 
 		function(params){
@@ -103,8 +120,28 @@ $(document).ready(function(){
 				}
 			);	
 		}				  
+		
+	/* All Post related AJAX calls */	
+	list_posts = 
+		function(params){
+			$.post('list_posts', params, 
+				function(res){
+					populate_posts_table(res);
+				}
+			);	
+		}
+	
+	load_post = 
+		function(params){
+			$.post('load_post', params, 
+				function(res){
+					//render_post(res);
+					highlight_table_row(posts_table, params.curr_row);
+				}
+			);	
+		}		
 
-
+	/* To avoid closure */	
 	function bind(fnc, val ) {
 		return function () {
 			return fnc(val);
@@ -177,6 +214,29 @@ $(document).ready(function(){
 		$("#btn-unsubscribe-group").click(unsub_group);
 	}
 	
+	
+	
+	function populate_posts_table(res){
+		posts_table.fnClearTable();
+		if(res.status){
+			var params = {'requester_email': res.user};
+			for(var i = 0; i< res.posts.length; i++){
+				curr = groups_table.fnAddData( [
+									res.posts[i].from + "<br />" + res.posts[i].subject
+								  ]);
+				var params = {'requester_email': res.user, 
+							  'post_id': res.posts[i].id,
+							  'curr_row': curr
+							 }
+				var f = bind(load_post, params)
+				curr_row = posts_table.fnGetNodes(curr);
+				$(curr_row).click(f);
+			}
+		}
+	}
+	
+	
+	
 	function highlight_table_row(table, curr_row){
 		if(curr_row !== undefined){
 			$('td', table.fnGetNodes()).css("background-color","white");
@@ -185,7 +245,8 @@ $(document).ready(function(){
 	}
 	
 	
-
+	/* Default blur effect in textbox */
+	
 	$(".default-text").focus(function(srcc)
 	{
 	    if ($(this).val() == $(this)[0].title)
@@ -206,6 +267,9 @@ $(document).ready(function(){
     
 	$(".default-text").blur();
 	
+	
+	/* Handle based on URLs */
+	
 	if(window.location.pathname.indexOf('/settings')!=-1){
 		list_groups();
 	}else{
@@ -219,7 +283,7 @@ $(document).ready(function(){
 				}
 			} 
 		);	
-		//list_threads();
+		list_posts();
 	}
 });
 
