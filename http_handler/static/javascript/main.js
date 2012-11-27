@@ -8,6 +8,7 @@ $(document).ready(function(){
 		"bAutoWidth": false,
 		"bFilter": false,
 		"sWidth": "100%",
+		"aaSorting": [],
 		"aoColumns": [                 
 			{"bSortable": false, "sWidth": "100%"}
 		]  
@@ -20,6 +21,7 @@ $(document).ready(function(){
 		"bAutoWidth": false,
 		"bFilter": false,
 		"sWidth": "100%",
+		"aaSorting": [],
 		"aoColumns": [                 
 			{"bSortable": false, "sWidth": "100%"}
 		]  
