@@ -278,9 +278,10 @@ $(document).ready(function(){
 	
 	/* Handle based on URLs */
 	
-	if(window.location.pathname.indexOf('/settings')!=-1){
+	if(window.location.pathname.indexOf('/groups')!=-1){
 		list_groups();
 	}else{
+		/*
 		$.post('list_groups', {}, 
 			function(res){
 				for(var i = 0; i< res.groups.length; i++){
@@ -290,7 +291,8 @@ $(document).ready(function(){
 					
 				}
 			} 
-		);	
+		);
+		*/	
 		list_posts();
 	}
 });
