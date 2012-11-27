@@ -148,7 +148,7 @@ def list_posts(request):
 
 def load_post(request):
 	try:
-		res = engine.main.load_post(request.POST['id'], request.POST['poster_email'])
+		res = engine.main.load_post(group_name=None, request.POST['post_id'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:
