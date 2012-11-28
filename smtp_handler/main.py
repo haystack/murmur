@@ -191,7 +191,7 @@ def handle_post(message, address=None, host=None):
 	if msg_id:
 		mail['message-id'] = msg_id	
 	
-	ps_blurb = html_ps(id)
+	ps_blurb = html_ps(id, group_name)
 	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")		
 	logging.debug('TO LIST: ' + str(to_send))
 	relay.deliver(mail, To = to_send)
@@ -225,7 +225,7 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 	if msg_id:
 		mail['message-id'] = msg_id
 	
-	ps_blurb = html_ps(id)
+	ps_blurb = html_ps(id, group_name)
 	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")
 	logging.debug('TO LIST: ' + str(to_send))
 	relay.deliver(mail, To = to_send)
@@ -366,7 +366,7 @@ def get_body(message):
                 	res['body']=email_message.get_payload()
 	return res
 	
-def html_ps(id):
+def html_ps(id, group_name):
 	follow_addr = 'mailto:%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = 'mailto:%s' %(group_name + '+' + id + UNFOLLOW_SUFFIX + '@' + host)
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
