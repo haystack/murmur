@@ -347,12 +347,13 @@ def get_body(message):
 	email_message = email.message_from_string(str(message))
 	maintype = email_message.get_content_maintype()
 	subtype = email_message.get_content_maintype()
+	body = None
 	if maintype == 'multipart':
 		for part in email_message.get_payload():
 			if part.get_content_maintype() == 'text':
 				if part.get_content_subtype() == 'html':
 					res['type']='html'
-					res['body']=part.get_payload()
+					body = part.get_payload()
 					break
 				else:
 					res['type']='plain'
@@ -360,9 +361,10 @@ def get_body(message):
 	elif maintype == 'text':
 		if subtype == 'html':
 			res['type']='html'
+			body =email_message.get_payload()
 		elif subtype == 'text':
 			res['type']='plain'
-	body =email_message.get_payload()
+			body =email_message.get_payload()
 	re.sub(r'<div style="border-top:solid thin; padding-top:5px;">.*</div>', '', body)
 	res['body'] = body
 	return res
