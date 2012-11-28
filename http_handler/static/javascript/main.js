@@ -235,7 +235,7 @@ $(document).ready(function(){
 			$("#btn-create-group").click(crt_group);
 			for(var i = 0; i< res.groups.length; i++){
 				curr = groups_table.fnAddData( [
-									res.groups[i].name
+									'<span class="strong">' + res.groups[i].name + '</span>'
 								  ]);
 				var params = {'requester_email': res.user, 
 							  'group_name': res.groups[i].name,
@@ -277,8 +277,8 @@ $(document).ready(function(){
 	function populate_group_info(res, curr_row){
 		$('#main-area').show()
 		var info = "<h3>Group Info</h3><hr />";
-		info += "Group Name: " + res.group_name + "<br />";
-		info += "Active: " + res.active + "<br /> <br />";
+		info += '<span class="strong">Group Name: </span><span class="strong-gray">' + res.group_name + '</span><br />';
+		info += '<span class="strong">Active: </span><span class="strong-gray">' + res.active + '</span><br /> <br />';
 		$("#group-info").html(info)
 		var params = {'requester_email': res.user, 
 					  'group_name': res.group_name,
@@ -310,7 +310,7 @@ $(document).ready(function(){
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.posts.length; i++){
 				curr = posts_table.fnAddData( [
-									'<h3>' + res.posts[i].from + '</h3>' + '<h4 class="sub-heading ellipsis">' + res.posts[i].subject + '</h4>'
+									'<span class="strong">' + res.posts[i].from + '</span><br /><span class="strong-gray ellipsis">' + res.posts[i].subject + '</span>'
 								  ]);
 				var params = {'requester_email': res.user, 
 							  'post_id': res.posts[i].id,
@@ -328,7 +328,7 @@ $(document).ready(function(){
 	function render_post(res){
 		$('#main-area').show()
 		if(res.status){
-			var content = '<h3>' + res.subject + '</h3>' + '<span class="strong">From: </span> <span class="from">' + res.from + '</span><br /><span class="strong">To: </span><span class="to">' + res.to + '</span><hr />' + res.text;
+			var content = '<h3>' + res.subject + '</h3>' + '<span class="strong">From: </span> <span class="strong-gray">' + res.from + '</span><br /><span class="strong">To: </span><span class="strong-gray">' + res.to + '</span><hr />' + res.text;
 			content += '<div><button type="button" id="btn-follow" style="margin-top:10px;">Follow</button> <button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</div>';
 			
 			content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
