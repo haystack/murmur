@@ -139,7 +139,17 @@ body {
 	overflow: auto;
 }
 
-
+.notification-msg {
+	border-top: 1px solid #82CFFA;
+	border-bottom: 1px solid #96C4EA;
+	border-left: 1px solid #E7F2FB;
+	border-right: 1px solid #E7F2FB;
+	background-color: #F4FAFE;
+	margin-bottom: 18px;
+	margin-top: 10px;
+	padding: 18px 40px 18px 54px;
+	line-height: 1.8em;
+}
 .sub-heading{
 	color: #737373;
 }
