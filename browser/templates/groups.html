@@ -3,8 +3,6 @@
  <a href="#" data-dropdown="#dropdown-nav">{{ user }} ▾ </a>
 {% endblock %}
 {% block content %}
-<script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="/static/javascript/main.js"></script>
 <div id="left-column-area">
     <input type="text" name="group-name" id="text-create-group" style="width:55%; margin-left:5px;" class="default-text" title="new-group-name"/>
 	<button type="button" id="btn-create-group" style="width:30%; left:60%; margin-right:5px; margin-bottom:5px;margin-top:5px;">Create</button>
@@ -44,6 +42,7 @@
 	</table>	
 	
 </div>
+<div id="notification-msg"></div>
 {% endblock %}
 
 

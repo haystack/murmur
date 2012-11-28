@@ -65,6 +65,7 @@ $(document).ready(function(){
 	        $(this).val($(this)[0].title);
 	    }
 	});
+	
     
 	
 	
@@ -87,6 +88,7 @@ $(document).ready(function(){
 					populate_group_info(res);
 					populate_members_table(res);
 					highlight_table_row(groups_table, params.curr_row);
+					notify(res, false);
 				}
 			);	
 		}
@@ -100,6 +102,7 @@ $(document).ready(function(){
 					$("#text-create-group").val("");
 					$("#text-create-group").blur();
 					list_groups(params);
+					notify(res, true);
 				}
 			);	
 		}
@@ -109,7 +112,7 @@ $(document).ready(function(){
 			$.post('subscribe_group', params, 
 				function(res){
 					group_info(params)
-					//notify(res);
+					notify(res, true);
 				}
 			);	
 		}
@@ -118,9 +121,9 @@ $(document).ready(function(){
 	unsubscribe_group = 
 		function(params){
 			$.post('unsubscribe_group', params, 
-				function(res){
+				function(res){					
 					group_info(params)
-					//notify(res);
+					notify(res, true);
 				}
 			);	
 		}
@@ -130,7 +133,7 @@ $(document).ready(function(){
 			$.post('activate_group', params, 
 				function(res){
 					group_info(params);
-					//notify(res);
+					notify(res, true);
 				}
 			);	
 		}
@@ -141,7 +144,7 @@ $(document).ready(function(){
 			$.post('deactivate_group', params, 
 				function(res){
 					group_info(params);
-					//notify(res);
+					notify(res, true);
 				}
 			);	
 		}				  
@@ -162,6 +165,7 @@ $(document).ready(function(){
 				function(res){
 					render_post(res);
 					highlight_table_row(posts_table, params.curr_row);
+					notify(res, false);
 				}
 			);	
 		}		
@@ -210,6 +214,16 @@ $(document).ready(function(){
 							  ]);
 		}
 		
+	}
+	
+	function notify(res, on_success){
+		if(!res.status){
+			noty({text: "Error: " + res.code, dismissQueue: true, timeout:2000, force: true });
+		}else{
+			if(on_success){
+				noty({text: "Success!", dismissQueue: true, timeout:2000, force: true });
+			}
+		}
 	}
 	
 	function populate_group_info(res, curr_row){
