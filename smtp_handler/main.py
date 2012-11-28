@@ -352,24 +352,24 @@ def get_body(message):
 			if part.get_content_maintype() == 'text':
 				if part.get_content_subtype() == 'html':
 					res['type']='html'
-                			res['body']=part.get_payload()
+					res['body']=part.get_payload()
 					break
 				else:
 					res['type']='plain'
-                                	res['body']=part.get_payload()
+					res['body']=part.get_payload()
 	elif maintype == 'text':
 		if subtype == 'html':
 			res['type']='html'
-			res['body']=email_message.get_payload()
 		elif subtype == 'text':
-                	res['type']='plain'
-                	res['body']=email_message.get_payload()
-	re.sub(r'<div class="mailx-extra">.*</div>', '', res)
+			res['type']='plain'
+		body =email_message.get_payload()
+	re.sub(r'<div style="border-top:solid thin; padding-top:5px;">.*</div>', '', body)
+	res['body'] = body
 	return res
 	
 def html_ps(id, group_name, host):
 	follow_addr = 'mailto:%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = 'mailto:%s' %(group_name + '+' + id + UNFOLLOW_SUFFIX + '@' + host)
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
-	body = '<div class="mailx-extra" style="border-top:solid thin; padding-top:5px;">%s</div>' %(content)
+	body = '<div style="border-top:solid thin; padding-top:5px;">%s</div>' %(content)
 	return body
