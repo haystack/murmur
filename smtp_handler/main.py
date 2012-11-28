@@ -365,7 +365,7 @@ def get_body(message):
 		elif subtype == 'text':
 			res['type']='plain'
 			body =email_message.get_payload()
-	re.sub(r'<div.*<a.*\_\_follow\_\_.*a>.*<a.*\_\_unfollow\_\_.*a>.*div>', '', body)
+	body = re.sub(r'<div.*?<a.*?\_\_follow\_\_.*?a>.*?<a.*?\_\_unfollow\_\_.*?a>.*?div>', '', body)
 	res['body'] = body
 	return res
 	
