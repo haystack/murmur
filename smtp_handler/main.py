@@ -364,7 +364,7 @@ def get_body(message):
 		elif subtype == 'text':
                 	res['type']='plain'
                 	res['body']=email_message.get_payload()
-	re.sub(r'<div class="mailx-extra">.*</div>', '', res, flags=re.IGNORECASE)
+	re.sub(r'<div class="mailx-extra">.*</div>', '', res, re.IGNORECASE)
 	return res
 	
 def html_ps(id, group_name, host):
