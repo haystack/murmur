@@ -362,7 +362,7 @@ def get_body(message):
 			res['type']='html'
 		elif subtype == 'text':
 			res['type']='plain'
-		body =email_message.get_payload()
+	body =email_message.get_payload()
 	re.sub(r'<div style="border-top:solid thin; padding-top:5px;">.*</div>', '', body)
 	res['body'] = body
 	return res
