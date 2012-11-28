@@ -204,6 +204,9 @@ $(document).ready(function(){
 	insert_reply = 
 		function(params){
 			params.msg_text = $("#reply-text-input").val() + '<br />' + params.text;
+			params.poster_email = params.requester_email;
+			delete params.requester_email;
+			delete params.text;
 			$.post('insert_reply', params, 
 				function(res){
 					if(res.status){
@@ -343,7 +346,7 @@ $(document).ready(function(){
 	  		$("#btn-follow").bind("click");
 	  		$("#btn-unfollow").bind("click");
 			var ins_reply = bind(insert_reply, params);
-			var flw_post = bind(follow_post);
+			var flw_post = bind(follow_post, params);
 			var unflw_post = bind(unfollow_post, params);
 	  		$("#btn-reply").click(ins_reply);
 	  		$("#btn-follow").click(flw_post);
