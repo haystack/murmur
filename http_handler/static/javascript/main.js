@@ -339,7 +339,7 @@ $(document).ready(function(){
 	  		$("#btn-unfollow").bind("click");
 			var flw_post = bind(follow_post, params, res.subject, res.text);
 			var unflw_post = bind(unfollow_post, params);
-			var ins_reply = bind(ins_reply, params);
+			var ins_reply = bind(insert_reply, params);
 	  		$("#btn-reply").click(ins_reply);
 	  		$("#btn-follow").click(flw_post);
 	  		$("#btn-unfollow").click(unflw_post);
