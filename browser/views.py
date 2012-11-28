@@ -180,7 +180,7 @@ def insert_reply(request):
 
 def follow_post(request):
 	try:
-		res = engine.main.follow_post(request.POST['group_name'], request.POST['requester_email'])
+		res = engine.main.follow_post(request.POST['post_id'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:
@@ -190,7 +190,7 @@ def follow_post(request):
 
 def unfollow_post(request):
 	try:
-		res = engine.main.unfollow_post(request.POST['group_name'], request.POST['requester_email'])
+		res = engine.main.unfollow_post(request.POST['post_id'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:

@@ -168,6 +168,42 @@ $(document).ready(function(){
 					notify(res, false);
 				}
 			);	
+		}
+	
+	follow_post = 
+		function(params){
+			$.post('follow_post', params, 
+				function(res){
+					notify(res, true);
+				}
+			);	
+		}
+	
+	unfollow_post = 
+		function(params){
+			$.post('unfollow_post', params, 
+				function(res){
+					notify(res, true);
+				}
+			);	
+		}
+		
+	insert_post = 
+		function(params){
+			$.post('insert_post', params, 
+				function(res){
+					notify(res, false);
+				}
+			);	
+		}
+	
+	insert_reply = 
+		function(params){
+			$.post('insert_reply', params, 
+				function(res){
+					notify(res, false);
+				}
+			);	
 		}		
 
 	/* To avoid closure */	
@@ -239,11 +275,11 @@ $(document).ready(function(){
  		$("#btn-activate-group").unbind("click");
  		$("#btn-deactivate-group").unbind("click");
  		$("#btn-subscribe-group").unbind("click");
- 		$("#btn-unsubscribe-group").bind("click");
+ 		$("#btn-unsubscribe-group").unbind("click");
  		$("#btn-activate-group").bind("click");
  		$("#btn-deactivate-group").bind("click");
  		$("#btn-subscribe-group").bind("click");
- 		$("#btn-unsubscribe-group").unbind("click");
+ 		$("#btn-unsubscribe-group").bind("click");
 		var act_group = bind(activate_group, params);
 		var deact_group = bind(deactivate_group, params);
 		var sub_group = bind(subscribe_group, params);
@@ -285,7 +321,23 @@ $(document).ready(function(){
 			
 			content += '<div class="comment"><textarea></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 			$("#main-area").html(content);
-			
+			var params = {'requester_email': res.user, 
+						  'post_id': res.id,
+						  'group_name': res.to
+						 }
+	  		$("#btn-reply").unbind("click");
+	  		$("#btn-follow").unbind("click");
+	  		$("#btn-unfollow").unbind("click");
+	  		$("#btn-reply").bind("click");
+	  		$("#btn-follow").bind("click");
+	  		$("#btn-unfollow").bind("click");
+			var flw_post = bind(follow_post, params);
+			var unflw_post = bind(unfollow_post, params);
+			var ins_reply = bind(ins_reply, params);
+	  		$("#btn-reply").click(ins_reply);
+	  		$("#btn-follow").click(flw_post);
+	  		$("#btn-unfollow").click(unflw_post);
+	  		
 		}
         
 	}
