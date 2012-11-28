@@ -180,8 +180,6 @@ def handle_post(message, address=None, host=None):
 	id = res['id']
 	to_send =  res['recipients']
 	post_addr = '%s <%s>' %(group_name, group_name + '+' + id + POST_SUFFIX + '@' + host)
-	follow_addr = '%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
-	ps_blurb = "To follow this thread, send an email to: %s \r\n" %(follow_addr)
 	mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
 	msg_id = message['message-id']
 		
@@ -191,14 +189,12 @@ def handle_post(message, address=None, host=None):
 		mail['References'] = msg_id
 
 	if msg_id:
-		mail['message-id'] = msg_id
-		
+		mail['message-id'] = msg_id	
 	
-	if(msg_text['type'] == 'html'):
-		mail.Html = unicode(msg_text['body'] + "<hr />" + ps_blurb, "utf-8")
-	else:
-		msg_text.Body = unicode(msg_text['body'] + "\n.....................\n" + ps_blurb, "utf-8")
-			
+	follow_addr = '%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
+	unfollow_addr = '%s' %(group_name + '+' + id + UNFOLLOW_SUFFIX + '@' + host)
+	ps_blurb = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>\r\n' %(follow_addr, unfollow_addr)
+	mail.Html = unicode(msg_text['body'] + "........................" + ps_blurb, "utf-8")			
 	logging.debug('TO LIST: ' + str(to_send))
 	relay.deliver(mail, To = to_send)
 
@@ -221,8 +217,6 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 		return
 	id = res['id']
 	to_send =  res['recipients']
-	unfollow_addr = '%s' %(group_name + '+' + post_id + UNFOLLOW_SUFFIX + '@' + host)
-	ps_blurb = "To un-follow this thread, send an email to: %s" %(unfollow_addr)
 	mail = MailResponse(From = message['From'], To = message['To'], Subject = message['Subject'])
 	msg_id = message['message-id']
 	if 'references' in message:
@@ -232,11 +226,11 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 
 	if msg_id:
 		mail['message-id'] = msg_id
-	if(msg_text['type'] == 'html'):
-		mail.Html = unicode(msg_text['body'] + "<hr />" + ps_blurb, "utf-8")
-	else:
-		mail.Body = unicode(msg_text['body'] + "\n.....................\n" + ps_blurb, "utf-8")
-		
+	
+	follow_addr = '%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
+	unfollow_addr = '%s' %(group_name + '+' + id + UNFOLLOW_SUFFIX + '@' + host)
+	ps_blurb = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>\r\n' %(follow_addr, unfollow_addr)
+	mail.Html = unicode(msg_text['body'] + "........................" + ps_blurb, "utf-8")
 	logging.debug('TO LIST: ' + str(to_send))
 	relay.deliver(mail, To = to_send)
 
