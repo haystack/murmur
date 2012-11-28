@@ -281,6 +281,8 @@ $(document).ready(function(){
 		$('#main-area').show()
 		if(res.status){
 			var content = '<h3>' + res.subject + '</h3>' + '<span class="strong">From: </span> <span class="from">' + res.from + '</span><br /><span class="strong">To: </span><span class="to">' + res.to + '</span><hr />' + res.text;
+			content += '<div><button type="button" id="btn-follow" style="margin-top:10px;">Follow</button> <button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</div>';
+			
 			content += '<div class="comment"><textarea></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 			$("#main-area").html(content);
 			
