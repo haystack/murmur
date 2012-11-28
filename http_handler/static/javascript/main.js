@@ -280,7 +280,7 @@ $(document).ready(function(){
 	function render_post(res){
 		$('#main-area').show()
 		if(res.status){
-			var content = '<h3>' + res.subject + '</h3>' + '<span class="strong">From: </span><span class="from">' + res.from + '</span><br /><span class="strong">To: </san><span class="to">' + res.to + '</span><hr />' + res.text;
+			var content = '<h3>' + res.subject + '</h3>' + '<span class="strong">From: </span> <span class="from">' + res.from + '</span><br /><span class="strong">To: </span><span class="to">' + res.to + '</span><hr />' + res.text;
 			content += '<div class="comment"><textarea></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 			$("#main-area").html(content);
 			
