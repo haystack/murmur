@@ -139,7 +139,7 @@ body {
 	overflow: auto;
 }
 
-#left-column-area datatables_wrapper{
+#left-column-area .dataTables_wrapper{
 	bottom:0px; 
 	overflow:auto; 
 	position:absolute; 
