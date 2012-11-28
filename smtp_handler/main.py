@@ -1,4 +1,4 @@
-import logging, time, base64, email
+import logging, time, base64, email, re
 from lamson.routing import route, stateless
 from config.settings import relay
 from schema.models import *
@@ -364,11 +364,12 @@ def get_body(message):
 		elif subtype == 'text':
                 	res['type']='plain'
                 	res['body']=email_message.get_payload()
+	re.sub(r'<div class="mailx-extra">.*</div>', '', res, flags=re.IGNORECASE)
 	return res
 	
 def html_ps(id, group_name, host):
 	follow_addr = 'mailto:%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = 'mailto:%s' %(group_name + '+' + id + UNFOLLOW_SUFFIX + '@' + host)
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
-	body = '<div class="mailx-exta" style="border-top:solid thin">%s</div>' %(content)
+	body = '<div class="mailx-extra" style="border-top:solid thin; padding-top:5px;">%s</div>' %(content)
 	return body
