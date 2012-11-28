@@ -172,7 +172,9 @@ $(document).ready(function(){
 	
 	follow_post = 
 		function(params){
-			$.post('follow_post', params, 
+			$.post('follow_post', {'requester_email': params.requester_email, 
+						  'post_id': params.post_id
+					  	}, 
 				function(res){
 					notify(res, true);
 				}
@@ -181,7 +183,9 @@ $(document).ready(function(){
 	
 	unfollow_post = 
 		function(params){
-			$.post('unfollow_post', params, 
+			$.post('unfollow_post', {'requester_email': params.requester_email, 
+						  'post_id': params.post_id
+					  	}, 
 				function(res){
 					notify(res, true);
 				}
@@ -198,9 +202,8 @@ $(document).ready(function(){
 		}
 	
 	insert_reply = 
-		function(params, subject, text){
-			params.subject = subject;
-			params.msg_text = $("reply-text-input").val() + '<br />' + text;
+		function(params){
+			params.msg_text = $("#reply-text-input").val() + '<br />' + params.text;
 			$.post('insert_reply', params, 
 				function(res){
 					if(res.status){
@@ -329,17 +332,17 @@ $(document).ready(function(){
 			$("#main-area").html(content);
 			var params = {'requester_email': res.user, 
 						  'post_id': res.id,
-						  'group_name': res.to
+						  'group_name': res.to,
+						  'subject': res.subject,
+						  'text':res.text
 					  	}
-			var subject = res.subject;
-			var text = res.text;
 	  		$("#btn-reply").unbind("click");
 	  		$("#btn-follow").unbind("click");
 	  		$("#btn-unfollow").unbind("click");
 	  		$("#btn-reply").bind("click");
 	  		$("#btn-follow").bind("click");
 	  		$("#btn-unfollow").bind("click");
-			var ins_reply = bind(insert_reply, params, subject, text);
+			var ins_reply = bind(insert_reply, params);
 			var flw_post = bind(follow_post);
 			var unflw_post = bind(unfollow_post, params);
 	  		$("#btn-reply").click(ins_reply);
