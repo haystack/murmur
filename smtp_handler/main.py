@@ -371,3 +371,4 @@ def html_ps(id):
 	unfollow_addr = 'mailto:%s' %(group_name + '+' + id + UNFOLLOW_SUFFIX + '@' + host)
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
 	body = '<div class="mailx-exta" style="border-top:solid medium #000">%s</div>' %(content)
+	return body
