@@ -144,7 +144,8 @@ body {
 	overflow:auto; 
 	position:absolute; 
 	width:100%; 
-	top: 35px;"
+	top: 35px;
+	border-top: #ccc solid 1px;
 }
 
 
