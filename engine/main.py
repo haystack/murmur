@@ -178,7 +178,7 @@ def insert_post(group_name, subject, message_text, poster_email):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
-		group_members = User.objects.filter(group = group)
+		group_members = User.objects.filter(group = group, active = True)
 		recipients = [m.email for m in group_members]
 		id = base64.b64encode(poster_email + str(time.time())).lower()
 		p = Post(id = id, email = poster_email, subject = subject, post=str(message_text), group = group)
