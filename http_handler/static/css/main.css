@@ -139,6 +139,14 @@ body {
 	overflow: auto;
 }
 
+#left-column-area datatables_wrapper{
+	bottom:0px; 
+	overflow:auto; 
+	position:absolute; 
+	width:100%; 
+	top: 35px;"
+}
+
 
 .from, .to{
 	color: #737373;
