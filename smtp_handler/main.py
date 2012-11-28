@@ -193,8 +193,9 @@ def handle_post(message, address=None, host=None):
 	
 	follow_addr = '%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = '%s' %(group_name + '+' + id + UNFOLLOW_SUFFIX + '@' + host)
-	ps_blurb = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>\r\n' %(follow_addr, unfollow_addr)
-	mail.Html = unicode(msg_text['body'] + "........................" + ps_blurb, "utf-8")			
+	ps_blurb = '<a href="mailto:%s">Follow</a> | <a href="mailto:%s">Un-Follow</a>\r\n' %(follow_addr, unfollow_addr)
+	line = "........................<br />"
+	mail.Html = unicode(msg_text['body'] + line + ps_blurb + line, "utf-8")		
 	logging.debug('TO LIST: ' + str(to_send))
 	relay.deliver(mail, To = to_send)
 
@@ -229,8 +230,9 @@ def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None)
 	
 	follow_addr = '%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = '%s' %(group_name + '+' + id + UNFOLLOW_SUFFIX + '@' + host)
-	ps_blurb = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>\r\n' %(follow_addr, unfollow_addr)
-	mail.Html = unicode(msg_text['body'] + "........................" + ps_blurb, "utf-8")
+	ps_blurb = '<a href="mailto:%s">Follow</a> | <a href="mailto:%s">Un-Follow</a>\r\n' %(follow_addr, unfollow_addr)
+	line = "........................<br />"
+	mail.Html = unicode(msg_text['body'] + line + ps_blurb + line, "utf-8")
 	logging.debug('TO LIST: ' + str(to_send))
 	relay.deliver(mail, To = to_send)
 
