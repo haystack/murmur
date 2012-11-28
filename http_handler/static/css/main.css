@@ -140,8 +140,9 @@ body {
 }
 
 
-.sub-heading{
+.from, .to{
 	color: #737373;
+	font-weight: bold;
 }
 
 .strong{
