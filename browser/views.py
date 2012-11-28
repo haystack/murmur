@@ -170,7 +170,7 @@ def insert_post(request):
 
 def insert_reply(request):
 	try:
-		res = engine.main.insert_reply(request.POST['group_name'], request.POST['message'], request.POST['poster_email'], request.POST['post_id'])
+		res = engine.main.insert_reply(request.POST['group_name'], request.POST['subject'], request.POST['msg_text'], request.POST['poster_email'], request.POST['post_id'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:

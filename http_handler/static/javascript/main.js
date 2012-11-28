@@ -198,10 +198,16 @@ $(document).ready(function(){
 		}
 	
 	insert_reply = 
-		function(params){
+		function(params, subject, text){
+			params.subject = subject;
+			params.msg_text = $("reply-text-input").val() + '<br />' + text;
 			$.post('insert_reply', params, 
 				function(res){
-					notify(res, false);
+					if(res.status){
+						$("reply-text-input").val="";
+						$("reply-text-input").blur();
+					}
+					notify(res, true);
 				}
 			);	
 		}		
@@ -319,19 +325,19 @@ $(document).ready(function(){
 			var content = '<h3>' + res.subject + '</h3>' + '<span class="strong">From: </span> <span class="from">' + res.from + '</span><br /><span class="strong">To: </span><span class="to">' + res.to + '</span><hr />' + res.text;
 			content += '<div><button type="button" id="btn-follow" style="margin-top:10px;">Follow</button> <button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</div>';
 			
-			content += '<div class="comment"><textarea></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
+			content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 			$("#main-area").html(content);
 			var params = {'requester_email': res.user, 
 						  'post_id': res.id,
 						  'group_name': res.to
-						 }
+					  	}
 	  		$("#btn-reply").unbind("click");
 	  		$("#btn-follow").unbind("click");
 	  		$("#btn-unfollow").unbind("click");
 	  		$("#btn-reply").bind("click");
 	  		$("#btn-follow").bind("click");
 	  		$("#btn-unfollow").bind("click");
-			var flw_post = bind(follow_post, params);
+			var flw_post = bind(follow_post, params, res.subject, res.text);
 			var unflw_post = bind(unfollow_post, params);
 			var ins_reply = bind(ins_reply, params);
 	  		$("#btn-reply").click(ins_reply);
