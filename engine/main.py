@@ -151,7 +151,7 @@ def list_posts(group_name=None):
 		res['status'] = True
 		res['posts'] = []
 		for p in posts:
-			res['posts'].append({'id':p.id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.text})
+			res['posts'].append({'id':p.id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post})
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	return res
