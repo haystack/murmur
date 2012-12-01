@@ -16,7 +16,7 @@ def list_groups():
 		res['status'] = True
 		res['groups'] = []
 		for g in groups:
-			res['groups'].append({'name':g.name, 'active':g.active, 'time_created': g.timestamp})
+			res['groups'].append({'name':g.name, 'active':g.active})
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	return res
@@ -151,7 +151,7 @@ def list_posts(group_name=None):
 		res['status'] = True
 		res['posts'] = []
 		for p in posts:
-			res['posts'].append({'id':p.id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.text, 'time_updated':p.timestamp})
+			res['posts'].append({'id':p.id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.text})
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	return res
