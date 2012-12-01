@@ -21,6 +21,7 @@ class Post(models.Model):
 	
 	class Meta:
 		db_table = "mailx_posts"
+		ordering = ["-timestamp"]
 
 class Group(models.Model):
 	id = models.AutoField(primary_key=True)
