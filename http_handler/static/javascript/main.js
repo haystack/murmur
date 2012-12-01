@@ -310,7 +310,7 @@ $(document).ready(function(){
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.posts.length; i++){
 				curr = posts_table.fnAddData( [
-									'<span class="strong">' + res.posts[i].from + '</span><br /><span class="strong-gray ellipsis">' + res.posts[i].subject + '</span>'
+									'<span class="strong">' + res.posts[i].from + '</span><br /><span class="strong-gray ellipsis">' + res.posts[i].subject + '</span><br /><span class="gray ellipsis">' + res.posts[i].text + '</span>';
 								  ]);
 				var params = {'requester_email': res.user, 
 							  'post_id': res.posts[i].id,
