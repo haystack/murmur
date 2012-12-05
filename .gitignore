@@ -4,7 +4,7 @@
 # Ignore all emacs backup files
 *.*~
 
-Ignore Mac DS_Store Files
+# Ignore Mac DS_Store Files
 .DS_Store
 
 # Ignore log files and locks
