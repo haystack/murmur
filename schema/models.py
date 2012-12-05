@@ -8,11 +8,13 @@ MailX Models
 '''
 
 class Post(models.Model):
-	id = models.CharField(max_length=50, primary_key=True)
+	id = models.AutoField(primary_key=True)
+	msg_id = models.CharField(max_length=50, unique=True)
 	email = models.CharField(max_length=50)
 	subject = models.TextField()
 	post = models.TextField()
 	group = models.ForeignKey('Group')
+	thread = models.ForeignKey('Thread')
 	reply_to = models.ForeignKey('self', blank=False, null = True, related_name="replies")
 	timestamp = models.DateTimeField(auto_now=True)
 
@@ -22,6 +24,19 @@ class Post(models.Model):
 	class Meta:
 		db_table = "mailx_posts"
 		ordering = ["-timestamp"]
+
+
+class Thread(models.Model):
+	id = models.AutoField(primary_key=True)
+	timestamp = models.DateTimeField(auto_now=True)
+
+	def __unicode__(self):
+		return self.name
+	
+	class Meta:
+		db_table = "mailx_threads"
+		ordering = ["-timestamp"]
+
 
 class Group(models.Model):
 	id = models.AutoField(primary_key=True)
