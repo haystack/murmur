@@ -178,8 +178,9 @@ def handle_post(message, address=None, host=None):
 		relay.deliver(mail)
 		return
 	id = res['id']
+	thread_id = res['thread_id']
 	to_send =  res['recipients']
-	post_addr = '%s <%s>' %(group_name, group_name + '+' + id + POST_SUFFIX + '@' + host)
+	post_addr = '%s <%s>' %(group_name, group_name + '+' + thread_id + '+' + id + POST_SUFFIX + '@' + host)
 	mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
 	msg_id = message['message-id']
 		
@@ -201,14 +202,14 @@ def handle_post(message, address=None, host=None):
 
 
 
-@route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=POST_SUFFIX+"|"+POST_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(thread_id)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=POST_SUFFIX+"|"+POST_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_reply(message, group_name=None, post_id=None, suffix=None, host=None):
+def handle_reply(message, group_name=None, thread_id=None, post_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
 	group_name = group_name.lower()
 	msg_text = get_body(str(message))
-	res = insert_reply(group_name, message['Subject'], msg_text['body'], addr, post_id)
+	res = insert_reply(group_name, message['Subject'], msg_text['body'], addr, post_id, thread_id)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
 		relay.deliver(mail)

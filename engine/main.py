@@ -180,13 +180,15 @@ def insert_post(group_name, subject, message_text, poster_email):
 		group = Group.objects.get(name=group_name)
 		group_members = User.objects.filter(group = group, active = True)
 		recipients = [m.email for m in group_members]
+		thread = Thread()
 		id = base64.b64encode(poster_email + str(time.time())).lower()
-		p = Post(id = id, email = poster_email, subject = subject, post=str(message_text), group = group)
+		p = Post(id = id, email = poster_email, subject = subject, post=str(message_text), group = group, thread=thread)
 		p.save()
 		f = Following(email = poster_email, post = p)
 		f.save()
 		res['status'] = True
 		res['id'] = id
+		res['thread_id'] = thread.id
 		res['recipients'] = recipients
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -196,18 +198,20 @@ def insert_post(group_name, subject, message_text, poster_email):
 	
 
 
-def insert_reply(group_name, subject, message_text, poster_email, post_id):
+def insert_reply(group_name, subject, message_text, poster_email, post_id, thread_id):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
 		id = base64.b64encode(poster_email + str(time.time())).lower()
-		post = Post.objects.get(id=post_id)
-		r = Post(id=id, email = poster_email, subject=subject, post = str(message_text), reply_to = post, group = group)
+		post = Post.objects.get(msg_id=post_id)
+		thread = Thread.objects.get(id=thread_id)
+		r = Post(id=id, email = poster_email, subject=subject, post = str(message_text), reply_to = post, group = group, thread=thread)
 		r.save()
 		following = Following.objects.filter(post = post)
 		recipients = [f.email for f in following]
 		res['status'] = True
 		res['id'] = id
+		res['thread_id'] = thread.id
 		res['recipients'] = recipients
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
