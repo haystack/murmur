@@ -136,6 +136,18 @@ body {
 }
 
 
+.left-column-area-content{
+      margin-right:75px;
+      padding:0;
+}
+
+.left-column-area-metadata{
+	float:right;
+	width:70px;
+	text-align:right;
+}
+
+
 #main-area-wrapper{
         position:absolute;
 		top: 0px;
@@ -187,6 +199,16 @@ body {
 .strong{
 	font-weight: bold;
 }
+
+.unread{
+	background-color: #D7ECFA;
+        color: #3D7AA6;
+        padding:5px 5px 5px 5px;
+	text-align:center;
+	width: 20px;
+	display: inline-block;
+}
+
 
 .ellipsis{
 	display:block;

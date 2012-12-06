@@ -306,9 +306,17 @@ $(document).ready(function(){
 		if(res.status){
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.threads.length; i++){
+				var content = '<div class="left-column-area-metadata">';
+				content += '<span class="unread">' + res.threads[i].replies.length + '</span>';
+				content += '</div>'
+				content += '<div class= "left-column-area-content">';
+				content +=  '<span class="strong ellipsis">' + res.threads[i].post.subject + '</span>'
+				content += '<span class="strong-gray ellipsis">' + res.threads[i].post.from + '</span>';
+				content += '</div>'
+				
 				curr = posts_table.fnAddData( [
-									'<span class="strong">' + res.threads[i].post.from + '</span><br /><span class="strong-gray ellipsis">' + res.threads[i].post.subject + '</span>'
-								  ]);
+								content	  
+								]);
 				var params = {'requester_email': res.user,
 							  'thread_id' : res.threads[i].thread_id, 
 							  'post': res.threads[i].post,
