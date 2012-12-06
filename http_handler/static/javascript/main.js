@@ -309,7 +309,8 @@ $(document).ready(function(){
 				curr = posts_table.fnAddData( [
 									'<span class="strong">' + res.threads[i].post.from + '</span><br /><span class="strong-gray ellipsis">' + res.threads[i].post.subject + '</span>'
 								  ]);
-				var params = {'requester_email': res.user, 
+				var params = {'requester_email': res.user,
+							  'thread_id' : res.threads[i].thread_id, 
 							  'post': res.threads[i].post,
 							  'replies' : res.threads[i].replies,
 							  'curr_row': curr
@@ -330,8 +331,8 @@ $(document).ready(function(){
 		
 		content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 		$("#main-area").html(content);
-		var params = {'requester_email': res.user, 
-					  'thread_id': res.post.thread_id,
+		var params = {'requester_email': res.requester_email, 
+					  'thread_id': res.thread_id,
 					  'msg_id':res.post.msg_id,
 					  'group_name': res.post.to,
 					  'subject': res.post.subject,
