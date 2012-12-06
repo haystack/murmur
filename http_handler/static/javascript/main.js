@@ -161,13 +161,8 @@ $(document).ready(function(){
 	
 	load_post = 
 		function(params){
-			$.post('load_post', params, 
-				function(res){
-					render_post(res);
-					highlight_table_row(posts_table, params.curr_row);
-					notify(res, false);
-				}
-			);	
+			render_post(res);
+			highlight_table_row(posts_table, params.curr_row);
 		}
 	
 	follow_thread = 
@@ -312,11 +307,11 @@ $(document).ready(function(){
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.threads.length; i++){
 				curr = posts_table.fnAddData( [
-									'<span class="strong">' + res.threads[i].blurb.from + '</span><br /><span class="strong-gray ellipsis">' + res.threads[i].blurb.subject + '</span>'
+									'<span class="strong">' + res.threads[i].post.from + '</span><br /><span class="strong-gray ellipsis">' + res.threads[i].post.subject + '</span>'
 								  ]);
 				var params = {'requester_email': res.user, 
-							  'thread_id': res.posts[i].thread_id,
-							  'msg_id' : res.posts[i].msg_id,
+							  'post': res.threads[i].post,
+							  'replies' : res.threads[i].replies,
 							  'curr_row': curr
 							 }
 				var f = bind(load_post, params)
@@ -331,17 +326,17 @@ $(document).ready(function(){
 	function render_post(res){
 		$('#main-area').show()
 		if(res.status){
-			var content = '<h3>' + res.subject + '</h3>' + '<span class="strong">From: </span> <span class="strong-gray">' + res.from + '</span><br /><span class="strong">To: </span><span class="strong-gray">' + res.to + '</span><hr />' + res.text;
+			var content = '<h3>' + res.post.subject + '</h3>' + '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br /><span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span><hr />' + res.post.text;
 			content += '<div><button type="button" id="btn-follow" style="margin-top:10px;">Follow</button> <button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</div>';
 			
 			content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 			$("#main-area").html(content);
 			var params = {'requester_email': res.user, 
-						  'thread_id': res.thread_id,
-						  'msg_id':res.msg_id,
-						  'group_name': res.to,
-						  'subject': res.subject,
-						  'text':res.text
+						  'thread_id': res.post.thread_id,
+						  'msg_id':res.post.msg_id,
+						  'group_name': res.post.to,
+						  'subject': res.post.subject,
+						  'text':res.post.text
 					  	}
 	  		$("#btn-reply").unbind("click");
 	  		$("#btn-follow").unbind("click");
