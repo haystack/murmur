@@ -2,9 +2,9 @@ from django.http import *
 from django.shortcuts import render_to_response
 import engine.main
 from engine.msg_codes import *
-from smtp_handler.main import *
 from lamson.mail import MailResponse
 from config.settings import relay
+from smtp_handler.main import *
 from django.core.context_processors import csrf
 import json
 
