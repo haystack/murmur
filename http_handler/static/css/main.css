@@ -210,6 +210,16 @@ body {
 	margin-bottom:10px;
 }
 
+.welcome{
+	margin:0px auto;
+	margin-top:30px; 
+	padding:30px; 
+	vertical-align:top;
+	background-color: #D7ECFA;
+	width:310px;
+	border: solid thin #447EAC;
+}
+
 table.dataTable{
 	width:100%;
 	border-spacing:0;

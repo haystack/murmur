@@ -272,11 +272,13 @@ $(document).ready(function(){
 	}
 	
 	function populate_group_info(res, curr_row){
-		$('#group-display-area').show()
 		var info = "<h3>Group Info</h3><hr />";
 		info += '<span class="strong">Group Name: </span><span class="strong-gray">' + res.group_name + '</span><br />';
 		info += '<span class="strong">Active: </span><span class="strong-gray">' + res.active + '</span><br /> <br />';
-		$("#group-info").html(info)
+		$("#group-info").html(info);
+		$("#main-area").empty();
+		$("#main-area").append($('#group-display-area'));
+		$('#group-display-area').show();
 		var params = {'requester_email': res.user, 
 					  'group_name': res.group_name,
 					  'curr_row': curr_row
