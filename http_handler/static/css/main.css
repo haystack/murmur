@@ -176,9 +176,7 @@ body {
 #left-column-area .dataTables_wrapper{
 	bottom:0px; 
 	overflow:auto; 
-	position:absolute; 
 	width:100%; 
-	top: 35px;
 	border-top: #ccc solid 1px;
 }
 
@@ -234,6 +232,14 @@ body {
 	padding: 20px;
 	margin-top:10px;
 	margin-bottom:10px;
+}
+
+
+.container{
+        background: #D7ECFA;
+        padding: 5px 10px 5px 10px;
+        margin:0px;
+	width: 100%;
 }
 
 
