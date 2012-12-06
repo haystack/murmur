@@ -306,12 +306,16 @@ $(document).ready(function(){
 		if(res.status){
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.threads.length; i++){
+				d = format_date(new Date(res.threads[i].timestamp));
 				var content = '<div class="left-column-area-metadata">';
-				content += '<span class="unread">' + res.threads[i].replies.length + '</span>';
+				content += '<span class="gray ellipsis">' + d.date + '</span>';
+				content += '<span class="gray ellipsis">' + d.time + '</span>';
+				content += '<span class="unread">' + res.threads[i].replies.length + '</span> <br />';
 				content += '</div>'
 				content += '<div class= "left-column-area-content">';
 				content +=  '<span class="strong ellipsis">' + res.threads[i].post.subject + '</span>'
 				content += '<span class="strong-gray ellipsis">' + res.threads[i].post.from + '</span>';
+				content += '<span class="blurb">' + strip(res.threads[i].post.text) + '</span>';
 				content += '</div>'
 				
 				curr = posts_table.fnAddData( [
@@ -400,6 +404,29 @@ $(document).ready(function(){
 	}
 	
 	
+	function strip(html){
+   		var tmp = document.createElement("DIV");
+   		tmp.innerHTML = html;
+   		var txt = tmp.textContent||tmp.innerText;
+		return txt.substring(0, 100);
+	}
+
+
+	function format_date(d) {
+		var dateStr,hours,minutes,ampm;
+		dateStr = (d.getMonth() + 1) +'/'+d.getDate()+'/'+d.getFullYear();
+		hours = d.getHours();
+		minutes = d.getMinutes();
+		ampm = hours >= 12 ? 'PM' : 'AM';
+		hours = hours % 12;
+		if(!hours) {
+			hours = 12;
+		}
+		//hours = hours ? hours : 12;
+		minutes = minutes < 10 ? '0'+minutes : minutes;
+		timeStr = hours + ':' + minutes + ' ' + ampm;
+		return {'date':dateStr, 'time': timeStr}
+	}
 	
 	
 	/* Handle based on URLs */

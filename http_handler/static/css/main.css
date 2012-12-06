@@ -203,19 +203,25 @@ body {
 .unread{
 	background-color: #D7ECFA;
         color: #3D7AA6;
-        padding:5px 5px 5px 5px;
 	text-align:center;
 	width: 20px;
 	display: inline-block;
 }
 
 
-.ellipsis{
+.left-column-area-content .ellipsis{
 	display:block;
-	max-width: 240px;
 	white-space: nowrap;
+	max-width: 240px;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.left-column-area-metadata .ellipsis{
+        display:block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
 }
 
 .default-text {
