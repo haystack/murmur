@@ -189,12 +189,12 @@ def insert_post(group_name, subject, message_text, poster_email):
 		group = Group.objects.get(name=group_name)
 		group_members = User.objects.filter(group = group, active = True)
 		recipients = [m.email for m in group_members]
-		thread = Thread(group=group)
+		thread = Thread()
 		thread.save()
 		msg_id = base64.b64encode(poster_email + str(time.time())).lower()
 		p = Post(msg_id = msg_id, email = poster_email, subject = subject, post=str(message_text), group = group, thread=thread)
 		p.save()
-		f = Following(email = poster_email, post = p)
+		f = Following(email = poster_email, thread = thread)
 		f.save()
 		res['status'] = True
 		res['msg_id'] = msg_id
@@ -218,7 +218,7 @@ def insert_reply(group_name, subject, message_text, poster_email, msg_id, thread
 		new_msg_id = base64.b64encode(poster_email + str(time.time())).lower()
 		r = Post(msg_id=new_msg_id, email = poster_email, subject=subject, post = str(message_text), reply_to = post, group = group, thread=thread)
 		r.save()
-		following = Following.objects.filter(post = post)
+		following = Following.objects.filter(thread = thread)
 		recipients = [f.email for f in following]
 		res['status'] = True
 		res['msg_id'] = new_msg_id
@@ -236,18 +236,19 @@ def insert_reply(group_name, subject, message_text, poster_email, msg_id, thread
 
 
 
-def follow_post(post_id, requester_email):
+def follow_thread(thread_id, requester_email):
 	res = {'status':False}
+	t = None
 	try:
-		post = Post.objects.get(id=post_id)
-		f = Following.objects.get(post = post, email=requester_email)
+		t = Thread.objects.get(id=thread_id)
+		f = Following.objects.get(thread = t, email=requester_email)
 		res['status'] = True
 	except Following.DoesNotExist:
-		f = Following(post = post, email = requester_email)
+		f = Following(thread = t, email = requester_email)
 		f.save()
 		res['status'] = True
-	except Post.DoesNotExist:
-		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
+	except Thread.DoesNotExist:
+		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
@@ -257,17 +258,17 @@ def follow_post(post_id, requester_email):
 
 
 
-def unfollow_post(post_id, requester_email):
+def unfollow_thread(thread_id, requester_email):
 	res = {'status':False}
 	try:
-		post = Post.objects.get(id=post_id)
-		f = Following.objects.get(post = post, email=requester_email)
+		t = Thread.objects.get(id=thread_id)
+		f = Following.objects.get(thread = t, email=requester_email)
 		f.delete()
 		res['status'] = True
 	except Following.DoesNotExist:
 		res['status'] = True
-	except Post.DoesNotExist:
-		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
+	except Thread.DoesNotExist:
+		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)

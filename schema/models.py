@@ -28,7 +28,6 @@ class Post(models.Model):
 
 class Thread(models.Model):
 	id = models.AutoField(primary_key=True)
-	group = models.ForeignKey('Group')
 	timestamp = models.DateTimeField(auto_now=True)
 
 	def __unicode__(self):
@@ -72,7 +71,7 @@ class User(models.Model):
 
 class Following(models.Model):
 	id = models.AutoField(primary_key=True)
-	post = models.ForeignKey('Post')
+	thread = models.ForeignKey('Thread')
 	email = models.CharField(max_length=50)
 	timestamp = models.DateTimeField(auto_now=True)
 	def __unicode__(self):

@@ -192,10 +192,11 @@ def handle_post(message, address=None, host=None):
 	if mail_id:
 		mail['message-id'] = mail_id	
 	
-	ps_blurb = html_ps(msg_id, group_name, host)
+	ps_blurb = html_ps(thread_id, msg_id, group_name, host)
 	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")		
 	logging.debug('TO LIST: ' + str(to_send))
-	relay.deliver(mail, To = to_send)
+	if(len(to_send)>0):
+		relay.deliver(mail, To = to_send)
 
 
 
@@ -216,7 +217,8 @@ def handle_reply(message, group_name=None, thread_id=None, msg_id=None, suffix=N
 		return
 	msg_id = res['msg_id']
 	to_send =  res['recipients']
-	mail = MailResponse(From = message['From'], To = message['To'], Subject = message['Subject'])
+	post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + host)
+	mail = MailResponse(From = message['From'], To = post_addr, Subject = message['Subject'])
 	mail_id = message['message-id']
 	if 'references' in message:
 		mail['References'] = message['References']
@@ -226,22 +228,23 @@ def handle_reply(message, group_name=None, thread_id=None, msg_id=None, suffix=N
 	if mail_id:
 		mail['message-id'] = mail_id
 	
-	ps_blurb = html_ps(msg_id, group_name, host)
+	ps_blurb = html_ps(thread_id, msg_id, group_name, host)
 	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")
 	logging.debug('TO LIST: ' + str(to_send))
-	relay.deliver(mail, To = to_send)
+	if(len(to_send) > 0):
+		relay.deliver(mail, To = to_send)
 
 
 
 
-@route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(thread_id)\\+(msg_id)(suffix)@(host)", group_name=".+", thread_id=".+", msg_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_follow(message, group_name=None, post_id=None, suffix=None, host=None):
+def handle_follow(message, group_name=None, thread_id=None, msg_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['From'].lower())
-	post_id = post_id.lower()
-	res = follow_post(post_id, addr)
+	msg_id = msg_id.lower()
+	res = follow_thread(thread_id, addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Follow success (post:%s)" %(post_id))
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Follow success.")
 		relay.deliver(mail)
 	else:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message: %s" %(res['code']))
@@ -252,14 +255,14 @@ def handle_follow(message, group_name=None, post_id=None, suffix=None, host=None
 
 
 
-@route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(thread_id)\\+(msg_id)(suffix)@(host)", group_name=".+", thread_id=".+", msg_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_unfollow(message, group_name=None, post_id=None, suffix=None, host=None):
+def handle_unfollow(message, group_name=None, thread_id=None, msg_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['From'].lower())
-	post_id = post_id.lower()
-	res = unfollow_post(post_id, addr)
+	msg_id = msg_id.lower()
+	res = unfollow_thread(thread_id, addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Unfollow success (post:%s)" %(post_id))
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Unfollow success")
 		relay.deliver(mail)
 	else:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message: %s" %(res['code']))
@@ -370,9 +373,9 @@ def get_body(message):
 	res['body'] = body
 	return res
 	
-def html_ps(id, group_name, host):
-	follow_addr = 'mailto:%s' %(group_name + '+' + id + FOLLOW_SUFFIX + '@' + host)
-	unfollow_addr = 'mailto:%s' %(group_name + '+' + id + UNFOLLOW_SUFFIX + '@' + host)
+def html_ps(thread_id, msg_id, group_name, host):
+	follow_addr = 'mailto:%s' %(group_name + '+' + str(thread_id) + '+' + msg_id + '+' + FOLLOW_SUFFIX + '@' + host)
+	unfollow_addr = 'mailto:%s' %(group_name + '+' + str(thread_id) + '+' + msg_id + '+' + UNFOLLOW_SUFFIX + '@' + host)
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
 	body = '<div style="border-top:solid thin; padding-top:5px;">%s</div>' %(content)
 	return body
