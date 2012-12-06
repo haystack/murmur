@@ -154,11 +154,18 @@ def group_info(group_name):
 def list_posts(group_name=None):
 	res = {'status':False}
 	try:
-		posts = Post.objects.all()
+		threads = Thread.objects.all()
 		res['status'] = True
-		res['posts'] = []
-		for p in posts:
-			res['posts'].append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post})
+		res['threads'] = []
+		for t in threads:
+			posts = Post.objects.filter(thread = t)		
+			posts = []
+			blurb = None
+			for p in posts:
+				if(not p.reply_to_id):
+					blurb = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post}
+				posts.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post})
+			res['threads'].append('id':t.id, 'posts':posts, 'blurb': blurb)
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)

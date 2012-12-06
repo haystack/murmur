@@ -310,9 +310,9 @@ $(document).ready(function(){
 		posts_table.fnClearTable();
 		if(res.status){
 			var params = {'requester_email': res.user};
-			for(var i = 0; i< res.posts.length; i++){
+			for(var i = 0; i< res.threads.length; i++){
 				curr = posts_table.fnAddData( [
-									'<span class="strong">' + res.posts[i].from + '</span><br /><span class="strong-gray ellipsis">' + res.posts[i].subject + '</span>'
+									'<span class="strong">' + res.threads[i].blurb.from + '</span><br /><span class="strong-gray ellipsis">' + res.threads[i].blurb.subject + '</span>'
 								  ]);
 				var params = {'requester_email': res.user, 
 							  'thread_id': res.posts[i].thread_id,
