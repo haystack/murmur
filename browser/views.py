@@ -2,6 +2,8 @@ from django.http import *
 from django.shortcuts import render_to_response
 import engine.main
 from engine.msg_codes import *
+from smtp_handler.main import *
+from lamson.mail import MailResponse
 from django.core.context_processors import csrf
 import json
 
@@ -161,6 +163,16 @@ def insert_post(request):
 	try:
 		res = engine.main.insert_post(request.POST['group_name'], request.POST['subject'],  request.POST['msg_text'], request.POST['poster_email'])
 		res.update({'user': request.session[SESSION_KEY]})
+		msg_id = res['msg_id']
+		thread_id = res['thread_id']
+		to_send =  res['recipients']
+		post_addr = '%s <%s>' %(group_name, request.POST['group_name'] + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + HOST)
+		mail = MailResponse(From = request.POST['poster_email'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, request.POST['subject']))
+		ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)
+		mail.Html = unicode(request.POST['msg_text'] + ps_blurb , "utf-8")		
+		logging.debug('TO LIST: ' + str(to_send))
+		if(len(to_send)>0):
+			relay.deliver(mail, To = to_send)
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:
 		return HttpResponse(request_error, mimetype="application/json")
