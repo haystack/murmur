@@ -177,22 +177,22 @@ def handle_post(message, address=None, host=None):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
 		relay.deliver(mail)
 		return
-	id = res['id']
+	msg_id = res['msg_id']
 	thread_id = res['thread_id']
 	to_send =  res['recipients']
-	post_addr = '%s <%s>' %(group_name, group_name + '+' + thread_id + '+' + id + POST_SUFFIX + '@' + host)
+	post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + host)
 	mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
-	msg_id = message['message-id']
+	mail_id = message['message-id']
 		
 	if 'references' in message:
 		mail['References'] = message['References']
-	elif msg_id:
-		mail['References'] = msg_id
+	elif mail_id:
+		mail['References'] = mail_id
 
-	if msg_id:
-		mail['message-id'] = msg_id	
+	if mail_id:
+		mail['message-id'] = mail_id	
 	
-	ps_blurb = html_ps(id, group_name, host)
+	ps_blurb = html_ps(msg_id, group_name, host)
 	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")		
 	logging.debug('TO LIST: ' + str(to_send))
 	relay.deliver(mail, To = to_send)
@@ -202,31 +202,31 @@ def handle_post(message, address=None, host=None):
 
 
 
-@route("(group_name)\\+(thread_id)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=POST_SUFFIX+"|"+POST_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(thread_id)\\+(msg_id)(suffix)@(host)", group_name=".+", thread_id=".+", msg_id=".+", suffix=POST_SUFFIX+"|"+POST_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_reply(message, group_name=None, thread_id=None, post_id=None, suffix=None, host=None):
+def handle_reply(message, group_name=None, thread_id=None, msg_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['from'].lower())
-	post_id = post_id.lower()
+	msg_id = msg_id.lower()
 	group_name = group_name.lower()
 	msg_text = get_body(str(message))
-	res = insert_reply(group_name, message['Subject'], msg_text['body'], addr, post_id, thread_id)
+	res = insert_reply(group_name, message['Subject'], msg_text['body'], addr, msg_id, thread_id)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
 		relay.deliver(mail)
 		return
-	id = res['id']
+	msg_id = res['msg_id']
 	to_send =  res['recipients']
 	mail = MailResponse(From = message['From'], To = message['To'], Subject = message['Subject'])
-	msg_id = message['message-id']
+	mail_id = message['message-id']
 	if 'references' in message:
 		mail['References'] = message['References']
-	elif msg_id:
-		mail['References'] = msg_id
+	elif mail_id:
+		mail['References'] = mail_id
 
-	if msg_id:
-		mail['message-id'] = msg_id
+	if mail_id:
+		mail['message-id'] = mail_id
 	
-	ps_blurb = html_ps(id, group_name, host)
+	ps_blurb = html_ps(msg_id, group_name, host)
 	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")
 	logging.debug('TO LIST: ' + str(to_send))
 	relay.deliver(mail, To = to_send)

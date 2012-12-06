@@ -19,6 +19,7 @@ def list_groups():
 			res['groups'].append({'name':g.name, 'active':g.active})
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 	
 
@@ -36,6 +37,7 @@ def create_group(group_name, requester_email):
 		res['status'] = True
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 
 
@@ -55,6 +57,7 @@ def activate_group(group_name, requester_email):
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 
 
@@ -75,6 +78,7 @@ def deactivate_group(group_name, requester_email):
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 
 
@@ -98,6 +102,7 @@ def subscribe_group(group_name, requester_email):
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 
 
@@ -120,6 +125,7 @@ def unsubscribe_group(group_name, requester_email):
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 
 
@@ -140,6 +146,7 @@ def group_info(group_name):
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']	
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 
 
@@ -154,6 +161,7 @@ def list_posts(group_name=None):
 			res['posts'].append({'id':p.id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post})
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 	
 
@@ -171,6 +179,7 @@ def load_post(group_name, post_id):
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 
 
@@ -180,37 +189,39 @@ def insert_post(group_name, subject, message_text, poster_email):
 		group = Group.objects.get(name=group_name)
 		group_members = User.objects.filter(group = group, active = True)
 		recipients = [m.email for m in group_members]
-		thread = Thread()
-		id = base64.b64encode(poster_email + str(time.time())).lower()
-		p = Post(id = id, email = poster_email, subject = subject, post=str(message_text), group = group, thread=thread)
+		thread = Thread(group=group)
+		thread.save()
+		msg_id = base64.b64encode(poster_email + str(time.time())).lower()
+		p = Post(msg_id = msg_id, email = poster_email, subject = subject, post=str(message_text), group = group, thread=thread)
 		p.save()
 		f = Following(email = poster_email, post = p)
 		f.save()
 		res['status'] = True
-		res['id'] = id
+		res['msg_id'] = msg_id
 		res['thread_id'] = thread.id
 		res['recipients'] = recipients
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 	
 
 
-def insert_reply(group_name, subject, message_text, poster_email, post_id, thread_id):
+def insert_reply(group_name, subject, message_text, poster_email, msg_id, thread_id):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
-		id = base64.b64encode(poster_email + str(time.time())).lower()
-		post = Post.objects.get(msg_id=post_id)
+		post = Post.objects.get(msg_id=msg_id)
 		thread = Thread.objects.get(id=thread_id)
-		r = Post(id=id, email = poster_email, subject=subject, post = str(message_text), reply_to = post, group = group, thread=thread)
+		new_msg_id = base64.b64encode(poster_email + str(time.time())).lower()
+		r = Post(msg_id=new_msg_id, email = poster_email, subject=subject, post = str(message_text), reply_to = post, group = group, thread=thread)
 		r.save()
 		following = Following.objects.filter(post = post)
 		recipients = [f.email for f in following]
 		res['status'] = True
-		res['id'] = id
+		res['msg_id'] = new_msg_id
 		res['thread_id'] = thread.id
 		res['recipients'] = recipients
 	except Group.DoesNotExist:
@@ -219,6 +230,7 @@ def insert_reply(group_name, subject, message_text, poster_email, post_id, threa
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 
 
@@ -238,6 +250,7 @@ def follow_post(post_id, requester_email):
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 
 
@@ -257,6 +270,7 @@ def unfollow_post(post_id, requester_email):
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
 	return res
 
 

@@ -28,6 +28,7 @@ class Post(models.Model):
 
 class Thread(models.Model):
 	id = models.AutoField(primary_key=True)
+	group = models.ForeignKey('Group')
 	timestamp = models.DateTimeField(auto_now=True)
 
 	def __unicode__(self):
