@@ -1,4 +1,4 @@
-import logging, time, base64, email
+import logging, time, base64, email, datetime
 from schema.models import *
 from msg_codes import *
 
@@ -230,6 +230,8 @@ def insert_reply(group_name, subject, message_text, poster_email, msg_id, thread
 		new_msg_id = base64.b64encode(poster_email + str(time.time())).lower()
 		r = Post(msg_id=new_msg_id, email = poster_email, subject=subject, post = str(message_text), reply_to = post, group = group, thread=thread)
 		r.save()
+		thread.timestamp = datetime.datetime.now()
+		thread.save()
 		following = Following.objects.filter(thread = thread)
 		recipients = [f.email for f in following]
 		res['status'] = True

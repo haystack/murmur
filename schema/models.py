@@ -23,7 +23,7 @@ class Post(models.Model):
 	
 	class Meta:
 		db_table = "mailx_posts"
-		ordering = ["-timestamp"]
+		ordering = ["timestamp"]
 
 
 class Thread(models.Model):
