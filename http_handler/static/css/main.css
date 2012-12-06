@@ -125,7 +125,7 @@ body {
         width: 350px;
         z-index:100;
         border-right: #999 solid 1px;
-	box-shadow: 1px 0px 10px #666;
+		box-shadow: 1px 0px 10px #666;
         overflow: auto;
 }
 
@@ -138,16 +138,16 @@ body {
 
 #main-area-wrapper{
         position:absolute;
-	top: 0px;
-	right: 0px;
-	bottom: 0px;
-	padding-right: 10px;
-        padding-top: 10px;
-        padding-left: 10px;
-	padding-bottom: 10px;
-	left: 350px;
-	background-color: #ccc;
-	overflow: auto;
+		top: 0px;
+		right: 0px;
+		bottom: 0px;
+		padding-right: 10px;
+		padding-top: 10px;
+		padding-left: 10px;
+		padding-bottom: 10px;
+		left: 350px;
+		background-color: #ccc;
+		overflow: auto;
 }
 
 #main-area{
@@ -211,11 +211,8 @@ body {
 }
 
 .welcome{
-	background-color: #3D7AA6;
-        color: #FFF;
-        border: #447EAC solid thin;
-        padding:5px 10px 5px 10px;
-	}
+	background: url('/static/images/no-img-selected.png') no-repeat fixed center;
+}
 
 
 table.dataTable{
