@@ -191,9 +191,13 @@ $(document).ready(function(){
 		
 	insert_post = 
 		function(params){
+			params.msg_text = $("#new-post-text").val();
+                        params.subject = $("#new-post-subject").val();
+                        params.group_name = $("#new-post-to").val();
+                        params.poster_email = params.requester_email;
 			$.post('insert_post', params, 
 				function(res){
-					notify(res, false);
+					notify(res, true);
 				}
 			);	
 		}
@@ -207,8 +211,8 @@ $(document).ready(function(){
 			$.post('insert_reply', params, 
 				function(res){
 					if(res.status){
-						$("reply-text-input").val="";
-						$("reply-text-input").blur();
+						$("#reply-text-input").val="";
+						$("#reply-text-input").blur();
 					}
 					notify(res, true);
 				}
@@ -401,8 +405,8 @@ $(document).ready(function(){
 		content += '<select id="new-post-to"></select> <br />';
 		content += '<span class="strong">Subject : </span> <br />';
                 content += '<input id="new-post-subject" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
-		content += '<textarea id="new-post-text-input" style="height:150px;"></textarea>';
-		content += '<button type="button" id="btn-reply" style="margin-top:10px;">Post</button>'
+		content += '<textarea id="new-post-text" style="height:150px;"></textarea>';
+		content += '<button type="button" id="btn-post" style="margin-top:10px;">Post</button>'
 		content += '</div>';
 
                 content += '</div>'
@@ -412,8 +416,13 @@ $(document).ready(function(){
          		   .attr("value", res.groups[i].name)
          		   .text(res.groups[i].name)); 
 					
+		
 		}
-
+		params = {'requester_email':res.user};
+		var ins_post = bind(insert_post, params);
+		$("#btn-post").unbind("click");
+                $("#btn-post").bind("click");
+		$("#btn-post").click(ins_post);
 	}
 	
 	function highlight_table_row(table, curr_row){

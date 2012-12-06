@@ -159,7 +159,7 @@ def load_post(request):
 
 def insert_post(request):
 	try:
-		res = engine.main.insert_post(request.POST['group_name'], request.POST['message'], request.POST['poster_email'])
+		res = engine.main.insert_post(request.POST['group_name'], request.POST['subject'],  request.POST['msg_text'], request.POST['poster_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:
