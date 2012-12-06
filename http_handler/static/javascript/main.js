@@ -326,13 +326,24 @@ $(document).ready(function(){
 	
 	function render_post(res){
 		var content = '<div class="main-area-content">';
-		content += '<h3>' + res.post.subject + '</h3>' + '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br /><span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span><hr />' + res.post.text;
-		content += '<div><button type="button" id="btn-follow" style="margin-top:10px;">Follow</button> <button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</div>';
+		content += '<div><div style="float:right"><button type="button" id="btn-follow" style="margin-top:10px;">Follow</button> <button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</div> <div><h3>' + res.post.subject + '</h3>' + '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br /><span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span></div> </div> <hr />' + res.post.text;
+		content += '<div class="reply">'
+		for(var i = 0; i< res.replies.length; i++){
+                       content += '<div class="main-area-content">';
+                       content += '<span class="strong-gray">' + res.replies[i].from + '</span><br /><br />' + res.replies[i].text;
+
+                       content += '</div>'
+                               
+               }
+		content += '</div>';
+		$("#main-area").empty();
+                $("#main-area").html(content);
+		var content = '<div class="main-area-content">';
 		
 		content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
-		content += '</div>'
-		$("#main-area").empty();
-		$("#main-area").html(content);
+		 
+		content += '</div>'	
+		$("#main-area").append(content);
 		var params = {'requester_email': res.requester_email, 
 					  'thread_id': res.thread_id,
 					  'msg_id':res.post.msg_id,
