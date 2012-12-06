@@ -243,7 +243,7 @@ $(document).ready(function(){
 				$(curr_row).click(f);
 			}
 		}
-		groups_table.fnGetNodes(0).click();
+		//groups_table.fnGetNodes(0).click();
 	}
 	
 	function populate_members_table(res){
@@ -272,7 +272,7 @@ $(document).ready(function(){
 	}
 	
 	function populate_group_info(res, curr_row){
-		$('#main-area').show()
+		$('#group-display-area').show()
 		var info = "<h3>Group Info</h3><hr />";
 		info += '<span class="strong">Group Name: </span><span class="strong-gray">' + res.group_name + '</span><br />';
 		info += '<span class="strong">Active: </span><span class="strong-gray">' + res.active + '</span><br /> <br />';
@@ -320,16 +320,17 @@ $(document).ready(function(){
 				$(curr_row).click(f);
 			}
 		}
-		posts_table.fnGetNodes(0).click();
+		//posts_table.fnGetNodes(0).click();
 	}
 	
 	
 	function render_post(res){
-		$('#main-area').show()
-		var content = '<h3>' + res.post.subject + '</h3>' + '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br /><span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span><hr />' + res.post.text;
+		var content = '<div class="main-area-content">';
+		content += '<h3>' + res.post.subject + '</h3>' + '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br /><span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span><hr />' + res.post.text;
 		content += '<div><button type="button" id="btn-follow" style="margin-top:10px;">Follow</button> <button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</div>';
 		
 		content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
+		content += '</div>'
 		$("#main-area").html(content);
 		var params = {'requester_email': res.requester_email, 
 					  'thread_id': res.thread_id,

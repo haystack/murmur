@@ -112,31 +112,55 @@ body {
 	width: 100%;
 }
 
+
+#left-column-area-wrapper{
+    position: absolute;
+        top: 0px;
+        right: auto;
+        bottom: 0px;
+        left: 0px;
+        background-color: white;
+        color: #333;
+        max-width: 50%;
+        width: 350px;
+        z-index:100;
+        border-right: #999 solid 1px;
+	box-shadow: 1px 0px 10px #666;
+        overflow: auto;
+}
+
+
 #left-column-area{
-    position: absolute;    
+      margin:0;
+      padding:0;
+}
+
+
+#main-area-wrapper{
+        position:absolute;
 	top: 0px;
-	right: auto;
+	right: 0px;
 	bottom: 0px;
-	left: 0px;
-	background-color: white;
-	color: #333;
-	max-width: 50%;
-	width: 300px;
-	z-index:100;
-	border-right: #ccc solid 1px;
+	padding-right: 10px;
+        padding-top: 10px;
+        padding-left: 10px;
+	padding-bottom: 10px;
+	left: 350px;
+	background-color: #ccc;
 	overflow: auto;
 }
 
 #main-area{
-    position:absolute;
-	top: 0px;
-	right: 0px;
-	bottom: 0px;
-	left: 350px;
-	padding-right:50px;
+      margin:0;
+      padding:0;
+}
+.main-area-content{
+	padding-right: 20px;
 	padding-top: 20px;
+	padding-left: 20px;
+	padding-bottom: 20px;
 	background-color: #FFF;
-	overflow: auto;
+	box-shadow: 1px 0px 10px #666;
 }
 
 #left-column-area .dataTables_wrapper{

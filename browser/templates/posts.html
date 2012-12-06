@@ -3,6 +3,7 @@
 <a href="#" data-dropdown="#dropdown-nav">{{ user }} ▾ </a>
 {% endblock %}
 {% block content %}
+<div id="left-column-area-wrapper">
 <div id="left-column-area">
     <button type="button" id="btn-create-new-post" style="margin: 5px auto 5px auto; text-align:center; display:block; max-height:25px;">+ New Post</button>
 	<table id="posts-table" class="dataTable">
@@ -13,8 +14,12 @@
 		</thead>
 	</table>	
 </div>
-<div id="main-area" style="display:none">
-	
+</div>
+
+<div id="main-area-wrapper">
+<div id="main-area">
+
+</div>
 </div>
 {% endblock %}
 
