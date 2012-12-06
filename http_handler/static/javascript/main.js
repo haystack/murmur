@@ -243,7 +243,7 @@ $(document).ready(function(){
 				$(curr_row).click(f);
 			}
 		}
-		//groups_table.fnGetNodes(0).click();
+		groups_table.fnGetNodes(0).click();
 	}
 	
 	function populate_members_table(res){
@@ -276,8 +276,6 @@ $(document).ready(function(){
 		info += '<span class="strong">Group Name: </span><span class="strong-gray">' + res.group_name + '</span><br />';
 		info += '<span class="strong">Active: </span><span class="strong-gray">' + res.active + '</span><br /> <br />';
 		$("#group-info").html(info);
-		$("#main-area").empty();
-		$("#main-area").append($('#group-display-area'));
 		$('#group-display-area').show();
 		var params = {'requester_email': res.user, 
 					  'group_name': res.group_name,

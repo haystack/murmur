@@ -211,14 +211,12 @@ body {
 }
 
 .welcome{
-	margin:0px auto;
-	margin-top:30px; 
-	padding:30px; 
-	vertical-align:top;
-	background-color: #D7ECFA;
-	width:310px;
-	border: solid thin #447EAC;
-}
+	background-color: #3D7AA6;
+        color: #FFF;
+        border: #447EAC solid thin;
+        padding:5px 10px 5px 10px;
+	}
+
 
 table.dataTable{
 	width:100%;
