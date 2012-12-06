@@ -204,7 +204,7 @@ $(document).ready(function(){
 	
 	insert_reply = 
 		function(params){
-			params.msg_text = $("#reply-text-input").val() + '<br />' + params.text;
+			params.msg_text = $("#reply-text-input").val() + '<br /> On ' + new Date() + ', <a href="mailto:' + params.requester_email + '">' + params.requester_email + '</a> wrote: <br />' + '<blockquote style="margin: 0 0 0 0.8ex; border-left: 1px #ccc solid; padding-left: 1ex;">' + params.text + '</blockquote>';
 			params.poster_email = params.requester_email;
 			delete params.requester_email;
 			delete params.text;
