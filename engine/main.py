@@ -158,23 +158,27 @@ def list_posts(group_name=None):
 		res['status'] = True
 		res['posts'] = []
 		for p in posts:
-			res['posts'].append({'id':p.id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post})
+			res['posts'].append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post})
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res
 	
 
-def load_post(group_name, post_id):
+def load_post(group_name, thread_id, msg_id):
 	res = {'status':False}
 	try:
-		p = Post.objects.get(id=post_id)
+		t = Thread.objects.get(id=thread_id)
+		p = Post.objects.get(msg_id=msg_id, thread= t)
 		res['status'] = True
-		res['id'] = p.id
+		res['msg_id'] = p.msg_id
+		res['thread_id'] = p.thread_id
 		res['from'] = p.email
 		res['subject'] = p.subject
 		res['text'] = p.post
 		res['to'] = p.group.name
+	except Thread.DoesNotExist:
+		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except Post.DoesNotExist:
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 	except:

@@ -3,6 +3,7 @@ msg_code={
 	'DUPLICATE_ERROR': 'Name already exists',
 	'GROUP_NOT_FOUND_ERROR': 'Group not found',
 	'POST_NOT_FOUND_ERROR': 'Post not found',
+	'THREAD_NOT_FOUND_ERROR': 'Thread not found',
 	'OWNER_UNSUBSCRIBE_ERROR': 'Can not unsubscribe the owner',
 	'REQUEST_ERROR': 'Incorrect request parameters',
 	'UNKNOWN_ERROR': 'Unknown',

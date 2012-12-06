@@ -150,7 +150,7 @@ def list_posts(request):
 
 def load_post(request):
 	try:
-		res = engine.main.load_post(None, request.POST['post_id'])
+		res = engine.main.load_post(group_name=None, thread_id = request.POST['thread_id'], msg_id=request.POST['msg_id'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:
@@ -170,7 +170,7 @@ def insert_post(request):
 
 def insert_reply(request):
 	try:
-		res = engine.main.insert_reply(request.POST['group_name'], request.POST['subject'], request.POST['msg_text'], request.POST['poster_email'], request.POST['post_id'])
+		res = engine.main.insert_reply(request.POST['group_name'], request.POST['subject'], request.POST['msg_text'], request.POST['poster_email'], request.POST['msg_id'], request.POST['thread_id'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:
@@ -178,9 +178,9 @@ def insert_reply(request):
 	
 
 
-def follow_post(request):
+def follow_thread(request):
 	try:
-		res = engine.main.follow_post(request.POST['post_id'], request.POST['requester_email'])
+		res = engine.main.follow_thread(request.POST['thread_id'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:
@@ -188,9 +188,9 @@ def follow_post(request):
 
 
 
-def unfollow_post(request):
+def unfollow_thread(request):
 	try:
-		res = engine.main.unfollow_post(request.POST['post_id'], request.POST['requester_email'])
+		res = engine.main.unfollow_thread(request.POST['thread_id'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:

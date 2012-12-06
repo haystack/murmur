@@ -170,10 +170,11 @@ $(document).ready(function(){
 			);	
 		}
 	
-	follow_post = 
+	follow_thread = 
 		function(params){
-			$.post('follow_post', {'requester_email': params.requester_email, 
-						  'post_id': params.post_id
+			$.post('follow_thread', {'requester_email': params.requester_email, 
+						  'thread_id': params.thread_id,
+						  'msg_id': params.msg_id
 					  	}, 
 				function(res){
 					notify(res, true);
@@ -181,10 +182,11 @@ $(document).ready(function(){
 			);	
 		}
 	
-	unfollow_post = 
+	unfollow_thread = 
 		function(params){
-			$.post('unfollow_post', {'requester_email': params.requester_email, 
-						  'post_id': params.post_id
+			$.post('unfollow_thread', {'requester_email': params.requester_email, 
+						  'thread_id': params.thread_id,
+						  'msg_id' : params.msg_id
 					  	}, 
 				function(res){
 					notify(res, true);
@@ -313,7 +315,8 @@ $(document).ready(function(){
 									'<span class="strong">' + res.posts[i].from + '</span><br /><span class="strong-gray ellipsis">' + res.posts[i].subject + '</span>'
 								  ]);
 				var params = {'requester_email': res.user, 
-							  'post_id': res.posts[i].id,
+							  'thread_id': res.posts[i].thread_id,
+							  'msg_id' : res.posts[i].msg_id,
 							  'curr_row': curr
 							 }
 				var f = bind(load_post, params)
@@ -334,7 +337,8 @@ $(document).ready(function(){
 			content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 			$("#main-area").html(content);
 			var params = {'requester_email': res.user, 
-						  'post_id': res.id,
+						  'thread_id': res.thread_id,
+						  'msg_id':res.msg_id,
 						  'group_name': res.to,
 						  'subject': res.subject,
 						  'text':res.text
@@ -346,11 +350,11 @@ $(document).ready(function(){
 	  		$("#btn-follow").bind("click");
 	  		$("#btn-unfollow").bind("click");
 			var ins_reply = bind(insert_reply, params);
-			var flw_post = bind(follow_post, params);
-			var unflw_post = bind(unfollow_post, params);
+			var flw_thread = bind(follow_thread, params);
+			var unflw_thread = bind(unfollow_thread, params);
 	  		$("#btn-reply").click(ins_reply);
-	  		$("#btn-follow").click(flw_post);
-	  		$("#btn-unfollow").click(unflw_post);
+	  		$("#btn-follow").click(flw_thread);
+	  		$("#btn-unfollow").click(unflw_thread);
 	  		
 		}
         
