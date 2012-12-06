@@ -163,10 +163,10 @@ def list_posts(group_name=None):
 			post = None
 			for p in posts:
 				if(not p.reply_to_id):
-					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post}
+					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':str(p.timestamp)}
 				else:
-					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post})
-			res['threads'].append({'thread_id':t.id, 'post':post, 'replies': replies})
+					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':str(p.timestamp)})
+			res['threads'].append({'thread_id':t.id, 'post':post, 'replies': replies, 'timestamp':str(t.timestamp)})
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
