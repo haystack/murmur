@@ -161,7 +161,7 @@ $(document).ready(function(){
 	
 	load_post = 
 		function(params){
-			render_post(res);
+			render_post(params);
 			highlight_table_row(posts_table, params.curr_row);
 		}
 	
@@ -325,33 +325,31 @@ $(document).ready(function(){
 	
 	function render_post(res){
 		$('#main-area').show()
-		if(res.status){
-			var content = '<h3>' + res.post.subject + '</h3>' + '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br /><span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span><hr />' + res.post.text;
-			content += '<div><button type="button" id="btn-follow" style="margin-top:10px;">Follow</button> <button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</div>';
-			
-			content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
-			$("#main-area").html(content);
-			var params = {'requester_email': res.user, 
-						  'thread_id': res.post.thread_id,
-						  'msg_id':res.post.msg_id,
-						  'group_name': res.post.to,
-						  'subject': res.post.subject,
-						  'text':res.post.text
-					  	}
-	  		$("#btn-reply").unbind("click");
-	  		$("#btn-follow").unbind("click");
-	  		$("#btn-unfollow").unbind("click");
-	  		$("#btn-reply").bind("click");
-	  		$("#btn-follow").bind("click");
-	  		$("#btn-unfollow").bind("click");
-			var ins_reply = bind(insert_reply, params);
-			var flw_thread = bind(follow_thread, params);
-			var unflw_thread = bind(unfollow_thread, params);
-	  		$("#btn-reply").click(ins_reply);
-	  		$("#btn-follow").click(flw_thread);
-	  		$("#btn-unfollow").click(unflw_thread);
+		var content = '<h3>' + res.post.subject + '</h3>' + '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br /><span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span><hr />' + res.post.text;
+		content += '<div><button type="button" id="btn-follow" style="margin-top:10px;">Follow</button> <button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</div>';
+		
+		content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
+		$("#main-area").html(content);
+		var params = {'requester_email': res.user, 
+					  'thread_id': res.post.thread_id,
+					  'msg_id':res.post.msg_id,
+					  'group_name': res.post.to,
+					  'subject': res.post.subject,
+					  'text':res.post.text
+					}
+		$("#btn-reply").unbind("click");
+		$("#btn-follow").unbind("click");
+		$("#btn-unfollow").unbind("click");
+		$("#btn-reply").bind("click");
+		$("#btn-follow").bind("click");
+		$("#btn-unfollow").bind("click");
+		var ins_reply = bind(insert_reply, params);
+		var flw_thread = bind(follow_thread, params);
+		var unflw_thread = bind(unfollow_thread, params);
+		$("#btn-reply").click(ins_reply);
+		$("#btn-follow").click(flw_thread);
+		$("#btn-unfollow").click(unflw_thread);
 	  		
-		}
         
 	}
 	
