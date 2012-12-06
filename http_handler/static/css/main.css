@@ -110,6 +110,7 @@ body {
 	bottom: 0px;
 	left: 0px;
 	width: 100%;
+	background-color: #ccc;
 }
 
 
@@ -125,7 +126,7 @@ body {
         width: 350px;
         z-index:100;
         border-right: #999 solid 1px;
-		box-shadow: 1px 0px 10px #666;
+	box-shadow: 1px 0px 10px #666;
         overflow: auto;
 }
 
@@ -149,17 +150,13 @@ body {
 
 
 #main-area-wrapper{
-        position:absolute;
-		top: 0px;
-		right: 0px;
-		bottom: 0px;
-		padding-right: 10px;
-		padding-top: 10px;
-		padding-left: 10px;
-		padding-bottom: 10px;
-		left: 350px;
-		background-color: #D7ECFA;
-		overflow: auto;
+	position:absolute;
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	padding: 10px;
+	left: 350px;
+	overflow: auto;
 }
 
 #main-area{

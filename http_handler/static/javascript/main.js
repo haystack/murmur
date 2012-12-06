@@ -394,7 +394,27 @@ $(document).ready(function(){
         
 	}
 	
-	
+	function new_post(res){
+                var content = '<div class="main-area-content">';
+                content += '<div class="comment">';
+		content += '<span class="strong">To : </span>'
+		content += '<select id="new-post-to"></select> <br />';
+		content += '<span class="strong">Subject : </span> <br />';
+                content += '<input id="new-post-subject" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
+		content += '<textarea id="new-post-text-input" style="height:150px;"></textarea>';
+		content += '<button type="button" id="btn-reply" style="margin-top:10px;">Post</button>'
+		content += '</div>';
+
+                content += '</div>'
+                $("#main-area").html(content);
+		for(var i = 0; i< res.groups.length; i++){
+			$("#new-post-to").append($("<option></option>")
+         		   .attr("value", res.groups[i].name)
+         		   .text(res.groups[i].name)); 
+					
+		}
+
+	}
 	
 	function highlight_table_row(table, curr_row){
 		if(curr_row !== undefined){
@@ -434,18 +454,17 @@ $(document).ready(function(){
 	if(window.location.pathname.indexOf('/groups')!=-1){
 		list_groups();
 	}else{
-		/*
+		
 		$.post('list_groups', {}, 
 			function(res){
-				for(var i = 0; i< res.groups.length; i++){
-					$("#list-create-group").append($("<option></option>")
-         		   .attr("value", res.groups[i].name)
-         		   .text(res.groups[i].name)); 
-					
-				}
+				$("#btn-create-new-post").unbind("click");
+				var func_new_post = bind(new_post, res);
+				$("#btn-create-new-post").bind("click");
+				$("#btn-create-new-post").click(func_new_post);
+			
 			} 
 		);
-		*/
+		
 		list_posts();	
 		//setInterval(list_posts, 10000);
 	}
