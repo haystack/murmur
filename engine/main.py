@@ -150,6 +150,8 @@ def group_info(group_name):
 	return res
 
 
+def format_date_time(str):
+	return str[:19].replace('-', '/')
 
 def list_posts(group_name=None):
 	res = {'status':False}
@@ -163,10 +165,10 @@ def list_posts(group_name=None):
 			post = None
 			for p in posts:
 				if(not p.reply_to_id):
-					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':str(p.timestamp)}
+					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(str(p.timestamp))}
 				else:
-					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':str(p.timestamp)})
-			res['threads'].append({'thread_id':t.id, 'post':post, 'replies': replies, 'timestamp':str(t.timestamp)})
+					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(str(p.timestamp))})
+			res['threads'].append({'thread_id':t.id, 'post':post, 'replies': replies, 'timestamp':format_date_time(str(t.timestamp))})
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
