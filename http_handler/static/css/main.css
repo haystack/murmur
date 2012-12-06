@@ -211,7 +211,13 @@ body {
 }
 
 .welcome{
-	background: url('/static/images/no-img-selected.png') no-repeat fixed center;
+	margin: 0px auto;
+	background: #fff url('/static/images/no-img-selected.png') no-repeat fixed center;
+	position: absolute;
+	top: 0px;
+	bottom:0px;
+	left: 0px;
+	right: 0px;
 }
 
 
