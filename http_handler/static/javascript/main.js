@@ -326,13 +326,28 @@ $(document).ready(function(){
 	
 	function render_post(res){
 		var content = '<div class="main-area-content">';
-		content += '<div><div style="float:right"><button type="button" id="btn-follow" style="margin-top:10px;">Follow</button> <button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</div> <div><h3>' + res.post.subject + '</h3>' + '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br /><span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span></div> </div> <hr />' + res.post.text;
+		content += '<div>';
+		content += '<div style="float:right">';
+		content += '<button type="button" id="btn-follow" style="margin-top:10px;">Follow</button>';
+		content += '<button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</button>';
+		content += '</div>';
+		content += '<div>';
+		content += '<h3>' + res.post.subject + '</h3>'
+		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
+		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span> <br />';
+		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp) + '</span>';
+		content += '</div>';
+		content += '</div>';
+		content += '<hr />';
+		content += res.post.text;
 		content += '<div class="reply">'
 		for(var i = 0; i< res.replies.length; i++){
-                       content += '<div class="main-area-content">';
-                       content += '<span class="strong-gray">' + res.replies[i].from + '</span><br /><br />' + res.replies[i].text;
-
-                       content += '</div>'
+                       	content += '<div class="main-area-content">';
+			content += '<span class="strong">' + res.replies[i].from + '</span>&nbsp;';
+                       	content += 'on ' + new Date(res.replies[i].timestamp) + '&nbsp;';
+			content += '<br /><br />';
+		      	content +=  res.replies[i].text;
+                       	content += '</div>'
                                
                }
 		content += '</div>';
