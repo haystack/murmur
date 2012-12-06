@@ -331,6 +331,7 @@ $(document).ready(function(){
 		
 		content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 		content += '</div>'
+		$("#main-area").empty();
 		$("#main-area").html(content);
 		var params = {'requester_email': res.requester_email, 
 					  'thread_id': res.thread_id,
