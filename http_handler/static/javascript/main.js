@@ -491,6 +491,10 @@ $(document).ready(function(){
 		//setInterval(refresh(), 10000);
 	}
 	$(".default-text").blur();
+	tinyMCE.init({
+		mode : "textareas",
+		theme : "simple"
+	});
 });
 
 				
