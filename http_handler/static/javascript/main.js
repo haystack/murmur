@@ -309,7 +309,7 @@ $(document).ready(function(){
 	
 	function populate_posts_table(res, load_params){
 		posts_table.fnClearTable();
-		var active_row = 0;
+		var active_row = 0
 		if(res.status){
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.threads.length; i++){
@@ -336,8 +336,9 @@ $(document).ready(function(){
 							 }
 				var f = bind(load_post, params)
 				curr_row = posts_table.fnGetNodes(curr);
-				if(curr_row == load_params.thread_id){
-					active_row = curr_row;
+				if(res.threads[i].thread_id == load_params.thread_id){
+					active_row = curr;
+					console.debug("new post/reply (thread-id: " + load_params.thread_id +").");
 				}
 
 				$(curr_row).click(f);
@@ -345,6 +346,7 @@ $(document).ready(function(){
 		}
 		if(load_params.load == true){
 			posts_table.fnGetNodes(active_row).click();
+			console.debug("load = true");
 		}
 	}
 	
@@ -376,14 +378,12 @@ $(document).ready(function(){
                                
                }
 		content += '</div>';
+		content += '<div class="main-area-content">';	
+		content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
+		content += '</div>'; 
+		content += '</div>'	
 		$("#main-area").empty();
                 $("#main-area").html(content);
-		var content = '<div class="main-area-content">';
-		
-		content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
-		 
-		content += '</div>'	
-		$("#main-area").append(content);
 		var params = {'requester_email': res.requester_email, 
 					  'thread_id': res.thread_id,
 					  'msg_id':res.post.msg_id,
@@ -437,6 +437,7 @@ $(document).ready(function(){
 	
 	function highlight_table_row(table, curr_row){
 		if(curr_row !== undefined){
+			table.active_row = curr_row;
 			$('td', table.fnGetNodes()).css("background-color","white");
 			$('td', table.fnGetNodes(curr_row)).css("background-color","lightyellow");
 		}	
@@ -468,7 +469,7 @@ $(document).ready(function(){
 	}
 
 
-	function refresh(){
+	 function init_posts_page (){
 		$.post('list_groups', {},
                         function(res){
                                 $("#btn-create-new-post").unbind("click");
@@ -487,8 +488,8 @@ $(document).ready(function(){
 	if(window.location.pathname.indexOf('/groups')!=-1){
 		list_groups();
 	}else{
-		refresh();	
-		//setInterval(refresh(), 10000);
+		init_posts_page();	
+		//setInterval(refresh, 10000);
 	}
 	$(".default-text").blur();
 	tinyMCE.init({
