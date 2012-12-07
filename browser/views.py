@@ -3,9 +3,10 @@ from django.shortcuts import render_to_response
 import engine.main
 from engine.msg_codes import *
 
-#from lamson.mail import MailResponse
-#from config.settings import relay
-#from smtp_handler.main import *
+from lamson.mail import MailResponse
+from lamson.server import Relay
+from config.settings import *
+
 from django.core.context_processors import csrf
 import json
 
@@ -19,6 +20,7 @@ MailX Web Handler
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 SESSION_KEY = 'USER'
 
+relay = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
             
 
 def init_session(email):
@@ -165,7 +167,6 @@ def insert_post(request):
 	try:
 		res = engine.main.insert_post(request.POST['group_name'], request.POST['subject'],  request.POST['msg_text'], request.POST['poster_email'])
 		res.update({'user': request.session[SESSION_KEY]})
-		'''
 		msg_id = res['msg_id']
 		thread_id = res['thread_id']
 		to_send =  res['recipients']
@@ -176,7 +177,7 @@ def insert_post(request):
 		logging.debug('TO LIST: ' + str(to_send))
 		if(len(to_send)>0):
 			relay.deliver(mail, To = to_send)
-		'''
+
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except:
 		return HttpResponse(request_error, mimetype="application/json")
