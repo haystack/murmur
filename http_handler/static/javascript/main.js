@@ -208,6 +208,9 @@ $(document).ready(function(){
 	insert_reply = 
 		function(params){
 			params.msg_text = $("#reply-text-input").val() + '<br /> <br /> On ' + new Date() + ', <a href="mailto:' + params.from + '">' + params.from + '</a> wrote: <br />' + '<blockquote style="margin: 0 0 0 0.8ex; border-left: 1px #ccc solid; padding-left: 1ex;">' + params.text + '</blockquote>';
+			if(params.subject.substr(0,3).trim().toLowerCase() != 're:'){
+				params.subject = 'Re: ' + params.subject;
+			}
 			params.poster_email = params.requester_email;
 			delete params.requester_email;
 			delete params.text;
@@ -384,6 +387,7 @@ $(document).ready(function(){
 		content += '</div>'	
 		$("#main-area").empty();
                 $("#main-area").html(content);
+		//tinyMCE.execCommand('mceAddControl', false, 'reply-text-input');
 		var params = {'requester_email': res.requester_email, 
 					  'thread_id': res.thread_id,
 					  'msg_id':res.post.msg_id,
@@ -494,13 +498,13 @@ $(document).ready(function(){
 	$(".default-text").blur();
 	tinyMCE.init({
 		mode : "textareas",
-		theme : "simple"
+		theme : "advanced",
+		theme_advanced_buttons1 : "bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,blockquote",
+		theme_advanced_toolbar_location : "top",
+		theme_advanced_toolbar_align : "left",
+		theme_advanced_statusbar_location : "bottom",
+		theme_advanced_resizing : true
 	});
+
+
 });
-
-				
-	
-
-
-
-

@@ -212,7 +212,7 @@ def insert_reply(request):
 		thread_id = res['thread_id']
 		to_send =  res['recipients']
 		post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(new_msg_id) + POST_SUFFIX + '@' + HOST)
-		mail = MailResponse(From = poster_email, To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, subject))
+		mail = MailResponse(From = poster_email, To = post_addr, Subject  = '%s' %(subject))
 		
 		
 		mail['References'] = msg_id		
