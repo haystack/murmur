@@ -204,7 +204,7 @@ $(document).ready(function(){
 	
 	insert_reply = 
 		function(params){
-			params.msg_text = $("#reply-text-input").val() + '<br /> On ' + new Date() + ', <a href="mailto:' + params.requester_email + '">' + params.requester_email + '</a> wrote: <br />' + '<blockquote style="margin: 0 0 0 0.8ex; border-left: 1px #ccc solid; padding-left: 1ex;">' + params.text + '</blockquote>';
+			params.msg_text = $("#reply-text-input").val() + '<br /> On ' + new Date() + ', <a href="mailto:' + params.from + '">' + params.from + '</a> wrote: <br />' + '<blockquote style="margin: 0 0 0 0.8ex; border-left: 1px #ccc solid; padding-left: 1ex;">' + params.text + '</blockquote>';
 			params.poster_email = params.requester_email;
 			delete params.requester_email;
 			delete params.text;
@@ -378,6 +378,7 @@ $(document).ready(function(){
 		var params = {'requester_email': res.requester_email, 
 					  'thread_id': res.thread_id,
 					  'msg_id':res.post.msg_id,
+					  'from':res.post.from,
 					  'group_name': res.post.to,
 					  'subject': res.post.subject,
 					  'text':res.post.text
