@@ -154,7 +154,7 @@ $(document).ready(function(){
 		function(params){
 			$.post('list_posts', params, 
 				function(res){
-					populate_posts_table(res);
+					populate_posts_table(res, params);
 				}
 			);	
 		}
@@ -198,7 +198,7 @@ $(document).ready(function(){
 			$.post('insert_post', params, 
 				function(res){
 					if(res.status){
-                                        	list_posts();
+                                        	list_posts({'load':true});
 					}
 					notify(res, true);
 				}
@@ -214,7 +214,7 @@ $(document).ready(function(){
 			$.post('insert_reply', params, 
 				function(res){
 					if(res.status){
-						list_posts();
+						list_posts({'load':true});
 					}
 					notify(res, true);
 				}
@@ -307,7 +307,7 @@ $(document).ready(function(){
 	
 	
 	
-	function populate_posts_table(res){
+	function populate_posts_table(res, load_params){
 		posts_table.fnClearTable();
 		if(res.status){
 			var params = {'requester_email': res.user};
@@ -338,7 +338,9 @@ $(document).ready(function(){
 				$(curr_row).click(f);
 			}
 		}
-		//posts_table.fnGetNodes(0).click();
+		if(load_params.load == true){
+			posts_table.fnGetNodes(0).click();
+		}
 	}
 	
 	
@@ -459,6 +461,20 @@ $(document).ready(function(){
 		timeStr = hours + ':' + minutes + ' ' + ampm;
 		return {'date':dateStr, 'time': timeStr}
 	}
+
+
+	function refresh(){
+		$.post('list_groups', {},
+                        function(res){
+                                $("#btn-create-new-post").unbind("click");
+                                var func_new_post = bind(new_post, res);
+                                $("#btn-create-new-post").bind("click");
+                                $("#btn-create-new-post").click(func_new_post);
+
+                        }
+                );
+		list_posts({'load':false});
+	}
 	
 	
 	/* Handle based on URLs */
@@ -466,19 +482,8 @@ $(document).ready(function(){
 	if(window.location.pathname.indexOf('/groups')!=-1){
 		list_groups();
 	}else{
-		
-		$.post('list_groups', {}, 
-			function(res){
-				$("#btn-create-new-post").unbind("click");
-				var func_new_post = bind(new_post, res);
-				$("#btn-create-new-post").bind("click");
-				$("#btn-create-new-post").click(func_new_post);
-			
-			} 
-		);
-		
-		list_posts();	
-		//setInterval(list_posts, 10000);
+		refresh();	
+		//setInterval(refresh(), 10000);
 	}
 	$(".default-text").blur();
 });
