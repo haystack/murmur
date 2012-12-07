@@ -197,6 +197,9 @@ $(document).ready(function(){
                         params.poster_email = params.requester_email;
 			$.post('insert_post', params, 
 				function(res){
+					if(res.status){
+                                        	list_posts();
+					}
 					notify(res, true);
 				}
 			);	
@@ -204,15 +207,14 @@ $(document).ready(function(){
 	
 	insert_reply = 
 		function(params){
-			params.msg_text = $("#reply-text-input").val() + '<br /> On ' + new Date() + ', <a href="mailto:' + params.from + '">' + params.from + '</a> wrote: <br />' + '<blockquote style="margin: 0 0 0 0.8ex; border-left: 1px #ccc solid; padding-left: 1ex;">' + params.text + '</blockquote>';
+			params.msg_text = $("#reply-text-input").val() + '<br /> <br /> On ' + new Date() + ', <a href="mailto:' + params.from + '">' + params.from + '</a> wrote: <br />' + '<blockquote style="margin: 0 0 0 0.8ex; border-left: 1px #ccc solid; padding-left: 1ex;">' + params.text + '</blockquote>';
 			params.poster_email = params.requester_email;
 			delete params.requester_email;
 			delete params.text;
 			$.post('insert_reply', params, 
 				function(res){
 					if(res.status){
-						$("#reply-text-input").val="";
-						$("#reply-text-input").blur();
+						list_posts();
 					}
 					notify(res, true);
 				}
