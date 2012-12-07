@@ -171,7 +171,7 @@ def load_post(request):
 def insert_post(request):
 	try:
 		group_name = request.POST['group_name']
-		subject = request.POST['subject']
+		subject = '[ %s ] -- %s' %(group_name, request.POST['subject'])
 		msg_text = request.POST['msg_text']
 		poster_email = request.POST['poster_email']
 		res = engine.main.insert_post(group_name, subject,  msg_text, poster_email)
@@ -181,7 +181,7 @@ def insert_post(request):
 		to_send =  res['recipients']
 		
 		post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + HOST)
-		mail = MailResponse(From = poster_email, To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, subject))
+		mail = MailResponse(From = poster_email, To = post_addr, Subject  = subject)
 		mail['message-id'] = msg_id
 		
 		ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)

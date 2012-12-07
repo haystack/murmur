@@ -159,8 +159,9 @@ def handle_post(message, address=None, host=None):
 	if(reserved):
 		return
 	group_name = address.lower()
+	subject = '[ %s ] -- %s' %(group_name, message['Subject'])
 	msg_text = get_body(str(message))
-	res = insert_post(group_name, message['Subject'], msg_text['body'], addr)
+	res = insert_post(group_name, subject, msg_text['body'], addr)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
 		relay.deliver(mail)
@@ -169,7 +170,7 @@ def handle_post(message, address=None, host=None):
 	thread_id = res['thread_id']
 	to_send =  res['recipients']
 	post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + host)
-	mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
+	mail = MailResponse(From = message['From'], To = post_addr, Subject  = subject)
 	
 		
 	if 'references' in message:
