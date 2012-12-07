@@ -344,8 +344,8 @@ $(document).ready(function(){
 		var content = '<div class="main-area-content">';
 		content += '<div>';
 		content += '<div style="float:right">';
-		content += '<button type="button" id="btn-follow" style="margin-top:10px;">Follow</button>';
-		content += '<button type="button" id="btn-unfollow" style="margin-top:10px;">Unfollow</button>';
+		content += '<button type="button" id="btn-follow" style="margin:5px;">Follow</button>';
+		content += '<button type="button" id="btn-unfollow" style="margin:5px;">Unfollow</button>';
 		content += '</div>';
 		content += '<div>';
 		content += '<h3>' + res.post.subject + '</h3>'

@@ -176,10 +176,24 @@ body {
 #left-column-area .dataTables_wrapper{
 	bottom:0px; 
 	overflow:auto; 
-	width:100%; 
 	border-top: #ccc solid 1px;
 }
 
+
+.left-column-area-content .ellipsis{
+	display:block;
+	white-space: nowrap;
+	max-width: 220px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.left-column-area-metadata .ellipsis{
+        display:block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+}
 
 .strong-gray{
 	color: #737373;
@@ -204,21 +218,6 @@ body {
 }
 
 
-.left-column-area-content .ellipsis{
-	display:block;
-	white-space: nowrap;
-	max-width: 240px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-.left-column-area-metadata .ellipsis{
-        display:block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-}
-
 .default-text {
 }
 
@@ -239,7 +238,6 @@ body {
         background: #D7ECFA;
         padding: 5px 10px 5px 10px;
         margin:0px;
-	width: 100%;
 }
 
 
