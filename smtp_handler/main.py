@@ -1,10 +1,10 @@
-import logging, time, base64, email, re
+import logging, time, base64
 from lamson.routing import route, stateless
 from config.settings import relay
 from schema.models import *
-from email.utils import *
 from lamson.mail import MailResponse
 from engine.main import *
+from utils import *
 
 '''
 MailX Mail Interface Handler
@@ -12,19 +12,6 @@ MailX Mail Interface Handler
 @author: Anant Bhardwaj
 @date: Oct 20, 2012
 '''
-
-HOST = 'slow.csail.mit.edu'
-NO_REPLY = 'no-reply' + '@' + HOST
-POST_SUFFIX = '__post__'
-FOLLOW_SUFFIX = '__follow__'
-UNFOLLOW_SUFFIX = '__unfollow__'
-UPVOTE_SUFFIX = '__upvote__'
-DOWNVOTE_SUFFIX = '__downvote__'
-FETCH_SUFFIX = '__fetch__'
-
-RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe', '+info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
-
-
 
 
 @route("(address)@(host)", address="all", host=HOST)
@@ -344,38 +331,3 @@ def help(message, address=None, host=None):
 	mail = MailResponse(From = from_addr, To = to_addr, Subject = subject, Body = body)
 	relay.deliver(mail)
 	return
-
-
-def get_body(message):
-	res={}
-	email_message = email.message_from_string(str(message))
-	maintype = email_message.get_content_maintype()
-	subtype = email_message.get_content_maintype()
-	body = None
-	if maintype == 'multipart':
-		for part in email_message.get_payload():
-			if part.get_content_maintype() == 'text':
-				if part.get_content_subtype() == 'html':
-					res['type']='html'
-					body = part.get_payload()
-					break
-				else:
-					res['type']='plain'
-					res['body']=part.get_payload()
-	elif maintype == 'text':
-		if subtype == 'html':
-			res['type']='html'
-			body =email_message.get_payload()
-		elif subtype == 'text':
-			res['type']='plain'
-			body =email_message.get_payload()
-	body = re.sub(r'<div.*?<a.*?\_\_follow\_\_.*?a>.*?<a.*?\_\_unfollow\_\_.*?a>.*?div>', '', body)
-	res['body'] = body
-	return res
-	
-def html_ps(thread_id, msg_id, group_name, host):
-	follow_addr = 'mailto:%s' %(group_name + '+' + str(thread_id) + '+' + msg_id + '+' + FOLLOW_SUFFIX + '@' + host)
-	unfollow_addr = 'mailto:%s' %(group_name + '+' + str(thread_id) + '+' + msg_id + '+' + UNFOLLOW_SUFFIX + '@' + host)
-	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
-	body = '<div style="border-top:solid thin; padding-top:5px;">%s</div>' %(content)
-	return body

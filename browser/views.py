@@ -4,11 +4,10 @@ import engine.main
 from engine.msg_codes import *
 
 from lamson.mail import MailResponse
-from config.settings import *
 from smtp_handler.utils import *
 
 from django.core.context_processors import csrf
-import json
+import json, logging
 
 '''
 @author: Anant Bhardwaj
@@ -74,7 +73,8 @@ def list_groups(request):
 		res = engine.main.list_groups()
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
 
@@ -84,7 +84,8 @@ def create_group(request):
 		res = engine.main.create_group(request.POST['group_name'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
 
@@ -95,7 +96,8 @@ def activate_group(request):
 		res = engine.main.activate_group(request.POST['group_name'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
 
@@ -106,7 +108,8 @@ def deactivate_group(request):
 		res = engine.main.deactivate_group(request.POST['group_name'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
 
@@ -117,7 +120,8 @@ def subscribe_group(request):
 		res = engine.main.subscribe_group(request.POST['group_name'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 	
 
@@ -128,7 +132,8 @@ def unsubscribe_group(request):
 		res = engine.main.unsubscribe_group(request.POST['group_name'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
 
@@ -138,7 +143,8 @@ def group_info(request):
 		res = engine.main.group_info(request.POST['group_name'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
 
@@ -147,7 +153,8 @@ def list_posts(request):
 		res = engine.main.list_posts()
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except  Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
 
@@ -156,24 +163,30 @@ def load_post(request):
 		res = engine.main.load_post(group_name=None, thread_id = request.POST['thread_id'], msg_id=request.POST['msg_id'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
 
 def insert_post(request):
 	try:
-		res = engine.main.insert_post(request.POST['group_name'], request.POST['subject'],  request.POST['msg_text'], request.POST['poster_email'])
+		group_name = request.POST['group_name']
+		subject = request.POST['subject']
+		msg_text = request.POST['msg_text']
+		poster_email = request.POST['poster_email']
+		res = engine.main.insert_post(group_name, subject,  msg_text, poster_email)
 		res.update({'user': request.session[SESSION_KEY]})
 		msg_id = res['msg_id']
 		thread_id = res['thread_id']
 		to_send =  res['recipients']
-		post_addr = '%s <%s>' %(request.POST['group_name'], request.POST['group_name'] + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + HOST)
-		mail = MailResponse(From = request.POST['poster_email'], To = post_addr, Subject  = '[ %s ] -- %s' %(request.POST['group_name'], request.POST['subject']))
-		ps_blurb = html_ps(thread_id, msg_id, request.POST['group_name'], HOST)
-		mail.Html = request.POST['msg_text'] + ps_blurb		
+		
+		post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + HOST)
+		mail = MailResponse(From = poster_email, To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, subject))
+		ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)
+		mail.Html = msg_text + ps_blurb		
 		logging.debug('TO LIST: ' + str(to_send))
 		if(len(to_send)>0):
-			relay.deliver(mail, To = to_send)
+			relay_mailer.deliver(mail, To = to_send)
 
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except Exception, e:
@@ -185,10 +198,26 @@ def insert_post(request):
 
 def insert_reply(request):
 	try:
-		res = engine.main.insert_reply(request.POST['group_name'], request.POST['subject'], request.POST['msg_text'], request.POST['poster_email'], request.POST['msg_id'], request.POST['thread_id'])
+		group_name = request.POST['group_name']
+		subject = request.POST['subject']
+		msg_text = request.POST['msg_text']
+		msg_id = request.POST['msg_id']
+		poster_email = request.POST['poster_email']
+		res = engine.main.insert_reply(group_name, subject, msg_text, poster_email, msg_id, thread_id)
 		res.update({'user': request.session[SESSION_KEY]})
+		new_msg_id = res['msg_id']
+		thread_id = res['thread_id']
+		to_send =  res['recipients']
+		post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(new_msg_id) + POST_SUFFIX + '@' + HOST)
+		mail = MailResponse(From = poster_email, To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, subject))
+		ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)
+		mail.Html = msg_text + ps_blurb		
+		logging.debug('TO LIST: ' + str(to_send))
+		if(len(to_send)>0):
+			relay_mailer.deliver(mail, To = to_send)
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 	
 
@@ -198,7 +227,8 @@ def follow_thread(request):
 		res = engine.main.follow_thread(request.POST['thread_id'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
 
@@ -208,7 +238,8 @@ def unfollow_thread(request):
 		res = engine.main.unfollow_thread(request.POST['thread_id'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
 
