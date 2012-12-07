@@ -321,7 +321,7 @@ $(document).ready(function(){
 				content += '<div class= "left-column-area-content">';
 				content +=  '<span class="strong ellipsis">' + res.threads[i].post.subject + '</span>'
 				content += '<span class="strong-gray ellipsis">' + res.threads[i].post.from + '</span>';
-				content += '<span class="blurb">' + strip(res.threads[i].post.text) + '</span>';
+				content += '<span class="blurb ellipsis">' + strip(res.threads[i].post.text) + '</span>';
 				content += '</div>'
 				
 				curr = posts_table.fnAddData( [
