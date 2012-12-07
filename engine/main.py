@@ -199,6 +199,7 @@ def load_post(group_name, thread_id, msg_id):
 
 def insert_post(group_name, subject, message_text, poster_email):
 	res = {'status':False}
+	thread = None
 	try:
 		group = Group.objects.get(name=group_name)
 		group_members = User.objects.filter(group = group, active = True)
@@ -217,6 +218,8 @@ def insert_post(group_name, subject, message_text, poster_email):
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except:
+		if(thread):
+			thread.delete()
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res
