@@ -4,8 +4,8 @@ import engine.main
 from engine.msg_codes import *
 
 from lamson.mail import MailResponse
-from lamson.server import Relay
 from config.settings import *
+from smtp_handler.utils import *
 
 from django.core.context_processors import csrf
 import json
@@ -19,9 +19,6 @@ MailX Web Handler
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 SESSION_KEY = 'USER'
-
-relay = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
-            
 
 def init_session(email):
 	pass
@@ -170,16 +167,17 @@ def insert_post(request):
 		msg_id = res['msg_id']
 		thread_id = res['thread_id']
 		to_send =  res['recipients']
-		post_addr = '%s <%s>' %(group_name, request.POST['group_name'] + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + HOST)
-		mail = MailResponse(From = request.POST['poster_email'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, request.POST['subject']))
-		ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)
-		mail.Html = unicode(request.POST['msg_text'] + ps_blurb , "utf-8")		
+		post_addr = '%s <%s>' %(request.POST['group_name'], request.POST['group_name'] + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + HOST)
+		mail = MailResponse(From = request.POST['poster_email'], To = post_addr, Subject  = '[ %s ] -- %s' %(request.POST['group_name'], request.POST['subject']))
+		ps_blurb = html_ps(thread_id, msg_id, request.POST['group_name'], HOST)
+		mail.Html = request.POST['msg_text'] + ps_blurb		
 		logging.debug('TO LIST: ' + str(to_send))
 		if(len(to_send)>0):
 			relay.deliver(mail, To = to_send)
 
 		return HttpResponse(json.dumps(res), mimetype="application/json")
-	except:
+	except Exception, e:
+		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 		
 	
@@ -215,4 +213,5 @@ def unfollow_thread(request):
 
 
 
-	
+
+
