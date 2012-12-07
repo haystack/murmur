@@ -309,7 +309,10 @@ $(document).ready(function(){
 	
 	function populate_posts_table(res, load_params){
 		posts_table.fnClearTable();
-		var active_row = 0;
+		var active_row = load_params.active_row
+		if(active_row == null){
+			active_row = 0;
+		}
 		if(res.status){
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.threads.length; i++){
@@ -437,6 +440,7 @@ $(document).ready(function(){
 	
 	function highlight_table_row(table, curr_row){
 		if(curr_row !== undefined){
+			table.active_row = curr_row;
 			$('td', table.fnGetNodes()).css("background-color","white");
 			$('td', table.fnGetNodes(curr_row)).css("background-color","lightyellow");
 		}	
@@ -468,7 +472,7 @@ $(document).ready(function(){
 	}
 
 
-	function refresh(){
+	var refresh = function (){
 		$.post('list_groups', {},
                         function(res){
                                 $("#btn-create-new-post").unbind("click");
@@ -478,7 +482,7 @@ $(document).ready(function(){
 
                         }
                 );
-		list_posts({'load':false});
+		list_posts({'load':true, 'active_row':posts_table.active_row});
 	}
 	
 	
@@ -488,7 +492,7 @@ $(document).ready(function(){
 		list_groups();
 	}else{
 		refresh();	
-		//setInterval(refresh(), 10000);
+		setInterval(refresh, 10000);
 	}
 	$(".default-text").blur();
 });
