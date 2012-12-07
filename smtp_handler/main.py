@@ -3,6 +3,7 @@ from lamson.routing import route, stateless
 from config.settings import relay
 from schema.models import *
 from lamson.mail import MailResponse
+from email.utils import *
 from engine.main import *
 from utils import *
 
@@ -213,7 +214,7 @@ def handle_reply(message, group_name=None, thread_id=None, msg_id=None, suffix=N
 		mail['References'] = message['message-id']
 
 	
-	mail['message-id'] = new-msg_id
+	mail['message-id'] = msg_id
 	
 	ps_blurb = html_ps(thread_id, msg_id, group_name, host)
 	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")

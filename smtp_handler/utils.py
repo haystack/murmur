@@ -56,5 +56,5 @@ def html_ps(thread_id, msg_id, group_name, host):
 	follow_addr = 'mailto:%s' %(group_name + '+' + str(thread_id) + '+' + msg_id + '+' + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = 'mailto:%s' %(group_name + '+' + str(thread_id) + '+' + msg_id + '+' + UNFOLLOW_SUFFIX + '@' + host)
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
-	body = '<div style="border-top:solid thin; padding-top:5px;">%s</div>' %(content)
+	body = '<div style="border-top:solid thin; padding-top:5px; margin-top:10px;">%s</div>' %(content)
 	return body
