@@ -30,7 +30,7 @@ form{
 	vertical-align:top;
 	background-color: #D7ECFA;
 	width:310px;
-	border: solid thin #447EAC;
+	box-shadow: 1px 0px 10px #666;
 }
 
 form label{
@@ -43,7 +43,7 @@ form input[type="text"]{
 }
 
 input[type="text"], select{
-	padding:5px 10px 5px 10px;
+	padding:5px;
 	border: #447EAC solid thin;
 }
 button, input[type="button"], input[type="submit"]{
