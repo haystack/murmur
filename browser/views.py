@@ -182,8 +182,10 @@ def insert_post(request):
 		
 		post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + HOST)
 		mail = MailResponse(From = poster_email, To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, subject))
+		mail['message-id'] = msg_id
+		
 		ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)
-		mail.Html = msg_text + ps_blurb		
+		mail.Html = msg_text + ps_blurb	
 		logging.debug('TO LIST: ' + str(to_send))
 		if(len(to_send)>0):
 			relay_mailer.deliver(mail, To = to_send)
@@ -211,6 +213,11 @@ def insert_reply(request):
 		to_send =  res['recipients']
 		post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(new_msg_id) + POST_SUFFIX + '@' + HOST)
 		mail = MailResponse(From = poster_email, To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, subject))
+		
+		
+		mail['References'] = msg_id		
+		mail['message-id'] = new_msg_id
+			
 		ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)
 		mail.Html = msg_text + ps_blurb		
 		logging.debug('TO LIST: ' + str(to_send))

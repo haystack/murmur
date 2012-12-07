@@ -169,16 +169,16 @@ def handle_post(message, address=None, host=None):
 	to_send =  res['recipients']
 	post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + host)
 	mail = MailResponse(From = message['From'], To = post_addr, Subject  = '[ %s ] -- %s' %(group_name, message['Subject']))
-	mail_id = message['message-id']
+	
 		
 	if 'references' in message:
 		mail['References'] = message['References']
-	elif mail_id:
-		mail['References'] = mail_id
-
-	if mail_id:
-		mail['message-id'] = mail_id	
+	elif 'message-id' in message:
+		mail['References'] = message['message-id']	
 	
+	
+	mail['message-id'] = msg_id
+
 	ps_blurb = html_ps(thread_id, msg_id, group_name, host)
 	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")		
 	logging.debug('TO LIST: ' + str(to_send))
@@ -206,14 +206,14 @@ def handle_reply(message, group_name=None, thread_id=None, msg_id=None, suffix=N
 	to_send =  res['recipients']
 	post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + host)
 	mail = MailResponse(From = message['From'], To = post_addr, Subject = message['Subject'])
-	mail_id = message['message-id']
+	
 	if 'references' in message:
 		mail['References'] = message['References']
-	elif mail_id:
-		mail['References'] = mail_id
+	elif 'message-id' in message:
+		mail['References'] = message['message-id']
 
-	if mail_id:
-		mail['message-id'] = mail_id
+	
+	mail['message-id'] = new-msg_id
 	
 	ps_blurb = html_ps(thread_id, msg_id, group_name, host)
 	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")
