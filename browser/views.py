@@ -202,6 +202,7 @@ def insert_reply(request):
 		subject = request.POST['subject']
 		msg_text = request.POST['msg_text']
 		msg_id = request.POST['msg_id']
+		thread_id = request.POST['thread_id']
 		poster_email = request.POST['poster_email']
 		res = engine.main.insert_reply(group_name, subject, msg_text, poster_email, msg_id, thread_id)
 		res.update({'user': request.session[SESSION_KEY]})
