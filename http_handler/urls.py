@@ -17,6 +17,7 @@ urlpatterns = patterns('',
 	 url(r'^group_info', 'browser.views.group_info'),
 	 
 	 url(r'^list_posts', 'browser.views.list_posts'),
+	 url(r'^refresh_posts', 'browser.views.refresh_posts'),
 	 url(r'^load_post', 'browser.views.load_post'),
 	 url(r'^insert_post', 'browser.views.insert_post'), 
 	 url(r'^insert_reply', 'browser.views.insert_reply'),

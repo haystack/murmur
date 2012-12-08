@@ -157,6 +157,16 @@ def list_posts(request):
 		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 
+def refresh_posts(request):
+        try:
+                res = engine.main.list_posts(thread_id = request.POST['thread_id'])
+                res.update({'user': request.session[SESSION_KEY]})
+                return HttpResponse(json.dumps(res), mimetype="application/json")
+        except  Exception, e:
+                logging.debug(e)
+                return HttpResponse(request_error, mimetype="application/json")
+
+
 
 def load_post(request):
 	try:

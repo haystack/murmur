@@ -21,9 +21,10 @@ $(document).ready(function(){
 		"bAutoWidth": false,
 		"bFilter": false,
 		"sWidth": "100%",
-		"aaSorting": [],
+		"aaSorting": [[1, "desc"]],
 		"aoColumns": [                 
-			{"bSortable": false, "sWidth": "100%"}
+			{"bSortable": false, "sWidth": "100%"},
+			{"bVisible": false}
 		]  
 	});
 	
@@ -154,11 +155,27 @@ $(document).ready(function(){
 		function(params){
 			$.post('list_posts', params, 
 				function(res){
-					populate_posts_table(res, params);
+					populate_posts_table(res, params, true);
 				}
 			);	
 		}
 	
+	
+	refresh_posts =
+                function(){
+			if(posts_table.last_thread_id != null){
+                        	$.post('refresh_posts', {'thread_id':posts_table.last_thread_id},
+                                	function(res){
+						if(res.status && res.threads.length > 0){
+                                        		populate_posts_table(res, {}, false);
+						}
+                               	 	}
+                        )	;
+			}
+                }
+
+
+
 	load_post = 
 		function(params){
 			render_post(params);
@@ -310,9 +327,12 @@ $(document).ready(function(){
 	
 	
 	
-	function populate_posts_table(res, load_params){
-		posts_table.fnClearTable();
+	function populate_posts_table(res, load_params, reset){
+		if(reset == true){
+			posts_table.fnClearTable();
+		}
 		var active_row = 0
+		var max_thread_id = -1;
 		if(res.status){
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.threads.length; i++){
@@ -329,7 +349,8 @@ $(document).ready(function(){
 				content += '</div>'
 				
 				curr = posts_table.fnAddData( [
-								content	  
+								content,
+								new Date(res.threads[i].timestamp) 	  
 								]);
 				var params = {'requester_email': res.user,
 							  'thread_id' : res.threads[i].thread_id, 
@@ -343,6 +364,9 @@ $(document).ready(function(){
 					active_row = curr;
 					console.debug("new post/reply (thread-id: " + load_params.thread_id +").");
 				}
+				if(res.threads[i].thread_id > max_thread_id){
+                                        max_thread_id = res.threads[i].thread_id;
+                                }
 
 				$(curr_row).click(f);
 			}
@@ -351,6 +375,7 @@ $(document).ready(function(){
 			posts_table.fnGetNodes(active_row).click();
 			console.debug("load = true");
 		}
+		posts_table.last_thread_id = max_thread_id;
 	}
 	
 	
@@ -486,6 +511,7 @@ $(document).ready(function(){
 		list_posts({'load':false});
 	}
 	
+
 	
 	/* Handle based on URLs */
 	
@@ -493,7 +519,7 @@ $(document).ready(function(){
 		list_groups();
 	}else{
 		init_posts_page();	
-		//setInterval(refresh, 10000);
+		setInterval(refresh_posts, 10000);
 	}
 	$(".default-text").blur();
 	tinyMCE.init({

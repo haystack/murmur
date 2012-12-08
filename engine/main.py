@@ -153,10 +153,10 @@ def group_info(group_name):
 def format_date_time(str):
 	return str[:19].replace('-', '/')
 
-def list_posts(group_name=None):
+def list_posts(group_name=None, thread_id = -1):
 	res = {'status':False}
 	try:
-		threads = Thread.objects.all()
+		threads = Thread.objects.filter(id__gt = thread_id)
 		res['status'] = True
 		res['threads'] = []
 		for t in threads:
