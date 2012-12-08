@@ -143,7 +143,7 @@ def group_info(request):
 	try:
 		res = engine.main.group_info(request.POST['group_name'])
 		res.update({'user': request.session[SESSION_KEY]})
-		member = (m for m in res['members'] if m["email"] == res['user']).next()
+		member = next((m for m in res['members'] if m["email"] == res['user']), None)
 		res['admin'] = False
 		res['subscribed'] = False
 		if(member):

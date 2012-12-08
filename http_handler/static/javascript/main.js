@@ -309,6 +309,25 @@ $(document).ready(function(){
 		$("#btn-deactivate-group").click(deact_group);
 		$("#btn-subscribe-group").click(sub_group);
 		$("#btn-unsubscribe-group").click(unsub_group);
+		$("#btn-subscribe-group").hide();
+		$("#btn-unsubscribe-group").hide();
+		$("#btn-activate-group").hide();
+		$("#btn-deactivate-group").hide();
+		if(res.admin){
+			if(res.active){
+				$("#btn-deactivate-group").show();
+			}else{
+				$("#btn-activate-group").show();
+			}
+		}else if(res.active){
+			if(res.subscribed){
+                                $("#btn-unsubscribe-group").show();
+                        }else{
+                                $("#btn-subscribe-group").show();
+                        }
+	
+		}
+
 	}
 	
 	
