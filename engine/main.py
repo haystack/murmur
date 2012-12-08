@@ -157,11 +157,11 @@ def format_date_time(d):
 def list_posts(group_name=None, timestamp_str = None):
 	res = {'status':False}
 	try:
-		timestamp = datetime.datetime.min
+		t = datetime.datetime.min
 		if(timestamp_str):
-			timestamp = datetime.datetime.strptime(timestamp_str, '%Y/%m/%d %H:%M:%S')
-		timestamp = timestamp.replace(tzinfo=utc)
-		threads = Thread.objects.filter(timestamp__gt = timestamp)
+			t = datetime.datetime.strptime(timestamp_str, '%Y/%m/%d %H:%M:%S')
+		t = t.replace(tzinfo=utc, second = t.second + 1)
+		threads = Thread.objects.filter(timestamp__gt = t)
 		res['threads'] = []
 		for t in threads:
 			posts = Post.objects.filter(thread = t)		

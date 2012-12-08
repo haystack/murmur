@@ -1,9 +1,9 @@
 $(document).ready(function(){
 	/* Global Objects */
 
-	var posts_local_data = {}
+	posts_local_data = {}
 
-	var groups_local_data = {}
+	groups_local_data = {}
 
  
 	/* Dynamic Table Definitions */	
