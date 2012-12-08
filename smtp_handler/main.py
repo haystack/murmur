@@ -198,7 +198,7 @@ def handle_reply(message, group_name=None, thread_id=None, msg_id=None, suffix=N
 	name, addr = parseaddr(message['from'].lower())
 	msg_id = msg_id.lower()
 	group_name = group_name.lower()
-	msg_text = get_body(str(message)).encode('ascii', 'ignore')
+	msg_text = get_body(str(message))
 	res = insert_reply(group_name, message['Subject'], msg_text['body'], addr, msg_id, thread_id)
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))

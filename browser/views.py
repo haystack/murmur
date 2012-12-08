@@ -182,10 +182,10 @@ def load_post(request):
 def insert_post(request):
 	try:
 		group_name = request.POST['group_name'].encode('ascii', 'ignore')
-		subject = '[ %s ] -- %s' %(group_name, request.POST['subject']).encode('ascii', 'ignore')
+		subject = '[ %s ] -- %s' %(group_name, request.POST['subject'].encode('ascii', 'ignore'))
 		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
 		poster_email = request.POST['poster_email'].encode('ascii', 'ignore')
-		res = engine.main.insert_post(group_name, subject,  msg_text, poster_email).encode('ascii', 'ignore')
+		res = engine.main.insert_post(group_name, subject,  msg_text, poster_email)
 		res.update({'user': request.session[SESSION_KEY]})
 		msg_id = res['msg_id']
 		thread_id = res['thread_id']
