@@ -336,7 +336,12 @@ $(document).ready(function(){
 				content += '<span class="blurb ellipsis">' + strip(res.threads[i].post.text) + '</span>';
 				content += '</div>'
 				var curr_row = $('<li class="row-item" id="' + res.threads[i].thread_id + '">' + content + '</li>');
-				posts_table.append(curr_row);
+				if(reset){
+					posts_table.append(curr_row);
+				}else{
+					posts_table.prepend(curr_row);	
+				}
+			
 				var params = {'requester_email': res.user,
 							  'thread_id' : res.threads[i].thread_id, 
 							  'post': res.threads[i].post,
