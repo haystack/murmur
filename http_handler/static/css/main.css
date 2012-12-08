@@ -127,17 +127,26 @@ body {
         z-index:100;
         border-right: #999 solid 1px;
 	box-shadow: 1px 0px 10px #666;
-        overflow: auto;
 }
-
 
 #left-column-area{
       margin:0;
       padding:0;
 }
 
-.table{
+#posts-table, #groups-table{
+	position:absolute;
+	top:40px;
+	bottom:0px;
+	overflow: auto;
 }
+
+.table{
+	width: 100%;
+}
+
+
+
 
 .table .row-item {
 	background: white;
