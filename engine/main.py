@@ -152,14 +152,14 @@ def group_info(group_name):
 
 
 def format_date_time(d):
-	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S.%f')
+	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
 def list_posts(group_name=None, timestamp_str = None):
 	res = {'status':False}
 	try:
 		timestamp = datetime.datetime.min
 		if(timestamp_str):
-			timestamp = datetime.datetime.strptime(timestamp_str, '%Y/%m/%d %H:%M:%S.%f')
+			timestamp = datetime.datetime.strptime(timestamp_str, '%Y/%m/%d %H:%M:%S')
 		timestamp = timestamp.replace(tzinfo=utc)
 		threads = Thread.objects.filter(timestamp__gt = timestamp)
 		res['threads'] = []
