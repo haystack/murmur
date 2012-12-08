@@ -136,6 +136,23 @@ body {
       padding:0;
 }
 
+.table{
+}
+
+.table .row-item {
+	background: white;
+	padding: 15px;
+        border-bottom: #ccc solid 1px;
+        vertical-align: middle;
+	border-bottom: 1px solid #ccc;
+	cursor: default;
+}
+
+.table .row-item.selected {
+	background: #FFF7CE!important;
+}
+
+
 
 .left-column-area-content{
       margin-right:75px;

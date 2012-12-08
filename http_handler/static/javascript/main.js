@@ -1,32 +1,12 @@
-$(document).ready(function(){ 
+$(document).ready(function(){
+	/* Global Objects */
+
+	var posts_local_data = {}
+
+	var groups_local_data = {}
+
+ 
 	/* Dynamic Table Definitions */	
-	
-	groups_table = $('#groups-table').dataTable({
-		"sDom": '<"top"f<"clear">>rt<"bottom"ilp<"clear">>',
-		"bPaginate": false,
-		"bInfo": false,
-		"bAutoWidth": false,
-		"bFilter": false,
-		"sWidth": "100%",
-		"aaSorting": [],
-		"aoColumns": [                 
-			{"bSortable": false, "sWidth": "100%"}
-		]  
-	});
-	
-	posts_table = $('#posts-table').dataTable({
-		"sDom": '<"top"f<"clear">>rt<"bottom"ilp<"clear">>',
-		"bPaginate": false,
-		"bInfo": false,
-		"bAutoWidth": false,
-		"bFilter": false,
-		"sWidth": "100%",
-		"aaSorting": [[1, "desc"]],
-		"aoColumns": [                 
-			{"bSortable": false, "sWidth": "100%"},
-			{"bVisible": false}
-		]  
-	});
 	
 	members_table = $('#members-table').dataTable({
 		"sDom": '<"top"f<"clear">>rt<"bottom"ilp<"clear">>',
@@ -88,7 +68,9 @@ $(document).ready(function(){
 				function(res){
 					populate_group_info(res);
 					populate_members_table(res);
-					highlight_table_row(groups_table, params.curr_row);
+					groups_local_data.selected_group = params.groups_name;
+                        		$('.row-item').css("background-color","white");
+                        		$('#' + params.group_name).css("background-color","lightyellow");
 					notify(res, false);
 				}
 			);	
@@ -163,8 +145,8 @@ $(document).ready(function(){
 	
 	refresh_posts =
                 function(){
-			if(posts_table.timestamp != null){
-                        	$.post('refresh_posts', {'timestamp':posts_table.timestamp},
+			if(posts_local_data.timestamp != null){
+                        	$.post('refresh_posts', {'timestamp':posts_local_data.timestamp},
                                 	function(res){
 						if(res.status && res.threads.length > 0){
                                         		populate_posts_table(res, {}, false);
@@ -179,8 +161,12 @@ $(document).ready(function(){
 	load_post = 
 		function(params){
 			render_post(params);
-			highlight_table_row(posts_table, params.curr_row);
-		}
+			posts_local_data.selected_thread = params.thread_id;
+			$('.row-item').css("background-color","white");
+			$('#' + params.thread_id).css("background-color","lightyellow");
+		}	
+
+	
 	
 	follow_thread = 
 		function(params){
@@ -249,7 +235,7 @@ $(document).ready(function(){
 	}
 
 	function populate_groups_table(res){
-		groups_table.fnClearTable();
+		var groups_table = $("#groups-table");
 		if(res.status){
 			var params = {'requester_email': res.user};
 	 		$("#btn-create-group").unbind("click");
@@ -257,19 +243,20 @@ $(document).ready(function(){
 			var crt_group = bind(create_group, params);
 			$("#btn-create-group").click(crt_group);
 			for(var i = 0; i< res.groups.length; i++){
-				curr = groups_table.fnAddData( [
-									'<span class="strong">' + res.groups[i].name + '</span>'
-								  ]);
+				var content = '<li class="row-item" id="'+ res.groups[i].name+'">';
+				content += '<span class="strong">' + res.groups[i].name + '</span>'
+				content += '</li>';
+				var curr_row = $(content);
+				groups_table.append(curr_row);
+								 
 				var params = {'requester_email': res.user, 
-							  'group_name': res.groups[i].name,
-							  'curr_row': curr
-							 }
+						'group_name': res.groups[i].name
+						}
 				var f = bind(group_info, params)
-				curr_row = groups_table.fnGetNodes(curr);
-				$(curr_row).click(f);
+				curr_row.click(f);
 			}
 		}
-		groups_table.fnGetNodes(0).click();
+		groups_table.children(":first").click();
 	}
 	
 	function populate_members_table(res){
@@ -328,8 +315,9 @@ $(document).ready(function(){
 	
 	
 	function populate_posts_table(res, load_params, reset){
+		var posts_table = $("#posts-table"); 
 		if(reset == true){
-			posts_table.fnClearTable();
+			posts_table.empty();
 		}
 		var active_row = 0
 		timestamp = new Date(0);
@@ -347,35 +335,30 @@ $(document).ready(function(){
 				content += '<span class="strong-gray ellipsis">' + res.threads[i].post.from + '</span>';
 				content += '<span class="blurb ellipsis">' + strip(res.threads[i].post.text) + '</span>';
 				content += '</div>'
-				
-				curr = posts_table.fnAddData( [
-								content,
-								new Date(res.threads[i].timestamp) 	  
-								]);
+				var curr_row = $('<li class="row-item" id="' + res.threads[i].thread_id + '">' + content + '</li>');
+				posts_table.append(curr_row);
 				var params = {'requester_email': res.user,
 							  'thread_id' : res.threads[i].thread_id, 
 							  'post': res.threads[i].post,
-							  'replies' : res.threads[i].replies,
-							  'curr_row': curr
+							  'replies' : res.threads[i].replies
 							 }
 				var f = bind(load_post, params)
-				curr_row = posts_table.fnGetNodes(curr);
 				if(res.threads[i].thread_id == load_params.thread_id){
-					active_row = curr;
+					active_row = res.threads[i].thread_id;
 					console.debug("new post/reply (thread-id: " + load_params.thread_id +").");
 				}
 				if(new Date(res.threads[i].timestamp) > timestamp){
                                         timestamp = res.threads[i].timestamp;
                                 }
 
-				$(curr_row).click(f);
+				curr_row.click(f);
 			}
 		}
 		if(load_params.load == true){
-			posts_table.fnGetNodes(active_row).click();
+			posts_table.find('"#'+active_row+'"').click();
 			console.debug("load = true");
 		}
-		posts_table.timestamp = timestamp;
+		posts_local_data.timestamp = timestamp;
 	}
 	
 	
@@ -464,13 +447,6 @@ $(document).ready(function(){
 		$("#btn-post").click(ins_post);
 	}
 	
-	function highlight_table_row(table, curr_row){
-		if(curr_row !== undefined){
-			table.active_row = curr_row;
-			$('td', table.fnGetNodes()).css("background-color","white");
-			$('td', table.fnGetNodes(curr_row)).css("background-color","lightyellow");
-		}	
-	}
 	
 	
 	function strip(html){
