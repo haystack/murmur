@@ -164,6 +164,8 @@ def list_posts(group_name=None, timestamp_str = None):
 		threads = Thread.objects.filter(timestamp__gt = t)
 		res['threads'] = []
 		for t in threads:
+			following = Following.objects.filter(thread = t)
+			f_list = [f.email for f in following]
 			posts = Post.objects.filter(thread = t)		
 			replies = []
 			post = None
@@ -172,7 +174,7 @@ def list_posts(group_name=None, timestamp_str = None):
 					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(p.timestamp)}
 				else:
 					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(p.timestamp)})
-			res['threads'].append({'thread_id':t.id, 'post':post, 'replies': replies, 'timestamp':format_date_time(t.timestamp)})
+			res['threads'].append({'thread_id':t.id, 'post':post, 'replies': replies, 'f_list':f_list, 'timestamp':format_date_time(t.timestamp)})
 			res['status'] = True
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']

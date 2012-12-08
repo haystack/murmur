@@ -175,6 +175,10 @@ $(document).ready(function(){
 						  'msg_id': params.msg_id
 					  	}, 
 				function(res){
+					if(res.status){
+						$("#btn-follow").hide();
+                				$("#btn-unfollow").show();
+					}
 					notify(res, true);
 				}
 			);	
@@ -187,6 +191,10 @@ $(document).ready(function(){
 						  'msg_id' : params.msg_id
 					  	}, 
 				function(res){
+					if(res.status){
+                                                $("#btn-follow").show();
+                                                $("#btn-unfollow").hide();
+                                        }
 					notify(res, true);
 				}
 			);	
@@ -357,7 +365,8 @@ $(document).ready(function(){
 				var params = {'requester_email': res.user,
 						'thread_id' : res.threads[i].thread_id, 
 						 'post': res.threads[i].post,
-						 'replies' : res.threads[i].replies
+						 'replies' : res.threads[i].replies,
+						 'f_list' : res.threads[i].f_list
 						}
 				var f = bind(load_post, params)
 				if(res.threads[i].thread_id == load_params.thread_id){
@@ -450,7 +459,13 @@ $(document).ready(function(){
 		$("#btn-reply").click(ins_reply);
 		$("#btn-follow").click(flw_thread);
 		$("#btn-unfollow").click(unflw_thread);
-	  		
+		$("#btn-follow").hide();
+		$("#btn-unfollow").hide();
+		if(res.f_list && res.f_list.indexOf(res.requester_email) != -1){
+			$("#btn-unfollow").show();
+		}else{
+			$("#btn-follow").show();
+		}  		
         
 	}
 	
