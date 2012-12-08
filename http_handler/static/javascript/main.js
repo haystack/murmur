@@ -339,7 +339,13 @@ $(document).ready(function(){
 				if(reset){
 					posts_table.append(curr_row);
 				}else{
-					posts_table.prepend(curr_row);	
+					var row = $('#' + res.threads[i].thread_id)
+					if(row.length == 0){ 
+						posts_table.prepend(curr_row);
+					}else{
+						row.remove();
+						posts_table.prepend(curr_row);
+					}	
 				}
 			
 				var params = {'requester_email': res.user,
