@@ -342,8 +342,8 @@ $(document).ready(function(){
 					if(row.length == 0){ 
 						posts_table.prepend(curr_row);
 					}else{
-						row.remove();
 						posts_table.prepend(curr_row);
+						row.remove();
 					}	
 				}
 			
