@@ -1,4 +1,4 @@
-import logging, time, base64, email, datetime
+import sys, logging, time, base64, email, datetime
 from schema.models import *
 from msg_codes import *
 from django.utils.timezone import utc
@@ -253,6 +253,7 @@ def insert_reply(group_name, subject, message_text, poster_email, msg_id, thread
 	except Post.DoesNotExist:
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 	except:
+		print sys.exc_info()
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res

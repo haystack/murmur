@@ -1,5 +1,6 @@
 from django.http import *
 from django.shortcuts import render_to_response
+from django.utils.encoding import *
 import engine.main
 from engine.msg_codes import *
 
@@ -180,11 +181,11 @@ def load_post(request):
 
 def insert_post(request):
 	try:
-		group_name = request.POST['group_name']
-		subject = '[ %s ] -- %s' %(group_name, request.POST['subject'])
-		msg_text = request.POST['msg_text']
-		poster_email = request.POST['poster_email']
-		res = engine.main.insert_post(group_name, subject,  msg_text, poster_email)
+		group_name = request.POST['group_name'].encode('ascii', 'ignore')
+		subject = '[ %s ] -- %s' %(group_name, request.POST['subject']).encode('ascii', 'ignore')
+		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
+		poster_email = request.POST['poster_email'].encode('ascii', 'ignore')
+		res = engine.main.insert_post(group_name, subject,  msg_text, poster_email).encode('ascii', 'ignore')
 		res.update({'user': request.session[SESSION_KEY]})
 		msg_id = res['msg_id']
 		thread_id = res['thread_id']
@@ -210,31 +211,33 @@ def insert_post(request):
 
 def insert_reply(request):
 	try:
-		group_name = request.POST['group_name']
-		subject = request.POST['subject']
-		msg_text = request.POST['msg_text']
-		msg_id = request.POST['msg_id']
-		thread_id = request.POST['thread_id']
-		poster_email = request.POST['poster_email']
+		group_name = request.POST['group_name'].encode('ascii', 'ignore')
+		subject = request.POST['subject'].encode('ascii', 'ignore')
+		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
+		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
+		thread_id = request.POST['thread_id'].encode('ascii', 'ignore')
+		poster_email = request.POST['poster_email'].encode('ascii', 'ignore')
 		res = engine.main.insert_reply(group_name, subject, msg_text, poster_email, msg_id, thread_id)
 		res.update({'user': request.session[SESSION_KEY]})
-		new_msg_id = res['msg_id']
-		thread_id = res['thread_id']
-		to_send =  res['recipients']
-		post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(new_msg_id) + POST_SUFFIX + '@' + HOST)
-		mail = MailResponse(From = poster_email, To = post_addr, Subject  = '%s' %(subject))
-		
-		
-		mail['References'] = msg_id		
-		mail['message-id'] = new_msg_id
+		if(res['status']):
+			new_msg_id = res['msg_id']
+			thread_id = res['thread_id']
+			to_send =  res['recipients']
+			post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(new_msg_id) + POST_SUFFIX + '@' + HOST)
+			mail = MailResponse(From = poster_email, To = post_addr, Subject  = '%s' %(subject))
 			
-		ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)
-		mail.Html = msg_text + ps_blurb		
-		logging.debug('TO LIST: ' + str(to_send))
-		if(len(to_send)>0):
-			relay_mailer.deliver(mail, To = to_send)
+			
+			mail['References'] = msg_id		
+			mail['message-id'] = new_msg_id
+				
+			ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)
+			mail.Html = msg_text + ps_blurb		
+			logging.debug('TO LIST: ' + str(to_send))
+			if(len(to_send)>0):
+				relay_mailer.deliver(mail, To = to_send)
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except Exception, e:
+		print sys.exc_info()
 		logging.debug(e)
 		return HttpResponse(request_error, mimetype="application/json")
 	

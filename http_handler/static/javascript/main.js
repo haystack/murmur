@@ -215,7 +215,6 @@ $(document).ready(function(){
 				params.subject = 'Re: ' + params.subject;
 			}
 			params.poster_email = params.requester_email;
-			delete params.requester_email;
 			delete params.text;
 			$.post('insert_reply', params, 
 				function(res){
