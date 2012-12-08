@@ -460,6 +460,7 @@ $(document).ready(function(){
 		$("#btn-post").unbind("click");
                 $("#btn-post").bind("click");
 		$("#btn-post").click(ins_post);
+		$('.row-item').css("background-color","white");
 	}
 	
 	
