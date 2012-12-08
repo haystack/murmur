@@ -1,6 +1,7 @@
 import logging, time, base64, email, datetime
 from schema.models import *
 from msg_codes import *
+from django.utils.timezone import utc
 
 '''
 MailX Main Controller
@@ -150,14 +151,17 @@ def group_info(group_name):
 	return res
 
 
-def format_date_time(str):
-	return str[:19].replace('-', '/')
+def format_date_time(d):
+	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S.%f')
 
-def list_posts(group_name=None, thread_id = -1):
+def list_posts(group_name=None, timestamp_str = None):
 	res = {'status':False}
 	try:
-		threads = Thread.objects.filter(id__gt = thread_id)
-		res['status'] = True
+		timestamp = datetime.datetime.min
+		if(timestamp_str):
+			timestamp = datetime.datetime.strptime(timestamp_str, '%Y/%m/%d %H:%M:%S.%f')
+		timestamp = timestamp.replace(tzinfo=utc)
+		threads = Thread.objects.filter(timestamp__gt = timestamp)
 		res['threads'] = []
 		for t in threads:
 			posts = Post.objects.filter(thread = t)		
@@ -165,10 +169,11 @@ def list_posts(group_name=None, thread_id = -1):
 			post = None
 			for p in posts:
 				if(not p.reply_to_id):
-					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(str(p.timestamp))}
+					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(p.timestamp)}
 				else:
-					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(str(p.timestamp))})
-			res['threads'].append({'thread_id':t.id, 'post':post, 'replies': replies, 'timestamp':format_date_time(str(t.timestamp))})
+					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(p.timestamp)})
+			res['threads'].append({'thread_id':t.id, 'post':post, 'replies': replies, 'timestamp':format_date_time(t.timestamp)})
+			res['status'] = True
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
@@ -235,7 +240,7 @@ def insert_reply(group_name, subject, message_text, poster_email, msg_id, thread
 		new_msg_id = base64.b64encode(poster_email + str(time.time())).lower()
 		r = Post(msg_id=new_msg_id, email = poster_email, subject=subject, post = str(message_text), reply_to = post, group = group, thread=thread)
 		r.save()
-		thread.timestamp = datetime.datetime.now()
+		thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
 		thread.save()
 		following = Following.objects.filter(thread = thread)
 		recipients = [f.email for f in following]
