@@ -143,6 +143,12 @@ def group_info(request):
 	try:
 		res = engine.main.group_info(request.POST['group_name'])
 		res.update({'user': request.session[SESSION_KEY]})
+		member = (m for m in res['members'] if m["email"] == res['user']).next()
+		res['admin'] = False
+		res['subscribed'] = False
+		if(member):
+			res['admin'] = member['admin']
+			res['subscribed'] = member['active']
 		return HttpResponse(json.dumps(res), mimetype="application/json")
 	except Exception, e:
 		logging.debug(e)
