@@ -360,7 +360,9 @@ $(document).ready(function(){
 					}else{
 						posts_table.prepend(curr_row);
 						row.remove();
-						curr_row.click();
+						if(res.threads[i].thread_id == posts_local_data.selected_thread){
+							curr_row.click();
+						}
 					}	
 				}
 			
