@@ -1,9 +1,9 @@
 $(document).ready(function(){
 	/* Global Objects */
 
-	var posts_local_data = {}
+	posts_local_data = {}
 
-	var groups_local_data = {}
+	groups_local_data = {}
 
  
 	/* Dynamic Table Definitions */	
@@ -175,6 +175,10 @@ $(document).ready(function(){
 						  'msg_id': params.msg_id
 					  	}, 
 				function(res){
+					if(res.status){
+						$("#btn-follow").hide();
+                				$("#btn-unfollow").show();
+					}
 					notify(res, true);
 				}
 			);	
@@ -187,6 +191,10 @@ $(document).ready(function(){
 						  'msg_id' : params.msg_id
 					  	}, 
 				function(res){
+					if(res.status){
+                                                $("#btn-follow").show();
+                                                $("#btn-unfollow").hide();
+                                        }
 					notify(res, true);
 				}
 			);	
@@ -252,7 +260,7 @@ $(document).ready(function(){
 						'group_name': res.groups[i].name
 						}
 				var f = bind(group_info, params)
-				curr_row.click(f);
+				curr_row.on('click',f);
 			}
 		}
 		groups_table.children(":first").click();
@@ -309,6 +317,25 @@ $(document).ready(function(){
 		$("#btn-deactivate-group").click(deact_group);
 		$("#btn-subscribe-group").click(sub_group);
 		$("#btn-unsubscribe-group").click(unsub_group);
+		$("#btn-subscribe-group").hide();
+		$("#btn-unsubscribe-group").hide();
+		$("#btn-activate-group").hide();
+		$("#btn-deactivate-group").hide();
+		if(res.admin){
+			if(res.active){
+				$("#btn-deactivate-group").show();
+			}else{
+				$("#btn-activate-group").show();
+			}
+		}else if(res.active){
+			if(res.subscribed){
+                                $("#btn-unsubscribe-group").show();
+                        }else{
+                                $("#btn-subscribe-group").show();
+                        }
+	
+		}
+
 	}
 	
 	
@@ -318,7 +345,7 @@ $(document).ready(function(){
 		if(reset == true){
 			posts_table.empty();
 		}
-		var active_row = 0
+		var selected_thread = posts_local_data.selected_thread
 		timestamp = new Date(0);
 		if(res.status){
 			var params = {'requester_email': res.user};
@@ -335,6 +362,23 @@ $(document).ready(function(){
 				content += '<span class="blurb ellipsis">' + strip(res.threads[i].post.text) + '</span>';
 				content += '</div>'
 				var curr_row = $('<li class="row-item" id="' + res.threads[i].thread_id + '">' + content + '</li>');
+				var params = {'requester_email': res.user,
+						'thread_id' : res.threads[i].thread_id, 
+						 'post': res.threads[i].post,
+						 'replies' : res.threads[i].replies,
+						 'f_list' : res.threads[i].f_list
+						}
+				var f = bind(load_post, params)
+				if(res.threads[i].thread_id == load_params.thread_id){
+					selected_thread = res.threads[i].thread_id;
+					console.debug("new post/reply (thread-id: " + load_params.thread_id +").");
+				}
+				if(new Date(res.threads[i].timestamp) > timestamp){
+                                        timestamp = res.threads[i].timestamp;
+                                }
+
+				curr_row.on('click',f);
+				
 				if(reset){
 					posts_table.append(curr_row);
 				}else{
@@ -344,28 +388,17 @@ $(document).ready(function(){
 					}else{
 						posts_table.prepend(curr_row);
 						row.remove();
+						if(res.threads[i].thread_id == posts_local_data.selected_thread){
+							curr_row.click();
+						}
 					}	
 				}
 			
-				var params = {'requester_email': res.user,
-							  'thread_id' : res.threads[i].thread_id, 
-							  'post': res.threads[i].post,
-							  'replies' : res.threads[i].replies
-							 }
-				var f = bind(load_post, params)
-				if(res.threads[i].thread_id == load_params.thread_id){
-					active_row = res.threads[i].thread_id;
-					console.debug("new post/reply (thread-id: " + load_params.thread_id +").");
-				}
-				if(new Date(res.threads[i].timestamp) > timestamp){
-                                        timestamp = res.threads[i].timestamp;
-                                }
 
-				curr_row.click(f);
 			}
 		}
 		if(load_params.load == true){
-			posts_table.find('"#'+active_row+'"').click();
+			posts_table.find('"#'+selected_thread+'"').click();
 			console.debug("load = true");
 		}
 		posts_local_data.timestamp = timestamp;
@@ -426,7 +459,13 @@ $(document).ready(function(){
 		$("#btn-reply").click(ins_reply);
 		$("#btn-follow").click(flw_thread);
 		$("#btn-unfollow").click(unflw_thread);
-	  		
+		$("#btn-follow").hide();
+		$("#btn-unfollow").hide();
+		if(res.f_list && res.f_list.indexOf(res.requester_email) != -1){
+			$("#btn-unfollow").show();
+		}else{
+			$("#btn-follow").show();
+		}  		
         
 	}
 	
@@ -455,6 +494,7 @@ $(document).ready(function(){
 		$("#btn-post").unbind("click");
                 $("#btn-post").bind("click");
 		$("#btn-post").click(ins_post);
+		$('.row-item').css("background-color","white");
 	}
 	
 	
