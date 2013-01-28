@@ -243,6 +243,7 @@ $(document).ready(function(){
 
 	function populate_groups_table(res){
 		var groups_table = $("#groups-table");
+		groups_table.html("");
 		if(res.status){
 			var params = {'requester_email': res.user};
 	 		$("#btn-create-group").unbind("click");
