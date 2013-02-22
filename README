@@ -11,20 +11,15 @@ sudo rabbitmqctl add_user mailx mailx
 sudo rabbitmqctl add_vhost /mailx
 sudo rabbitmqctl set_permissions -p /mailx mailx ".*" ".*" ".*"
 
-# setup a virtual environment
-virtualenv mailx
-cd mailx
-source bin/activate
+
 
 # install required python packages
 pip install lamson
 pip install django
 pip install psycopg2
-pip install djcelery
+pip install django-celery
 
 # download mailx
-mkdir src
-cd src
 git clone git@github.com:abhardwaj/mailx.git
 
 
@@ -40,12 +35,12 @@ vi config/settings.py
 # edit django configuration settings
 vi http_handler/settings.py 
 
-# setup postgres database 
+# setup the database 
 psql -U postgres -W -h localhost
 create database mailx
 
 # install schema
-cd src/mailx
+cd mailx
 python manage.py syncdb
 
 
@@ -56,17 +51,15 @@ python manage.py syncdb
 python manage.py celeryd
 
 # run mailx server
-cd src/mailx
-mkdir logs
-mkdir run
+cd mailx
 lamson start
 
 # to stop/restart
-cd src/mailx
+cd mailx
 lamson stop/restart
 
-# log files
-cd src/mailx
+# see log files
+cd mailx
 cat logs/mailx.log  #mailx log
 cat lamson.out  #lamson stdio
 cat lamson.err #lamson stderr 
