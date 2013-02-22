@@ -7,9 +7,5 @@
 # Ignore Mac DS_Store Files
 .DS_Store
 
-# Ignore log files and locks
-logs/
-run/
-
 # Local Settings
 local_settings.py
