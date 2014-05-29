@@ -30,6 +30,7 @@ form{
 	vertical-align:top;
 	background-color: #D7ECFA;
 	width:310px;
+	box-shadow: 1px 0px 10px #666;
 }
 
 form label{
@@ -196,7 +197,6 @@ body {
 	padding-bottom: 20px;
 	margin-bottom: 10px;
 	background-color: #FFF;
-	box-shadow: 1px 0px 10px #666;
 }
 
 #left-column-area .dataTables_wrapper{
