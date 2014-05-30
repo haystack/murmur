@@ -218,7 +218,7 @@ $(document).ready(function(){
 	
 	insert_reply = 
 		function(params){
-			params.msg_text = $("#reply-text-input").val() + '<br /> <br /> On ' + new Date() + ', <a href="mailto:' + params.from + '">' + params.from + '</a> wrote: <br />' + '<blockquote style="margin: 0 0 0 0.8ex; border-left: 1px #ccc solid; padding-left: 1ex;">' + params.text + '</blockquote>';
+			params.msg_text = $("#reply-text-input").val();
 			if(params.subject.substr(0,3).trim().toLowerCase() != 're:'){
 				params.subject = 'Re: ' + params.subject;
 			}
