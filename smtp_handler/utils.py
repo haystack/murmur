@@ -11,7 +11,7 @@ MailX Mail Utils and Constants
 @date: Oct 20, 2012
 '''
 
-HOST = 'slow.csail.mit.edu'
+HOST = 'mailx.csail.mit.edu'
 NO_REPLY = 'no-reply' + '@' + HOST
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
