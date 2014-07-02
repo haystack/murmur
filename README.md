@@ -1,30 +1,31 @@
-MailX Installation Instruction
-===
+MailX
+=
+### Installation Instructions
 
-### install required linux packages
+#### install required linux packages
 `sudo apt-get install postgresql`
 
-### install required python packages
+#### install required python packages
 * `sudo pip install lamson`
 * `sudo pip install django`
 * `sudo pip install psycopg2`
 
-### download mailx
+#### download mailx
 git clone git@github.com:abhardwaj/mailx.git
 
-### configuration
+#### configuration
 * configure your relay_server (exim4 or sendmail) in config/settings.py
 * use port other than 25 (default 587)
 * edit database details in http_handler/settings.py 
 
 
-### setup the database 
+#### setup the database 
 * `psql -U postgres -W -h localhost`
 * `create database mailx`
 
-# install schema
+#### install schema
 * `python manage.py syncdb`
 
-# run mailx server
+#### run mailx server
 * `lamson start`
 * `python manage.py runserver`
