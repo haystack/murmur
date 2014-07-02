@@ -11,7 +11,7 @@ MailX
 * `sudo pip install psycopg2`
 
 #### download mailx
-git clone git@github.com:abhardwaj/mailx.git
+`git clone git@github.com:abhardwaj/mailx.git`
 
 #### configuration
 * configure your relay_server (exim4 or sendmail) in config/settings.py
