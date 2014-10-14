@@ -6,9 +6,7 @@ MailX
 `sudo apt-get install postgresql`
 
 #### install required python packages
-* `sudo pip install lamson`
-* `sudo pip install django`
-* `sudo pip install psycopg2`
+* `sudo pip install -r requirements.txt`
 
 #### download mailx
 `git clone git@github.com:abhardwaj/mailx.git`
