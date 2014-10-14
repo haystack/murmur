@@ -73,10 +73,10 @@ def list_groups(request):
 	try:
 		res = engine.main.list_groups()
 		res.update({'user': request.session[SESSION_KEY]})
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 
 
 
@@ -84,10 +84,10 @@ def create_group(request):
 	try:
 		res = engine.main.create_group(request.POST['group_name'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 
 
 
@@ -96,10 +96,10 @@ def activate_group(request):
 	try:
 		res = engine.main.activate_group(request.POST['group_name'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 
 
 
@@ -108,10 +108,10 @@ def deactivate_group(request):
 	try:
 		res = engine.main.deactivate_group(request.POST['group_name'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 
 
 
@@ -120,10 +120,10 @@ def subscribe_group(request):
 	try:
 		res = engine.main.subscribe_group(request.POST['group_name'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 	
 
 
@@ -132,10 +132,10 @@ def unsubscribe_group(request):
 	try:
 		res = engine.main.unsubscribe_group(request.POST['group_name'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 
 
 
@@ -149,29 +149,29 @@ def group_info(request):
 		if(member):
 			res['admin'] = member['admin']
 			res['subscribed'] = member['active']
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 
 
 def list_posts(request):
 	try:
 		res = engine.main.list_posts()
 		res.update({'user': request.session[SESSION_KEY]})
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except  Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 
 def refresh_posts(request):
-        try:
-                res = engine.main.list_posts(timestamp_str = request.POST['timestamp'])
-                res.update({'user': request.session[SESSION_KEY]})
-                return HttpResponse(json.dumps(res), mimetype="application/json")
-        except  Exception, e:
-                logging.debug(e)
-                return HttpResponse(request_error, mimetype="application/json")
+	try:
+		res = engine.main.list_posts(timestamp_str = request.POST['timestamp'])
+		res.update({'user': request.session[SESSION_KEY]})
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except  Exception, e:
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
 
 
@@ -179,10 +179,10 @@ def load_post(request):
 	try:
 		res = engine.main.load_post(group_name=None, thread_id = request.POST['thread_id'], msg_id=request.POST['msg_id'])
 		res.update({'user': request.session[SESSION_KEY]})
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 
 
 def insert_post(request):
@@ -207,10 +207,10 @@ def insert_post(request):
 		if(len(to_send)>0):
 			relay_mailer.deliver(mail, To = to_send)
 
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 		
 	
 
@@ -241,11 +241,11 @@ def insert_reply(request):
 			logging.debug('TO LIST: ' + str(to_send))
 			if(len(to_send)>0):
 				relay_mailer.deliver(mail, To = to_send)
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print sys.exc_info()
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 	
 
 
@@ -253,10 +253,10 @@ def follow_thread(request):
 	try:
 		res = engine.main.follow_thread(request.POST['thread_id'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 
 
 
@@ -264,10 +264,10 @@ def unfollow_thread(request):
 	try:
 		res = engine.main.unfollow_thread(request.POST['thread_id'], request.POST['requester_email'])
 		res.update({'user': request.session[SESSION_KEY]})
-		return HttpResponse(json.dumps(res), mimetype="application/json")
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
-		return HttpResponse(request_error, mimetype="application/json")
+		return HttpResponse(request_error, content_type="application/json")
 
 
 
