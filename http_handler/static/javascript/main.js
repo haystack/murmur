@@ -542,9 +542,9 @@ $(document).ready(function(){
 	
 	/* Handle based on URLs */
 	
-	if(window.location.pathname.indexOf('/groups')!=-1){
+	if (window.location.pathname.indexOf('/groups') != -1) {
 		list_groups();
-	}else{
+	} else if (window.location.pathname.indexOf('/login') == -1) {
 		init_posts_page();	
 		setInterval(refresh_posts, 10000);
 	}
