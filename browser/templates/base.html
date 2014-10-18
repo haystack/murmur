@@ -1,3 +1,6 @@
+{% load staticfiles %}
+
+
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -27,12 +30,13 @@
 <body>
 	<div id="dropdown-nav" class="dropdown-menu has-tip">
 	    <ul>
-	        <li><a href="logout">Logout</a></li>
+	    	<li><a href="settings">Settings</a></li>
+	        <li><a href="accounts/logout">Logout</a></li>
 	    </ul>
 	</div>
 	<div id="header">
 		<span id="headlink-left">
-		{% block headlink-left %}<a id="logo" href="posts">MailX</a>{% endblock %}
+		{% block headlink-left %}<a id="logo" href="/">MailX</a>{% endblock %}
 		</span>
 		<span id="headlink-right">
 		{% block headlink-right %}{% endblock %}

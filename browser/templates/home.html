@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block headlink-right %}
+{% endblock %}
+{% block content %}
+
+
+<div class="accounts">
+	
+<h3>Welcome to MailX!</h3>
+<hr />
+<div>
+	<a href="{% url "django.contrib.auth.views.login" %}">Login</a>
+</div>
+<div>
+	<a href="{% url "registration_register" %}">Register</a>
+</div>
+</div>
+{% endblock %}

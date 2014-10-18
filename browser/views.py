@@ -1,14 +1,19 @@
 from django.http import *
-from django.shortcuts import render_to_response
+from django.contrib.auth.decorators import login_required
 from django.utils.encoding import *
 import engine.main
 from engine.msg_codes import *
+
 
 from lamson.mail import MailResponse
 from smtp_handler.utils import *
 
 from django.core.context_processors import csrf
 import json, logging
+from django.contrib.auth.models import User
+from django.shortcuts import render_to_response
+
+from annoying.decorators import render_to
 
 '''
 @author: Anant Bhardwaj
@@ -18,72 +23,47 @@ MailX Web Handler
 '''
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
-SESSION_KEY = 'USER'
-
-def init_session(email):
-	pass
-
-def login_form(request):
-	c = {}
-	c.update(csrf(request))
-	return render_to_response('login.html', c)
-
-def login(request, redirect_url='posts'):
-	if request.method == "POST":
-		try:
-			user = request.POST["email"]
-			if(user != ""):
-				request.session.flush()
-				request.session[SESSION_KEY] = user
-				return HttpResponseRedirect(redirect_url)
-			else:
-				return login_form(request)
-		except:
-			return login_form(request)
-	else:
-		return login_form(request)
-		
-
 
 def logout(request):
 	request.session.flush()
-	return HttpResponseRedirect('posts')
+	return HttpResponseRedirect('/')
 
-
+@render_to('home.html')
 def index(request):
-	return HttpResponseRedirect('posts')
-		
+	if not request.user.is_authenticated():
+		return dict()
+	else:
+		return HttpResponseRedirect('posts')
+
+@render_to("posts.html")
+@login_required
 def posts(request):
-	try:
-		user = request.session[SESSION_KEY]
-		return render_to_response("posts.html", {'user': user})
-	except KeyError:
-		return HttpResponseRedirect('login')
+	return {'user': request.user}
+
+@render_to("settings.html")
+@login_required
+def settings(request):
+	return {'user': request.user}
 	
+@render_to("posts.html")
+@login_required
 def groups(request):
-	try:
-		user = request.session[SESSION_KEY]
-		return render_to_response("groups.html", {'user': user})
-	except KeyError:
-		return HttpResponseRedirect('login')
+	return {'user': request.user}
 	
-
-
+@login_required
 def list_groups(request):
 	try:
 		res = engine.main.list_groups()
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
-
+@login_required
 def create_group(request):
 	try:
 		res = engine.main.create_group(request.POST['group_name'], request.POST['requester_email'])
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -91,11 +71,10 @@ def create_group(request):
 
 
 
-
+@login_required
 def activate_group(request):
 	try:
 		res = engine.main.activate_group(request.POST['group_name'], request.POST['requester_email'])
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -103,11 +82,10 @@ def activate_group(request):
 
 
 
-
+@login_required
 def deactivate_group(request):
 	try:
 		res = engine.main.deactivate_group(request.POST['group_name'], request.POST['requester_email'])
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -115,11 +93,10 @@ def deactivate_group(request):
 
 
 
-
+@login_required
 def subscribe_group(request):
 	try:
 		res = engine.main.subscribe_group(request.POST['group_name'], request.POST['requester_email'])
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -127,23 +104,21 @@ def subscribe_group(request):
 	
 
 
-
+@login_required
 def unsubscribe_group(request):
 	try:
 		res = engine.main.unsubscribe_group(request.POST['group_name'], request.POST['requester_email'])
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
-
+@login_required
 def group_info(request):
 	try:
 		res = engine.main.group_info(request.POST['group_name'])
-		res.update({'user': request.session[SESSION_KEY]})
-		member = next((m for m in res['members'] if m["email"] == res['user']), None)
+		member = next((m for m in res['members'] if m["email"] == res['user'].email), None)
 		res['admin'] = False
 		res['subscribed'] = False
 		if(member):
@@ -154,37 +129,35 @@ def group_info(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
-
+@login_required
 def list_posts(request):
 	try:
 		res = engine.main.list_posts()
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except  Exception, e:
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
+@login_required
 def refresh_posts(request):
 	try:
 		res = engine.main.list_posts(timestamp_str = request.POST['timestamp'])
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except  Exception, e:
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
-
+@login_required
 def load_post(request):
 	try:
 		res = engine.main.load_post(group_name=None, thread_id = request.POST['thread_id'], msg_id=request.POST['msg_id'])
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
-
+@login_required
 def insert_post(request):
 	try:
 		group_name = request.POST['group_name'].encode('ascii', 'ignore')
@@ -192,7 +165,6 @@ def insert_post(request):
 		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
 		poster_email = request.POST['poster_email'].encode('ascii', 'ignore')
 		res = engine.main.insert_post(group_name, subject,  msg_text, poster_email)
-		res.update({'user': request.session[SESSION_KEY]})
 		msg_id = res['msg_id']
 		thread_id = res['thread_id']
 		to_send =  res['recipients']
@@ -214,7 +186,7 @@ def insert_post(request):
 		
 	
 
-
+@login_required
 def insert_reply(request):
 	try:
 		group_name = request.POST['group_name'].encode('ascii', 'ignore')
@@ -224,7 +196,6 @@ def insert_reply(request):
 		thread_id = request.POST['thread_id'].encode('ascii', 'ignore')
 		poster_email = request.POST['poster_email'].encode('ascii', 'ignore')
 		res = engine.main.insert_reply(group_name, subject, msg_text, poster_email, msg_id, thread_id)
-		res.update({'user': request.session[SESSION_KEY]})
 		if(res['status']):
 			new_msg_id = res['msg_id']
 			thread_id = res['thread_id']
@@ -248,22 +219,20 @@ def insert_reply(request):
 		return HttpResponse(request_error, content_type="application/json")
 	
 
-
+@login_required
 def follow_thread(request):
 	try:
 		res = engine.main.follow_thread(request.POST['thread_id'], request.POST['requester_email'])
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
-
+@login_required
 def unfollow_thread(request):
 	try:
 		res = engine.main.unfollow_thread(request.POST['thread_id'], request.POST['requester_email'])
-		res.update({'user': request.session[SESSION_KEY]})
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

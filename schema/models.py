@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 '''
 MailX Models
@@ -40,7 +41,8 @@ class Thread(models.Model):
 
 class Group(models.Model):
 	id = models.AutoField(primary_key=True)
-	name = models.CharField(max_length=20, unique = True)
+	name = models.CharField(max_length=20, unique=True)
+	public = models.BooleanField(default=True)
 	active = models.BooleanField(default=True)
 	timestamp = models.DateTimeField(auto_now=True)
 	def __unicode__(self):
@@ -50,22 +52,13 @@ class Group(models.Model):
 		db_table = "mailx_groups"
 
 
-
-
-class User(models.Model):
-	id = models.AutoField(primary_key=True)
-	email = models.CharField(max_length=50)
-	group = models.ForeignKey('Group')
-	admin = models.BooleanField(default=False)
-	member = models.BooleanField(default=False)
-	moderator = models.BooleanField(default=False)
-	guest = models.BooleanField(default=False)
-	active = models.BooleanField(default=True)
-	def __unicode__(self):
-		return self.name
+class UserProfile(models.Model):
+	user = models.OneToOneField(User)
+# 	
+# 	def __unicode__(self):
+# 		return self.user.email
 
 	class Meta:
-		unique_together = ('email', 'group',)
 		db_table = "mailx_users"
 
 
@@ -95,13 +88,13 @@ class Like(models.Model):
 
 
 class Dislke(models.Model):
-        id = models.AutoField(primary_key=True)
-        post = models.ForeignKey('Post')
-        email = models.CharField(max_length=50)
-        timestamp = models.DateTimeField(auto_now=True)
-        def __unicode__(self):
-			return self.name
+	id = models.AutoField(primary_key=True)
+	post = models.ForeignKey('Post')
+	email = models.CharField(max_length=50)
+	timestamp = models.DateTimeField(auto_now=True)
+	def __unicode__(self):
+		return self.name
 
-        class Meta:
-			db_table = "mailx_dislikes"
+	class Meta:
+		db_table = "mailx_dislikes"
 

@@ -22,8 +22,7 @@ hr{
 	border: thin #447EAC solid;
 }
 
-
-form{
+.accounts {
 	margin:0px auto;
 	margin-top:30px; 
 	padding:30px; 
@@ -33,7 +32,7 @@ form{
 	box-shadow: 1px 0px 10px #666;
 }
 
-form label{
+.accounts label{
 	font-weight:bold; 
 	color:#666;
 }

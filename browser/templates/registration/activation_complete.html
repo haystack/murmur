@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block headlink-right %}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="accounts">
+    {% if account %}
+     	<h3>Activation complete </h3>
+		<hr />
+    <p>
+        Click here to login <a class="btn btn-primary" href="{% url "auth_login" %}"> login</a>
+    </p>
+</div>
+{% endblock %}
+

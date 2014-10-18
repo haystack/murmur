@@ -1,10 +1,12 @@
 from django.conf.urls import patterns, include, url
+from django.contrib.auth import views as auth_views
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
 urlpatterns = patterns('',
      url(r'^$', 'browser.views.index'),
+     url(r'^settings', 'browser.views.settings'),
 	 url(r'^posts', 'browser.views.posts'),
 	 url(r'^groups', 'browser.views.groups'),
 	 
@@ -23,7 +25,27 @@ urlpatterns = patterns('',
 	 url(r'^insert_reply', 'browser.views.insert_reply'),
 	 url(r'^follow_thread', 'browser.views.follow_thread'),
 	 url(r'^unfollow_thread', 'browser.views.unfollow_thread'),
-	 
-	 url(r'^login', 'browser.views.login'),
-	 url(r'^logout', 'browser.views.logout'),
+     
+    #override the registration default urls - bug with django 1.6
+      url(r'^password/change/$',
+                    auth_views.password_change,
+                    name='password_change'),
+      url(r'^password/change/done/$',
+                    auth_views.password_change_done,
+                    name='password_change_done'),
+      url(r'^password/reset/$',
+                    auth_views.password_reset,
+                    name='password_reset'),
+      url(r'^password/reset/done/$',
+                    auth_views.password_reset_done,
+                    name='password_reset_done'),
+      url(r'^password/reset/complete/$',
+                    auth_views.password_reset_complete,
+                    name='password_reset_complete'),
+      url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
+                    auth_views.password_reset_confirm,
+                    name='password_reset_confirm'),
+                       
+     (r'^accounts/', include('registration.backends.default.urls')),
+
 )
