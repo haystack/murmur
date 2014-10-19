@@ -6,10 +6,24 @@
 <div class="accounts">
         <form method='post' action='.'>
         	{% csrf_token %}
+        	
 		<h3>Register Account</h3>
 		<hr />
-                	{{ form.as_p }}
-                    <input type="submit" class="btn btn-primary" value="Register!" />
+        
+        <p class="required">
+        	<label for="id_email">E-mail:</label> 
+        	<input id="id_email" name="email" type="email">
+        </p>
+        <p class="required">
+        	<label for="id_password1">Password:</label> 
+        	<input id="id_password1" name="password1" type="password">
+        </p>
+        <p class="required">
+        	<label for="id_password2">Password (again):</label> 
+        	<input id="id_password2" name="password2" type="password">
+        </p>
+        
+        <input type="submit" class="btn btn-primary" value="Register!" />
 
         </form>
 </div>

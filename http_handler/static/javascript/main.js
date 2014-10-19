@@ -17,11 +17,10 @@ $(document).ready(function(){
 		"sWidth": "100%",
 		"aoColumns": [                 
 			{"bSortable": false, "sWidth": "50%"},
-			{"bSortable": false, "sWidth": "10%"},
-			{"bSortable": false, "sWidth": "10%"},
-			{"bSortable": false, "sWidth": "10%"},
-			{"bSortable": false, "sWidth": "10%"},
-			{"bSortable": false, "sWidth": "10%"}
+			{"bSortable": false, "sWidth": "12.5%"},
+			{"bSortable": false, "sWidth": "12.5%"},
+			{"bSortable": false, "sWidth": "12.5%"},
+			{"bSortable": false, "sWidth": "12.5%"}
 		]  
 	});
 	
@@ -29,12 +28,13 @@ $(document).ready(function(){
 	
 	/* Default blur effect in textbox */
 	
-	$(".default-text").focus(function(srcc)
+	$(".default-text").focus(function(src)
 	{
 	    if ($(this).val() == $(this)[0].title)
 	    {
 	        $(this).removeClass("default-text-active");
 	        $(this).val("");
+	        
 	    }
 	});
     
@@ -48,7 +48,6 @@ $(document).ready(function(){
 	});
 	
     
-	
 	
 	/* All Group related AJAX calls */	
 	list_groups = 
@@ -276,7 +275,6 @@ $(document).ready(function(){
 								res.members[i].admin,
 								res.members[i].moderator,
 								res.members[i].member,
-								res.members[i].guest
 							  ]);
 		}
 		
@@ -544,10 +542,11 @@ $(document).ready(function(){
 	
 	if (window.location.pathname.indexOf('/groups') != -1) {
 		list_groups();
-	} else if (window.location.pathname.indexOf('/login') == -1) {
+	} else if (window.location.pathname.indexOf('/posts') != -1) {
 		init_posts_page();	
 		setInterval(refresh_posts, 10000);
 	}
+	
 	$(".default-text").blur();
 	tinyMCE.init({
 		mode : "textareas",

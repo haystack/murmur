@@ -1,13 +1,11 @@
 {% extends "base.html" %}
-{% block headlink-right %}
- <a href="#" data-dropdown="#dropdown-nav">{{ user }} ▾ </a>
-{% endblock %}
+
 {% block content %}
 <div id="left-column-area-wrapper">
 <div id="left-column-area">
-	<div class="container" style="height:30px;">
-    		<input type="text" name="group-name" id="text-create-group" style="width:55%; max-height:25px;" class="default-text" title="new-group-name"/>
-		<button type="button" id="btn-create-group" style="width:30%; left:60%; margin:0px;">Create</button>
+	<div class="post-container">
+    	<input type="text" name="group-name" id="text-create-group" class="default-text" title="new-group-name"/>
+		<button type="button" id="btn-create-group">Create</button>
 	</div>
 	<ul id="groups-table" class="table">
 	</ul>
@@ -36,7 +34,6 @@
 				<th>Admin</th>
 				<th>Moderator</th>
 				<th>Member</th>
-				<th>Guest</th>
 			</tr>
 		</thead>
 	</table>	
