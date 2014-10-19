@@ -10,10 +10,10 @@ MailX Main Controller
 @date: Oct 20, 2012
 '''
 
-def list_groups():
+def list_groups(user):
 	res = {'status':False}
 	try:
-		groups = Group.objects.all()
+		groups = Group.objects.filter(members__in=[user])
 		res['status'] = True
 		res['groups'] = []
 		for g in groups:
@@ -25,16 +25,20 @@ def list_groups():
 	
 
 
-def create_group(group_name, requester_email):
+def create_group(group_name, public, requester):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
 		res['code'] = msg_code['DUPLICATE_ERROR']
 	except Group.DoesNotExist:
-		group = Group(name=group_name, active=True)
+		group = Group(name=group_name, active=True, public=public)
 		group.save()
-		user = User(email = requester_email, group = group, admin = True, active = True)
-		user.save()
+		
+		group.admins.add(requester)
+		group.moderators.add(requester)
+		group.members.add(requester)
+		group.save()
+		
 		res['status'] = True
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
@@ -132,17 +136,38 @@ def unsubscribe_group(group_name, requester_email):
 
 
 
-def group_info(group_name):
+def group_info(group_name, user):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
-		members = User.objects.filter(group=group).values()
+		
+		members = group.members.all()
 		res['status'] = True
 		res['group_name'] = group_name
 		res['active'] = group.active
 		res['members'] = []
 		for member in members:
-			res['members'].append({'email': member['email'], 'group_name':group_name, 'admin': member['admin'], 'member':member['member'], 'moderator':member['moderator'], 'guest':member['guest'], 'active':member['active']})
+
+			admin = False
+			mod = False
+			if group.admins.filter(email=member.email).count() > 0:
+				admin = True
+			elif group.moderators.filter(email=member.email).count() > 0:
+				mod = True
+			
+			if user.email == member.email:
+				res['admin'] = admin
+				res['moderator'] = mod
+				res['subscribed'] = member.is_active
+			
+			member_info = {'email': member.email, 
+						   'group_name': group_name, 
+						   'admin': admin, 
+						   'member': True, 
+						   'moderator': mod, 
+						   'active': member.is_active}
+			
+			res['members'].append(member_info)
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']	
 	except:

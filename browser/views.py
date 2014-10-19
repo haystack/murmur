@@ -10,10 +10,10 @@ from smtp_handler.utils import *
 
 from django.core.context_processors import csrf
 import json, logging
-from django.contrib.auth.models import User
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 
 from annoying.decorators import render_to
+from schema.models import UserProfile, Group
 
 '''
 @author: Anant Bhardwaj
@@ -33,19 +33,31 @@ def index(request):
 	if not request.user.is_authenticated():
 		return dict()
 	else:
-		return HttpResponseRedirect('posts')
+		return HttpResponseRedirect('/posts')
 
 @render_to("posts.html")
 @login_required
 def posts(request):
-	return {'user': request.user}
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	
+	groups = Group.objects.filter(members__in=[user])
+	
+	active_group = request.POST.get('group_name')
+	if active_group:
+		request.session['active_group'] = active_group
+	elif request.session.get('active_group'):
+		active_group = request.session.get('active_group')
+	else:
+		active_group = groups[0].group_name
+		
+	return {'user': user, "active_group": active_group, "groups": groups}
 
 @render_to("settings.html")
 @login_required
 def settings(request):
 	return {'user': request.user}
 	
-@render_to("posts.html")
+@render_to("groups.html")
 @login_required
 def groups(request):
 	return {'user': request.user}
@@ -53,7 +65,8 @@ def groups(request):
 @login_required
 def list_groups(request):
 	try:
-		res = engine.main.list_groups()
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.list_groups(user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -63,9 +76,14 @@ def list_groups(request):
 @login_required
 def create_group(request):
 	try:
-		res = engine.main.create_group(request.POST['group_name'], request.POST['requester_email'])
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		
+		# for now, all groups are public
+		public = True
+		res = engine.main.create_group(request.POST['group_name'], public, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
+		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
@@ -74,7 +92,7 @@ def create_group(request):
 @login_required
 def activate_group(request):
 	try:
-		res = engine.main.activate_group(request.POST['group_name'], request.POST['requester_email'])
+		res = engine.main.activate_group(request.POST['group_name'], request.user.email)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -85,7 +103,7 @@ def activate_group(request):
 @login_required
 def deactivate_group(request):
 	try:
-		res = engine.main.deactivate_group(request.POST['group_name'], request.POST['requester_email'])
+		res = engine.main.deactivate_group(request.POST['group_name'], request.user.email)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -96,7 +114,9 @@ def deactivate_group(request):
 @login_required
 def subscribe_group(request):
 	try:
-		res = engine.main.subscribe_group(request.POST['group_name'], request.POST['requester_email'])
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		
+		res = engine.main.subscribe_group(request.POST['group_name'], user.email)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -107,7 +127,7 @@ def subscribe_group(request):
 @login_required
 def unsubscribe_group(request):
 	try:
-		res = engine.main.unsubscribe_group(request.POST['group_name'], request.POST['requester_email'])
+		res = engine.main.unsubscribe_group(request.POST['group_name'], request.user.email)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -117,13 +137,8 @@ def unsubscribe_group(request):
 @login_required
 def group_info(request):
 	try:
-		res = engine.main.group_info(request.POST['group_name'])
-		member = next((m for m in res['members'] if m["email"] == res['user'].email), None)
-		res['admin'] = False
-		res['subscribed'] = False
-		if(member):
-			res['admin'] = member['admin']
-			res['subscribed'] = member['active']
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.group_info(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -163,7 +178,7 @@ def insert_post(request):
 		group_name = request.POST['group_name'].encode('ascii', 'ignore')
 		subject = '[ %s ] -- %s' %(group_name, request.POST['subject'].encode('ascii', 'ignore'))
 		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
-		poster_email = request.POST['poster_email'].encode('ascii', 'ignore')
+		poster_email = request.user.email.encode('ascii', 'ignore')
 		res = engine.main.insert_post(group_name, subject,  msg_text, poster_email)
 		msg_id = res['msg_id']
 		thread_id = res['thread_id']
@@ -194,7 +209,7 @@ def insert_reply(request):
 		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
 		thread_id = request.POST['thread_id'].encode('ascii', 'ignore')
-		poster_email = request.POST['poster_email'].encode('ascii', 'ignore')
+		poster_email = request.user.email.encode('ascii', 'ignore')
 		res = engine.main.insert_reply(group_name, subject, msg_text, poster_email, msg_id, thread_id)
 		if(res['status']):
 			new_msg_id = res['msg_id']
@@ -222,7 +237,7 @@ def insert_reply(request):
 @login_required
 def follow_thread(request):
 	try:
-		res = engine.main.follow_thread(request.POST['thread_id'], request.POST['requester_email'])
+		res = engine.main.follow_thread(request.POST['thread_id'], request.user.email)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -232,7 +247,7 @@ def follow_thread(request):
 @login_required
 def unfollow_thread(request):
 	try:
-		res = engine.main.unfollow_thread(request.POST['thread_id'], request.POST['requester_email'])
+		res = engine.main.unfollow_thread(request.POST['thread_id'], request.user.email)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

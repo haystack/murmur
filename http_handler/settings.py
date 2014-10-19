@@ -123,6 +123,8 @@ EMAIL_HOST_USER = 'amy.xian.zhang@gmail.com'
 EMAIL_HOST_PASSWORD = '2ANbmhCZ7f!'
 EMAIL_PORT = 587
 
+AUTH_USER_MODEL = 'schema.UserProfile'
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
