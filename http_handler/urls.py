@@ -7,11 +7,12 @@ from django.contrib.auth import views as auth_views
 urlpatterns = patterns('',
      url(r'^$', 'browser.views.index'),
      url(r'^settings', 'browser.views.settings'),
-	 url(r'^posts', 'browser.views.posts'),
+	 url(r'^posts$', 'browser.views.posts'),
 	 url(r'^groups', 'browser.views.groups'),
 	 
 	 url(r'^list_groups', 'browser.views.list_groups'),
 	 url(r'^create_group', 'browser.views.create_group'),
+     
 	 url(r'^activate_group', 'browser.views.activate_group'),
 	 url(r'^deactivate_group', 'browser.views.deactivate_group'),
 	 url(r'^subscribe_group', 'browser.views.subscribe_group'),

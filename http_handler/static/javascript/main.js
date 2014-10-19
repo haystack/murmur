@@ -291,8 +291,7 @@ $(document).ready(function(){
 	}
 	
 	function populate_group_info(res, curr_row){
-		var info = "<h3>Group Info</h3><hr />";
-		info += '<span class="strong">Group Name: </span><span class="strong-gray">' + res.group_name + '</span><br />';
+		var info = "<h3>Group: " + res.group_name + "</h3><hr />";
 		info += '<span class="strong">Active: </span><span class="strong-gray">' + res.active + '</span><br /> <br />';
 		$("#group-info").html(info);
 		$('#group-display-area').show();
@@ -469,10 +468,12 @@ $(document).ready(function(){
 	}
 	
 	function new_post(res){
-                var content = '<div class="main-area-content">';
-                content += '<div class="comment">';
-		content += '<span class="strong">To : </span>'
-		content += '<select id="new-post-to"></select> <br />';
+		
+		var active_group = $("#active_group").text();
+        var content = '<div class="main-area-content">';
+        content += '<div class="comment">';
+		content += '<span class="strong">To : </span>';
+		content += '<span id="new-post-to" value="' + active_group + '">' + active_group + '</span> <br />';
 		content += '<span class="strong">Subject : </span> <br />';
                 content += '<input id="new-post-subject" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
 		content += '<textarea id="new-post-text" style="height:150px;"></textarea>';
@@ -481,13 +482,7 @@ $(document).ready(function(){
 
                 content += '</div>'
                 $("#main-area").html(content);
-		for(var i = 0; i< res.groups.length; i++){
-			$("#new-post-to").append($("<option></option>")
-         		   .attr("value", res.groups[i].name)
-         		   .text(res.groups[i].name)); 
-					
-		
-		}
+
 		params = {'requester_email':res.user};
 		var ins_post = bind(insert_post, params);
 		$("#btn-post").unbind("click");

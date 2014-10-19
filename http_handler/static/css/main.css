@@ -270,3 +270,7 @@ table.dataTable tbody tr:hover td {
 	border-bottom: #ccc solid 1px;
 	color: #999;
 	}
+	
+#groups-table .row-item {
+	cursor: pointer;
+}

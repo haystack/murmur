@@ -40,15 +40,17 @@ def index(request):
 def posts(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	
-	groups = Group.objects.filter(members__in=[user])
+	groups = Group.objects.filter(members__in=[user]).values("name")
 	
-	active_group = request.POST.get('group_name')
+	active_group = request.GET.get('group_name')
 	if active_group:
 		request.session['active_group'] = active_group
+		active_group = {'name': active_group}
 	elif request.session.get('active_group'):
 		active_group = request.session.get('active_group')
+		active_group = {'name': active_group}
 	else:
-		active_group = groups[0].group_name
+		active_group = groups[0]
 		
 	return {'user': user, "active_group": active_group, "groups": groups}
 
@@ -60,7 +62,7 @@ def settings(request):
 @render_to("groups.html")
 @login_required
 def groups(request):
-	return {'user': request.user}
+	return {'user': request.user, 'group_page': True}
 	
 @login_required
 def list_groups(request):
