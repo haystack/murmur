@@ -12,7 +12,8 @@ from http_handler import settings
 
 class Post(models.Model):
 	id = models.AutoField(primary_key=True)
-	author = models.OneToOneField(settings.AUTH_USER_MODEL)
+	author = models.ForeignKey(settings.AUTH_USER_MODEL)
+	msg_id = models.CharField(max_length=50, unique=True)
 	subject = models.TextField()
 	post = models.TextField()
 	group = models.ForeignKey('Group')
@@ -136,7 +137,7 @@ class UserProfile(AbstractBaseUser):
 class Following(models.Model):
 	id = models.AutoField(primary_key=True)
 	thread = models.ForeignKey('Thread')
-	email = models.CharField(max_length=50)
+	user = models.OneToOneField(settings.AUTH_USER_MODEL)
 	timestamp = models.DateTimeField(auto_now=True)
 	def __unicode__(self):
 		return self.name

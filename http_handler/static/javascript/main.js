@@ -203,7 +203,7 @@ $(document).ready(function(){
 		function(params){
 			params.msg_text = $("#new-post-text").val();
                         params.subject = $("#new-post-subject").val();
-                        params.group_name = $("#new-post-to").val();
+                        params.group_name = $("#new-post-to").text();
                         params.poster_email = params.requester_email;
 			$.post('insert_post', params, 
 				function(res){
@@ -293,6 +293,7 @@ $(document).ready(function(){
 	function populate_group_info(res, curr_row){
 		var info = "<h3>Group: " + res.group_name + "</h3><hr />";
 		info += '<span class="strong">Active: </span><span class="strong-gray">' + res.active + '</span><br /> <br />';
+		info += '<a href="/posts?group_name=' + res.group_name + '">View Posts</a> <br /> <br />';
 		$("#group-info").html(info);
 		$('#group-display-area').show();
 		var params = {'requester_email': res.user, 
@@ -473,7 +474,7 @@ $(document).ready(function(){
         var content = '<div class="main-area-content">';
         content += '<div class="comment">';
 		content += '<span class="strong">To : </span>';
-		content += '<span id="new-post-to" value="' + active_group + '">' + active_group + '</span> <br />';
+		content += '<span id="new-post-to">' + active_group + '</span> <br />';
 		content += '<span class="strong">Subject : </span> <br />';
                 content += '<input id="new-post-subject" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
 		content += '<textarea id="new-post-text" style="height:150px;"></textarea>';

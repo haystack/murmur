@@ -152,7 +152,7 @@ def group_info(group_name, user):
 			mod = False
 			if group.admins.filter(email=member.email).count() > 0:
 				admin = True
-			elif group.moderators.filter(email=member.email).count() > 0:
+			if group.moderators.filter(email=member.email).count() > 0:
 				mod = True
 			
 			if user.email == member.email:
@@ -190,15 +190,15 @@ def list_posts(group_name=None, timestamp_str = None):
 		res['threads'] = []
 		for t in threads:
 			following = Following.objects.filter(thread = t)
-			f_list = [f.email for f in following]
+			f_list = [f.user.email for f in following]
 			posts = Post.objects.filter(thread = t)		
 			replies = []
 			post = None
 			for p in posts:
 				if(not p.reply_to_id):
-					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(p.timestamp)}
+					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.author.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(p.timestamp)}
 				else:
-					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(p.timestamp)})
+					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.author.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(p.timestamp)})
 			res['threads'].append({'thread_id':t.id, 'post':post, 'replies': replies, 'f_list':f_list, 'timestamp':format_date_time(t.timestamp)})
 			res['status'] = True
 	except:
@@ -229,24 +229,27 @@ def load_post(group_name, thread_id, msg_id):
 	return res
 
 
-def insert_post(group_name, subject, message_text, poster_email):
+def insert_post(group_name, subject, message_text, user):
 	res = {'status':False}
 	thread = None
 	try:
+		
 		group = Group.objects.get(name=group_name)
-		group_members = User.objects.filter(group = group, active = True)
+		group_members = group.members.all()
+		
 		recipients = [m.email for m in group_members]
 		thread = Thread()
 		thread.save()
-		msg_id = base64.b64encode(poster_email + str(time.time())).lower()
-		p = Post(msg_id = msg_id, email = poster_email, subject = subject, post=str(message_text), group = group, thread=thread)
+		msg_id = base64.b64encode(user.email + str(time.time())).lower()
+		p = Post(msg_id=msg_id, author=user, subject=subject, post=str(message_text), group=group, thread=thread)
 		p.save()
-		f = Following(email = poster_email, thread = thread)
+		f = Following(user=user, thread=thread)
 		f.save()
 		res['status'] = True
 		res['msg_id'] = msg_id
 		res['thread_id'] = thread.id
 		res['recipients'] = recipients
+
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except:
@@ -258,19 +261,19 @@ def insert_post(group_name, subject, message_text, poster_email):
 	
 
 
-def insert_reply(group_name, subject, message_text, poster_email, msg_id, thread_id):
+def insert_reply(group_name, subject, message_text, user, msg_id, thread_id):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
 		post = Post.objects.get(msg_id=msg_id)
 		thread = Thread.objects.get(id=thread_id)
-		new_msg_id = base64.b64encode(poster_email + str(time.time())).lower()
-		r = Post(msg_id=new_msg_id, email = poster_email, subject=subject, post = str(message_text), reply_to = post, group = group, thread=thread)
+		new_msg_id = base64.b64encode(user.email + str(time.time())).lower()
+		r = Post(msg_id=new_msg_id, author=user, subject=subject, post = str(message_text), reply_to=post, group=group, thread=thread)
 		r.save()
 		thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
 		thread.save()
-		following = Following.objects.filter(thread = thread)
-		recipients = [f.email for f in following]
+		following = Following.objects.filter(thread=thread)
+		recipients = [f.user.email for f in following]
 		res['status'] = True
 		res['msg_id'] = new_msg_id
 		res['thread_id'] = thread.id
@@ -288,15 +291,15 @@ def insert_reply(group_name, subject, message_text, poster_email, msg_id, thread
 
 
 
-def follow_thread(thread_id, requester_email):
+def follow_thread(thread_id, user):
 	res = {'status':False}
 	t = None
 	try:
 		t = Thread.objects.get(id=thread_id)
-		f = Following.objects.get(thread = t, email=requester_email)
+		f = Following.objects.get(thread=t, user=user)
 		res['status'] = True
 	except Following.DoesNotExist:
-		f = Following(thread = t, email = requester_email)
+		f = Following(thread=t, user=user)
 		f.save()
 		res['status'] = True
 	except Thread.DoesNotExist:
@@ -310,11 +313,11 @@ def follow_thread(thread_id, requester_email):
 
 
 
-def unfollow_thread(thread_id, requester_email):
+def unfollow_thread(thread_id, user):
 	res = {'status':False}
 	try:
 		t = Thread.objects.get(id=thread_id)
-		f = Following.objects.get(thread = t, email=requester_email)
+		f = Following.objects.get(thread=t, user=user)
 		f.delete()
 		res['status'] = True
 	except Following.DoesNotExist:
