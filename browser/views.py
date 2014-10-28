@@ -56,7 +56,9 @@ def settings(request):
 @render_to("groups.html")
 @login_required
 def groups(request):
-	return {'user': request.user, 'group_page': True}
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(members__in=[user]).values("name")
+	return {'user': request.user, 'groups': groups, 'group_page': True}
 	
 @login_required
 def list_groups(request):
