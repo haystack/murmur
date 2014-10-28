@@ -1,22 +1,67 @@
 # Django settings for mailx project.
 
-DEBUG = True
+import os
+import django
+
+
+DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+
+_ENV_FILE_PATH = '/opt/mailx/env'
+_DEBUG_FILE_PATH = '/opt/mailx/debug'
+
+def _get_env():
+    f = open(_ENV_FILE_PATH)
+    env = f.read()
+
+    if env[-1] == '\n':
+        env = env[:-1]
+    
+    f.close()
+    return env
+ENV = _get_env() 
+
+def _get_debug():
+    f = open(_DEBUG_FILE_PATH)
+    debug = f.read()
+
+    if debug[-1] == '\n':
+        debug = debug[:-1]
+    
+    f.close()
+    if debug == 'true':
+        return True
+    else:
+        return False
+    
+DEBUG = _get_debug()
+
+try:
+    execfile(SITE_ROOT + '/../private.py')
+except IOError:
+    print "Unable to open configuration file!"
+
+if ENV == 'prod':
+    BASE_URL = 'http://mailx.csail.mit.edu'
+    MYSQL = MYSQL_PROD
+else:
+    BASE_URL = 'http://localhost:8000'
+    MYSQL = MYSQL_LOCAL
+
 TEMPLATE_DEBUG = DEBUG
 
-ADMINS = (
-    ('Anant Bhardwaj', 'anantb@csail.mit.edu'),
-)
-
-MANAGERS = ADMINS
+LOGIN_REDIRECT_URL = "/"
+DEFAULT_EMAIL = "amy.xian.zhang@gmail.com"
+DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'mailx',                      # Or path to database file if using sqlite3.
-        'USER': 'postgres',                      # Not used with sqlite3.
-        'PASSWORD': 'koobkoob',                  # Not used with sqlite3.
-        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'NAME': MYSQL["NAME"],# Or path to database file if using sqlite3.
+        'USER': MYSQL["USER"], # Not used with sqlite3.
+        'PASSWORD': MYSQL["PASSWORD"],# Not used with sqlite3.
+        'HOST': MYSQL["HOST"], # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '', # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -116,12 +161,6 @@ TEMPLATE_DIRS = (
 ACCOUNT_ACTIVATION_DAYS = 7
 
 LOGIN_REDIRECT_URL = "/"
-
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'amy.xian.zhang@gmail.com'
-EMAIL_HOST_PASSWORD = '2ANbmhCZ7f!'
-EMAIL_PORT = 587
 
 AUTH_USER_MODEL = 'schema.UserProfile'
 
