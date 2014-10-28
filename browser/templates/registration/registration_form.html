@@ -4,25 +4,14 @@
 {% block content %}
 
 <div class="accounts">
-        <form method='post' action='.'>
+        <form method='post'>
         	{% csrf_token %}
         	
 		<h3>Register Account</h3>
 		<hr />
         
-        <p class="required">
-        	<label for="id_email">E-mail:</label> 
-        	<input id="id_email" name="email" type="email">
-        </p>
-        <p class="required">
-        	<label for="id_password1">Password:</label> 
-        	<input id="id_password1" name="password1" type="password">
-        </p>
-        <p class="required">
-        	<label for="id_password2">Password (again):</label> 
-        	<input id="id_password2" name="password2" type="password">
-        </p>
-        
+        {{ form.as_p }}
+
         <input type="submit" class="btn btn-primary" value="Register!" />
 
         </form>
