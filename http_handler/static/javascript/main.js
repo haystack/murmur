@@ -529,7 +529,8 @@ $(document).ready(function(){
 
                         }
                 );
-		list_posts({'load':false});
+        var active_group = $("#active_group").text();
+		list_posts({'load':false, 'active_group': active_group});
 	}
 	
 

@@ -143,7 +143,8 @@ def group_info(request):
 @login_required
 def list_posts(request):
 	try:
-		res = engine.main.list_posts()
+		group_name = request.POST.get('active_group')
+		res = engine.main.list_posts(group_name=group_name)
 		res['user'] = request.user.email
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except  Exception, e:
@@ -154,7 +155,8 @@ def list_posts(request):
 @login_required
 def refresh_posts(request):
 	try:
-		res = engine.main.list_posts(timestamp_str = request.POST['timestamp'])
+		group_name = request.POST.get('active_group')
+		res = engine.main.list_posts(group_name=group_name, timestamp_str = request.POST['timestamp'])
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except  Exception, e:
 		logging.debug(e)

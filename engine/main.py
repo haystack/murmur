@@ -186,7 +186,12 @@ def list_posts(group_name=None, timestamp_str = None):
 		if(timestamp_str):
 			t = datetime.datetime.strptime(timestamp_str, '%Y/%m/%d %H:%M:%S')
 		t = t.replace(tzinfo=utc, second = t.second + 1)
-		threads = Thread.objects.filter(timestamp__gt = t)
+		
+		if (group_name != None):
+			g = Group.objects.filter(name=group_name)
+			threads = Thread.objects.filter(timestamp__gt = t, group = g)
+		else:
+			threads = Thread.objects.filter(timestamp__gt = t)
 		res['threads'] = []
 		for t in threads:
 			following = Following.objects.filter(thread = t)
@@ -239,6 +244,7 @@ def insert_post(group_name, subject, message_text, user):
 		
 		recipients = [m.email for m in group_members]
 		thread = Thread()
+		thread.group = group
 		thread.save()
 		msg_id = base64.b64encode(user.email + str(time.time())).lower()
 		p = Post(msg_id=msg_id, author=user, subject=subject, post=str(message_text), group=group, thread=thread)
