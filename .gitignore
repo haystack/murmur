@@ -1,6 +1,9 @@
 # Ignore all compiled python files.
 *.pyc
 
+# Ignore private file
+private.py
+
 # Ignore all emacs backup files
 *.*~
 
