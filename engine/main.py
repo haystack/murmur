@@ -2,6 +2,8 @@ import sys, logging, time, base64, email, datetime
 from schema.models import *
 from msg_codes import *
 from django.utils.timezone import utc
+from django.db.models import Q
+
 
 '''
 MailX Main Controller
@@ -19,7 +21,7 @@ def list_groups(user):
 		for g in groups:
 			res['groups'].append({'name':g.name, 'member': True, 'active':g.active})
 			
-		pub_groups = Group.objects.filter(public=True)
+		pub_groups = Group.objects.filter(Q(public=True), ~Q(members__in=[user]))
 		for g in pub_groups:
 			res['groups'].append({'name':g.name,  'member': False, 'active':g.active})
 			
