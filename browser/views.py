@@ -90,7 +90,8 @@ def create_group(request):
 @login_required
 def activate_group(request):
 	try:
-		res = engine.main.activate_group(request.POST['group_name'], request.user.email)
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.activate_group(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -101,7 +102,8 @@ def activate_group(request):
 @login_required
 def deactivate_group(request):
 	try:
-		res = engine.main.deactivate_group(request.POST['group_name'], request.user.email)
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.deactivate_group(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -113,8 +115,7 @@ def deactivate_group(request):
 def subscribe_group(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		
-		res = engine.main.subscribe_group(request.POST['group_name'], user.email)
+		res = engine.main.subscribe_group(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -125,7 +126,8 @@ def subscribe_group(request):
 @login_required
 def unsubscribe_group(request):
 	try:
-		res = engine.main.unsubscribe_group(request.POST['group_name'], request.user.email)
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.unsubscribe_group(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

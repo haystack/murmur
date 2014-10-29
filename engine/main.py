@@ -55,83 +55,75 @@ def create_group(group_name, public, requester):
 
 
 
-def activate_group(group_name, requester_email):
+def activate_group(group_name, user):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
-		user = User.objects.get(email = requester_email, group = group, admin = True)
-		group.active = True
-		group.save()
-		res['status'] = True
-	except User.DoesNotExist:
-		res['code'] = msg_code['PRIVILEGE_ERROR']
-	except Group.DoesNotExist:
-		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
-	except:
-		res['code'] = msg_code['UNKNOWN_ERROR']
-	logging.debug(res)
-	return res
-
-
-
-
-
-def deactivate_group(group_name, requester_email):
-	res = {'status':False}
-	try:
-		group = Group.objects.get(name=group_name)
-		user = User.objects.get(email = requester_email, group = group, admin = True)
-		group.active = False
-		group.save()
-		res['status'] = True
-	except User.DoesNotExist:
-		res['code'] = msg_code['PRIVILEGE_ERROR']
-	except Group.DoesNotExist:
-		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
-	except:
-		res['code'] = msg_code['UNKNOWN_ERROR']
-	logging.debug(res)
-	return res
-
-
-
-
-
-def subscribe_group(group_name, requester_email):
-	res = {'status':False}
-	group = None
-	try:
-		group = Group.objects.get(name=group_name, active = True)
-		user = User.objects.get(email = requester_email, group = group)
-		user.active=True
-		user.save()
-		res['status'] = True
-	except User.DoesNotExist:
-		user = User(email = requester_email, group = group, active = True)
-		user.save()
-		res['status'] = True
-	except Group.DoesNotExist:
-		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
-	except:
-		res['code'] = msg_code['UNKNOWN_ERROR']
-	logging.debug(res)
-	return res
-
-
-
-
-def unsubscribe_group(group_name, requester_email):
-	res = {'status':False}
-	try:
-		group = Group.objects.get(name=group_name, active = True)
-		user = User.objects.get(email = requester_email, group = group)
-		if(user.admin):
-			res['code'] = msg_code['OWNER_UNSUBSCRIBE_ERROR']
+		if group.admins.filter(email=user.email).count() > 0:
+			group.active = True
+			group.save()
+			res['status'] = True
 		else:
-			user.active=False
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
+
+
+
+
+def deactivate_group(group_name, user):
+	res = {'status':False}
+	try:
+		group = Group.objects.get(name=group_name)
+		if group.admins.filter(email=user.email).count() > 0:
+			group.active = False
+			group.save()
+			res['status'] = True
+		else:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
+
+
+
+
+def subscribe_group(group_name, user):
+	res = {'status':False}
+
+	try:
+		group = Group.objects.get(name=group_name)
+		if group.members.filter(email=user.email).count() > 0:
+			user.active=True
 			user.save()
 			res['status'] = True
-	except User.DoesNotExist:
+		else:
+			group.members.add(user)
+			res['status'] = True
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
+
+
+
+def unsubscribe_group(group_name, user):
+	res = {'status':False}
+	try:
+		group = Group.objects.get(name=group_name)
+		group.members.remove(user)
 		res['status'] = True
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
