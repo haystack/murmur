@@ -51,7 +51,7 @@ else:
 TEMPLATE_DEBUG = DEBUG
 
 LOGIN_REDIRECT_URL = "/"
-DEFAULT_EMAIL = "amy.xian.zhang@gmail.com"
+DEFAULT_EMAIL = "haystack.mit@gmail.com"
 DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
 DATABASES = {

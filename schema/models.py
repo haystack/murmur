@@ -96,6 +96,7 @@ class UserProfile(AbstractBaseUser):
 	last_name = models.CharField('last name', max_length=30, blank=True)
 	is_active = models.BooleanField(default=True)
 	is_admin = models.BooleanField(default=False)
+	date_joined = models.DateTimeField(auto_now=True)
 
 	objects = MyUserManager()
 

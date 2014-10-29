@@ -17,7 +17,12 @@ def list_groups(user):
 		res['status'] = True
 		res['groups'] = []
 		for g in groups:
-			res['groups'].append({'name':g.name, 'active':g.active})
+			res['groups'].append({'name':g.name, 'member': True, 'active':g.active})
+			
+		pub_groups = Group.objects.filter(public=True)
+		for g in pub_groups:
+			res['groups'].append({'name':g.name,  'member': False, 'active':g.active})
+			
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
