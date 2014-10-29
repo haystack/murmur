@@ -22,7 +22,7 @@ class Post(models.Model):
 	timestamp = models.DateTimeField(auto_now=True)
 
 	def __unicode__(self):
-		return self.name
+		return '%s %s' % (self.author.email, self.subject)
 	
 	class Meta:
 		db_table = "mailx_posts"
@@ -35,7 +35,7 @@ class Thread(models.Model):
 	group = models.ForeignKey('Group')
 
 	def __unicode__(self):
-		return self.name
+		return '%s in %s' % (self.id, self.group)
 	
 	class Meta:
 		db_table = "mailx_threads"
@@ -102,9 +102,6 @@ class UserProfile(AbstractBaseUser):
 
 	USERNAME_FIELD = 'email'
 
-	def get_absolute_url(self):
-		return "/users/%s/" % urlquote(self.username)
-
 	def get_full_name(self):
 		"""
         Returns the first_name plus the last_name, with a space in between.
@@ -139,10 +136,11 @@ class UserProfile(AbstractBaseUser):
 class Following(models.Model):
 	id = models.AutoField(primary_key=True)
 	thread = models.ForeignKey('Thread')
-	user = models.OneToOneField(settings.AUTH_USER_MODEL)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	timestamp = models.DateTimeField(auto_now=True)
+	
 	def __unicode__(self):
-		return self.name
+		return '%s follows Thread: %s' % (self.user.email, self.thread.id)
 
 	class Meta:
 		db_table = "mailx_following"

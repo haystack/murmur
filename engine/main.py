@@ -1,4 +1,4 @@
-import sys, logging, time, base64, email, datetime
+import sys, logging, base64, email, datetime
 from schema.models import *
 from msg_codes import *
 from django.utils.timezone import utc
@@ -245,7 +245,8 @@ def insert_post(group_name, subject, message_text, user):
 		thread = Thread()
 		thread.group = group
 		thread.save()
-		msg_id = base64.b64encode(user.email + str(time.time())).lower()
+		msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower()
+		msg_id = msg_id[:min(len(msg_id), 50)]
 		p = Post(msg_id=msg_id, author=user, subject=subject, post=str(message_text), group=group, thread=thread)
 		p.save()
 		f = Following(user=user, thread=thread)
@@ -272,7 +273,8 @@ def insert_reply(group_name, subject, message_text, user, msg_id, thread_id):
 		group = Group.objects.get(name=group_name)
 		post = Post.objects.get(msg_id=msg_id)
 		thread = Thread.objects.get(id=thread_id)
-		new_msg_id = base64.b64encode(user.email + str(time.time())).lower()
+		new_msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower()
+		new_msg_id = new_msg_id[:min(len(new_msg_id), 50)]
 		r = Post(msg_id=new_msg_id, author=user, subject=subject, post = str(message_text), reply_to=post, group=group, thread=thread)
 		r.save()
 		thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
