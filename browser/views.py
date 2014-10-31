@@ -187,14 +187,13 @@ def insert_post(request):
 
 		res = engine.main.insert_post(group_name, subject,  msg_text, user)
 		msg_id = res['msg_id']
-		thread_id = res['thread_id']
 		to_send =  res['recipients']
 		
 		post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 		mail = MailResponse(From = user.email, To = post_addr, Subject  = subject)
 		mail['message-id'] = msg_id
 		
-		ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)
+		ps_blurb = html_ps(group_name, HOST)
 		mail.Html = msg_text + ps_blurb	
 		logging.debug('TO LIST: ' + str(to_send))
 		if(len(to_send)>0):
@@ -216,21 +215,18 @@ def insert_reply(request):
 		subject = request.POST['subject'].encode('ascii', 'ignore')
 		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
-		thread_id = request.POST['thread_id'].encode('ascii', 'ignore')
 		
-		res = engine.main.insert_reply(group_name, subject, msg_text, user, msg_id, thread_id)
+		res = engine.main.insert_reply(group_name, subject, msg_text, user)
 		if(res['status']):
-			new_msg_id = res['msg_id']
-			thread_id = res['thread_id']
+			
 			to_send =  res['recipients']
 			post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 			mail = MailResponse(From = user.email, To = post_addr, Subject  = '%s' %(subject))
 			
-			
 			mail['References'] = msg_id		
-			mail['message-id'] = new_msg_id
+			mail['message-id'] = res['msg_id']
 				
-			ps_blurb = html_ps(thread_id, msg_id, group_name, HOST)
+			ps_blurb = html_ps(group_name, HOST)
 			mail.Html = msg_text + ps_blurb		
 			logging.debug('TO LIST: ' + str(to_send))
 			if(len(to_send)>0):

@@ -241,19 +241,23 @@ def insert_post(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		group_members = group.members.all()
 		
-		recipients = [m.email for m in group_members]
+		recipients = [m.email for m in group_members if m.email != user.email]
+		
 		thread = Thread()
+		thread.subject = subject
 		thread.group = group
 		thread.save()
-		msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower()
-		msg_id = msg_id[:min(len(msg_id), 50)]
+		
+		msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
+		
 		p = Post(msg_id=msg_id, author=user, subject=subject, post=str(message_text), group=group, thread=thread)
 		p.save()
+		
 		f = Following(user=user, thread=thread)
 		f.save()
+		
 		res['status'] = True
 		res['msg_id'] = msg_id
-		res['thread_id'] = thread.id
 		res['recipients'] = recipients
 
 	except Group.DoesNotExist:
@@ -267,24 +271,30 @@ def insert_post(group_name, subject, message_text, user):
 	
 
 
-def insert_reply(group_name, subject, message_text, user, msg_id, thread_id):
+def insert_reply(group_name, subject, message_text, user):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
-		post = Post.objects.get(msg_id=msg_id)
-		thread = Thread.objects.get(id=thread_id)
-		new_msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower()
-		new_msg_id = new_msg_id[:min(len(new_msg_id), 50)]
-		r = Post(msg_id=new_msg_id, author=user, subject=subject, post = str(message_text), reply_to=post, group=group, thread=thread)
+		
+		orig_post_subj = subject[4:]
+		
+		post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')[0]
+		thread = Thread.objects.get(subject=orig_post_subj)
+		
+		msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
+		
+		r = Post(msg_id=msg_id, author=user, subject=subject, post = str(message_text), reply_to=post, group=group, thread=thread)
 		r.save()
+		
 		thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
 		thread.save()
+		
 		following = Following.objects.filter(thread=thread)
-		recipients = [f.user.email for f in following]
+		recipients = [f.user.email for f in following if f.user.email != user.email]
 		res['status'] = True
-		res['msg_id'] = new_msg_id
-		res['thread_id'] = thread.id
 		res['recipients'] = recipients
+		res['msg_id'] = msg_id
+		
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except Post.DoesNotExist:

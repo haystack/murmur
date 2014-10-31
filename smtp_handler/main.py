@@ -158,18 +158,24 @@ def handle_post(message, address=None, host=None):
 	reserved = filter(lambda x: address.endswith(x), RESERVED)
 	if(reserved):
 		return
+	
 	group_name = address.lower()
-	subject = '[ %s ] -- %s' %(group_name, message['Subject'].encode('ascii', 'ignore'))
+	subject = '[ %s ] %s' %(group_name, message['Subject'].encode('ascii', 'ignore'))
 	msg_text = get_body(str(message))
-	res = insert_post(group_name, subject, msg_text['body'], addr)
+	
+	if message['Subject'][0:4] == "Re: ":
+		res = insert_reply(group_name, message['Subject'], msg_text['body'], addr)
+	else:
+		res = insert_post(group_name, subject, msg_text['body'], addr)
+		
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
 		relay.deliver(mail)
 		return
 	msg_id = res['msg_id']
-	thread_id = res['thread_id']
+	
 	to_send =  res['recipients']
-	post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + host)
+	post_addr = '%s <%s>' %(group_name, group_name + '@' + host)
 	mail = MailResponse(From = message['From'], To = post_addr, Subject  = subject)
 	
 		
@@ -186,43 +192,6 @@ def handle_post(message, address=None, host=None):
 	logging.debug('TO LIST: ' + str(to_send))
 	if(len(to_send)>0):
 		relay.deliver(mail, To = to_send)
-
-
-
-
-
-
-@route("(group_name)\\+(thread_id)\\+(msg_id)(suffix)@(host)", group_name=".+", thread_id=".+", msg_id=".+", suffix=POST_SUFFIX+"|"+POST_SUFFIX.upper(), host=HOST)
-@stateless
-def handle_reply(message, group_name=None, thread_id=None, msg_id=None, suffix=None, host=None):
-	name, addr = parseaddr(message['from'].lower())
-	msg_id = msg_id.lower()
-	group_name = group_name.lower()
-	msg_text = get_body(str(message))
-	res = insert_reply(group_name, message['Subject'], msg_text['body'], addr, msg_id, thread_id)
-	if(not res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
-		relay.deliver(mail)
-		return
-	msg_id = res['msg_id']
-	to_send =  res['recipients']
-	post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + host)
-	mail = MailResponse(From = message['From'], To = post_addr, Subject = message['Subject'])
-	
-	if 'references' in message:
-		mail['References'] = message['References']
-	elif 'message-id' in message:
-		mail['References'] = message['message-id']
-
-	
-	mail['message-id'] = msg_id
-	
-	ps_blurb = html_ps(thread_id, msg_id, group_name, host)
-	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")
-	logging.debug('TO LIST: ' + str(to_send))
-	if(len(to_send) > 0):
-		relay.deliver(mail, To = to_send)
-
 
 
 

@@ -13,8 +13,8 @@ from http_handler import settings
 class Post(models.Model):
 	id = models.AutoField(primary_key=True)
 	author = models.ForeignKey(settings.AUTH_USER_MODEL)
-	msg_id = models.CharField(max_length=50, unique=True)
 	subject = models.TextField()
+	msg_id = models.CharField(max_length=50, unique=True)
 	post = models.TextField()
 	group = models.ForeignKey('Group')
 	thread = models.ForeignKey('Thread')
@@ -31,6 +31,7 @@ class Post(models.Model):
 
 class Thread(models.Model):
 	id = models.AutoField(primary_key=True)
+	subject = models.TextField(unique=True)
 	timestamp = models.DateTimeField(auto_now=True)
 	group = models.ForeignKey('Group')
 
