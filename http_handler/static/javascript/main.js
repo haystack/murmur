@@ -65,11 +65,12 @@ $(document).ready(function(){
 		function(params){
 			$.post('group_info', params, 
 				function(res){
+					$("#new-group-area").hide();
 					populate_group_info(res);
 					populate_members_table(res);
-					groups_local_data.selected_group = params.groups_name;
-                        		$('.row-item').css("background-color","white");
-                        		$('#' + params.group_name).css("background-color","lightyellow");
+					groups_local_data.selected_group = params.group_name;
+            		$('.row-item').css("background-color","white");
+            		$('#' + params.group_name).css("background-color","lightyellow");
 					notify(res, false);
 				}
 			);	
@@ -78,12 +79,11 @@ $(document).ready(function(){
 	
 	create_group = 
 		function(params){
-			params.group_name = $("#text-create-group").val()
+			params.group_name = $("#new-group-name").val()
 			$.post('create_group', params, 
 				function(res){
-					$("#text-create-group").val("");
-					$("#text-create-group").blur();
 					list_groups(params);
+					group_info(params);
 					notify(res, true);
 				}
 			);	
@@ -244,11 +244,15 @@ $(document).ready(function(){
 		var groups_table = $("#groups-table");
 		groups_table.html("");
 		if(res.status){
-			var params = {'requester_email': res.user};
+	 		
 	 		$("#btn-create-group").unbind("click");
 	 		$("#btn-create-group").bind("click");
-			var crt_group = bind(create_group, params);
+	 		
+	 		var crt_group = bind(new_group, res);
+	 		
 			$("#btn-create-group").click(crt_group);
+			
+			
 			for(var i = 0; i< res.groups.length; i++){
 				var content = '<li class="row-item" id="'+ res.groups[i].name+'">';
 				content += '<span class="strong">' + res.groups[i].name + '</span>'
@@ -263,7 +267,6 @@ $(document).ready(function(){
 				curr_row.on('click',f);
 			}
 		}
-		groups_table.children(":first").click();
 	}
 	
 	function populate_members_table(res){
@@ -493,6 +496,34 @@ $(document).ready(function(){
 	}
 	
 	
+	function new_group(res){
+		
+        var content = '<div class="comment">';
+        
+		content += '<span class="strong">New Group Name : </span> <br />';
+                content += '<input id="new-group-name" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
+		
+		content += '<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>';
+		content += '</div>';
+        
+        $("#new-group-area").html(content);
+        
+        params = {'requester_email':res.user};
+
+		var cr_group = bind(create_group, params);
+		$("#btn-new-create-group").unbind("click");
+        $("#btn-new-create-group").bind("click");
+		$("#btn-new-create-group").click(cr_group);
+
+		$('#group-display-area').hide();
+		
+		$("#new-group-area").show();
+		
+		$('.row-item').css("background-color","white");
+	}
+	
+	
+	
 	
 	function strip(html){
    		var tmp = document.createElement("DIV");
@@ -539,6 +570,8 @@ $(document).ready(function(){
 	
 	if (window.location.pathname.indexOf('/groups') != -1) {
 		list_groups();
+		var groups_table = $("#groups-table");
+		groups_table.children(":first").click();
 	} else if (window.location.pathname.indexOf('/posts') != -1) {
 		init_posts_page();	
 		setInterval(refresh_posts, 10000);

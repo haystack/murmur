@@ -109,7 +109,11 @@ hr{
 }
 
 
-.post-container input[type="text"]{
+#text-search-group {
+	width:219px;
+}
+
+#text-search-post {
 	width:230px;
 }
 
