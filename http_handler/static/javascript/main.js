@@ -191,9 +191,9 @@ $(document).ready(function(){
 					  	}, 
 				function(res){
 					if(res.status){
-                                                $("#btn-follow").show();
-                                                $("#btn-unfollow").hide();
-                                        }
+                       $("#btn-follow").show();
+                       $("#btn-unfollow").hide();
+                    }
 					notify(res, true);
 				}
 			);	
@@ -208,7 +208,7 @@ $(document).ready(function(){
 			$.post('insert_post', params, 
 				function(res){
 					if(res.status){
-                                        	list_posts({'load':true, 'thread_id':res.thread_id});
+                    	list_posts({'load':true, 'thread_id':res.thread_id});
 					}
 					notify(res, true);
 				}

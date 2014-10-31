@@ -36,18 +36,22 @@ def get_body(message):
 				if part.get_content_subtype() == 'html':
 					res['type']='html'
 					body = part.get_payload()
+					body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@mailx\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
 					break
 				else:
 					res['type']='plain'
-					res['body']=part.get_payload()
+					body = part.get_payload()
+					body = re.sub(r'Follow <.*?\+__follow__@mailx\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@mailx.csail\.mit\.edu>','', body)
 	elif maintype == 'text':
 		if subtype == 'html':
 			res['type']='html'
 			body =email_message.get_payload()
+			body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@mailx\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
 		elif subtype == 'text':
 			res['type']='plain'
 			body =email_message.get_payload()
-	body = re.sub(r'<div.*?<a.*?\_\_follow\_\_.*?a>.*?<a.*?\_\_unfollow\_\_.*?a>.*?div>', '', body)
+			body = re.sub(r'Follow <.*?\+__follow__@mailx\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@mailx.csail\.mit\.edu>','', body)
+	
 	res['body'] = body
 	return res
 

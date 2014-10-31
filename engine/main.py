@@ -258,6 +258,7 @@ def insert_post(group_name, subject, message_text, user):
 		
 		res['status'] = True
 		res['msg_id'] = msg_id
+		res['thread_id'] = thread.id
 		res['recipients'] = recipients
 
 	except Group.DoesNotExist:
@@ -293,6 +294,7 @@ def insert_reply(group_name, subject, message_text, user):
 		recipients = [f.user.email for f in following if f.user.email != user.email]
 		res['status'] = True
 		res['recipients'] = recipients
+		res['thread_id'] = thread.id
 		res['msg_id'] = msg_id
 		
 	except Group.DoesNotExist:

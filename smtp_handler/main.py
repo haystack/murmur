@@ -161,12 +161,15 @@ def handle_post(message, address=None, host=None):
 	
 	group_name = address.lower()
 	subject = '[ %s ] %s' %(group_name, message['Subject'].encode('ascii', 'ignore'))
+	
 	msg_text = get_body(str(message))
 	
+	user = UserProfile.objects.get(email=addr)
+	
 	if message['Subject'][0:4] == "Re: ":
-		res = insert_reply(group_name, message['Subject'], msg_text['body'], addr)
+		res = insert_reply(group_name, message['Subject'], msg_text['body'], user)
 	else:
-		res = insert_post(group_name, subject, msg_text['body'], addr)
+		res = insert_post(group_name, subject, msg_text['body'], user)
 		
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
@@ -187,7 +190,7 @@ def handle_post(message, address=None, host=None):
 	
 	mail['message-id'] = msg_id
 
-	ps_blurb = html_ps(thread_id, msg_id, group_name, host)
+	ps_blurb = html_ps(group_name, host)
 	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")		
 	logging.debug('TO LIST: ' + str(to_send))
 	if(len(to_send)>0):
