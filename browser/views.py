@@ -182,7 +182,7 @@ def insert_post(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 
 		group_name = request.POST['group_name'].encode('ascii', 'ignore')
-		subject = '[ %s ] -- %s' %(group_name, request.POST['subject'].encode('ascii', 'ignore'))
+		subject = '[ %s ] %s' %(group_name, request.POST['subject'].encode('ascii', 'ignore'))
 		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
 
 		res = engine.main.insert_post(group_name, subject,  msg_text, user)
@@ -190,7 +190,7 @@ def insert_post(request):
 		thread_id = res['thread_id']
 		to_send =  res['recipients']
 		
-		post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(msg_id) + POST_SUFFIX + '@' + HOST)
+		post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 		mail = MailResponse(From = user.email, To = post_addr, Subject  = subject)
 		mail['message-id'] = msg_id
 		
@@ -223,7 +223,7 @@ def insert_reply(request):
 			new_msg_id = res['msg_id']
 			thread_id = res['thread_id']
 			to_send =  res['recipients']
-			post_addr = '%s <%s>' %(group_name, group_name + '+' + str(thread_id) + '+' + str(new_msg_id) + POST_SUFFIX + '@' + HOST)
+			post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 			mail = MailResponse(From = user.email, To = post_addr, Subject  = '%s' %(subject))
 			
 			
