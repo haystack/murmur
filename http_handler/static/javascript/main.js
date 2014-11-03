@@ -52,11 +52,15 @@ $(document).ready(function(){
 	/* All Group related AJAX calls */	
 	list_groups = 
 		function(params){
-			$.post('list_groups', params, 
-				function(res){
+			$.ajax({
+				type: 'POST',
+				url: 'list_groups', 
+				data: params,
+				success:  function(res){
 					populate_groups_table(res);
-				}
-			);	
+				},
+				async: false,
+			});	
 	};
 	
 	
@@ -142,7 +146,7 @@ $(document).ready(function(){
 					populate_posts_table(res, params, true);
 				}
 			);	
-		}
+		};
 	
 	
 	refresh_posts =
@@ -274,8 +278,9 @@ $(document).ready(function(){
 								 
 				var params = {'requester_email': res.user, 
 						'group_name': res.groups[i].name
-						}
-				var f = bind(group_info, params)
+					};
+				var f = bind(group_info, params);
+				
 				curr_row.on('click',f);
 			}
 		}
@@ -319,34 +324,47 @@ $(document).ready(function(){
  		$("#btn-deactivate-group").unbind("click");
  		$("#btn-subscribe-group").unbind("click");
  		$("#btn-unsubscribe-group").unbind("click");
+ 		$("#btn-add-members").unbind("click");
+ 		
  		$("#btn-activate-group").bind("click");
  		$("#btn-deactivate-group").bind("click");
  		$("#btn-subscribe-group").bind("click");
  		$("#btn-unsubscribe-group").bind("click");
+ 		$("#btn-add-members").bind("click");
+ 		
 		var act_group = bind(activate_group, params);
 		var deact_group = bind(deactivate_group, params);
 		var sub_group = bind(subscribe_group, params);
 		var unsub_group = bind(unsubscribe_group, params);
+		var add_members = bind(add_new_members, params);
+		
 		$("#btn-activate-group").click(act_group);
 		$("#btn-deactivate-group").click(deact_group);
 		$("#btn-subscribe-group").click(sub_group);
 		$("#btn-unsubscribe-group").click(unsub_group);
+		$("#btn-add-members").click(add_members);
+		
 		$("#btn-subscribe-group").hide();
 		$("#btn-unsubscribe-group").hide();
 		$("#btn-activate-group").hide();
 		$("#btn-deactivate-group").hide();
+		$("#btn-add-members").hide();
+		
 		if(res.admin){
 			if(res.active){
 				$("#btn-deactivate-group").show();
-			}else{
+				
+			} else{
 				$("#btn-activate-group").show();
 			}
-		}else if(res.active){
+			$("#btn-add-members").show();
+		}
+		if(res.active){
 			if(res.subscribed){
-                                $("#btn-unsubscribe-group").show();
-                        }else{
-                                $("#btn-subscribe-group").show();
-                        }
+                    $("#btn-unsubscribe-group").show();
+            } else{
+                    $("#btn-subscribe-group").show();
+            }
 	
 		}
 
@@ -359,7 +377,7 @@ $(document).ready(function(){
 		if(reset == true){
 			posts_table.empty();
 		}
-		var selected_thread = posts_local_data.selected_thread
+		var selected_thread = posts_local_data.selected_thread;
 		timestamp = new Date(0);
 		if(res.status){
 			var params = {'requester_email': res.user};
@@ -369,20 +387,20 @@ $(document).ready(function(){
 				content += '<span class="gray ellipsis">' + d.date + '</span>';
 				content += '<span class="gray ellipsis">' + d.time + '</span>';
 				content += '<span class="unread">' + res.threads[i].replies.length + '</span> <br />';
-				content += '</div>'
+				content += '</div>';
 				content += '<div class= "left-column-area-content">';
-				content +=  '<span class="strong ellipsis">' + res.threads[i].post.subject + '</span>'
+				content +=  '<span class="strong ellipsis">' + res.threads[i].post.subject + '</span>';
 				content += '<span class="strong-gray ellipsis">' + res.threads[i].post.from + '</span>';
 				content += '<span class="blurb ellipsis">' + strip(res.threads[i].post.text) + '</span>';
-				content += '</div>'
+				content += '</div>';
 				var curr_row = $('<li class="row-item" id="' + res.threads[i].thread_id + '">' + content + '</li>');
 				var params = {'requester_email': res.user,
 						'thread_id' : res.threads[i].thread_id, 
 						 'post': res.threads[i].post,
 						 'replies' : res.threads[i].replies,
 						 'f_list' : res.threads[i].f_list
-						}
-				var f = bind(load_post, params)
+					};
+				var f = bind(load_post, params);
 				if(res.threads[i].thread_id == load_params.thread_id){
 					selected_thread = res.threads[i].thread_id;
 					console.debug("new post/reply (thread-id: " + load_params.thread_id +").");
@@ -396,7 +414,7 @@ $(document).ready(function(){
 				if(reset){
 					posts_table.append(curr_row);
 				}else{
-					var row = $('#' + res.threads[i].thread_id)
+					var row = $('#' + res.threads[i].thread_id);
 					if(row.length == 0){ 
 						posts_table.prepend(curr_row);
 					}else{
@@ -427,7 +445,7 @@ $(document).ready(function(){
 		content += '<button type="button" id="btn-unfollow" style="margin:5px;">Unfollow</button>';
 		content += '</div>';
 		content += '<div>';
-		content += '<h3>' + res.post.subject + '</h3>'
+		content += '<h3>' + res.post.subject + '</h3>';
 		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
 		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span> <br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp) + '</span>';
@@ -435,7 +453,7 @@ $(document).ready(function(){
 		content += '</div>';
 		content += '<hr />';
 		content += res.post.text;
-		content += '<div class="reply">'
+		content += '<div class="reply">';
 		for(var i = 0; i< res.replies.length; i++){
                        	content += '<div class="main-area-content">';
 			content += '<span class="strong">' + res.replies[i].from + '</span>&nbsp;';
@@ -481,6 +499,10 @@ $(document).ready(function(){
 			$("#btn-follow").show();
 		}  		
         
+	}
+	
+	function add_new_members() {
+		
 	}
 	
 	function new_post(res){
@@ -593,7 +615,8 @@ $(document).ready(function(){
 	if (window.location.pathname.indexOf('/groups') != -1) {
 		list_groups();
 		var groups_table = $("#groups-table");
-		groups_table.children(":first").click();
+		groups_table.children().first().click();
+		console.log('clicked');
 	} else if (window.location.pathname.indexOf('/posts') != -1) {
 		init_posts_page();	
 		setInterval(refresh_posts, 10000);
