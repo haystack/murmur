@@ -15,15 +15,22 @@ MailX Main Controller
 def list_groups(user):
 	res = {'status':False}
 	try:
-		groups = Group.objects.filter(members__in=[user])
+		groups = Group.objects.filter(members__in=[user], active=True)
 		res['status'] = True
 		res['groups'] = []
 		for g in groups:
-			res['groups'].append({'name':g.name, 'member': True, 'active':g.active})
+			admin = False
+			mod = False
+			if g.admins.filter(email=user.email).count() > 0:
+				admin = True
+			if g.moderators.filter(email=user.email).count() > 0:
+				mod = True
 			
-		pub_groups = Group.objects.filter(Q(public=True), ~Q(members__in=[user]))
+			res['groups'].append({'name':g.name, 'member': True, 'admin': admin, 'mod': mod})
+			
+		pub_groups = Group.objects.filter(Q(public=True, active=True), ~Q(members__in=[user]))
 		for g in pub_groups:
-			res['groups'].append({'name':g.name,  'member': False, 'active':g.active})
+			res['groups'].append({'name':g.name,  'member': False, 'admin': False, 'mod': False})
 			
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']

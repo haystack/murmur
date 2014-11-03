@@ -255,7 +255,16 @@ $(document).ready(function(){
 			
 			for(var i = 0; i< res.groups.length; i++){
 				var content = '<li class="row-item" id="'+ res.groups[i].name+'">';
-				content += '<span class="strong">' + res.groups[i].name + '</span>'
+				content += '<span class="strong">' + res.groups[i].name + '</span>';
+				if (res.groups[i].member == true)
+					content += '<span class="member label">Member</span>';
+				
+				if (res.groups[i].admin == true)
+					content += '<span class="admin label">Admin</span>';
+				
+				if (res.groups[i].mod == true)
+					content += '<span class="mod label">Mod</span>';
+				
 				content += '</li>';
 				var curr_row = $(content);
 				groups_table.append(curr_row);
