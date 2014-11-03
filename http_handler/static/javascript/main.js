@@ -57,7 +57,7 @@ $(document).ready(function(){
 					populate_groups_table(res);
 				}
 			);	
-		}
+	};
 	
 	
 	
@@ -74,12 +74,13 @@ $(document).ready(function(){
 					notify(res, false);
 				}
 			);	
-		}
+		};
 	
 	
 	create_group = 
 		function(params){
-			params.group_name = $("#new-group-name").val()
+			params.group_name = $("#new-group-name").val();
+			params.public = $('input[name=pubpriv]:checked', '#new-group-form').val();
 			$.post('create_group', params, 
 				function(res){
 					list_groups(params);
@@ -87,28 +88,30 @@ $(document).ready(function(){
 					notify(res, true);
 				}
 			);	
-		}
+		};
 
 	subscribe_group = 
 		function(params){
 			$.post('subscribe_group', params, 
 				function(res){
-					group_info(params)
+					list_groups(params);
+					group_info(params);
 					notify(res, true);
 				}
 			);	
-		}
+		};
 		
 		
 	unsubscribe_group = 
 		function(params){
 			$.post('unsubscribe_group', params, 
-				function(res){					
-					group_info(params)
+				function(res){
+					list_groups(params);
+					group_info(params);
 					notify(res, true);
 				}
 			);	
-		}
+		};
 
 	activate_group = 
 		function(params){
@@ -509,11 +512,21 @@ $(document).ready(function(){
 		
         var content = '<div class="comment">';
         
+        content += '<form id="new-group-form">';
 		content += '<span class="strong">New Group Name : </span> <br />';
-                content += '<input id="new-group-name" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
+        content += '<input id="new-group-name" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
+		
+		content += '<span class="strong">New Group Privacy Settings : </span> <br />';
+		content += '<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group"> Public<br />';
+		content += 'All users will be able to view and search for this group by name.<br />';
+		
+		content += '<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group"> Private<br />';
+		content += 'Only users added to this group by admins will be notified about the group.<br /><br />';
 		
 		content += '<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>';
-		content += '</div>';
+		
+		
+		content += '</form></div>';
         
         $("#new-group-area").html(content);
         

@@ -75,9 +75,7 @@ def list_groups(request):
 def create_group(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		
-		# for now, all groups are public
-		public = True
+		public = request.POST['public'] == 'public'
 		res = engine.main.create_group(request.POST['group_name'], public, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
