@@ -3,6 +3,9 @@ from schema.models import *
 from msg_codes import *
 from django.utils.timezone import utc
 from django.db.models import Q
+from browser.util import password_generator
+from lamson.mail import MailResponse
+from smtp_handler.utils import relay_mailer
 
 
 '''
@@ -100,6 +103,57 @@ def deactivate_group(group_name, user):
 	logging.debug(res)
 	return res
 
+
+
+
+def add_members(group_name, emails, user):
+	res = {'status':False}
+	
+	try:
+		group = Group.objects.get(name=group_name)
+		
+		if group.admins.filter(email=user.email).count() > 0:
+			res['status'] = True
+			email_list = emails.strip().lower().split(',')
+			for email in email_list:
+				email = email.strip()
+				
+				mail = MailResponse(From = 'help@mailx.csail.mit.edu', 
+									To = email, 
+									Subject  = "You've been subscribed to %s Mailing List" % (group_name))
+				
+				email_user = UserProfile.objects.filter(email=email)
+				if email_user.count() == 1:
+					group.members.add(email_user[0])
+					
+					message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
+					message += "To see posts from this list, visit <a href='http://mailx.csail.mit.edu/posts?group_name=%s'>http://mailx.csail.mit.edu/posts?group_name=%s</a><br />" % (group_name, group_name)
+					message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://mailx.csail.mit.edu/groups'>http://mailx.csail.mit.edu/groups</a><br />"
+				else:
+					pw = password_generator()
+					new_user = UserProfile.objects.create_user(email, pw)
+					group.members.add(new_user)
+					
+					message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
+					message += "An account has been created for you at <a href='http://mailx.csail.mit.edu'>http://mailx.csail.mit.edu</a><br />"
+					message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
+					message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
+					message += "To see posts from this list, visit <a href='http://mailx.csail.mit.edu/posts?group_name=%s'>http://mailx.csail.mit.edu/posts?group_name=%s</a><br />" % (group_name, group_name)
+					message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://mailx.csail.mit.edu/groups'>http://mailx.csail.mit.edu/groups</a><br />"
+
+				mail.Html = message
+				logging.debug('TO LIST: ' + str(email))
+				
+				relay_mailer.deliver(mail, To = [email])
+					
+		else:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
 
 
 

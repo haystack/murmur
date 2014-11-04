@@ -93,6 +93,18 @@ $(document).ready(function(){
 				}
 			);	
 		};
+		
+	add_members = 
+		function(params){
+			params.emails = $('#new-member-emails').val();
+			$.post('add_members', params, 
+				function(res){
+					list_groups(params);
+					group_info(params);
+					notify(res, true);
+				}
+			);	
+		};
 
 	subscribe_group = 
 		function(params){
@@ -319,7 +331,7 @@ $(document).ready(function(){
 		var params = {'requester_email': res.user, 
 					  'group_name': res.group_name,
 					  'curr_row': curr_row
-					 }
+					};
  		$("#btn-activate-group").unbind("click");
  		$("#btn-deactivate-group").unbind("click");
  		$("#btn-subscribe-group").unbind("click");
@@ -336,13 +348,13 @@ $(document).ready(function(){
 		var deact_group = bind(deactivate_group, params);
 		var sub_group = bind(subscribe_group, params);
 		var unsub_group = bind(unsubscribe_group, params);
-		var add_members = bind(add_new_members, params);
+		var ad_members = bind(add_new_members, params);
 		
 		$("#btn-activate-group").click(act_group);
 		$("#btn-deactivate-group").click(deact_group);
 		$("#btn-subscribe-group").click(sub_group);
 		$("#btn-unsubscribe-group").click(unsub_group);
-		$("#btn-add-members").click(add_members);
+		$("#btn-add-members").click(ad_members);
 		
 		$("#btn-subscribe-group").hide();
 		$("#btn-unsubscribe-group").hide();
@@ -501,8 +513,33 @@ $(document).ready(function(){
         
 	}
 	
-	function add_new_members() {
+	function add_new_members(res) {
 		
+		$("#new-group-area").html('');
+		
+        var content = '<div class="comment">';
+        
+        content += '<h3>Add New Members</h3><hr /><br />';
+        content += '<form id="new-members-form">';
+		content += '<span class="strong">Emails Separated by Commas : </span> <br />';
+        content += '<input id="new-member-emails" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
+		
+		content += '<button type="button" id="btn-add-members" style="margin-top:10px;">Add Members</button>';
+
+		content += '</form></div>';
+        
+        $("#new-group-area").html(content);
+        
+		params = {'group_name': res.group_name};
+
+		var member_add = bind(add_members, params);
+		$("#btn-add-members").unbind("click");
+        $("#btn-add-members").bind("click");
+		$("#btn-add-members").click(member_add);
+
+		$('#group-display-area').hide();
+		
+		$("#new-group-area").show();
 	}
 	
 	function new_post(res){
@@ -515,11 +552,11 @@ $(document).ready(function(){
 		content += '<span class="strong">Subject : </span> <br />';
                 content += '<input id="new-post-subject" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
 		content += '<textarea id="new-post-text" style="height:150px;"></textarea>';
-		content += '<button type="button" id="btn-post" style="margin-top:10px;">Post</button>'
+		content += '<button type="button" id="btn-post" style="margin-top:10px;">Post</button>';
 		content += '</div>';
 
-                content += '</div>'
-                $("#main-area").html(content);
+        content += '</div>';
+        $("#main-area").html(content);
 
 		params = {'requester_email':res.user};
 		var ins_post = bind(insert_post, params);
@@ -531,6 +568,8 @@ $(document).ready(function(){
 	
 	
 	function new_group(res){
+		
+		$("#new-group-area").html('');
 		
         var content = '<div class="comment">';
         
@@ -562,8 +601,6 @@ $(document).ready(function(){
 		$('#group-display-area').hide();
 		
 		$("#new-group-area").show();
-		
-		$('.row-item').css("background-color","white");
 	}
 	
 	
@@ -616,7 +653,6 @@ $(document).ready(function(){
 		list_groups();
 		var groups_table = $("#groups-table");
 		groups_table.children().first().click();
-		console.log('clicked');
 	} else if (window.location.pathname.indexOf('/posts') != -1) {
 		init_posts_page();	
 		setInterval(refresh_posts, 10000);

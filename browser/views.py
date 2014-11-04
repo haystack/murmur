@@ -108,6 +108,16 @@ def deactivate_group(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 
+@login_required
+def add_members(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.add_members(request.POST['group_name'], request.POST['emails'], user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+	
 
 @login_required
 def subscribe_group(request):

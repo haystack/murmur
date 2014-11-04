@@ -1,3 +1,6 @@
+import string
+import random
+
 
 def load_groups(request, groups, user):
         
@@ -14,3 +17,7 @@ def load_groups(request, groups, user):
         active_group = {'name': 'No Groups Yet'}
     
     return active_group
+
+
+def password_generator(size=8, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))

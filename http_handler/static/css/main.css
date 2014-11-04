@@ -279,6 +279,11 @@ table.dataTable tbody tr:hover td {
 	cursor: pointer;
 }
 
+li {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
 .label {
 	padding-left: 5px;
 	padding-right: 5px;
