@@ -302,7 +302,7 @@ def insert_post(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		group_members = group.members.all()
 		
-		recipients = [m.email for m in group_members if m.email != user.email]
+		recipients = [m.email for m in group_members]
 		
 		thread = Thread()
 		thread.subject = subject
@@ -352,7 +352,7 @@ def insert_reply(group_name, subject, message_text, user):
 		thread.save()
 		
 		following = Following.objects.filter(thread=thread)
-		recipients = [f.user.email for f in following if f.user.email != user.email]
+		recipients = [f.user.email for f in following]
 		res['status'] = True
 		res['recipients'] = recipients
 		res['thread_id'] = thread.id
