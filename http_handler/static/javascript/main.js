@@ -1,9 +1,9 @@
 $(document).ready(function(){
 	/* Global Objects */
 
-	posts_local_data = {}
+	posts_local_data = {};
 
-	groups_local_data = {}
+	groups_local_data = {};
 
  
 	/* Dynamic Table Definitions */	
@@ -137,7 +137,7 @@ $(document).ready(function(){
 					notify(res, true);
 				}
 			);	
-		}
+		};
 		
 	
 	deactivate_group = 
@@ -148,7 +148,7 @@ $(document).ready(function(){
 					notify(res, true);
 				}
 			);	
-		}				  
+		};			  
 		
 	/* All Post related AJAX calls */	
 	list_posts = 
@@ -162,17 +162,19 @@ $(document).ready(function(){
 	
 	
 	refresh_posts =
-                function(){
+    	function(){
 			if(posts_local_data.timestamp != null){
-                        	$.post('refresh_posts', {'timestamp':posts_local_data.timestamp},
-                                	function(res){
-						if(res.status && res.threads.length > 0){
-                                        		populate_posts_table(res, {}, false);
-						}
-                               	 	}
-                        	);
+				params = {'timestamp': 		posts_local_data.timestamp,
+						  'active_group': 	$("#active_group").text()
+						 };
+            	$.post('refresh_posts', params,
+                function(res){
+					if(res.status && res.threads.length > 0){
+                    	populate_posts_table(res, {}, false);
+					}
+                });
 			}
-                }
+    };
 
 
 
@@ -182,7 +184,7 @@ $(document).ready(function(){
 			posts_local_data.selected_thread = params.thread_id;
 			$('.row-item').css("background-color","white");
 			$('#' + params.thread_id).css("background-color","lightyellow");
-		}	
+		};
 
 	
 	
@@ -200,7 +202,7 @@ $(document).ready(function(){
 					notify(res, true);
 				}
 			);	
-		}
+		};
 	
 	unfollow_thread = 
 		function(params){
@@ -216,7 +218,7 @@ $(document).ready(function(){
 					notify(res, true);
 				}
 			);	
-		}
+		};
 		
 	insert_post = 
 		function(params){
@@ -232,7 +234,7 @@ $(document).ready(function(){
 					notify(res, true);
 				}
 			);	
-		}
+		};
 	
 	insert_reply = 
 		function(params){
@@ -250,7 +252,7 @@ $(document).ready(function(){
 					notify(res, true);
 				}
 			);	
-		}		
+		};		
 
 	/* To avoid closure */	
 	function bind(fnc, val ) {
@@ -472,14 +474,14 @@ $(document).ready(function(){
                        	content += 'on ' + new Date(res.replies[i].timestamp) + '&nbsp;';
 			content += '<br /><br />';
 		      	content +=  res.replies[i].text;
-                       	content += '</div>'
+                       	content += '</div>';
                                
                }
 		content += '</div>';
 		content += '<div class="main-area-content">';	
 		content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 		content += '</div>'; 
-		content += '</div>'	
+		content += '</div>';
 		$("#main-area").empty();
                 $("#main-area").html(content);
 		//tinyMCE.execCommand('mceAddControl', false, 'reply-text-input');
@@ -490,7 +492,7 @@ $(document).ready(function(){
 					  'group_name': res.post.to,
 					  'subject': res.post.subject,
 					  'text':res.post.text
-					}
+				};
 		$("#btn-reply").unbind("click");
 		$("#btn-follow").unbind("click");
 		$("#btn-unfollow").unbind("click");
@@ -627,7 +629,7 @@ $(document).ready(function(){
 		//hours = hours ? hours : 12;
 		minutes = minutes < 10 ? '0'+minutes : minutes;
 		timeStr = hours + ':' + minutes + ' ' + ampm;
-		return {'date':dateStr, 'time': timeStr}
+		return {'date':dateStr, 'time': timeStr};
 	}
 
 
