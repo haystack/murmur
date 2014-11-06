@@ -341,7 +341,7 @@ def insert_reply(group_name, subject, message_text, user):
 		orig_post_subj = subject[4:]
 		
 		post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')[0]
-		thread = Thread.objects.get(subject=orig_post_subj)
+		thread = Thread.objects.filter(subject=orig_post_subj).order_by('-timestamp')[0]
 		
 		msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
 		

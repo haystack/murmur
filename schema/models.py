@@ -31,7 +31,7 @@ class Post(models.Model):
 
 class Thread(models.Model):
 	id = models.AutoField(primary_key=True)
-	subject = models.TextField(unique=True)
+	subject = models.TextField()
 	timestamp = models.DateTimeField(auto_now=True)
 	group = models.ForeignKey('Group')
 
