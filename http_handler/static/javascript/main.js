@@ -405,7 +405,7 @@ $(document).ready(function(){
 				content += '<div class= "left-column-area-content">';
 				content +=  '<span class="strong ellipsis">' + res.threads[i].post.subject + '</span>';
 				content += '<span class="strong-gray ellipsis">' + res.threads[i].post.from + '</span>';
-				content += '<span class="blurb ellipsis">' + strip(res.threads[i].post.text) + '</span>';
+				content += '<span class="blurb ellipsis">' + res.threads[i].post.text + '</span>';
 				content += '</div>';
 				var curr_row = $('<li class="row-item" id="' + res.threads[i].thread_id + '">' + content + '</li>');
 				var params = {'requester_email': res.user,
@@ -604,17 +604,6 @@ $(document).ready(function(){
 		
 		$("#new-group-area").show();
 	}
-	
-	
-	
-	
-	function strip(html){
-   		var tmp = document.createElement("DIV");
-   		tmp.innerHTML = html;
-   		var txt = tmp.textContent||tmp.innerText;
-		return txt.substring(0, 100);
-	}
-
 
 	function format_date(d) {
 		var dateStr,hours,minutes,ampm;

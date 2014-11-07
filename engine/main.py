@@ -6,6 +6,7 @@ from django.db.models import Q
 from browser.util import password_generator
 from lamson.mail import MailResponse
 from smtp_handler.utils import relay_mailer
+from cgi import escape
 
 
 '''
@@ -261,9 +262,9 @@ def list_posts(group_name=None, timestamp_str = None):
 			post = None
 			for p in posts:
 				if(not p.reply_to_id):
-					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.author.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(p.timestamp)}
+					post = {'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.author.email, 'to':p.group.name, 'subject': escape(p.subject), 'text': escape(p.post), 'timestamp':format_date_time(p.timestamp)}
 				else:
-					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.author.email, 'to':p.group.name, 'subject':p.subject, 'text': p.post, 'timestamp':format_date_time(p.timestamp)})
+					replies.append({'msg_id':p.msg_id, 'thread_id':p.thread_id, 'from':p.author.email, 'to':p.group.name, 'subject': escape(p.subject), 'text': escape(p.post), 'timestamp':format_date_time(p.timestamp)})
 			res['threads'].append({'thread_id':t.id, 'post':post, 'replies': replies, 'f_list':f_list, 'timestamp':format_date_time(t.timestamp)})
 			res['status'] = True
 	except:
@@ -281,8 +282,8 @@ def load_post(group_name, thread_id, msg_id):
 		res['msg_id'] = p.msg_id
 		res['thread_id'] = p.thread_id
 		res['from'] = p.email
-		res['subject'] = p.subject
-		res['text'] = p.post
+		res['subject'] = escape(p.subject)
+		res['text'] = escape(p.post)
 		res['to'] = p.group.name
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
