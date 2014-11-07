@@ -334,7 +334,7 @@ def insert_post(group_name, subject, message_text, user):
 	
 
 
-def insert_reply(group_name, subject, message_text, user):
+def insert_reply(group_name, subject, message_text, user, thread_id=None):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
@@ -342,8 +342,10 @@ def insert_reply(group_name, subject, message_text, user):
 		orig_post_subj = subject[4:]
 		
 		post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')[0]
-		thread = Thread.objects.filter(subject=orig_post_subj).order_by('-timestamp')[0]
-		
+		if not thread_id:
+			thread = Thread.objects.filter(subject=orig_post_subj).order_by('-timestamp')[0]
+		else:
+			thread = Thread.objects.get(id=thread_id)
 		msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
 		
 		r = Post(msg_id=msg_id, author=user, subject=subject, post = str(message_text), reply_to=post, group=group, thread=thread)

@@ -223,8 +223,9 @@ def insert_reply(request):
 		subject = request.POST['subject'].encode('ascii', 'ignore')
 		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
+		thread_id = request.POST.get('thread_id', None)
 		
-		res = engine.main.insert_reply(group_name, subject, msg_text, user)
+		res = engine.main.insert_reply(group_name, subject, msg_text, user, thread_id=thread_id)
 		if(res['status']):
 			
 			to_send =  res['recipients']

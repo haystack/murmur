@@ -246,6 +246,7 @@ $(document).ready(function(){
 			}
 			params.poster_email = params.requester_email;
 			delete params.text;
+			posts_local_data.selected_thread = params.thread_id;
 			$.post('insert_reply', params, 
 				function(res){
 					if(res.status){
@@ -448,7 +449,7 @@ $(document).ready(function(){
 			}
 		}
 		if(load_params.load == true){
-			posts_table.find('"#'+selected_thread+'"').click();
+			posts_table.find('#'+selected_thread).click();
 			console.debug("load = true");
 		}
 		posts_local_data.timestamp = timestamp;
