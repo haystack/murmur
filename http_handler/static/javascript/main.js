@@ -229,7 +229,9 @@ $(document).ready(function(){
 			$.post('insert_post', params, 
 				function(res){
 					if(res.status){
-                    	list_posts({'load':true, 'thread_id':res.thread_id});
+                    	list_posts({'load':true, 
+                    				'active_group': params.group_name,
+                    				'thread_id':res.thread_id});
 					}
 					notify(res, true);
 				}
@@ -247,7 +249,9 @@ $(document).ready(function(){
 			$.post('insert_reply', params, 
 				function(res){
 					if(res.status){
-						list_posts({'load':true, 'thread_id':res.thread_id});
+						list_posts({'load':true, 
+									'active_group': params.group_name,
+									'thread_id':res.thread_id});
 					}
 					notify(res, true);
 				}
