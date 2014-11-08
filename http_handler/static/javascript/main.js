@@ -87,6 +87,7 @@ $(document).ready(function(){
 			params.public = $('input[name=pubpriv]:checked', '#new-group-form').val();
 			$.post('create_group', params, 
 				function(res){
+					$('#list-group-names').prepend('<li><a href="/posts?group_name=' + params.group_name + '">' + params.group_name + '</a></li>');
 					list_groups(params);
 					group_info(params);
 					notify(res, true);
