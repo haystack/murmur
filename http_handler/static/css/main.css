@@ -164,7 +164,13 @@ textarea {
 	background: #FFF7CE!important;
 }
 
-ul {
+#mailx-header ul {
+    list-style-type: none;
+    padding-left: 0px;
+    margin-left: 0px;
+}
+
+#left-column-area-wrapper ul {
     list-style-type: none;
     padding-left: 0px;
     margin-left: 0px;
@@ -279,7 +285,12 @@ table.dataTable tbody tr:hover td {
 	cursor: pointer;
 }
 
-li {
+#mailx-header li {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+#left-column-area-wrapper li {
 	margin-left: 10px;
 	margin-right: 10px;
 }
@@ -302,4 +313,8 @@ li {
 
 .member {
 	background-color: blue;
+}
+
+.blurb {
+	min-height: 15px;
 }

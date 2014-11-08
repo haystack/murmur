@@ -223,7 +223,7 @@ $(document).ready(function(){
 		
 	insert_post = 
 		function(params){
-			params.msg_text = $("#new-post-text").val();
+			params.msg_text = CKEDITOR.instances['new-post-text'].getData();
                         params.subject = $("#new-post-subject").val();
                         params.group_name = $("#new-post-to").text();
                         params.poster_email = params.requester_email;
@@ -241,7 +241,7 @@ $(document).ready(function(){
 	
 	insert_reply = 
 		function(params){
-			params.msg_text = $("#reply-text-input").val();
+			params.msg_text = CKEDITOR.instances['reply-text-input'].getData();
 			if(params.subject.substr(0,3).trim().toLowerCase() != 're:'){
 				params.subject = 'Re: ' + params.subject;
 			}
@@ -485,7 +485,10 @@ $(document).ready(function(){
                }
 		content += '</div>';
 		content += '<div class="main-area-content">';	
-		content += '<div class="comment"><textarea id="reply-text-input"></textarea><button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
+		content += '<div class="comment">';
+		content += '<textarea id="reply-text-input"></textarea>';
+		content += "<script>CKEDITOR.replace( 'reply-text-input' );</script>";
+		content += '<button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
 		content += '</div>'; 
 		content += '</div>';
 		$("#main-area").empty();
@@ -560,6 +563,9 @@ $(document).ready(function(){
 		content += '<span class="strong">Subject : </span> <br />';
                 content += '<input id="new-post-subject" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
 		content += '<textarea id="new-post-text" style="height:150px;"></textarea>';
+		
+		content += "<script>CKEDITOR.replace( 'new-post-text' );</script>";
+		
 		content += '<button type="button" id="btn-post" style="margin-top:10px;">Post</button>';
 		content += '</div>';
 

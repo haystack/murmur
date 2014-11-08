@@ -19,18 +19,23 @@ ALLOWED_TAGS = [
     'div',
     'br',
     'span',
-    'img'
-    
+    'img',
+    'p',
+    'h1',
+    'h2',
+    'h3',
+    'pre',
+    's',
 ]
 
 ALLOWED_ATTRIBUTES = {
     'a': ['href', 'title'],
     'abbr': ['title'],
     'acronym': ['title'],
-    'img': ['src']
+    'img': ['src','alt', 'style']
 }
 
-ALLOWED_STYLES = []
+ALLOWED_STYLES = ['border-style', 'border-width', 'float', 'height', 'margin', 'width']
 
 
 def load_groups(request, groups, user):
