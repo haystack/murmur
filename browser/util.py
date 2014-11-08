@@ -2,6 +2,37 @@ import string
 import random
 
 
+
+ALLOWED_TAGS = [
+    'a',
+    'abbr',
+    'acronym',
+    'b',
+    'blockquote',
+    'code',
+    'em',
+    'i',
+    'li',
+    'ol',
+    'strong',
+    'ul',
+    'div',
+    'br',
+    'span',
+    'img'
+    
+]
+
+ALLOWED_ATTRIBUTES = {
+    'a': ['href', 'title'],
+    'abbr': ['title'],
+    'acronym': ['title'],
+    'img': ['src']
+}
+
+ALLOWED_STYLES = []
+
+
 def load_groups(request, groups, user):
         
     active_group = request.GET.get('group_name')
