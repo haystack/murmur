@@ -16,6 +16,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 
 from annoying.decorators import render_to
 from schema.models import UserProfile, Group
+from html2text import html2text
 
 '''
 @author: Anant Bhardwaj
@@ -191,18 +192,27 @@ def insert_post(request):
 
 		group_name = request.POST['group_name'].encode('ascii', 'ignore')
 		subject = '[ %s ] %s' %(group_name, request.POST['subject'].encode('ascii', 'ignore'))
+		
 		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
 
 		res = engine.main.insert_post(group_name, subject,  msg_text, user)
+		
+		
 		msg_id = res['msg_id']
 		to_send =  res['recipients']
 		
 		post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 		mail = MailResponse(From = user.email, To = post_addr, Subject  = subject)
+		
 		mail['message-id'] = msg_id
 		
 		ps_blurb = html_ps(group_name, HOST)
 		mail.Html = msg_text + ps_blurb	
+		
+		ps_blurb = plain_ps(group_name, HOST)
+		mail.Body = html2text(msg_text) + ps_blurb	
+		
+		
 		logging.debug('TO LIST: ' + str(to_send))
 		if(len(to_send)>0):
 			relay_mailer.deliver(mail, To = to_send)
@@ -237,6 +247,10 @@ def insert_reply(request):
 				
 			ps_blurb = html_ps(group_name, HOST)
 			mail.Html = msg_text + ps_blurb		
+			
+			ps_blurb = plain_ps(group_name, HOST)
+			mail.Body = html2text(msg_text) + ps_blurb	
+			
 			logging.debug('TO LIST: ' + str(to_send))
 			if(len(to_send)>0):
 				relay_mailer.deliver(mail, To = to_send)

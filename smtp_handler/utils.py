@@ -24,35 +24,33 @@ RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe',
 
 relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
 
+
 def get_body(message):
-	res={}
+	res = {}
 	email_message = email.message_from_string(str(message))
 	maintype = email_message.get_content_maintype()
 	subtype = email_message.get_content_maintype()
-	body = None
+
 	if maintype == 'multipart':
 		for part in email_message.get_payload():
 			if part.get_content_maintype() == 'text':
 				if part.get_content_subtype() == 'html':
-					res['type']='html'
 					body = part.get_payload()
 					body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@mailx\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
-					break
+					res['html'] = body
 				else:
-					res['type']='plain'
 					body = part.get_payload()
 					body = re.sub(r'Follow <.*?\+__follow__@mailx\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@mailx.csail\.mit\.edu>','', body)
+					res['plain'] = body
 	elif maintype == 'text':
 		if subtype == 'html':
-			res['type']='html'
-			body =email_message.get_payload()
+			body = email_message.get_payload()
 			body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@mailx\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
+			res['html'] = body
 		elif subtype == 'text':
-			res['type']='plain'
-			body =email_message.get_payload()
+			body = email_message.get_payload()
 			body = re.sub(r'Follow <.*?\+__follow__@mailx\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@mailx.csail\.mit\.edu>','', body)
-	
-	res['body'] = body
+			res['plain'] = body
 	return res
 
 	
@@ -62,3 +60,9 @@ def html_ps(group_name, host):
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
 	body = '<div style="border-top:solid thin; padding-top:5px; margin-top:10px;">%s</div>' %(content)
 	return body
+
+def plain_ps(group_name, host):
+	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + host)
+	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + host)
+	content = 'Follow<%s> | Un-Follow<%s>' %(follow_addr, unfollow_addr)
+	return content

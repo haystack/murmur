@@ -6,6 +6,8 @@ from lamson.mail import MailResponse
 from email.utils import *
 from engine.main import *
 from utils import *
+from html2text import html2text
+from markdown2 import markdown
 
 '''
 MailX Mail Interface Handler
@@ -164,12 +166,17 @@ def handle_post(message, address=None, host=None):
 	
 	msg_text = get_body(str(message))
 	
+	if 'html' not in msg_text:
+		msg_text['html'] = markdown(msg_text['plain'])
+	if 'plain' not in msg_text:
+		msg_text['plain'] = html2text(msg_text['html'])
+	
 	user = UserProfile.objects.get(email=addr)
 	
 	if message['Subject'][0:4] == "Re: ":
-		res = insert_reply(group_name, message['Subject'], msg_text['body'], user)
+		res = insert_reply(group_name, message['Subject'], msg_text['html'], user)
 	else:
-		res = insert_post(group_name, subject, msg_text['body'], user)
+		res = insert_post(group_name, subject, msg_text['html'], user)
 		
 	if(not res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
@@ -191,7 +198,11 @@ def handle_post(message, address=None, host=None):
 	mail['message-id'] = msg_id
 
 	ps_blurb = html_ps(group_name, host)
-	mail.Html = unicode(msg_text['body'] + ps_blurb , "utf-8")		
+	mail.Html = unicode(msg_text['html'] + ps_blurb , "utf-8")	
+	
+	ps_blurb = plain_ps(group_name, host)
+	mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
+		
 	logging.debug('TO LIST: ' + str(to_send))
 	if(len(to_send)>0):
 		relay.deliver(mail, To = to_send)
