@@ -318,3 +318,8 @@ table.dataTable tbody tr:hover td {
 .blurb {
 	min-height: 15px;
 }
+
+.italic-small {
+	font-style: italic;
+	size: 10px;
+}

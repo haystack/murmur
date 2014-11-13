@@ -2,7 +2,7 @@ from django.http import *
 from django.contrib.auth.decorators import login_required
 from django.utils.encoding import *
 import engine.main
-from engine.msg_codes import *
+from engine.constants import *
 
 from browser.util import load_groups
 
@@ -76,7 +76,7 @@ def create_group(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		public = request.POST['public'] == 'public'
-		res = engine.main.create_group(request.POST['group_name'], public, user)
+		res = engine.main.create_group(request.POST['group_name'], request.POST['group_desc'], public, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

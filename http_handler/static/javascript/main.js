@@ -84,12 +84,15 @@ $(document).ready(function(){
 	create_group = 
 		function(params){
 			params.group_name = $("#new-group-name").val();
+			params.group_desc = $("#new-group-description").val();
 			params.public = $('input[name=pubpriv]:checked', '#new-group-form').val();
 			$.post('create_group', params, 
 				function(res){
-					$('#list-group-names').prepend('<li><a href="/posts?group_name=' + params.group_name + '">' + params.group_name + '</a></li>');
-					list_groups(params);
-					group_info(params);
+					if(res.status){
+						$('#list-group-names').prepend('<li><a href="/posts?group_name=' + params.group_name + '">' + params.group_name + '</a></li>');
+						list_groups(params);
+						group_info(params);
+					}
 					notify(res, true);
 				}
 			);	
@@ -291,6 +294,8 @@ $(document).ready(function(){
 				
 				if (res.groups[i].mod == true)
 					content += '<span class="mod label">Mod</span>';
+				
+				content += '<br /><span class="italic-small">' + res.groups[i].desc + '</span>';
 				
 				content += '</li>';
 				var curr_row = $(content);
@@ -589,14 +594,19 @@ $(document).ready(function(){
         
         content += '<form id="new-group-form">';
 		content += '<span class="strong">New Group Name : </span> <br />';
-        content += '<input id="new-group-name" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
+		content += '<span class="italic-small">Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed</span><br />';
+        content += '<input id="new-group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
+		
+		content += '<span class="strong">New Group Description : </span> <br />';
+		content += '<span class="italic-small">Maximum 140 characters</span><br />';
+		content += '<textarea id="new-group-description" maxlength="140"></textarea><br /><br />';
 		
 		content += '<span class="strong">New Group Privacy Settings : </span> <br />';
-		content += '<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group"> Public<br />';
-		content += 'All users will be able to view and search for this group by name.<br />';
+		content += '<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked> Public<br />';
+		content += '<span class="italic-small">All users will be able to view and search for this group by name.</span><br />';
 		
 		content += '<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group"> Private<br />';
-		content += 'Only users added to this group by admins will be notified about the group.<br /><br />';
+		content += '<span class="italic-small">Only users added to this group by admins will be notified about the group.</span><br /><br />';
 		
 		content += '<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>';
 		

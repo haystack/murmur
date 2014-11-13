@@ -1,6 +1,6 @@
 import sys, logging, base64, email, datetime
 from schema.models import *
-from msg_codes import *
+from constants import *
 from django.utils.timezone import utc
 from django.db.models import Q
 from browser.util import *
@@ -8,6 +8,7 @@ from lamson.mail import MailResponse
 from smtp_handler.utils import relay_mailer
 from bleach import clean
 from cgi import escape
+import re
 
 
 '''
@@ -31,11 +32,11 @@ def list_groups(user):
 			if g.moderators.filter(email=user.email).count() > 0:
 				mod = True
 			
-			res['groups'].append({'name':g.name, 'member': True, 'admin': admin, 'mod': mod})
+			res['groups'].append({'name':g.name, 'desc': escape(g.description), 'member': True, 'admin': admin, 'mod': mod})
 			
 		pub_groups = Group.objects.filter(Q(public=True, active=True), ~Q(members__in=[user]))
 		for g in pub_groups:
-			res['groups'].append({'name':g.name,  'member': False, 'admin': False, 'mod': False})
+			res['groups'].append({'name':g.name, 'desc': escape(g.description), 'member': False, 'admin': False, 'mod': False})
 			
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
@@ -44,13 +45,28 @@ def list_groups(user):
 	
 
 
-def create_group(group_name, public, requester):
+def create_group(group_name, group_desc, public, requester):
 	res = {'status':False}
+	
+	
+	if not re.match('^[\w-]+$', group_name) is not None:
+		res['code'] = msg_code['INCORRECT_GROUP_NAME']
+		return res
+	
+	if len(group_desc) > MAX_GROUP_DESC_LENGTH:
+		res['code'] = msg_code['MAX_GROUP_DESC_LENGTH']
+		return res
+	
+	if len(group_name) > MAX_GROUP_NAME_LENGTH:
+		res['code'] = msg_code['MAX_GROUP_NAME_LENGTH']
+		return res
+	
 	try:
 		group = Group.objects.get(name=group_name)
 		res['code'] = msg_code['DUPLICATE_ERROR']
+		
 	except Group.DoesNotExist:
-		group = Group(name=group_name, active=True, public=public)
+		group = Group(name=group_name, active=True, public=public, description=group_desc)
 		group.save()
 		
 		group.admins.add(requester)
@@ -61,6 +77,7 @@ def create_group(group_name, public, requester):
 		res['status'] = True
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
+		
 	logging.debug(res)
 	return res
 
@@ -315,25 +332,29 @@ def insert_post(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		group_members = group.members.all()
 		
-		recipients = [m.email for m in group_members]
+		if user in group_members:
 		
-		thread = Thread()
-		thread.subject = subject
-		thread.group = group
-		thread.save()
-		
-		msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
-		
-		p = Post(msg_id=msg_id, author=user, subject=subject, post=str(message_text), group=group, thread=thread)
-		p.save()
-		
-		f = Following(user=user, thread=thread)
-		f.save()
-		
-		res['status'] = True
-		res['msg_id'] = msg_id
-		res['thread_id'] = thread.id
-		res['recipients'] = recipients
+			recipients = [m.email for m in group_members]
+			
+			thread = Thread()
+			thread.subject = subject
+			thread.group = group
+			thread.save()
+			
+			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
+			
+			p = Post(msg_id=msg_id, author=user, subject=subject, post=str(message_text), group=group, thread=thread)
+			p.save()
+			
+			f = Following(user=user, thread=thread)
+			f.save()
+			
+			res['status'] = True
+			res['msg_id'] = msg_id
+			res['thread_id'] = thread.id
+			res['recipients'] = recipients
+		else:
+			res['code'] = msg_code['NOT_MEMBER']
 
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -351,27 +372,34 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 	try:
 		group = Group.objects.get(name=group_name)
 		
-		orig_post_subj = subject[4:]
+		group_members = group.members.all()
 		
-		post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')[0]
-		if not thread_id:
-			thread = Thread.objects.filter(subject=orig_post_subj).order_by('-timestamp')[0]
+		if user in group_members:
+		
+			orig_post_subj = subject[4:]
+			
+			post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')[0]
+			if not thread_id:
+				thread = Thread.objects.filter(subject=orig_post_subj).order_by('-timestamp')[0]
+			else:
+				thread = Thread.objects.get(id=thread_id)
+			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
+			
+			r = Post(msg_id=msg_id, author=user, subject=subject, post = str(message_text), reply_to=post, group=group, thread=thread)
+			r.save()
+			
+			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
+			thread.save()
+			
+			following = Following.objects.filter(thread=thread)
+			recipients = [f.user.email for f in following]
+			res['status'] = True
+			res['recipients'] = recipients
+			res['thread_id'] = thread.id
+			res['msg_id'] = msg_id
+			
 		else:
-			thread = Thread.objects.get(id=thread_id)
-		msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
-		
-		r = Post(msg_id=msg_id, author=user, subject=subject, post = str(message_text), reply_to=post, group=group, thread=thread)
-		r.save()
-		
-		thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
-		thread.save()
-		
-		following = Following.objects.filter(thread=thread)
-		recipients = [f.user.email for f in following]
-		res['status'] = True
-		res['recipients'] = recipients
-		res['thread_id'] = thread.id
-		res['msg_id'] = msg_id
+			res['code'] = msg_code['NOT_MEMBER']
 		
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
