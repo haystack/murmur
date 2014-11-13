@@ -10,7 +10,7 @@ django-compressor==1.4
 django-gravatar==0.1.0
 django-registration==1.0
 gnureadline==6.3.3
-html2text==2014.9.25
+html2text
 html5lib==1.0b3
 ipython==2.3.0
 lamson==1.3.4

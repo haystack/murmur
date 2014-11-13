@@ -155,6 +155,7 @@ def info(message, group_name=None, host=None):
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
 def handle_post(message, address=None, host=None):
+	
 	address = address.lower()
 	name, addr = parseaddr(message['From'].lower())
 	reserved = filter(lambda x: address.endswith(x), RESERVED)
@@ -186,13 +187,31 @@ def handle_post(message, address=None, host=None):
 	
 	to_send =  res['recipients']
 	post_addr = '%s <%s>' %(group_name, group_name + '@' + host)
-	mail = MailResponse(From = message['From'], To = post_addr, Subject  = subject)
+	mail = MailResponse(From = message['From'], 
+						To = post_addr, 
+						Subject  = subject)
 	
+	mail.update({
+		"Sender": post_addr, 
+		"Reply-To": post_addr,
+		"List-Id": post_addr,
+		"List-Unsubscribe": "<mailto:%s+unsubscribe@%s>" % (group_name,host),
+		"List-Archive": "<http://%s/groups/%s/>" % (host, group_name),
+		"List-Post": "<mailto:%s>" % post_addr,
+		"List-Help": "<mailto:help@%s>" % host,
+		"List-Subscribe": "<mailto:%s+subscribe@%s>" % (group_name,host),
+		"Return-Path": post_addr, 
+		"Precedence": 'list',
+	})
 		
 	if 'references' in message:
-		mail['References'] = message['References']
+		mail['References'] = message['references']
 	elif 'message-id' in message:
 		mail['References'] = message['message-id']	
+		
+
+	if 'in-reply-to' not in message:
+		mail["In-Reply-To"] = message['message-id']
 	
 	
 	mail['message-id'] = msg_id
@@ -204,6 +223,7 @@ def handle_post(message, address=None, host=None):
 	mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
 		
 	logging.debug('TO LIST: ' + str(to_send))
+	
 	if(len(to_send)>0):
 		relay.deliver(mail, To = to_send)
 
