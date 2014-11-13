@@ -57,7 +57,7 @@ def create_group(group_name, group_desc, public, requester):
 		res['code'] = msg_code['MAX_GROUP_DESC_LENGTH']
 		return res
 	
-	if len(group_name) > MAX_GROUP_NAME_LENGTH:
+	if len(group_name) > MAX_GROUP_NAME_LENGTH or len(group_name) == 0:
 		res['code'] = msg_code['MAX_GROUP_NAME_LENGTH']
 		return res
 	
