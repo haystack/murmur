@@ -6,7 +6,10 @@
 <head>
 	<title>{% block title %}MailX{% endblock %}</title>
 	<link href="/static/css/third-party/bootstrap.min.css" rel="stylesheet">
-	<link href="/static/css/main.css" rel="stylesheet">
+	<link href="/static/css/base.css" rel="stylesheet">
+	{% block customcss %}
+		<link href="/static/css/main.css" rel="stylesheet">
+	{% endblock %}
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 
@@ -35,26 +38,37 @@
 	                	<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
 					{% endfor %}
 	                <li class="divider"></li>
-	                <li><a href="/groups">Join/create new group</a></li>
+	                <li><a href="/my_groups">Manage my groups</a></li>
+	                <li><a href="/group_list">Join/create new groups</a></li>
 	              </ul>
 	            </li>
 	            
-	            <li><a href="/groups">Manage Groups</a></li>
+	            <li><a href="/my_groups">My Groups</a></li>
+	            <li><a href="/group_list">Explore Groups</a></li>
 	        
             {% else %}
             	<li class="dropdown">
 	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>View Group Posts</span><span class="caret"></span></a>
 	              	<ul class="dropdown-menu" role="menu" id="list-group-names">
 		              	{% for group in groups %}
-		                	<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
+		              		{% if group.name == active_group %}
+		              			<li><a href="/posts?group_name={{ group.name }}"><span id="active_group">{{ group.name }}</span></a></li>
+		              		{% else %}
+		                		<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
+		                	{% endif %}
 						{% endfor %}
 	                <li class="divider"></li>
-	                <li><a href="/groups">Join/create new group</a></li>
+	                <li><a href="/my_groups">Manage my groups</a></li>
+	                <li><a href="/group_list">Join/create new groups</a></li>
 	              </ul>
 	            </li>
-            
-            	<li class="active"><a href="/groups">Manage Groups</a></li>
-
+            	{% if my_groups %}
+            		<li class="active"><a href="/my_groups">My Groups</a></li>
+            		<li><a href="/group_list">Explore Groups</a></li>
+            	{% else %}
+            		<li><a href="/my_groups">My Groups</a></li>
+            		<li class="active"><a href="/group_list">Explore Groups</a></li>
+				{% endif %}
             {% endif %}
           </ul>
           <ul class="nav navbar-nav navbar-right">
@@ -77,7 +91,6 @@
 	
 	{% endblock %}
 
-	
 	<script type="text/javascript" src="/static/javascript/third-party/jquery.min.js"></script>	
 	<script src="/static/javascript/third-party/bootstrap.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/csrf.min.js"></script>
@@ -87,6 +100,9 @@
 	<script type="text/javascript" src="/static/javascript/third-party/noty/themes/default.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/ckeditor/ckeditor.js"></script>
+	
+	{% block customjs %}
 	<script type="text/javascript" src="/static/javascript/main.js"></script>
+	{% endblock %}
 </body>
 </html>

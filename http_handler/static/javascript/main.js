@@ -54,7 +54,7 @@ $(document).ready(function(){
 		function(params){
 			$.ajax({
 				type: 'POST',
-				url: 'list_groups', 
+				url: 'list_my_groups', 
 				data: params,
 				success:  function(res){
 					populate_groups_table(res);
@@ -282,6 +282,10 @@ $(document).ready(function(){
 	 		
 			$("#btn-create-group").click(crt_group);
 			
+			if (res.groups.length == 0) {
+				var content = '<i>You are not in any groups yet. <a href="/group_list">Join or create a new group.</a></i>';
+				$("#groups-table").append(content);
+			}
 			
 			for(var i = 0; i< res.groups.length; i++){
 				var content = '<li class="row-item" id="'+ res.groups[i].name+'">';
@@ -662,7 +666,7 @@ $(document).ready(function(){
 	
 	/* Handle based on URLs */
 	
-	if (window.location.pathname.indexOf('/groups') != -1) {
+	if (window.location.pathname.indexOf('/my_groups') != -1) {
 		list_groups();
 		var groups_table = $("#groups-table");
 		groups_table.children().first().click();

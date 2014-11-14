@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block customcss %}
+	<link href="/static/css/group_info.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+  	
+  	<button type="button">Create New Group</button><br />
+  	
+     <h3>Public Groups</h3>
+     <hr />
+		<div>
+			<table id="members-table" class="display" cellspacing="0" width="100%">
+				<thead>
+					<tr>
+						<th>Group Name</th>
+						<th>Description</th>
+						<th>Admin</th>
+						<th>Moderator</th>
+						<th>Member</th>
+						<th>Created</th>
+						<th>Num Members</th>
+					</tr>
+				</thead>
+				
+				<tfoot>
+					<tr>
+						<th>Group Name</th>
+						<th>Description</th>
+						<th>Admin</th>
+						<th>Moderator</th>
+						<th>Member</th>
+						<th>Created</th>
+						<th>Num Members</th>
+					</tr>
+				</tfoot>
+				
+				<tbody>
+					{% for group in pub_groups %}
+					<tr>
+						<td><a href="/groups/{{ group.name }}">{{group.name}}</a></td>
+						<td><span class="italic-small">{{ group.desc }}</span></td>
+						<th>{{ group.admin }}</th>
+						<th>{{ group.mod }}</th>
+						<th>{{ group.member }}</th>
+						<th>{{ group.created }}</th>
+						<th>{{ group.count }}</th>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>	
+
+
+		</div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block customjs %}
+
+<script type="text/javascript" src="/static/javascript/group_page.js"></script>
+
+{% endblock %}
+
+

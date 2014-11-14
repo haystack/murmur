@@ -12,7 +12,7 @@ from smtp_handler.utils import *
 
 from django.core.context_processors import csrf
 import json, logging
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from annoying.decorators import render_to
 from schema.models import UserProfile, Group
@@ -31,13 +31,27 @@ def logout(request):
 	request.session.flush()
 	return HttpResponseRedirect('/')
 
+@render_to('404.html')
+def error(request):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(members__in=[user]).values("name")
+	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
+	
+	error = request.GET.get('e')
+	if error == 'gname':
+		res['error'] = '%s is not a valid group name.' % request.GET['group_name']
+	else:
+		res['error'] = 'Unknown error.'
+	return res
+
+
 @render_to('home.html')
 def index(request):
 	if not request.user.is_authenticated():
 		return dict()
 	else:
 		return HttpResponseRedirect('/posts')
-
+	
 @render_to("posts.html")
 @login_required
 def posts(request):
@@ -56,16 +70,38 @@ def settings(request):
 	
 @render_to("groups.html")
 @login_required
-def groups(request):
+def my_groups(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(members__in=[user]).values("name")
-	return {'user': request.user, 'groups': groups, 'group_page': True}
+	return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
 	
+@render_to("group_page.html")
 @login_required
-def list_groups(request):
+def group_page(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(members__in=[user])
+	group_info = engine.main.group_info_page(user, group_name)
+	if group_info['group']:
+		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True}
+	else:
+		return redirect('/404?e=gname&name=%s' % group_name)
+	
+	
+@render_to("list_groups.html")
+@login_required
+def group_list(request):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(members__in=[user]).values("name")
+	pub_groups = engine.main.list_groups(user)
+	return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
+
+
+
+@login_required
+def list_my_groups(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		res = engine.main.list_groups(user)
+		res = engine.main.list_my_groups(user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

@@ -18,7 +18,66 @@ MailX Main Controller
 @date: Oct 20, 2012
 '''
 
+
 def list_groups(user):
+	groups = []
+	pub_groups = Group.objects.filter(Q(public=True, active=True)).order_by('name')
+	for g in pub_groups:
+		admin = False
+		mod = False
+		member = False
+		
+		if g.admins.filter(email=user.email).count() > 0:
+			admin = True
+		if g.moderators.filter(email=user.email).count() > 0:
+			mod = True
+		if g.members.filter(email=user.email).count() > 0:
+			member = True
+			
+		groups.append({'name':g.name, 
+					   'desc': escape(g.description), 
+					   'member': member, 
+					   'admin': admin, 
+					   'mod': mod,
+					   'created': g.timestamp,
+					   'count': g.members.count(),
+					   })
+	return groups
+
+def group_info_page(user, group_name):
+	res = {}
+	try:
+		group = Group.objects.get(name=group_name)
+		
+		members = group.members.all()
+		res['group'] = group
+		res['members'] = []
+		for member in members:
+
+			admin = False
+			mod = False
+			if group.admins.filter(email=member.email).count() > 0:
+				admin = True
+			if group.moderators.filter(email=member.email).count() > 0:
+				mod = True
+			
+			if user.email == member.email:
+				res['admin'] = admin
+				res['moderator'] = mod
+				res['subscribed'] = member.is_active
+			
+			member_info = {'email': member.email, 
+							'joined': 1,
+						   'admin': admin, 
+						   'mod': mod}
+			
+			res['members'].append(member_info)
+	except:
+		res['group'] = None
+	
+	return res
+
+def list_my_groups(user):
 	res = {'status':False}
 	try:
 		groups = Group.objects.filter(members__in=[user], active=True)
@@ -33,10 +92,6 @@ def list_groups(user):
 				mod = True
 			
 			res['groups'].append({'name':g.name, 'desc': escape(g.description), 'member': True, 'admin': admin, 'mod': mod})
-			
-		pub_groups = Group.objects.filter(Q(public=True, active=True), ~Q(members__in=[user]))
-		for g in pub_groups:
-			res['groups'].append({'name':g.name, 'desc': escape(g.description), 'member': False, 'admin': False, 'mod': False})
 			
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
