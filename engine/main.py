@@ -52,6 +52,11 @@ def group_info_page(user, group_name):
 		members = group.members.all()
 		res['group'] = group
 		res['members'] = []
+		
+		res['admin'] = False
+		res['moderator'] = False
+		res['subscribed'] = False
+		
 		for member in members:
 
 			admin = False
@@ -64,7 +69,7 @@ def group_info_page(user, group_name):
 			if user.email == member.email:
 				res['admin'] = admin
 				res['moderator'] = mod
-				res['subscribed'] = member.is_active
+				res['subscribed'] = True
 			
 			member_info = {'email': member.email, 
 							'joined': 1,

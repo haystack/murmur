@@ -8,20 +8,43 @@
 
 <div class="container">
   <div class="group-container">
-  	
-     <h3>{{ group_info.group.name }}</h3>
+	{% if group_info.subscribed %}
+			<span class="member label">Member</span>
+	{% endif %}
+  		{% if group_info.admin %}
+		<span class="admin label">Admin</span>
+	{% endif %}
+	{% if group_info.moderator %}
+		<span class="mod label">Mod</span>
+	{% endif %}
+     <h3>{{ group_info.group.name }}   	</h3>
+
      <hr />
-		<span class="italic-small">{{ group_info.group.description }}</span><br />
+		<span class="italic-small">{{ group_info.group.description }}</span><br /><br />
+		
+		<span class="strong">Active: </span><span class="strong-gray">{{ group_info.group.active }}</span><br /> <br />
+		<a href="/posts?group_name={{ group_info.group.name }}">View Posts</a> <br /> <br />
 		
 			<div id="group-options">
-				<button type="button" id="btn-activate-group">Activate</button>
-				<button type="button" id="btn-deactivate-group">De-Activate</button>
-				<button type="button" id="btn-subscribe-group">Subscribe</button>
-				<button type="button" id="btn-unsubscribe-group">Un-Subscribe</button>
+				{% if group_info.admin %}
+					{% if group_info.group.active %}
+						<button type="button" id="btn-deactivate-group">De-Activate</button>
+					{% else %}
+						<button type="button" id="btn-activate-group">Activate</button>
+					{% endif %}
+				{% endif %}
+				
+				{% if group_info.subscribed %}
+					<button type="button" id="btn-unsubscribe-group">Un-Subscribe</button>
+				{% else %}
+					<button type="button" id="btn-subscribe-group">Subscribe</button>
+				{% endif %}
 			</div>
 			<br />
 			<h3>Members List</h3> 
-			<button type="button" id="btn-add-members">Add Members</button>
+			{% if group_info.admin %}
+				<button type="button" id="btn-add-members">Add Members</button>
+			{% endif %}
 			<hr />
 			<table id="members-table" class="display" cellspacing="0" width="100%">
 				<thead>
