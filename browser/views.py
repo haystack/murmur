@@ -40,6 +40,8 @@ def error(request):
 	error = request.GET.get('e')
 	if error == 'gname':
 		res['error'] = '%s is not a valid group name.' % request.GET['group_name']
+	elif error == 'admin':
+		res['error'] = 'You do not have the admin privileges to visit this page.'
 	else:
 		res['error'] = 'Unknown error.'
 	return res
@@ -95,6 +97,19 @@ def group_list(request):
 	pub_groups = engine.main.list_groups(user)
 	return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
 
+@render_to("add_members.html")
+@login_required
+def add_members_view(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(members__in=[user])
+	try:
+		group = Group.objects.get(name=group_name)
+		if group.admins.filter(email=user.email).count() > 0:
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+		else:
+			return redirect('/404?e=admin')
+	except Group.DoesNotExist:
+		return redirect('/404?e=gname&name=%s' % group_name)
 
 
 @login_required

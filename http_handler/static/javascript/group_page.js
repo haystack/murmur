@@ -114,7 +114,7 @@ $(document).ready(function(){
 		btn_unsubscribe_group.click(unsub_group);
 		
 		btn_add_members.click(function() {
-			window.location = '/';
+			window.location = '/groups/' + group_name + '/add_members';
 		});
 		
 	}
