@@ -111,6 +111,12 @@ def add_members_view(request, group_name):
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 
+@render_to("create_group.html")
+@login_required
+def create_group_view(request):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(members__in=[user])
+	return {'user': request.user, 'groups': groups, 'group_page': True}
 
 @login_required
 def list_my_groups(request):

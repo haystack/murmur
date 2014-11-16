@@ -13,6 +13,7 @@ urlpatterns = patterns('',
      url(r'^groups/(?P<group_name>[\w-]+)/add_members', 'browser.views.add_members_view'),
      url(r'^groups/(?P<group_name>[\w-]+)', 'browser.views.group_page'),
      url(r'^404', 'browser.views.error'),
+     url(r'^create_new_group', 'browser.views.create_group_view'),
 	 
 	 url(r'^list_my_groups', 'browser.views.list_my_groups'),
 	 url(r'^create_group', 'browser.views.create_group'),

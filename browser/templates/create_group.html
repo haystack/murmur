@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+	
+     <h3>Create New Group</h3>
+
+     <hr />
+     
+     <form id="new-group-form">
+	 <span class="strong">New Group Name : </span> <br />
+	 <span class="italic-small">
+	 	Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed
+	 </span><br />
+     <input id="new-group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;">
+     </input> <br /> <br />
+		
+	<span class="strong">New Group Description : </span> <br />
+	<span class="italic-small">Maximum 140 characters</span><br />
+	<textarea id="new-group-description" maxlength="140"></textarea><br /><br />
+		
+	<span class="strong">New Group Privacy Settings : </span> <br />
+	<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked> Public<br />
+	<span class="italic-small">All users will be able to view and search for this group by name.</span><br />
+		
+	<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group"> Private<br />
+	<span class="italic-small">Only users added to this group by admins will be notified about the group.</span><br /><br />
+		
+	<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>
+		
+		
+	</form>
+        
+     
+        
+  </div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/create_group.js"></script>
+{% endblock %}
+
+
+
+
