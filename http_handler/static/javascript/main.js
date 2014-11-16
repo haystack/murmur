@@ -8,7 +8,7 @@ $(document).ready(function(){
  
 	/* Dynamic Table Definitions */	
 	
-	members_table = $('#members-table').dataTable({});
+	members_table = $('#members-table').dataTable();
 	
 	
 	
