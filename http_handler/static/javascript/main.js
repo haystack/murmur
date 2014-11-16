@@ -100,8 +100,11 @@ $(document).ready(function(){
 		function(params){
 			$.post('subscribe_group', params, 
 				function(res){
-					list_groups(params);
-					group_info(params);
+					if (res.status) {
+						$('#list-group-names').prepend('<li><a href="/posts?group_name=' + params.group_name + '">' + params.group_name + '</a></li>');
+						list_groups(params);
+						group_info(params);
+					}
 					notify(res, true);
 				}
 			);	
@@ -635,7 +638,7 @@ $(document).ready(function(){
 
 
 	 function init_posts_page (){
-		$.post('list_groups', {},
+		$.post('list_my_groups', {},
                         function(res){
                                 $("#btn-create-new-post").unbind("click");
                                 var func_new_post = bind(new_post, res);

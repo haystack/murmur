@@ -27,12 +27,11 @@ def list_groups(user):
 		mod = False
 		member = False
 		
-		if g.admins.filter(email=user.email).count() > 0:
-			admin = True
-		if g.moderators.filter(email=user.email).count() > 0:
-			mod = True
-		if g.members.filter(email=user.email).count() > 0:
+		membergroup = MemberGroup.objects.filter(member=user, group=g)
+		if membergroup.count() == 1:
 			member = True
+			admin = membergroup[0].admin
+			mod = membergroup[0].moderator
 			
 		groups.append({'name':g.name, 
 					   'desc': escape(g.description), 
@@ -40,7 +39,7 @@ def list_groups(user):
 					   'admin': admin, 
 					   'mod': mod,
 					   'created': g.timestamp,
-					   'count': g.members.count(),
+					   'count': g.membergroup_set.count()
 					   })
 	return groups
 
@@ -48,8 +47,8 @@ def group_info_page(user, group_name):
 	res = {}
 	try:
 		group = Group.objects.get(name=group_name)
-		
-		members = group.members.all()
+		members = MemberGroup.objects.filter(group=group)
+
 		res['group'] = group
 		res['members'] = []
 		
@@ -57,24 +56,17 @@ def group_info_page(user, group_name):
 		res['moderator'] = False
 		res['subscribed'] = False
 		
-		for member in members:
-
-			admin = False
-			mod = False
-			if group.admins.filter(email=member.email).count() > 0:
-				admin = True
-			if group.moderators.filter(email=member.email).count() > 0:
-				mod = True
+		for membergroup in members:
 			
-			if user.email == member.email:
-				res['admin'] = admin
-				res['moderator'] = mod
+			if user.email == membergroup.member.email:
+				res['admin'] = membergroup.admin
+				res['moderator'] = membergroup.moderator
 				res['subscribed'] = True
 			
-			member_info = {'email': member.email, 
-							'joined': 1,
-						   'admin': admin, 
-						   'mod': mod}
+			member_info = {'email': membergroup.member.email, 
+						   'joined': membergroup.timestamp,
+						   'admin': membergroup.admin, 
+						   'mod': membergroup.moderator}
 			
 			res['members'].append(member_info)
 	except:
@@ -85,18 +77,15 @@ def group_info_page(user, group_name):
 def list_my_groups(user):
 	res = {'status':False}
 	try:
-		groups = Group.objects.filter(members__in=[user], active=True)
+		membergroup = MemberGroup.objects.filter(member=user, group__active=True).select_related()
 		res['status'] = True
 		res['groups'] = []
-		for g in groups:
-			admin = False
-			mod = False
-			if g.admins.filter(email=user.email).count() > 0:
-				admin = True
-			if g.moderators.filter(email=user.email).count() > 0:
-				mod = True
-			
-			res['groups'].append({'name':g.name, 'desc': escape(g.description), 'member': True, 'admin': admin, 'mod': mod})
+		for mg in membergroup:
+			res['groups'].append({'name':mg.group.name, 
+								  'desc': escape(mg.group.description), 
+								  'member': True, 
+								  'admin': mg.admin, 
+								  'mod': mg.moderator})
 			
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
@@ -129,10 +118,8 @@ def create_group(group_name, group_desc, public, requester):
 		group = Group(name=group_name, active=True, public=public, description=group_desc)
 		group.save()
 		
-		group.admins.add(requester)
-		group.moderators.add(requester)
-		group.members.add(requester)
-		group.save()
+		membergroup = MemberGroup(group=group, member=requester, admin=True, moderator=True)
+		membergroup.save()
 		
 		res['status'] = True
 	except:
@@ -148,7 +135,8 @@ def activate_group(group_name, user):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
-		if group.admins.filter(email=user.email).count() > 0:
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		if membergroup.admin:
 			group.active = True
 			group.save()
 			res['status'] = True
@@ -156,6 +144,8 @@ def activate_group(group_name, user):
 			res['code'] = msg_code['PRIVILEGE_ERROR']
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
@@ -169,7 +159,8 @@ def deactivate_group(group_name, user):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
-		if group.admins.filter(email=user.email).count() > 0:
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		if membergroup.admin:
 			group.active = False
 			group.save()
 			res['status'] = True
@@ -177,6 +168,8 @@ def deactivate_group(group_name, user):
 			res['code'] = msg_code['PRIVILEGE_ERROR']
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
@@ -190,8 +183,8 @@ def add_members(group_name, emails, user):
 	
 	try:
 		group = Group.objects.get(name=group_name)
-		
-		if group.admins.filter(email=user.email).count() > 0:
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		if membergroup.admin:
 			res['status'] = True
 			email_list = emails.strip().lower().split(',')
 			for email in email_list:
@@ -211,7 +204,7 @@ def add_members(group_name, emails, user):
 				else:
 					pw = password_generator()
 					new_user = UserProfile.objects.create_user(email, pw)
-					group.members.add(new_user)
+					_ = MemberGroup.objects.get_or_create(group=group, user=new_user)
 					
 					message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
 					message += "An account has been created for you at <a href='http://mailx.csail.mit.edu'>http://mailx.csail.mit.edu</a><br />"
@@ -229,6 +222,8 @@ def add_members(group_name, emails, user):
 			res['code'] = msg_code['PRIVILEGE_ERROR']
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
@@ -241,13 +236,14 @@ def subscribe_group(group_name, user):
 	res = {'status':False}
 
 	try:
-		group = Group.objects.get(name=group_name)
-		if group.members.filter(email=user.email).count() > 0:
+		membergroup = MemberGroup.objects.filter(group__name=group_name, member=user)
+		if membergroup.count() == 1:
 			user.active=True
 			user.save()
 			res['status'] = True
 		else:
-			group.members.add(user)
+			group = Group.objects.get(name=group_name)
+			_ = MemberGroup.objects.create(group=group, member=user)
 			res['status'] = True
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -263,10 +259,13 @@ def unsubscribe_group(group_name, user):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
-		group.members.remove(user)
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		membergroup.delete()
 		res['status'] = True
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
@@ -279,32 +278,28 @@ def group_info(group_name, user):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
+		membergroups = MemberGroup.objects.filter(group=group).select_related()
 		
-		members = group.members.all()
 		res['status'] = True
 		res['group_name'] = group_name
 		res['active'] = group.active
 		res['members'] = []
-		for member in members:
+		for membergroup in membergroups:
 
-			admin = False
-			mod = False
-			if group.admins.filter(email=member.email).count() > 0:
-				admin = True
-			if group.moderators.filter(email=member.email).count() > 0:
-				mod = True
+			admin = membergroup.admin
+			mod = membergroup.moderator
 			
-			if user.email == member.email:
+			if user.email == membergroup.member.email:
 				res['admin'] = admin
 				res['moderator'] = mod
-				res['subscribed'] = member.is_active
+				res['subscribed'] = True
 			
-			member_info = {'email': member.email, 
+			member_info = {'email': membergroup.member.email, 
 						   'group_name': group_name, 
 						   'admin': admin, 
 						   'member': True, 
 						   'moderator': mod, 
-						   'active': member.is_active}
+						   'active': membergroup.member.is_active}
 			
 			res['members'].append(member_info)
 	except Group.DoesNotExist:
@@ -356,6 +351,7 @@ def list_posts(group_name=None, timestamp_str = None):
 								   'f_list':f_list, 
 								   'timestamp':format_date_time(t.timestamp)})
 			res['status'] = True
+			
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
@@ -390,7 +386,8 @@ def insert_post(group_name, subject, message_text, user):
 	try:
 		
 		group = Group.objects.get(name=group_name)
-		group_members = group.members.all()
+		
+		group_members = UserProfile.objects.filter(membergroup__group=group)
 		
 		if user in group_members:
 		
@@ -432,10 +429,10 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 	try:
 		group = Group.objects.get(name=group_name)
 		
-		group_members = group.members.all()
+		group_members = UserProfile.objects.filter(membergroup__group=group)
 		
 		if user in group_members:
-		
+			
 			orig_post_subj = subject[4:]
 			
 			post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')[0]

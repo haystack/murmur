@@ -15,7 +15,7 @@ import json, logging
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from annoying.decorators import render_to
-from schema.models import UserProfile, Group
+from schema.models import UserProfile, Group, MemberGroup
 from html2text import html2text
 
 '''
@@ -34,12 +34,12 @@ def logout(request):
 @render_to('404.html')
 def error(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(members__in=[user]).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name")
 	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
 	
 	error = request.GET.get('e')
 	if error == 'gname':
-		res['error'] = '%s is not a valid group name.' % request.GET['group_name']
+		res['error'] = '%s is not a valid group name.' % request.GET['name']
 	elif error == 'admin':
 		res['error'] = 'You do not have the admin privileges to visit this page.'
 	else:
@@ -58,7 +58,7 @@ def index(request):
 @login_required
 def posts(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(members__in=[user]).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name")
 	active_group = load_groups(request, groups, user)
 	return {'user': user, "active_group": active_group, "groups": groups}
 
@@ -66,7 +66,7 @@ def posts(request):
 @login_required
 def settings(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(members__in=[user]).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name")
 	active_group = load_groups(request, groups, user)
 	return {'user': request.user, "active_group": active_group, "groups": groups}
 	
@@ -74,14 +74,14 @@ def settings(request):
 @login_required
 def my_groups(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(members__in=[user]).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name")
 	return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
 	
 @render_to("group_page.html")
 @login_required
 def group_page(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(members__in=[user])
+	groups = Group.objects.filter(membergroup__member=user).values("name")
 	group_info = engine.main.group_info_page(user, group_name)
 	if group_info['group']:
 		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True}
@@ -93,7 +93,7 @@ def group_page(request, group_name):
 @login_required
 def group_list(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(members__in=[user]).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name")
 	pub_groups = engine.main.list_groups(user)
 	return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
 
@@ -101,10 +101,11 @@ def group_list(request):
 @login_required
 def add_members_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(members__in=[user])
+	groups = Group.objects.filter(membergroup__member=user).values("name")
 	try:
 		group = Group.objects.get(name=group_name)
-		if group.admins.filter(email=user.email).count() > 0:
+		membergroup = MemberGroup.objects.filter(user=user, group=group)
+		if membergroup.count() == 1 and membergroup[0].admin:
 			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
 		else:
 			return redirect('/404?e=admin')
@@ -115,7 +116,7 @@ def add_members_view(request, group_name):
 @login_required
 def create_group_view(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(members__in=[user])
+	groups = Group.objects.filter(membergroup__member=user).values("name")
 	return {'user': request.user, 'groups': groups, 'group_page': True}
 
 @login_required

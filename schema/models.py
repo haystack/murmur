@@ -42,6 +42,21 @@ class Thread(models.Model):
 		db_table = "mailx_threads"
 		ordering = ["-timestamp"]
 
+class MemberGroup(models.Model):
+	id = models.AutoField(primary_key=True)
+	member = models.ForeignKey(settings.AUTH_USER_MODEL)
+	group = models.ForeignKey('Group')
+	timestamp = models.DateTimeField(auto_now=True)
+	admin = models.BooleanField(default=False)
+	moderator = models.BooleanField(default=False)
+	
+	def __unicode__(self):
+		return '%s - %s' % (self.member.email, self.group.name)
+
+	class Meta:
+		db_table = "mailx_membergroups"
+		unique_together = ("member", "group")
+	
 
 class Group(models.Model):
 	id = models.AutoField(primary_key=True)
@@ -50,9 +65,6 @@ class Group(models.Model):
 	public = models.BooleanField(default=True)
 	active = models.BooleanField(default=True)
 	timestamp = models.DateTimeField(auto_now=True)
-	admins = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="admin")
-	moderators = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="moderator")
-	members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="member")
 	
 	def __unicode__(self):
 		return self.name
