@@ -8,21 +8,7 @@ $(document).ready(function(){
  
 	/* Dynamic Table Definitions */	
 	
-	members_table = $('#members-table').dataTable({
-		"sDom": '<"top"f<"clear">>rt<"bottom"ilp<"clear">>',
-		"bPaginate": false,
-		"bInfo": false,
-		"bAutoWidth": false,
-		"bFilter": false,
-		"sWidth": "100%",
-		"aoColumns": [                 
-			{"bSortable": false, "sWidth": "50%"},
-			{"bSortable": false, "sWidth": "12.5%"},
-			{"bSortable": false, "sWidth": "12.5%"},
-			{"bSortable": false, "sWidth": "12.5%"},
-			{"bSortable": false, "sWidth": "12.5%"}
-		]  
-	});
+	members_table = $('#members-table').dataTable({});
 	
 	
 	

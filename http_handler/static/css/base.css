@@ -83,15 +83,6 @@ hr{
       margin:0;
       padding:0;
 }
-.main-area-content{
-	padding-right: 20px;
-	padding-top: 20px;
-	padding-left: 20px;
-	padding-bottom: 20px;
-	margin-bottom: 10px;
-	background-color: #FFF;
-	box-shadow: 1px 0px 3px #666;
-}
 
 
 .left-column-area-content .ellipsis{
@@ -252,3 +243,40 @@ textarea {
 	font-style: italic;
 	size: 10px;
 }
+
+
+#posts-table, #groups-table{
+	position:absolute;
+	top: 50px;
+	bottom:0px;
+	overflow: auto;
+}
+
+.table{
+	width: 100%;
+}
+
+.table .row-item {
+	background: white;
+	padding: 15px;
+        border-bottom: #ccc solid 1px;
+        vertical-align: middle;
+	border-bottom: 1px solid #ccc;
+	cursor: default;
+}
+
+.table .row-item.selected {
+	background: #FFF7CE!important;
+}
+
+.main-area-content {
+	background: #FFFFFF;
+	padding: 20px;
+	margin-top:10px;
+	margin-bottom:10px;
+}
+
+.dataTable {
+	background: #D7ECFA;
+}
+
