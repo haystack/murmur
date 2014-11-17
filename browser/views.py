@@ -104,7 +104,7 @@ def add_members_view(request, group_name):
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	try:
 		group = Group.objects.get(name=group_name)
-		membergroup = MemberGroup.objects.filter(user=user, group=group)
+		membergroup = MemberGroup.objects.filter(member=user, group=group)
 		if membergroup.count() == 1 and membergroup[0].admin:
 			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
 		else:
