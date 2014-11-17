@@ -26,13 +26,19 @@ ALLOWED_TAGS = [
     'h3',
     'pre',
     's',
+    'html',
+    'head',
+    'meta',
+    'body'
 ]
 
 ALLOWED_ATTRIBUTES = {
     'a': ['href', 'title'],
     'abbr': ['title'],
     'acronym': ['title'],
-    'img': ['src','alt', 'style']
+    'img': ['src','alt', 'style'],
+    'meta': ['content', 'http-equiv'],
+    'body': ['bgcolor', 'text']
 }
 
 ALLOWED_STYLES = ['border-style', 'border-width', 'float', 'height', 'margin', 'width']
