@@ -576,7 +576,7 @@ $(document).ready(function(){
 		}
 
 		content += ' Only receive replies when following the thread<br />';
-		content += '<span class="italic-small">You will only be emailed replies to a message if you explicitly follow the thread.</span><br /><br />';
+		content += '<span class="italic-small">You will only be emailed replies to a message if you explicitly follow the thread, started the thread, or contribute a message at any point in the thread.</span><br /><br />';
 		
 		content += '<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Settings</button> ';
 		content += '<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>';

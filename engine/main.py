@@ -486,11 +486,15 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
 			thread.save()
 			
+			f = Following(user=user, thread=thread)
+			f.save()
+			
+			#users following the thread
 			following = Following.objects.filter(thread=thread)
 			recipients = [f.user.email for f in following]
 			
+			#users that always follow threads in this group
 			member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True)
-			
 			recipients.extend([m.member.email for m in member_recip])
 			
 			res['status'] = True
