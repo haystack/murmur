@@ -224,7 +224,6 @@ def add_members(group_name, emails, user):
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		if membergroup.admin:
-			res['status'] = True
 			email_list = emails.strip().lower().split(',')
 			for email in email_list:
 				email = email.strip()
@@ -235,7 +234,7 @@ def add_members(group_name, emails, user):
 				
 				email_user = UserProfile.objects.filter(email=email)
 				if email_user.count() == 1:
-					group.members.add(email_user[0])
+					_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group)
 					
 					message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
 					message += "To see posts from this list, visit <a href='http://mailx.csail.mit.edu/posts?group_name=%s'>http://mailx.csail.mit.edu/posts?group_name=%s</a><br />" % (group_name, group_name)
@@ -256,7 +255,7 @@ def add_members(group_name, emails, user):
 				logging.debug('TO LIST: ' + str(email))
 				
 				relay_mailer.deliver(mail, To = [email])
-					
+			res['status'] = True
 		else:
 			res['code'] = msg_code['PRIVILEGE_ERROR']
 	except Group.DoesNotExist:
