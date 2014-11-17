@@ -42,6 +42,13 @@
 		<a href="/posts?group_name={{ group_info.group.name }}">View Posts</a> <br /> <br />
 	
 			<div id="group-options">
+				{% if group_info.subscribed %}
+					<button type="button" id="btn-edit-settings">Edit My Settings</button>				
+					<br /><br />
+				{% else %}
+					<button type="button" id="btn-edit-settings" style="display: none;">Edit My Settings</button>
+				{% endif %}
+				
 				{% if group_info.admin %}
 					{% if group_info.group.active %}
 						<button type="button" id="btn-deactivate-group">De-Activate</button>

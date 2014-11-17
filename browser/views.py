@@ -111,6 +111,22 @@ def add_members_view(request, group_name):
 			return redirect('/404?e=admin')
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
+	
+
+@render_to("edit_my_settings.html")
+@login_required
+def my_group_settings_view(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.get(member=user, group=group)
+		return {'user': request.user, 'groups': groups, 'group_info': group, 'settings': membergroup, 'group_page': True}
+	except Group.DoesNotExist:
+		return redirect('/404?e=gname&name=%s' % group_name)
+	except MemberGroup.DoesNotExist:
+		return redirect('/404?e=member')
+
 
 @render_to("create_group.html")
 @login_required
@@ -118,6 +134,7 @@ def create_group_view(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	return {'user': request.user, 'groups': groups, 'group_page': True}
+
 
 @login_required
 def list_my_groups(request):
@@ -136,6 +153,29 @@ def create_group(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		public = request.POST['public'] == 'public'
 		res = engine.main.create_group(request.POST['group_name'], request.POST['group_desc'], public, user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+def get_group_settings(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.get_group_settings(request.POST['group_name'], user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+
+@login_required
+def edit_group_settings(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		following = request.POST['public'] == 'yes'
+		res = engine.main.edit_group_settings(request.POST['group_name'], following, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

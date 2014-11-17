@@ -128,6 +128,45 @@ def create_group(group_name, group_desc, public, requester):
 	logging.debug(res)
 	return res
 
+def get_group_settings(group_name, user):
+	res = {'status':False}
+	
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		res['following'] = membergroup.always_follow_thread
+		res['status'] = True
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+		
+	logging.debug(res)
+	return res
+
+
+def edit_group_settings(group_name, following, user):
+	res = {'status':False}
+	
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		membergroup.always_follow_thread = following
+		membergroup.save()
+		
+		res['status'] = True
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+		
+	logging.debug(res)
+	return res
+
 
 
 
@@ -450,8 +489,13 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			
 			following = Following.objects.filter(thread=thread)
 			recipients = [f.user.email for f in following]
+			
+			member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True)
+			
+			recipients.extend([m.member.email for m in member_recip])
+			
 			res['status'] = True
-			res['recipients'] = recipients
+			res['recipients'] = list(set(recipients))
 			res['thread_id'] = thread.id
 			res['msg_id'] = msg_id
 			

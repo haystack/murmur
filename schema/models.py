@@ -49,6 +49,7 @@ class MemberGroup(models.Model):
 	timestamp = models.DateTimeField(auto_now=True)
 	admin = models.BooleanField(default=False)
 	moderator = models.BooleanField(default=False)
+	always_follow_thread = models.BooleanField(default=True)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)

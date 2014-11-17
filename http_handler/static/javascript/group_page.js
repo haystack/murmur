@@ -10,6 +10,7 @@ $(document).ready(function(){
 	var mod = $.trim($(".mod").text()) == "Mod";
 	var group_active = $.trim($(".group_active").text()) == "True";
 	
+	var btn_edit_settings = $("#btn-edit-settings");
 	var btn_activate_group = $("#btn-activate-group");
 	var btn_deactivate_group = $("#btn-deactivate-group");
 	var btn_add_members = $("#btn-add-members");
@@ -89,12 +90,14 @@ $(document).ready(function(){
 	fix_visibility();
 			
 	function bind_buttons() {
+		btn_edit_settings.unbind("click");
  		btn_activate_group.unbind("click");
  		btn_deactivate_group.unbind("click");
  		btn_subscribe_group.unbind("click");
  		btn_unsubscribe_group.unbind("click");
  		btn_add_members.unbind("click");
  		
+ 		btn_edit_settings.bind("click");
  		btn_activate_group.bind("click");
  		btn_deactivate_group.bind("click");
  		btn_subscribe_group.bind("click");
@@ -115,6 +118,10 @@ $(document).ready(function(){
 		
 		btn_add_members.click(function() {
 			window.location = '/groups/' + group_name + '/add_members';
+		});
+		
+		btn_edit_settings.click(function() {
+			window.location = '/groups/' + group_name + '/edit_my_settings';
 		});
 		
 	}
