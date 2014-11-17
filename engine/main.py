@@ -238,7 +238,7 @@ def add_members(group_name, emails, user):
 					
 					message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
 					message += "To see posts from this list, visit <a href='http://mailx.csail.mit.edu/posts?group_name=%s'>http://mailx.csail.mit.edu/posts?group_name=%s</a><br />" % (group_name, group_name)
-					message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://mailx.csail.mit.edu/groups'>http://mailx.csail.mit.edu/groups</a><br />"
+					message += "To manage your mailing list settings, subscribe, or unsubscribe, visit <a href='http://mailx.csail.mit.edu/groups/%s'>http://mailx.csail.mit.edu/groups/%s</a><br />" % (group_name, group_name)
 				else:
 					pw = password_generator()
 					new_user = UserProfile.objects.create_user(email, pw)

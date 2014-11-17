@@ -30,9 +30,14 @@ hr{
 	max-width:780px;
 }
 
-.dropdown {
+.dropdown-left {
 	width: 150px;
 }
+
+.dropdown-right {
+	width: 250px;
+}
+
 
 .accounts label{
 	font-weight:bold; 
