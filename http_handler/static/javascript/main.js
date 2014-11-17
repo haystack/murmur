@@ -566,12 +566,12 @@ $(document).ready(function(){
 		if (res.following == true) {
 			content += '<input type="radio" name="following" value="yes" id="rdo-follow" checked>';
 			content += ' Always receive all replies<br />';
-			content += '<span class="italic-small">You will be emailed all replies to any messages on this list.</span><br />';
+			content += '<span class="italic-small">(Default) You will be emailed all replies to any messages on this list.</span><br />';
 			content += '<input type="radio" name="following" value="no" id="rdo-no-follow">';
 		} else {
 			content += '<input type="radio" name="following" value="yes" id="rdo-follow">';
 			content += ' Always receive all replies<br />';
-			content += '<span class="italic-small">You will be emailed all replies to any messages on this list.</span><br />';
+			content += '<span class="italic-small">(Default) You will be emailed all replies to any messages on this list.</span><br />';
 			content += '<input type="radio" name="following" value="no" id="rdo-no-follow" checked>';
 		}
 
