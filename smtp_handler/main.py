@@ -180,29 +180,19 @@ def handle_post(message, address=None, host=None):
 		res = insert_post(group_name, subject, msg_text['html'], user)
 		
 	if(not res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message:%s" %(res['code']))
+		mail = setup_post(NO_REPLY, addr, "Error", group_name, host)
+		mail.Body = "Error Message:%s" %(res['code'])
+		
 		relay.deliver(mail)
 		return
-	msg_id = res['msg_id']
 	
-	to_send =  res['recipients']
 	post_addr = '%s <%s>' %(group_name, group_name + '@' + host)
-	mail = MailResponse(From = message['From'], 
-						To = post_addr, 
-						Subject  = subject)
 	
-	mail.update({
-		"Sender": post_addr, 
-		"Reply-To": post_addr,
-		"List-Id": post_addr,
-		"List-Unsubscribe": "<mailto:%s+unsubscribe@%s>" % (group_name,host),
-		"List-Archive": "<http://%s/groups/%s/>" % (host, group_name),
-		"List-Post": "<mailto:%s>" % post_addr,
-		"List-Help": "<mailto:help@%s>" % host,
-		"List-Subscribe": "<mailto:%s+subscribe@%s>" % (group_name,host),
-		"Return-Path": post_addr, 
-		"Precedence": 'list',
-	})
+	mail = setup_post(message['From'], 
+						post_addr, 
+						subject,	
+						group_name, 
+						host)
 		
 	if 'references' in message:
 		mail['References'] = message['references']
@@ -213,6 +203,9 @@ def handle_post(message, address=None, host=None):
 	if 'in-reply-to' not in message:
 		mail["In-Reply-To"] = message['message-id']
 	
+	
+	msg_id = res['msg_id']
+	to_send =  res['recipients']
 	
 	mail['message-id'] = msg_id
 

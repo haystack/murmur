@@ -24,6 +24,30 @@ RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe',
 
 relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
 
+def setup_post(From, To, Subject, group_name, host):
+	
+	mail = MailResponse(From = From, 
+						To = To, 
+						Subject = Subject)
+	
+	post_addr = '%s <%s>' %(group_name, group_name + '@' + host)
+	
+	mail.update({
+		"Sender": post_addr, 
+		"Reply-To": post_addr,
+		"List-Id": post_addr,
+		"List-Unsubscribe": "<mailto:%s+unsubscribe@%s>" % (group_name,host),
+		"List-Archive": "<http://%s/groups/%s/>" % (host, group_name),
+		"List-Post": "<mailto:%s>" % (group_name + '@' + host),
+		"List-Help": "<mailto:help@%s>" % host,
+		"List-Subscribe": "<mailto:%s+subscribe@%s>" % (group_name,host),
+		"Return-Path": post_addr, 
+		"Precedence": 'list',
+	})
+	
+	return mail
+
+
 
 def get_body(message):
 	res = {}

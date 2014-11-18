@@ -300,21 +300,12 @@ def insert_post(request):
 		to_send =  res['recipients']
 		
 		post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
-		mail = MailResponse(From = user.email, To = post_addr, Subject  = subject)
 		
-		
-		mail.update({
-				"Sender": post_addr, 
-				"Reply-To": post_addr,
-				"List-Id": post_addr,
-				"List-Unsubscribe": "<mailto:%s+unsubscribe@%s>" % (group_name, HOST),
-				"List-Archive": "<http://%s/groups/%s/>" % (HOST, group_name),
-				"List-Post": "<mailto:%s>" % post_addr,
-				"List-Help": "<mailto:help@%s>" % HOST,
-				"List-Subscribe": "<mailto:%s+subscribe@%s>" % (group_name,HOST),
-				"Return-Path": post_addr, 
-				"Precedence": 'list',
-			})
+		mail = setup_post(user.email, 
+					post_addr, 
+					subject,	
+					group_name, 
+					HOST)
 		
 		mail['message-id'] = msg_id
 		
@@ -352,25 +343,17 @@ def insert_reply(request):
 			
 			to_send =  res['recipients']
 			post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
-			mail = MailResponse(From = user.email, To = post_addr, Subject  = '%s' %(subject))
 			
+			mail = setup_post(user.email, 
+					post_addr, 
+					subject,	
+					group_name, 
+					HOST)
+		
 			mail['References'] = msg_id		
 			mail['message-id'] = res['msg_id']
 			
 			mail["In-Reply-To"] = msg_id
-				
-			mail.update({
-				"Sender": post_addr, 
-				"Reply-To": post_addr,
-				"List-Id": post_addr,
-				"List-Unsubscribe": "<mailto:%s+unsubscribe@%s>" % (group_name, HOST),
-				"List-Archive": "<http://%s/groups/%s/>" % (HOST, group_name),
-				"List-Post": "<mailto:%s>" % post_addr,
-				"List-Help": "<mailto:help@%s>" % HOST,
-				"List-Subscribe": "<mailto:%s+subscribe@%s>" % (group_name,HOST),
-				"Return-Path": post_addr, 
-				"Precedence": 'list',
-			})
 				
 			ps_blurb = html_ps(group_name, HOST)
 			mail.Html = msg_text + ps_blurb		
