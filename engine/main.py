@@ -525,7 +525,7 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 	except Post.DoesNotExist:
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 	except:
-		print sys.exc_info()
+		logging.debug(sys.exc_info())
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res
