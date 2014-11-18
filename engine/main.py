@@ -242,7 +242,7 @@ def add_members(group_name, emails, user):
 				else:
 					pw = password_generator()
 					new_user = UserProfile.objects.create_user(email, pw)
-					_ = MemberGroup.objects.get_or_create(group=group, user=new_user)
+					_ = MemberGroup.objects.get_or_create(group=group, member=new_user)
 					
 					message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
 					message += "An account has been created for you at <a href='http://mailx.csail.mit.edu'>http://mailx.csail.mit.edu</a><br />"
