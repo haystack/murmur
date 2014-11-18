@@ -475,9 +475,24 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			
 			post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')[0]
 			if not thread_id:
-				thread = Thread.objects.filter(subject=orig_post_subj).order_by('-timestamp')[0]
+				thread = Thread.objects.filter(subject=orig_post_subj).order_by('-timestamp')
+				if thread.count() == 1:
+					thread = thread[0]
+				else:
+					thread = None
 			else:
-				thread = Thread.objects.get(id=thread_id)
+				thread = Thread.objects.filter(id=thread_id)
+				if thread.count() == 1:
+					thread = thread[0]
+				else:
+					thread = None
+			
+			if not thread:
+				thread = Thread()
+				thread.subject = orig_post_subj
+				thread.group = group
+				thread.save()
+				
 			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
 			
 			r = Post(msg_id=msg_id, author=user, subject=subject, post = str(message_text), reply_to=post, group=group, thread=thread)
