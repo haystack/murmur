@@ -473,7 +473,12 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			
 			orig_post_subj = subject[4:]
 			
-			post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')[0]
+			post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')
+			if post.count() == 1:
+				post = post[0]
+			else:
+				post = None
+				
 			if not thread_id:
 				thread = Thread.objects.filter(subject=orig_post_subj).order_by('-timestamp')
 				if thread.count() == 1:
