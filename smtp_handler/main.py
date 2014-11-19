@@ -163,7 +163,7 @@ def handle_post(message, address=None, host=None):
 		return
 	
 	group_name = address.lower()
-	subject = '[ %s ] %s' %(group_name, message['Subject'].encode('ascii', 'ignore'))
+	subject = '[ %s ] %s' %(group_name, message['Subject'])
 	
 	msg_text = get_body(str(message))
 	
@@ -210,10 +210,10 @@ def handle_post(message, address=None, host=None):
 	mail['message-id'] = msg_id
 
 	ps_blurb = html_ps(group_name, host)
-	mail.Html = unicode(msg_text['html'] + ps_blurb , "utf-8")	
+	mail.Html = unicode(msg_text['html'] + ps_blurb)	
 	
 	ps_blurb = plain_ps(group_name, host)
-	mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
+	mail.Body = unicode(msg_text['plain'] + ps_blurb)
 		
 	logging.debug('TO LIST: ' + str(to_send))
 	

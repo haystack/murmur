@@ -288,11 +288,11 @@ def insert_post(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 
-		group_name = request.POST['group_name'].encode('ascii', 'ignore')
-		subject = '[ %s ] %s' %(group_name, request.POST['subject'].encode('ascii', 'ignore'))
+		group_name = request.POST['group_name']
+		subject = '[ %s ] %s' %(group_name, request.POST['subject'])
 		
-		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
-
+		msg_text = request.POST['msg_text']
+		
 		res = engine.main.insert_post(group_name, subject,  msg_text, user)
 		
 		
@@ -333,8 +333,11 @@ def insert_reply(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		group_name = request.POST['group_name'].encode('ascii', 'ignore')
-		subject = request.POST['subject'].encode('ascii', 'ignore')
-		msg_text = request.POST['msg_text'].encode('ascii', 'ignore')
+		
+		subject = request.POST['subject']
+		
+		msg_text = request.POST['msg_text']
+		
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
 		thread_id = request.POST.get('thread_id', None)
 		

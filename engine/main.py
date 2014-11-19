@@ -438,7 +438,7 @@ def insert_post(group_name, subject, message_text, user):
 			
 			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
 			
-			p = Post(msg_id=msg_id, author=user, subject=subject, post=str(message_text), group=group, thread=thread)
+			p = Post(msg_id=msg_id, author=user, subject=subject, post=message_text, group=group, thread=thread)
 			p.save()
 			
 			f = Following(user=user, thread=thread)
@@ -474,7 +474,7 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			orig_post_subj = subject[4:]
 			
 			post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')
-			if post.count() == 1:
+			if post.count() >= 1:
 				post = post[0]
 			else:
 				post = None
@@ -497,10 +497,10 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 				thread.subject = orig_post_subj
 				thread.group = group
 				thread.save()
-				
+
 			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@mailx.csail.mit.edu'
 			
-			r = Post(msg_id=msg_id, author=user, subject=subject, post = str(message_text), reply_to=post, group=group, thread=thread)
+			r = Post(msg_id=msg_id, author=user, subject=subject, post = message_text, reply_to=post, group=group, thread=thread)
 			r.save()
 			
 			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
