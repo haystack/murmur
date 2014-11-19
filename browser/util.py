@@ -29,7 +29,8 @@ ALLOWED_TAGS = [
     'html',
     'head',
     'meta',
-    'body'
+    'body',
+    'hr',
 ]
 
 ALLOWED_ATTRIBUTES = {
