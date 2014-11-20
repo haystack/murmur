@@ -522,7 +522,13 @@ $(document).ready(function(){
 		content += '</div>'; 
 		content += '</div>';
 		$("#main-area").empty();
-                $("#main-area").html(content);
+        $("#main-area").html(content);
+        
+        $( ".gmail_quote" ).wrap( "<div class='accordian'></div>" );
+        $(".accordian").prepend("<h3>...</h3>");
+        
+    	$(".accordian").accordion({collapsible: true});
+        
 		//tinyMCE.execCommand('mceAddControl', false, 'reply-text-input');
 		var params = {'requester_email': res.requester_email, 
 					  'thread_id': res.thread_id,

@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block customcss %}
+	<link href="/static/css/third-party/jquery-ui.min.css" rel="stylesheet">
+{% endblock %}
+
+
 {% block content %}
 
 <div id="left-column-area-wrapper">
@@ -29,6 +34,11 @@
 	</div>
 </div>
 </div>
+{% endblock %}
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/main.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/jquery-ui.min.js"></script>
 {% endblock %}
 
 

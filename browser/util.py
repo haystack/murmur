@@ -39,7 +39,8 @@ ALLOWED_ATTRIBUTES = {
     'acronym': ['title'],
     'img': ['src','alt', 'style'],
     'meta': ['content', 'http-equiv'],
-    'body': ['bgcolor', 'text']
+    'body': ['bgcolor', 'text'],
+    'div': ['class']
 }
 
 ALLOWED_STYLES = ['border-style', 'border-width', 'float', 'height', 'margin', 'width']
