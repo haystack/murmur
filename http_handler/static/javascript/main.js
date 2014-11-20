@@ -527,7 +527,7 @@ $(document).ready(function(){
         $( ".gmail_quote" ).wrap( "<div class='accordian'></div>" );
         $(".accordian").prepend("<h3>...</h3>");
         
-    	$(".accordian").accordion({collapsible: true});
+    	$(".accordian").accordion({collapsible: true, active: false});
         
 		//tinyMCE.execCommand('mceAddControl', false, 'reply-text-input');
 		var params = {'requester_email': res.requester_email, 
