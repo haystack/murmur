@@ -525,6 +525,7 @@ $(document).ready(function(){
         $("#main-area").html(content);
         
         $( ".gmail_quote" ).wrap( "<div class='accordian'></div>" );
+        $( ".moz-cite-prefix" ).wrap( "<div class='accordian'></div>" );
         $(".accordian").prepend("<h3>...</h3>");
         
     	$(".accordian").accordion({collapsible: true, active: false});
