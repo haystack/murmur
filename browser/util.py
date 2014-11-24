@@ -31,6 +31,11 @@ ALLOWED_TAGS = [
     'meta',
     'body',
     'hr',
+    'table',
+    'tbody',
+    'tr',
+    'th',
+    'td',
 ]
 
 ALLOWED_ATTRIBUTES = {
