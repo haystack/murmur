@@ -36,6 +36,7 @@ ALLOWED_TAGS = [
     'tr',
     'th',
     'td',
+    'u'
 ]
 
 ALLOWED_ATTRIBUTES = {
