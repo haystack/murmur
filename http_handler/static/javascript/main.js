@@ -524,7 +524,16 @@ $(document).ready(function(){
 		$("#main-area").empty();
         $("#main-area").html(content);
         
-        $( ".gmail_quote" ).wrap( "<div class='accordian'></div>" );
+        var gmail_quotes = $(".gmail_quote");
+        var check = "---------- Forwarded message ----------";
+        
+        gmail_quotes.each(function () {
+        	var text = this.text();
+        	
+        	if (text.substring(0, check.length) !== check) {
+        		this.wrap( "<div class='accordian'></div>" );
+        	}
+        });
         
         var block = $( ".moz-cite-prefix" ).next();
         block.addClass("moz-blockquote");
