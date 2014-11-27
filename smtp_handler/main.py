@@ -214,10 +214,13 @@ def handle_post(message, address=None, host=None):
 	try:
 		mail.Html = unicode(msg_text['html'] + ps_blurb)	
 	except UnicodeDecodeError:
-		mail.Html = unicode(msg_text['html'] + ps_blurb, 'utf-8')
+		mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
 	
 	ps_blurb = plain_ps(group_name, host)
-	mail.Body = unicode(msg_text['plain'] + ps_blurb)
+	try:
+		mail.Body = unicode(msg_text['plain'] + ps_blurb)
+	except UnicodeDecodeError:
+		mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
 		
 	logging.debug('TO LIST: ' + str(to_send))
 	
