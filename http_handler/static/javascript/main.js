@@ -528,10 +528,10 @@ $(document).ready(function(){
         var check = "---------- Forwarded message ----------";
         
         gmail_quotes.each(function () {
-        	var text = this.text();
+        	var text = $(this).text();
         	
         	if (text.substring(0, check.length) !== check) {
-        		this.wrap( "<div class='accordian'></div>" );
+        		$(this).wrap( "<div class='accordian'></div>" );
         	}
         });
         
