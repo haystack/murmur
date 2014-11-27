@@ -453,8 +453,9 @@ def insert_post(group_name, subject, message_text, user):
 
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
-	except:
-		if(thread):
+	except Exception, e:
+		logging.debug(e)
+		if(thread and thread.id):
 			thread.delete()
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
