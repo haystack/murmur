@@ -56,16 +56,28 @@ def get_body(message):
 	subtype = email_message.get_content_maintype()
 
 	if maintype == 'multipart':
+		res['html'] = ''
+		res['plain'] = ''
 		for part in email_message.get_payload():
 			if part.get_content_maintype() == 'text':
 				if part.get_content_subtype() == 'html':
 					body = part.get_payload()
 					body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@murmur\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
-					res['html'] = body
+					res['html'] += body
 				else:
 					body = part.get_payload()
 					body = re.sub(r'Follow <.*?\+__follow__@murmur\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@murmur.csail\.mit\.edu>','', body)
-					res['plain'] = body
+					res['plain'] += body
+			elif part.get_content_maintype() == 'multipart':
+				for part2 in part.get_payload():
+					if part2.get_content_subtype() == 'html':
+						body = part2.get_payload()
+						body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@murmur\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
+						res['html'] += body
+					elif part2.get_content_subtype() == 'plain':
+						body = part2.get_payload()
+						body = re.sub(r'Follow <.*?\+__follow__@murmur\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@murmur.csail\.mit\.edu>','', body)
+						res['plain'] += body
 	elif maintype == 'text':
 		if subtype == 'html':
 			body = email_message.get_payload()
