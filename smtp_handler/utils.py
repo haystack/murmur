@@ -11,7 +11,7 @@ MailX Mail Utils and Constants
 @date: Oct 20, 2012
 '''
 
-HOST = 'mailx.csail.mit.edu'
+HOST = 'murmur.csail.mit.edu'
 NO_REPLY = 'no-reply' + '@' + HOST
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
@@ -60,20 +60,20 @@ def get_body(message):
 			if part.get_content_maintype() == 'text':
 				if part.get_content_subtype() == 'html':
 					body = part.get_payload()
-					body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@mailx\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
+					body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@murmur\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
 					res['html'] = body
 				else:
 					body = part.get_payload()
-					body = re.sub(r'Follow <.*?\+__follow__@mailx\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@mailx.csail\.mit\.edu>','', body)
+					body = re.sub(r'Follow <.*?\+__follow__@murmur\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@murmur.csail\.mit\.edu>','', body)
 					res['plain'] = body
 	elif maintype == 'text':
 		if subtype == 'html':
 			body = email_message.get_payload()
-			body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@mailx\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
+			body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@murmur\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
 			res['html'] = body
 		elif subtype == 'text':
 			body = email_message.get_payload()
-			body = re.sub(r'Follow <.*?\+__follow__@mailx\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@mailx.csail\.mit\.edu>','', body)
+			body = re.sub(r'Follow <.*?\+__follow__@murmur\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@murmur.csail\.mit\.edu>','', body)
 			res['plain'] = body
 	return res
 

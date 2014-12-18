@@ -42,7 +42,7 @@ except IOError:
     print "Unable to open configuration file!"
 
 if ENV == 'prod':
-    BASE_URL = 'http://mailx.csail.mit.edu'
+    BASE_URL = 'http://murmur.csail.mit.edu'
     MYSQL = MYSQL_PROD
 else:
     BASE_URL = 'http://localhost:8000'
