@@ -36,7 +36,8 @@ ALLOWED_TAGS = [
     'tr',
     'th',
     'td',
-    'u'
+    'u',
+    'font'
 ]
 
 ALLOWED_ATTRIBUTES = {
