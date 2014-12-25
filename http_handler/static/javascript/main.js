@@ -543,7 +543,7 @@ $(document).ready(function(){
         
     	$(".accordian").accordion({collapsible: true, 
     							   active: false,
-    							   heightStyle: "fill"});
+    							   heightStyle: "content"});
         
 		//tinyMCE.execCommand('mceAddControl', false, 'reply-text-input');
 		var params = {'requester_email': res.requester_email, 
