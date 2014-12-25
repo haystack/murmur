@@ -541,7 +541,9 @@ $(document).ready(function(){
         
         $(".accordian").prepend("<h3>...</h3>");
         
-    	$(".accordian").accordion({collapsible: true, active: false});
+    	$(".accordian").accordion({collapsible: true, 
+    							   active: false,
+    							   heightStyle: "fill"});
         
 		//tinyMCE.execCommand('mceAddControl', false, 'reply-text-input');
 		var params = {'requester_email': res.requester_email, 
