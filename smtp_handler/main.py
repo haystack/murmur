@@ -163,7 +163,11 @@ def handle_post(message, address=None, host=None):
 		return
 	
 	group_name = address.lower()
-	subject = '[ %s ] %s' %(group_name, message['Subject'])
+	
+	if message['Subject'][0:4] != "Re: ":
+		subject = '[ %s ] %s' %(group_name, message['Subject'])
+	else:
+		subject = message['Subject']
 	
 	msg_text = get_body(str(message))
 	
