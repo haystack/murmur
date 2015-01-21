@@ -433,8 +433,8 @@ $(document).ready(function(){
 			for(var i = 0; i< res.threads.length; i++){
 				d = format_date(new Date(res.threads[i].timestamp));
 				var content = '<div class="left-column-area-metadata">';
-				content += '<span class="gray ellipsis">' + d.date + '</span>';
-				content += '<span class="gray ellipsis">' + d.time + '</span>';
+				content += '<span class="gray">' + d.date + '</span><BR>';
+				content += '<span class="gray">' + d.time + '</span>';
 				content += '<span class="unread">' + res.threads[i].replies.length + '</span> <br />';
 				content += '</div>';
 				content += '<div class= "left-column-area-content">';

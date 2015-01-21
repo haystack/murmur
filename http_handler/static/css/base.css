@@ -53,7 +53,7 @@ hr{
 #post-column-area-wrapper {
     background-color: white;
     color: #333;
-    width: 720px;
+    max-width: 720px;
 }
 
 #left-column-area-wrapper{

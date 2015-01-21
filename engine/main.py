@@ -353,7 +353,7 @@ def group_info(group_name, user):
 def format_date_time(d):
 	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
-def list_posts(group_name=None, timestamp_str=None):
+def list_posts(group_name=None, timestamp_str=None, format_datetime=True):
 	res = {'status':False}
 	try:
 		t = datetime.datetime.min
@@ -374,22 +374,22 @@ def list_posts(group_name=None, timestamp_str=None):
 			replies = []
 			post = None
 			for p in posts:
-				post_dict = {'msg_id':p.msg_id, 
-							'thread_id':p.thread_id, 
-							'from':p.author.email, 
-							'to':p.group.name, 
+				post_dict = {'msg_id': p.msg_id, 
+							'thread_id': p.thread_id, 
+							'from': p.author.email, 
+							'to': p.group.name, 
 							'subject': escape(p.subject), 
 							'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
-							'timestamp':format_date_time(p.timestamp)}
+							'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp}
 				if not p.reply_to_id:
 					post = post_dict
 				else:
 					replies.append(post_dict)
-			res['threads'].append({'thread_id':t.id, 
-								   'post':post, 
+			res['threads'].append({'thread_id': t.id, 
+								   'post': post, 
 								   'replies': replies, 
-								   'f_list':f_list, 
-								   'timestamp':format_date_time(t.timestamp)})
+								   'f_list': f_list, 
+								   'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
 			res['status'] = True
 			
 	except:

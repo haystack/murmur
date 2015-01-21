@@ -27,7 +27,8 @@
 				{% for post in posts %}
 					<li class="row-item" id="{{ post.thread_id }}">
 						<div class="left-column-area-metadata">
-							<span class="gray">{{ post.timestamp }}</span>
+							<span class="gray">{{ post.timestamp|date:"n/j/Y" }}</span>
+							<span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
 							<span class="unread">{{ post.replies|length }}</span> <br>
 						</div>
 						<div class="left-column-area-content">
