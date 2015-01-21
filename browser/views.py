@@ -63,7 +63,7 @@ def posts(request):
 	if request.flavour == "mobile":
 		if active_group['name'] == 'No Groups Yet':
 			return HttpResponseRedirect('/post_list')
-		return HttpResponseRedirect('/post_list?group_name=' % active_group['name'])
+		return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 	else:
 		return {'user': user, "active_group": active_group, "groups": groups}
 
