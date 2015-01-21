@@ -353,7 +353,7 @@ def group_info(group_name, user):
 def format_date_time(d):
 	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
-def list_posts(group_name=None, timestamp_str = None):
+def list_posts(group_name=None, timestamp_str=None):
 	res = {'status':False}
 	try:
 		t = datetime.datetime.min

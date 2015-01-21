@@ -50,6 +50,12 @@ hr{
 	margin: 5px;
 }
 
+#post-column-area-wrapper {
+    background-color: white;
+    color: #333;
+    width: 720px;
+}
+
 #left-column-area-wrapper{
     position: absolute;
         top: 50px;
@@ -62,6 +68,12 @@ hr{
         z-index:100;
         border-right: #999 solid 1px;
 }
+
+#post-column-area{
+      margin:0;
+      padding:0;
+}
+
 
 #left-column-area{
       margin:0;
@@ -113,6 +125,11 @@ hr{
         margin:0px;
 }
 
+.post-list-container {
+    background: #D7ECFA;
+    padding: 5px 0px 5px 0px;
+    margin:0px;
+}
 
 #text-search-group {
 	width:219px;
@@ -259,7 +276,24 @@ textarea {
 	overflow: auto;
 }
 
-.table{
+#post-list-table .row-item{
+	background: white;
+	padding: 15px;
+        border-bottom: #ccc solid 1px;
+        vertical-align: middle;
+	border-bottom: 1px solid #ccc;
+	cursor: default;
+}
+
+#post-list-table .row-item:hover {
+	background: #FFF7CE!important;
+}
+
+#post-list-table {
+	padding: 0px;
+}
+
+.table, #post-list-table{
 	width: 100%;
 }
 
