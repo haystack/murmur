@@ -30,6 +30,15 @@ hr{
 	max-width:780px;
 }
 
+.group-container-posts {
+	margin:0px auto;
+	margin-top:30px; 
+	padding:8px; 
+	vertical-align:top;
+	background-color: #D7ECFA;
+	max-width:780px;
+}
+
 .dropdown-left {
 	min-width: 105px;
 	max-width: 195px;
