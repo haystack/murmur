@@ -25,19 +25,21 @@
 		
 			<ul id="post-list-table">
 				{% for post in posts %}
-					<li class="row-item" id="{{ post.thread_id }}">
-						<div class="left-column-area-metadata">
-							<span class="gray">{{ post.timestamp|date:"n/j/Y" }}</span>
-							<span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
-							<span class="unread">{{ post.replies|length }}</span> <br>
-						</div>
-						<div class="left-column-area-content">
-							<span class="strong ellipsis">{{ post.post.subject }}</span>
-							<span class="strong-gray ellipsis">{{ post.post.from }}</span>
-							<span class="blurb ellipsis">{{ post.post.text|striptags }}
-							</span>
-						</div>
-					</li>
+					<a href="/thread?group_name={{ active_group.name }}&tid={{ post.thread_id }}">
+						<li class="row-item" id="{{ post.thread_id }}">
+							<div class="left-column-area-metadata">
+								<span class="gray">{{ post.timestamp|date:"n/j/Y" }}</span>
+								<span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
+								<span class="unread">{{ post.replies|length }}</span> <br>
+							</div>
+							<div class="left-column-area-content">
+								<span class="strong ellipsis">{{ post.post.subject }}</span>
+								<span class="strong-gray ellipsis">{{ post.post.from }}</span>
+								<span class="blurb ellipsis">{{ post.post.text|striptags }}
+								</span>
+							</div>
+						</li>
+					</a>
 				{% endfor %}
 			</ul>	
 		</div>

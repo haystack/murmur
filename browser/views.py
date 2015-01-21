@@ -73,8 +73,19 @@ def post_list(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	active_group = load_groups(request, groups, user)
-	res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False)
+	res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False, return_replies=False)
 	return {'user': request.user, 'groups': groups, 'posts': res.get('threads'), 'active_group': active_group}
+
+@render_to("thread.html")
+@login_required
+def thread(request):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	active_group = load_groups(request, groups, user)
+	res = engine.main.load_thread(request.GET.get('group_name'), request.GET.get('tid'))
+	return {'user': request.user, 'groups': groups, 'thread': res, 'active_group': active_group}
+
+
 
 @render_to("settings.html")
 @login_required

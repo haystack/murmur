@@ -11,6 +11,7 @@ from cgi import escape
 import re
 
 from http_handler.settings import BASE_URL
+import json
 
 
 '''
@@ -353,7 +354,7 @@ def group_info(group_name, user):
 def format_date_time(d):
 	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
-def list_posts(group_name=None, timestamp_str=None, format_datetime=True):
+def list_posts(group_name=None, timestamp_str=None, return_replies=True, format_datetime=True):
 	res = {'status':False}
 	try:
 		t = datetime.datetime.min
@@ -370,6 +371,7 @@ def list_posts(group_name=None, timestamp_str=None, format_datetime=True):
 		for t in threads:
 			following = Following.objects.filter(thread = t)
 			f_list = [f.user.email for f in following]
+			
 			posts = Post.objects.filter(thread = t)		
 			replies = []
 			post = None
@@ -383,6 +385,8 @@ def list_posts(group_name=None, timestamp_str=None, format_datetime=True):
 							'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp}
 				if not p.reply_to_id:
 					post = post_dict
+					if not return_replies:
+						break
 				else:
 					replies.append(post_dict)
 			res['threads'].append({'thread_id': t.id, 
@@ -397,6 +401,33 @@ def list_posts(group_name=None, timestamp_str=None, format_datetime=True):
 	logging.debug(res)
 	return res
 	
+def load_thread(group_name, thread_id):
+	t = Thread.objects.get(id=thread_id)
+	
+	following = Following.objects.filter(thread = t)
+	f_list = [f.user.email for f in following]
+	
+	posts = Post.objects.filter(thread = t)		
+	replies = []
+	post = None
+	for p in posts:
+		post_dict = {'msg_id': p.msg_id, 
+					'thread_id': p.thread_id, 
+					'from': p.author.email, 
+					'to': p.group.name, 
+					'subject': escape(p.subject), 
+					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
+					'timestamp': p.timestamp}
+		if not p.reply_to_id:
+			post = post_dict
+		else:
+			replies.append(post_dict)
+			
+	return {'thread_id': t.id, 
+		    'post': post, 
+		    'replies': replies, 
+		    'f_list': json.dumps(f_list), 
+		    'timestamp': t.timestamp}
 
 def load_post(group_name, thread_id, msg_id):
 	res = {'status':False}
@@ -509,8 +540,9 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
 			thread.save()
 			
-			f = Following(user=user, thread=thread)
-			f.save()
+			if not Following.objects.filter(user=user, thread=thread).exists(): 
+				f = Following(user=user, thread=thread)
+				f.save()
 			
 			#users following the thread
 			following = Following.objects.filter(thread=thread)
@@ -567,14 +599,15 @@ def unfollow_thread(thread_id, user):
 	res = {'status':False}
 	try:
 		t = Thread.objects.get(id=thread_id)
-		f = Following.objects.get(thread=t, user=user)
+		f = Following.objects.filter(thread=t, user=user)
 		f.delete()
 		res['status'] = True
 	except Following.DoesNotExist:
 		res['status'] = True
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
-	except:
+	except Exception, e:
+		print e
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res
