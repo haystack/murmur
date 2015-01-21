@@ -298,7 +298,7 @@ $(document).ready(function(){
 			$("#btn-create-group").click(crt_group);
 			
 			if (res.groups.length == 0) {
-				var content = '<i>You are not in any groups yet. <a href="/group_list">Join or create a new group.</a></i>';
+				var content = '<div class="add-padding"><i>You are not in any groups yet. <a href="/group_list">Join or create a new group.</a></i></div>';
 				$("#groups-table").append(content);
 			}
 			

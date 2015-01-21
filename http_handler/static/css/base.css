@@ -294,3 +294,7 @@ blockquote {
 	font-size: 12px;
 }
 
+.add-padding {
+	padding-left: 10px;
+	padding-right: 10px;
+}
