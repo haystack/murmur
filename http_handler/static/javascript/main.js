@@ -515,11 +515,9 @@ $(document).ready(function(){
                }
 		content += '</div>';
 		content += '<div class="main-area-content">';	
-		content += '<div class="comment">';
 		content += '<textarea id="reply-text-input"></textarea>';
 		content += "<script>CKEDITOR.replace( 'reply-text-input' );</script>";
 		content += '<button type="button" id="btn-reply" style="margin-top:10px;">Reply</button></div>';
-		content += '</div>'; 
 		content += '</div>';
 		$("#main-area").empty();
         $("#main-area").html(content);
