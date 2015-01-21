@@ -60,7 +60,12 @@ def posts(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	active_group = load_groups(request, groups, user)
-	return {'user': user, "active_group": active_group, "groups": groups}
+	if request.flavour == "mobile":
+		if active_group['name'] == 'No Groups Yet':
+			return HttpResponseRedirect('/post_list')
+		return HttpResponseRedirect('/post_list?group_name=' % active_group['name'])
+	else:
+		return {'user': user, "active_group": active_group, "groups": groups}
 
 @render_to("list_posts.html")
 @login_required
