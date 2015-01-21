@@ -31,11 +31,13 @@ hr{
 }
 
 .dropdown-left {
-	min-width: 150px;
+	min-width: 105px;
+	max-width: 195px;
 }
 
 .dropdown-right {
 	min-width: 150px;
+	max-width: 198px;
 }
 
 
