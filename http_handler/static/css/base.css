@@ -281,6 +281,11 @@ textarea {
 	margin-right: 35px;
 }
 
+.italic-med {
+	font-style: italic;
+	font-size: 15px;
+}
+
 
 #posts-table, #groups-table{
 	position:absolute;
