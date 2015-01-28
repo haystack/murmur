@@ -229,6 +229,8 @@ textarea {
 	margin-bottom:10px;
 }
 
+.
+
 .reply{
         margin-top:10px;
         margin-bottom:10px;
@@ -283,6 +285,10 @@ textarea {
 	top: 50px;
 	bottom:0px;
 	overflow: auto;
+}
+
+#post-list-table {
+	list-style-type: none;
 }
 
 #post-list-table .row-item{

@@ -67,7 +67,7 @@ def posts(request):
 	else:
 		return {'user': user, "active_group": active_group, "groups": groups}
 
-@render_to("list_posts.html")
+@render_to("mobile_list_posts.html")
 @login_required
 def post_list(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
@@ -99,8 +99,20 @@ def settings(request):
 @login_required
 def my_groups(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
-	return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
+	if request.flavour == "mobile":
+		return HttpResponseRedirect('/my_group_list')
+	else:
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
+
+
+@render_to("mobile_list_groups.html")
+@login_required
+def my_group_list(request):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = engine.main.list_my_groups(user)
+	return {'user': request.user, 'groups': groups['groups'], 'group_page': True, 'my_groups': True}
+
 	
 @render_to("group_page.html")
 @login_required
