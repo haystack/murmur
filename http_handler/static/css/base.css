@@ -60,7 +60,6 @@ hr{
 }
 
 #post-column-area-wrapper {
-    background-color: white;
     color: #333;
     max-width: 720px;
 }
@@ -71,7 +70,6 @@ hr{
         right: auto;
         bottom: 0px;
         left: 0px;
-        background-color: white;
         color: #333;
         width: 350px;
         z-index:100;
