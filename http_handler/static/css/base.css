@@ -284,9 +284,16 @@ textarea {
 
 #posts-table, #groups-table{
 	position:absolute;
-	top: 77px;
 	bottom:0px;
 	overflow: auto;
+}
+
+#posts-table {
+	top: 77px;
+}
+
+#groups-table {
+	top: 43px;
 }
 
 #post-list-table {
