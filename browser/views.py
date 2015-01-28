@@ -113,6 +113,14 @@ def my_group_list(request):
 	groups = engine.main.list_my_groups(user)
 	return {'user': request.user, 'groups': groups['groups'], 'group_page': True, 'my_groups': True}
 
+
+@render_to("mobile_pub_list_groups.html")
+@login_required
+def pub_group_list(request):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = engine.main.list_groups(user)
+	return {'user': request.user, 'groups': groups, 'group_page': True}
+
 	
 @render_to("group_page.html")
 @login_required
@@ -132,7 +140,10 @@ def group_list(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	pub_groups = engine.main.list_groups(user)
-	return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
+	if request.flavour == "mobile":
+		return HttpResponseRedirect('/pub_group_list')
+	else:
+		return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
 
 @render_to("add_members.html")
 @login_required
