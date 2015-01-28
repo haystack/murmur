@@ -391,6 +391,7 @@ def list_posts(group_name=None, timestamp_str=None, return_replies=True, format_
 					replies.append(post_dict)
 			res['threads'].append({'thread_id': t.id, 
 								   'post': post, 
+								   'num_replies': posts.count() - 1,
 								   'replies': replies, 
 								   'f_list': f_list, 
 								   'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
