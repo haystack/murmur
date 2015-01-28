@@ -150,13 +150,14 @@ def get_group_settings(group_name, user):
 	return res
 
 
-def edit_group_settings(group_name, following, user):
+def edit_group_settings(group_name, following, no_emails, user):
 	res = {'status':False}
 	
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		membergroup.always_follow_thread = following
+		membergroup.no_emails = no_emails
 		membergroup.save()
 		
 		res['status'] = True
@@ -166,7 +167,7 @@ def edit_group_settings(group_name, following, user):
 		res['code'] = msg_code['NOT_MEMBER']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
-		
+	
 	logging.debug(res)
 	return res
 
@@ -459,11 +460,15 @@ def insert_post(group_name, subject, message_text, user):
 		
 		group = Group.objects.get(name=group_name)
 		
-		group_members = UserProfile.objects.filter(membergroup__group=group)
+		group_members = MemberGroup.objects.filter(group=group)
 		
-		if user in group_members:
+		user_member = MemberGroup.objects.filter(group=group, user=user)
 		
-			recipients = [m.email for m in group_members]
+		if user_member.exists():
+		
+			recipients = [m.member.email for m in group_members if not m.no_emails and m != user.email]
+			
+			recipients.append(user.email)
 			
 			thread = Thread()
 			thread.subject = subject
@@ -549,8 +554,8 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			following = Following.objects.filter(thread=thread)
 			recipients = [f.user.email for f in following]
 			
-			#users that always follow threads in this group
-			member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True)
+			#users that always follow threads in this group. minus those that don't want to get emails
+			member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True, no_emails=False)
 			recipients.extend([m.member.email for m in member_recip])
 			
 			res['status'] = True

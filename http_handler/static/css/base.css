@@ -275,7 +275,10 @@ textarea {
 
 .italic-small {
 	font-style: italic;
-	size: 10px;
+	font-size: 13px;
+	display: block;
+	margin-left: 35px;
+	margin-right: 35px;
 }
 
 

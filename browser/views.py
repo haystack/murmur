@@ -222,8 +222,9 @@ def get_group_settings(request):
 def edit_group_settings(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		following = request.POST['public'] == 'yes'
-		res = engine.main.edit_group_settings(request.POST['group_name'], following, user)
+		following = request.POST['following'] == 'yes'
+		no_emails = request.POST['no_emails'] == 'true'
+		res = engine.main.edit_group_settings(request.POST['group_name'], following, no_emails, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

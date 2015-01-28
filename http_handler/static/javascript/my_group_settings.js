@@ -6,9 +6,17 @@ $(document).ready(function(){
 	var btn_save_settings = $("#btn-save-settings");
 	var btn_cancel_settings = $("#btn-cancel-settings");
 	
+	toggle_edit_emails();
+	
+	$('#ck-no-email').change(function() {
+        toggle_edit_emails();      
+    });
+	
+	
 	edit_group_settings =
 		function(params){
-			params.public = $('input[name=following]:checked', '#group-settings-form').val();
+			params.no_emails = $('#ck-no-email').is(":checked");
+			params.following = $('input[name=following]:checked', '#group-settings-form').val();
 			$.post('/edit_group_settings', params, 
 				function(res){
 					notify(res, true);
@@ -18,6 +26,19 @@ $(document).ready(function(){
 
 		
 	bind_buttons();
+	
+	function toggle_edit_emails() {
+		no_emails = $('#ck-no-email').is(":checked");
+		if (no_emails) {
+			$('#edit-emails').css({"color": "gray"});
+			$('#rdo-follow').attr('disabled', true);
+			$('#rdo-no-follow').attr('disabled', true);
+		} else {
+			$('#edit-emails').css({"color": "black"});
+			$('#rdo-follow').attr('disabled', false);
+			$('#rdo-no-follow').attr('disabled', false);
+		}
+	}
 			
 	function bind_buttons() {
 		var params = {'group_name': group_name};
