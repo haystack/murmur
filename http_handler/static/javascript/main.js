@@ -83,44 +83,8 @@ $(document).ready(function(){
 				}
 			);	
 		};
-		
-	add_members = 
-		function(params){
-			params.emails = $('#new-member-emails').val();
-			$.post('add_members', params, 
-				function(res){
-					list_groups(params);
-					group_info(params);
-					notify(res, true);
-				}
-			);	
-		};
 
-	get_group_settings =
-		function(params){
-			$.ajax({
-				type: 'POST',
-				url: 'group_settings', 
-				data: params,
-				success:  function(res){
-					res.group_name = params.group_name;
-					view_group_settings(res);
-				},
-				async: false,
-			});	
-		};
 
-	edit_group_settings =
-		function(params){
-			params.public = $('input[name=following]:checked', '#group-settings-form').val();
-			$.post('edit_group_settings', params, 
-				function(res){
-					list_groups(params);
-					group_info(params);
-					notify(res, true);
-				}
-			);	
-		};
 
 	subscribe_group = 
 		function(params){
@@ -378,19 +342,22 @@ $(document).ready(function(){
  		$("#btn-unsubscribe-group").bind("click");
  		$("#btn-add-members").bind("click");
  		
- 		var get_settings = bind(get_group_settings, params);
 		var act_group = bind(activate_group, params);
 		var deact_group = bind(deactivate_group, params);
 		var sub_group = bind(subscribe_group, params);
 		var unsub_group = bind(unsubscribe_group, params);
-		var ad_members = bind(add_new_members, params);
 		
-		$("#btn-edit-settings").click(get_settings);
+		$("#btn-edit-settings").click(function() {
+			window.location.href = "/groups/" + res.group_name + "/edit_my_settings";
+		});
+		
 		$("#btn-activate-group").click(act_group);
 		$("#btn-deactivate-group").click(deact_group);
 		$("#btn-subscribe-group").click(sub_group);
 		$("#btn-unsubscribe-group").click(unsub_group);
-		$("#btn-add-members").click(ad_members);
+		$("#btn-add-members").click(function() {
+			window.location.href = "/groups/" + res.group_name + "/add_members";
+		});
 		
 		$("#btn-subscribe-group").hide();
 		$("#btn-unsubscribe-group").hide();
@@ -573,82 +540,7 @@ $(document).ready(function(){
         
 	}
 	
-	function view_group_settings(res) {
-		$("#new-group-area").html('');
-		var content = '<div class="comment">';
-        
-        content += '<h3>Edit My Settings for ' + res.group_name + '</h3><hr /><br />';
-        content += '<form id="group-settings-form">';
-        
-		content += '<span class="strong">Receiving Replies : </span> <br />';
-
-		if (res.following == true) {
-			content += '<input type="radio" name="following" value="yes" id="rdo-follow" checked>';
-			content += ' Always receive all replies<br />';
-			content += '<span class="italic-small">(Default) You will be emailed all replies to any messages on this list.</span><br />';
-			content += '<input type="radio" name="following" value="no" id="rdo-no-follow">';
-		} else {
-			content += '<input type="radio" name="following" value="yes" id="rdo-follow">';
-			content += ' Always receive all replies<br />';
-			content += '<span class="italic-small">(Default) You will be emailed all replies to any messages on this list.</span><br />';
-			content += '<input type="radio" name="following" value="no" id="rdo-no-follow" checked>';
-		}
-
-		content += ' Only receive replies when following the thread<br />';
-		content += '<span class="italic-small">You will only be emailed replies to a message if you explicitly follow the thread, started the thread, or contribute a message at any point in the thread.</span><br /><br />';
-		
-		content += '<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Settings</button> ';
-		content += '<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>';
-
-		content += '</form></div>';
-        
-        $("#new-group-area").html(content);
-        
-		params = {'group_name': res.group_name};
-
-		var save_settings = bind(edit_group_settings, params);
-		var get_info = bind(group_info, params);
-		$("#btn-save-settings").unbind("click");
-		$("#btn-cancel-settings").unbind("click");
-        $("#btn-save-settings").bind("click");
-        $("#btn-cancel-settings").bind("click");
-        
-		$("#btn-save-settings").click(save_settings);
-		$("#btn-cancel-settings").click(get_info);
-
-		$('#group-display-area').hide();
-		
-		$("#new-group-area").show();
-	}
 	
-	function add_new_members(res) {
-		
-		$("#new-group-area").html('');
-		
-        var content = '<div class="comment">';
-        
-        content += '<h3>Add New Members</h3><hr /><br />';
-        content += '<form id="new-members-form">';
-		content += '<span class="strong">Emails Separated by Commas : </span> <br />';
-        content += '<input id="new-member-emails" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
-		
-		content += '<button type="button" id="btn-add-members" style="margin-top:10px;">Add Members</button>';
-
-		content += '</form></div>';
-        
-        $("#new-group-area").html(content);
-        
-		params = {'group_name': res.group_name};
-
-		var member_add = bind(add_members, params);
-		$("#btn-add-members").unbind("click");
-        $("#btn-add-members").bind("click");
-		$("#btn-add-members").click(member_add);
-
-		$('#group-display-area').hide();
-		
-		$("#new-group-area").show();
-	}
 	
 	function new_post(res){
 		
