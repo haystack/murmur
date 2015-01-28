@@ -84,18 +84,22 @@
 				<thead>
 					<tr>
 						<th>Email</th>
-						<th>Joined</th>
-						<th>Admin</th>
-						<th>Moderator</th>
+						{% if flavour != "mobile" %}
+							<th>Joined</th>
+							<th>Admin</th>
+							<th>Moderator</th>
+						{% endif %}
 					</tr>
 				</thead>
 				
 				<tfoot>
 					<tr>
 						<th>Email</th>
-						<th>Joined</th>
-						<th>Admin</th>
-						<th>Moderator</th>
+						{% if flavour != "mobile" %}
+							<th>Joined</th>
+							<th>Admin</th>
+							<th>Moderator</th>
+						{% endif %}
 					</tr>
 				</tfoot>
 				
@@ -109,9 +113,11 @@
 					{% endif %}
 					
 						<td>{{ member.email }}</td>
-						<td>{{ member.joined }}</td>
-						<td>{{ member.admin }}</td>
-						<td>{{ member.mod }}</td>
+						{% if flavour != "mobile" %}
+							<td>{{ member.joined }}</td>
+							<td>{{ member.admin }}</td>
+							<td>{{ member.mod }}</td>
+						{% endif %}
 					</tr>
 					{% endfor %}
 				</tbody>
