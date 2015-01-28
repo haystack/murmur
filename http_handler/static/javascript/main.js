@@ -278,7 +278,7 @@ $(document).ready(function(){
 				if (res.groups[i].mod == true)
 					content += '<span class="mod label">Mod</span>';
 				
-				content += '<br /><span class="italic-small">' + res.groups[i].desc + '</span>';
+				content += '<br /><span class="italic-med">' + res.groups[i].desc + '</span>';
 				
 				content += '</li>';
 				var curr_row = $(content);
@@ -578,19 +578,19 @@ $(document).ready(function(){
         
         content += '<form id="new-group-form">';
 		content += '<span class="strong">New Group Name : </span> <br />';
-		content += '<span class="italic-small">Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed</span><br />';
+		content += '<span class="italic-med">Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed</span><br />';
         content += '<input id="new-group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
 		
 		content += '<span class="strong">New Group Description : </span> <br />';
-		content += '<span class="italic-small">Maximum 140 characters</span><br />';
+		content += '<span class="italic-med">Maximum 140 characters</span><br />';
 		content += '<textarea id="new-group-description" maxlength="140"></textarea><br /><br />';
 		
 		content += '<span class="strong">New Group Privacy Settings : </span> <br />';
 		content += '<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked> Public<br />';
-		content += '<span class="italic-small">All users will be able to view and search for this group by name.</span><br />';
+		content += '<span class="italic-med">All users will be able to view and search for this group by name.</span><br />';
 		
 		content += '<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group"> Private<br />';
-		content += '<span class="italic-small">Only users added to this group by admins will be notified about the group.</span><br /><br />';
+		content += '<span class="italic-med">Only users added to this group by admins will be notified about the group.</span><br /><br />';
 		
 		content += '<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>';
 		

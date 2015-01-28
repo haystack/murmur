@@ -16,7 +16,8 @@
 					<button type="button" id="btn-unfollow" style="margin: 5px;">Unfollow</button>
 				</div>
 				<div>
-					<a href="/groups/uid">View Group Info</a>
+					<a href="/posts?group_name={{ active_group.name }}"><button type="button" style="margin: 5px;">View Posts</button></a>
+					<a href="/groups/{{ active_group.name }}"><button type="button" style="margin: 5px;">Group Info</button></a>
 					<br>
 					<h3><span id="post-subject">{{ thread.post.subject }}</span></h3>
 					<span class="strong">From: </span> 

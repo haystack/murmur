@@ -463,7 +463,7 @@ def insert_post(group_name, subject, message_text, user):
 		
 		group_members = MemberGroup.objects.filter(group=group)
 		
-		user_member = MemberGroup.objects.filter(group=group, user=user)
+		user_member = MemberGroup.objects.filter(group=group, member=user)
 		
 		if user_member.exists():
 		
@@ -494,6 +494,7 @@ def insert_post(group_name, subject, message_text, user):
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except Exception, e:
+		print e
 		logging.debug(e)
 		if(thread and thread.id):
 			thread.delete()

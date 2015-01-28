@@ -174,6 +174,19 @@ def my_group_settings_view(request, group_name):
 		return redirect('/404?e=gname&name=%s' % group_name)
 	except MemberGroup.DoesNotExist:
 		return redirect('/404?e=member')
+	
+@render_to("create_post.html")
+@login_required
+def my_group_create_post_view(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	try:
+		group = Group.objects.get(name=group_name)
+		return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+	except Group.DoesNotExist:
+		return redirect('/404?e=gname&name=%s' % group_name)
+	except MemberGroup.DoesNotExist:
+		return redirect('/404?e=member')
 
 
 @render_to("create_group.html")
@@ -343,7 +356,6 @@ def insert_post(request):
 		msg_text = request.POST['msg_text']
 		
 		res = engine.main.insert_post(group_name, subject,  msg_text, user)
-		
 		
 		msg_id = res['msg_id']
 		to_send =  res['recipients']
