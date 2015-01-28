@@ -494,7 +494,6 @@ $(document).ready(function(){
 		content += '<button type="button" id="btn-unfollow" style="margin:5px;">Unfollow</button>';
 		content += '</div>';
 		content += '<div>';
-		content += '<a href="/groups/' + res.post.to +'">View Group Info</a><br />'
 		content += '<h3>' + res.post.subject + '</h3>';
 		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
 		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span> <br />';

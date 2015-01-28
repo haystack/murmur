@@ -14,6 +14,7 @@
 		
 		{% if active_group.name != "No Groups Yet" %}
 		<button type="button" id="btn-create-new-post">+ New Post</button>
+		<a href="/groups/{{ active_group.name }}"><button type="button">View Group Info</button></a>
     	<input type="text" id="text-search-post" class="default-text" value="Search within posts" title="Search within posts"/>
 	
 		{% else %}

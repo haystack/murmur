@@ -143,7 +143,8 @@ hr{
 }
 
 #text-search-post {
-	width:230px;
+	margin-top: 3px;
+	width:328px;
 }
 
 input, select{
@@ -280,7 +281,7 @@ textarea {
 
 #posts-table, #groups-table{
 	position:absolute;
-	top: 50px;
+	top: 77px;
 	bottom:0px;
 	overflow: auto;
 }
@@ -315,6 +316,10 @@ textarea {
 #post-list-table a {
 	text-decoration: none;
 	color: #000000;
+}
+
+#btn-create-new-post {
+	width: 202px;
 }
 
 .table, #post-list-table{
