@@ -499,9 +499,9 @@ $(document).ready(function(){
         	}
         });
         
-        var block = $( ".moz-cite-prefix" ).next();
-        block.addClass("moz-blockquote");
-        $(".moz-cite-prefix, .moz-blockquote").wrapAll( "<div class='accordian'><div></div></div>" );
+  //      var block = $( ".moz-cite-prefix" ).next();
+  //      block.addClass("moz-blockquote");
+  //      $(".moz-cite-prefix, .moz-blockquote").wrapAll( "<div class='accordian'><div></div></div>" );
         
         $(".accordian").prepend("<h3>...</h3>");
         
