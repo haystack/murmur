@@ -14,23 +14,55 @@
 
 {% block content %}
 
+{% if flavour != "mobile" %}
+<div class="container-home">
+{% else %}
 <div class="container">
+{% endif %}
   <div class="home-left">
   	
-     <h3>Welcome to Murmur!</h3>
-     <hr />
-	<div>
-		<a href="{% url "django.contrib.auth.views.login" %}">Login</a>
-	</div>
-	<div>
-		<a href="{% url "registration_register" %}">Register</a>
-	</div>
+     <h3>Welcome to Murmur.</h3>
+     
+     <h5>We're re-imagining mailing lists and community discourse for the age of social media.</h5>
+     <br />
+     
+
   </div>
-</div>
-	
-<div id="image-attrib">
+  <div class="home-right">
+  	<form method="POST" action="{% url "auth_login" %}">
+		{% csrf_token %}
+		<h3>Login</h3>
+		{{ form.as_p }}
+		<br />
+		<input type="submit" value="Log In" />
+	</form>
+	<br />
+	<P><a href="{% url "auth_password_reset" %}">Reset Password</a></p>
+   
+   <p>
+       <form method='post' action="{% url "registration_register" %}">
+        	{% csrf_token %}
+        	
+		<h3>Register Account</h3>
+		Create an account to join or start a group!<br />
+		<br />
+        {{ reg_form.as_p }}
+
+        <input type="submit" class="btn btn-primary" value="Register!" />
+
+        </form>
+  </p>
+  </div>
+  
 
 </div>
+
+  
+ <div id="image-attrib">
+
+ </div>
+	
+
 
 {% endblock %}
 

@@ -1,11 +1,10 @@
 {% extends "base.html" %}
-{% block headlink-right %}
-{% endblock %}
+
 {% block content %}
 <div class="accounts">
 	<form method="POST" action=".">
 		{% csrf_token %}
-		<h3>MailX Login</h3>
+		<h3>Murmur Login</h3>
 		<hr />
 		{{ form.as_p }}
 		<br />
@@ -13,7 +12,7 @@
 	</form>
 	<br />
 	<P><a href="{% url "auth_password_reset" %}">Reset Password</a></p>
-<p><a href="{% url "registration_register" %}">Register</a></p>
+	<p><a href="{% url "registration_register" %}">Register</a></p>
 </div>
 
 

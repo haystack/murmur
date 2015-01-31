@@ -13,15 +13,6 @@ import re
 from http_handler.settings import BASE_URL
 import json
 
-
-'''
-MailX Main Controller
-
-@author: Anant Bhardwaj
-@date: Oct 20, 2012
-'''
-
-
 def list_groups(user):
 	groups = []
 	pub_groups = Group.objects.filter(Q(public=True, active=True)).order_by('name')

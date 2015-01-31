@@ -1,11 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
-'''
-MailX Models
 
-@author: Anant Bhardwaj
-@date: Oct 20, 2012
-'''
 from django.utils.http import urlquote
 from django.core.mail import send_mail
 from http_handler import settings

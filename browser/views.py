@@ -17,13 +17,8 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from annoying.decorators import render_to
 from schema.models import UserProfile, Group, MemberGroup
 from html2text import html2text
-
-'''
-@author: Anant Bhardwaj
-@date: Nov 9, 2012
-
-MailX Web Handler
-'''
+from django.contrib.auth.forms import AuthenticationForm
+from registration.forms import RegistrationForm
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
@@ -50,7 +45,8 @@ def error(request):
 @render_to('home.html')
 def index(request):
 	if not request.user.is_authenticated():
-		return dict()
+		return {'form': AuthenticationForm(),
+				'reg_form': RegistrationForm()}
 	else:
 		return HttpResponseRedirect('/posts')
 	

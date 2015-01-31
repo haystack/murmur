@@ -3,6 +3,10 @@
 @date: 08/11/2012
 */
 
+body, html {
+	height: 100%;
+}
+
 body {
   padding-top: 50px;
 }
@@ -12,14 +16,35 @@ hr{
 	border: thin #447EAC solid;
 }
 
-.home-left {
-	margin:0px auto;
+#logo {
+	font-family: 'Pacifico', cursive;
+	font-size: 22px;
+}
+
+#logo:hover {
+	color: #000000
+}
+
+.container-home {
+	 width: 800px;
+	 margin: 0 auto;
+	 height: 100%;
+}
+
+.home-left, .home-right {
+	
+	float: left;
 	margin-top:30px; 
 	padding:30px; 
+	margin-left: 10px;
+	margin-right: 10px;
 	vertical-align:top;
 	background-color: #f8f8f8;
 	max-width:380px;
+	min-width: 380px;
 }
+
+
 
 .navbar-default .navbar-brand {
 	color: #000000;
@@ -399,8 +424,8 @@ blockquote {
 }
 
 #image-attrib {
-	position: fixed;
-    bottom: 20px;
-    left: 20px;
-    width: 100%;
+	position: relative;
+  	bottom: 0;
+  	right: 0;
+  	padding: 10px;
 }
