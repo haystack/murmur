@@ -58,14 +58,18 @@ def load_groups(request, groups, user):
     active_group = request.GET.get('group_name')
     if active_group:
         request.session['active_group'] = active_group
-        active_group = {'name': active_group}
+        active_group = {'name': active_group,
+                        'active': True}
     elif request.session.get('active_group'):
         active_group = request.session.get('active_group')
-        active_group = {'name': active_group}
+        active_group = {'name': active_group,
+                        'active': True}
     elif len(groups) > 0:
         active_group = groups[0]
+        active_group['active'] = True
     else:
-        active_group = {'name': 'No Groups Yet'}
+        active_group = {'name': 'No Groups Yet',
+                        'active': False}
     
     return active_group
 

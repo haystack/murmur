@@ -24,8 +24,24 @@
      <h3>Welcome to Murmur.</h3>
      
      <h5>We're re-imagining mailing lists and community discourse for the age of social media.</h5>
+
+     Though mailing list software has changed little in the past 40 years, social media and other community sites have changed drastically.
      <br />
+     <br />
+     Murmur introduces new features to the mailing list so that you can communicate with your
+     group in the way that you desire, through email or the web. 
+     <br />
+     <br />
+     And as a community, members can collectively organize and moderate the discussion to satisfy the 
+     varied needs and concerns of their cohorts.
      
+     <br />
+     <br />
+     <a href="/about">Learn More </a>
+     
+     <br />
+     <br />
+     <a href="/group_list">Explore Public Groups</a>
 
   </div>
   <div class="home-right">
@@ -33,11 +49,12 @@
 		{% csrf_token %}
 		<h3>Login</h3>
 		{{ form.as_p }}
-		<br />
-		<input type="submit" value="Log In" />
+		<a href="{% url "auth_password_reset" %}">Forgot your password?</a>
+		<br /><br />
+		<input type="submit" class="btn btn-primary" value="Log In" />
 	</form>
 	<br />
-	<P><a href="{% url "auth_password_reset" %}">Reset Password</a></p>
+	
    
    <p>
        <form method='post' action="{% url "registration_register" %}">

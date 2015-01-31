@@ -35,6 +35,9 @@ $(document).ready(function(){
 						var row = members_table.fnSettings().aoData[ row_info[0] ].nTr;
 						row.className = "my_row";
 					}
+					if (res.redirect) {
+						window.location.href = res.url;
+					}
 					notify(res, true);
 				}
 			);	

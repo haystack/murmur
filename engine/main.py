@@ -13,7 +13,7 @@ import re
 from http_handler.settings import BASE_URL
 import json
 
-def list_groups(user):
+def list_groups(user=None):
 	groups = []
 	pub_groups = Group.objects.filter(Q(public=True, active=True)).order_by('name')
 	for g in pub_groups:
@@ -21,11 +21,12 @@ def list_groups(user):
 		mod = False
 		member = False
 		
-		membergroup = MemberGroup.objects.filter(member=user, group=g)
-		if membergroup.count() == 1:
-			member = True
-			admin = membergroup[0].admin
-			mod = membergroup[0].moderator
+		if user != None:
+			membergroup = MemberGroup.objects.filter(member=user, group=g)
+			if membergroup.count() == 1:
+				member = True
+				admin = membergroup[0].admin
+				mod = membergroup[0].moderator
 			
 		groups.append({'name':g.name, 
 					   'desc': escape(g.description), 
@@ -52,10 +53,11 @@ def group_info_page(user, group_name):
 		
 		for membergroup in members:
 			
-			if user.email == membergroup.member.email:
-				res['admin'] = membergroup.admin
-				res['moderator'] = membergroup.moderator
-				res['subscribed'] = True
+			if user != None:
+				if user.email == membergroup.member.email:
+					res['admin'] = membergroup.admin
+					res['moderator'] = membergroup.moderator
+					res['subscribed'] = True
 			
 			member_info = {'email': membergroup.member.email, 
 						   'joined': membergroup.timestamp,

@@ -19,6 +19,7 @@ from schema.models import UserProfile, Group, MemberGroup
 from html2text import html2text
 from django.contrib.auth.forms import AuthenticationForm
 from registration.forms import RegistrationForm
+from django.conf import global_settings
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
@@ -28,8 +29,12 @@ def logout(request):
 
 @render_to('404.html')
 def error(request):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+	else:
+		user = None
+		groups = []
 	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
 	
 	error = request.GET.get('e')
@@ -37,6 +42,8 @@ def error(request):
 		res['error'] = '%s is not a valid group name.' % request.GET['name']
 	elif error == 'admin':
 		res['error'] = 'You do not have the admin privileges to visit this page.'
+	elif error == 'member':
+		res['error'] = 'You need to be a member of this group to visit this page.'
 	else:
 		res['error'] = 'Unknown error.'
 	return res
@@ -51,26 +58,79 @@ def index(request):
 		return HttpResponseRedirect('/posts')
 	
 @render_to("posts.html")
-@login_required
 def posts(request):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
-	active_group = load_groups(request, groups, user)
-	if request.flavour == "mobile":
-		if active_group['name'] == 'No Groups Yet':
-			return HttpResponseRedirect('/post_list')
-		return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		active_group = load_groups(request, groups, user)
+		
+		if active_group['active']:
+			group = Group.objects.get(name=active_group['name'])
+			if not group.public:
+				is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+			
+		if not active_group['active'] or group.public or is_member:
+			if request.flavour == "mobile":
+				if not active_group['active']:
+					return HttpResponseRedirect('/post_list')
+				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+			else:
+				return {'user': user, "active_group": active_group, "groups": groups}
+		else:
+			if active_group['active']:
+				request.session['active_group'] = None
+			return redirect('/404?e=member')
+		
 	else:
-		return {'user': user, "active_group": active_group, "groups": groups}
+		user = None
+		groups = []
+		active_group = request.GET.get('group_name')
+		if active_group:
+			group = Group.objects.get(name=active_group)
+			viewable = group.public
+			if group.public:
+				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group))
+			else:
+				return redirect('/404?e=member')
+		else:
+			return HttpResponseRedirect(global_settings.LOGIN_URL)
+		
+		
 
 @render_to("mobile_list_posts.html")
-@login_required
 def post_list(request):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
-	active_group = load_groups(request, groups, user)
-	res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False, return_replies=False)
-	return {'user': request.user, 'groups': groups, 'posts': res.get('threads'), 'active_group': active_group}
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		active_group = load_groups(request, groups, user)
+		if active_group['active']:
+			group = Group.objects.get(name=active_group['name'])
+			if not group.public:
+				is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+			
+		if not active_group['active'] or group.public or is_member:
+			res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False, return_replies=False)
+			return {'user': request.user, 'groups': groups, 'posts': res.get('threads'), 'active_group': active_group}
+		else:
+			if active_group['active']:
+				request.session['active_group'] = None
+			return redirect('/404?e=member')
+	else:
+		user = None
+		groups = []
+		active_group = {'name': request.GET.get('group_name')}
+		if active_group['name']:
+			group = Group.objects.get(name=active_group['name'])
+			if not group.public:
+				return redirect('/404?e=member')
+			else:
+				res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False, return_replies=False)
+				return {'user': request.user, 'groups': groups, 'posts': res.get('threads'), 'active_group': active_group}
+		else:
+			return HttpResponseRedirect(global_settings.LOGIN_URL)
+		
+	
 
 @render_to("thread.html")
 @login_required
@@ -119,10 +179,14 @@ def pub_group_list(request):
 
 	
 @render_to("group_page.html")
-@login_required
 def group_page(request, group_name):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+	except Exception:
+		user = None
+		groups = []
+		
 	group_info = engine.main.group_info_page(user, group_name)
 	if group_info['group']:
 		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True}
@@ -131,10 +195,13 @@ def group_page(request, group_name):
 	
 	
 @render_to("list_groups.html")
-@login_required
 def group_list(request):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+	except Exception:
+		user = None
+		groups = []
 	pub_groups = engine.main.list_groups(user)
 	if request.flavour == "mobile":
 		return HttpResponseRedirect('/pub_group_list')
@@ -276,17 +343,26 @@ def add_members(request):
 		return HttpResponse(request_error, content_type="application/json")
 	
 
-@login_required
+
 def subscribe_group(request):
 	try:
-		user = get_object_or_404(UserProfile, email=request.user.email)
-		res = engine.main.subscribe_group(request.POST['group_name'], user)
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		if request.user.is_authenticated():
+		
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.subscribe_group(request.POST['group_name'], user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+		
+		else:
+			group = request.POST['group_name']
+			return HttpResponse(json.dumps({'redirect': True, 
+										'url': global_settings.LOGIN_URL + "?next=/groups/" + group}), 
+										content_type="application/json")
+	
+
 	except Exception, e:
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 	
-
 
 @login_required
 def unsubscribe_group(request):
