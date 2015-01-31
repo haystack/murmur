@@ -12,6 +12,26 @@ hr{
 	border: thin #447EAC solid;
 }
 
+.home-left {
+	margin:0px auto;
+	margin-top:30px; 
+	padding:30px; 
+	vertical-align:top;
+	background-color: #f8f8f8;
+	max-width:380px;
+}
+
+.navbar-default .navbar-brand {
+	color: #000000;
+}
+
+.icon {
+	height: 25px;
+	position: relative;
+	top: -5px;
+	padding-right: 5px;
+}
+
 .accounts {
 	margin:0px auto;
 	margin-top:30px; 
@@ -376,4 +396,11 @@ blockquote {
 .add-padding {
 	padding-left: 10px;
 	padding-right: 10px;
+}
+
+#image-attrib {
+	position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 100%;
 }
