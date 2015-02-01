@@ -59,16 +59,15 @@ def index(request):
 	
 @render_to("posts.html")
 def posts(request):
-
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		active_group = load_groups(request, groups, user)
 		
+		is_member = False
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
-			if not group.public:
-				is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+			is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
 			
 		if not active_group['active'] or group.public or is_member:
 			if request.flavour == "mobile":
@@ -76,10 +75,20 @@ def posts(request):
 					return HttpResponseRedirect('/post_list')
 				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 			else:
-				return {'user': user, "active_group": active_group, "groups": groups}
+				if not active_group['active'] or is_member:
+					if is_member:
+						request.session['active_group'] = active_group['name']
+					#only show the default view if not mobile and no group is selected or user is member of the group
+					return {'user': user, "active_group": active_group, "groups": groups}
+				else:
+					if len(groups) == 0:
+						if request.GET.get('group_name'):
+							return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+						else:
+							return {'user': user, "active_group": active_group, "groups": groups}
+					else:
+						return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 		else:
-			if active_group['active']:
-				request.session['active_group'] = None
 			return redirect('/404?e=member')
 		
 	else:
@@ -88,7 +97,6 @@ def posts(request):
 		active_group = request.GET.get('group_name')
 		if active_group:
 			group = Group.objects.get(name=active_group)
-			viewable = group.public
 			if group.public:
 				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group))
 			else:
@@ -104,17 +112,17 @@ def post_list(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		active_group = load_groups(request, groups, user)
+		is_member = False
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
-			if not group.public:
-				is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+			is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
 			
 		if not active_group['active'] or group.public or is_member:
+			if is_member:
+				request.session['active_group'] = active_group['name']
 			res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False, return_replies=False)
 			return {'user': request.user, 'groups': groups, 'posts': res.get('threads'), 'active_group': active_group}
 		else:
-			if active_group['active']:
-				request.session['active_group'] = None
 			return redirect('/404?e=member')
 	else:
 		user = None
@@ -138,13 +146,15 @@ def thread(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		active_group = load_groups(request, groups, user)
+		
+		is_member = False
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
-			if not group.public:
-				is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+			is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
 			
 		if not active_group['active'] or group.public or is_member:
 			res = engine.main.load_thread(request.GET.get('group_name'), request.GET.get('tid'))
+			request.user.is_member = is_member
 			return {'user': request.user, 'groups': groups, 'thread': res, 'active_group': active_group}
 		else:
 			if active_group['active']:
@@ -265,15 +275,19 @@ def my_group_settings_view(request, group_name):
 @render_to("create_post.html")
 @login_required
 def my_group_create_post_view(request, group_name):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
-	try:
-		group = Group.objects.get(name=group_name)
-		return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
-	except Group.DoesNotExist:
-		return redirect('/404?e=gname&name=%s' % group_name)
-	except MemberGroup.DoesNotExist:
-		return redirect('/404?e=member')
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		try:
+			group = Group.objects.get(name=group_name)
+			member = MemberGroup.objects.get(member=user, group=group)
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+		except Group.DoesNotExist:
+			return redirect('/404?e=gname&name=%s' % group_name)
+		except MemberGroup.DoesNotExist:
+			return redirect('/404?e=member')
+	else:
+		return HttpResponseRedirect(global_settings.LOGIN_URL)
 
 
 @render_to("create_group.html")

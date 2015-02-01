@@ -74,7 +74,11 @@
 	        
             {% else %}
             	<li class="dropdown dropdown-left">
+            	{% if groups %}
 	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>View Posts</span><span class="caret"></span></a>
+	            {% else %}
+	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>No Groups Yet</span><span class="caret"></span></a>
+	            {% endif %}
 	              	<ul class="dropdown-menu" role="menu" id="list-group-names">
 		              	{% for group in groups %}
 		              		{% if group.name == active_group %}
@@ -107,6 +111,14 @@
             </li>
           </ul>
         </div><!--/.nav-collapse -->
+        
+        {% else %}
+        <div class="navbar-collapse collapse">
+        	<ul class="nav navbar-nav navbar-right">
+        		<li><a href="/accounts/login/">Login</a></li>
+        		<li><a href="/accounts/register/">Register</a></li>
+        	</ul>
+        </div>
         {% endif %}
       </div>
     </div>
