@@ -27,6 +27,10 @@ def logout(request):
 	request.session.flush()
 	return HttpResponseRedirect('/')
 
+@render_to('about.html')
+def about(request):
+	return {}
+
 @render_to('404.html')
 def error(request):
 	if request.user.is_authenticated():
