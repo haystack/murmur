@@ -133,13 +133,37 @@ def post_list(request):
 	
 
 @render_to("thread.html")
-@login_required
 def thread(request):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
-	active_group = load_groups(request, groups, user)
-	res = engine.main.load_thread(request.GET.get('group_name'), request.GET.get('tid'))
-	return {'user': request.user, 'groups': groups, 'thread': res, 'active_group': active_group}
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		active_group = load_groups(request, groups, user)
+		if active_group['active']:
+			group = Group.objects.get(name=active_group['name'])
+			if not group.public:
+				is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+			
+		if not active_group['active'] or group.public or is_member:
+			res = engine.main.load_thread(request.GET.get('group_name'), request.GET.get('tid'))
+			return {'user': request.user, 'groups': groups, 'thread': res, 'active_group': active_group}
+		else:
+			if active_group['active']:
+				request.session['active_group'] = None
+			return redirect('/404?e=member')
+	else:
+		user = None
+		groups = []
+		active_group = {'name': request.GET.get('group_name')}
+		if active_group['name']:
+			group = Group.objects.get(name=active_group['name'])
+			if not group.public:
+				return redirect('/404?e=member')
+			else:
+				res = engine.main.load_thread(request.GET.get('group_name'), request.GET.get('tid'))
+				return {'user': request.user, 'groups': groups, 'thread': res, 'active_group': active_group}
+		else:
+			return HttpResponseRedirect(global_settings.LOGIN_URL)
+			
 
 
 
@@ -506,17 +530,23 @@ def insert_reply(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 	
-
-@login_required
 def follow_thread(request):
 	try:
-		user = get_object_or_404(UserProfile, email=request.user.email)
-		res = engine.main.follow_thread(request.POST['thread_id'], user)
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.follow_thread(request.POST['thread_id'], user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+		else:
+			group = request.POST['group_name']
+			thread = request.POST['thread_id']
+			return HttpResponse(json.dumps({'redirect': True, 
+										'url': global_settings.LOGIN_URL + "?next=/thread?group_name=" + group + "&tid=" + thread}), 
+										content_type="application/json")
 	except Exception, e:
+		print request
+		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
-
 
 @login_required
 def unfollow_thread(request):

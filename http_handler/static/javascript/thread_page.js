@@ -1,6 +1,8 @@
 $(document).ready(function(){
 	
-	CKEDITOR.replace( 'reply-text-input' );
+	if ($('#reply-text-input').length) {
+		CKEDITOR.replace( 'reply-text-input' );
+	}
 	
 	var gmail_quotes = $(".gmail_quote");
     var check = "---------- Forwarded message ----------";
@@ -62,12 +64,17 @@ $(document).ready(function(){
 		function(params){
 			$.post('follow_thread', {'requester_email': params.requester_email, 
 						  'thread_id': params.thread_id,
-						  'msg_id': params.msg_id
+						  'msg_id': params.msg_id,
+						  'group_name': params.group_name,
 					  	}, 
 				function(res){
+					console.log(res);
 					if(res.status){
 						$("#btn-follow").hide();
 	            				$("#btn-unfollow").show();
+					}
+					if (res.redirect) {
+						window.location.href = res.url;
 					}
 					notify(res, true);
 				}

@@ -46,10 +46,14 @@
 				</div>
 			{% endfor %}
 		</div>
-		<div class="main-area-content">
-			<textarea id="reply-text-input"></textarea>
-			<button type="button" id="btn-reply" style="margin-top:10px;">Reply</button>
-		</div>
+		{% if user.is_authenticated %}
+			<div class="main-area-content">
+				<textarea id="reply-text-input"></textarea>
+				<button type="button" id="btn-reply" style="margin-top:10px;">Reply</button>
+			</div>
+		{% else %}
+			<a href="/accounts/login">Login to reply</a>
+		{% endif %}
 	</div>
 </div>
 
