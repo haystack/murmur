@@ -340,3 +340,16 @@ def help(message, address=None, host=None):
 	mail = MailResponse(From = from_addr, To = to_addr, Subject = subject, Body = body)
 	relay.deliver(mail)
 	return
+
+
+@route("(address)@(host)", address=".+", host=".+")
+@stateless
+def send_account_info(message, address=None, host=None):
+	logging.debug(message['Subject'])
+	logging.debug(message['To'])
+	logging.debug(message['From'])
+	msg_text = get_body(str(message))
+	logging.debug(msg_text)
+	if str(message['From']) == "no-reply@murmur.csail.mit.com" and ("Account activation on Murmur" in str(message['Subject']) or "Password reset on Murmur" in str(message['Subject'])):
+		mail = MailResponse(From = NO_REPLY, To = message['To'], Subject = message['Subject'], Body = msg_text['plain'])
+		relay.deliver(mail)

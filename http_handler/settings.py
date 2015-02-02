@@ -58,7 +58,7 @@ EMAIL_PORT = 25
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
-DEFAULT_EMAIL = 'Murmur Admin <admin@murmur.csail.mit.com>'
+DEFAULT_EMAIL = 'no-reply@murmur.csail.mit.com'
 DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
 
