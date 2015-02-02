@@ -111,6 +111,10 @@ hr{
 	border: #447EAC solid 1px;
 }
 
+.tt-dataset-groups {
+	border: #447EAC solid 1px;
+}
+
 .tt-dataset-posts a {
 	text-decoration: none;
 	color: #000000;
@@ -119,6 +123,20 @@ hr{
 .tt-dataset-posts div:hover {
 	background-color: #FFF7CE;
 }
+
+.tt-dataset-groups a {
+	text-decoration: none;
+	color: #000000;
+}
+
+.tt-dataset-groups div:hover {
+	background-color: #FFF7CE;
+}
+
+.tt-cursor{
+    background-color: #FFF7CE;
+}
+
 
 .dropdown-left {
 	min-width: 105px;
@@ -220,6 +238,7 @@ hr{
 }
 
 #text-search-group {
+	top: -6px;
 	width:219px;
 }
 
@@ -374,7 +393,7 @@ textarea {
 }
 
 #groups-table {
-	top: 43px;
+	top: 48px;
 }
 
 #post-list-table {

@@ -271,7 +271,15 @@ $(document).ready(function(){
 				$("#groups-table").append(content);
 			}
 			
+			var group_list = [];
+			
 			for(var i = 0; i< res.groups.length; i++){
+				
+				var group_in = {"name": res.groups[i].name,
+								  "desc": res.groups[i].desc
+								 };
+				group_list.push(group_in);
+				
 				var content = '<li class="row-item" id="'+ res.groups[i].name+'">';
 				content += '<span class="strong">' + res.groups[i].name + '</span>';
 				if (res.groups[i].member == true)
@@ -296,6 +304,37 @@ $(document).ready(function(){
 				
 				curr_row.on('click',f);
 			}
+			
+			var groups = new Bloodhound({
+				datumTokenizer: Bloodhound.tokenizers.obj.whitespace("name", "desc"),
+				queryTokenizer: Bloodhound.tokenizers.whitespace,
+				local: group_list
+			});
+			groups.initialize();
+			
+			$("#text-search-group").typeahead({
+				minLength: 2,
+				highlight: true,
+				hint: false,
+			}, {
+				name: 'groups',
+				displayKey: 'name',
+				source: groups.ttAdapter(),
+				highlighter: function(item) {
+	                return item.name + item.desc;
+	            },
+	            templates: {
+				    empty: [
+				      '<div class="empty-message">',
+				      'Unable to find any groups that match the current query',
+				      '</div>'
+				    ].join('\n'),
+				    suggestion: function (group) {
+	            		return '<a href="/groups/'+ group.name + '"><div class="suggestion">' + group.name + '<br /><span class="italic-med">' + group.desc.trunc(40) + '</span></div></a>';
+	        		}
+			  	}
+	            
+			});
 		}
 	}
 	
@@ -459,8 +498,7 @@ $(document).ready(function(){
 			
 
 			}
-		
-		console.log(post_list);
+
 		var posts = new Bloodhound({
 			datumTokenizer: Bloodhound.tokenizers.obj.whitespace("text", "subject", "from"),
 			queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -477,7 +515,6 @@ $(document).ready(function(){
 			displayKey: 'subject',
 			source: posts.ttAdapter(),
 			highlighter: function(item) {
-				console.log(item);
                 return item.subject + item.text;
             },
  
