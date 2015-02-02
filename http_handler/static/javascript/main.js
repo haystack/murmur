@@ -492,7 +492,7 @@ $(document).ready(function(){
 			      '</div>'
 			    ].join('\n'),
 			    suggestion: function (post) {
-            		return '<a href="/thread?group_name=' + res.group_name + '&tid=' + post.tid + '"><div class="suggestion">' + post.subject.trunc(53) + '<br />' + post.from + '<br />' + post.text.trunc(50) + '</div></a>';
+            		return '<a href="/thread?group_name=' + res.group_name + '&tid=' + post.tid + '"><div class="suggestion">' + post.subject.trunc(43) + '<br />' + post.from + '<br />' + post.text.trunc(40) + '</div></a>';
         }
 		  }
             
