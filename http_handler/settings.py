@@ -51,8 +51,16 @@ else:
 TEMPLATE_DEBUG = DEBUG
 
 LOGIN_REDIRECT_URL = "/"
-DEFAULT_EMAIL = "haystack.mit@gmail.com"
+
+EMAIL_HOST = 'localhost'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
+DEFAULT_EMAIL = 'Murmur Admin <admin@murmur.csail.mit.com>'
 DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
+
 
 DATABASES = {
     'default': {
