@@ -84,6 +84,42 @@ hr{
 	max-width:780px;
 }
 
+#text-search-post {
+	width: 316px;
+	background-color:#ffffff;
+}
+
+.default-text {
+	color: #000000;
+	font-style: italic;
+}
+
+.tt-hint {
+	visibility: none;
+}
+
+.suggestion {
+	border: #D7ECFA solid 1px;
+}
+
+.tt-dropdown-menu {
+	background-color: #ffffff;
+	width: 326px;
+}
+
+.tt-dataset-posts {
+	border: #447EAC solid 1px;
+}
+
+.tt-dataset-posts a {
+	text-decoration: none;
+	color: #000000;
+}
+
+.tt-dataset-posts div:hover {
+	background-color: #FFF7CE;
+}
+
 .dropdown-left {
 	min-width: 105px;
 	max-width: 195px;
@@ -256,13 +292,8 @@ textarea {
 	width: 20px;
 	display: inline-block;
 }
-
-
-.default-text {
-}
-
 .default-text-active { 
-	color: #a1a1a1; 
+	color: #000000; 
 	font-style: italic;
 }
 

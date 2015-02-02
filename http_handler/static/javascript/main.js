@@ -1,3 +1,8 @@
+String.prototype.trunc = String.prototype.trunc ||
+      function(n){
+          return this.length>n ? this.substr(0,n-1)+'&hellip;' : this;
+      };
+
 $(document).ready(function(){
 	/* Global Objects */
 
@@ -396,8 +401,18 @@ $(document).ready(function(){
 		var selected_thread = posts_local_data.selected_thread;
 		timestamp = new Date(0);
 		if(res.status){
+			console.log(res);
+			
+			var post_list = [];
+			
 			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.threads.length; i++){
+				post = {'subject': res.threads[i].post.subject,
+						'text': strip(res.threads[i].post.text),
+						'from': res.threads[i].post.from,
+						'tid': res.threads[i].thread_id,
+						};
+				post_list.push(post);
 				d = format_date(new Date(res.threads[i].timestamp));
 				var content = '<div class="left-column-area-metadata">';
 				content += '<span class="gray">' + d.date + '</span><BR>';
@@ -444,6 +459,45 @@ $(document).ready(function(){
 			
 
 			}
+		
+		console.log(post_list);
+		var posts = new Bloodhound({
+			datumTokenizer: Bloodhound.tokenizers.obj.whitespace("text", "subject", "from"),
+			queryTokenizer: Bloodhound.tokenizers.whitespace,
+			local: post_list
+		});
+		posts.initialize();
+		
+		$("#text-search-post").typeahead({
+			minLength: 2,
+			highlight: true,
+			hint: false,
+		}, {
+			name: 'posts',
+			displayKey: 'subject',
+			source: posts.ttAdapter(),
+			highlighter: function(item) {
+				console.log(item);
+                return item.subject + item.text;
+            },
+ 
+            updater: function(item) {
+                console.log("'" + item + "' selected.");
+                return item;
+            },
+              templates: {
+			    empty: [
+			      '<div class="empty-message">',
+			      'unable to find any posts that match the current query',
+			      '</div>'
+			    ].join('\n'),
+			    suggestion: function (post) {
+            		return '<a href="/thread?group_name=' + res.group_name + '&tid=' + post.tid + '"><div class="suggestion">' + post.subject.trunc(53) + '<br />' + post.from + '<br />' + post.text.trunc(50) + '</div></a>';
+        }
+		  }
+            
+		});
+		
 		}
 		if(load_params.load == true){
 			posts_table.find('#'+selected_thread).click();

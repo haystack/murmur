@@ -433,6 +433,7 @@ def list_posts(request):
 		group_name = request.POST.get('active_group')
 		res = engine.main.list_posts(group_name=group_name)
 		res['user'] = request.user.email
+		res['group_name'] = group_name
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except  Exception, e:
 		logging.debug(e)
