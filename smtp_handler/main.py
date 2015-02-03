@@ -207,6 +207,10 @@ def handle_post(message, address=None, host=None):
 	if 'in-reply-to' not in message:
 		mail["In-Reply-To"] = message['message-id']
 	
+	for attachment in msg_text.get("attachments"):
+		mail.attach(filename=attachment['filename'],
+					content_type=attachment['mime'],
+					data=attachment['content'])
 	
 	msg_id = res['msg_id']
 	to_send =  res['recipients']
@@ -349,7 +353,6 @@ def send_account_info(message, address=None, host=None):
 	logging.debug(message['To'])
 	logging.debug(message['From'])
 	msg_text = get_body(str(message))
-	logging.debug(msg_text)
 	if str(message['From']) == "no-reply@murmur.csail.mit.com" and ("Account activation on Murmur" in str(message['Subject']) or "Password reset on Murmur" in str(message['Subject'])):
 		mail = MailResponse(From = NO_REPLY, To = message['To'], Subject = message['Subject'], Body = msg_text['plain'])
 		relay.deliver(mail)

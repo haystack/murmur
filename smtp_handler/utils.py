@@ -24,6 +24,9 @@ RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe',
 
 relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
 
+ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "application/pdf"]
+MAX_ATTACHMENT_SIZE = 823349
+
 def setup_post(From, To, Subject, group_name, host):
 	
 	mail = MailResponse(From = From, 
@@ -52,6 +55,18 @@ def setup_post(From, To, Subject, group_name, host):
 def get_body(message):
 	res = {}
 	email_message = email.message_from_string(str(message))
+	
+	res['attachments'] = []
+	if len(email_message.get_payload()) > 1:
+		for i in range(1, len(email_message.get_payload())):
+			attachment = email_message.get_payload()[i]
+			attachment_type = attachment.get_content_type()
+			attachment_data = attachment.get_payload(decode=True)
+			if attachment_type in ALLOWED_MIMETYPES and len(attachment_data) < MAX_ATTACHMENT_SIZE:
+				res['attachments'].append({'content': attachment_data,
+										   'mime': attachment_type,
+										   'filename': attachment.get_filename()})
+		
 	maintype = email_message.get_content_maintype()
 	subtype = email_message.get_content_maintype()
 
