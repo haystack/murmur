@@ -31,6 +31,21 @@ hr{
 	 height: 100%;
 }
 
+@media (min-width: 768px) and (max-width: 1000px) {
+    .navbar-collapse.collapse {
+        display: none !important;
+    }
+    .navbar-collapse.collapse.in {
+        display: block !important;
+    }
+    .navbar-header .collapse, .navbar-toggle {
+        display:block !important;
+    }
+    .navbar-header {
+        float:none;
+    }
+}
+
 .home-left, .home-right, .home-left-mobile, .home-right-mobile {
 	
 	float: left;
@@ -149,7 +164,7 @@ hr{
 
 .dropdown-left {
 	min-width: 105px;
-	max-width: 195px;
+	max-width: 240px;
 }
 
 .dropdown-right {
