@@ -30,12 +30,15 @@ $(document).ready(function(){
     $('body').css({'background-image': 'url("' + array[val] + '")'});
     $('#image-attrib').html(about[val]);
 
+	if ($('.home-left').length > 0) {
+		window.setInterval(function() {
+			var val = getRandomInt(0,7);
+	        $('body').css({'background-image': 'url("' + array[val] + '")'});
+	        $('#image-attrib').html(about[val]);
+		}, 12000);
+	}
+	
 
-	window.setInterval(function() {
-		var val = getRandomInt(0,7);
-        $('body').css({'background-image': 'url("' + array[val] + '")'});
-        $('#image-attrib').html(about[val]);
-	}, 12000);
 });
 
 
