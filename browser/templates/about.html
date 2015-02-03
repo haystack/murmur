@@ -19,7 +19,12 @@
 {% else %}
 <div class="container">
 {% endif %}
+{% if flavour != "mobile" %}
   <div class="home-left">
+  	{% else %}
+  	<div class="home-left-mobile">
+  	{% endif %}
+  	
      
      <h4>We're re-imagining mailing lists and community discourse for the age of social media.</h4>
 
@@ -50,7 +55,12 @@
     </div>
     
     
-    <div class="home-right">
+{% if flavour != "mobile" %}
+  <div class="home-right">
+  	{% else %}
+  	<div class="home-right-mobile">
+  	{% endif %}
+  	
   <h4>Our Research Team</h4>
      Amy X. Zhang<br />
      Ph.D. Student,

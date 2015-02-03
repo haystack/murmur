@@ -31,7 +31,7 @@ hr{
 	 height: 100%;
 }
 
-.home-left, .home-right {
+.home-left, .home-right, .home-left-mobile, .home-right-mobile {
 	
 	float: left;
 	margin-top:30px; 
@@ -40,8 +40,17 @@ hr{
 	margin-right: 10px;
 	vertical-align:top;
 	background-color: #f8f8f8;
-	max-width:380px;
+
+}
+
+.home-left, .home-right {
 	min-width: 380px;
+	max-width: 380px;
+}
+
+.home-left-mobile, .home-right-mobile {
+	min-width: 280px;
+	max-width: 280px;
 }
 
 

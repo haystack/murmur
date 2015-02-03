@@ -19,7 +19,12 @@
 {% else %}
 <div class="container">
 {% endif %}
+
+{% if flavour != "mobile" %}
   <div class="home-left">
+  	{% else %}
+  	<div class="home-left-mobile">
+  	{% endif %}
   	
      <h3>Welcome to Murmur.</h3>
      
@@ -44,7 +49,12 @@
      <a href="/group_list">Explore Public Groups</a>
 
   </div>
+{% if flavour != "mobile" %}
   <div class="home-right">
+  	{% else %}
+  	<div class="home-right-mobile">
+  	{% endif %}
+  	
   	<form method="POST" action="{% url "auth_login" %}">
 		{% csrf_token %}
 		<h3>Login</h3>
