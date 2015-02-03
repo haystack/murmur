@@ -560,6 +560,7 @@ $(document).ready(function(){
 		content += '</div>';
 		content += '<hr />';
 		content += res.post.text;
+		content += '<br />';
 		content += '<div class="reply">';
 		for(var i = 0; i< res.replies.length; i++){
                        	content += '<div class="main-area-content">';
