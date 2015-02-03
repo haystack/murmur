@@ -169,7 +169,8 @@ def handle_post(message, address=None, host=None):
 	else:
 		subject = message['Subject']
 	
-	msg_text = get_body(str(message))
+	email_message = email.message_from_string(str(message))
+	msg_text = get_body(email_message)
 	
 	if 'html' not in msg_text:
 		msg_text['html'] = markdown(msg_text['plain'])
@@ -207,10 +208,13 @@ def handle_post(message, address=None, host=None):
 	if 'in-reply-to' not in message:
 		mail["In-Reply-To"] = message['message-id']
 	
-	for attachment in msg_text.get("attachments"):
-		mail.attach(filename=attachment['filename'],
-					content_type=attachment['mime'],
-					data=attachment['content'])
+	
+	if len(email_message.get_payload()) > 1:
+		attachments = get_attachments(email_message)
+		for attachment in attachments.get("attachments"):
+			mail.attach(filename=attachment['filename'],
+						content_type=attachment['mime'],
+						data=attachment['content'])
 	
 	msg_id = res['msg_id']
 	to_send =  res['recipients']
@@ -349,10 +353,12 @@ def help(message, address=None, host=None):
 @route("(address)@(host)", address=".+", host=".+")
 @stateless
 def send_account_info(message, address=None, host=None):
-	logging.debug(message['Subject'])
-	logging.debug(message['To'])
-	logging.debug(message['From'])
 	if str(message['From']) == "no-reply@murmur.csail.mit.com" and ("Account activation on Murmur" in str(message['Subject']) or "Password reset on Murmur" in str(message['Subject'])):
-		msg_text = get_body(str(message))
+		logging.debug(message['Subject'])
+		logging.debug(message['To'])
+		logging.debug(message['From'])
+		
+		email_message = email.message_from_string(str(message))
+		msg_text = get_body(email_message)
 		mail = MailResponse(From = NO_REPLY, To = message['To'], Subject = message['Subject'], Body = msg_text['plain'])
 		relay.deliver(mail)
