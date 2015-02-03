@@ -352,7 +352,7 @@ def send_account_info(message, address=None, host=None):
 	logging.debug(message['Subject'])
 	logging.debug(message['To'])
 	logging.debug(message['From'])
-	msg_text = get_body(str(message))
 	if str(message['From']) == "no-reply@murmur.csail.mit.com" and ("Account activation on Murmur" in str(message['Subject']) or "Password reset on Murmur" in str(message['Subject'])):
+		msg_text = get_body(str(message))
 		mail = MailResponse(From = NO_REPLY, To = message['To'], Subject = message['Subject'], Body = msg_text['plain'])
 		relay.deliver(mail)
