@@ -110,11 +110,12 @@ def html_ps(group_name, host):
 	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + host)
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
-	body = '<div style="border-top:solid thin; padding-top:5px; margin-top:10px;">%s</div>' %(content)
+	body = '<div class="murmur-footer" style="border-top:solid thin; padding-top:5px; margin-top:10px;">%s</div>' %(content)
 	return body
 
 def plain_ps(group_name, host):
 	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + host)
 	content = 'Follow<%s> | Un-Follow<%s>' %(follow_addr, unfollow_addr)
-	return content
+	body = "=============================================\r\n%s\r\n=============================================" % content
+	return body
