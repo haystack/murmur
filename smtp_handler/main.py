@@ -8,7 +8,6 @@ from engine.main import *
 from utils import *
 from html2text import html2text
 from markdown2 import markdown
-from BeautifulSoup import BeautifulSoup
 
 '''
 MailX Mail Interface Handler
@@ -175,12 +174,9 @@ def handle_post(message, address=None, host=None):
 	
 	if message['Subject'][0:4] == "Re: ":
 		if 'html' in msg_text:
-			soup = BeautifulSoup(msg_text['html'])
-			for div in soup.findAll('div', 'murmur-footer'):
-				div.extract()
-			msg_text['html'] = str(soup)
+			msg_text['html'] = re.sub('(?s)<div style="border-top:solid thin;padding-top:5px;margin-top:10px">.*?</div>','', msg_text['html'])
 		if 'plain' in msg_text:
-			re.sub('(?s)=============================================.*?=============================================', '', msg_text['plain'])
+			msg_text['plain'] = re.sub('(?s)------.*?------', '', msg_text['plain'])
 	
 	if 'html' not in msg_text:
 		msg_text['html'] = markdown(msg_text['plain'])
