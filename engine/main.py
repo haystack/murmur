@@ -226,7 +226,7 @@ def add_members(group_name, emails, user):
 			for email in email_list:
 				email = email.strip()
 				
-				mail = MailResponse(From = 'help@murmur.csail.mit.edu', 
+				mail = MailResponse(From = 'no-reply@murmur.csail.mit.edu', 
 									To = email, 
 									Subject  = "You've been subscribed to %s Mailing List" % (group_name))
 				
