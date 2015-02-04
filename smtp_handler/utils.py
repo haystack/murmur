@@ -116,5 +116,4 @@ def plain_ps(group_name, host):
 	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + host)
 	content = 'Follow<%s> | Un-Follow<%s>' %(follow_addr, unfollow_addr)
-	body = "------\r\n%s\r\n------" % content
-	return body
+	return content

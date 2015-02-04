@@ -176,7 +176,7 @@ def handle_post(message, address=None, host=None):
 		if 'html' in msg_text:
 			msg_text['html'] = re.sub('(?s)<div style="border-top:solid thin;padding-top:5px;margin-top:10px">.*?</div>','', msg_text['html'])
 		if 'plain' in msg_text:
-			msg_text['plain'] = re.sub('(?s)------.*?------', '', msg_text['plain'])
+			msg_text['plain'] = re.sub('(?s)\n>  Follow <test\+__follow__@murmur.csail.mit.edu> \| Un-Follow\n> <test\+__unfollow__@murmur.csail.mit.edu>\n', '', msg_text['plain'])
 	
 	if 'html' not in msg_text:
 		msg_text['html'] = markdown(msg_text['plain'])
