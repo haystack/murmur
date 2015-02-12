@@ -8,6 +8,8 @@ from engine.main import *
 from utils import *
 from html2text import html2text
 from markdown2 import markdown
+from django.db.utils import OperationalError
+import django.db
 
 '''
 MailX Mail Interface Handler
@@ -183,7 +185,11 @@ def handle_post(message, address=None, host=None):
 	if 'plain' not in msg_text:
 		msg_text['plain'] = html2text(msg_text['html'])
 	
-	user = UserProfile.objects.get(email=addr)
+	try:
+		user = UserProfile.objects.get(email=addr)
+	except OperationalError:
+		django.db.close_connection()
+		user = UserProfile.objects.get(email=addr)
 	
 	if message['Subject'][0:4] == "Re: ":
 		res = insert_reply(group_name, message['Subject'], msg_text['html'], user)
