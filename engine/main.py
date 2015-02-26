@@ -132,12 +132,7 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, user):
 		group.description = group_desc
 		group.public = public
 		group.save()
-		#res['old_group_name'] = old_group_name
-		#res['new_group_name'] = new_group_name
-		#res['group_desc'] = group_desc
-		#res['public'] = public
-		res['status'] = True
-		
+		res['status'] = True	
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except:

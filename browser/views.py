@@ -325,16 +325,6 @@ def edit_group_info_view(request, group_name):
  	except Group.DoesNotExist:
  		return redirect('/404?e=gname&name=%s' % group_name)
 
-# def get_group_info(request):
-# 	try:
-# 		user = get_object_or_404(UserProfile, email=request.user.email)
-# 		res = engine.main.get_group_info(request.POST['group_name'], user)
-# 		return HttpResponse(json.dumps(res), content_type="application/json")
-# 	except Exception, e:
-# 		print e
-# 		logging.debug(e)
-# 		return HttpResponse(request_error, content_type="application/json")
-
 
 @login_required
 def edit_group_info(request):
