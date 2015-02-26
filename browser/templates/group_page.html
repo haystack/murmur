@@ -43,7 +43,10 @@
 	
 			<div id="group-options">
 				{% if group_info.subscribed %}
-					<button type="button" id="btn-edit-settings">Edit My Settings</button>				
+					<button type="button" id="btn-edit-settings">Edit My Settings</button>
+					{% if group_info.admin %}
+						<button type="button" id="btn-edit-group-info">Edit Group Information</button>
+					{% endif %}
 					<br /><br />
 				{% else %}
 					<button type="button" id="btn-edit-settings" style="display: none;">Edit My Settings</button>
