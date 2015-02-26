@@ -124,6 +124,28 @@ def create_group(group_name, group_desc, public, requester):
 	logging.debug(res)
 	return res
 
+def edit_group_info(old_group_name, new_group_name, group_desc, public, user):
+	res = {'status':False}	
+	try:
+		group = Group.objects.get(name=old_group_name)
+		group.name = new_group_name
+		group.description = group_desc
+		group.public = public
+		group.save()
+		#res['old_group_name'] = old_group_name
+		#res['new_group_name'] = new_group_name
+		#res['group_desc'] = group_desc
+		#res['public'] = public
+		res['status'] = True
+		
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
+
 def get_group_settings(group_name, user):
 	res = {'status':False}
 	
