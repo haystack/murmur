@@ -316,7 +316,7 @@ def edit_group_info_view(request, group_name):
  	groups = Group.objects.filter(membergroup__member=user).values("name")  #defines the user and the groups this user is in.
  	try:
  		group = Group.objects.get(name=group_name)
- 		membergroup = MemberGroup.objects.filter(member=user, group=group) #
+ 		membergroup = MemberGroup.objects.filter(member=user, group=group)
  		if membergroup[0].admin:
  			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
  		else:
@@ -333,7 +333,7 @@ def edit_group_info(request):
 		new_group_name = request.POST['new_group_name']
 		group_desc = request.POST['group_desc'] 
 		public = request.POST['public'] == 'public'
-		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, user) #so the group name here is the new group name and so it can't recognize the GROUPPP
+		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, user) 
 		if res['status']:
 			active_group = request.session.get('active_group')
 			if active_group == old_group_name:
@@ -349,7 +349,7 @@ def edit_group_info(request):
 def create_group(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		public = request.POST['public'] == 'public' ###??? what are theseeeeee thingss in bracketsss
+		public = request.POST['public'] == 'public'
 		res = engine.main.create_group(request.POST['group_name'], request.POST['group_desc'], public, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:

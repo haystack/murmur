@@ -2,9 +2,7 @@ $(document).ready(function(){
 
 	var user_name = $.trim($('#user_email').text());
 	var old_group_name = $.trim($("#group-name").text());
-		
-		console.log("GROUP NAME IS");
-		console.log(old_group_name);
+
 		var group_desc = $.trim($("#group-desc").text());
 
 		var btn_save_settings = $("#btn-save-settings");
@@ -12,13 +10,11 @@ $(document).ready(function(){
 
 		edit_group_info=
 			function(params){
-				params.old_group_name = old_group_name
+				params.old_group_name = old_group_name;
 				params.new_group_name = $("#edit-group-name").val();
 				params.group_desc = $("#edit-group-description").val();
 				params.public = $('input[name=pubpriv]:checked', "#group-info-form").val();
-				console.log(params);
-		console.log("HERE I AM INNNNN");
-		console.log(params);
+
 				$.post('/edit_group_info', params,
 					function(res){
 						notify(res,true);
