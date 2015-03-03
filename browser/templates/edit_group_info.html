@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+	
+     <h3>Edit <span id="group-name">{{ group_info.name }}</span> Information</h3>
+
+     <hr />
+     
+     <form id="group-info-form">
+	 <span class="strong">Group Name : </span> <br />
+	 <span class="italic-med">
+	 	Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed
+	 </span><br />
+     <textarea id="edit-group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box; height:25px;">{{ group_info.name }}</textarea> <br /> <br />
+		
+	<span class="strong">Group Description :</span><br /><span class="italic-med">Maximum 140 characters</span><br /><textarea id="edit-group-description" maxlength="140">{{ group_info.description}}</textarea><br /><br />
+		
+	<span class="strong">Group Privacy Settings : </span> <br />
+	<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked> Public<br />
+	<span class="italic-med">All users will be able to view and search for this group by name.</span><br />
+		
+	<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group"> Private<br />
+	<span class="italic-med">Only users added to this group by admins will be notified about the group.</span><br /><br />
+		
+	<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Changes</button>
+	<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>		
+		
+	</form>
+        
+     
+        
+  </div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/edit_group_info.js"></script>
+{% endblock %}
+
+
+
+

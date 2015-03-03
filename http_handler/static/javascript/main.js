@@ -372,6 +372,7 @@ $(document).ready(function(){
 					  'group_name': res.group_name,
 					  'curr_row': curr_row
 					};
+		$("#btn-edit-group-info").unbind("click");
 		$("#btn-edit-settings").unbind("click");
  		$("#btn-activate-group").unbind("click");
  		$("#btn-deactivate-group").unbind("click");
@@ -379,6 +380,7 @@ $(document).ready(function(){
  		$("#btn-unsubscribe-group").unbind("click");
  		$("#btn-add-members").unbind("click");
  		
+ 		$("#btn-edit-group-info").bind("click");
  		$("#btn-edit-settings").bind("click");
  		$("#btn-activate-group").bind("click");
  		$("#btn-deactivate-group").bind("click");
@@ -395,6 +397,10 @@ $(document).ready(function(){
 			window.location.href = "/groups/" + res.group_name + "/edit_my_settings";
 		});
 		
+		$("#btn-edit-group-info").click(function() {
+			window.location.href = "/groups/" + res.group_name + "/edit_group_info";
+		});
+
 		$("#btn-activate-group").click(act_group);
 		$("#btn-deactivate-group").click(deact_group);
 		$("#btn-subscribe-group").click(sub_group);
@@ -408,7 +414,8 @@ $(document).ready(function(){
 		$("#btn-activate-group").hide();
 		$("#btn-deactivate-group").hide();
 		$("#btn-add-members").hide();
-		
+		$("#btn-edit-group-info").hide();
+
 		$("#btn-edit-settings").show();
 		if(res.admin){
 			if(res.active){
@@ -418,6 +425,7 @@ $(document).ready(function(){
 				$("#btn-activate-group").show();
 			}
 			$("#btn-add-members").show();
+			$("#btn-edit-group-info").show()
 		}
 		if(res.active){
 			if(res.subscribed){
