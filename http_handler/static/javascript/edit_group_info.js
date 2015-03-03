@@ -18,6 +18,10 @@ $(document).ready(function(){
 				$.post('/edit_group_info', params,
 					function(res){
 						notify(res,true);
+						if (res.status) {
+							window.location = "/groups/" + params.new_group_name + "/edit_group_info";
+						}
+						
 					}
 				);
 			};
