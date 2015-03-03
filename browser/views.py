@@ -259,7 +259,6 @@ def add_members_view(request, group_name):
 			return redirect('/404?e=admin')
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
-	
 
 @render_to("edit_my_settings.html")
 @login_required
@@ -292,15 +291,6 @@ def my_group_create_post_view(request, group_name):
 	else:
 		return HttpResponseRedirect(global_settings.LOGIN_URL)
 
-
-@render_to("create_group.html")
-@login_required
-def create_group_view(request):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
-	return {'user': request.user, 'groups': groups, 'group_page': True}
-
-
 @login_required
 def list_my_groups(request):
 	try:
@@ -311,18 +301,62 @@ def list_my_groups(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
+@render_to("create_group.html")
+@login_required
+def create_group_view(request):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	return {'user': request.user, 'groups': groups, 'group_page': True}
+
+
+@render_to("edit_group_info.html")
+@login_required
+def edit_group_info_view(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)  
+ 	groups = Group.objects.filter(membergroup__member=user).values("name")  #defines the user and the groups this user is in.
+ 	try:
+ 		group = Group.objects.get(name=group_name)
+ 		membergroup = MemberGroup.objects.filter(member=user, group=group) #
+ 		if membergroup[0].admin:
+ 			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+ 		else:
+ 			return redirect('/404?e=admin')
+ 	except Group.DoesNotExist:
+ 		return redirect('/404?e=gname&name=%s' % group_name)
+
+
+@login_required
+def edit_group_info(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		old_group_name = request.POST['old_group_name']  
+		new_group_name = request.POST['new_group_name']
+		group_desc = request.POST['group_desc'] 
+		public = request.POST['public'] == 'public'
+		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, user) #so the group name here is the new group name and so it can't recognize the GROUPPP
+		if res['status']:
+			active_group = request.session.get('active_group')
+			if active_group == old_group_name:
+				request.session['active_group'] = new_group_name
+
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
 def create_group(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		public = request.POST['public'] == 'public'
+		public = request.POST['public'] == 'public' ###??? what are theseeeeee thingss in bracketsss
 		res = engine.main.create_group(request.POST['group_name'], request.POST['group_desc'], public, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
+
 
 def get_group_settings(request):
 	try:
