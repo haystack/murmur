@@ -313,16 +313,16 @@ def create_group_view(request):
 @login_required
 def edit_group_info_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)  
- 	groups = Group.objects.filter(membergroup__member=user).values("name")  #defines the user and the groups this user is in.
- 	try:
- 		group = Group.objects.get(name=group_name)
- 		membergroup = MemberGroup.objects.filter(member=user, group=group)
- 		if membergroup[0].admin:
- 			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
- 		else:
- 			return redirect('/404?e=admin')
- 	except Group.DoesNotExist:
- 		return redirect('/404?e=gname&name=%s' % group_name)
+	groups = Group.objects.filter(membergroup__member=user).values("name")  #defines the user and the groups this user is in.
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.filter(member=user, group=group)
+		if membergroup[0].admin:
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+		else:
+			return redirect('/404?e=admin')
+	except Group.DoesNotExist:
+		return redirect('/404?e=gname&name=%s' % group_name)
 
 
 @login_required
