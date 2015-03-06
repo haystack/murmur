@@ -38,7 +38,20 @@
 		
 		<br /><br />
 		
-		<span class="strong">Active: </span><span class="strong-gray group_active">{{ group_info.group.active }}</span><br /> <br />
+		This group is <span class="strong">
+		{% if group_info.group.public %}
+			Public{% else %}
+			Private{% endif %}</span>.
+		<br />
+
+		{% if not group_info.group.allow_attachments %}
+			<span class="strong">No Attachments</span> are allowed.
+		{% else %}
+			Attachments <span class="strong">are allowed</span>.
+		{% endif %}
+		<br />
+		<br />
+		
 		<a href="/posts?group_name={{ group_info.group.name }}">View Posts</a> <br /> <br />
 	
 			<div id="group-options">

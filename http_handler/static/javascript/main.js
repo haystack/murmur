@@ -336,8 +336,23 @@ $(document).ready(function(){
 	
 	function populate_group_info(res, curr_row){
 		var info = "<h3>Group: " + res.group_name + "</h3><hr />";
-		info += '<span class="strong">Active: </span><span class="strong-gray">' + res.active + '</span><br /> <br />';
-		info += '<a href="/posts?group_name=' + res.group_name + '">View Posts</a> <br /> <br />';
+		
+		info += "This group is <span class='strong'>";
+		if (res.public) {
+			info += "Public";
+		} else {
+			info += "Private";
+		}
+		info += "</span>.<br />";
+		
+		if (res.allow_attachments) {
+			info += '<span class="strong">No Attachments</span> are allowed.';
+		} else {
+			info += 'Attachments <span class="strong">are allowed</span>.';
+		}
+		
+		info += '<br /> <br />';
+		info += '<a href="/posts?group_name=' + res.group_name + '"><button type="button">View Posts</button></a> <br /> <br />';
 		$("#group-info").html(info);
 		$('#group-display-area').show();
 		var params = {'requester_email': res.user, 

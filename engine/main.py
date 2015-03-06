@@ -337,6 +337,8 @@ def group_info(group_name, user):
 		res['status'] = True
 		res['group_name'] = group_name
 		res['active'] = group.active
+		res['public'] = group.public
+		res['allow_attachments'] = group.allow_attachments
 		res['members'] = []
 		for membergroup in membergroups:
 
