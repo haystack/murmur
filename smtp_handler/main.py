@@ -235,7 +235,8 @@ def handle_post(message, address=None, host=None):
 		for attachment in attachments.get("attachments"):
 			mail.attach(filename=attachment['filename'],
 						content_type=attachment['mime'],
-						data=attachment['content'])
+						data=attachment['content'],
+						disposition=attachment['disposition'])
 		
 	if 'references' in message:
 		mail['References'] = message['references']

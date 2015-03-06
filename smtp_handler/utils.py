@@ -64,14 +64,20 @@ def get_attachments(email_message):
 	for i in range(1, len(email_message.get_payload())):
 		attachment = email_message.get_payload()[i]
 		attachment_type = attachment.get_content_type()
+		disposition = attachment.get('content-disposition')
+		if disposition:
+			disposition = disposition.split(';')[0]
+		
 		attachment_data = attachment.get_payload(decode=True)
 		if attachment_type in ALLOWED_MIMETYPES:
 			if len(attachment_data) < MAX_ATTACHMENT_SIZE:
 				res['attachments'].append({'content': attachment_data,
 										   'mime': attachment_type,
-										   'filename': attachment.get_filename()})
+										   'filename': attachment.get_filename(),
+										   'disposition': disposition
+										   })
 			else:
-				res['error'] = 'One or more attachments exceed size limit of 1MB. Please use a separate service and send a link in the list instead.'
+				res['error'] = 'One or more attachments exceed size limit of 1MB. Please use a separate service and send a link to the list instead.'
 				break
 		else:
 			res['error'] = 'One or more attachments violate allowed mimetypes: jpg, img, png, pdf, and bmp.'
