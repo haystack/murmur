@@ -70,26 +70,6 @@ $(document).ready(function(){
 				}
 			);	
 		};
-	
-	
-	create_group = 
-		function(params){
-			params.group_name = $("#new-group-name").val();
-			params.group_desc = $("#new-group-description").val();
-			params.public = $('input[name=pubpriv]:checked', '#new-group-form').val();
-			$.post('create_group', params, 
-				function(res){
-					if(res.status){
-						$('#list-group-names').prepend('<li><a href="/posts?group_name=' + params.group_name + '">' + params.group_name + '</a></li>');
-						list_groups(params);
-						group_info(params);
-					}
-					notify(res, true);
-				}
-			);	
-		};
-
-
 
 	subscribe_group = 
 		function(params){
@@ -258,14 +238,6 @@ $(document).ready(function(){
 		var groups_table = $("#groups-table");
 		groups_table.html("");
 		if(res.status){
-	 		
-	 		$("#btn-create-group").unbind("click");
-	 		$("#btn-create-group").bind("click");
-	 		
-	 		var crt_group = bind(new_group, res);
-	 		
-			$("#btn-create-group").click(crt_group);
-			
 			if (res.groups.length == 0) {
 				var content = '<div class="add-padding"><i>You are not in any groups yet. <a href="/group_list">Join or create a new group.</a></i></div>';
 				$("#groups-table").append(content);
@@ -668,48 +640,7 @@ $(document).ready(function(){
 		$("#btn-post").click(ins_post);
 		$('.row-item').css("background-color","white");
 	}
-	
-	
-	function new_group(res){
-		
-		$("#new-group-area").html('');
-		
-        var content = '<div class="comment">';
-        
-        content += '<form id="new-group-form">';
-		content += '<span class="strong">New Group Name : </span> <br />';
-		content += '<span class="italic-med">Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed</span><br />';
-        content += '<input id="new-group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />';
-		
-		content += '<span class="strong">New Group Description : </span> <br />';
-		content += '<span class="italic-med">Maximum 140 characters</span><br />';
-		content += '<textarea id="new-group-description" maxlength="140"></textarea><br /><br />';
-		
-		content += '<span class="strong">New Group Privacy Settings : </span> <br />';
-		content += '<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked> Public<br />';
-		content += '<span class="italic-med">All users will be able to view and search for this group by name.</span><br />';
-		
-		content += '<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group"> Private<br />';
-		content += '<span class="italic-med">Only users added to this group by admins will be notified about the group.</span><br /><br />';
-		
-		content += '<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>';
-		
-		
-		content += '</form></div>';
-        
-        $("#new-group-area").html(content);
-        
-        params = {'requester_email':res.user};
 
-		var cr_group = bind(create_group, params);
-		$("#btn-new-create-group").unbind("click");
-        $("#btn-new-create-group").bind("click");
-		$("#btn-new-create-group").click(cr_group);
-
-		$('#group-display-area').hide();
-		
-		$("#new-group-area").show();
-	}
 
 	function format_date(d) {
 		var dateStr,hours,minutes,ampm;

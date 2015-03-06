@@ -90,7 +90,7 @@ def list_my_groups(user):
 	
 
 
-def create_group(group_name, group_desc, public, requester):
+def create_group(group_name, group_desc, public, attach, requester):
 	res = {'status':False}
 	
 	
@@ -111,7 +111,7 @@ def create_group(group_name, group_desc, public, requester):
 		res['code'] = msg_code['DUPLICATE_ERROR']
 		
 	except Group.DoesNotExist:
-		group = Group(name=group_name, active=True, public=public, description=group_desc)
+		group = Group(name=group_name, active=True, public=public, allow_attachments=attach, description=group_desc)
 		group.save()
 		
 		membergroup = MemberGroup(group=group, member=requester, admin=True, moderator=True)
@@ -124,13 +124,14 @@ def create_group(group_name, group_desc, public, requester):
 	logging.debug(res)
 	return res
 
-def edit_group_info(old_group_name, new_group_name, group_desc, public, user):
+def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, user):
 	res = {'status':False}	
 	try:
 		group = Group.objects.get(name=old_group_name)
 		group.name = new_group_name
 		group.description = group_desc
 		group.public = public
+		group.allow_attachments = attach
 		group.save()
 		res['status'] = True	
 	except Group.DoesNotExist:

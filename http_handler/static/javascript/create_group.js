@@ -9,6 +9,7 @@ $(document).ready(function(){
 			params.group_name = $("#new-group-name").val();
 			params.group_desc = $("#new-group-description").val();
 			params.public = $('input[name=pubpriv]:checked', '#new-group-form').val();
+			params.attach = $('input[name=attach]:checked', '#new-group-form').val();
 			$.post('create_group', params, 
 				function(res){
 					notify(res, true);

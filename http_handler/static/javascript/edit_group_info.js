@@ -14,6 +14,7 @@ $(document).ready(function(){
 				params.new_group_name = $("#edit-group-name").val();
 				params.group_desc = $("#edit-group-description").val();
 				params.public = $('input[name=pubpriv]:checked', "#group-info-form").val();
+				params.attach = $('input[name=attach]:checked', "#group-info-form").val();
 
 				$.post('/edit_group_info', params,
 					function(res){

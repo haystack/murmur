@@ -20,17 +20,25 @@
      <input id="new-group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;">
      </input> <br /> <br />
 		
-	<span class="strong">New Group Description : </span> <br />
+	<span class="strong">Group Description : </span> <br />
 	<span class="italic-med">Maximum 140 characters</span><br />
 	<textarea id="new-group-description" maxlength="140"></textarea><br /><br />
 		
-	<span class="strong">New Group Privacy Settings : </span> <br />
+	<span class="strong">Privacy Settings : </span> <br />
 	<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked> Public<br />
-	<span class="italic-med">All users will be able to view and search for this group by name.</span><br />
+	<span class="italic-small">All users will be able to view and search for this group by name and description.</span>
 		
 	<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group"> Private<br />
-	<span class="italic-med">Only users added to this group by admins will be notified about the group.</span><br /><br />
+	<span class="italic-small">Only users added to this group by admins will be notified about the group.</span><br />
 		
+	<span class="strong">Attachment Policy : </span> <br />
+	<input type="radio" name="attach" value="yes-attach" id="rdo-attach-create-group" checked> Allow Attachments<br />
+	<span class="italic-small">All members of the group can post attachments to the list. Size of attachment cannot exceed 1MB. We currently only support images and pdfs.</span>
+	<input type="radio" name="attach" value="no-attach" id="rdo-noattach-create-group"> No Attachments Allowed<br />
+	<span class="italic-small">Users will not be able to post attachments to the list.</span><br />
+
+	
+	
 	<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>
 		
 		

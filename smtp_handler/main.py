@@ -165,6 +165,12 @@ def handle_post(message, address=None, host=None):
 		return
 	
 	group_name = address.lower()
+	try:
+		group = Group.objects.get(name=group_name)
+	except Exception, e:
+		mail = create_error_email(addr, group_name, host, e)
+		relay.deliver(mail)
+		return
 	
 	if message['Subject'][0:4] != "Re: ":
 		subject = '[ %s ] %s' %(group_name, message['Subject'])
@@ -174,6 +180,21 @@ def handle_post(message, address=None, host=None):
 	email_message = email.message_from_string(str(message))
 	msg_text = get_body(email_message)
 	
+
+	attachments = None
+	
+	if len(email_message.get_payload()) > 1:
+		if not group.allow_attachments:
+			mail = create_error_email(addr, group_name, host, "No attachments allowed for this group.")
+			relay.deliver(mail)
+			return
+
+		attachments = get_attachments(email_message)
+		if attachments['error'] != '':
+			mail = create_error_email(addr, group_name, host, attachments['error'])
+			relay.deliver(mail)
+			return
+
 	if message['Subject'][0:4] == "Re: ":
 		if 'html' in msg_text:
 			msg_text['html'] = re.sub('(?s)<div style="border-top:solid thin;padding-top:5px;margin-top:10px">.*?</div>','', msg_text['html'])
@@ -191,15 +212,14 @@ def handle_post(message, address=None, host=None):
 		django.db.close_connection()
 		user = UserProfile.objects.get(email=addr)
 	
+	
 	if message['Subject'][0:4] == "Re: ":
 		res = insert_reply(group_name, message['Subject'], msg_text['html'], user)
 	else:
 		res = insert_post(group_name, subject, msg_text['html'], user)
 		
 	if(not res['status']):
-		mail = setup_post(NO_REPLY, addr, "Error", group_name, host)
-		mail.Body = "Error Message:%s" %(res['code'])
-		
+		mail = create_error_email(addr, group_name, host, res['code'])
 		relay.deliver(mail)
 		return
 	
@@ -211,6 +231,12 @@ def handle_post(message, address=None, host=None):
 						group_name, 
 						host)
 		
+	if attachments:
+		for attachment in attachments.get("attachments"):
+			mail.attach(filename=attachment['filename'],
+						content_type=attachment['mime'],
+						data=attachment['content'])
+		
 	if 'references' in message:
 		mail['References'] = message['references']
 	elif 'message-id' in message:
@@ -219,14 +245,6 @@ def handle_post(message, address=None, host=None):
 
 	if 'in-reply-to' not in message:
 		mail["In-Reply-To"] = message['message-id']
-	
-	
-	if len(email_message.get_payload()) > 1:
-		attachments = get_attachments(email_message)
-		for attachment in attachments.get("attachments"):
-			mail.attach(filename=attachment['filename'],
-						content_type=attachment['mime'],
-						data=attachment['content'])
 	
 	msg_id = res['msg_id']
 	to_send =  res['recipients']

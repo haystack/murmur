@@ -25,7 +25,7 @@ RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe',
 relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
 
 ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "application/pdf"]
-MAX_ATTACHMENT_SIZE = 823349
+MAX_ATTACHMENT_SIZE = 1000000
 
 def setup_post(From, To, Subject, group_name, host):
 	
@@ -51,17 +51,31 @@ def setup_post(From, To, Subject, group_name, host):
 	return mail
 
 
+def create_error_email(addr, group_name, host, error):
+	mail = setup_post(NO_REPLY, addr, "Error", group_name, host)
+	mail.Body = "Error Message:%s" %(error)
+	return mail
+		
+
 def get_attachments(email_message):
-	res = {'status': True}
-	res['attachments'] = []
+	res = {'attachments': [],
+		   'error': ''}
+	
 	for i in range(1, len(email_message.get_payload())):
 		attachment = email_message.get_payload()[i]
 		attachment_type = attachment.get_content_type()
 		attachment_data = attachment.get_payload(decode=True)
-		if attachment_type in ALLOWED_MIMETYPES and len(attachment_data) < MAX_ATTACHMENT_SIZE:
-			res['attachments'].append({'content': attachment_data,
-									   'mime': attachment_type,
-									   'filename': attachment.get_filename()})
+		if attachment_type in ALLOWED_MIMETYPES:
+			if len(attachment_data) < MAX_ATTACHMENT_SIZE:
+				res['attachments'].append({'content': attachment_data,
+										   'mime': attachment_type,
+										   'filename': attachment.get_filename()})
+			else:
+				res['error'] = 'One or more attachments exceed size limit of 1MB. Please use a separate service and send a link in the list instead.'
+				break
+		else:
+			res['error'] = 'One or more attachments violate allowed mimetypes: jpg, img, png, pdf, and bmp.'
+			break
 	return res
 	
 
