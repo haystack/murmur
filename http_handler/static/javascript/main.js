@@ -345,7 +345,7 @@ $(document).ready(function(){
 		}
 		info += "</span>.<br />";
 		
-		if (res.allow_attachments) {
+		if (!res.allow_attachments) {
 			info += '<span class="strong">No Attachments</span> are allowed.';
 		} else {
 			info += 'Attachments <span class="strong">are allowed</span>.';
