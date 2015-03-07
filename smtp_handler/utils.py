@@ -65,6 +65,7 @@ def get_attachments(email_message):
 	for i in range(1, len(email_message.get_payload())):
 		attachment = email_message.get_payload()[i]
 		attachment_type = attachment.get_content_type()
+		content_id = attachment.get('content-id')
 		disposition = attachment.get('content-disposition')
 		if disposition:
 			disposition = disposition.split(';')[0]
@@ -75,8 +76,8 @@ def get_attachments(email_message):
 				res['attachments'].append({'content': attachment_data,
 										   'mime': attachment_type,
 										   'filename': attachment.get_filename(),
-										   'disposition': disposition
-										   })
+										   'disposition': disposition,
+										   'id': content_id})
 			else:
 				res['error'] = 'One or more attachments exceed size limit of 1MB. Please use a separate service and send a link to the list instead.'
 				break
