@@ -44,7 +44,7 @@ ALLOWED_ATTRIBUTES = {
     'a': ['href', 'title'],
     'abbr': ['title'],
     'acronym': ['title'],
-    'img': ['src','alt', 'style'],
+    'img': ['src','alt', 'style', 'width', 'height'],
     'meta': ['content', 'http-equiv'],
     'body': ['bgcolor', 'text'],
     'div': ['class']
