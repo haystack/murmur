@@ -1,7 +1,8 @@
 import email, re
-from lamson.mail import MailResponse
 from lamson.server import Relay
 from config.settings import *
+
+from lamson_subclass import MurmurMailResponse
 
 
 '''
@@ -29,7 +30,7 @@ MAX_ATTACHMENT_SIZE = 1000000
 
 def setup_post(From, To, Subject, group_name, host):
 	
-	mail = MailResponse(From = From, 
+	mail = MurmurMailResponse(From = From, 
 						To = To, 
 						Subject = Subject)
 	
