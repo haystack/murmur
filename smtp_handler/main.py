@@ -11,6 +11,10 @@ from markdown2 import markdown
 from django.db.utils import OperationalError
 import django.db
 
+import lamson
+lamson.encoding.CONTENT_ENCODING_KEYS.add('Content-ID')
+
+
 '''
 MailX Mail Interface Handler
 
