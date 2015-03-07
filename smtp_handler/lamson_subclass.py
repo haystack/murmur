@@ -253,7 +253,7 @@ class MurmurMailBase(object):
         part.content_encoding['Content-Disposition'] = (disposition,
                                                         {'filename': filename})
         if id:
-            part.__set_item__('Content-ID', id)
+            part.__setitem__('Content-ID', id)
             
         self.parts.append(part)
 
