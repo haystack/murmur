@@ -177,7 +177,8 @@ def handle_post(message, address=None, host=None):
 		subject = '[%s] %s' %(group_name, message['Subject'])
 	else:
 		subject = message['Subject']
-		orig_message = re.sub('[' + group_name + '] ', '', message['Subject'])
+		offset = len(group_name) + 3 + 4
+		orig_message = message['Subject'][offset:]
 	
 	email_message = email.message_from_string(str(message))
 	msg_text = get_body(email_message)
