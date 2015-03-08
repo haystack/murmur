@@ -181,21 +181,20 @@ def handle_post(message, address=None, host=None):
 	
 	email_message = email.message_from_string(str(message))
 	msg_text = get_body(email_message)
-	
 
-	attachments = None
-	
-	if len(email_message.get_payload()) > 1:
+	attachments = get_attachments(email_message)
+	if len(attachments['attachments']) > 0:
 		if not group.allow_attachments:
 			mail = create_error_email(addr, group_name, host, "No attachments allowed for this group.")
 			relay.deliver(mail)
 			return
-
-		attachments = get_attachments(email_message)
-		if attachments['error'] != '':
-			mail = create_error_email(addr, group_name, host, attachments['error'])
-			relay.deliver(mail)
-			return
+		
+	if attachments['error'] != '':
+		mail = create_error_email(addr, group_name, host, attachments['error'])
+		relay.deliver(mail)
+		return
+		
+			
 
 	if message['Subject'][0:4] == "Re: ":
 		if 'html' in msg_text:
@@ -233,13 +232,12 @@ def handle_post(message, address=None, host=None):
 						group_name, 
 						host)
 		
-	if attachments:
-		for attachment in attachments.get("attachments"):
-			mail.attach(filename=attachment['filename'],
-						content_type=attachment['mime'],
-						data=attachment['content'],
-						disposition=attachment['disposition'],
-						id=attachment['id'])
+	for attachment in attachments.get("attachments"):
+		mail.attach(filename=attachment['filename'],
+					content_type=attachment['mime'],
+					data=attachment['content'],
+					disposition=attachment['disposition'],
+					id=attachment['id'])
 		
 	if 'references' in message:
 		mail['References'] = message['references']

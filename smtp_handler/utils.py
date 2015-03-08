@@ -69,6 +69,10 @@ def get_attachments(email_message):
 		disposition = attachment.get('content-disposition')
 		if disposition:
 			disposition = disposition.split(';')[0]
+			if disposition not in ['inline', 'attachment']:
+				continue
+		else:
+			continue
 		
 		attachment_data = attachment.get_payload(decode=True)
 		if attachment_type in ALLOWED_MIMETYPES:
