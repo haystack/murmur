@@ -306,6 +306,8 @@ $(document).ready(function(){
 	        		}
 			  	}
 	            
+			}).on('typeahead:selected', function($e, datum) {
+				window.location.href = "/groups/" + datum.name;
 			});
 		}
 	}
@@ -512,11 +514,6 @@ $(document).ready(function(){
 			highlighter: function(item) {
                 return item.subject + item.text;
             },
- 
-            updater: function(item) {
-                console.log("'" + item + "' selected.");
-                return item;
-            },
               templates: {
 			    empty: [
 			      '<div class="empty-message">',
@@ -528,7 +525,9 @@ $(document).ready(function(){
         }
 		  }
             
-		});
+		}).on('typeahead:selected', function($e, datum) {
+				window.location.href = '/thread?group_name=' + res.group_name + '&tid=' + datum.tid;
+			});;
 		
 		}
 		if(load_params.load == true){
