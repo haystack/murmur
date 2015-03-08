@@ -36,6 +36,14 @@ class Thread(models.Model):
 	class Meta:
 		db_table = "mailx_threads"
 		ordering = ["-timestamp"]
+		
+class Tag(models.Model):
+	id = models.AutoField(primary_key=True)
+	thread = models.ForeignKey(Thread)
+	name = models.CharField(max_length=20, unique=True)
+	
+	def __unicode__(self):
+		return '%s tag for %s' % (self.name, self.thread)
 
 class MemberGroup(models.Model):
 	id = models.AutoField(primary_key=True)

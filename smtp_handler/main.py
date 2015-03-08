@@ -172,10 +172,12 @@ def handle_post(message, address=None, host=None):
 		relay.deliver(mail)
 		return
 	
+	orig_message = message['Subject']
 	if message['Subject'][0:4] != "Re: ":
-		subject = '[ %s ] %s' %(group_name, message['Subject'])
+		subject = '[%s] %s' %(group_name, message['Subject'])
 	else:
 		subject = message['Subject']
+		orig_message = re.sub('[' + group_name + '] ', '', message['Subject'])
 	
 	email_message = email.message_from_string(str(message))
 	msg_text = get_body(email_message)
@@ -214,9 +216,9 @@ def handle_post(message, address=None, host=None):
 	
 	
 	if message['Subject'][0:4] == "Re: ":
-		res = insert_reply(group_name, message['Subject'], msg_text['html'], user)
+		res = insert_reply(group_name, orig_message, msg_text['html'], user)
 	else:
-		res = insert_post(group_name, subject, msg_text['html'], user)
+		res = insert_post(group_name, orig_message, msg_text['html'], user)
 		
 	if(not res['status']):
 		mail = create_error_email(addr, group_name, host, res['code'])
