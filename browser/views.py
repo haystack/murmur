@@ -501,11 +501,11 @@ def insert_post(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 
 		group_name = request.POST['group_name']
-		subject = '[ %s ] %s' %(group_name, request.POST['subject'])
+		subject = '[%s] %s' %(group_name, request.POST['subject'])
 		
 		msg_text = request.POST['msg_text']
 		
-		res = engine.main.insert_post(group_name, subject,  msg_text, user)
+		res = engine.main.insert_post(group_name, request.POST['subject'],  msg_text, user)
 		
 		msg_id = res['msg_id']
 		to_send =  res['recipients']
@@ -545,14 +545,14 @@ def insert_reply(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		group_name = request.POST['group_name'].encode('ascii', 'ignore')
 		
-		subject = request.POST['subject']
+		subject = 'Re: [%s] %s' %(group_name, request.POST['subject'])
 		
 		msg_text = request.POST['msg_text']
 		
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
 		thread_id = request.POST.get('thread_id', None)
 		
-		res = engine.main.insert_reply(group_name, subject, msg_text, user, thread_id=thread_id)
+		res = engine.main.insert_reply(group_name, 'Re: ' + request.POST['subject'], msg_text, user, thread_id=thread_id)
 		if(res['status']):
 			
 			to_send =  res['recipients']
