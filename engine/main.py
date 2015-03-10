@@ -520,7 +520,7 @@ def insert_post(group_name, subject, message_text, user):
 			res['status'] = True
 			res['msg_id'] = msg_id
 			res['thread_id'] = thread.id
-			res['tags'] = json.dumps(tags)
+			res['tags'] = tags
 			res['recipients'] = recipients
 		else:
 			res['code'] = msg_code['NOT_MEMBER']
@@ -573,7 +573,9 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 				thread.subject = orig_post_subj
 				thread.group = group
 				thread.save()
-
+			
+			tags = list(Tag.objects.filter(tagthread__thread=thread).values_list('name', flat=True))
+			
 			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@murmur.csail.mit.edu'
 			
 			r = Post(msg_id=msg_id, author=user, subject=subject, post = message_text, reply_to=post, group=group, thread=thread)
@@ -596,6 +598,7 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			
 			res['status'] = True
 			res['recipients'] = list(set(recipients))
+			res['tags'] = tags
 			res['thread_id'] = thread.id
 			res['msg_id'] = msg_id
 			

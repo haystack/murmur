@@ -502,11 +502,17 @@ def insert_post(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 
 		group_name = request.POST['group_name']
-		subject = '[%s] %s' %(group_name, request.POST['subject'])
 		
 		msg_text = request.POST['msg_text']
 		
 		res = engine.main.insert_post(group_name, request.POST['subject'],  msg_text, user)
+		
+		subj_tag = ''
+		for tag in res['tags']:
+			subj_tag += '[%s]' % tag
+			
+		subject = '[%s]%s %s' %(group_name, subj_tag, request.POST['subject'])
+		
 		
 		msg_id = res['msg_id']
 		to_send =  res['recipients']
@@ -550,8 +556,6 @@ def insert_reply(request):
 		if request.POST['subject'][0:4].lower() == "re: ":
 			orig_subject = request.POST['subject'][4:]
 		
-		subject = 'Re: [%s] %s' %(group_name, orig_subject)
-		
 		msg_text = request.POST['msg_text']
 		
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
@@ -563,6 +567,13 @@ def insert_reply(request):
 			to_send =  res['recipients']
 			post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 			
+					
+			subj_tag = ''
+			for tag in res['tags']:
+				subj_tag += '[%s]' % tag
+			
+			subject = 'Re: [%s]%s %s' %(group_name, subj_tag, orig_subject)
+
 			mail = setup_post(user.email, 
 					post_addr, 
 					subject,	

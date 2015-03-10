@@ -172,13 +172,10 @@ def handle_post(message, address=None, host=None):
 		relay.deliver(mail)
 		return
 	
-	orig_message = message['Subject']
 	if message['Subject'][0:4] != "Re: ":
-		subject = '[%s] %s' %(group_name, message['Subject'])
+		orig_message = message['Subject']
 	else:
-		subject = message['Subject']
-		offset = len(group_name) + 3 + 4
-		orig_message = "Re: " + message['Subject'][offset:]
+		orig_message = re.sub("[.*?]", "", message['Subject'])
 	
 	email_message = email.message_from_string(str(message))
 	msg_text = get_body(email_message)
@@ -194,8 +191,6 @@ def handle_post(message, address=None, host=None):
 		mail = create_error_email(addr, group_name, host, attachments['error'])
 		relay.deliver(mail)
 		return
-		
-			
 
 	if message['Subject'][0:4] == "Re: ":
 		if 'html' in msg_text:
@@ -226,6 +221,20 @@ def handle_post(message, address=None, host=None):
 		return
 	
 	post_addr = '%s <%s>' %(group_name, group_name + '@' + host)
+	
+	
+	if message['Subject'][0:4] != "Re: ":
+		subj_tag = ''
+		for tag in res['tags']:
+			subj_tag += '[%s]' % tag
+			
+		subject = '[%s]%s %s' %(group_name, subj_tag,message['Subject'])
+	else:
+		subject = message['Subject']
+		
+		
+		
+	
 	
 	mail = setup_post(message['From'], 
 						post_addr, 
