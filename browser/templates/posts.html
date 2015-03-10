@@ -34,10 +34,10 @@
 	<h1>{{ active_group.name }}</h1>
 	<br>
 	{% if active_group.description %}
-		<br>
-		{{ active_group.description }}
+		<i>{{ active_group.description }}</i>
 		<br>
 	{% endif %}
+	<br>
 	
 	{% if tag_info %}
 		Top tags: <BR>

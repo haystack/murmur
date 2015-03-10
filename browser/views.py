@@ -73,6 +73,7 @@ def posts(request):
 		is_member = False
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
+			active_group['description'] = group.description
 			is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
 			
