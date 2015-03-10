@@ -31,6 +31,17 @@
 <div id="main-area-wrapper">
 <div id="main-area">
 	<div class="main-area-content">
+		{% if member_info %}
+			<span class="member label">Member</span>
+		{% endif %}
+		{% if member_info.admin %}
+			<span class="admin label">Admin</span>
+		{% endif %}
+		{% if member_info.moderator %}
+			<span class="mod label">Mod</span>
+		{% endif %}
+		
+		
 	<h1>{{ active_group.name }}</h1>
 	<br>
 	{% if active_group.description %}

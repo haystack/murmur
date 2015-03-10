@@ -70,14 +70,21 @@ def posts(request):
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		active_group = load_groups(request, groups, user)
 		tag_info = None
+		member_info = None
 		is_member = False
+		
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
 			active_group['description'] = group.description
-			is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+			member = MemberGroup.objects.filter(member=user, group=group)
+			if member.count() > 0:
+				is_member = True
+				member_info = member[0]
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
 			
 			
+		page_info = {'user': user, "active_group": active_group, "groups": groups, "tag_info": tag_info, 'member_info': member_info}
+		
 		if not active_group['active'] or group.public or is_member:
 			if request.flavour == "mobile":
 				if not active_group['active']:
@@ -88,13 +95,13 @@ def posts(request):
 					if is_member:
 						request.session['active_group'] = active_group['name']
 					#only show the default view if not mobile and no group is selected or user is member of the group
-					return {'user': user, "active_group": active_group, "groups": groups, "tag_info": tag_info}
+					return page_info
 				else:
 					if len(groups) == 0:
 						if request.GET.get('group_name'):
 							return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 						else:
-							return {'user': user, "active_group": active_group, "groups": groups, "tag_info": tag_info}
+							return page_info
 					else:
 						return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 		else:
