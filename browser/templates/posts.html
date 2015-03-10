@@ -31,7 +31,21 @@
 <div id="main-area-wrapper">
 <div id="main-area">
 	<div class="main-area-content">
-	<img src="/static/images/no-img-selected.png" style="margin:0px auto; display: block; width: 50%;"></img>	
+	<h1>{{ active_group.name }}</h1>
+	<br>
+	{% if active_group.description %}
+		<br>
+		{{ active_group.description }}
+		<br>
+	{% endif %}
+	
+	{% if tag_info %}
+		Top tags: <BR>
+		{% for tag in tag_info %}
+			<label class="label2" style="background-color: #{{ tag.color }}">{{ tag.name }}</label> 
+			{{ tag.num_p }} posts
+		{% endfor %}
+	{% endif %}
 	</div>
 </div>
 </div>

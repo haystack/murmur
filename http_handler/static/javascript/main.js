@@ -716,7 +716,7 @@ $(document).ready(function(){
 	}
 	
 	function strip(html){
-   		return html.replace(/<(?:.|\n)*?>/gm, '');
+   		return html.replace(/<(?:.|\n)*?>/gm, ' ');
 	}
 	
 	$(".default-text").blur();

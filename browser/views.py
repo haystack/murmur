@@ -15,11 +15,12 @@ import json, logging
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from annoying.decorators import render_to
-from schema.models import UserProfile, Group, MemberGroup
+from schema.models import UserProfile, Group, MemberGroup, Tag
 from html2text import html2text
 from django.contrib.auth.forms import AuthenticationForm
 from registration.forms import RegistrationForm
 from django.conf import global_settings
+from django.db.models.aggregates import Count
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
@@ -68,11 +69,13 @@ def posts(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		active_group = load_groups(request, groups, user)
-		
+		tag_info = None
 		is_member = False
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
 			is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
+			
 			
 		if not active_group['active'] or group.public or is_member:
 			if request.flavour == "mobile":
@@ -84,13 +87,13 @@ def posts(request):
 					if is_member:
 						request.session['active_group'] = active_group['name']
 					#only show the default view if not mobile and no group is selected or user is member of the group
-					return {'user': user, "active_group": active_group, "groups": groups}
+					return {'user': user, "active_group": active_group, "groups": groups, "tag_info": tag_info}
 				else:
 					if len(groups) == 0:
 						if request.GET.get('group_name'):
 							return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 						else:
-							return {'user': user, "active_group": active_group, "groups": groups}
+							return {'user': user, "active_group": active_group, "groups": groups, "tag_info": tag_info}
 					else:
 						return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 		else:
