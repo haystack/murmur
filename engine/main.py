@@ -547,7 +547,7 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 		
 		if user in group_members:
 			
-			orig_post_subj = subject[4:]
+			orig_post_subj = subject[4:].strip()
 			
 			post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')
 			if post.count() >= 1:
