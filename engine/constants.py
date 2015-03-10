@@ -1,3 +1,5 @@
+import re
+from django.utils.html import strip_tags
 MAX_GROUP_NAME_LENGTH = 20
 MAX_GROUP_DESC_LENGTH = 140
 
@@ -15,3 +17,7 @@ msg_code={
 	'MAX_GROUP_DESC_LENGTH': 'Group description is too long',
 	'UNKNOWN_ERROR': 'Unknown',
 }
+
+def extract_hash_tags(s):
+	s = strip_tags(s)
+	return set(re.sub(r'\W+', '', part).lower() for part in s.split() if part.startswith('#'))

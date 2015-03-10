@@ -144,6 +144,12 @@ hr{
 	color: #000000;
 }
 
+.postheader {
+	font-size: 20px; 
+	font-weight: bold; 
+	padding-right: 20px;
+}
+
 .tt-dataset-posts div:hover {
 	background-color: #FFF7CE;
 }
@@ -214,6 +220,19 @@ hr{
 	float:right;
 	width:70px;
 	text-align:right;
+}
+
+.label2 {
+	display: inline;
+	padding: .2em .6em .3em;
+	font-size: 75%;
+	font-weight: 700;
+	line-height: 1;
+	color: #fff;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: baseline;
+	border-radius: .25em;
 }
 
 

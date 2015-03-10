@@ -23,6 +23,7 @@ from django.conf import global_settings
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
+
 def logout(request):
 	request.session.flush()
 	return HttpResponseRedirect('/')
@@ -545,7 +546,11 @@ def insert_reply(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		group_name = request.POST['group_name'].encode('ascii', 'ignore')
 		
-		subject = 'Re: [%s] %s' %(group_name, request.POST['subject'])
+		orig_subject = request.POST['subject']
+		if request.POST['subject'][0:4].lower() == "re: ":
+			orig_subject = request.POST['subject'][4:]
+		
+		subject = 'Re: [%s] %s' %(group_name, orig_subject)
 		
 		msg_text = request.POST['msg_text']
 		

@@ -12,6 +12,8 @@ import re
 
 from http_handler.settings import BASE_URL
 import json
+from engine.constants import extract_hash_tags
+
 
 def list_groups(user=None):
 	groups = []
@@ -404,11 +406,13 @@ def list_posts(group_name=None, timestamp_str=None, return_replies=True, format_
 						break
 				else:
 					replies.append(post_dict)
+			tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
 			res['threads'].append({'thread_id': t.id, 
 								   'post': post, 
 								   'num_replies': posts.count() - 1,
 								   'replies': replies, 
 								   'f_list': f_list, 
+								   'tags': tags,
 								   'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
 			res['status'] = True
 			
@@ -438,10 +442,12 @@ def load_thread(group_name, thread_id):
 			post = post_dict
 		else:
 			replies.append(post_dict)
-			
+	tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
+	
 	return {'thread_id': t.id, 
 		    'post': post, 
 		    'replies': replies, 
+		    'tags': json.dumps(tags),
 		    'f_list': json.dumps(f_list), 
 		    'timestamp': t.timestamp}
 
@@ -450,10 +456,12 @@ def load_post(group_name, thread_id, msg_id):
 	try:
 		t = Thread.objects.get(id=thread_id)
 		p = Post.objects.get(msg_id=msg_id, thread= t)
+		tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
 		res['status'] = True
 		res['msg_id'] = p.msg_id
 		res['thread_id'] = p.thread_id
 		res['from'] = p.email
+		res['tags'] = json.dumps(tags)
 		res['subject'] = escape(p.subject)
 		res['text'] = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
 		res['to'] = p.group.name
@@ -494,12 +502,25 @@ def insert_post(group_name, subject, message_text, user):
 			p = Post(msg_id=msg_id, author=user, subject=subject, post=message_text, group=group, thread=thread)
 			p.save()
 			
+			tags = list(extract_hash_tags(message_text))
+			
+		
+			for tag in tags:
+				t, created = Tag.objects.get_or_create(name=tag, group=group)
+				if created:
+					r = lambda: random.randint(0,255)
+					color = '%02X%02X%02X' % (r(),r(),r())
+					t.color = color
+					t.save()
+				tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
+			
 			f = Following(user=user, thread=thread)
 			f.save()
 			
 			res['status'] = True
 			res['msg_id'] = msg_id
 			res['thread_id'] = thread.id
+			res['tags'] = json.dumps(tags)
 			res['recipients'] = recipients
 		else:
 			res['code'] = msg_code['NOT_MEMBER']

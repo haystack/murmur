@@ -447,6 +447,7 @@ $(document).ready(function(){
 						'text': strip(res.threads[i].post.text),
 						'from': res.threads[i].post.from,
 						'tid': res.threads[i].thread_id,
+						'tags': res.threads[i].tags
 						};
 				post_list.push(post);
 				d = format_date(new Date(res.threads[i].timestamp));
@@ -460,17 +461,25 @@ $(document).ready(function(){
 				content += '<span class="strong-gray ellipsis">' + res.threads[i].post.from + '</span>';
 				content += '<span class="blurb ellipsis">' + strip(res.threads[i].post.text) + '</span>';
 				content += '</div>';
+				
+				if (res.threads[i].tags.length > 0) {
+					content += '<div>';
+					for (var j = 0; j < res.threads[i].tags.length; j++) {
+						content += '<span class="label2" style="background-color: #' + res.threads[i].tags[j].color + ';">' + res.threads[i].tags[j].name + '</span>';
+					}
+					content += '</div>';
+				}
 				var curr_row = $('<li class="row-item" id="' + res.threads[i].thread_id + '">' + content + '</li>');
 				var params = {'requester_email': res.user,
 						'thread_id' : res.threads[i].thread_id, 
 						 'post': res.threads[i].post,
 						 'replies' : res.threads[i].replies,
-						 'f_list' : res.threads[i].f_list
+						 'f_list' : res.threads[i].f_list,
+						 'tags' : res.threads[i].tags
 					};
 				var f = bind(load_post, params);
 				if(res.threads[i].thread_id == load_params.thread_id){
 					selected_thread = res.threads[i].thread_id;
-					console.debug("new post/reply (thread-id: " + load_params.thread_id +").");
 				}
 				if(new Date(res.threads[i].timestamp) > timestamp){
                                         timestamp = res.threads[i].timestamp;
@@ -546,7 +555,13 @@ $(document).ready(function(){
 		content += '<button type="button" id="btn-unfollow" style="margin:5px;">Unfollow</button>';
 		content += '</div>';
 		content += '<div>';
-		content += '<h3>' + res.post.subject + '</h3>';
+		content += '<span class="postheader">' + res.post.subject + '</span>';
+		if (res.tags.length > 0) {
+			for (var j = 0; j < res.tags.length; j++) {
+				content += '<span class="label2" style="background-color: #' + res.tags[j].color + ';">' + res.tags[j].name + '</span>';
+			}
+			content += '<br>';
+		}
 		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
 		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span> <br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp) + '</span>';
