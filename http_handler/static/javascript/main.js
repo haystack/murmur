@@ -465,7 +465,7 @@ $(document).ready(function(){
 				if (res.threads[i].tags.length > 0) {
 					content += '<div>';
 					for (var j = 0; j < res.threads[i].tags.length; j++) {
-						content += '<span class="label2" style="background-color: #' + res.threads[i].tags[j].color + ';">' + res.threads[i].tags[j].name + '</span>';
+						content += '<span class="label2" style="background-color: #' + res.threads[i].tags[j].color + ';">' + res.threads[i].tags[j].name + '</span> ';
 					}
 					content += '</div>';
 				}
@@ -558,7 +558,7 @@ $(document).ready(function(){
 		content += '<span class="postheader">' + res.post.subject + '</span>';
 		if (res.tags.length > 0) {
 			for (var j = 0; j < res.tags.length; j++) {
-				content += '<span class="label2" style="background-color: #' + res.tags[j].color + ';">' + res.tags[j].name + '</span>';
+				content += '<span class="label2" style="background-color: #' + res.tags[j].color + ';">' + res.tags[j].name + '</span> ';
 			}
 			content += '<br>';
 		}
