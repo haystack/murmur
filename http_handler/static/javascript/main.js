@@ -560,8 +560,8 @@ $(document).ready(function(){
 			for (var j = 0; j < res.tags.length; j++) {
 				content += '<span class="label2" style="background-color: #' + res.tags[j].color + ';">' + res.tags[j].name + '</span> ';
 			}
-			content += '<br>';
 		}
+		content += '<br>';
 		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
 		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span> <br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp) + '</span>';

@@ -175,7 +175,7 @@ def handle_post(message, address=None, host=None):
 	if message['Subject'][0:4] != "Re: ":
 		orig_message = message['Subject']
 	else:
-		orig_message = re.sub("[.*?]", "", message['Subject'])
+		orig_message = re.sub("\[.*?\]", "", message['Subject'])
 	
 	email_message = email.message_from_string(str(message))
 	msg_text = get_body(email_message)
