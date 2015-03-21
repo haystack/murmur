@@ -158,6 +158,9 @@ def info(message, group_name=None, host=None):
 @stateless
 def handle_post(message, address=None, host=None):
 	
+	#does this fix the MySQL has gone away erro?
+	django.db.close_connection()
+	
 	address = address.lower()
 	name, addr = parseaddr(message['From'].lower())
 	reserved = filter(lambda x: address.endswith(x), RESERVED)
@@ -203,12 +206,8 @@ def handle_post(message, address=None, host=None):
 	if 'plain' not in msg_text:
 		msg_text['plain'] = html2text(msg_text['html'])
 	
-	try:
-		user = UserProfile.objects.get(email=addr)
-	except OperationalError:
-		django.db.close_connection()
-		user = UserProfile.objects.get(email=addr)
 	
+	user = UserProfile.objects.get(email=addr)
 	
 	if message['Subject'][0:4] == "Re: ":
 		res = insert_reply(group_name, orig_message, msg_text['html'], user)
@@ -232,10 +231,6 @@ def handle_post(message, address=None, host=None):
 	else:
 		subject = message['Subject']
 		
-		
-		
-	
-	
 	mail = setup_post(message['From'], 
 						post_addr, 
 						subject,	
