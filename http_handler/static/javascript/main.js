@@ -14,9 +14,7 @@ $(document).ready(function(){
 	/* Dynamic Table Definitions */	
 	
 	members_table = $('#members-table').dataTable();
-	
-	
-	
+
 	/* Default blur effect in textbox */
 	
 	$(".default-text").focus(function(src)
@@ -314,14 +312,25 @@ $(document).ready(function(){
 	
 	function populate_members_table(res){
 		members_table.fnClearTable();
+		tableData = []
 		for(var i = 0; i< res.members.length; i++){
-			curr = members_table.fnAddData( [
-								res.members[i].email,
-								res.members[i].active,
-								res.members[i].admin,
-								res.members[i].moderator,
-								res.members[i].member,
-							  ]);
+			email = res.members[i].email;
+			tableData.push(email);
+			admin = res.members[i].admin;
+			moderator = res.members[i].moderator;
+			if (admin == true) {
+				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');					;
+			}
+			else {
+				tableData.push(" ");
+			}
+			if (moderator == true) {
+				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');					;
+			}
+			else {
+				tableData.push(" ");
+			}
+			curr = members_table.fnAddData(tableData);
 		}
 		
 	}
