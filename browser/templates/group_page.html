@@ -131,8 +131,16 @@
 						<td>{{ member.email }}</td>
 						{% if flavour != "mobile" %}
 							<td>{{ member.joined }}</td>
-							<td>{{ member.admin }}</td>
-							<td>{{ member.mod }}</td>
+							{% if member.admin %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+							{% endif %}
+							{% if member.mod %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+							{% endif %}
 						{% endif %}
 					</tr>
 					{% endfor %}

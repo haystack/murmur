@@ -45,9 +45,21 @@
 					<tr>
 						<td><a href="/groups/{{ group.name }}">{{group.name}}</a></td>
 						<td><span class="italic-med">{{ group.desc }}</span></td>
-						<th>{{ group.admin }}</th>
-						<th>{{ group.mod }}</th>
-						<th>{{ group.member }}</th>
+						{% if group.admin %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+						{% endif %}
+						{% if group.mod %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+						{% endif %}
+						{% if group.member %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+						{% endif %}
 						<th>{{ group.created }}</th>
 						<th>{{ group.count }}</th>
 					</tr>
