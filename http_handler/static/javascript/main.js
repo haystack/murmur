@@ -312,8 +312,8 @@ $(document).ready(function(){
 	
 	function populate_members_table(res){
 		members_table.fnClearTable();
-		tableData = []
 		for(var i = 0; i< res.members.length; i++){
+			tableData = []
 			email = res.members[i].email;
 			tableData.push(email);
 			admin = res.members[i].admin;
