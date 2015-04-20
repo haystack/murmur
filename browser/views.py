@@ -227,7 +227,7 @@ def pub_group_list(request):
 		groups = engine.main.list_groups(user)
 	except Exception:
 		user = None
-		groups = []
+		groups = engine.main.list_groups()
 	return {'user': request.user, 'groups': groups, 'group_page': True}
 
 	
