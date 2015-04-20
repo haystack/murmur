@@ -222,8 +222,12 @@ def my_group_list(request):
 
 @render_to("mobile_pub_list_groups.html")
 def pub_group_list(request):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = engine.main.list_groups(user)
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = engine.main.list_groups(user)
+	except Exception:
+		user = None
+		groups = []
 	return {'user': request.user, 'groups': groups, 'group_page': True}
 
 	
