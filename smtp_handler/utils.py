@@ -13,7 +13,7 @@ MailX Mail Utils and Constants
 '''
 
 HOST = 'murmur\.csail\.mit\.edu|mailx\.csail\.mit\.edu'
-NO_REPLY = 'no-reply' + '@' + HOST
+NO_REPLY = 'no-reply' + '@murmur.csail.mit.edu'
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
 UNFOLLOW_SUFFIX = '__unfollow__'
