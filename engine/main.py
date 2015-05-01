@@ -486,6 +486,8 @@ def insert_post(group_name, subject, message_text, user):
 		
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		
+		message_text = message_text.encode("ascii", "ignore")
+		
 		if user_member.exists():
 		
 			recipients = [m.member.email for m in group_members if not m.no_emails and m != user.email]
@@ -577,6 +579,8 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			tags = list(Tag.objects.filter(tagthread__thread=thread).values_list('name', flat=True))
 			
 			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@murmur.csail.mit.edu'
+			
+			message_text = message_text.encode("ascii", "ignore")
 			
 			r = Post(msg_id=msg_id, author=user, subject=subject, post = message_text, reply_to=post, group=group, thread=thread)
 			r.save()
