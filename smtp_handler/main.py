@@ -218,10 +218,7 @@ def handle_post(message, address=None, host=None):
 		mail = create_error_email(addr, group_name, host, res['code'])
 		relay.deliver(mail)
 		return
-	
-	post_addr = '%s <%s>' %(group_name, group_name + '@' + host)
-	
-	
+
 	if message['Subject'][0:4] != "Re: ":
 		subj_tag = ''
 		for tag in res['tags']:
@@ -231,8 +228,7 @@ def handle_post(message, address=None, host=None):
 	else:
 		subject = message['Subject']
 		
-	mail = setup_post(message['From'], 
-						post_addr, 
+	mail = setup_post(message['From'],
 						subject,	
 						group_name, 
 						host)

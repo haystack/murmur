@@ -28,14 +28,16 @@ relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug
 ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "application/pdf"]
 MAX_ATTACHMENT_SIZE = 1000000
 
-def setup_post(From, To, Subject, group_name, host):
+def setup_post(From, To, Subject, group_name):
 	
-	mail = MurmurMailResponse(From = From, 
-						To = To, 
-						Subject = Subject)
+	host = 'murmur.csail.mit.edu'
 	
 	post_addr = '%s <%s>' %(group_name, group_name + '@' + host)
-	
+
+	mail = MurmurMailResponse(From = From, 
+						To = post_addr, 
+						Subject = Subject)
+
 	mail.update({
 		"Sender": post_addr, 
 		"Reply-To": post_addr,
@@ -135,14 +137,16 @@ def get_body(email_message):
 			res['plain'] = body
 	return res
 
-def html_ps(group_name, host):
+def html_ps(group_name):
+	host = 'murmur.csail.mit.edu'
 	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + host)
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
 	body = '<div style="border-top:solid thin; padding-top:5px; margin-top:10px;">%s</div>' %(content)
 	return body
 
-def plain_ps(group_name, host):
+def plain_ps(group_name):
+	host = 'murmur.csail.mit.edu'
 	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + host)
 	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + host)
 	content = 'Follow<%s> | Un-Follow<%s>' %(follow_addr, unfollow_addr)
