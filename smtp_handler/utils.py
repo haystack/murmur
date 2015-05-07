@@ -28,7 +28,7 @@ relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug
 ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "application/pdf"]
 MAX_ATTACHMENT_SIZE = 1000000
 
-def setup_post(From, To, Subject, group_name):
+def setup_post(From, Subject, group_name):
 	
 	host = 'murmur.csail.mit.edu'
 	
