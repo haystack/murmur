@@ -486,6 +486,11 @@ def insert_post(group_name, subject, message_text, user):
 		
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		
+		try:
+			message_text = message_text.decode("utf-8")
+		except Exception, e:
+			logging.debug("guessing this is unicode then")
+		
 		message_text = message_text.encode("ascii", "ignore")
 		
 		if user_member.exists():
@@ -579,6 +584,11 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			tags = list(Tag.objects.filter(tagthread__thread=thread).values_list('name', flat=True))
 			
 			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@murmur.csail.mit.edu'
+			
+			try:
+				message_text = message_text.decode("utf-8")
+			except Exception, e:
+				logging.debug("guessing this is unicode then")
 			
 			message_text = message_text.encode("ascii", "ignore")
 			
