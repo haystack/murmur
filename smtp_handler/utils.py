@@ -55,7 +55,7 @@ def setup_post(From, Subject, group_name):
 
 
 def create_error_email(addr, group_name, host, error):
-	mail = setup_post(NO_REPLY, addr, "Error", group_name, host)
+	mail = setup_post(NO_REPLY, "Error", group_name)
 	mail.Body = "Error Message:%s" %(error)
 	return mail
 		
