@@ -232,8 +232,31 @@ def deactivate_group(group_name, user):
 	logging.debug(res)
 	return res
 
-
-
+def edit_members_table(group_name, toDelete, user):
+	res = {'status':False}
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroups = MemberGroup.objects.filter(group=group).select_related()
+		toDelete_list = toDelete.split(',')
+		toDelete_realList = []
+		for item in toDelete_list:
+			if item == '':
+				continue
+			else:
+				toDelete_realList.append(int(item))
+		for membergroup in membergroups:
+			if membergroup.id in toDelete_realList:
+				membergroup.delete()
+		res['status'] = True
+	except Exception, e:
+		print e
+		logging.debug(e)
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
 
 def add_members(group_name, emails, user):
 	res = {'status':False}
@@ -352,7 +375,8 @@ def group_info(group_name, user):
 				res['moderator'] = mod
 				res['subscribed'] = True
 			
-			member_info = {'email': membergroup.member.email, 
+			member_info = {'id': membergroup.id,
+						   'email': membergroup.member.email,
 						   'group_name': group_name, 
 						   'admin': admin, 
 						   'member': True, 

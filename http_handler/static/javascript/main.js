@@ -5,7 +5,6 @@ String.prototype.trunc = String.prototype.trunc ||
 
 $(document).ready(function(){
 	/* Global Objects */
-
 	posts_local_data = {};
 
 	groups_local_data = {};
@@ -52,8 +51,7 @@ $(document).ready(function(){
 			});	
 	};
 	
-	
-	
+
 	group_info = 
 		function(params){
 			$.post('group_info', params, 
@@ -66,8 +64,27 @@ $(document).ready(function(){
             		$('#' + params.group_name).css("background-color","lightyellow");
 					notify(res, false);
 				}
-			);	
+			);
 		};
+
+	var btn_delete_members = $("#btn-delete-members");
+	var btn_set_admin = $("#btn-set-admin");
+
+	edit_members_table=
+		function(params){
+			toDelete = ""
+			$('.checkbox').each(function() {
+				if (this.checked==true)
+					toDelete= toDelete + (this.id) + ",";
+			});
+			params.toDelete = toDelete
+			$.post('/edit_members', params,
+					function(res){
+						notify(res,true);
+					}
+				);
+			};
+
 
 	subscribe_group = 
 		function(params){
@@ -309,31 +326,42 @@ $(document).ready(function(){
 			});
 		}
 	}
-	
+
 	function populate_members_table(res){
 		members_table.fnClearTable();
+		current_group_name = res.members[0].group_name;
 		for(var i = 0; i< res.members.length; i++){
+			member = res.members[i]
 			tableData = []
+			checkbox = '<input class="checkbox" type="checkbox" id ='+ res.members[i].id + '>';
+			tableData.push(checkbox)
 			email = res.members[i].email;
 			tableData.push(email);
 			admin = res.members[i].admin;
 			moderator = res.members[i].moderator;
 			if (admin == true) {
-				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');					;
+				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');
 			}
 			else {
-				tableData.push(" ");
+				tableData.push('<input class="checkboxADMIN" type="checkbox" id ='+ res.members[i].id + '>');
 			}
 			if (moderator == true) {
-				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');					;
+				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');
 			}
 			else {
-				tableData.push(" ");
+				tableData.push('<input class="checkboxMODERATOR" type="checkbox" id ='+ res.members[i].id + '>');
 			}
 			curr = members_table.fnAddData(tableData);
-		}
-		
-	}
+			};
+		var params = {
+				'group_name': current_group_name,
+				};
+		var delete_members = bind(edit_members_table, params);
+		btn_delete_members.unbind("click");
+        btn_delete_members.bind("click");
+		btn_delete_members.click(delete_members);
+
+			};
 	
 	function notify(res, on_success){
 		if(!res.status){
