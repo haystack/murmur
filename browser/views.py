@@ -366,7 +366,7 @@ def edit_group_info(request):
 def edit_members(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		res = engine.main.edit_members_table(request.POST['group_name'], request.POST['toDelete'], user)
+		res = engine.main.edit_members_table(request.POST['group_name'], request.POST['toDelete'], request.POST['toAdmin'], request.POST['toMod'],user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
