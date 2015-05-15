@@ -69,15 +69,33 @@ $(document).ready(function(){
 
 	var btn_delete_members = $("#btn-delete-members");
 	var btn_set_admin = $("#btn-set-admin");
+	var btn_set_mod = $("#btn-set-mod");
 
 	edit_members_table=
 		function(params){
+			toAdmin = ""
+			toMod = ""
 			toDelete = ""
+
 			$('.checkbox').each(function() {
 				if (this.checked==true)
 					toDelete= toDelete + (this.id) + ",";
 			});
+
+			$('.checkboxADMIN').each(function() {
+				if (this.checked==true)
+					toAdmin = toAdmin + (this.id) + ",";
+			});
+
+			$('.checkboxMODERATOR').each(function() {
+				if (this.checked == true)
+					toMod = toMod + (this.id) + ",";
+			});
+
 			params.toDelete = toDelete
+			params.toAdmin = toAdmin
+			params.toMod = toMod
+			console.log(params)
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
@@ -328,6 +346,7 @@ $(document).ready(function(){
 	}
 
 	function populate_members_table(res){
+		console.log(res);
 		members_table.fnClearTable();
 		current_group_name = res.members[0].group_name;
 		for(var i = 0; i< res.members.length; i++){
@@ -357,9 +376,17 @@ $(document).ready(function(){
 				'group_name': current_group_name,
 				};
 		var delete_members = bind(edit_members_table, params);
+		var make_admin = bind(edit_members_table, params);
+		var make_mod = bind(edit_members_table, params);
 		btn_delete_members.unbind("click");
         btn_delete_members.bind("click");
 		btn_delete_members.click(delete_members);
+		btn_set_mod.unbind("click");
+		btn_set_mod.bind("click");
+		btn_set_mod.click(make_mod);
+		btn_set_admin.unbind("click");
+		btn_set_admin.bind("click");
+		btn_set_admin.click(make_admin);
 
 			};
 	
