@@ -71,30 +71,49 @@ $(document).ready(function(){
 	var btn_set_admin = $("#btn-set-admin");
 	var btn_set_mod = $("#btn-set-mod");
 
-	edit_members_table=
+	var toDelete = ""
+	var toAdmin = ""
+	var	toMod = ""
+
+	edit_members_table_del=
 		function(params){
-			toAdmin = ""
-			toMod = ""
-			toDelete = ""
-
 			$('.checkbox').each(function() {
-				if (this.checked==true)
-					toDelete= toDelete + (this.id) + ",";
+			if (this.checked==true)
+				toDelete= toDelete + (this.id) + ",";
 			});
-
-			$('.checkboxADMIN').each(function() {
-				if (this.checked==true)
-					toAdmin = toAdmin + (this.id) + ",";
-			});
-
-			$('.checkboxMODERATOR').each(function() {
-				if (this.checked == true)
-					toMod = toMod + (this.id) + ",";
-			});
-
-			params.toDelete = toDelete
 			params.toAdmin = toAdmin
 			params.toMod = toMod
+			params.toDelete = toDelete
+			$.post('/edit_members', params,
+					function(res){
+						notify(res,true);
+					}
+				);
+			};
+	edit_members_table_makeADMIN = 
+		function(params){
+			$('.checkbox').each(function() {
+			if (this.checked==true)
+				toAdmin= toAdmin + (this.id) + ",";
+			});
+			params.toAdmin = toAdmin
+			params.toMod = toMod
+			params.toDelete = toDelete
+			$.post('/edit_members', params,
+					function(res){
+						notify(res,true);
+					}
+				);
+			};
+	edit_members_table_makeMOD = 
+		function(params){
+			$('.checkbox').each(function() {
+				if (this.checked==true)
+					toMod = toMod + (this.id) + ",";
+			});
+			params.toAdmin = toAdmin
+			params.toMod = toMod
+			params.toDelete = toDelete
 			console.log(params)
 			$.post('/edit_members', params,
 					function(res){
@@ -362,22 +381,22 @@ $(document).ready(function(){
 				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');
 			}
 			else {
-				tableData.push('<input class="checkboxADMIN" type="checkbox" id ='+ res.members[i].id + '>');
+				tableData.push('');
 			}
 			if (moderator == true) {
 				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');
 			}
 			else {
-				tableData.push('<input class="checkboxMODERATOR" type="checkbox" id ='+ res.members[i].id + '>');
+				tableData.push('');
 			}
 			curr = members_table.fnAddData(tableData);
 			};
 		var params = {
 				'group_name': current_group_name,
 				};
-		var delete_members = bind(edit_members_table, params);
-		var make_admin = bind(edit_members_table, params);
-		var make_mod = bind(edit_members_table, params);
+		var delete_members = bind(edit_members_table_del, params);
+		var make_admin = bind(edit_members_table_makeADMIN, params);
+		var make_mod = bind(edit_members_table_makeMOD, params);
 		btn_delete_members.unbind("click");
         btn_delete_members.bind("click");
 		btn_delete_members.click(delete_members);
