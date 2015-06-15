@@ -114,7 +114,6 @@ $(document).ready(function(){
 			params.toAdmin = toAdmin
 			params.toMod = toMod
 			params.toDelete = toDelete
-			console.log(params)
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
