@@ -364,7 +364,6 @@ $(document).ready(function(){
 	}
 
 	function populate_members_table(res){
-		console.log(res);
 		members_table.fnClearTable();
 		current_group_name = res.members[0].group_name;
 		for(var i = 0; i< res.members.length; i++){
@@ -518,9 +517,7 @@ $(document).ready(function(){
 		}
 		var selected_thread = posts_local_data.selected_thread;
 		timestamp = new Date(0);
-		if(res.status){
-			console.log(res);
-			
+		if(res.status){			
 			var post_list = [];
 			
 			var params = {'requester_email': res.user};

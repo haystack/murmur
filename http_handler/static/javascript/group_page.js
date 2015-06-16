@@ -99,7 +99,6 @@ $(document).ready(function(){
 
 	edit_members_table_del=
 		function(params){
-			console.log("edit members table del");
 			$('.checkbox').each(function() {
 			if (this.checked==true)
 				toDelete= toDelete + (this.id) + ",";
@@ -107,14 +106,13 @@ $(document).ready(function(){
 			params.toAdmin = toAdmin
 			params.toMod = toMod
 			params.toDelete = toDelete
-			console.log(params);
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
 					}
 				);
 			};
-	edit_members_table_makeADMIN = 
+	edit_members_table_makeADMIN =
 		function(params){
 			$('.checkbox').each(function() {
 			if (this.checked==true)
@@ -129,7 +127,7 @@ $(document).ready(function(){
 					}
 				);
 			};
-	edit_members_table_makeMOD = 
+	edit_members_table_makeMOD =
 		function(params){
 			$('.checkbox').each(function() {
 				if (this.checked==true)

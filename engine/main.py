@@ -62,7 +62,7 @@ def group_info_page(user, group_name):
 					res['subscribed'] = True
 			
 			member_info = {'id':membergroup.id,
-							'email': membergroup.member.email, 
+							'email': membergroup.member.email,
 						   'joined': membergroup.timestamp,
 						   'admin': membergroup.admin, 
 						   'mod': membergroup.moderator}
