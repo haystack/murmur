@@ -213,11 +213,17 @@ $(document).ready(function(){
 			}
 			btn_add_members.show();
 			btn_edit_group_info.show();
+			btn_set_admin.show();
+			btn_set_mod.show();
+			btn_delete_members.show():
 			
 		} else {
 			btn_add_members.hide();
 			btn_deactivate_group.hide();
 			btn_activate_group.hide();
+			btn_set_mod.hide();
+			btn_set_admin.hide();
+			btn_delete_members.hide();
 		}
 		
 		if (member) {

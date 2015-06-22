@@ -404,8 +404,13 @@ $(document).ready(function(){
 		btn_set_admin.unbind("click");
 		btn_set_admin.bind("click");
 		btn_set_admin.click(make_admin);
-
-			};
+		if (!res.admin)
+		{
+			btn_delete_members.hide();
+			btn_set_admin.hide();
+			btn_set_mod.hide();
+		}
+	};
 	
 	function notify(res, on_success){
 		if(!res.status){
