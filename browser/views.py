@@ -544,19 +544,17 @@ def insert_post(request):
 		to_send =  res['recipients']
 		
 		post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
-		
-		mail = setup_post(user.email, 
-					post_addr, 
-					subject,	
-					group_name, 
-					HOST)
+
+		mail = setup_post(user.email,
+			subject,
+			group_name)
 		
 		mail['message-id'] = msg_id
-		
-		ps_blurb = html_ps(group_name, HOST)
+
+		ps_blurb = html_ps(group_name)
 		mail.Html = msg_text + ps_blurb	
 		
-		ps_blurb = plain_ps(group_name, HOST)
+		ps_blurb = plain_ps(group_name)
 		mail.Body = html2text(msg_text) + ps_blurb	
 		
 		
@@ -600,21 +598,19 @@ def insert_reply(request):
 			
 			subject = 'Re: [%s]%s %s' %(group_name, subj_tag, orig_subject)
 
-			mail = setup_post(user.email, 
-					post_addr, 
+			mail = setup_post(user.email,
 					subject,	
-					group_name, 
-					HOST)
+					group_name)
 		
 			mail['References'] = msg_id		
 			mail['message-id'] = res['msg_id']
 			
 			mail["In-Reply-To"] = msg_id
 				
-			ps_blurb = html_ps(group_name, HOST)
+			ps_blurb = html_ps(group_name)
 			mail.Html = msg_text + ps_blurb		
 			
-			ps_blurb = plain_ps(group_name, HOST)
+			ps_blurb = plain_ps(group_name)
 			mail.Body = html2text(msg_text) + ps_blurb	
 			
 			logging.debug('TO LIST: ' + str(to_send))

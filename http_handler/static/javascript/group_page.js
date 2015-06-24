@@ -215,7 +215,7 @@ $(document).ready(function(){
 			btn_edit_group_info.show();
 			btn_set_admin.show();
 			btn_set_mod.show();
-			btn_delete_members.show():
+			btn_delete_members.show();
 			
 		} else {
 			btn_add_members.hide();
