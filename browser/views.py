@@ -363,6 +363,17 @@ def edit_group_info(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def edit_members(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.edit_members_table(request.POST['group_name'], request.POST['toDelete'], request.POST['toAdmin'], request.POST['toMod'],user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def create_group(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -533,19 +544,17 @@ def insert_post(request):
 		to_send =  res['recipients']
 		
 		post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
-		
-		mail = setup_post(user.email, 
-					post_addr, 
-					subject,	
-					group_name, 
-					HOST)
+
+		mail = setup_post(user.email,
+			subject,
+			group_name)
 		
 		mail['message-id'] = msg_id
-		
-		ps_blurb = html_ps(group_name, HOST)
+
+		ps_blurb = html_ps(group_name)
 		mail.Html = msg_text + ps_blurb	
 		
-		ps_blurb = plain_ps(group_name, HOST)
+		ps_blurb = plain_ps(group_name)
 		mail.Body = html2text(msg_text) + ps_blurb	
 		
 		
@@ -589,21 +598,19 @@ def insert_reply(request):
 			
 			subject = 'Re: [%s]%s %s' %(group_name, subj_tag, orig_subject)
 
-			mail = setup_post(user.email, 
-					post_addr, 
+			mail = setup_post(user.email,
 					subject,	
-					group_name, 
-					HOST)
+					group_name)
 		
 			mail['References'] = msg_id		
 			mail['message-id'] = res['msg_id']
 			
 			mail["In-Reply-To"] = msg_id
 				
-			ps_blurb = html_ps(group_name, HOST)
+			ps_blurb = html_ps(group_name)
 			mail.Html = msg_text + ps_blurb		
 			
-			ps_blurb = plain_ps(group_name, HOST)
+			ps_blurb = plain_ps(group_name)
 			mail.Body = html2text(msg_text) + ps_blurb	
 			
 			logging.debug('TO LIST: ' + str(to_send))

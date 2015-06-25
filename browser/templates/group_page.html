@@ -91,6 +91,9 @@
 			<h3>Members List</h3> 
 			{% if group_info.admin %}
 				<button type="button" id="btn-add-members">Add Members</button>
+				<button type="button" id="btn-del-members">Delete Members</button>
+				<button type="button" id="btn-set-admin">Set as Admin</button>
+			    <button type="button" id="btn-set-mod">Set as Moderator</button>
 			{% else %}
 				<button type="button" id="btn-add-members" style="display: none;">Add Members</button>
 			{% endif %}
@@ -99,6 +102,7 @@
 			<table id="members-table" class="display" cellspacing="0" width="100%">
 				<thead>
 					<tr>
+						<th>Select</th>
 						<th>Email</th>
 						{% if flavour != "mobile" %}
 							<th>Joined</th>
@@ -110,6 +114,7 @@
 				
 				<tfoot>
 					<tr>
+						<th>Select</th>
 						<th>Email</th>
 						{% if flavour != "mobile" %}
 							<th>Joined</th>
@@ -127,7 +132,7 @@
 					{% else %}
 						<tr>
 					{% endif %}
-					
+						<td><input class="checkbox" type="checkbox" id ={{ member.id }}></td>
 						<td>{{ member.email }}</td>
 						{% if flavour != "mobile" %}
 							<td>{{ member.joined }}</td>
