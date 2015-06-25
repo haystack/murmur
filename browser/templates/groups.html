@@ -42,10 +42,16 @@
 	<table id="members-table" class="display" cellspacing="0" width="100%">
 		<thead>
 			<tr>
+			{% if user.admin %}
 				<th>Select</th>
 				<th>Email</th>
 				<th>Admin</th>
 				<th>Moderator</th>
+			{% else %}
+				<th>Email</th>
+				<th>Admin</th>
+				<th>Moderator</th>
+			{% endif %}
 			</tr>
 		</thead>
 	</table>	

@@ -369,8 +369,10 @@ $(document).ready(function(){
 		for(var i = 0; i< res.members.length; i++){
 			member = res.members[i]
 			tableData = []
+			if (res.admin){
 			checkbox = '<input class="checkbox" type="checkbox" id ='+ res.members[i].id + '>';
-			tableData.push(checkbox)
+			tableData.push(checkbox);
+		}
 			email = res.members[i].email;
 			tableData.push(email);
 			admin = res.members[i].admin;
