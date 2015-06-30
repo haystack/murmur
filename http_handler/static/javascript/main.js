@@ -70,6 +70,7 @@ $(document).ready(function(){
 	var btn_delete_members = $("#btn-delete-members");
 	var btn_set_admin = $("#btn-set-admin");
 	var btn_set_mod = $("#btn-set-mod");
+	var select_column = $("#adminSelectOnly");
 
 	var toDelete = ""
 	var toAdmin = ""
@@ -369,6 +370,7 @@ $(document).ready(function(){
 		for(var i = 0; i< res.members.length; i++){
 			member = res.members[i]
 			tableData = []
+			//problem here is that res.admin is returning True even when not admin.
 			if (res.admin){
 			checkbox = '<input class="checkbox" type="checkbox" id ='+ res.members[i].id + '>';
 			tableData.push(checkbox);
@@ -411,6 +413,13 @@ $(document).ready(function(){
 			btn_delete_members.hide();
 			btn_set_admin.hide();
 			btn_set_mod.hide();
+			select_column.hide();
+		}
+		else{
+			select_column.show();
+			btn_delete_members.show();
+			btn_set_admin.show();
+			btn_set_mod.show();
 		}
 	};
 	

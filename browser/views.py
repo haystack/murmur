@@ -208,7 +208,10 @@ def my_groups(request):
 	if request.flavour == "mobile":
 		return HttpResponseRedirect('/my_group_list')
 	else:
+		print "THIS IS THE START OF THE PRINT STATEMENT"
+		print request.user
 		groups = Group.objects.filter(membergroup__member=user).values("name")
+		mgs = 	groups = engine.main.list_my_groups(user)
 		return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
 
 
