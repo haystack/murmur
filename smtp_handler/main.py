@@ -206,13 +206,17 @@ def handle_post(message, address=None, host=None):
 	if 'plain' not in msg_text:
 		msg_text['plain'] = html2text(msg_text['html'])
 	
-	
+	try:
+
 	user = UserProfile.objects.get(email=addr)
 	
 	if message['Subject'][0:4] == "Re: ":
 		res = insert_reply(group_name, orig_message, msg_text['html'], user)
 	else:
 		res = insert_post(group_name, orig_message, msg_text['html'], user)
+
+	except:
+		res = {'status': False, 'code': msg_code['NOT MEMBER']}
 		
 	if(not res['status']):
 		mail = create_error_email(addr, group_name, host, res['code'])

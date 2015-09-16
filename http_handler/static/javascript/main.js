@@ -78,18 +78,21 @@ $(document).ready(function(){
 
 	edit_members_table_del=
 		function(params){
-			$('.checkbox').each(function() {
-			if (this.checked==true)
-				toDelete= toDelete + (this.id) + ",";
-			});
-			params.toAdmin = toAdmin
-			params.toMod = toMod
-			params.toDelete = toDelete
-			$.post('/edit_members', params,
+			var c = confirm("Are you sure you want to delete the selected emails?");
+			if (c){
+				$('.checkbox').each(function() {
+				if (this.checked==true)
+					toDelete= toDelete + (this.id) + ",";
+				});
+				params.toAdmin = toAdmin
+				params.toMod = toMod
+				params.toDelete = toDelete
+				$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
 					}
-				);
+					);
+				}
 			};
 	edit_members_table_makeADMIN = 
 		function(params){
