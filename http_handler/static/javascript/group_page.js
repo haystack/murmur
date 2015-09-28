@@ -109,6 +109,9 @@ $(document).ready(function(){
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
+						setTimeout(function(){
+							window.location.reload();
+						},400);
 					}
 				);
 			};
@@ -124,6 +127,9 @@ $(document).ready(function(){
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
+					setTimeout(function(){
+							window.location.reload();
+						},400);
 					}
 				);
 			};
@@ -139,6 +145,9 @@ $(document).ready(function(){
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
+					setTimeout(function(){
+							window.location.reload();
+						},400);
 					}
 				);
 			};

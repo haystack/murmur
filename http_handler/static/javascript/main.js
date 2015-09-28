@@ -382,7 +382,6 @@ $(document).ready(function(){
 		for(var i = 0; i< res.members.length; i++){
 			member = res.members[i]
 			tableData = []
-			//problem here is that res.admin is returning True even when not admin.
 			if (res.admin){
 			checkbox = '<input class="checkbox" type="checkbox" id ='+ res.members[i].id + '>';
 			tableData.push(checkbox);
@@ -408,6 +407,7 @@ $(document).ready(function(){
 		var params = {
 				'group_name': current_group_name,
 				};
+		if (res.admin){
 		var delete_members = bind(edit_members_table_del, params);
 		var make_admin = bind(edit_members_table_makeADMIN, params);
 		var make_mod = bind(edit_members_table_makeMOD, params);
@@ -420,6 +420,7 @@ $(document).ready(function(){
 		btn_set_admin.unbind("click");
 		btn_set_admin.bind("click");
 		btn_set_admin.click(make_admin);
+		}
 		if (!res.admin)
 		{
 			btn_delete_members.hide();
