@@ -523,7 +523,13 @@ $(document).ready(function(){
 			content += '<span class="unread">' + thread_list[i].replies.length + '</span> <br />';
 			content += '</div>';
 			content += '<div class= "left-column-area-content">';
-			content +=  '<span class="strong ellipsis">' + thread_list[i].post.subject + '</span>';
+			
+			subj = thread_list[i].post.subject;
+			if (subj.length > 90) {
+				content +=  '<span class="strong">' + thread_list[i].post.subject.substring(0,90) + '...</span>';
+			} else {
+				content +=  '<span class="strong">' + thread_list[i].post.subject + '</span>';
+			}
 			content += '<span class="strong-gray ellipsis">' + thread_list[i].post.from + '</span>';
 			content += '<span class="blurb ellipsis">' + strip(thread_list[i].post.text) + '</span>';
 			content += '</div>';
