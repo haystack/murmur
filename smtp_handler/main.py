@@ -298,7 +298,7 @@ def handle_unfollow(message, group_name=None, thread_id=None, suffix=None, host=
 	name, addr = parseaddr(message['From'].lower())
 	res = unfollow_thread(thread_id, email=addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "You unfollowed the thread \"%s\" successfully." % res['thread_name'])
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "You unfollowed the thread \"%s\" successfully." % res['thread_name'])
 		relay.deliver(mail)
 	else:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message: %s" %(res['code']))
