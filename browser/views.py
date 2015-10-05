@@ -610,10 +610,10 @@ def insert_reply(request):
 			
 			mail["In-Reply-To"] = msg_id
 				
-			ps_blurb = html_ps(group_name, HOST)
+			ps_blurb = html_ps(group_name, res['thread_id'])
 			mail.Html = msg_text + ps_blurb		
 			
-			ps_blurb = plain_ps(group_name, HOST)
+			ps_blurb = plain_ps(group_name, res['thread_id'])
 			mail.Body = html2text(msg_text) + ps_blurb	
 			
 			logging.debug('TO LIST: ' + str(to_send))

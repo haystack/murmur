@@ -253,14 +253,14 @@ def handle_post(message, address=None, host=None):
 	
 	mail['message-id'] = msg_id
 
-	ps_blurb = html_ps(group_name)
+	ps_blurb = html_ps(group_name, res['thread_id'])
 	
 	try:
 		mail.Html = unicode(msg_text['html'] + ps_blurb)	
 	except UnicodeDecodeError:
 		mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
 	
-	ps_blurb = plain_ps(group_name)
+	ps_blurb = plain_ps(group_name, res['thread_id'])
 	try:
 		mail.Body = unicode(msg_text['plain'] + ps_blurb)
 	except UnicodeDecodeError:
@@ -273,17 +273,16 @@ def handle_post(message, address=None, host=None):
 
 
 
-@route("(group_name)\\+(thread_id)\\+(msg_id)(suffix)@(host)", group_name=".+", thread_id=".+", msg_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_follow(message, group_name=None, thread_id=None, msg_id=None, suffix=None, host=None):
+def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['From'].lower())
-	msg_id = msg_id.lower()
 	res = follow_thread(thread_id, addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Follow success.")
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "You followed the thread \"%s\" successfully." % res['thread_name'])
 		relay.deliver(mail)
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message: %s" %(res['code']))
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Sorry there was an error: %s" % (res['code']))
 		relay.deliver(mail)
 	return
 

@@ -21,6 +21,15 @@ UPVOTE_SUFFIX = '__upvote__'
 DOWNVOTE_SUFFIX = '__downvote__'
 FETCH_SUFFIX = '__fetch__'
 
+FOLLOW_ADDR = 'http://%s/follow?tid=' % (HOST)
+UNFOLLOW_ADDR = 'http://%s/unfollow?tid=' % (HOST)
+
+HTML_SUBHEAD = '<div style="border-top:solid thin;padding-top:5px;margin-top:10px">'
+HTML_SUBTAIL = '</div>'
+
+PLAIN_SUBHEAD = '***\nMurmur\n'
+PLAIN_SUBTAIL = '\n***\n'
+
 RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe', '+info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
 
 relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
@@ -108,42 +117,60 @@ def get_body(email_message):
 			if part.get_content_maintype() == 'text':
 				if part.get_content_subtype() == 'html':
 					body = part.get_payload()
-					body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@murmur\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
+					body = remove_html_ps(body)
 					res['html'] += body
 				else:
 					body = part.get_payload()
-					body = re.sub(r'Follow <.*?\+__follow__@murmur\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@murmur.csail\.mit\.edu>','', body)
+					body = remove_plain_ps(body)
 					res['plain'] += body
 			elif part.get_content_maintype() == 'multipart':
 				for part2 in part.get_payload():
 					if part2.get_content_subtype() == 'html':
 						body = part2.get_payload()
-						body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@murmur\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
+						body = remove_html_ps(body)
 						res['html'] += body
 					elif part2.get_content_subtype() == 'plain':
 						body = part2.get_payload()
-						body = re.sub(r'Follow <.*?\+__follow__@murmur\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@murmur.csail\.mit\.edu>','', body)
+						body = remove_plain_ps(body)
 						res['plain'] += body
 	elif maintype == 'text':
 		if subtype == 'html':
 			body = email_message.get_payload()
-			body = re.sub(r'<div style="border-top:solid thin;padding-top:5px;margin-top:10px"><a href="mailto:.*?\+__follow__@murmur\.csail\.mit\.edu" target="_blank">Follow<\/a> \| <a href="mailto:.*?\+__unfollow__@mailx\.csail\.mit\.edu" target="_blank">Un-Follow<\/a><\/div>','',body)
+			body = remove_html_ps(body)
 			res['html'] = body
+			
 		elif subtype == 'text':
 			body = email_message.get_payload()
-			body = re.sub(r'Follow <.*?\+__follow__@murmur\.csail\.mit\.edu> \| Un-Follow\\n> <.*?\+__unfollow__@murmur.csail\.mit\.edu>','', body)
+			body = remove_plain_ps(body)
 			res['plain'] = body
 	return res
 
-def html_ps(group_name):
-	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
-	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
+def remove_html_ps(body):
+	head, _, x = body.partition(HTML_SUBHEAD)
+	_, _, tail = x.partition(HTML_SUBTAIL)
+	return head + tail
+
+def remove_plain_ps(body):
+	head, _, x = body.partition(PLAIN_SUBHEAD)
+	_, _, tail = x.partition(PLAIN_SUBTAIL)
+	return head + tail
+
+def html_ps(group_name, tid):
+	#follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
+	#unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
+	
+	follow_addr = '%s%s' % (FOLLOW_ADDR, tid)
+	unfollow_addr = '%s%s' % (UNFOLLOW_ADDR, tid)
+	
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
-	body = '<div style="border-top:solid thin; padding-top:5px; margin-top:10px;">%s</div>' %(content)
+	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
-def plain_ps(group_name):
-	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
-	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
+def plain_ps(group_name, tid):
+	follow_addr = 'mailto:%s' %(group_name + '+' + tid + FOLLOW_SUFFIX + '@' + HOST)
+	unfollow_addr = 'mailto:%s' %(group_name + '+' + tid + UNFOLLOW_SUFFIX + '@' + HOST)
+	
 	content = 'Follow<%s> | Un-Follow<%s>' %(follow_addr, unfollow_addr)
-	return content
+	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
+	
+	return body
