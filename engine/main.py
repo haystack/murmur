@@ -394,8 +394,9 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 				following = Following.objects.filter(thread=t, user=u).exists()
 				muting = Mute.objects.filter(thread=t, user=u).exists()
 				
-				#member_group = MemberGroup.objects.get(member=u, group=g)
-				#res['member_group'] = {'no_emails': member_group}
+				member_group = MemberGroup.objects.get(member=u, group=g)
+				res['member_group'] = {'no_emails': member_group.no_emails, 
+									   'always_follow_thread': member_group.always_follow_thread}
 
 			posts = Post.objects.filter(thread = t)		
 			replies = []
@@ -695,6 +696,56 @@ def unfollow_thread(thread_id, email):
 
 
 
+def mute_thread(thread_id, email=None, user=None):
+	res = {'status':False}
+	t = None
+	try:
+		if email:
+			user = UserProfile.objects.get(email=email)
+		t = Thread.objects.get(id=int(thread_id))
+		f = Mute.objects.get(thread=t, user=user)
+		res['status'] = True
+		res['thread_name'] = t.subject
+	except UserProfile.DoesNotExist:
+		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
+	except Mute.DoesNotExist:
+		f = Mute(thread=t, user=user)
+		f.save()
+		res['status'] = True
+		res['thread_name'] = t.subject
+	except Thread.DoesNotExist:
+		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
+
+
+
+
+def unmute_thread(thread_id, email):
+	res = {'status':False}
+	try:
+		if email:
+			user = UserProfile.objects.get(email=email)
+		t = Thread.objects.get(id=int(thread_id))
+		f = Mute.objects.filter(thread=t, user=user)
+		f.delete()
+		res['status'] = True
+		res['thread_name'] = t.subject
+	except UserProfile.DoesNotExist:
+		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
+	except Mute.DoesNotExist:
+		res['status'] = True
+		res['thread_name'] = t.subject
+	except Thread.DoesNotExist:
+		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
+	except Exception, e:
+		print e
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
 
 
 

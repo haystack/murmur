@@ -47,6 +47,9 @@ urlpatterns = patterns('',
 	 url(r'^follow_thread', 'browser.views.follow_thread'),
 	 url(r'^unfollow_thread', 'browser.views.unfollow_thread'),
      
+     url(r'^mute_thread', 'browser.views.mute_thread'),
+     url(r'^unmute_thread', 'browser.views.unmute_thread'),
+     
     #override the registration default urls - bug with django 1.6
       url(r'^password/change/$',
                     auth_views.password_change,

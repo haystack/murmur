@@ -649,7 +649,7 @@ def unfollow_thread_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unfollow?tid=" + request.GET.get('tid'))
 
-
+@login_required
 def follow_thread(request):
 	try:
 		if request.user.is_authenticated():
@@ -673,6 +673,37 @@ def unfollow_thread(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.unfollow_thread(request.POST['thread_id'], user=user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+
+
+@login_required
+def mute_thread(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.mute_thread(request.POST['thread_id'], user=user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+		else:
+			group = request.POST['group_name']
+			thread = request.POST['thread_id']
+			return HttpResponse(json.dumps({'redirect': True, 
+										'url': global_settings.LOGIN_URL + "?next=/thread?group_name=" + group + "&tid=" + thread}), 
+										content_type="application/json")
+	except Exception, e:
+		print request
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def unmute_thread(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.unmute_thread(request.POST['thread_id'], user=user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

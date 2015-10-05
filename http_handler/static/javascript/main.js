@@ -11,8 +11,27 @@ $(document).ready(function(){
 	groups_local_data = {};
 	
 	posts_list = [];
-
  
+	window.onpopstate = function(event) {
+		if (window.location.pathname.indexOf('/posts') != -1) {
+			if (event.state.thread_id) {
+				$("#main-area").html(event.state.code);
+				posts_local_data.selected_thread = event.state.thread_id;
+				$('.row-item').css("background-color","white");
+				$('#' + event.state.thread_id).css("background-color","lightyellow");
+			} else {
+				$('.row-item').css("background-color","white");
+				$("#main-area").html(event.state.code);
+			}
+		} else {	
+			$("#group-info").html(event.state.code);
+			groups_local_data.selected_group = event.state.group_name;
+			$('.row-item').css("background-color","white");
+			$('#' + event.state.group_name).css("background-color","lightyellow");
+		}
+	};
+ 
+
 	/* Dynamic Table Definitions */	
 	
 	members_table = $('#members-table').dataTable();
@@ -123,6 +142,10 @@ $(document).ready(function(){
 		function(params){
 			$.post('list_posts', params, 
 				function(res){
+					params.thread_id = parseInt(getUrlParameter('tid'));
+					if (params.thread_id > -1) {
+						params.load = true;
+					}
 					populate_posts_table(res, params, true);
 				}
 			);	
@@ -183,6 +206,42 @@ $(document).ready(function(){
 					if(res.status){
                        $("#btn-follow").show();
                        $("#btn-unfollow").hide();
+                       $('#' + params.thread_id).children()[2].remove();
+                    }
+					notify(res, true);
+				}
+			);	
+		};
+		
+		
+	
+	mute_thread = 
+		function(params){
+			$.post('mute_thread', {'requester_email': params.requester_email, 
+						  'thread_id': params.thread_id,
+						  'msg_id': params.msg_id
+					  	}, 
+				function(res){
+					if(res.status){
+						$("#btn-mute").hide();
+                		$("#btn-unmute").show();
+                		$('#' + params.thread_id + ' > div:nth-child(2)').after('<div><span class="label2 following" style="background-color: #3D7AA6;">Muted</span></div>');
+					}
+					notify(res, true);
+				}
+			);	
+		};
+	
+	unmute_thread = 
+		function(params){
+			$.post('unmute_thread', {'requester_email': params.requester_email, 
+						  'thread_id': params.thread_id,
+						  'msg_id' : params.msg_id
+					  	}, 
+				function(res){
+					if(res.status){
+                       $("#btn-mute").show();
+                       $("#btn-unmute").hide();
                        $('#' + params.thread_id).children()[2].remove();
                     }
 					notify(res, true);
@@ -369,6 +428,14 @@ $(document).ready(function(){
 		info += '<br /> <br />';
 		info += '<a href="/posts?group_name=' + res.group_name + '"><button type="button">View Posts</button></a> <br /> <br />';
 		$("#group-info").html(info);
+		
+		if (getUrlParameter('group_name') == undefined) {
+			history.replaceState({'code': info, 'group_name': res.group_name}, res.group_name, "my_groups?group_name=" + res.group_name);
+		} else {
+			history.pushState({'code': info, 'group_name': res.group_name}, res.group_name, "my_groups?group_name=" + res.group_name);
+		}
+		
+   
 		$('#group-display-area').show();
 		var params = {'requester_email': res.user, 
 					  'group_name': res.group_name,
@@ -440,7 +507,7 @@ $(document).ready(function(){
 
 	}
 	
-	function display_posts_list(thread_list, load_params, reset, user) {
+	function display_posts_list(thread_list, load_params, reset, user, member_group) {
 		var posts_table = $("#posts-table"); 
 		if(reset == true){
 			posts_table.empty();
@@ -461,10 +528,16 @@ $(document).ready(function(){
 			content += '<span class="blurb ellipsis">' + strip(thread_list[i].post.text) + '</span>';
 			content += '</div>';
 			
-			if (thread_list[i].following == true) {
-				content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>';
+			if (member_group.no_emails == true || member_group.always_follow_thread == false) {
+				if (thread_list[i].following == true) {
+					content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>';
+				}
+			} else {
+				if (thread_list[i].muting == true) {
+					content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Muted</span></div>';
+				}
 			}
-			
+				
 			if (thread_list[i].tags.length > 0) {
 				content += '<div>';
 				for (var j = 0; j < thread_list[i].tags.length; j++) {
@@ -478,7 +551,9 @@ $(document).ready(function(){
 				 'post': thread_list[i].post,
 				 'replies' : thread_list[i].replies,
 				 'following' : thread_list[i].following,
-				 'tags' : thread_list[i].tags
+				 'muting' : thread_list[i].muting,
+				 'tags' : thread_list[i].tags,
+				 'member_group': member_group,
 			};
 				
 			var f = bind(load_post, params);
@@ -515,7 +590,7 @@ $(document).ready(function(){
 		var selected_thread;
 		if(res.status){
 			posts_list = res.threads;
-			selected_thread = display_posts_list(res.threads, load_params, reset, res.user);
+			selected_thread = display_posts_list(res.threads, load_params, reset, res.user, res.member_group);
 			
 			var p_list = [];
 			
@@ -573,11 +648,14 @@ $(document).ready(function(){
 	
 	
 	function render_post(res){
+	
 		var content = '<div class="main-area-content">';
 		content += '<div>';
 		content += '<div style="float:right">';
 		content += '<button type="button" id="btn-follow" style="margin:5px;">Follow</button>';
 		content += '<button type="button" id="btn-unfollow" style="margin:5px;">Unfollow</button>';
+		content += '<button type="button" id="btn-mute" style="margin:5px;">Mute</button>';
+		content += '<button type="button" id="btn-unmute" style="margin:5px;">Unmute</button>';
 		content += '</div>';
 		content += '<div>';
 		content += '<span class="postheader">' + res.post.subject + '</span>';
@@ -614,6 +692,9 @@ $(document).ready(function(){
 		$("#main-area").empty();
         $("#main-area").html(content);
         
+        history.pushState({'code': content, 'thread_id': res.thread_id}, res.post.subject, "posts?group_name=" + $("#active_group").text() + "&tid=" + res.thread_id);
+		
+        
         var gmail_quotes = $(".gmail_quote");
         var check = "---------- Forwarded message ----------";
         
@@ -647,25 +728,57 @@ $(document).ready(function(){
 		$("#btn-reply").unbind("click");
 		$("#btn-follow").unbind("click");
 		$("#btn-unfollow").unbind("click");
+		$("#btn-mute").unbind("click");
+		$("#btn-unmute").unbind("click");
 		$("#btn-reply").bind("click");
 		$("#btn-follow").bind("click");
 		$("#btn-unfollow").bind("click");
+		$("#btn-unfollow").bind("click");
+		$("#btn-mute").bind("click");
 		var ins_reply = bind(insert_reply, params);
 		var flw_thread = bind(follow_thread, params);
 		var unflw_thread = bind(unfollow_thread, params);
+		var m_thread = bind(mute_thread, params);
+		var um_thread = bind(unmute_thread, params);
 		$("#btn-reply").click(ins_reply);
 		$("#btn-follow").click(flw_thread);
 		$("#btn-unfollow").click(unflw_thread);
+		$("#btn-mute").click(m_thread);
+		$("#btn-unmute").click(um_thread);
 		$("#btn-follow").hide();
 		$("#btn-unfollow").hide();
-		if(res.following){
-			$("#btn-unfollow").show();
-		}else{
-			$("#btn-follow").show();
-		}  		
+		$("#btn-mute").hide();
+		$("#btn-unmute").hide();
+		if (res.member_group.no_emails == true || res.member_group.always_follow_thread == false) {
+			if (res.following){
+				$("#btn-unfollow").show();
+			} else{
+				$("#btn-follow").show();
+			} 
+		} else {
+			if (res.muting){
+				$("#btn-unmute").show();
+			} else{
+				$("#btn-mute").show();
+			}
+		} 		
         
 	}
 	
+	var getUrlParameter = function getUrlParameter(sParam) {
+	    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+	        sURLVariables = sPageURL.split('&'),
+	        sParameterName,
+	        i;
+	
+	    for (i = 0; i < sURLVariables.length; i++) {
+	        sParameterName = sURLVariables[i].split('=');
+	
+	        if (sParameterName[0] === sParam) {
+	            return sParameterName[1] === undefined ? true : sParameterName[1];
+	        }
+	    }
+	};
 	
 	
 	function new_post(res){
@@ -686,6 +799,9 @@ $(document).ready(function(){
 
         content += '</div>';
         $("#main-area").html(content);
+        
+        history.pushState({'code': content}, "New Post", "posts?group_name=" + $("#active_group").text() + '#new_post');
+		
 
 		params = {'requester_email':res.user};
 		var ins_post = bind(insert_post, params);
@@ -714,6 +830,8 @@ $(document).ready(function(){
 
 
 	 function init_posts_page (){
+	 	history.replaceState({'code': $("#main-area").html()}, '');
+	 	
 		$.post('list_my_groups', {},
                         function(res){
                                 $("#btn-create-new-post").unbind("click");
@@ -734,7 +852,12 @@ $(document).ready(function(){
 	if (window.location.pathname.indexOf('/my_groups') != -1) {
 		list_groups();
 		var groups_table = $("#groups-table");
-		groups_table.children().first().click();
+		group_name = getUrlParameter('group_name');
+		if (group_name != undefined) {
+			$("#" + group_name).click();
+		} else {
+			groups_table.children().first().click();
+		}
 	} else if (window.location.pathname.indexOf('/posts') != -1) {
 		init_posts_page();	
 		setInterval(refresh_posts, 10000);
