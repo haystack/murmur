@@ -506,13 +506,15 @@ $(document).ready(function(){
 				}	
 			}
 		}
+		return selected_thread;
 	}
 	
 	function populate_posts_table(res, load_params, reset){
 
+		var selected_thread;
 		if(res.status){
 			posts_list = res.threads;
-			display_posts_list(res.threads, load_params, reset, res.user);
+			selected_thread = display_posts_list(res.threads, load_params, reset, res.user);
 			
 			var p_list = [];
 			
