@@ -631,7 +631,7 @@ def follow_thread_get(request):
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		active_group = load_groups(request, groups, user)
 		thread_id = request.GET.get('tid')
-		res = engine.main.follow_thread(thread_id, user)
+		res = engine.main.follow_thread(thread_id, user=user)
 		return {'res': res, 'type': 'follow', 'user': request.user, 'groups': groups, 'active_group': active_group}
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/follow?tid=" + request.GET.get('tid'))
@@ -644,7 +644,7 @@ def unfollow_thread_get(request):
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		active_group = load_groups(request, groups, user)
 		thread_id = request.GET.get('tid')
-		res = engine.main.unfollow_thread(thread_id, user)
+		res = engine.main.unfollow_thread(thread_id, user=user)
 		return {'res': res, 'type': 'unfollow', 'user': request.user, 'groups': groups, 'active_group': active_group}
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unfollow?tid=" + request.GET.get('tid'))
@@ -654,7 +654,7 @@ def follow_thread(request):
 	try:
 		if request.user.is_authenticated():
 			user = get_object_or_404(UserProfile, email=request.user.email)
-			res = engine.main.follow_thread(request.POST['thread_id'], user)
+			res = engine.main.follow_thread(request.POST['thread_id'], user=user)
 			return HttpResponse(json.dumps(res), content_type="application/json")
 		else:
 			group = request.POST['group_name']
@@ -672,7 +672,7 @@ def follow_thread(request):
 def unfollow_thread(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		res = engine.main.unfollow_thread(request.POST['thread_id'], user)
+		res = engine.main.unfollow_thread(request.POST['thread_id'], user=user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

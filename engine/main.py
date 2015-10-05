@@ -635,14 +635,18 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 
 
 
-def follow_thread(thread_id, user):
+def follow_thread(thread_id, email=None, user=None):
 	res = {'status':False}
 	t = None
 	try:
+		if email:
+			user = UserProfile.objects.get(email=email)
 		t = Thread.objects.get(id=int(thread_id))
 		f = Following.objects.get(thread=t, user=user)
 		res['status'] = True
 		res['thread_name'] = t.subject
+	except UserProfile.DoesNotExist:
+		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Following.DoesNotExist:
 		f = Following(thread=t, user=user)
 		f.save()
@@ -659,14 +663,18 @@ def follow_thread(thread_id, user):
 
 
 
-def unfollow_thread(thread_id, user):
+def unfollow_thread(thread_id, email):
 	res = {'status':False}
 	try:
+		if email:
+			user = UserProfile.objects.get(email=email)
 		t = Thread.objects.get(id=int(thread_id))
 		f = Following.objects.filter(thread=t, user=user)
 		f.delete()
 		res['status'] = True
 		res['thread_name'] = t.subject
+	except UserProfile.DoesNotExist:
+		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Following.DoesNotExist:
 		res['status'] = True
 		res['thread_name'] = t.subject

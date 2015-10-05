@@ -279,7 +279,7 @@ def handle_post(message, address=None, host=None):
 @stateless
 def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['From'].lower())
-	res = follow_thread(thread_id, addr)
+	res = follow_thread(thread_id, email=addr)
 	if(res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "You followed the thread \"%s\" successfully." % res['thread_name'])
 		relay.deliver(mail)
@@ -296,7 +296,7 @@ def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=No
 @stateless
 def handle_unfollow(message, group_name=None, thread_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['From'].lower())
-	res = unfollow_thread(thread_id, addr)
+	res = unfollow_thread(thread_id, email=addr)
 	if(res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "You unfollowed the thread \"%s\" successfully." % res['thread_name'])
 		relay.deliver(mail)
