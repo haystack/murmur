@@ -544,11 +544,9 @@ def insert_post(request):
 		
 		post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 		
-		mail = setup_post(user.email, 
-					post_addr, 
+		mail = setup_post(user.email,
 					subject,	
-					group_name, 
-					HOST)
+					group_name)
 		
 		mail['message-id'] = msg_id
 		
