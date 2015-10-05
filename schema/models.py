@@ -184,6 +184,18 @@ class Following(models.Model):
 		db_table = "mailx_following"
 
 
+class Mute(models.Model):
+	id = models.AutoField(primary_key=True)
+	thread = models.ForeignKey('Thread')
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	timestamp = models.DateTimeField(auto_now=True)
+	
+	def __unicode__(self):
+		return '%s mutes Thread: %s' % (self.user.email, self.thread.id)
+
+	class Meta:
+		db_table = "mailx_mute"
+
 class Like(models.Model):
 	id = models.AutoField(primary_key=True)
 	post = models.ForeignKey('Post')
