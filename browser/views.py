@@ -706,6 +706,7 @@ def unmute_thread(request):
 		res = engine.main.unmute_thread(request.POST['thread_id'], user=user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
+		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 

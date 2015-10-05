@@ -671,7 +671,7 @@ def follow_thread(thread_id, email=None, user=None):
 
 
 
-def unfollow_thread(thread_id, email):
+def unfollow_thread(thread_id, email=None, user=None):
 	res = {'status':False}
 	try:
 		if email:
@@ -724,7 +724,7 @@ def mute_thread(thread_id, email=None, user=None):
 
 
 
-def unmute_thread(thread_id, email):
+def unmute_thread(thread_id, email=None, user=None):
 	res = {'status':False}
 	try:
 		if email:
