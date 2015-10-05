@@ -290,14 +290,13 @@ def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=No
 
 
 
-@route("(group_name)\\+(thread_id)\\+(msg_id)(suffix)@(host)", group_name=".+", thread_id=".+", msg_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_unfollow(message, group_name=None, thread_id=None, msg_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['From'].lower())
-	msg_id = msg_id.lower()
 	res = unfollow_thread(thread_id, addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Unfollow success")
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "You unfollowed the thread \"%s\" successfully." % res['thread_name'])
 		relay.deliver(mail)
 	else:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message: %s" %(res['code']))
