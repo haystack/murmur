@@ -387,10 +387,15 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 		res['threads'] = []
 		for t in threads:
 			following = False
+			muting = False
 			
 			if user != None:
 				u = UserProfile.objects.get(email=user)
 				following = Following.objects.filter(thread=t, user=u).exists()
+				muting = Mute.objects.filter(thread=t, user=u).exists()
+				
+				#member_group = MemberGroup.objects.get(member=u, group=g)
+				#res['member_group'] = {'no_emails': member_group}
 
 			posts = Post.objects.filter(thread = t)		
 			replies = []
@@ -415,11 +420,13 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 								   'num_replies': posts.count() - 1,
 								   'replies': replies, 
 								   'following': following, 
+								   'muting': muting,
 								   'tags': tags,
 								   'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
 			res['status'] = True
 			
-	except:
+	except Exception, e:
+		print e
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res

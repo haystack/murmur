@@ -506,6 +506,7 @@ $(document).ready(function(){
 				}	
 			}
 		}
+		posts_local_data.timestamp = timestamp;
 		return selected_thread;
 	}
 	
@@ -568,7 +569,6 @@ $(document).ready(function(){
 			posts_table.find('#'+selected_thread).click();
 			console.debug("load = true");
 		}
-		posts_local_data.timestamp = timestamp;
 	}
 	
 	
