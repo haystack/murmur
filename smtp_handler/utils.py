@@ -167,8 +167,8 @@ def html_ps(group_name, tid):
 	return body
 
 def plain_ps(group_name, tid):
-	follow_addr = 'mailto:%s' %(group_name + '+' + tid + FOLLOW_SUFFIX + '@' + HOST)
-	unfollow_addr = 'mailto:%s' %(group_name + '+' + tid + UNFOLLOW_SUFFIX + '@' + HOST)
+	follow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + FOLLOW_SUFFIX + '@' + HOST)
+	unfollow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + UNFOLLOW_SUFFIX + '@' + HOST)
 	
 	content = 'Follow<%s> | Un-Follow<%s>' %(follow_addr, unfollow_addr)
 	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
