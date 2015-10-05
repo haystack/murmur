@@ -371,7 +371,7 @@ def group_info(group_name, user):
 def format_date_time(d):
 	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
-def list_posts(group_name=None, timestamp_str=None, return_replies=True, format_datetime=True):
+def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=True, format_datetime=True):
 	res = {'status':False}
 	try:
 		t = datetime.datetime.min
@@ -386,9 +386,12 @@ def list_posts(group_name=None, timestamp_str=None, return_replies=True, format_
 			threads = Thread.objects.filter(timestamp__gt = t)
 		res['threads'] = []
 		for t in threads:
-			following = Following.objects.filter(thread = t)
-			f_list = [f.user.email for f in following]
+			following = False
 			
+			if user != None:
+				u = UserProfile.objects.get(email=user)
+				following = Following.objects.filter(thread=t, user=u).exists()
+
 			posts = Post.objects.filter(thread = t)		
 			replies = []
 			post = None
@@ -411,7 +414,7 @@ def list_posts(group_name=None, timestamp_str=None, return_replies=True, format_
 								   'post': post, 
 								   'num_replies': posts.count() - 1,
 								   'replies': replies, 
-								   'f_list': f_list, 
+								   'following': following, 
 								   'tags': tags,
 								   'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
 			res['status'] = True

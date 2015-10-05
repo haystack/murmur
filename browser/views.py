@@ -492,7 +492,7 @@ def group_info(request):
 def list_posts(request):
 	try:
 		group_name = request.POST.get('active_group')
-		res = engine.main.list_posts(group_name=group_name)
+		res = engine.main.list_posts(group_name=group_name, user=request.user.email)
 		res['user'] = request.user.email
 		res['group_name'] = group_name
 		return HttpResponse(json.dumps(res), content_type="application/json")

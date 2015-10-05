@@ -9,6 +9,8 @@ $(document).ready(function(){
 	posts_local_data = {};
 
 	groups_local_data = {};
+	
+	posts_list = [];
 
  
 	/* Dynamic Table Definitions */	
@@ -163,7 +165,8 @@ $(document).ready(function(){
 				function(res){
 					if(res.status){
 						$("#btn-follow").hide();
-                				$("#btn-unfollow").show();
+                		$("#btn-unfollow").show();
+                		$('#' + params.thread_id + ' > div:nth-child(2)').after('<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>');
 					}
 					notify(res, true);
 				}
@@ -180,6 +183,7 @@ $(document).ready(function(){
 					if(res.status){
                        $("#btn-follow").show();
                        $("#btn-unfollow").hide();
+                       $('#' + params.thread_id).children()[2].remove();
                     }
 					notify(res, true);
 				}
@@ -313,7 +317,7 @@ $(document).ready(function(){
 	function populate_members_table(res){
 		members_table.fnClearTable();
 		for(var i = 0; i< res.members.length; i++){
-			tableData = []
+			tableData = [];
 			email = res.members[i].email;
 			tableData.push(email);
 			admin = res.members[i].admin;
@@ -423,7 +427,7 @@ $(document).ready(function(){
 				$("#btn-activate-group").show();
 			}
 			$("#btn-add-members").show();
-			$("#btn-edit-group-info").show()
+			$("#btn-edit-group-info").show();
 		}
 		if(res.active){
 			if(res.subscribed){
@@ -436,21 +440,82 @@ $(document).ready(function(){
 
 	}
 	
-	
-	
-	function populate_posts_table(res, load_params, reset){
+	function display_posts_list(thread_list, load_params, reset, user) {
 		var posts_table = $("#posts-table"); 
 		if(reset == true){
 			posts_table.empty();
 		}
 		var selected_thread = posts_local_data.selected_thread;
 		timestamp = new Date(0);
+		
+		for (var i = 0; i< thread_list.length; i++){
+			d = format_date(new Date(thread_list[i].timestamp));
+			var content = '<div class="left-column-area-metadata">';
+			content += '<span class="gray">' + d.date + '</span><BR>';
+			content += '<span class="gray">' + d.time + '</span><BR>';
+			content += '<span class="unread">' + thread_list[i].replies.length + '</span> <br />';
+			content += '</div>';
+			content += '<div class= "left-column-area-content">';
+			content +=  '<span class="strong ellipsis">' + thread_list[i].post.subject + '</span>';
+			content += '<span class="strong-gray ellipsis">' + thread_list[i].post.from + '</span>';
+			content += '<span class="blurb ellipsis">' + strip(thread_list[i].post.text) + '</span>';
+			content += '</div>';
+			
+			if (thread_list[i].following == true) {
+				content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>';
+			}
+			
+			if (thread_list[i].tags.length > 0) {
+				content += '<div>';
+				for (var j = 0; j < thread_list[i].tags.length; j++) {
+					content += '<span class="label2" style="background-color: #' + thread_list[i].tags[j].color + ';">' + thread_list[i].tags[j].name + '</span> ';
+				}
+				content += '</div>';
+			}
+			var curr_row = $('<li class="row-item" id="' + thread_list[i].thread_id + '">' + content + '</li>');
+			var params = {'requester_email': user,
+				'thread_id' : thread_list[i].thread_id, 
+				 'post': thread_list[i].post,
+				 'replies' : thread_list[i].replies,
+				 'following' : thread_list[i].following,
+				 'tags' : thread_list[i].tags
+			};
+				
+			var f = bind(load_post, params);
+			if(thread_list[i].thread_id == load_params.thread_id){
+				selected_thread = thread_list[i].thread_id;
+			}
+			if(new Date(thread_list[i].timestamp) > timestamp){
+                                    timestamp = thread_list[i].timestamp;
+                            }
+
+			curr_row.on('click',f);
+			
+			if(reset){
+				posts_table.append(curr_row);
+			} else{
+			 	var row = $('#' + thread_list[i].thread_id);
+				if(row.length == 0){ 
+					posts_table.prepend(curr_row);
+				}else{
+					posts_table.prepend(curr_row);
+					row.remove();
+					if(thread_list[i].thread_id == posts_local_data.selected_thread){
+						curr_row.click();
+					}
+				}	
+			}
+		}
+	}
+	
+	function populate_posts_table(res, load_params, reset){
+
 		if(res.status){
-			console.log(res);
+			posts_list = res.threads;
+			display_posts_list(res.threads, load_params, reset, res.user);
 			
-			var post_list = [];
+			var p_list = [];
 			
-			var params = {'requester_email': res.user};
 			for(var i = 0; i< res.threads.length; i++){
 				post = {'subject': res.threads[i].post.subject,
 						'text': strip(res.threads[i].post.text),
@@ -458,66 +523,13 @@ $(document).ready(function(){
 						'tid': res.threads[i].thread_id,
 						'tags': res.threads[i].tags
 						};
-				post_list.push(post);
-				d = format_date(new Date(res.threads[i].timestamp));
-				var content = '<div class="left-column-area-metadata">';
-				content += '<span class="gray">' + d.date + '</span><BR>';
-				content += '<span class="gray">' + d.time + '</span>';
-				content += '<span class="unread">' + res.threads[i].replies.length + '</span> <br />';
-				content += '</div>';
-				content += '<div class= "left-column-area-content">';
-				content +=  '<span class="strong ellipsis">' + res.threads[i].post.subject + '</span>';
-				content += '<span class="strong-gray ellipsis">' + res.threads[i].post.from + '</span>';
-				content += '<span class="blurb ellipsis">' + strip(res.threads[i].post.text) + '</span>';
-				content += '</div>';
-				
-				if (res.threads[i].tags.length > 0) {
-					content += '<div>';
-					for (var j = 0; j < res.threads[i].tags.length; j++) {
-						content += '<span class="label2" style="background-color: #' + res.threads[i].tags[j].color + ';">' + res.threads[i].tags[j].name + '</span> ';
-					}
-					content += '</div>';
-				}
-				var curr_row = $('<li class="row-item" id="' + res.threads[i].thread_id + '">' + content + '</li>');
-				var params = {'requester_email': res.user,
-						'thread_id' : res.threads[i].thread_id, 
-						 'post': res.threads[i].post,
-						 'replies' : res.threads[i].replies,
-						 'f_list' : res.threads[i].f_list,
-						 'tags' : res.threads[i].tags
-					};
-				var f = bind(load_post, params);
-				if(res.threads[i].thread_id == load_params.thread_id){
-					selected_thread = res.threads[i].thread_id;
-				}
-				if(new Date(res.threads[i].timestamp) > timestamp){
-                                        timestamp = res.threads[i].timestamp;
-                                }
-
-				curr_row.on('click',f);
-				
-				if(reset){
-					posts_table.append(curr_row);
-				}else{
-					var row = $('#' + res.threads[i].thread_id);
-					if(row.length == 0){ 
-						posts_table.prepend(curr_row);
-					}else{
-						posts_table.prepend(curr_row);
-						row.remove();
-						if(res.threads[i].thread_id == posts_local_data.selected_thread){
-							curr_row.click();
-						}
-					}	
-				}
-			
-
+				p_list.push(post);
 			}
 
 		var posts = new Bloodhound({
 			datumTokenizer: Bloodhound.tokenizers.obj.whitespace("text", "subject", "from"),
 			queryTokenizer: Bloodhound.tokenizers.whitespace,
-			local: post_list
+			local: p_list
 		});
 		posts.initialize();
 		
@@ -567,7 +579,7 @@ $(document).ready(function(){
 		content += '<span class="postheader">' + res.post.subject + '</span>';
 		if (res.tags.length > 0) {
 			for (var j = 0; j < res.tags.length; j++) {
-				content += '<span class="label2" style="background-color: #' + res.tags[j].color + ';">' + res.tags[j].name + '</span> ';
+				content += '<span class="label2" style="position: relative; top: -3px; background-color: #' + res.tags[j].color + ';">' + res.tags[j].name + '</span> ';
 			}
 		}
 		content += '<br>';
@@ -642,7 +654,7 @@ $(document).ready(function(){
 		$("#btn-unfollow").click(unflw_thread);
 		$("#btn-follow").hide();
 		$("#btn-unfollow").hide();
-		if(res.f_list && res.f_list.indexOf(res.requester_email) != -1){
+		if(res.following){
 			$("#btn-unfollow").show();
 		}else{
 			$("#btn-follow").show();
