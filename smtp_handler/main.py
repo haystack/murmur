@@ -157,6 +157,8 @@ def info(message, group_name=None, host=None):
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
 def handle_post(message, address=None, host=None):
+	if '+' in address and '__' in address:
+		return
 	
 	#does this fix the MySQL has gone away erro?
 	django.db.close_connection()
@@ -292,7 +294,7 @@ def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=No
 
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_unfollow(message, group_name=None, thread_id=None, msg_id=None, suffix=None, host=None):
+def handle_unfollow(message, group_name=None, thread_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['From'].lower())
 	res = unfollow_thread(thread_id, addr)
 	if(res['status']):

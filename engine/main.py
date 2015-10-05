@@ -639,7 +639,7 @@ def follow_thread(thread_id, user):
 	res = {'status':False}
 	t = None
 	try:
-		t = Thread.objects.get(id=thread_id)
+		t = Thread.objects.get(id=int(thread_id))
 		f = Following.objects.get(thread=t, user=user)
 		res['status'] = True
 		res['thread_name'] = t.subject
@@ -662,7 +662,7 @@ def follow_thread(thread_id, user):
 def unfollow_thread(thread_id, user):
 	res = {'status':False}
 	try:
-		t = Thread.objects.get(id=thread_id)
+		t = Thread.objects.get(id=int(thread_id))
 		f = Following.objects.filter(thread=t, user=user)
 		f.delete()
 		res['status'] = True
