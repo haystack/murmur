@@ -21,9 +21,19 @@ from django.contrib.auth.forms import AuthenticationForm
 from registration.forms import RegistrationForm
 from django.conf import global_settings
 from django.db.models.aggregates import Count
+from django.http import HttpResponse
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
+
+def lamson_status(request):
+	import psutil
+	response_text = ""
+	if "lamson" in [psutil.Process(i).name() for i in psutil.pids()]:
+		response_text = "lamson running"
+	response = HttpResponse(response_text)
+	return response
+	
 
 def logout(request):
 	request.session.flush()

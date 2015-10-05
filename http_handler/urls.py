@@ -6,6 +6,7 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = patterns('',
      url(r'^$', 'browser.views.index'),
+     url(r'^lamson_status', 'browser.views.lamson_status'),
      url(r'^about', 'browser.views.about'),
      url(r'^settings', 'browser.views.settings'),
 	 url(r'^posts$', 'browser.views.posts'),
