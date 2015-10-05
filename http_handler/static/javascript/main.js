@@ -560,6 +560,8 @@ $(document).ready(function(){
 			});;
 		
 		}
+		var posts_table = $("#posts-table"); 
+		
 		if(load_params.load == true){
 			posts_table.find('#'+selected_thread).click();
 			console.debug("load = true");
