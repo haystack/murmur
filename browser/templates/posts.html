@@ -43,7 +43,6 @@
 		
 		
 	<h1>{{ active_group.name }}</h1>
-	<br>
 	{% if active_group.description %}
 		<i>{{ active_group.description }}</i>
 		<br>
@@ -63,6 +62,18 @@
 			<br>
 		{% endfor %}
 	{% endif %}
+	<P></P><BR>
+	<div>
+		{% if member_info.no_emails %}
+			You are currently set to <b>receive no emails</b> from this group, except those you follow.
+		{% elif member_info.always_follow_thread %}
+			You are currently set to <b>receive all emails</b> from this group, except those you mute.
+		{% else %}
+			You are currently set to <b>receive the first email of each thread</b> from this group, except those you follow.
+		{% endif %}
+		<BR>
+		<a href="/groups/{{active_group.name}}/edit_my_settings">Change your settings.</a>
+	</div>
 	</div>
 </div>
 </div>
