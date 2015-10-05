@@ -12,7 +12,7 @@ MailX Mail Utils and Constants
 @date: Oct 20, 2012
 '''
 
-HOST = 'murmur\.csail\.mit\.edu|mailx\.csail\.mit\.edu'
+HOST = 'murmur.csail.mit.edu'
 NO_REPLY = 'no-reply' + '@murmur.csail.mit.edu'
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
@@ -30,9 +30,7 @@ MAX_ATTACHMENT_SIZE = 1000000
 
 def setup_post(From, Subject, group_name):
 	
-	host = 'murmur.csail.mit.edu'
-	
-	post_addr = '%s <%s>' %(group_name, group_name + '@' + host)
+	post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 
 	mail = MurmurMailResponse(From = From, 
 						To = post_addr, 
@@ -42,11 +40,11 @@ def setup_post(From, Subject, group_name):
 		"Sender": post_addr, 
 		"Reply-To": post_addr,
 		"List-Id": post_addr,
-		"List-Unsubscribe": "<mailto:%s+unsubscribe@%s>" % (group_name,host),
-		"List-Archive": "<http://%s/groups/%s/>" % (host, group_name),
-		"List-Post": "<mailto:%s>" % (group_name + '@' + host),
-		"List-Help": "<mailto:help@%s>" % host,
-		"List-Subscribe": "<mailto:%s+subscribe@%s>" % (group_name,host),
+		"List-Unsubscribe": "<mailto:%s+unsubscribe@%s>" % (group_name, HOST),
+		"List-Archive": "<http://%s/groups/%s/>" % (HOST, group_name),
+		"List-Post": "<mailto:%s>" % (group_name + '@' + HOST),
+		"List-Help": "<mailto:help@%s>" % HOST,
+		"List-Subscribe": "<mailto:%s+subscribe@%s>" % (group_name, HOST),
 		"Return-Path": post_addr, 
 		"Precedence": 'list',
 	})
@@ -138,16 +136,14 @@ def get_body(email_message):
 	return res
 
 def html_ps(group_name):
-	host = 'murmur.csail.mit.edu'
-	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + host)
-	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + host)
+	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
+	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
 	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
 	body = '<div style="border-top:solid thin; padding-top:5px; margin-top:10px;">%s</div>' %(content)
 	return body
 
 def plain_ps(group_name):
-	host = 'murmur.csail.mit.edu'
-	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + host)
-	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + host)
+	follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
+	unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
 	content = 'Follow<%s> | Un-Follow<%s>' %(follow_addr, unfollow_addr)
 	return content

@@ -625,6 +625,33 @@ def insert_reply(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 	
+@render_to("follow_thread.html")
+@login_required
+def follow_thread_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		active_group = load_groups(request, groups, user)
+		thread_id = request.GET.get('tid')
+		res = engine.main.follow_thread(thread_id, user)
+		return {'res': res, 'type': 'follow', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + "?next=/follow?tid=" + request.GET.get('tid'))
+
+@render_to("follow_thread.html")
+@login_required
+def unfollow_thread_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		active_group = load_groups(request, groups, user)
+		thread_id = request.GET.get('tid')
+		res = engine.main.unfollow_thread(thread_id, user)
+		return {'res': res, 'type': 'unfollow', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + "?next=/unfollow?tid=" + request.GET.get('tid'))
+
+
 def follow_thread(request):
 	try:
 		if request.user.is_authenticated():

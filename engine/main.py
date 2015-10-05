@@ -642,10 +642,12 @@ def follow_thread(thread_id, user):
 		t = Thread.objects.get(id=thread_id)
 		f = Following.objects.get(thread=t, user=user)
 		res['status'] = True
+		res['thread_name'] = t.subject
 	except Following.DoesNotExist:
 		f = Following(thread=t, user=user)
 		f.save()
 		res['status'] = True
+		res['thread_name'] = t.subject
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except:
@@ -664,8 +666,10 @@ def unfollow_thread(thread_id, user):
 		f = Following.objects.filter(thread=t, user=user)
 		f.delete()
 		res['status'] = True
+		res['thread_name'] = t.subject
 	except Following.DoesNotExist:
 		res['status'] = True
+		res['thread_name'] = t.subject
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except Exception, e:
