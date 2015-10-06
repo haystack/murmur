@@ -605,11 +605,9 @@ def insert_reply(request):
 			
 			subject = 'Re: [%s]%s %s' %(group_name, subj_tag, orig_subject)
 
-			mail = setup_post(user.email, 
-					post_addr, 
+			mail = setup_post(user.email,
 					subject,	
-					group_name, 
-					HOST)
+					group_name)
 		
 			mail['References'] = msg_id		
 			mail['message-id'] = res['msg_id']
