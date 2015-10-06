@@ -160,129 +160,138 @@ def handle_post(message, address=None, host=None):
 	if '+' in address and '__' in address:
 		return
 	
-	#does this fix the MySQL has gone away erro?
-	django.db.close_connection()
-	
-	address = address.lower()
-	name, addr = parseaddr(message['From'].lower())
-	reserved = filter(lambda x: address.endswith(x), RESERVED)
-	if(reserved):
-		return
-	
-	group_name = address.lower()
 	try:
-		group = Group.objects.get(name=group_name)
+	
+		#does this fix the MySQL has gone away erro?
+		django.db.close_connection()
+		
+		address = address.lower()
+		name, addr = parseaddr(message['From'].lower())
+		reserved = filter(lambda x: address.endswith(x), RESERVED)
+		if(reserved):
+			return
+		
+		group_name = address.lower()
+		try:
+			group = Group.objects.get(name=group_name)
+		except Exception, e:
+			mail = create_error_email(addr, group_name, host, e)
+			relay.deliver(mail)
+			return
+		
+		if message['Subject'][0:4] != "Re: ":
+			orig_message = message['Subject']
+		else:
+			orig_message = re.sub("\[.*?\]", "", message['Subject'])
+		
+		email_message = email.message_from_string(str(message))
+		msg_text = get_body(email_message)
+	
+		attachments = get_attachments(email_message)
+		if len(attachments['attachments']) > 0:
+			if not group.allow_attachments:
+				mail = create_error_email(addr, group_name, host, "No attachments allowed for this group.")
+				relay.deliver(mail)
+				return
+			
+		if attachments['error'] != '':
+			mail = create_error_email(addr, group_name, host, attachments['error'])
+			relay.deliver(mail)
+			return
+	
+		if message['Subject'][0:4] == "Re: ":
+			if 'html' in msg_text:
+				msg_text['html'] = re.sub('(?s)<div style="border-top:solid thin;padding-top:5px;margin-top:10px">.*?</div>','', msg_text['html'])
+			if 'plain' in msg_text:
+				msg_text['plain'] = re.sub('(?s)\n>  Follow <test\+__follow__@murmur.csail.mit.edu> \| Un-Follow\n> <test\+__unfollow__@murmur.csail.mit.edu>\n', '', msg_text['plain'])
+		
+		if 'html' not in msg_text:
+			msg_text['html'] = markdown(msg_text['plain'])
+		if 'plain' not in msg_text:
+			msg_text['plain'] = html2text(msg_text['html'])
+		
+		
+		user = UserProfile.objects.get(email=addr)
+		
+		if message['Subject'][0:4] == "Re: ":
+			res = insert_reply(group_name, orig_message, msg_text['html'], user)
+		else:
+			res = insert_post(group_name, orig_message, msg_text['html'], user)
+			
+		if(not res['status']):
+			mail = create_error_email(addr, group_name, host, res['code'])
+			relay.deliver(mail)
+			return
+	
+		if message['Subject'][0:4] != "Re: ":
+			subj_tag = ''
+			for tag in res['tags']:
+				subj_tag += '[%s]' % tag
+				
+			subject = '[%s]%s %s' %(group_name, subj_tag,message['Subject'])
+		else:
+			subject = message['Subject']
+			
+		mail = setup_post(message['From'],
+							subject,	
+							group_name)
+			
+		for attachment in attachments.get("attachments"):
+			mail.attach(filename=attachment['filename'],
+						content_type=attachment['mime'],
+						data=attachment['content'],
+						disposition=attachment['disposition'],
+						id=attachment['id'])
+			
+		if 'references' in message:
+			mail['References'] = message['references']
+		elif 'message-id' in message:
+			mail['References'] = message['message-id']	
+			
+	
+		if 'in-reply-to' not in message:
+			mail["In-Reply-To"] = message['message-id']
+		
+		msg_id = res['msg_id']
+		to_send =  res['recipients']
+		
+		mail['message-id'] = msg_id
+			
+		logging.debug('TO LIST: ' + str(to_send))
+		
+		g = Group.objects.get(name=group_name)
+		t = Thread.objects.get(id=res['thread_id'])
+		
+		if len(to_send) > 0:
+			for recip_email in to_send:
+				recip = UserProfile.objects.get(email=recip_email)
+				membergroup = MemberGroup.objects.get(group=g, member=recip)
+				
+				following = Following.objects.filter(thread=t, user=recip).exists()
+				muting = Mute.objects.filter(thread=t, user=recip).exists()
+			
+				ps_blurb = html_ps(t, membergroup, following, muting)
+				
+				try:
+					mail.Html = unicode(msg_text['html'] + ps_blurb)	
+				except UnicodeDecodeError:
+					mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
+				
+				ps_blurb = plain_ps(g, t, membergroup, following, muting)
+				try:
+					mail.Body = unicode(msg_text['plain'] + ps_blurb)
+				except UnicodeDecodeError:
+					mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
+			
+				relay.deliver(mail, To = recip_email)
 	except Exception, e:
+		logging.debug(e)
 		mail = create_error_email(addr, group_name, host, e)
 		relay.deliver(mail)
 		return
 	
-	if message['Subject'][0:4] != "Re: ":
-		orig_message = message['Subject']
-	else:
-		orig_message = re.sub("\[.*?\]", "", message['Subject'])
-	
-	email_message = email.message_from_string(str(message))
-	msg_text = get_body(email_message)
-
-	attachments = get_attachments(email_message)
-	if len(attachments['attachments']) > 0:
-		if not group.allow_attachments:
-			mail = create_error_email(addr, group_name, host, "No attachments allowed for this group.")
-			relay.deliver(mail)
-			return
 		
-	if attachments['error'] != '':
-		mail = create_error_email(addr, group_name, host, attachments['error'])
-		relay.deliver(mail)
-		return
-
-	if message['Subject'][0:4] == "Re: ":
-		if 'html' in msg_text:
-			msg_text['html'] = re.sub('(?s)<div style="border-top:solid thin;padding-top:5px;margin-top:10px">.*?</div>','', msg_text['html'])
-		if 'plain' in msg_text:
-			msg_text['plain'] = re.sub('(?s)\n>  Follow <test\+__follow__@murmur.csail.mit.edu> \| Un-Follow\n> <test\+__unfollow__@murmur.csail.mit.edu>\n', '', msg_text['plain'])
-	
-	if 'html' not in msg_text:
-		msg_text['html'] = markdown(msg_text['plain'])
-	if 'plain' not in msg_text:
-		msg_text['plain'] = html2text(msg_text['html'])
-	
-	
-	user = UserProfile.objects.get(email=addr)
-	
-	if message['Subject'][0:4] == "Re: ":
-		res = insert_reply(group_name, orig_message, msg_text['html'], user)
-	else:
-		res = insert_post(group_name, orig_message, msg_text['html'], user)
 		
-	if(not res['status']):
-		mail = create_error_email(addr, group_name, host, res['code'])
-		relay.deliver(mail)
-		return
-
-	if message['Subject'][0:4] != "Re: ":
-		subj_tag = ''
-		for tag in res['tags']:
-			subj_tag += '[%s]' % tag
-			
-		subject = '[%s]%s %s' %(group_name, subj_tag,message['Subject'])
-	else:
-		subject = message['Subject']
-		
-	mail = setup_post(message['From'],
-						subject,	
-						group_name)
-		
-	for attachment in attachments.get("attachments"):
-		mail.attach(filename=attachment['filename'],
-					content_type=attachment['mime'],
-					data=attachment['content'],
-					disposition=attachment['disposition'],
-					id=attachment['id'])
-		
-	if 'references' in message:
-		mail['References'] = message['references']
-	elif 'message-id' in message:
-		mail['References'] = message['message-id']	
-		
-
-	if 'in-reply-to' not in message:
-		mail["In-Reply-To"] = message['message-id']
-	
-	msg_id = res['msg_id']
-	to_send =  res['recipients']
-	
-	mail['message-id'] = msg_id
-		
-	logging.debug('TO LIST: ' + str(to_send))
-	
-	g = Group.objects.get(name=group_name)
-	t = Thread.objects.get(id=res['thread_id'])
-	
-	if len(to_send) > 0:
-		for recip_email in to_send:
-			recip = UserProfile.objects.get(email=recip_email)
-			membergroup = MemberGroup.objects.get(group=g, member=recip)
-			
-			following = Following.objects.filter(thread=t, user=recip).exists()
-			muting = Mute.objects.filter(thread=t, user=recip).exists()
-		
-			ps_blurb = html_ps(t, membergroup, following, muting)
-			
-			try:
-				mail.Html = unicode(msg_text['html'] + ps_blurb)	
-			except UnicodeDecodeError:
-				mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
-			
-			ps_blurb = plain_ps(g, t, membergroup, following, muting)
-			try:
-				mail.Body = unicode(msg_text['plain'] + ps_blurb)
-			except UnicodeDecodeError:
-				mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
-		
-			relay.deliver(mail, To = recip_email)
-
 
 
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
