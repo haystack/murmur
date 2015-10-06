@@ -551,23 +551,24 @@ def insert_post(request):
 		mail['message-id'] = msg_id
 		
 		g = Group.objects.get(name=group_name)
-		membergroup = MemberGroup.objects.get(group=g, member=user)
 		t = Thread.objects.get(id=res['thread_id'])
 		
-		following = Following.objects.filter(thread=t, user=user).exists()
-		muting = Mute.objects.filter(thread=t, user=user).exists()
-		
-		
-		ps_blurb = html_ps(t, membergroup, following, muting)
-		mail.Html = msg_text + ps_blurb	
-		
-		ps_blurb = plain_ps(g, t, membergroup, following, muting)
-		mail.Body = html2text(msg_text) + ps_blurb	
-		
-		
 		logging.debug('TO LIST: ' + str(to_send))
-		if(len(to_send)>0):
-			relay_mailer.deliver(mail, To = to_send)
+		
+		if len(to_send) > 0:
+			for email in to_send:
+				recip = UserProfile.objects.get(email=email)
+				membergroup = MemberGroup.objects.get(group=g, member=recip)
+				following = Following.objects.filter(thread=t, user=recip).exists()
+				muting = Mute.objects.filter(thread=t, user=recip).exists()
+
+				ps_blurb = html_ps(t, membergroup, following, muting)
+				mail.Html = msg_text + ps_blurb	
+				
+				ps_blurb = plain_ps(g, t, membergroup, following, muting)
+				mail.Body = html2text(msg_text) + ps_blurb	
+			
+				relay_mailer.deliver(mail, To = [email])
 
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
