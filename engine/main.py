@@ -394,9 +394,10 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 				following = Following.objects.filter(thread=t, user=u).exists()
 				muting = Mute.objects.filter(thread=t, user=u).exists()
 				
-				member_group = MemberGroup.objects.get(member=u, group=g)
-				res['member_group'] = {'no_emails': member_group.no_emails, 
-									   'always_follow_thread': member_group.always_follow_thread}
+				member_group = MemberGroup.objects.filter(member=u, group=g)
+				if member_group.exists():
+					res['member_group'] = {'no_emails': member_group[0].no_emails, 
+										   'always_follow_thread': member_group[0].always_follow_thread}
 
 			posts = Post.objects.filter(thread = t)		
 			replies = []
