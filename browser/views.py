@@ -735,7 +735,6 @@ def mute_thread(request):
 										'url': global_settings.LOGIN_URL + "?next=/thread?group_name=" + group + "&tid=" + thread}), 
 										content_type="application/json")
 	except Exception, e:
-		print request
 		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")

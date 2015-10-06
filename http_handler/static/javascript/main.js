@@ -217,11 +217,13 @@ $(document).ready(function(){
 	
 	mute_thread = 
 		function(params){
+			console.log(params);
 			$.post('mute_thread', {'requester_email': params.requester_email, 
 						  'thread_id': params.thread_id,
 						  'msg_id': params.msg_id
 					  	}, 
 				function(res){
+					console.log(res);
 					if(res.status){
 						$("#btn-mute").hide();
                 		$("#btn-unmute").show();

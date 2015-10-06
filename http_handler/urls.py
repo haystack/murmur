@@ -41,17 +41,19 @@ urlpatterns = patterns('',
 	 url(r'^insert_post', 'browser.views.insert_post'), 
 	 url(r'^insert_reply', 'browser.views.insert_reply'),
      
+     url(r'^follow_thread', 'browser.views.follow_thread'),
+     url(r'^unfollow_thread', 'browser.views.unfollow_thread'),
+     
+     url(r'^mute_thread', 'browser.views.mute_thread'),
+     url(r'^unmute_thread', 'browser.views.unmute_thread'),
+     
      url(r'^follow', 'browser.views.follow_thread_get'),
      url(r'^unfollow', 'browser.views.unfollow_thread_get'),
 
      url(r'^mute', 'browser.views.mute_thread_get'),
      url(r'^unmute', 'browser.views.unmute_thread_get'),
 
-	 url(r'^follow_thread', 'browser.views.follow_thread'),
-	 url(r'^unfollow_thread', 'browser.views.unfollow_thread'),
-     
-     url(r'^mute_thread', 'browser.views.mute_thread'),
-     url(r'^unmute_thread', 'browser.views.unmute_thread'),
+
      
     #override the registration default urls - bug with django 1.6
       url(r'^password/change/$',
