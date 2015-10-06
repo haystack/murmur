@@ -254,31 +254,34 @@ def handle_post(message, address=None, host=None):
 	to_send =  res['recipients']
 	
 	mail['message-id'] = msg_id
-
-	g = Group.objects.get(name=group_name)
-	membergroup = MemberGroup.objects.get(group=g, member=user)
-	t = Thread.objects.get(id=res['thread_id'])
-	
-	following = Following.objects.filter(thread=t, user=user).exists()
-	muting = Mute.objects.filter(thread=t, user=user).exists()
-
-	ps_blurb = html_ps(t, membergroup, following, muting)
-	
-	try:
-		mail.Html = unicode(msg_text['html'] + ps_blurb)	
-	except UnicodeDecodeError:
-		mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
-	
-	ps_blurb = plain_ps(g, t, membergroup, following, muting)
-	try:
-		mail.Body = unicode(msg_text['plain'] + ps_blurb)
-	except UnicodeDecodeError:
-		mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
 		
 	logging.debug('TO LIST: ' + str(to_send))
 	
-	if(len(to_send)>0):
-		relay.deliver(mail, To = to_send)
+	g = Group.objects.get(name=group_name)
+	t = Thread.objects.get(id=res['thread_id'])
+	
+	if len(to_send) > 0:
+		for email in to_send:
+			recip = UserProfile.objects.get(email=email)
+			membergroup = MemberGroup.objects.get(group=g, member=recip)
+			
+			following = Following.objects.filter(thread=t, user=recip).exists()
+			muting = Mute.objects.filter(thread=t, user=recip).exists()
+		
+			ps_blurb = html_ps(t, membergroup, following, muting)
+			
+			try:
+				mail.Html = unicode(msg_text['html'] + ps_blurb)	
+			except UnicodeDecodeError:
+				mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
+			
+			ps_blurb = plain_ps(g, t, membergroup, following, muting)
+			try:
+				mail.Body = unicode(msg_text['plain'] + ps_blurb)
+			except UnicodeDecodeError:
+				mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
+		
+			relay.deliver(mail, To = [email])
 
 
 
