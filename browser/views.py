@@ -505,7 +505,11 @@ def list_posts(request):
 def refresh_posts(request):
 	try:
 		group_name = request.POST.get('active_group')
-		res = engine.main.list_posts(group_name=group_name, timestamp_str = request.POST['timestamp'])
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+		else:
+			user = None
+		res = engine.main.list_posts(group_name=group_name, user=user, timestamp_str = request.POST['timestamp'])
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except  Exception, e:
 		logging.debug(e)

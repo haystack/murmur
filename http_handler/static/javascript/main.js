@@ -536,13 +536,15 @@ $(document).ready(function(){
 			content += '<span class="blurb ellipsis">' + strip(thread_list[i].post.text) + '</span>';
 			content += '</div>';
 			
-			if (member_group.no_emails == true || member_group.always_follow_thread == false) {
-				if (thread_list[i].following == true) {
-					content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>';
-				}
-			} else {
-				if (thread_list[i].muting == true) {
-					content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Muted</span></div>';
+			if (member_group != undefined) {
+				if (member_group.no_emails == true || member_group.always_follow_thread == false) {
+					if (thread_list[i].following == true) {
+						content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>';
+					}
+				} else {
+					if (thread_list[i].muting == true) {
+						content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Muted</span></div>';
+					}
 				}
 			}
 				
@@ -757,19 +759,21 @@ $(document).ready(function(){
 		$("#btn-unfollow").hide();
 		$("#btn-mute").hide();
 		$("#btn-unmute").hide();
-		if (res.member_group.no_emails == true || res.member_group.always_follow_thread == false) {
-			if (res.following){
-				$("#btn-unfollow").show();
-			} else{
-				$("#btn-follow").show();
+		if (res.member_group != undefined) {
+			if (res.member_group.no_emails == true || res.member_group.always_follow_thread == false) {
+				if (res.following){
+					$("#btn-unfollow").show();
+				} else{
+					$("#btn-follow").show();
+				} 
+			} else {
+				if (res.muting){
+					$("#btn-unmute").show();
+				} else{
+					$("#btn-mute").show();
+				}
 			} 
-		} else {
-			if (res.muting){
-				$("#btn-unmute").show();
-			} else{
-				$("#btn-mute").show();
-			}
-		} 		
+		}		
         
 	}
 	
