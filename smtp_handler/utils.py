@@ -174,7 +174,7 @@ def html_ps(thread, membergroup, following, muting):
 		if following:
 			content = 'You\'re currently following this thread. <a href="%s">Un-Follow</a> to stop receiving emails from this thread.' % (unfollow_addr)
 		else:
-			content = 'You aren\'t receive any replies to this thread. <a href="%s">Follow</a> to receive replies to this thread.' % (follow_addr)
+			content = 'You currently aren\'t receiving any replies to this thread. <a href="%s">Follow</a> to receive replies to this thread.' % (follow_addr)
 	else:
 		mute_addr = '%s%s' % (MUTE_ADDR, tid)
 		unmute_addr = '%s%s' % (UNMUTE_ADDR, tid)

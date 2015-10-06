@@ -556,8 +556,8 @@ def insert_post(request):
 		logging.debug('TO LIST: ' + str(to_send))
 		
 		if len(to_send) > 0:
-			for email in to_send:
-				recip = UserProfile.objects.get(email=email)
+			for recip_email in to_send:
+				recip = UserProfile.objects.get(email=recip_email)
 				membergroup = MemberGroup.objects.get(group=g, member=recip)
 				following = Following.objects.filter(thread=t, user=recip).exists()
 				muting = Mute.objects.filter(thread=t, user=recip).exists()
@@ -568,7 +568,7 @@ def insert_post(request):
 				ps_blurb = plain_ps(g, t, membergroup, following, muting)
 				mail.Body = html2text(msg_text) + ps_blurb	
 			
-				relay_mailer.deliver(mail, To = [email])
+				relay_mailer.deliver(mail, To = recip_email)
 
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
@@ -616,21 +616,25 @@ def insert_reply(request):
 			mail["In-Reply-To"] = msg_id
 			
 			g = Group.objects.get(name=group_name)
-			membergroup = MemberGroup.objects.get(group=g, member=user)
 			t = Thread.objects.get(id=res['thread_id'])
 			
-			following = Following.objects.filter(thread=t, user=user).exists()
-			muting = Mute.objects.filter(thread=t, user=user).exists()
-				
-			ps_blurb = html_ps(t, membergroup, following, muting)
-			mail.Html = msg_text + ps_blurb		
-			
-			ps_blurb = plain_ps(g, t, membergroup, following, muting)
-			mail.Body = html2text(msg_text) + ps_blurb	
-			
 			logging.debug('TO LIST: ' + str(to_send))
-			if(len(to_send)>0):
-				relay_mailer.deliver(mail, To = to_send)
+			
+			if len(to_send) > 0:
+				for recip_email in to_send:
+					recip = UserProfile.objects.get(email=recip_email)
+					membergroup = MemberGroup.objects.get(group=g, member=recip)
+					following = Following.objects.filter(thread=t, user=recip).exists()
+					muting = Mute.objects.filter(thread=t, user=recip).exists()
+	
+					ps_blurb = html_ps(t, membergroup, following, muting)
+					mail.Html = msg_text + ps_blurb	
+					
+					ps_blurb = plain_ps(g, t, membergroup, following, muting)
+					mail.Body = html2text(msg_text) + ps_blurb	
+				
+					relay_mailer.deliver(mail, To = recip_email)
+					
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print sys.exc_info()
@@ -672,7 +676,7 @@ def mute_thread_get(request):
 		active_group = load_groups(request, groups, user)
 		thread_id = request.GET.get('tid')
 		res = engine.main.mute_thread(thread_id, user=user)
-		return {'res': res, 'type': 'mute', 'user': request.user, 'groups': groups, 'active_group': active_group}
+		return {'res': res, 'type': 'mut', 'user': request.user, 'groups': groups, 'active_group': active_group}
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/mute?tid=" + request.GET.get('tid'))
 
@@ -685,7 +689,7 @@ def unmute_thread_get(request):
 		active_group = load_groups(request, groups, user)
 		thread_id = request.GET.get('tid')
 		res = engine.main.unmute_thread(thread_id, user=user)
-		return {'res': res, 'type': 'unmute', 'user': request.user, 'groups': groups, 'active_group': active_group}
+		return {'res': res, 'type': 'unmut', 'user': request.user, 'groups': groups, 'active_group': active_group}
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unmute?tid=" + request.GET.get('tid'))
 

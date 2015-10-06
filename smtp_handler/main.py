@@ -261,8 +261,8 @@ def handle_post(message, address=None, host=None):
 	t = Thread.objects.get(id=res['thread_id'])
 	
 	if len(to_send) > 0:
-		for email in to_send:
-			recip = UserProfile.objects.get(email=email)
+		for recip_email in to_send:
+			recip = UserProfile.objects.get(email=recip_email)
 			membergroup = MemberGroup.objects.get(group=g, member=recip)
 			
 			following = Following.objects.filter(thread=t, user=recip).exists()
@@ -281,7 +281,7 @@ def handle_post(message, address=None, host=None):
 			except UnicodeDecodeError:
 				mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
 		
-			relay.deliver(mail, To = [email])
+			relay.deliver(mail, To = recip_email)
 
 
 
