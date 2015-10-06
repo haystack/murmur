@@ -43,7 +43,10 @@ urlpatterns = patterns('',
      
      url(r'^follow', 'browser.views.follow_thread_get'),
      url(r'^unfollow', 'browser.views.unfollow_thread_get'),
-     
+
+     url(r'^mute', 'browser.views.mute_thread_get'),
+     url(r'^unmute', 'browser.views.unmute_thread_get'),
+
 	 url(r'^follow_thread', 'browser.views.follow_thread'),
 	 url(r'^unfollow_thread', 'browser.views.unfollow_thread'),
      

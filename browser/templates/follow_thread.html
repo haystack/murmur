@@ -13,6 +13,9 @@
 	{% else %}
 		Sorry, there was an error: {{ res.code }}.
 	{% endif %}
+	<BR>
+		<a href="/posts?tid={{res.thread_id}}">View the thread on Murmur.</a>
+		<a href="/groups/{{active_group.name}}/edit_my_settings">Edit your settings for {{active_group.name}}.</a>
       
   </div>
 </div>

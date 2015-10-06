@@ -255,14 +255,21 @@ def handle_post(message, address=None, host=None):
 	
 	mail['message-id'] = msg_id
 
-	ps_blurb = html_ps(group_name, res['thread_id'])
+	g = Group.objects.get(name=group_name)
+	membergroup = MemberGroup.objects.get(group=g, member=user)
+	t = Thread.objects.get(id=res['thread_id'])
+	
+	following = Following.objects.filter(thread=t, user=user).exists()
+	muting = Mute.objects.filter(thread=t, user=user).exists()
+
+	ps_blurb = html_ps(t, membergroup, following, muting)
 	
 	try:
 		mail.Html = unicode(msg_text['html'] + ps_blurb)	
 	except UnicodeDecodeError:
 		mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
 	
-	ps_blurb = plain_ps(group_name, res['thread_id'])
+	ps_blurb = plain_ps(g, t, membergroup, following, muting)
 	try:
 		mail.Body = unicode(msg_text['plain'] + ps_blurb)
 	except UnicodeDecodeError:
@@ -281,10 +288,10 @@ def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=No
 	name, addr = parseaddr(message['From'].lower())
 	res = follow_thread(thread_id, email=addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "You followed the thread \"%s\" successfully." % res['thread_name'])
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Success! You are now following the thread \"%s\". You will receive emails for all following replies to to this thread." % res['thread_name'])
 		relay.deliver(mail)
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Sorry there was an error: %s" % (res['code']))
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Sorry there was an error: %s" % (res['code']))
 		relay.deliver(mail)
 	return
 
@@ -301,10 +308,40 @@ def handle_unfollow(message, group_name=None, thread_id=None, suffix=None, host=
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "You unfollowed the thread \"%s\" successfully." % res['thread_name'])
 		relay.deliver(mail)
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message: %s" %(res['code']))
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Error Message: %s" %(res['code']))
 		relay.deliver(mail)
 	return
 
+
+@route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=MUTE_SUFFIX+"|"+MUTE_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_mute(message, group_name=None, thread_id=None, suffix=None, host=None):
+	name, addr = parseaddr(message['From'].lower())
+	res = mute_thread(thread_id, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Success! You have now muted the thread \"%s\"." % res['thread_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Sorry there was an error: %s" % (res['code']))
+		relay.deliver(mail)
+	return
+
+
+
+
+
+@route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=UNMUTE_SUFFIX+"|"+UNMUTE_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_unmute(message, group_name=None, thread_id=None, suffix=None, host=None):
+	name, addr = parseaddr(message['From'].lower())
+	res = unmute_thread(thread_id, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "You unmuted the thread \"%s\" successfully. You will receive emails for all following replies to to this thread." % res['thread_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Error Message: %s" %(res['code']))
+		relay.deliver(mail)
+	return
 
 
 """

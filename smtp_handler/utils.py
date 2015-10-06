@@ -3,6 +3,7 @@ from lamson.server import Relay
 from config.settings import *
 
 from lamson_subclass import MurmurMailResponse
+from schema.models import Group, MemberGroup, Thread, Following, Mute
 
 
 '''
@@ -17,6 +18,8 @@ NO_REPLY = 'no-reply' + '@murmur.csail.mit.edu'
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
 UNFOLLOW_SUFFIX = '__unfollow__'
+MUTE_SUFFIX = '__mute__'
+UNMUTE_SUFFIX = '__unmute__'
 UPVOTE_SUFFIX = '__upvote__'
 DOWNVOTE_SUFFIX = '__downvote__'
 FETCH_SUFFIX = '__fetch__'
@@ -24,13 +27,16 @@ FETCH_SUFFIX = '__fetch__'
 FOLLOW_ADDR = 'http://%s/follow?tid=' % (HOST)
 UNFOLLOW_ADDR = 'http://%s/unfollow?tid=' % (HOST)
 
+MUTE_ADDR = 'http://%s/mute?tid=' % (HOST)
+UNMUTE_ADDR = 'http://%s/unmute?tid=' % (HOST)
+
 HTML_SUBHEAD = '<div style="border-top:solid thin;padding-top:5px;margin-top:10px">'
 HTML_SUBTAIL = '</div>'
 
 PLAIN_SUBHEAD = '***\nMurmur\n'
 PLAIN_SUBTAIL = '\n***\n'
 
-RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe', '+info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
+RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe', '+info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, MUTE_SUFFIX, UNMUTE_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
 
 relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
 
@@ -155,22 +161,51 @@ def remove_plain_ps(body):
 	_, _, tail = x.partition(PLAIN_SUBTAIL)
 	return head + tail
 
-def html_ps(group_name, tid):
+def html_ps(thread, membergroup, following, muting):
 	#follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
 	#unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
 	
-	follow_addr = '%s%s' % (FOLLOW_ADDR, tid)
-	unfollow_addr = '%s%s' % (UNFOLLOW_ADDR, tid)
+	tid = thread.id
 	
-	content = '<a href="%s">Follow</a> | <a href="%s">Un-Follow</a>' %(follow_addr, unfollow_addr)
+	if membergroup.no_emails or not membergroup.always_follow_thread:
+		follow_addr = '%s%s' % (FOLLOW_ADDR, tid)
+		unfollow_addr = '%s%s' % (UNFOLLOW_ADDR, tid)
+		
+		if following:
+			content = 'You\'re currently following this thread. <a href="%s">Un-Follow</a> to stop receiving emails from this thread.' % (unfollow_addr)
+		else:
+			content = 'You aren\'t receive any replies to this thread. <a href="%s">Follow</a> to receive replies to this thread.' % (follow_addr)
+	else:
+		mute_addr = '%s%s' % (MUTE_ADDR, tid)
+		unmute_addr = '%s%s' % (UNMUTE_ADDR, tid)
+		if muting:
+			content = 'You\'re currently muting this thread. <a href="%s">Un-Mute</a> to start receiving emails to this thread.' % (unmute_addr)
+		else:
+			content = 'You\'re currently receiving emails to this thread. <a href="%s">Mute</a> to stop receiving emails from this thread.' % (mute_addr)
+
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
-def plain_ps(group_name, tid):
-	follow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + FOLLOW_SUFFIX + '@' + HOST)
-	unfollow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + UNFOLLOW_SUFFIX + '@' + HOST)
+def plain_ps(group, thread, membergroup, following, muting):
+	tid = thread.id
+	group_name = group.name
 	
-	content = 'Follow<%s> | Un-Follow<%s>' %(follow_addr, unfollow_addr)
+	if membergroup.no_emails or not membergroup.always_follow_thread:
+		follow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + FOLLOW_SUFFIX + '@' + HOST)
+		unfollow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + UNFOLLOW_SUFFIX + '@' + HOST)
+		
+		if following:
+			content = 'You\'re currently following this thread. Un-Follow<%s> to stop receiving emails from this thread.' % (unfollow_addr)
+		else:
+			content = 'You aren\'t receive any replies to this thread. Follow<%s> to receive replies to this thread.' % (follow_addr)
+	else:
+		mute_addr = 'mailto:%s' % (group_name + '+' + str(tid) + MUTE_SUFFIX + '@' + HOST)
+		unmute_addr = 'mailto:%s' % (group_name + '+' + str(tid) + UNMUTE_SUFFIX + '@' + HOST)
+		if muting:
+			content = 'You\'re currently muting this thread. Un-Mute<%s> to start receiving emails to this thread.' % (unmute_addr)
+		else:
+			content = 'You\'re currently receiving emails to this thread. Mute<%s> to stop receiving emails from this thread.' % (mute_addr)
+	
 	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
 	
 	return body

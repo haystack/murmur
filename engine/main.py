@@ -653,6 +653,7 @@ def follow_thread(thread_id, email=None, user=None):
 		f = Following.objects.get(thread=t, user=user)
 		res['status'] = True
 		res['thread_name'] = t.subject
+		res['thread_id'] = t.id
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Following.DoesNotExist:
@@ -660,6 +661,7 @@ def follow_thread(thread_id, email=None, user=None):
 		f.save()
 		res['status'] = True
 		res['thread_name'] = t.subject
+		res['thread_id'] = t.id
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except:
@@ -681,11 +683,13 @@ def unfollow_thread(thread_id, email=None, user=None):
 		f.delete()
 		res['status'] = True
 		res['thread_name'] = t.subject
+		res['thread_id'] = t.id
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Following.DoesNotExist:
 		res['status'] = True
 		res['thread_name'] = t.subject
+		res['thread_id'] = t.id
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except Exception, e:
@@ -706,6 +710,7 @@ def mute_thread(thread_id, email=None, user=None):
 		f = Mute.objects.get(thread=t, user=user)
 		res['status'] = True
 		res['thread_name'] = t.subject
+		res['thread_id'] = t.id
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Mute.DoesNotExist:
@@ -713,6 +718,7 @@ def mute_thread(thread_id, email=None, user=None):
 		f.save()
 		res['status'] = True
 		res['thread_name'] = t.subject
+		res['thread_id'] = t.id
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except:
@@ -734,11 +740,13 @@ def unmute_thread(thread_id, email=None, user=None):
 		f.delete()
 		res['status'] = True
 		res['thread_name'] = t.subject
+		res['thread_id'] = t.id
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Mute.DoesNotExist:
 		res['status'] = True
 		res['thread_name'] = t.subject
+		res['thread_id'] = t.id
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except Exception, e:
