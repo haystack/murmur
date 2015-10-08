@@ -30,7 +30,7 @@ UNFOLLOW_ADDR = 'http://%s/unfollow?tid=' % (HOST)
 MUTE_ADDR = 'http://%s/mute?tid=' % (HOST)
 UNMUTE_ADDR = 'http://%s/unmute?tid=' % (HOST)
 
-EDIT_SETTINGS_ADDR = 'http://%s/groups/%s/edit_my_settings' % (HOST)
+EDIT_SETTINGS_ADDR = 'http://%s/groups/%s/edit_my_settings'
 
 HTML_SUBHEAD = '<div style="border-top:solid thin;padding-top:5px;margin-top:10px">'
 HTML_SUBTAIL = '</div>'
@@ -185,7 +185,7 @@ def html_ps(group, thread, membergroup, following, muting):
 		else:
 			content = 'You\'re currently receiving emails to this thread. <a href="%s">Mute</a> to stop receiving emails from this thread.' % (mute_addr)
 
-	addr = EDIT_SETTINGS_ADDR % group.name
+	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
 	if membergroup.no_emails:
 		content += "<BR><BR>You are set to receive no emails from this group, except for the threads you follow. <a href=\"%s\">Change your settings</a>." % (addr)
 	elif membergroup.always_follow_thread:
@@ -217,7 +217,7 @@ def plain_ps(group, thread, membergroup, following, muting):
 		else:
 			content = 'You\'re currently receiving emails to this thread. Mute<%s> to stop receiving emails from this thread.' % (mute_addr)
 	
-	addr = EDIT_SETTINGS_ADDR % group.name
+	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
 	if membergroup.no_emails:
 		content += "\n\nYou are set to receive no emails from this group, except for the threads you follow. Change your settings<%s>." % (addr)
 	elif membergroup.always_follow_thread:
