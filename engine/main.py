@@ -509,7 +509,7 @@ def insert_post(group_name, subject, message_text, user):
 		
 			recipients = []
 		
-			recipients = [m.member.email for m in group_members if not m.no_emails and m != user.email]
+			recipients = [m.member.email for m in group_members if not m.no_emails and m.member.email != user.email]
 			
 			recipients.append(user.email)
 			
