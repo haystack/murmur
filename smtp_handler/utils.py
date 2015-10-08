@@ -187,12 +187,13 @@ def html_ps(group, thread, membergroup, following, muting):
 
 	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
 	if membergroup.no_emails:
-		content += "<BR><BR>You are set to receive no emails from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>." % (addr)
+		content += "<BR><BR>You are set to receive no emails from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>" % (addr)
 	elif membergroup.always_follow_thread:
-		content += "<BR><BR>You are set to receive only the 1st email from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>." % (addr)
+		content += "<BR><BR>You are set to receive all emails from this group, except for the threads you mute. <BR><a href=\"%s\">Change your settings</a>" % (addr)
 	else:
-		content += "<BR><BR>You are set to receive all emails from this group, except for the threads you mute. <BR><a href=\"%s\">Change your settings</a>." % (addr)
-	
+		content += "<BR><BR>You are set to receive only the 1st email from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>" % (addr)
+
+		
 
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
@@ -219,12 +220,13 @@ def plain_ps(group, thread, membergroup, following, muting):
 	
 	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
 	if membergroup.no_emails:
-		content += "\n\nYou are set to receive no emails from this group, except for the threads you follow. \nChange your settings<%s>." % (addr)
+		content += "\n\nYou are set to receive no emails from this group, except for the threads you follow. \nChange your settings<%s>" % (addr)
 	elif membergroup.always_follow_thread:
-		content += "\n\nYou are set to receive only the 1st email from this group, except for the threads you follow. \nChange your settings<%s>." % (addr)
+		content += "\n\nYou are set to receive all emails from this group, except for the threads you mute. \nChange your settings<%s>" % (addr)
 	else:
-		content += "\n\nYou are set to receive all emails from this group, except for the threads you mute. \nChange your settings<%s>." % (addr)
-	
+		content += "\n\nYou are set to receive only the 1st email from this group, except for the threads you follow. \nChange your settings<%s>" % (addr)
+
+		
 	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
 	
 	return body
