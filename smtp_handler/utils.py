@@ -30,6 +30,8 @@ UNFOLLOW_ADDR = 'http://%s/unfollow?tid=' % (HOST)
 MUTE_ADDR = 'http://%s/mute?tid=' % (HOST)
 UNMUTE_ADDR = 'http://%s/unmute?tid=' % (HOST)
 
+EDIT_SETTINGS_ADDR = 'http://%s/groups/%s/edit_my_settings' % (HOST)
+
 HTML_SUBHEAD = '<div style="border-top:solid thin;padding-top:5px;margin-top:10px">'
 HTML_SUBTAIL = '</div>'
 
@@ -161,7 +163,7 @@ def remove_plain_ps(body):
 	_, _, tail = x.partition(PLAIN_SUBTAIL)
 	return head + tail
 
-def html_ps(thread, membergroup, following, muting):
+def html_ps(group, thread, membergroup, following, muting):
 	#follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
 	#unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
 	
@@ -182,6 +184,15 @@ def html_ps(thread, membergroup, following, muting):
 			content = 'You\'re currently muting this thread. <a href="%s">Un-Mute</a> to start receiving emails to this thread.' % (unmute_addr)
 		else:
 			content = 'You\'re currently receiving emails to this thread. <a href="%s">Mute</a> to stop receiving emails from this thread.' % (mute_addr)
+
+	addr = EDIT_SETTINGS_ADDR % group.name
+	if membergroup.no_emails:
+		content += "<BR><BR>You are set to receive no emails from this group, except for the threads you follow. <a href=\"%s\">Change your settings</a>." % (addr)
+	elif membergroup.always_follow_thread:
+		content += "<BR><BR>You are set to receive only the 1st email from this group, except for the threads you follow. <a href=\"%s\">Change your settings</a>." % (addr)
+	else:
+		content += "<BR><BR>You are set to receive all emails from this group, except for the threads you mute. <a href=\"%s\">Change your settings</a>." % (addr)
+	
 
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
@@ -205,6 +216,14 @@ def plain_ps(group, thread, membergroup, following, muting):
 			content = 'You\'re currently muting this thread. Un-Mute<%s> to start receiving emails to this thread.' % (unmute_addr)
 		else:
 			content = 'You\'re currently receiving emails to this thread. Mute<%s> to stop receiving emails from this thread.' % (mute_addr)
+	
+	addr = EDIT_SETTINGS_ADDR % group.name
+	if membergroup.no_emails:
+		content += "\n\nYou are set to receive no emails from this group, except for the threads you follow. Change your settings<%s>." % (addr)
+	elif membergroup.always_follow_thread:
+		content += "\n\nYou are set to receive only the 1st email from this group, except for the threads you follow. Change your settings<%s>." % (addr)
+	else:
+		content += "\n\nYou are set to receive all emails from this group, except for the threads you mute. Change your settings<%s>." % (addr)
 	
 	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
 	

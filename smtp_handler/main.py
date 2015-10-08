@@ -270,7 +270,7 @@ def handle_post(message, address=None, host=None):
 				following = Following.objects.filter(thread=t, user=recip).exists()
 				muting = Mute.objects.filter(thread=t, user=recip).exists()
 			
-				ps_blurb = html_ps(t, membergroup, following, muting)
+				ps_blurb = html_ps(g, t, membergroup, following, muting)
 				
 				try:
 					mail.Html = unicode(msg_text['html'] + ps_blurb)	
