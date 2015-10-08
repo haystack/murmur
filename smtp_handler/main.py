@@ -175,6 +175,7 @@ def handle_post(message, address=None, host=None):
 		try:
 			group = Group.objects.get(name=group_name)
 		except Exception, e:
+			logging.debug(e)
 			mail = create_error_email(addr, group_name, host, e)
 			relay.deliver(mail)
 			return
@@ -190,11 +191,13 @@ def handle_post(message, address=None, host=None):
 		attachments = get_attachments(email_message)
 		if len(attachments['attachments']) > 0:
 			if not group.allow_attachments:
+				logging.debug("No attachments allowed for this group")
 				mail = create_error_email(addr, group_name, host, "No attachments allowed for this group.")
 				relay.deliver(mail)
 				return
 			
 		if attachments['error'] != '':
+			logging.debug(attachments['error'])
 			mail = create_error_email(addr, group_name, host, attachments['error'])
 			relay.deliver(mail)
 			return
