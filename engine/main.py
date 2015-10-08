@@ -507,6 +507,8 @@ def insert_post(group_name, subject, message_text, user):
 		
 		if user_member.exists():
 		
+			recipients = []
+		
 			recipients = [m.member.email for m in group_members if not m.no_emails and m != user.email]
 			
 			recipients.append(user.email)
@@ -613,14 +615,18 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			if not Following.objects.filter(user=user, thread=thread).exists(): 
 				f = Following(user=user, thread=thread)
 				f.save()
+				
+			#users muting the thread
+			muted = Mute.objects.filter(thread=thread)
+			muted_emails = [m.user.email for m in muted]
 			
 			#users following the thread
 			following = Following.objects.filter(thread=thread)
-			recipients = [f.user.email for f in following]
+			recipients = [f.user.email for f in following if f.user.email not in muted_emails]
 			
 			#users that always follow threads in this group. minus those that don't want to get emails
 			member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True, no_emails=False)
-			recipients.extend([m.member.email for m in member_recip])
+			recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
 			
 			res['status'] = True
 			res['recipients'] = list(set(recipients))
