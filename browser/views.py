@@ -78,7 +78,17 @@ def posts(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		active_group = load_groups(request, groups, user)
+		
+		thread_id = request.GET.get('tid')
+		if thread_id:
+			try:
+				group_name = Thread.objects.get(id=thread_id).group.name
+			except Thread.DoesNotExist:
+				pass
+			active_group = load_groups(request, groups, user, group_name=group_name)
+		else:
+			active_group = load_groups(request, groups, user)
+			
 		tag_info = None
 		member_info = None
 		is_member = False
