@@ -486,60 +486,107 @@ def load_post(group_name, thread_id, msg_id):
 	logging.debug(res)
 	return res
 
+def _create_post(group, subject, message_text, user):
+
+	try:
+		message_text = message_text.decode("utf-8")
+	except Exception, _:
+		logging.debug("guessing this is unicode then")
+	
+	message_text = message_text.encode("ascii", "ignore")
+	
+	group_members = MemberGroup.objects.filter(group=group)
+	recipients = []
+	recipients = [m.member.email for m in group_members if not m.no_emails and m.member.email != user.email]
+	recipients.append(user.email)
+	
+	thread = Thread()
+	thread.subject = subject
+	thread.group = group
+	thread.save()
+	
+	msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@murmur.csail.mit.edu'
+	
+	p = Post(msg_id=msg_id, author=user, subject=subject, post=message_text, group=group, thread=thread)
+	p.save()
+	
+	tags = list(extract_hash_tags(message_text))
+	tag_objs = []
+	for tag in tags:
+		t, created = Tag.objects.get_or_create(name=tag, group=group)
+		if created:
+			r = lambda: random.randint(0,255)
+			color = '%02X%02X%02X' % (r(),r(),r())
+			t.color = color
+			t.save()
+			tag_objs.append({'name': t.name, 'color': t.color})
+		tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
+	
+	f = Following(user=user, thread=thread)
+	f.save()
+	
+	return p, thread, recipients, tags, tag_objs, recipients
+
+def insert_post_web(group_name, subject, message_text, user):
+	res = {'status':False}
+	thread = None
+	
+	try:
+		group = Group.objects.get(name=group_name)
+		user_member = MemberGroup.objects.filter(group=group, member=user)
+		if user_member.exists():
+			p, thread, recipients, tags, tag_objs, recipients = _create_post(group, subject, message_text, user)
+			res['status'] = True
+			
+			res['member_group'] = {'no_emails': user_member[0].no_emails, 
+								   'always_follow_thread': user_member[0].always_follow_thread}
+	
+			post_info = {'msg_id': p.msg_id,
+						 'thread_id': thread.id,
+						 'from': user.email,
+						 'to': group_name,
+						 'subject': escape(p.subject),
+						 'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
+						 'timestamp': format_date_time(p.timestamp),
+						}
+				
+			res['threads'] = []
+			res['threads'].append({'thread_id': thread.id,
+								   'post': post_info,
+								   'num_replies': 0,
+								   'replies': [],
+								   'following': True,
+								   'muting': False,
+								   'tags': tag_objs,
+								   'timestamp': format_date_time(p.timestamp)})
+			res['msg_id'] = p.msg_id
+			res['thread_id'] = thread.id
+			res['tags'] = tags
+			res['recipients'] = recipients
+		else:
+			res['code'] = msg_code['NOT_MEMBER']
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except Exception, e:
+		print e
+		logging.debug(e)
+		if(thread and thread.id):
+			thread.delete()
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
 
 def insert_post(group_name, subject, message_text, user):
 	res = {'status':False}
 	thread = None
 	try:
-		
 		group = Group.objects.get(name=group_name)
-		
-		group_members = MemberGroup.objects.filter(group=group)
-		
 		user_member = MemberGroup.objects.filter(group=group, member=user)
-		
-		try:
-			message_text = message_text.decode("utf-8")
-		except Exception, e:
-			logging.debug("guessing this is unicode then")
-		
-		message_text = message_text.encode("ascii", "ignore")
-		
 		if user_member.exists():
-		
-			recipients = []
-		
-			recipients = [m.member.email for m in group_members if not m.no_emails and m.member.email != user.email]
-			
-			recipients.append(user.email)
-			
-			thread = Thread()
-			thread.subject = subject
-			thread.group = group
-			thread.save()
-			
-			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@murmur.csail.mit.edu'
-			
-			p = Post(msg_id=msg_id, author=user, subject=subject, post=message_text, group=group, thread=thread)
-			p.save()
-			
-			tags = list(extract_hash_tags(message_text))
-			
-		
-			for tag in tags:
-				t, created = Tag.objects.get_or_create(name=tag, group=group)
-				if created:
-					r = lambda: random.randint(0,255)
-					color = '%02X%02X%02X' % (r(),r(),r())
-					t.color = color
-					t.save()
-				tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
-			
-			f = Following(user=user, thread=thread)
-			f.save()
-			
+			p, thread, recipients, tags, _, recipients = _create_post(group, subject, message_text, user)
 			res['status'] = True
-			res['msg_id'] = msg_id
+			res['msg_id'] = p.msg_id
 			res['thread_id'] = thread.id
 			res['tags'] = tags
 			res['recipients'] = recipients
@@ -661,6 +708,7 @@ def follow_thread(thread_id, email=None, user=None):
 		res['status'] = True
 		res['thread_name'] = t.subject
 		res['thread_id'] = t.id
+		res['group_name'] = t.group.name
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Following.DoesNotExist:
@@ -669,6 +717,7 @@ def follow_thread(thread_id, email=None, user=None):
 		res['status'] = True
 		res['thread_name'] = t.subject
 		res['thread_id'] = t.id
+		res['group_name'] = t.group.name
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except:
@@ -691,12 +740,14 @@ def unfollow_thread(thread_id, email=None, user=None):
 		res['status'] = True
 		res['thread_name'] = t.subject
 		res['thread_id'] = t.id
+		res['group_name'] = t.group.name
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Following.DoesNotExist:
 		res['status'] = True
 		res['thread_name'] = t.subject
 		res['thread_id'] = t.id
+		res['group_name'] = t.group.name
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except Exception, e:
@@ -718,6 +769,7 @@ def mute_thread(thread_id, email=None, user=None):
 		res['status'] = True
 		res['thread_name'] = t.subject
 		res['thread_id'] = t.id
+		res['group_name'] = t.group.name
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Mute.DoesNotExist:
@@ -726,6 +778,7 @@ def mute_thread(thread_id, email=None, user=None):
 		res['status'] = True
 		res['thread_name'] = t.subject
 		res['thread_id'] = t.id
+		res['group_name'] = t.group.name
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except:
@@ -748,12 +801,14 @@ def unmute_thread(thread_id, email=None, user=None):
 		res['status'] = True
 		res['thread_name'] = t.subject
 		res['thread_id'] = t.id
+		res['group_name'] = t.group.name
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Mute.DoesNotExist:
 		res['status'] = True
 		res['thread_name'] = t.subject
 		res['thread_id'] = t.id
+		res['group_name'] = t.group.name
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except Exception, e:

@@ -53,9 +53,12 @@ ALLOWED_ATTRIBUTES = {
 ALLOWED_STYLES = ['border-style', 'border-width', 'float', 'height', 'margin', 'width']
 
 
-def load_groups(request, groups, user):
-        
-    active_group = request.GET.get('group_name')
+def load_groups(request, groups, user, group_name=None):
+    
+    if group_name:
+        active_group = group_name
+    else:
+        active_group = request.GET.get('group_name')
     if active_group:
         active_group = {'name': active_group,
                         'active': True}

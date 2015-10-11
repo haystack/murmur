@@ -534,7 +534,7 @@ def insert_post(request):
 		
 		msg_text = request.POST['msg_text']
 		
-		res = engine.main.insert_post(group_name, request.POST['subject'],  msg_text, user)
+		res = engine.main.insert_post_web(group_name, request.POST['subject'],  msg_text, user)
 		
 		subj_tag = ''
 		for tag in res['tags']:
@@ -651,9 +651,11 @@ def follow_thread_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		active_group = load_groups(request, groups, user)
+		
 		thread_id = request.GET.get('tid')
 		res = engine.main.follow_thread(thread_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
 		return {'res': res, 'type': 'follow', 'user': request.user, 'groups': groups, 'active_group': active_group}
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/follow?tid=" + request.GET.get('tid'))
@@ -664,9 +666,11 @@ def unfollow_thread_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		active_group = load_groups(request, groups, user)
+		
 		thread_id = request.GET.get('tid')
 		res = engine.main.unfollow_thread(thread_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
 		return {'res': res, 'type': 'unfollow', 'user': request.user, 'groups': groups, 'active_group': active_group}
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unfollow?tid=" + request.GET.get('tid'))
@@ -677,9 +681,11 @@ def mute_thread_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		active_group = load_groups(request, groups, user)
+		
 		thread_id = request.GET.get('tid')
 		res = engine.main.mute_thread(thread_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
 		return {'res': res, 'type': 'mut', 'user': request.user, 'groups': groups, 'active_group': active_group}
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/mute?tid=" + request.GET.get('tid'))
@@ -690,9 +696,11 @@ def unmute_thread_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		active_group = load_groups(request, groups, user)
+
 		thread_id = request.GET.get('tid')
 		res = engine.main.unmute_thread(thread_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
 		return {'res': res, 'type': 'unmut', 'user': request.user, 'groups': groups, 'active_group': active_group}
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unmute?tid=" + request.GET.get('tid'))

@@ -9,8 +9,6 @@ $(document).ready(function(){
 	posts_local_data = {};
 
 	groups_local_data = {};
-	
-	posts_list = [];
  
 	window.onpopstate = function(event) {
 		if (window.location.pathname.indexOf('/posts') != -1) {
@@ -146,7 +144,9 @@ $(document).ready(function(){
 					if (params.thread_id > -1) {
 						params.load = true;
 					}
-					populate_posts_table(res, params, true);
+					if (res.status) {
+						populate_posts_table(res, params, true);
+					}
 				}
 			);	
 		};
@@ -259,10 +259,8 @@ $(document).ready(function(){
                         params.poster_email = params.requester_email;
 			$.post('insert_post', params, 
 				function(res){
-					if(res.status){
-                    	list_posts({'load':true, 
-                    				'active_group': params.group_name,
-                    				'thread_id':res.thread_id});
+					if (res.status) {
+						populate_posts_table(res, {'thread_id': res.thread_id, 'load': true}, false);
 					}
 					notify(res, true);
 				}
@@ -598,8 +596,7 @@ $(document).ready(function(){
 	function populate_posts_table(res, load_params, reset){
 
 		var selected_thread;
-		if(res.status){
-			posts_list = res.threads;
+		if (res.status){
 			selected_thread = display_posts_list(res.threads, load_params, reset, res.user, res.member_group);
 			
 			var p_list = [];
@@ -614,45 +611,42 @@ $(document).ready(function(){
 				p_list.push(post);
 			}
 
-		var posts = new Bloodhound({
-			datumTokenizer: Bloodhound.tokenizers.obj.whitespace("text", "subject", "from"),
-			queryTokenizer: Bloodhound.tokenizers.whitespace,
-			local: p_list
-		});
-		posts.initialize();
+			var posts = new Bloodhound({
+				datumTokenizer: Bloodhound.tokenizers.obj.whitespace("text", "subject", "from"),
+				queryTokenizer: Bloodhound.tokenizers.whitespace,
+				local: p_list
+			});
+			posts.initialize();
 		
-		$("#text-search-post").typeahead({
-			minLength: 2,
-			highlight: true,
-			hint: false,
-		}, {
-			name: 'posts',
-			displayKey: 'subject',
-			source: posts.ttAdapter(),
-			highlighter: function(item) {
-                return item.subject + item.text;
-            },
-              templates: {
-			    empty: [
-			      '<div class="empty-message">',
-			      'unable to find any posts that match the current query',
-			      '</div>'
-			    ].join('\n'),
-			    suggestion: function (post) {
-            		return '<a href="/thread?group_name=' + res.group_name + '&tid=' + post.tid + '"><div class="suggestion">' + post.subject.trunc(43) + '<br />' + post.from + '<br />' + post.text.trunc(40) + '</div></a>';
-        }
-		  }
-            
-		}).on('typeahead:selected', function($e, datum) {
+			$("#text-search-post").typeahead({
+				minLength: 2,
+				highlight: true,
+				hint: false,
+			}, {
+				name: 'posts',
+				displayKey: 'subject',
+				source: posts.ttAdapter(),
+				highlighter: function(item) {
+	                return item.subject + item.text;
+	            },
+	            templates: {
+				    empty: [
+				      '<div class="empty-message">',
+				      'unable to find any posts that match the current query',
+				      '</div>'
+				    ].join('\n'),
+				    suggestion: function (post) {
+	            		return '<a href="/thread?group_name=' + res.group_name + '&tid=' + post.tid + '"><div class="suggestion">' + post.subject.trunc(43) + '<br />' + post.from + '<br />' + post.text.trunc(40) + '</div></a>';
+	        		}
+		 		}
+			}).on('typeahead:selected', function($e, datum) {
 				window.location.href = '/thread?group_name=' + res.group_name + '&tid=' + datum.tid;
 			});;
-		
 		}
 		var posts_table = $("#posts-table"); 
 		
-		if(load_params.load == true){
-			posts_table.find('#'+selected_thread).click();
-			console.debug("load = true");
+		if (load_params.load == true){
+			posts_table.find('#' + selected_thread).click();
 		}
 	}
 	
@@ -872,7 +866,7 @@ $(document).ready(function(){
 		}
 	} else if (window.location.pathname.indexOf('/posts') != -1) {
 		init_posts_page();	
-		setInterval(refresh_posts, 10000);
+		setInterval(refresh_posts, 50000);
 	}
 	
 	function strip(html){
