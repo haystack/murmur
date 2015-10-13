@@ -278,13 +278,13 @@ def handle_post(message, address=None, host=None):
 				try:
 					mail.Html = unicode(msg_text['html'] + ps_blurb)	
 				except UnicodeDecodeError:
-					mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
+					mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8", 'ignore')
 				
 				ps_blurb = plain_ps(g, t, membergroup, following, muting)
 				try:
 					mail.Body = unicode(msg_text['plain'] + ps_blurb)
 				except UnicodeDecodeError:
-					mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
+					mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8", 'ignore')
 			
 				relay.deliver(mail, To = recip_email)
 	except Exception, e:
