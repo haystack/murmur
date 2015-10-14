@@ -275,16 +275,24 @@ def handle_post(message, address=None, host=None):
 			
 				ps_blurb = html_ps(g, t, membergroup, following, muting)
 				
-				
-				new_body = msg_text['html'] + ps_blurb
-				logging.debug(new_body)
+				ps_blurb = unicode(ps_blurb)
 				
 				try:
-					mail.Html = unicode(new_body, "utf-8")	
+					# assume email is in utf-8
+					
+					new_body = unicode(msg_text['html'], "utf-8", "ignore")
+					new_body = new_body + ps_blurb
+
+					mail.Html = new_body
 				except UnicodeDecodeError:
 					logging.debug('error 1 - 1')
+					
 					try:
-						mail.Html = unicode(new_body)
+						#then try ascii
+						new_body = unicode(msg_text['html'], errors="ignore")
+						new_body = new_body + ps_blurb
+	
+						mail.Html = new_body
 					except Exception, e:
 						logging.debug("WHY")
 						logging.debug(traceback.format_exc())
@@ -292,15 +300,20 @@ def handle_post(message, address=None, host=None):
 				
 				ps_blurb = plain_ps(g, t, membergroup, following, muting)
 				
-				plain_body = msg_text['plain'] + ps_blurb
-				logging.debug(plain_body)
-				
 				try:
-					mail.Body = unicode(plain_body, "utf-8")
+					plain_body = unicode(msg_text['plain'], "utf-8", "ignore")
+					plain_body = plain_body + ps_blurb
+					
+					mail.Body = plain_body
 				except UnicodeDecodeError:
 					logging.debug('error 1 - 2')
+					
 					try:
-						mail.Body = unicode(plain_body)
+						# then try default (ascii)
+						plain_body = unicode(msg_text['plain'], errors="ignore")
+						plain_body = plain_body + ps_blurb
+						
+						mail.Body = plain_body
 					except Exception, e:
 						logging.debug("WHY 2")
 						logging.debug(traceback.format_exc())
