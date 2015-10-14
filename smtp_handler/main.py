@@ -273,7 +273,7 @@ def handle_post(message, address=None, host=None):
 				following = Following.objects.filter(thread=t, user=recip).exists()
 				muting = Mute.objects.filter(thread=t, user=recip).exists()
 			
-				ps_blurb = html_ps(g, t, membergroup, following, muting)
+				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting)
 				
 				ps_blurb = unicode(ps_blurb)
 				
@@ -290,7 +290,7 @@ def handle_post(message, address=None, host=None):
 
 					mail.Html = new_body
 				
-				ps_blurb = plain_ps(g, t, membergroup, following, muting)
+				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting)
 				
 				try:
 					plain_body = unicode(msg_text['plain'], "utf-8", "ignore")

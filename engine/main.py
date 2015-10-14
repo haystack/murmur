@@ -592,6 +592,7 @@ def insert_post_web(group_name, subject, message_text, user):
 								   'timestamp': format_date_time(p.timestamp)})
 			res['msg_id'] = p.msg_id
 			res['thread_id'] = thread.id
+			res['post_id'] = p.id
 			res['tags'] = tag_objs
 			res['recipients'] = recipients
 		else:
@@ -617,6 +618,7 @@ def insert_post(group_name, subject, message_text, user):
 		if user_member.exists():
 			p, thread, recipients, tag_objs, recipients = _create_post(group, subject, message_text, user)
 			res['status'] = True
+			res['post_id'] = p.id
 			res['msg_id'] = p.msg_id
 			res['thread_id'] = thread.id
 			res['tags'] = tag_objs
@@ -711,6 +713,7 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			res['tags'] = tags
 			res['thread_id'] = thread.id
 			res['msg_id'] = msg_id
+			res['post_id'] = r.id
 			
 		else:
 			res['code'] = msg_code['NOT_MEMBER']

@@ -32,6 +32,8 @@ UNMUTE_ADDR = 'http://%s/unmute?tid=' % (HOST)
 
 EDIT_SETTINGS_ADDR = 'http://%s/groups/%s/edit_my_settings'
 
+PERMALINK_POST = 'http://%s/thread?tid=%s&post_id=%s'
+
 HTML_SUBHEAD = '<div style="border-top:solid thin;padding-top:5px;margin-top:10px">'
 HTML_SUBTAIL = '</div>'
 
@@ -165,27 +167,30 @@ def remove_plain_ps(body):
 	_, _, tail = x.partition(PLAIN_SUBTAIL)
 	return head + tail
 
-def html_ps(group, thread, membergroup, following, muting):
+def html_ps(group, thread, post_id, membergroup, following, muting):
 	#follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
 	#unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
 	
 	tid = thread.id
+	
+	permalink = PERMALINK_POST % (HOST, tid, post_id)
+	content = '<a href="%s">Link to Post</a><br /><br />' % (permalink)
 	
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_addr = '%s%s' % (FOLLOW_ADDR, tid)
 		unfollow_addr = '%s%s' % (UNFOLLOW_ADDR, tid)
 		
 		if following:
-			content = 'You\'re currently following this thread. <a href="%s">Un-Follow</a> to stop receiving emails from this thread.' % (unfollow_addr)
+			content += 'You\'re currently following this thread. <a href="%s">Un-Follow</a> to stop receiving emails from this thread.' % (unfollow_addr)
 		else:
-			content = 'You currently aren\'t receiving any replies to this thread. <a href="%s">Follow</a> to receive replies to this thread.' % (follow_addr)
+			content += 'You currently aren\'t receiving any replies to this thread. <a href="%s">Follow</a> to receive replies to this thread.' % (follow_addr)
 	else:
 		mute_addr = '%s%s' % (MUTE_ADDR, tid)
 		unmute_addr = '%s%s' % (UNMUTE_ADDR, tid)
 		if muting:
-			content = 'You\'re currently muting this thread. <a href="%s">Un-Mute</a> to start receiving emails to this thread.' % (unmute_addr)
+			content += 'You\'re currently muting this thread. <a href="%s">Un-Mute</a> to start receiving emails to this thread.' % (unmute_addr)
 		else:
-			content = 'You\'re currently receiving emails to this thread. <a href="%s">Mute</a> to stop receiving emails from this thread.' % (mute_addr)
+			content += 'You\'re currently receiving emails to this thread. <a href="%s">Mute</a> to stop receiving emails from this thread.' % (mute_addr)
 
 	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
 	if membergroup.no_emails:
@@ -200,9 +205,12 @@ def html_ps(group, thread, membergroup, following, muting):
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
-def plain_ps(group, thread, membergroup, following, muting):
+def plain_ps(group, thread, post_id, membergroup, following, muting):
 	tid = thread.id
 	group_name = group.name
+	
+	permalink = PERMALINK_POST % (HOST, tid, post_id)
+	content = 'Link to Post<%s>\n\n' % (permalink)
 	
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + FOLLOW_SUFFIX + '@' + HOST)
