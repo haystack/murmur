@@ -313,8 +313,6 @@ $(document).ready(function(){
 				
 				var content = '<li class="row-item" id="'+ res.groups[i].name+'">';
 				content += '<span class="strong">' + res.groups[i].name + '</span>';
-				if (res.groups[i].member == true)
-					content += '<span class="member label">Member</span>';
 				
 				if (res.groups[i].admin == true)
 					content += '<span class="admin label">Admin</span>';
