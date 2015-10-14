@@ -546,11 +546,10 @@ def _create_post(group, subject, message_text, user):
 		if match.lower() != group.name:
 			_create_tag(group, thread, match)
 	
-	
 	tags = list(extract_hash_tags(message_text))
-	
 	for tag in tags:
-		_create_tag(group, thread, tag)
+		if tag.lower() != group.name:
+			_create_tag(group, thread, tag)
 	
 	tag_objs = list(Tag.objects.filter(tagthread__thread=thread).values('name', 'color'))
 	

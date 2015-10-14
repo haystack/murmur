@@ -563,7 +563,8 @@ def insert_post(request):
 		for tag in res['tags']:
 			subj_tag += '[%s]' % tag['name']
 			
-		subject = '[%s]%s %s' %(group_name, subj_tag, request.POST['subject'])
+		stripped_subj = re.sub("\[.*?\]", "", request.POST['subject'])
+		subject = '[%s]%s %s' %(group_name, subj_tag, stripped_subj)
 		
 		
 		msg_id = res['msg_id']
