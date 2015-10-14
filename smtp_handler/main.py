@@ -275,24 +275,32 @@ def handle_post(message, address=None, host=None):
 			
 				ps_blurb = html_ps(g, t, membergroup, following, muting)
 				
+				
+				new_body = msg_text['html'] + ps_blurb
+				logging.debug(new_body)
+				
 				try:
-					mail.Html = unicode(msg_text['html'] + ps_blurb)	
+					mail.Html = unicode(new_body, "utf-8")	
 				except UnicodeDecodeError:
 					logging.debug('error 1 - 1')
 					try:
-						mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
+						mail.Html = unicode(new_body)
 					except Exception, e:
 						logging.debug("WHY")
 						logging.debug(traceback.format_exc())
 						logging.debug(e)
 				
 				ps_blurb = plain_ps(g, t, membergroup, following, muting)
+				
+				plain_body = msg_text['plain'] + ps_blurb
+				logging.debug(plain_body)
+				
 				try:
-					mail.Body = unicode(msg_text['plain'] + ps_blurb)
+					mail.Body = unicode(plain_body, "utf-8")
 				except UnicodeDecodeError:
 					logging.debug('error 1 - 2')
 					try:
-						mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
+						mail.Body = unicode(plain_body)
 					except Exception, e:
 						logging.debug("WHY 2")
 						logging.debug(traceback.format_exc())
