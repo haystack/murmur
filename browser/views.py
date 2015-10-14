@@ -156,7 +156,7 @@ def post_list(request):
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
 			is_member = MemberGroup.objects.filter(member=user, group=group).exists()
-			group_name = active_group.name
+			group_name = active_group['name']
 			
 		if group.public or is_member:
 			if is_member:
