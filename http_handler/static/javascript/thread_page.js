@@ -1,5 +1,9 @@
 $(document).ready(function(){
 	
+	if ($("#highlight_post").length){
+		$('html, body').animate({scrollTop: $("#highlight_post").offset().top - 50}, 0);
+	}
+	   
 	if ($('#reply-text-input').length) {
 		CKEDITOR.replace( 'reply-text-input' );
 	}
@@ -32,23 +36,23 @@ $(document).ready(function(){
 				  'thread_id': getParameterByName('tid'),
 				  'msg_id': $("#post_info").val(),
 				  'from': $("#post-from").text(),
-				  'group_name': getParameterByName('group_name'),
 				  'subject': $("#post-subject").text(),
 			};
 	   
 	$("#btn-reply").unbind("click");
 	$("#btn-follow").unbind("click");
 	$("#btn-unfollow").unbind("click");
+	$("#btn-mute").unbind("click");
+	$("#btn-unmute").unbind("click");
 	$("#btn-reply").bind("click");
 	$("#btn-follow").bind("click");
 	$("#btn-unfollow").bind("click");
+	$("#btn-mute").bind("click");
+	$("#btn-unmute").bind("click");
 
 	insert_reply = 
 		function(params){
 			params.msg_text = CKEDITOR.instances['reply-text-input'].getData();
-			if(params.subject.substr(0,3).trim().toLowerCase() != 're:'){
-				params.subject = 'Re: ' + params.subject;
-			}
 			params.poster_email = params.requester_email;
 			$.post('insert_reply', params, 
 				function(res){
@@ -65,13 +69,12 @@ $(document).ready(function(){
 			$.post('follow_thread', {'requester_email': params.requester_email, 
 						  'thread_id': params.thread_id,
 						  'msg_id': params.msg_id,
-						  'group_name': params.group_name,
 					  	}, 
 				function(res){
 					console.log(res);
 					if(res.status){
 						$("#btn-follow").hide();
-	            				$("#btn-unfollow").show();
+	            		$("#btn-unfollow").show();
 					}
 					if (res.redirect) {
 						window.location.href = res.url;
@@ -95,26 +98,87 @@ $(document).ready(function(){
 					notify(res, true);
 				}
 			);	
-		};		
+		};	
+		
+	mute_thread = 
+		function(params){
+			$.post('mute_thread', {'requester_email': params.requester_email, 
+						  'thread_id': params.thread_id,
+						  'msg_id': params.msg_id
+					  	}, 
+				function(res){
+					if(res.status){
+						$("#btn-mute").hide();
+                		$("#btn-unmute").show();
+                	}
+					notify(res, true);
+				}
+			);	
+		};
+	
+	unmute_thread = 
+		function(params){
+			$.post('unmute_thread', {'requester_email': params.requester_email, 
+						  'thread_id': params.thread_id,
+						  'msg_id' : params.msg_id
+					  	}, 
+				function(res){
+					if(res.status){
+                       $("#btn-mute").show();
+                       $("#btn-unmute").hide();
+                    }
+					notify(res, true);
+				}
+			);	
+		};	
 		
 	var ins_reply = bind(insert_reply, params);
 	var flw_thread = bind(follow_thread, params);
 	var unflw_thread = bind(unfollow_thread, params);	
+	var m_thread = bind(mute_thread, params);
+	var unm_thread = bind(unmute_thread, params);	
 		
 	$("#btn-reply").click(ins_reply);
+	
 	$("#btn-follow").click(flw_thread);
 	$("#btn-unfollow").click(unflw_thread);
+	
+	$("#btn-mute").click(m_thread);
+	$("#btn-unmute").click(unm_thread);
 		
 	$("#btn-follow").hide();
 	$("#btn-unfollow").hide();
 	
+	$("#btn-mute").hide();
+	$("#btn-unmute").hide();
 	
 	
-	var f_list = $.parseJSON($("#flist").val());
-	if (f_list && f_list.indexOf(requester_email) != -1) {
-		$("#btn-unfollow").show();
+	var follow = $("#follow").val();
+	var mute = $("#mute").val();
+	var member = $("#member").val();
+	var no_emails = $("#no_emails").val();
+	var always_follow = $("#always_follow").val();
+	
+	if (member == "True") {
+		if (no_emails == "True" || always_follow == "False") {
+			if (follow == "True") {
+				$("#btn-unfollow").show();
+			} else {
+				$("#btn-follow").show();
+			}
+		} else {
+			if (mute == "True") {
+				$("#btn-mute").show();
+			} else {
+				$("#btn-unmute").show();
+			}
+		}
 	} else {
-		$("#btn-follow").show();
+		if (follow == "True") {
+			$("#btn-unfollow").show();
+		} else {
+			$("#btn-follow").show();
+		}
 	}  	
 });
 

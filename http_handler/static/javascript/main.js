@@ -217,13 +217,11 @@ $(document).ready(function(){
 	
 	mute_thread = 
 		function(params){
-			console.log(params);
 			$.post('mute_thread', {'requester_email': params.requester_email, 
 						  'thread_id': params.thread_id,
 						  'msg_id': params.msg_id
 					  	}, 
 				function(res){
-					console.log(res);
 					if(res.status){
 						$("#btn-mute").hide();
                 		$("#btn-unmute").show();
@@ -672,11 +670,14 @@ $(document).ready(function(){
 		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
 		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span> <br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp) + '</span>';
+		content += '<br /><small><a href="/thread?tid=' + res.thread_id + '">Thread Permalink</a></small>';
+		
 		content += '</div>';
 		content += '</div>';
 		content += '<hr />';
 		content += res.post.text;
 		content += '<br />';
+		content += '<small><a href="/thread?tid=' + res.thread_id + '&post_id=' + res.post.id + '">Permalink</a></small><br /><br />';
 		content += '<div class="reply">';
 		for(var i = 0; i< res.replies.length; i++){
                        	content += '<div class="main-area-content">';
@@ -684,6 +685,7 @@ $(document).ready(function(){
                        	content += 'on ' + new Date(res.replies[i].timestamp) + '&nbsp;';
 			content += '<br /><br />';
 		      	content +=  res.replies[i].text;
+		      	content += '<br /><small><a href="/thread?tid=' + res.thread_id + '&post_id=' + res.replies[i].id + '">Permalink</a></small><br /><br />';
                        	content += '</div>';
                                
                }

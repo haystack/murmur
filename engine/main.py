@@ -403,7 +403,8 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 			replies = []
 			post = None
 			for p in posts:
-				post_dict = {'msg_id': p.msg_id, 
+				post_dict = {'id': p.id,
+							'msg_id': p.msg_id, 
 							'thread_id': p.thread_id, 
 							'from': p.author.email, 
 							'to': p.group.name, 
@@ -433,34 +434,52 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 	logging.debug(res)
 	return res
 	
-def load_thread(group_name, thread_id):
-	t = Thread.objects.get(id=thread_id)
+def load_thread(t, user=None, member=None):
+
+	following = False
+	muting = False
+	no_emails = False
+	always_follow = False
+	is_member = False
+	if user:
+		following = Following.objects.filter(thread=t, user=user).exists()
+		muting = Mute.objects.filter(thread=t, user=user).exists()
+		if member:
+			is_member = True
+			no_emails = member.no_emails
+			always_follow = member.always_follow_thread
 	
-	following = Following.objects.filter(thread = t)
-	f_list = [f.user.email for f in following]
 	
 	posts = Post.objects.filter(thread = t)		
 	replies = []
 	post = None
 	for p in posts:
-		post_dict = {'msg_id': p.msg_id, 
+		post_dict = {
+					'id': str(p.id),
+					'msg_id': p.msg_id, 
 					'thread_id': p.thread_id, 
 					'from': p.author.email, 
 					'to': p.group.name, 
 					'subject': escape(p.subject), 
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
-					'timestamp': p.timestamp}
+					'timestamp': p.timestamp
+					}
 		if not p.reply_to_id:
 			post = post_dict
 		else:
 			replies.append(post_dict)
 	tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
 	
-	return {'thread_id': t.id, 
+	return {'status': True,
+			'thread_id': t.id, 
 		    'post': post, 
 		    'replies': replies, 
 		    'tags': json.dumps(tags),
-		    'f_list': json.dumps(f_list), 
+		    'following': following, 
+		    'muting': muting,
+		    'member': is_member,
+		    'no_emails': no_emails,
+		    'always_follow': always_follow,
 		    'timestamp': t.timestamp}
 
 def load_post(group_name, thread_id, msg_id):

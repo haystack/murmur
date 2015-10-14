@@ -509,6 +509,11 @@ textarea {
 	background: #D7ECFA;
 }
 
+
+#highlight_post {
+	background-color: #FFF7CE;
+}
+
 blockquote {
 	font-size: 12px;
 }

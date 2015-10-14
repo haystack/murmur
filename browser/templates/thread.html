@@ -10,10 +10,16 @@
 	<div class="group-container-posts">
 		<div class="main-area-content">
 			<div>
-				<input type="hidden" id="flist" name="flist" value="{{ thread.f_list }}" readonly>
+				<input type="hidden" id="follow" name="follow" value="{{ thread.following }}" readonly>
+				<input type="hidden" id="mute" name="mute" value="{{ thread.muting }}" readonly>
+				<input type="hidden" id="member" name="member" value="{{ thread.member }}" readonly>
+				<input type="hidden" id="no_emails" name="no_emails" value="{{ thread.no_emails }}" readonly>
+				<input type="hidden" id="always_follow" name="always_follow" value="{{ thread.always_follow }}" readonly>
 				<div style="float:right">
-					<button type="button" id="btn-follow" style="margin: 5px;">Follow</button>
-					<button type="button" id="btn-unfollow" style="margin: 5px;">Unfollow</button>
+					<button type="button" id="btn-follow" style="margin: 5px; display: none;">Follow</button>
+					<button type="button" id="btn-unfollow" style="margin: 5px; display: none;">Unfollow</button>
+					<button type="button" id="btn-mute" style="margin: 5px; display: none;">Mute</button>
+					<button type="button" id="btn-unmute" style="margin: 5px; display: none;">Unmute</button>
 				</div>
 				<div>
 					<a href="/posts?group_name={{ active_group.name }}"><button type="button" style="margin: 5px;">View Posts</button></a>
@@ -31,23 +37,44 @@
 				</div>
 			</div>
 			<hr>
+			{% if post_id == thread.post.id %}
+				<div id="highlight_post">
+			{% else %}
 			<div>
+			{% endif %}
 				{% autoescape off %}{{ thread.post.text }}{% endautoescape %}
 			</div>
+			<small>
+				<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{thread.post.id}}">Permalink</a>
+			</small>
+			<BR>
+				<BR>
 			{% for reply in thread.replies %}
 				<div class="reply">
 					<div class="main-area-content">
 						<span class="strong">{{ reply.from }}</span> 
 						on {{ reply.timestamp }}&nbsp;
+						
 						<br>
-						<br>
-						{% autoescape off %}{{ reply.text }}{% endautoescape %}
+						
+						{% if post_id == reply.id %}
+							<div id="highlight_post">
+						{% else %}
+						<div>
+						{% endif %}
+						
+							{% autoescape off %}{{ reply.text }}{% endautoescape %}
+						</div>
+						<small>
+							<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{reply.id}}">Permalink</a>
+						
+						</small>
 					</div>
 				</div>
 			{% endfor %}
 		</div>
 		{% if user.is_authenticated %}
-			{% if user.is_member %}
+			{% if thread.member %}
 				<div class="main-area-content">
 					<textarea id="reply-text-input"></textarea>
 					<button type="button" id="btn-reply" style="margin-top:10px;">Reply</button>

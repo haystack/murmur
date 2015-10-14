@@ -60,6 +60,8 @@ def error(request):
 		res['error'] = 'You do not have the admin privileges to visit this page.'
 	elif error == 'member':
 		res['error'] = 'You need to be a member of this group to visit this page.'
+	elif error == 'thread':
+		res['error'] = 'This thread no longer exists.'
 	else:
 		res['error'] = 'Unknown error.'
 	return res
@@ -178,20 +180,34 @@ def post_list(request):
 
 @render_to("thread.html")
 def thread(request):
+	
+	post_id = request.GET.get('post_id')
+	thread_id = request.GET.get('tid')
+	try:
+		thread = Thread.objects.get(id=int(thread_id))
+	except Thread.DoesNotExist:
+		return redirect('/404?e=thread')
+	
+	group = thread.group
+	
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		active_group = load_groups(request, groups, user)
 		
-		is_member = False
-		if active_group['active']:
-			group = Group.objects.get(name=active_group['name'])
-			is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+		member_group = MemberGroup.objects.filter(member=user, group=group)
+		is_member = member_group.exists()
+		
+		if is_member:
+			active_group = load_groups(request, groups, user, group_name=group.name)
+		else:
+			active_group = load_groups(None, groups, user)
 			
-		if not active_group['active'] or group.public or is_member:
-			res = engine.main.load_thread(request.GET.get('group_name'), request.GET.get('tid'))
-			request.user.is_member = is_member
-			return {'user': request.user, 'groups': groups, 'thread': res, 'active_group': active_group}
+		if group.public or is_member:
+			if is_member:
+				res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
+			else:
+				res = engine.main.load_thread(thread, user=request.user)
+			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id, 'active_group': active_group}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None
@@ -199,16 +215,13 @@ def thread(request):
 	else:
 		user = None
 		groups = []
-		active_group = {'name': request.GET.get('group_name')}
-		if active_group['name']:
-			group = Group.objects.get(name=active_group['name'])
-			if not group.public:
-				return redirect('/404?e=member')
-			else:
-				res = engine.main.load_thread(request.GET.get('group_name'), request.GET.get('tid'))
-				return {'user': request.user, 'groups': groups, 'thread': res, 'active_group': active_group}
-		else:
+		active_group = {'name': group.name}
+		if not group.public:
 			return HttpResponseRedirect(global_settings.LOGIN_URL)
+		else:
+			res = engine.main.load_thread(thread)
+			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id,'active_group': active_group}
+			
 			
 
 
@@ -596,16 +609,26 @@ def insert_post(request):
 def insert_reply(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		group_name = request.POST['group_name'].encode('ascii', 'ignore')
+		thread_id = request.POST.get('thread_id')
+		group_name = request.POST.get('group_name')
+		if thread_id and not group_name:
+			group_name = Thread.objects.get(id=thread_id).group.name
+		else:
+			group_name = group_name.encode('ascii', 'ignore')
 		
 		orig_subject = request.POST['subject']
+		
+		print orig_subject
+		
 		if request.POST['subject'][0:4].lower() == "re: ":
+			
+			print 'here'
 			orig_subject = request.POST['subject'][4:]
 		
 		msg_text = request.POST['msg_text']
 		
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
-		thread_id = request.POST.get('thread_id', None)
+		
 		
 		res = engine.main.insert_reply(group_name, 'Re: ' + request.POST['subject'], msg_text, user, thread_id=thread_id)
 		if(res['status']):
@@ -723,10 +746,9 @@ def follow_thread(request):
 			res = engine.main.follow_thread(request.POST['thread_id'], user=user)
 			return HttpResponse(json.dumps(res), content_type="application/json")
 		else:
-			group = request.POST['group_name']
 			thread = request.POST['thread_id']
 			return HttpResponse(json.dumps({'redirect': True, 
-										'url': global_settings.LOGIN_URL + "?next=/thread?group_name=" + group + "&tid=" + thread}), 
+										'url': global_settings.LOGIN_URL + "?next=/thread?tid=" + thread}), 
 										content_type="application/json")
 	except Exception, e:
 		print request
@@ -754,10 +776,9 @@ def mute_thread(request):
 			res = engine.main.mute_thread(request.POST['thread_id'], user=user)
 			return HttpResponse(json.dumps(res), content_type="application/json")
 		else:
-			group = request.POST['group_name']
 			thread = request.POST['thread_id']
 			return HttpResponse(json.dumps({'redirect': True, 
-										'url': global_settings.LOGIN_URL + "?next=/thread?group_name=" + group + "&tid=" + thread}), 
+										'url': global_settings.LOGIN_URL + "?next=/thread?tid=" + thread}), 
 										content_type="application/json")
 	except Exception, e:
 		print e
