@@ -6,6 +6,7 @@ from lamson.mail import MailResponse
 from email.utils import *
 from engine.main import *
 from utils import *
+import traceback
 from html2text import html2text
 from markdown2 import markdown
 from django.db.utils import OperationalError
@@ -282,6 +283,7 @@ def handle_post(message, address=None, host=None):
 						mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
 					except Exception, e:
 						logging.debug("WHY")
+						logging.debug(traceback.format_exc())
 						logging.debug(e)
 				
 				ps_blurb = plain_ps(g, t, membergroup, following, muting)
@@ -293,6 +295,7 @@ def handle_post(message, address=None, host=None):
 						mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
 					except Exception, e:
 						logging.debug("WHY 2")
+						logging.debug(traceback.format_exc())
 						logging.debug(e)
 					
 			
