@@ -37,9 +37,9 @@
 								<span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
 								<span class="unread">{{ post.num_replies }}</span> <br>
 							</div>
-							<div class="left-column-area-content">
-								<span class="strong ellipsis">{{ post.post.subject }}</span>
-								<span class="strong-gray ellipsis">{{ post.post.from }}</span>
+							<div class="middle-column-area-content">
+								<span class="strong">{{ post.post.subject }}</span>
+								<span class="strong-gray">{{ post.post.from }}</span>
 								<span class="blurb ellipsis">{{ post.post.text|striptags }}
 								</span>
 							</div>
