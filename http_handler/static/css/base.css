@@ -258,7 +258,7 @@ hr{
 .middle-column-area-content .ellipsis {
 	display:block;
 	white-space: nowrap;
-	max-width: 520px;
+	max-width: 600px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
