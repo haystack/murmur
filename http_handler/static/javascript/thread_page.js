@@ -168,9 +168,9 @@ $(document).ready(function(){
 			}
 		} else {
 			if (mute == "True") {
-				$("#btn-mute").show();
-			} else {
 				$("#btn-unmute").show();
+			} else {
+				$("#btn-mute").show();
 			}
 		}
 	} else {
