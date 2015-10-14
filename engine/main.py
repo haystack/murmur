@@ -505,6 +505,16 @@ def load_post(group_name, thread_id, msg_id):
 	logging.debug(res)
 	return res
 
+
+def _create_tag(group, thread, name):
+	t, created = Tag.objects.get_or_create(group=group, name=name)
+	if created:
+		r = lambda: random.randint(0,255)
+		color = '%02X%02X%02X' % (r(),r(),r())
+		t.color = color
+		t.save()
+	tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
+
 def _create_post(group, subject, message_text, user):
 
 	try:
@@ -515,36 +525,39 @@ def _create_post(group, subject, message_text, user):
 	message_text = message_text.encode("ascii", "ignore")
 	
 	group_members = MemberGroup.objects.filter(group=group)
-	recipients = []
 	recipients = [m.member.email for m in group_members if not m.no_emails and m.member.email != user.email]
 	recipients.append(user.email)
 	
+	stripped_subj = re.sub("\[.*?\]", "", subject)
+	
 	thread = Thread()
-	thread.subject = subject
+	thread.subject = stripped_subj
 	thread.group = group
 	thread.save()
 	
+
 	msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@murmur.csail.mit.edu'
 	
-	p = Post(msg_id=msg_id, author=user, subject=subject, post=message_text, group=group, thread=thread)
+	p = Post(msg_id=msg_id, author=user, subject=stripped_subj, post=message_text, group=group, thread=thread)
 	p.save()
 	
+	
+	for match in re.findall(r"[^[]*\[([^]]*)\]", subject):
+		if match.lower() != group.name:
+			_create_tag(group, thread, match)
+	
+	
 	tags = list(extract_hash_tags(message_text))
-	tag_objs = []
+	
 	for tag in tags:
-		t, created = Tag.objects.get_or_create(name=tag, group=group)
-		if created:
-			r = lambda: random.randint(0,255)
-			color = '%02X%02X%02X' % (r(),r(),r())
-			t.color = color
-			t.save()
-			tag_objs.append({'name': t.name, 'color': t.color})
-		tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
+		_create_tag(group, thread, tag)
+	
+	tag_objs = list(Tag.objects.filter(tagthread__thread=thread).values('name', 'color'))
 	
 	f = Following(user=user, thread=thread)
 	f.save()
 	
-	return p, thread, recipients, tags, tag_objs, recipients
+	return p, thread, recipients, tag_objs, recipients
 
 def insert_post_web(group_name, subject, message_text, user):
 	res = {'status':False}
@@ -554,7 +567,7 @@ def insert_post_web(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
-			p, thread, recipients, tags, tag_objs, recipients = _create_post(group, subject, message_text, user)
+			p, thread, recipients, tag_objs, recipients = _create_post(group, subject, message_text, user)
 			res['status'] = True
 			
 			res['member_group'] = {'no_emails': user_member[0].no_emails, 
@@ -580,7 +593,7 @@ def insert_post_web(group_name, subject, message_text, user):
 								   'timestamp': format_date_time(p.timestamp)})
 			res['msg_id'] = p.msg_id
 			res['thread_id'] = thread.id
-			res['tags'] = tags
+			res['tags'] = tag_objs
 			res['recipients'] = recipients
 		else:
 			res['code'] = msg_code['NOT_MEMBER']
@@ -603,11 +616,11 @@ def insert_post(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
-			p, thread, recipients, tags, _, recipients = _create_post(group, subject, message_text, user)
+			p, thread, recipients, tag_objs, recipients = _create_post(group, subject, message_text, user)
 			res['status'] = True
 			res['msg_id'] = p.msg_id
 			res['thread_id'] = thread.id
-			res['tags'] = tags
+			res['tags'] = tag_objs
 			res['recipients'] = recipients
 		else:
 			res['code'] = msg_code['NOT_MEMBER']
@@ -661,7 +674,7 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 				thread.group = group
 				thread.save()
 			
-			tags = list(Tag.objects.filter(tagthread__thread=thread).values_list('name', flat=True))
+			tags = list(Tag.objects.filter(tagthread__thread=thread).values('name'))
 			
 			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@murmur.csail.mit.edu'
 			

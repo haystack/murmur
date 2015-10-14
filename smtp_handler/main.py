@@ -228,9 +228,10 @@ def handle_post(message, address=None, host=None):
 		if message['Subject'][0:4] != "Re: ":
 			subj_tag = ''
 			for tag in res['tags']:
-				subj_tag += '[%s]' % tag
+				subj_tag += '[%s]' % tag['name']
 				
-			subject = '[%s]%s %s' %(group_name, subj_tag,message['Subject'])
+			trunc_subj = re.sub("\[.*?\]", "", message['Subject'])
+			subject = '[%s]%s %s' %(group_name, subj_tag, trunc_subj)
 		else:
 			subject = message['Subject']
 			

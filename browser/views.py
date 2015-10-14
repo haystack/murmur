@@ -561,7 +561,7 @@ def insert_post(request):
 		
 		subj_tag = ''
 		for tag in res['tags']:
-			subj_tag += '[%s]' % tag
+			subj_tag += '[%s]' % tag['name']
 			
 		subject = '[%s]%s %s' %(group_name, subj_tag, request.POST['subject'])
 		
