@@ -204,15 +204,14 @@ def handle_post(message, address=None, host=None):
 	
 		if message['Subject'][0:4] == "Re: ":
 			if 'html' in msg_text:
-				msg_text['html'] = re.sub('(?s)<div style="border-top:solid thin;padding-top:5px;margin-top:10px">.*?</div>','', msg_text['html'])
+				msg_text['html'] = remove_html_ps(msg_text['html'])
 			if 'plain' in msg_text:
-				msg_text['plain'] = re.sub('(?s)\n>  Follow <test\+__follow__@murmur.csail.mit.edu> \| Un-Follow\n> <test\+__unfollow__@murmur.csail.mit.edu>\n', '', msg_text['plain'])
-		
-		if 'html' not in msg_text:
+				msg_text['plain'] = remove_plain_ps(msg_text['plain'])
+				
+		if 'html' not in msg_text or msg_text['html'] == '':
 			msg_text['html'] = markdown(msg_text['plain'])
-		if 'plain' not in msg_text:
+		if 'plain' not in msg_text or msg_text['plain'] == '':
 			msg_text['plain'] = html2text(msg_text['html'])
-		
 		
 		user = UserProfile.objects.get(email=addr)
 		
@@ -221,7 +220,7 @@ def handle_post(message, address=None, host=None):
 		else:
 			res = insert_post(group_name, orig_message, msg_text['html'], user)
 			
-		if(not res['status']):
+		if not res['status']:
 			mail = create_error_email(addr, group_name, host, res['code'])
 			relay.deliver(mail)
 			return
@@ -278,16 +277,28 @@ def handle_post(message, address=None, host=None):
 				try:
 					mail.Html = unicode(msg_text['html'] + ps_blurb)	
 				except UnicodeDecodeError:
-					mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8", 'ignore')
+					logging.debug('error 1 - 1')
+					try:
+						mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
+					except Exception, e:
+						logging.debug("WHY")
+						logging.debug(e)
 				
 				ps_blurb = plain_ps(g, t, membergroup, following, muting)
 				try:
 					mail.Body = unicode(msg_text['plain'] + ps_blurb)
 				except UnicodeDecodeError:
-					mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8", 'ignore')
+					logging.debug('error 1 - 2')
+					try:
+						mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
+					except Exception, e:
+						logging.debug("WHY 2")
+						logging.debug(e)
+					
 			
 				relay.deliver(mail, To = recip_email)
 	except Exception, e:
+		logging.debug('it happened earlier')
 		logging.debug(e)
 		mail = create_error_email(addr, group_name, host, e)
 		relay.deliver(mail)
