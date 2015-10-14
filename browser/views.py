@@ -149,16 +149,19 @@ def post_list(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
 		active_group = load_groups(request, groups, user)
 		is_member = False
+		group_name = request.GET.get('group_name')
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
-			is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+			is_member = MemberGroup.objects.filter(member=user, group=group).exists()
+			group_name = active_group.name
 			
-		if not active_group['active'] or group.public or is_member:
+		if group.public or is_member:
 			if is_member:
-				request.session['active_group'] = active_group['name']
-			res = engine.main.list_posts(group_name=request.GET.get('group_name'), user=user, format_datetime=False, return_replies=False)
+				request.session['active_group'] = group_name
+			res = engine.main.list_posts(group_name=group_name, user=user, format_datetime=False, return_replies=False)
 			return {'user': request.user, 'groups': groups, 'posts': res.get('threads'), 'active_group': active_group}
 		else:
 			return redirect('/404?e=member')
