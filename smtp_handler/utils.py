@@ -104,8 +104,10 @@ def get_attachments(email_message):
 					res['error'] = 'One or more attachments exceed size limit of 1MB. Please use a separate service and send a link to the list instead.'
 					break
 			else:
-				res['error'] = 'One or more attachments violate allowed mimetypes: jpg, img, png, pdf, and bmp.'
-				break
+				# just send the email without the attachment
+				#res['error'] = 'One or more attachments violate allowed mimetypes: jpg, img, png, pdf, and bmp.'
+				#break
+				continue
 		except Exception, e:
 			logging.debug(e)
 			continue

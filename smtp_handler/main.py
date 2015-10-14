@@ -6,7 +6,6 @@ from lamson.mail import MailResponse
 from email.utils import *
 from engine.main import *
 from utils import *
-import traceback
 from html2text import html2text
 from markdown2 import markdown
 from django.db.utils import OperationalError
