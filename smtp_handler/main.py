@@ -279,24 +279,16 @@ def handle_post(message, address=None, host=None):
 				
 				try:
 					# assume email is in utf-8
-					
 					new_body = unicode(msg_text['html'], "utf-8", "ignore")
 					new_body = new_body + ps_blurb
 
 					mail.Html = new_body
 				except UnicodeDecodeError:
-					logging.debug('error 1 - 1')
-					
-					try:
-						#then try ascii
-						new_body = unicode(msg_text['html'], errors="ignore")
-						new_body = new_body + ps_blurb
-	
-						mail.Html = new_body
-					except Exception, e:
-						logging.debug("WHY")
-						logging.debug(traceback.format_exc())
-						logging.debug(e)
+					#then try default (ascii)
+					new_body = unicode(msg_text['html'], errors="ignore")
+					new_body = new_body + ps_blurb
+
+					mail.Html = new_body
 				
 				ps_blurb = plain_ps(g, t, membergroup, following, muting)
 				
@@ -306,23 +298,15 @@ def handle_post(message, address=None, host=None):
 					
 					mail.Body = plain_body
 				except UnicodeDecodeError:
-					logging.debug('error 1 - 2')
+					# then try default (ascii)
+					plain_body = unicode(msg_text['plain'], errors="ignore")
+					plain_body = plain_body + ps_blurb
 					
-					try:
-						# then try default (ascii)
-						plain_body = unicode(msg_text['plain'], errors="ignore")
-						plain_body = plain_body + ps_blurb
-						
-						mail.Body = plain_body
-					except Exception, e:
-						logging.debug("WHY 2")
-						logging.debug(traceback.format_exc())
-						logging.debug(e)
+					mail.Body = plain_body
 					
 			
 				relay.deliver(mail, To = recip_email)
 	except Exception, e:
-		logging.debug('it happened earlier')
 		logging.debug(e)
 		mail = create_error_email(addr, group_name, host, e)
 		relay.deliver(mail)
