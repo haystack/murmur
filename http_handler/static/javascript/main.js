@@ -273,7 +273,7 @@ $(document).ready(function(){
 		function(params){
 			params.msg_text = CKEDITOR.instances['reply-text-input'].getData();
 			if(params.subject.substr(0,3).toLowerCase() == 're:'){
-				params.subject = params.subject.substr(3,len(params.subject)).trim();
+				params.subject = params.subject.substr(3, params.subject.length).trim();
 			}
 			params.poster_email = params.requester_email;
 			delete params.text;
