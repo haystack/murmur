@@ -161,7 +161,6 @@ def handle_post(message, address=None, host=None):
 		return
 	
 	try:
-	
 		#does this fix the MySQL has gone away erro?
 		django.db.close_connection()
 		
@@ -176,8 +175,9 @@ def handle_post(message, address=None, host=None):
 			group = Group.objects.get(name=group_name)
 		except Exception, e:
 			logging.debug(e)
-			mail = create_error_email(addr, group_name, host, e)
-			relay.deliver(mail)
+			mail = create_error_email(group_name, e)
+			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = "axz@mit.edu")
 			return
 		
 		if message['Subject'][0:4] != "Re: ":
@@ -192,14 +192,16 @@ def handle_post(message, address=None, host=None):
 		if len(attachments['attachments']) > 0:
 			if not group.allow_attachments:
 				logging.debug("No attachments allowed for this group")
-				mail = create_error_email(addr, group_name, host, "No attachments allowed for this group.")
-				relay.deliver(mail)
+				mail = create_error_email(group_name, "No attachments allowed for this group.")
+				relay.deliver(mail, To = addr)
+				relay.deliver(mail, To = "axz@mit.edu")
 				return
 			
 		if attachments['error'] != '':
 			logging.debug(attachments['error'])
-			mail = create_error_email(addr, group_name, host, attachments['error'])
-			relay.deliver(mail)
+			mail = create_error_email(group_name, attachments['error'])
+			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = "axz@mit.edu")
 			return
 	
 		if message['Subject'][0:4] == "Re: ":
@@ -221,8 +223,9 @@ def handle_post(message, address=None, host=None):
 			res = insert_post(group_name, orig_message, msg_text['html'], user)
 			
 		if not res['status']:
-			mail = create_error_email(addr, group_name, host, res['code'])
-			relay.deliver(mail)
+			mail = create_error_email(group_name, res['code'])
+			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = "axz@mit.edu")
 			return
 	
 		if message['Subject'][0:4] != "Re: ":
@@ -304,17 +307,22 @@ def handle_post(message, address=None, host=None):
 					mail.Body = plain_body
 				except UnicodeDecodeError:
 					# then try default (ascii)
+					logging.debug('unicode decode error')
 					plain_body = unicode(msg_text['plain'], errors="ignore")
 					plain_body = plain_body + ps_blurb
 					
 					mail.Body = plain_body
-					
-			
+				except TypeError:
+					logging.debug('decoding Unicode is not supported')
+					plain_body = msg_text['plain']
+					mail.Body = plain_body + ps_blurb
+	
 				relay.deliver(mail, To = recip_email)
+				
 	except Exception, e:
 		logging.debug(e)
-		mail = create_error_email(addr, group_name, host, e)
-		relay.deliver(mail)
+		mail = create_error_email(group_name, e)
+		relay.deliver(mail, To = "axz@mit.edu")
 		return
 	
 		
