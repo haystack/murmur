@@ -15,7 +15,8 @@ import json, logging
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from annoying.decorators import render_to
-from schema.models import UserProfile, Group, MemberGroup, Tag
+from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
+	MuteTag
 from html2text import html2text
 from django.contrib.auth.forms import AuthenticationForm
 from registration.forms import RegistrationForm
@@ -94,7 +95,7 @@ def posts(request):
 		tag_info = None
 		member_info = None
 		is_member = False
-		
+
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
 			active_group['description'] = group.description
@@ -102,10 +103,18 @@ def posts(request):
 			if member.count() > 0:
 				is_member = True
 				member_info = member[0]
+	
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
+			for tag in tag_info:
+				tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
+				tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
 			
-			
-		page_info = {'user': user, "active_group": active_group, "groups": groups, "tag_info": tag_info, 'member_info': member_info}
+		page_info = {"user": user, 
+					"active_group": active_group, 
+					"groups": groups, 
+					"tag_info": tag_info, 
+					"member_info": member_info,
+					}
 		
 		if not active_group['active'] or group.public or is_member:
 			if request.flavour == "mobile":
@@ -113,21 +122,16 @@ def posts(request):
 					return HttpResponseRedirect('/post_list')
 				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 			else:
-				if not active_group['active'] or is_member:
-					if is_member:
-						request.session['active_group'] = active_group['name']
-					#only show the default view if not mobile and no group is selected or user is member of the group
+				if is_member:
+					request.session['active_group'] = active_group['name']
 					return page_info
 				else:
-					if len(groups) == 0:
-						if request.GET.get('group_name'):
-							return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
-						else:
-							return page_info
-					else:
-						return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+					return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 		else:
-			return redirect('/404?e=member')
+			if len(groups) == 0:
+				return HttpResponseRedirect('/group_list')
+			else:
+				return redirect('/404?e=member')
 		
 	else:
 		user = None

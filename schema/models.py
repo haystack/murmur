@@ -63,6 +63,7 @@ class Tag(models.Model):
 class FollowTag(models.Model):
 	id = models.AutoField(primary_key=True)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	group = models.ForeignKey('Group')
 	tag = models.ForeignKey('Tag')
 	
 	def __unicode__(self):
@@ -74,6 +75,7 @@ class FollowTag(models.Model):
 class MuteTag(models.Model):
 	id = models.AutoField(primary_key=True)
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	group = models.ForeignKey('Group')
 	tag = models.ForeignKey('Tag')
 	
 	def __unicode__(self):

@@ -238,6 +238,22 @@ hr{
 }
 
 
+.label3 {
+	display: inline;
+	padding: .2em .6em .3em;
+	font-size: 80%;
+	line-height: 1;
+	color: #000000;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: baseline;
+	border-radius: .25em;
+	border: 1px solid #bbbbbb;
+	background-color: #D7ECFA;
+	font-weight: 400;
+}
+
+
 #main-area-wrapper{
 	position:absolute;
 	top: 50px;
