@@ -754,13 +754,28 @@ $(document).ready(function(){
 		$("#btn-mute").hide();
 		$("#btn-unmute").hide();
 		if (res.member_group != undefined) {
+			var follow_mute = $('#' + res.thread_id).find('.following').text();
+
 			if (res.member_group.no_emails == true || res.member_group.always_follow_thread == false) {
+				
+				if (follow_mute == "Following") {
+					res.following = true;
+				} else {
+					res.following = false;
+				}
+
 				if (res.following){
 					$("#btn-unfollow").show();
 				} else{
 					$("#btn-follow").show();
 				} 
 			} else {
+				if (follow_mute == "Muted") {
+					res.muting = true;
+				} else {
+					res.muting = false;
+				}
+				
 				if (res.muting){
 					$("#btn-unmute").show();
 				} else{

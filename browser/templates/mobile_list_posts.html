@@ -29,7 +29,7 @@
 			</div>
 		
 			<ul id="post-list-table">
-				{% for post in posts %}
+				{% for post in posts.threads %}
 					<a href="/thread?group_name={{ active_group.name }}&tid={{ post.thread_id }}">
 						<li class="row-item" id="{{ post.thread_id }}">
 							<div class="left-column-area-metadata">
@@ -45,9 +45,17 @@
 								</span>
 							</div>
 							
-							{% if post.following %}
-								<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>
+							
+							{% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
+								{% if post.following %}
+									<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>
+								{% endif %}
 							{% endif %}
+							
+							{% if posts.member_group.always_follow_thread and post.muting %}
+								<div><span class="label2 muted" style="background-color: #3D7AA6;">Muted</span></div>
+							{% endif %}
+							
 							
 							{% if post.tags|length > 0 %}
 								<div>

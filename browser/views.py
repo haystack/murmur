@@ -162,7 +162,7 @@ def post_list(request):
 			if is_member:
 				request.session['active_group'] = group_name
 			res = engine.main.list_posts(group_name=group_name, user=user, format_datetime=False, return_replies=False)
-			return {'user': request.user, 'groups': groups, 'posts': res.get('threads'), 'active_group': active_group}
+			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group}
 		else:
 			return redirect('/404?e=member')
 	else:
@@ -175,7 +175,7 @@ def post_list(request):
 				return redirect('/404?e=member')
 			else:
 				res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False, return_replies=False)
-				return {'user': request.user, 'groups': groups, 'posts': res.get('threads'), 'active_group': active_group}
+				return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group}
 		else:
 			return HttpResponseRedirect(global_settings.LOGIN_URL)
 		
