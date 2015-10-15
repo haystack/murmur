@@ -285,13 +285,15 @@ def handle_post(message, address=None, host=None):
 					mail.Html = new_body
 				except UnicodeDecodeError:
 					#then try default (ascii)
+					logging.debug('unicode decode error')
 					new_body = unicode(msg_text['html'], errors="ignore")
 					new_body = new_body + ps_blurb
 
 					mail.Html = new_body
 				except TypeError:
+					logging.debug('decoding Unicode is not supported')
 					new_body = msg_text['html']
-					mail.Html = new_body
+					mail.Html = new_body + ps_blurb
 				
 				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting)
 				
