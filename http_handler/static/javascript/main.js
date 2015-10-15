@@ -530,6 +530,15 @@ $(document).ready(function(){
 			content += '<span class="blurb ellipsis">' + strip(thread_list[i].post.text) + '</span>';
 			content += '</div>';
 			
+							
+			if (thread_list[i].tags.length > 0) {
+				content += '<div style="float: right;">';
+				for (var j = 0; j < thread_list[i].tags.length; j++) {
+					content += '<span class="label2" style="float: right; margin: 4px 2px 2px 2px; background-color: #' + thread_list[i].tags[j].color + ';">' + thread_list[i].tags[j].name + '</span> ';
+				}
+				content += '</div>';
+			}
+			
 			if (member_group != undefined) {
 				if (member_group.no_emails == true || member_group.always_follow_thread == false) {
 					if (thread_list[i].following == true) {
@@ -541,14 +550,7 @@ $(document).ready(function(){
 					}
 				}
 			}
-				
-			if (thread_list[i].tags.length > 0) {
-				content += '<div>';
-				for (var j = 0; j < thread_list[i].tags.length; j++) {
-					content += '<span class="label2" style="background-color: #' + thread_list[i].tags[j].color + ';">' + thread_list[i].tags[j].name + '</span> ';
-				}
-				content += '</div>';
-			}
+
 			var curr_row = $('<li class="row-item" id="' + thread_list[i].thread_id + '">' + content + '</li>');
 			var params = {'requester_email': user,
 				'thread_id' : thread_list[i].thread_id, 
