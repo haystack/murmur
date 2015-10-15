@@ -289,6 +289,9 @@ def handle_post(message, address=None, host=None):
 					new_body = new_body + ps_blurb
 
 					mail.Html = new_body
+				except TypeError:
+					new_body = msg_text['html']
+					mail.Html = new_body
 				
 				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting)
 				

@@ -626,11 +626,7 @@ def insert_reply(request):
 		
 		orig_subject = request.POST['subject']
 		
-		print orig_subject
-		
 		if request.POST['subject'][0:4].lower() == "re: ":
-			
-			print 'here'
 			orig_subject = request.POST['subject'][4:]
 		
 		msg_text = request.POST['msg_text']
@@ -672,10 +668,10 @@ def insert_reply(request):
 					following = Following.objects.filter(thread=t, user=recip).exists()
 					muting = Mute.objects.filter(thread=t, user=recip).exists()
 	
-					ps_blurb = html_ps(g, t, membergroup, following, muting)
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting)
 					mail.Html = msg_text + ps_blurb	
 					
-					ps_blurb = plain_ps(g, t, membergroup, following, muting)
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting)
 					mail.Body = html2text(msg_text) + ps_blurb	
 				
 					relay_mailer.deliver(mail, To = recip_email)
