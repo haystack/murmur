@@ -643,7 +643,7 @@ def insert_reply(request):
 					
 			subj_tag = ''
 			for tag in res['tags']:
-				subj_tag += '[%s]' % tag
+				subj_tag += '[%s]' % tag['name']
 			
 			subject = 'Re: [%s]%s %s' %(group_name, subj_tag, orig_subject)
 
