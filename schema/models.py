@@ -59,6 +59,29 @@ class Tag(models.Model):
 	
 	class Meta:
 		unique_together = ("name", "group")
+		
+class FollowTag(models.Model):
+	id = models.AutoField(primary_key=True)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	tag = models.ForeignKey('Tag')
+	
+	def __unicode__(self):
+		return '%s follows tag %s' % (self.user.email, self.tag.name)
+	
+	class Meta:
+		unique_together = ("user", "tag")
+
+class MuteTag(models.Model):
+	id = models.AutoField(primary_key=True)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	tag = models.ForeignKey('Tag')
+	
+	def __unicode__(self):
+		return '%s mutes tag %s' % (self.user.email, self.tag.name)
+	
+	class Meta:
+		unique_together = ("user", "tag")
+
 
 class MemberGroup(models.Model):
 	id = models.AutoField(primary_key=True)

@@ -52,14 +52,15 @@
 	{% if tag_info %}
 		Top tags: <BR>
 		{% for tag in tag_info %}
-			<label class="label2" style="background-color: #{{ tag.color }}">{{ tag.name }}</label> 
-			{{ tag.num_p }} 
+			<h4><label class="label2" style="background-color: #{{ tag.color }}">{{ tag.name }}</label> 
+			<small>{{ tag.num_p }} 
 			{% if tag.num_p == 1 %} 
 				post 
 			{% else %}
 				posts
 			{% endif %}
-			<br>
+			</small>
+			</h4>
 		{% endfor %}
 	{% endif %}
 	<P></P><BR>

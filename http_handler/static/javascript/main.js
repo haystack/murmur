@@ -189,7 +189,8 @@ $(document).ready(function(){
 					if(res.status){
 						$("#btn-follow").hide();
                 		$("#btn-unfollow").show();
-                		$('#' + params.thread_id + ' > div:nth-child(2)').after('<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>');
+                		$('#' + params.thread_id).children()[3].remove();
+                		$('#' + params.thread_id + ' > div:nth-child(3)').after('<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>');
 					}
 					notify(res, true);
 				}
@@ -206,7 +207,8 @@ $(document).ready(function(){
 					if(res.status){
                        $("#btn-follow").show();
                        $("#btn-unfollow").hide();
-                       $('#' + params.thread_id).children()[2].remove();
+                       $('#' + params.thread_id).children()[3].remove();
+                       $('#' + params.thread_id + ' > div:nth-child(3)').after('<div style="height: 20px;"></div>');
                     }
 					notify(res, true);
 				}
@@ -225,7 +227,8 @@ $(document).ready(function(){
 					if(res.status){
 						$("#btn-mute").hide();
                 		$("#btn-unmute").show();
-                		$('#' + params.thread_id + ' > div:nth-child(2)').after('<div><span class="label2 following" style="background-color: #3D7AA6;">Muted</span></div>');
+                		$('#' + params.thread_id).children()[3].remove();
+                		$('#' + params.thread_id + ' > div:nth-child(3)').after('<div><span class="label2 following" style="background-color: #3D7AA6;">Muted</span></div>');
 					}
 					notify(res, true);
 				}
@@ -242,7 +245,8 @@ $(document).ready(function(){
 					if(res.status){
                        $("#btn-mute").show();
                        $("#btn-unmute").hide();
-                       $('#' + params.thread_id).children()[2].remove();
+                       $('#' + params.thread_id).children()[3].remove();
+                       $('#' + params.thread_id + ' > div:nth-child(3)').after('<div style="height: 20px;"></div>');
                     }
 					notify(res, true);
 				}
@@ -543,10 +547,14 @@ $(document).ready(function(){
 				if (member_group.no_emails == true || member_group.always_follow_thread == false) {
 					if (thread_list[i].following == true) {
 						content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>';
+					} else {
+						content += '<div style="height: 20px;"></div>';
 					}
 				} else {
 					if (thread_list[i].muting == true) {
 						content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Muted</span></div>';
+					} else {
+						content += '<div style="height: 20px;"></div>';
 					}
 				}
 			}
