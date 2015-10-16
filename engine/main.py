@@ -852,9 +852,83 @@ def unmute_thread(thread_id, email=None, user=None):
 	return res
 
 
+def follow_tag(tag_name, group_name, user):
+	res = {'status':False}
+	g = Group.objects.get(name=group_name)
+	tag = None
+	try:
+		tag = Tag.objects.get(name=tag_name, group=g)
+		tag_follow = FollowTag.objects.get(tag=tag, user=user)
+		res['status'] = True
+	except FollowTag.DoesNotExist:
+		f = FollowTag(tag=tag, group=g, user=user)
+		f.save()
+		res['status'] = True
+	except Tag.DoesNotExist:
+		res['code'] = msg_code['TAG_NOT_FOUND_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
 
 
 
+def unfollow_tag(tag_name, group_name, user):
+	res = {'status':False}
+	g = Group.objects.get(name=group_name)
+	tag = None
+	try:
+		tag = Tag.objects.get(name=tag_name, group=g)
+		tag_follow = FollowTag.objects.get(tag=tag, user=user)
+		tag_follow.delete()
+		res['status'] = True
+	except FollowTag.DoesNotExist:
+		res['status'] = True
+	except Tag.DoesNotExist:
+		res['code'] = msg_code['TAG_NOT_FOUND_ERROR']
+	except Exception, e:
+		print e
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
+
+def mute_tag(tag_name, group_name, user):
+	res = {'status':False}
+	g = Group.objects.get(name=group_name)
+	tag = None
+	try:
+		tag = Tag.objects.get(name=tag_name, group=g)
+		tag_mute = MuteTag.objects.get(tag=tag, user=user)
+		res['status'] = True
+	except MuteTag.DoesNotExist:
+		f = MuteTag(tag=tag, group=g, user=user)
+		f.save()
+		res['status'] = True
+	except Tag.DoesNotExist:
+		res['code'] = msg_code['TAG_NOT_FOUND_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
 
 
 
+def unmute_tag(tag_name, group_name, user):
+	res = {'status':False}
+	g = Group.objects.get(name=group_name)
+	tag = None
+	try:
+		tag = Tag.objects.get(name=tag_name, group=g)
+		tag_mute = MuteTag.objects.get(tag=tag, user=user)
+		tag_mute.delete()
+		res['status'] = True
+	except MuteTag.DoesNotExist:
+		res['status'] = True
+	except Tag.DoesNotExist:
+		res['code'] = msg_code['TAG_NOT_FOUND_ERROR']
+	except Exception, e:
+		print e
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res

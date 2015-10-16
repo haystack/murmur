@@ -10,6 +10,7 @@ msg_code={
 	'GROUP_NOT_FOUND_ERROR': 'Group not found',
 	'POST_NOT_FOUND_ERROR': 'Post not found',
 	'THREAD_NOT_FOUND_ERROR': 'Thread not found',
+	'TAG_NOT_FOUND_ERROR': 'Tag not found',
 	'OWNER_UNSUBSCRIBE_ERROR': 'Can not unsubscribe the owner',
 	'REQUEST_ERROR': 'Incorrect request parameters',
 	'INCORRECT_GROUP_NAME': 'Group name cannot be of this format',

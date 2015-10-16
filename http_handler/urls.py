@@ -41,6 +41,12 @@ urlpatterns = patterns('',
 	 url(r'^insert_post', 'browser.views.insert_post'), 
 	 url(r'^insert_reply', 'browser.views.insert_reply'),
      
+     url(r'^follow_tag', 'browser.views.follow_tag'),
+     url(r'^unfollow_tag', 'browser.views.unfollow_tag'),
+     
+     url(r'^mute_tag', 'browser.views.mute_tag'),
+     url(r'^unmute_tag', 'browser.views.unmute_tag'),
+     
      url(r'^follow_thread', 'browser.views.follow_thread'),
      url(r'^unfollow_thread', 'browser.views.unfollow_thread'),
      
@@ -52,6 +58,8 @@ urlpatterns = patterns('',
 
      url(r'^mute', 'browser.views.mute_thread_get'),
      url(r'^unmute', 'browser.views.unmute_thread_get'),
+     
+
 
 
      

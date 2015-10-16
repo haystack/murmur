@@ -770,6 +770,55 @@ def unfollow_thread(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
+@login_required
+def follow_tag(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.follow_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def unfollow_tag(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.unfollow_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def mute_tag(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.mute_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def unmute_tag(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.unmute_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+
 
 
 @login_required

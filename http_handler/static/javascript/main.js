@@ -253,6 +253,82 @@ $(document).ready(function(){
 			);	
 		};
 		
+	follow_tag = 
+		function(params){
+			$.post('follow_tag', {'group_name': params.group,
+								  'tag_name': params.tag_name}, 
+				function(res){
+					if(res.status){
+						var tag_button = $('#tag_' + params.index + '_button');
+						tag_button.text('Unfollow this tag');
+						
+						var uf_tag = bind(unfollow_tag, params);
+						tag_button.bind("click");
+						tag_button.click(uf_tag);
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
+	
+	unfollow_tag = 
+		function(params){
+			$.post('unfollow_tag', {'group_name': params.group,
+								    'tag_name': params.tag_name}, 
+				function(res){
+					if(res.status){
+						var tag_button = $('#tag_' + params.index + '_button');
+						tag_button.text('Follow this tag');
+						
+						var f_tag = bind(follow_tag, params);
+						tag_button.bind("click");
+						tag_button.click(f_tag);
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
+
+	mute_tag = 
+		function(params){
+			$.post('mute_tag', {'group_name': params.group,
+								  'tag_name': params.tag_name}, 
+				function(res){
+					if(res.status){
+						var tag_button = $('#tag_' + params.index + '_button');
+						tag_button.text('Unmute this tag');
+						
+						var um_tag = bind(unmute_tag, params);
+						tag_button.bind("click");
+						tag_button.click(um_tag);
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
+	
+	unmute_tag = 
+		function(params){
+			$.post('unmute_tag', {'group_name': params.group,
+								    'tag_name': params.tag_name}, 
+				function(res){
+					if(res.status){
+						var tag_button = $('#tag_' + params.index + '_button');
+						tag_button.text('Mute this tag');
+						
+						var m_tag = bind(mute_tag, params);
+						tag_button.bind("click");
+						tag_button.click(m_tag);
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};		
+		
 	insert_post = 
 		function(params){
 			params.msg_text = CKEDITOR.instances['new-post-text'].getData();
@@ -811,6 +887,37 @@ $(document).ready(function(){
 	    }
 	};
 	
+	function activate_tag_buttons(active_group) {
+		$('.tag_follow_mute').each(function(index) {
+
+			tag_type = $( this ).text();
+			tag_name = $("#tag_" + index).text();
+			
+			params = {'tag_name': tag_name, 
+					  'group': active_group,
+					  'index': index};
+			
+			if (tag_type == "Follow this tag") {
+				var f_tag = bind(follow_tag, params);
+				$(this).bind("click");
+				$(this).click(f_tag);
+			} else if (tag_type == "Unfollow this tag") {
+				var uf_tag = bind(unfollow_tag, params);
+				$(this).bind("click");
+				$(this).click(uf_tag);
+			} else if (tag_type == "Mute this tag") {
+				var m_tag = bind(mute_tag, params);
+				$(this).bind("click");
+				$(this).click(m_tag);
+			} else if (tag_type == "Unmute this tag") {
+				var um_tag = bind(unmute_tag, params);
+				$(this).bind("click");
+				$(this).click(um_tag);
+			} 
+
+			
+		});
+	}
 	
 	function new_post(res){
 		
@@ -874,6 +981,7 @@ $(document).ready(function(){
                 );
         var active_group = $("#active_group").text();
 		list_posts({'load':false, 'active_group': active_group});
+		activate_tag_buttons(active_group);
 	}
 	
 
