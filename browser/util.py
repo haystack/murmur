@@ -53,7 +53,7 @@ ALLOWED_ATTRIBUTES = {
 ALLOWED_STYLES = ['border-style', 'border-width', 'float', 'height', 'margin', 'width']
 
 
-def load_groups(request, groups, user, group_name=None):
+def load_groups(request, group_names, user, group_name=None):
     
     if group_name:
         active_group = group_name
@@ -66,15 +66,13 @@ def load_groups(request, groups, user, group_name=None):
     if active_group:
         active_group = {'name': active_group,
                         'active': True}
-    elif request and request.session.get('active_group'):
-        active_group = request.session.get('active_group')
-        names = [g['name'] for g in groups]
-        if active_group in names:
-            active_group = {'name': active_group,
-                            'active': True}
-    elif len(groups) > 0:
-        active_group = groups[0]
-        active_group['active'] = True
+    elif request.session.get('active_group') in group_names:
+        active_group = {'name': request.session.get('active_group'),
+                        'active': True}
+        
+    elif len(group_names) > 0:
+        active_group = {'name': group_names[0],
+                        'active': True}
     else:
         active_group = {'name': 'No Groups Yet',
                         'active': False}
