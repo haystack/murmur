@@ -559,7 +559,9 @@ def _create_post(group, subject, message_text, user):
 	recipients = []
 	for m in group_members:
 		if not m.no_emails and m.member.email != user.email:
-			recipients.append(m.member.email)
+			mute_tag = MuteTag.objects.filter(tag__in=tags, group=group, user=m.member).exists()
+			if not mute_tag:
+				recipients.append(m.member.email)
 		else:
 			follow_tag = FollowTag.objects.filter(tag__in=tags, group=group, user=m.member).exists()
 			if follow_tag:
