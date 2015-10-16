@@ -625,14 +625,16 @@ def insert_reply(request):
 		orig_subject = request.POST['subject']
 		
 		if request.POST['subject'][0:4].lower() == "re: ":
-			orig_subject = request.POST['subject'][4:]
+			orig_subject = re.sub("\[.*?\]", "", request.POST['subject'][4:])
+		else:
+			orig_subject = re.sub("\[.*?\]", "", request.POST['subject'])
 		
 		msg_text = request.POST['msg_text']
 		
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
 		
 		
-		res = engine.main.insert_reply(group_name, 'Re: ' + request.POST['subject'], msg_text, user, thread_id=thread_id)
+		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, thread_id=thread_id)
 		if(res['status']):
 			
 			to_send =  res['recipients']
