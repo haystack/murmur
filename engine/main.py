@@ -524,10 +524,6 @@ def _create_post(group, subject, message_text, user):
 	
 	message_text = message_text.encode("ascii", "ignore")
 	
-	group_members = MemberGroup.objects.filter(group=group)
-	recipients = [m.member.email for m in group_members if not m.no_emails and m.member.email != user.email]
-	recipients.append(user.email)
-	
 	stripped_subj = re.sub("\[.*?\]", "", subject)
 	
 	thread = Thread()
@@ -551,10 +547,25 @@ def _create_post(group, subject, message_text, user):
 		if tag.lower() != group.name:
 			_create_tag(group, thread, tag)
 	
-	tag_objs = list(Tag.objects.filter(tagthread__thread=thread).values('name', 'color'))
+	tags = Tag.objects.filter(tagthread__thread=thread)
+	tag_objs = list(tags.values('name', 'color'))
 	
 	f = Following(user=user, thread=thread)
 	f.save()
+	
+	
+	group_members = MemberGroup.objects.filter(group=group)
+	
+	recipients = []
+	for m in group_members:
+		if not m.no_emails and m.member.email != user.email:
+			recipients.append(m.member.email)
+		else:
+			follow_tag = FollowTag.objects.filter(tag__in=tags, group=group, user=m.member).exists()
+			if follow_tag:
+				recipients.append(m.member.email)
+				
+	recipients.append(user.email)
 	
 	return p, thread, recipients, tag_objs, recipients
 
@@ -675,7 +686,7 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 				thread.group = group
 				thread.save()
 			
-			tags = list(Tag.objects.filter(tagthread__thread=thread).values('name'))
+			tag_objs = Tag.objects.filter(tagthread__thread=thread)
 			
 			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@murmur.csail.mit.edu'
 			
@@ -696,21 +707,33 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 				f = Following(user=user, thread=thread)
 				f.save()
 				
-			#users muting the thread
-			muted = Mute.objects.filter(thread=thread)
-			muted_emails = [m.user.email for m in muted]
-			
-			#users following the thread
-			following = Following.objects.filter(thread=thread)
-			recipients = [f.user.email for f in following if f.user.email not in muted_emails]
-			
-			#users that always follow threads in this group. minus those that don't want to get emails
+				
 			member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True, no_emails=False)
+			always_follow_members = [member.email for member in member_recip]
+			
+			#users that have muted the thread and are set to always follow
+			muted = Mute.objects.filter(thread=thread).select_related()
+			muted_emails = [m.user.email for m in muted if m.user.email in always_follow_members]
+			
+			#users following the thread and set to not always follow
+			following = Following.objects.filter(thread=thread)
+			recipients = [f.user.email for f in following if f.user.email not in always_follow_members]
+			
+			if tag_objs.count() > 0:
+				#users muting the tag and are set to always follow
+				muted_tag = MuteTag.objects.filter(group=group, tag__in=tag_objs).select_related()
+				muted_emails.extend([m.user.email for m in muted_tag if m.user.email in always_follow_members])
+
+				#users following the tag
+				follow_tag = FollowTag.objects.filter(group=group, tag__in=tag_objs).select_related()
+				recipients.extend([f.user.email for f in follow_tag if f.user.email not in always_follow_members])
+			
+			#users that always follow threads in this group. minus those that muted
 			recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
 			
 			res['status'] = True
 			res['recipients'] = list(set(recipients))
-			res['tags'] = tags
+			res['tags'] = list(tag_objs.values('name'))
 			res['thread_id'] = thread.id
 			res['msg_id'] = msg_id
 			res['post_id'] = r.id
