@@ -66,7 +66,7 @@ def load_groups(request, groups, user, group_name=None):
     if active_group:
         active_group = {'name': active_group,
                         'active': True}
-    elif request.session.get('active_group'):
+    elif request and request.session.get('active_group'):
         active_group = request.session.get('active_group')
         active_group = {'name': active_group,
                         'active': True}

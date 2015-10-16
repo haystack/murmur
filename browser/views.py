@@ -204,10 +204,7 @@ def thread(request):
 		member_group = MemberGroup.objects.filter(member=user, group=group)
 		is_member = member_group.exists()
 		
-		if is_member:
-			active_group = load_groups(request, groups, user, group_name=group.name)
-		else:
-			active_group = load_groups(None, groups, user)
+		active_group = load_groups(request, groups, user, group_name=group.name)
 			
 		if group.public or is_member:
 			if is_member:
