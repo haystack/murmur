@@ -98,7 +98,6 @@ hr{
 	padding:30px; 
 	vertical-align:top;
 	background-color: #D7ECFA;
-	max-width:780px;
 }
 
 .group-container-posts {
@@ -107,7 +106,6 @@ hr{
 	padding:8px; 
 	vertical-align:top;
 	background-color: #D7ECFA;
-	max-width:780px;
 }
 
 #text-search-post {
@@ -192,7 +190,6 @@ hr{
 
 #post-column-area-wrapper {
     color: #333;
-    max-width: 720px;
 }
 
 #left-column-area-wrapper{

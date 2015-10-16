@@ -60,6 +60,8 @@ def load_groups(request, groups, user, group_name=None):
     else:
         if request:
             active_group = request.GET.get('group_name')
+        else:
+            active_group = None
         
     if active_group:
         active_group = {'name': active_group,
