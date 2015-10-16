@@ -181,9 +181,9 @@ def handle_post(message, address=None, host=None):
 			return
 		
 		if message['Subject'][0:4] != "Re: ":
-			orig_message = message['Subject']
+			orig_message = message['Subject'].strip()
 		else:
-			orig_message = re.sub("\[.*?\]", "", message['Subject'])
+			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
 		
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)
@@ -218,7 +218,7 @@ def handle_post(message, address=None, host=None):
 		user = UserProfile.objects.get(email=addr)
 		
 		if message['Subject'][0:4] == "Re: ":
-			res = insert_reply(group_name, orig_message, msg_text['html'], user)
+			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user)
 		else:
 			res = insert_post(group_name, orig_message, msg_text['html'], user)
 			
