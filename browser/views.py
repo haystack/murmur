@@ -129,7 +129,10 @@ def posts(request):
 				else:
 					return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 		else:
-			return redirect('/404?e=member')
+			if len(groups) == 0:
+				return HttpResponseRedirect('/group_list')
+			else:
+				return redirect('/404?e=member')
 		
 	else:
 		user = None
