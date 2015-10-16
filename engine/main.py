@@ -569,7 +569,7 @@ def _create_post(group, subject, message_text, user):
 				
 	recipients.append(user.email)
 	
-	return p, thread, recipients, tag_objs, recipients
+	return p, thread, recipients, tag_objs,
 
 def insert_post_web(group_name, subject, message_text, user):
 	res = {'status':False}
@@ -579,7 +579,7 @@ def insert_post_web(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
-			p, thread, recipients, tag_objs, recipients = _create_post(group, subject, message_text, user)
+			p, thread, recipients, tag_objs = _create_post(group, subject, message_text, user)
 			res['status'] = True
 			
 			res['member_group'] = {'no_emails': user_member[0].no_emails, 
@@ -629,7 +629,7 @@ def insert_post(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
-			p, thread, recipients, tag_objs, recipients = _create_post(group, subject, message_text, user)
+			p, thread, recipients, tag_objs = _create_post(group, subject, message_text, user)
 			res['status'] = True
 			res['post_id'] = p.id
 			res['msg_id'] = p.msg_id
@@ -711,7 +711,7 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 				
 				
 			member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True, no_emails=False)
-			always_follow_members = [member.email for member in member_recip]
+			always_follow_members = [member_group.member.email for member_group in member_recip]
 			
 			#users that have muted the thread and are set to always follow
 			muted = Mute.objects.filter(thread=thread).select_related()
