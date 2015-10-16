@@ -524,7 +524,7 @@ def _create_post(group, subject, message_text, user):
 	
 	message_text = message_text.encode("ascii", "ignore")
 	
-	stripped_subj = re.sub("\[.*?\]", "", subject)
+	stripped_subj = re.sub("\[.*?\]", "", subject).strip()
 	
 	thread = Thread()
 	thread.subject = stripped_subj

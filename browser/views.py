@@ -625,9 +625,9 @@ def insert_reply(request):
 		orig_subject = request.POST['subject']
 		
 		if request.POST['subject'][0:4].lower() == "re: ":
-			orig_subject = re.sub("\[.*?\]", "", request.POST['subject'][4:])
+			orig_subject = re.sub("\[.*?\]", "", request.POST['subject'][4:]).strip()
 		else:
-			orig_subject = re.sub("\[.*?\]", "", request.POST['subject'])
+			orig_subject = re.sub("\[.*?\]", "", request.POST['subject']).strip()
 		
 		msg_text = request.POST['msg_text']
 		
