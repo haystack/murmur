@@ -118,7 +118,7 @@ def posts(request):
 		
 		# not a member of any groups
 		if not active_group['active']:
-			return HttpResponseRedirect('/pub_group_list')
+			return HttpResponseRedirect('/group_list')
 		elif group.public or is_member:
 			if request.flavour == "mobile":
 				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
@@ -129,10 +129,7 @@ def posts(request):
 				else:
 					return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 		else:
-			if len(groups) == 0:
-				return HttpResponseRedirect('/group_list')
-			else:
-				return redirect('/404?e=member')
+			return redirect('/404?e=member')
 		
 	else:
 		user = None
@@ -262,15 +259,11 @@ def my_group_list(request):
 def pub_group_list(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = Group.objects.filter(membergroup__member=user).values("name")
-		active_group = load_groups(request, groups, user)
-		pub_groups = engine.main.list_groups(user)
+		groups = engine.main.list_groups(user)
 	except Exception:
 		user = None
-		groups = []
-		active_group = None
 		groups = engine.main.list_groups()
-	return {'user': request.user, 'active_group': active_group, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
+	return {'user': request.user, 'groups': groups, 'group_page': True}
 
 	
 @render_to("group_page.html")
