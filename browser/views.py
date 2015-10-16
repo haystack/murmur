@@ -116,10 +116,11 @@ def posts(request):
 					"member_info": member_info,
 					}
 		
-		if not active_group['active'] or group.public or is_member:
+		# not a member of any groups
+		if not active_group['active']:
+			return HttpResponseRedirect('/pub_group_list')
+		elif group.public or is_member:
 			if request.flavour == "mobile":
-				if not active_group['active']:
-					return HttpResponseRedirect('/post_list')
 				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 			else:
 				if is_member:
