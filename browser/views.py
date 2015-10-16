@@ -262,11 +262,15 @@ def my_group_list(request):
 def pub_group_list(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = engine.main.list_groups(user)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		active_group = load_groups(request, groups, user)
+		pub_groups = engine.main.list_groups(user)
 	except Exception:
 		user = None
+		groups = []
+		active_group = None
 		groups = engine.main.list_groups()
-	return {'user': request.user, 'groups': groups, 'group_page': True}
+	return {'user': request.user, 'active_group': active_group, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
 
 	
 @render_to("group_page.html")
