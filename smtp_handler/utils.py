@@ -228,7 +228,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 				content += 'You\'re currently receiving emails to this thread. <a href="%s">Mute thread</a>.<BR>' % (mute_addr)
 		
 		for tag in tags:
-			tag_str += ' <a href="%s%s&group=%s">Mute %s</a> |' % (MUTE_TAG_ADDR, tag.name, group.name)
+			tag_str += ' <a href="%s%s&group=%s">Mute %s</a> |' % (MUTE_TAG_ADDR, tag.name, group.name, tag.name)
 		content += tag_str
 
 	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
