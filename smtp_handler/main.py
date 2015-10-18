@@ -287,7 +287,7 @@ def handle_post(message, address=None, host=None):
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 				
-					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					
 					ps_blurb = unicode(ps_blurb)
 					
@@ -309,7 +309,7 @@ def handle_post(message, address=None, host=None):
 						new_body = msg_text['html']
 						mail.Html = new_body + ps_blurb
 					
-					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					
 					try:
 						plain_body = unicode(msg_text['plain'], "utf-8", "ignore")

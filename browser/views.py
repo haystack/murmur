@@ -607,10 +607,10 @@ def insert_post(request):
 				tag_following = tag_followings.filter(user=recip)
 				tag_muting = tag_mutings.filter(user=recip)
 
-				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
+				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 				mail.Html = msg_text + ps_blurb	
 				
-				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
+				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 				mail.Body = html2text(msg_text) + ps_blurb	
 			
 				relay_mailer.deliver(mail, To = recip.email)
@@ -693,10 +693,10 @@ def insert_reply(request):
 					tag_muting = tag_mutings.filter(user=recip)
 
 	
-					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					mail.Html = msg_text + ps_blurb	
 					
-					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					mail.Body = html2text(msg_text) + ps_blurb	
 				
 					relay_mailer.deliver(mail, To = recip.email)
