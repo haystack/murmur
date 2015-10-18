@@ -178,6 +178,9 @@ def remove_plain_ps(body):
 def _insert_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	tag_str = 'Tags: | '
 	
+	if tags.count() == 0:
+		return ''
+	
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_tags = []
 		for f in tag_following:
