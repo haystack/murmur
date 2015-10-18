@@ -213,7 +213,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 		tag_str = 'Tags: | '
 		muting_tags = []
 		if muting:
-			content += 'You\'re currently muting this thread. <a href="%s">Un-Mute</a>.<BR>' % (unmute_addr)
+			content += 'You\'re currently muting this thread. <a href="%s">Un-Mute thread</a>.<BR>' % (unmute_addr)
 		else:
 			if tag_muting.count() > 0:
 				for m in tag_muting:
@@ -225,7 +225,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 				else:
 					content += 'You\'re currently muting the tag %s. <BR>' % (muting_tags[0])
 			else:
-				content += 'You\'re currently receiving emails to this thread. <a href="%s">Mute</a>.<BR>' % (mute_addr)
+				content += 'You\'re currently receiving emails to this thread. <a href="%s">Mute thread</a>.<BR>' % (mute_addr)
 		
 		for tag in tags:
 			tag_str += ' <a href="%s">Mute %s</a> |' % (MUTE_TAG_ADDR, tag.name)
