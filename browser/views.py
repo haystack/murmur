@@ -849,7 +849,10 @@ def unmute_thread(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
-
-
-
+@login_required
+def murmur_acct(request, acct_func=None):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	active_group = load_groups(request, groups, user)
+	return acct_func(request, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
 

@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth import views as auth_views
+from browser.views import *
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
@@ -65,11 +66,15 @@ urlpatterns = patterns('',
      
     #override the registration default urls - bug with django 1.6
       url(r'^password/change/$',
-                    auth_views.password_change,
-                    name='password_change'),
+                    murmur_acct,
+                    {'acct_func': auth_views.password_change},
+                    name='password_change',
+                    ),
       url(r'^password/change/done/$',
-                    auth_views.password_change_done,
-                    name='password_change_done'),
+                    murmur_acct,
+                    {'acct_func': auth_views.password_change_done},
+                    name='password_change_done',
+                    ),
       url(r'^password/reset/$',
                     auth_views.password_reset,
                     name='password_reset'),
