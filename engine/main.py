@@ -547,8 +547,8 @@ def _create_post(group, subject, message_text, user):
 		if tag.lower() != group.name:
 			_create_tag(group, thread, tag)
 	
-	tags = Tag.objects.filter(tagthread__thread=thread)
-	tag_objs = list(tags.values('name', 'color'))
+	tag_objs = Tag.objects.filter(tagthread__thread=thread)
+	tags = list(tag_objs.values('name', 'color'))
 	
 	f = Following(user=user, thread=thread)
 	f.save()
@@ -559,17 +559,17 @@ def _create_post(group, subject, message_text, user):
 	recipients = []
 	for m in group_members:
 		if not m.no_emails and m.member.email != user.email:
-			mute_tag = MuteTag.objects.filter(tag__in=tags, group=group, user=m.member).exists()
+			mute_tag = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
 			if not mute_tag:
 				recipients.append(m.member.email)
 		else:
-			follow_tag = FollowTag.objects.filter(tag__in=tags, group=group, user=m.member).exists()
+			follow_tag = FollowTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
 			if follow_tag:
 				recipients.append(m.member.email)
 				
 	recipients.append(user.email)
 	
-	return p, thread, recipients, tag_objs,
+	return p, thread, recipients, tags, tag_objs
 
 def insert_post_web(group_name, subject, message_text, user):
 	res = {'status':False}
@@ -579,7 +579,7 @@ def insert_post_web(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
-			p, thread, recipients, tag_objs = _create_post(group, subject, message_text, user)
+			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user)
 			res['status'] = True
 			
 			res['member_group'] = {'no_emails': user_member[0].no_emails, 
@@ -601,12 +601,13 @@ def insert_post_web(group_name, subject, message_text, user):
 								   'replies': [],
 								   'following': True,
 								   'muting': False,
-								   'tags': tag_objs,
+								   'tags': tags,
 								   'timestamp': format_date_time(p.timestamp)})
 			res['msg_id'] = p.msg_id
 			res['thread_id'] = thread.id
 			res['post_id'] = p.id
-			res['tags'] = tag_objs
+			res['tags'] = tags
+			res['tag_objs'] = tag_objs
 			res['recipients'] = recipients
 		else:
 			res['code'] = msg_code['NOT_MEMBER']
@@ -629,12 +630,13 @@ def insert_post(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
-			p, thread, recipients, tag_objs = _create_post(group, subject, message_text, user)
+			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user)
 			res['status'] = True
 			res['post_id'] = p.id
 			res['msg_id'] = p.msg_id
 			res['thread_id'] = thread.id
-			res['tags'] = tag_objs
+			res['tags'] = tags
+			res['tag_objs'] = tag_objs
 			res['recipients'] = recipients
 		else:
 			res['code'] = msg_code['NOT_MEMBER']
@@ -736,6 +738,7 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			res['status'] = True
 			res['recipients'] = list(set(recipients))
 			res['tags'] = list(tag_objs.values('name'))
+			res['tag_objs'] = tag_objs
 			res['thread_id'] = thread.id
 			res['msg_id'] = msg_id
 			res['post_id'] = r.id

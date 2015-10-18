@@ -177,7 +177,7 @@ def handle_post(message, address=None, host=None):
 			logging.debug(e)
 			mail = create_error_email(group_name, e)
 			relay.deliver(mail, To = addr)
-			relay.deliver(mail, To = "axz@mit.edu")
+			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 		
 		if message['Subject'][0:4] != "Re: ":
@@ -194,14 +194,14 @@ def handle_post(message, address=None, host=None):
 				logging.debug("No attachments allowed for this group")
 				mail = create_error_email(group_name, "No attachments allowed for this group.")
 				relay.deliver(mail, To = addr)
-				relay.deliver(mail, To = "axz@mit.edu")
+				relay.deliver(mail, To = ADMIN_EMAILS)
 				return
 			
 		if attachments['error'] != '':
 			logging.debug(attachments['error'])
 			mail = create_error_email(group_name, attachments['error'])
 			relay.deliver(mail, To = addr)
-			relay.deliver(mail, To = "axz@mit.edu")
+			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 	
 		if message['Subject'][0:4] == "Re: ":
@@ -225,7 +225,7 @@ def handle_post(message, address=None, host=None):
 		if not res['status']:
 			mail = create_error_email(group_name, res['code'])
 			relay.deliver(mail, To = addr)
-			relay.deliver(mail, To = "axz@mit.edu")
+			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 	
 		if message['Subject'][0:4] != "Re: ":
@@ -268,61 +268,81 @@ def handle_post(message, address=None, host=None):
 		g = Group.objects.get(name=group_name)
 		t = Thread.objects.get(id=res['thread_id'])
 		
-		if len(to_send) > 0:
-			for recip_email in to_send:
-				recip = UserProfile.objects.get(email=recip_email)
-				membergroup = MemberGroup.objects.get(group=g, member=recip)
+		try:
+			if len(to_send) > 0:
 				
-				following = Following.objects.filter(thread=t, user=recip).exists()
-				muting = Mute.objects.filter(thread=t, user=recip).exists()
-			
-				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting)
+				recips = UserProfile.objects.filter(email__in=to_send)
+				membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
 				
-				ps_blurb = unicode(ps_blurb)
+				followings = Following.objects.filter(thread=t, user__in=recips)
+				mutings = Mute.objects.filter(thread=t, user__in=recips)
 				
-				try:
-					# assume email is in utf-8
-					new_body = unicode(msg_text['html'], "utf-8", "ignore")
-					new_body = new_body + ps_blurb
-
-					mail.Html = new_body
-				except UnicodeDecodeError:
-					#then try default (ascii)
-					logging.debug('unicode decode error')
-					new_body = unicode(msg_text['html'], errors="ignore")
-					new_body = new_body + ps_blurb
-
-					mail.Html = new_body
-				except TypeError:
-					logging.debug('decoding Unicode is not supported')
-					new_body = msg_text['html']
-					mail.Html = new_body + ps_blurb
+				tag_followings = FollowTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+				tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
 				
-				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting)
+				for recip in recips:
+					membergroup = membergroups.filter(member=recip)[0]
+					following = followings.filter(user=recip).exists()
+					muting = mutings.filter(user=recip).exists()
+					tag_following = tag_followings.filter(user=recip)
+					tag_muting = tag_mutings.filter(user=recip)
 				
-				try:
-					plain_body = unicode(msg_text['plain'], "utf-8", "ignore")
-					plain_body = plain_body + ps_blurb
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
 					
-					mail.Body = plain_body
-				except UnicodeDecodeError:
-					# then try default (ascii)
-					logging.debug('unicode decode error')
-					plain_body = unicode(msg_text['plain'], errors="ignore")
-					plain_body = plain_body + ps_blurb
+					ps_blurb = unicode(ps_blurb)
 					
-					mail.Body = plain_body
-				except TypeError:
-					logging.debug('decoding Unicode is not supported')
-					plain_body = msg_text['plain']
-					mail.Body = plain_body + ps_blurb
+					try:
+						# assume email is in utf-8
+						new_body = unicode(msg_text['html'], "utf-8", "ignore")
+						new_body = new_body + ps_blurb
 	
-				relay.deliver(mail, To = recip_email)
+						mail.Html = new_body
+					except UnicodeDecodeError:
+						#then try default (ascii)
+						logging.debug('unicode decode error')
+						new_body = unicode(msg_text['html'], errors="ignore")
+						new_body = new_body + ps_blurb
+	
+						mail.Html = new_body
+					except TypeError:
+						logging.debug('decoding Unicode is not supported')
+						new_body = msg_text['html']
+						mail.Html = new_body + ps_blurb
+					
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
+					
+					try:
+						plain_body = unicode(msg_text['plain'], "utf-8", "ignore")
+						plain_body = plain_body + ps_blurb
+						
+						mail.Body = plain_body
+					except UnicodeDecodeError:
+						# then try default (ascii)
+						logging.debug('unicode decode error')
+						plain_body = unicode(msg_text['plain'], errors="ignore")
+						plain_body = plain_body + ps_blurb
+						
+						mail.Body = plain_body
+					except TypeError:
+						logging.debug('decoding Unicode is not supported')
+						plain_body = msg_text['plain']
+						mail.Body = plain_body + ps_blurb
+		
+					relay.deliver(mail, To = recip.email)
+		except Exception, e:
+			logging.debug(e)
+			error_mail = create_error_email(group_name, e)
+			relay.deliver(error_mail, To = ADMIN_EMAILS)
+			
+			# try to deliver mail even without footers
+			mail.Html = msg_text['html']
+			mail.Body = msg_text['plain']
+			relay.deliver(mail, To = to_send)
 				
 	except Exception, e:
 		logging.debug(e)
 		mail = create_error_email(group_name, e)
-		relay.deliver(mail, To = "axz@mit.edu")
+		relay.deliver(mail, To = ADMIN_EMAILS)
 		return
 	
 		

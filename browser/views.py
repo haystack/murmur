@@ -589,20 +589,33 @@ def insert_post(request):
 		logging.debug('TO LIST: ' + str(to_send))
 		
 		if len(to_send) > 0:
-			for recip_email in to_send:
-				recip = UserProfile.objects.get(email=recip_email)
-				membergroup = MemberGroup.objects.get(group=g, member=recip)
-				following = Following.objects.filter(thread=t, user=recip).exists()
-				muting = Mute.objects.filter(thread=t, user=recip).exists()
+			
+			recips = UserProfile.objects.filter(email__in=to_send)
+			membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
+			
+			followings = Following.objects.filter(thread=t, user__in=recips)
+			mutings = Mute.objects.filter(thread=t, user__in=recips)
+			
+			tag_followings = FollowTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+			tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+			
+			
+			for recip in recips:
+				membergroup = membergroups.filter(member=recip)[0]
+				following = followings.filter(user=recip).exists()
+				muting = mutings.filter(user=recip).exists()
+				tag_following = tag_followings.filter(user=recip)
+				tag_muting = tag_mutings.filter(user=recip)
 
-				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting)
+				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
 				mail.Html = msg_text + ps_blurb	
 				
-				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting)
+				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
 				mail.Body = html2text(msg_text) + ps_blurb	
 			
-				relay_mailer.deliver(mail, To = recip_email)
+				relay_mailer.deliver(mail, To = recip.email)
 
+		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
@@ -662,20 +675,33 @@ def insert_reply(request):
 			logging.debug('TO LIST: ' + str(to_send))
 			
 			if len(to_send) > 0:
-				for recip_email in to_send:
-					recip = UserProfile.objects.get(email=recip_email)
-					membergroup = MemberGroup.objects.get(group=g, member=recip)
-					following = Following.objects.filter(thread=t, user=recip).exists()
-					muting = Mute.objects.filter(thread=t, user=recip).exists()
+				
+				recips = UserProfile.objects.filter(email__in=to_send)
+				membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
+				
+				followings = Following.objects.filter(thread=t, user__in=recips)
+				mutings = Mute.objects.filter(thread=t, user__in=recips)
+				
+				tag_followings = FollowTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+				tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+				
+				for recip in recips:
+					membergroup = membergroups.filter(member=recip)[0]
+					following = followings.filter(user=recip).exists()
+					muting = mutings.filter(user=recip).exists()
+					tag_following = tag_followings.filter(user=recip)
+					tag_muting = tag_mutings.filter(user=recip)
+
 	
-					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting)
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
 					mail.Html = msg_text + ps_blurb	
 					
-					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting)
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting)
 					mail.Body = html2text(msg_text) + ps_blurb	
 				
-					relay_mailer.deliver(mail, To = recip_email)
+					relay_mailer.deliver(mail, To = recip.email)
 					
+		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print sys.exc_info()
