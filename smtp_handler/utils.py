@@ -29,10 +29,10 @@ ADMIN_EMAILS = ['axz@mit.edu']
 FOLLOW_ADDR = 'http://%s/follow?tid=' % (HOST)
 UNFOLLOW_ADDR = 'http://%s/unfollow?tid=' % (HOST)
 
-FOLLOW_TAG_ADDR = 'http://%s/follow_tag?tag=' % (HOST)
-UNFOLLOW_TAG_ADDR = 'http://%s/unfollow_tag?tag=' % (HOST)
-MUTE_TAG_ADDR = 'http://%s/mute_tag?tag=' % (HOST)
-UNMUTE_TAG_ADDR = 'http://%s/unmute_tag?tag=' % (HOST)
+FOLLOW_TAG_ADDR = 'http://%s/follow_tag_get?tag=' % (HOST)
+UNFOLLOW_TAG_ADDR = 'http://%s/unfollow_tag_get?tag=' % (HOST)
+MUTE_TAG_ADDR = 'http://%s/mute_tag_get?tag=' % (HOST)
+UNMUTE_TAG_ADDR = 'http://%s/unmute_tag_get?tag=' % (HOST)
 
 MUTE_ADDR = 'http://%s/mute?tid=' % (HOST)
 UNMUTE_ADDR = 'http://%s/unmute?tid=' % (HOST)
@@ -195,7 +195,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 			if tag_following.count() > 0:
 				for f in tag_following:
 					following_tags.append(f.tag.name)
-					tag_str += '<a href="%s">Unfollow %s</a> | ' % (UNFOLLOW_TAG_ADDR, f.tag.name)
+					tag_str += '<a href="%s%s&group=%s">Unfollow %s</a> | ' % (UNFOLLOW_TAG_ADDR, f.tag.name, group.name, f.tag.name)
 				if len(following_tags) > 1:
 					n_str = ', '.join(following_tags)
 					content += 'You\'re currently following the tags %s. <BR>' % (n_str)
@@ -205,7 +205,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 				content += 'You currently aren\'t receiving any replies to this thread. <a href="%s">Follow thread</a>.<BR>' % (follow_addr)
 		
 		for tag in tags:
-			tag_str += ' <a href="%s">Follow %s</a> |' % (FOLLOW_TAG_ADDR, tag.name)
+			tag_str += ' <a href="%s%s&group=%s">Follow %s</a> |' % (FOLLOW_TAG_ADDR, tag.name, group.name, tag.name)
 		content += tag_str
 	else:
 		mute_addr = '%s%s' % (MUTE_ADDR, tid)
@@ -218,7 +218,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 			if tag_muting.count() > 0:
 				for m in tag_muting:
 					muting_tags.append(m.tag.name)
-					tag_str += '<a href="%s">Unmute %s</a> |' % (UNMUTE_TAG_ADDR, m.tag.name)
+					tag_str += '<a href="%s%s&group=%s">Unmute %s</a> |' % (UNMUTE_TAG_ADDR, m.tag.name, group.name, m.tag.name)
 				if len(muting_tags) > 1:
 					n_str = ', '.join(muting_tags)
 					content += 'You\'re currently muting the tags %s. <BR>' % (n_str)
@@ -228,7 +228,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 				content += 'You\'re currently receiving emails to this thread. <a href="%s">Mute thread</a>.<BR>' % (mute_addr)
 		
 		for tag in tags:
-			tag_str += ' <a href="%s">Mute %s</a> |' % (MUTE_TAG_ADDR, tag.name)
+			tag_str += ' <a href="%s%s&group=%s">Mute %s</a> |' % (MUTE_TAG_ADDR, tag.name, group.name)
 		content += tag_str
 
 	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)

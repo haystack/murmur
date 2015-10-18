@@ -708,6 +708,76 @@ def insert_reply(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 	
+@render_to("follow_tag.html")
+@login_required
+def follow_tag_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		tag_name = request.GET.get('tag')
+		group_name = request.GET.get('group')
+		res = engine.main.follow_tag(tag_name, group_name, user=user)
+		
+		active_group = load_groups(request, groups, user, group_name=group_name)
+		
+		return {'res': res, 'type': 'follow', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect("%s?next=/follow_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
+
+@render_to("follow_tag.html")
+@login_required
+def unfollow_tag_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		tag_name = request.GET.get('tag')
+		group_name = request.GET.get('group')
+		res = engine.main.unfollow_tag(tag_name, group_name, user=user)
+		
+		active_group = load_groups(request, groups, user, group_name=group_name)
+		
+		return {'res': res, 'type': 'unfollow', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect("%s?next=/unfollow_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
+
+@render_to("follow_tag.html")
+@login_required
+def mute_tag_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		tag_name = request.GET.get('tag')
+		group_name = request.GET.get('group')
+		res = engine.main.mute_tag(tag_name, group_name, user)
+		
+		active_group = load_groups(request, groups, user, group_name=group_name)
+		
+		return {'res': res, 'type': 'mut', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect("%s?next=/mute_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
+
+@render_to("follow_tag.html")
+@login_required
+def unmute_tag_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		tag_name = request.GET.get('tag')
+		group_name = request.GET.get('group')
+		res = engine.main.unmute_tag(tag_name, group_name, user)
+		
+		active_group = load_groups(request, groups, user, group_name=group_name)
+		
+		return {'res': res, 'type': 'unmut', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect("%s?next=/unmute_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
+
+	
+
 @render_to("follow_thread.html")
 @login_required
 def follow_thread_get(request):

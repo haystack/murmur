@@ -887,10 +887,12 @@ def follow_tag(tag_name, group_name, user):
 	try:
 		tag = Tag.objects.get(name=tag_name, group=g)
 		tag_follow = FollowTag.objects.get(tag=tag, user=user)
+		res['tag_name'] = tag_name
 		res['status'] = True
 	except FollowTag.DoesNotExist:
 		f = FollowTag(tag=tag, group=g, user=user)
 		f.save()
+		res['tag_name'] = tag_name
 		res['status'] = True
 	except Tag.DoesNotExist:
 		res['code'] = msg_code['TAG_NOT_FOUND_ERROR']
@@ -909,8 +911,10 @@ def unfollow_tag(tag_name, group_name, user):
 		tag = Tag.objects.get(name=tag_name, group=g)
 		tag_follow = FollowTag.objects.get(tag=tag, user=user)
 		tag_follow.delete()
+		res['tag_name'] = tag_name
 		res['status'] = True
 	except FollowTag.DoesNotExist:
+		res['tag_name'] = tag_name
 		res['status'] = True
 	except Tag.DoesNotExist:
 		res['code'] = msg_code['TAG_NOT_FOUND_ERROR']
@@ -928,10 +932,12 @@ def mute_tag(tag_name, group_name, user):
 	try:
 		tag = Tag.objects.get(name=tag_name, group=g)
 		tag_mute = MuteTag.objects.get(tag=tag, user=user)
+		res['tag_name'] = tag_name
 		res['status'] = True
 	except MuteTag.DoesNotExist:
 		f = MuteTag(tag=tag, group=g, user=user)
 		f.save()
+		res['tag_name'] = tag_name
 		res['status'] = True
 	except Tag.DoesNotExist:
 		res['code'] = msg_code['TAG_NOT_FOUND_ERROR']
@@ -950,8 +956,10 @@ def unmute_tag(tag_name, group_name, user):
 		tag = Tag.objects.get(name=tag_name, group=g)
 		tag_mute = MuteTag.objects.get(tag=tag, user=user)
 		tag_mute.delete()
+		res['tag_name'] = tag_name
 		res['status'] = True
 	except MuteTag.DoesNotExist:
+		res['tag_name'] = tag_name
 		res['status'] = True
 	except Tag.DoesNotExist:
 		res['code'] = msg_code['TAG_NOT_FOUND_ERROR']
