@@ -2,9 +2,7 @@
 @author: Anant Bhardwaj
 @date: 08/11/2012
 */
-a + a {
-	margin-left: 10px;
-}
+
 body, html {
 	height: 100%;
 }
