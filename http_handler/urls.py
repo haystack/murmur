@@ -42,12 +42,17 @@ urlpatterns = patterns('',
 	 url(r'^insert_post', 'browser.views.insert_post'), 
 	 url(r'^insert_reply', 'browser.views.insert_reply'),
      
+     url(r'^upvote_get', 'browser.views.upvote_get'),
+     url(r'^unupvote_get', 'browser.views.unupvote_get'),
+ 
+     url(r'^upvote', 'browser.views.upvote'),
+     url(r'^unupvote', 'browser.views.unupvote'),
+     
      url(r'^follow_tag_get', 'browser.views.follow_tag_get'),
      url(r'^unfollow_tag_get', 'browser.views.unfollow_tag_get'),
      
      url(r'^mute_tag_get', 'browser.views.mute_tag_get'),
      url(r'^unmute_tag_get', 'browser.views.unmute_tag_get'),
-     
      
      url(r'^follow_tag', 'browser.views.follow_tag'),
      url(r'^unfollow_tag', 'browser.views.unfollow_tag'),

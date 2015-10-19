@@ -755,8 +755,60 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 	logging.debug(res)
 	return res
 
+def upvote(post_id, email=None, user=None):
+	res = {'status':False}
+	p = None
+	try:
+		if email:
+			user = UserProfile.objects.get(email=email)
+		p = Post.objects.get(id=int(post_id))
+		l = Upvote.objects.get(post=p, user=user)
+		res['status'] = True
+		res['thread_id'] = p.thread.id
+		res['post_name'] = p.subject
+		res['post_id'] = p.id
+		res['group_name'] = p.group.name
+	except UserProfile.DoesNotExist:
+		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
+	except Upvote.DoesNotExist:
+		l = Upvote(post=p, user=user)
+		l.save()
+		res['status'] = True
+		res['thread_id'] = p.thread.id
+		res['post_name'] = p.subject
+		res['post_id'] = p.id
+		res['group_name'] = p.group.name
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
 
-
+def unupvote(post_id, email=None, user=None):
+	res = {'status':False}
+	p = None
+	try:
+		if email:
+			user = UserProfile.objects.get(email=email)
+		p = Post.objects.get(id=int(post_id))
+		l = Upvote.objects.get(post=p, user=user)
+		l.delete()
+		res['status'] = True
+		res['post_name'] = p.subject
+		res['thread_id'] = p.thread.id
+		res['post_id'] = p.id
+		res['group_name'] = p.group.name
+	except UserProfile.DoesNotExist:
+		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
+	except Upvote.DoesNotExist:
+		res['status'] = True
+		res['thread_id'] = p.thread.id
+		res['post_name'] = p.subject
+		res['post_id'] = p.id
+		res['group_name'] = p.group.name
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
 
 def follow_thread(thread_id, email=None, user=None):
 	res = {'status':False}

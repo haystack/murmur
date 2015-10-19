@@ -65,6 +65,7 @@ class FollowTag(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	group = models.ForeignKey('Group')
 	tag = models.ForeignKey('Tag')
+	timestamp = models.DateTimeField(auto_now=True)
 	
 	def __unicode__(self):
 		return '%s follows tag %s' % (self.user.email, self.tag.name)
@@ -77,6 +78,7 @@ class MuteTag(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	group = models.ForeignKey('Group')
 	tag = models.ForeignKey('Tag')
+	timestamp = models.DateTimeField(auto_now=True)
 	
 	def __unicode__(self):
 		return '%s mutes tag %s' % (self.user.email, self.tag.name)
@@ -221,27 +223,16 @@ class Mute(models.Model):
 	class Meta:
 		db_table = "mailx_mute"
 
-class Like(models.Model):
+class Upvote(models.Model):
 	id = models.AutoField(primary_key=True)
 	post = models.ForeignKey('Post')
-	email = models.CharField(max_length=50)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	timestamp = models.DateTimeField(auto_now=True)
+	
 	def __unicode__(self):
-		return self.name
+		return '%s likes Post %s' % (self.user.email, self.post.id)
 
 	class Meta:
 		db_table = "mailx_likes"
 
-
-
-class Dislke(models.Model):
-	id = models.AutoField(primary_key=True)
-	post = models.ForeignKey('Post')
-	email = models.CharField(max_length=50)
-	timestamp = models.DateTimeField(auto_now=True)
-	def __unicode__(self):
-		return self.name
-
-	class Meta:
-		db_table = "mailx_dislikes"
 

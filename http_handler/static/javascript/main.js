@@ -253,6 +253,18 @@ $(document).ready(function(){
 			);	
 		};
 		
+	upvote = 
+		function(post_id){
+			$.post('upvote', {'post_id': post_id}, 
+				function(res){
+					if(res.status){
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
+		
 	follow_tag = 
 		function(params){
 			$.post('follow_tag', {'group_name': params.group,
@@ -761,7 +773,10 @@ $(document).ready(function(){
 		content += '<hr />';
 		content += res.post.text;
 		content += '<br />';
-		content += '<small><a href="/thread?tid=' + res.thread_id + '&post_id=' + res.post.id + '">Permalink</a></small><br /><br />';
+		
+		content += '<small><a onclick="upvote(\'' + res.post.id + '\'); return false;">+1 Post</a> ';
+		
+		content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.post.id + '">Permalink</a></small><br /><br />';
 		content += '<div class="reply">';
 		for(var i = 0; i< res.replies.length; i++){
                        	content += '<div class="main-area-content">';
@@ -769,8 +784,10 @@ $(document).ready(function(){
                        	content += 'on ' + new Date(res.replies[i].timestamp) + '&nbsp;';
 			content += '<br /><br />';
 		      	content +=  res.replies[i].text;
-		      	content += '<br /><small><a href="/thread?tid=' + res.thread_id + '&post_id=' + res.replies[i].id + '">Permalink</a></small><br /><br />';
-                       	content += '</div>';
+		      	content += '<br />';
+		      	content += '<small><a onclick="upvote(\'' + res.replies[i].id + '\'); return false;">+1 Post</a> ';
+		      	content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.replies[i].id + '">Permalink</a></small><br /><br />';
+                content += '</div>';
                                
                }
 		content += '</div>';

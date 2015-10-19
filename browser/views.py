@@ -833,6 +833,59 @@ def unmute_thread_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unmute?tid=" + request.GET.get('tid'))
 
+
+@login_required
+def upvote(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.upvote(request.POST['post_id'], user=user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+	
+@login_required
+def unupvote(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.unupvote(request.POST['post_id'], user=user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@render_to("upvote.html")
+@login_required
+def upvote_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+
+		post_id = request.GET.get('post_id')
+		res = engine.main.upvote(post_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
+		return {'res': res, 'type': 'upvoted', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + "?next=/upvote_get?post_id=" + request.GET.get('post_id'))
+	
+@render_to("upvote.html")
+@login_required
+def unupvote_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+
+		post_id = request.GET.get('post_id')
+		res = engine.main.unupvote(post_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
+		return {'res': res, 'type': 'undid your upvote of', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + "?next=/unupvote_get?post_id=" + request.GET.get('post_id'))
+
 @login_required
 def follow_thread(request):
 	try:
@@ -846,7 +899,6 @@ def follow_thread(request):
 										'url': global_settings.LOGIN_URL + "?next=/thread?tid=" + thread}), 
 										content_type="application/json")
 	except Exception, e:
-		print request
 		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
