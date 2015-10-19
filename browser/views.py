@@ -751,7 +751,7 @@ def mute_tag_get(request):
 		
 		tag_name = request.GET.get('tag')
 		group_name = request.GET.get('group')
-		res = engine.main.mute_tag(tag_name, group_name, user)
+		res = engine.main.mute_tag(tag_name, group_name, user=user)
 		
 		active_group = load_groups(request, groups, user, group_name=group_name)
 		
@@ -768,7 +768,7 @@ def unmute_tag_get(request):
 		
 		tag_name = request.GET.get('tag')
 		group_name = request.GET.get('group')
-		res = engine.main.unmute_tag(tag_name, group_name, user)
+		res = engine.main.unmute_tag(tag_name, group_name, user=user)
 		
 		active_group = load_groups(request, groups, user, group_name=group_name)
 		

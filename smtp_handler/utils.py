@@ -20,6 +20,10 @@ FOLLOW_SUFFIX = '__follow__'
 UNFOLLOW_SUFFIX = '__unfollow__'
 MUTE_SUFFIX = '__mute__'
 UNMUTE_SUFFIX = '__unmute__'
+FOLLOW_TAG_SUFFIX = '__followtag__'
+UNFOLLOW_TAG_SUFFIX = '__unfollowtag__'
+MUTE_TAG_SUFFIX = '__mutetag__'
+UNMUTE_TAG_SUFFIX = '__unmutetag__'
 UPVOTE_SUFFIX = '__upvote__'
 DOWNVOTE_SUFFIX = '__downvote__'
 FETCH_SUFFIX = '__fetch__'
@@ -174,6 +178,35 @@ def remove_plain_ps(body):
 	_, _, tail = x.partition(PLAIN_SUBTAIL)
 	return head + tail
 
+def _insert_plain_tag_line(group, tags, membergroup, tag_following, tag_muting):
+	tag_str = 'Tags: | '
+	
+	if tags.count() == 0:
+		return ''
+	
+	if membergroup.no_emails or not membergroup.always_follow_thread:
+		follow_tags = []
+		for f in tag_following:
+			follow_tags.append(f.tag.name)
+			unfollow_tag_email = 'mailto:%s' % (group.name + '+' + f.tag.name + UNFOLLOW_TAG_SUFFIX + '@' + HOST)
+			tag_str += 'Unfollow %s<%s> | ' % (f.tag.name, unfollow_tag_email)
+		
+		for tag in tags:
+			if tag.name not in follow_tags:
+				follow_tag_email = 'mailto:%s' % (group.name + '+' + tag.name + FOLLOW_TAG_SUFFIX + '@' + HOST)
+				tag_str += ' Follow %s<%s> |' % (tag.name, follow_tag_email)
+	else:
+		mute_tags = []
+		for f in tag_muting:
+			mute_tags.append(f.tag.name)
+			unmute_tag_email = 'mailto:%s' % (group.name + '+' + f.tag.name + UNMUTE_TAG_SUFFIX + '@' + HOST)
+			tag_str += 'Unmute %s<%s> | ' % (f.tag.name, unmute_tag_email)
+		
+		for tag in tags:
+			if tag.name not in mute_tags:
+				mute_tag_email = 'mailto:%s' % (group.name + '+' + tag.name + MUTE_TAG_SUFFIX + '@' + HOST)
+				tag_str += ' Mute %s<%s> |' % (tag.name, mute_tag_email)
+	return tag_str
 
 def _insert_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	tag_str = 'Tags: | '
@@ -268,50 +301,38 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + FOLLOW_SUFFIX + '@' + HOST)
 		unfollow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + UNFOLLOW_SUFFIX + '@' + HOST)
-		
-		tag_str = 'Tags: | '
-		following_tags = []
+
 		if following:
 			content = 'You\'re currently following this thread. Un-Follow thread<%s>.\n' % (unfollow_addr)
 		else:
 			if tag_following.count() > 0:
-				for f in tag_following:
-					following_tags.append(f.tag.name)
-					tag_str += ' Unfollow %s<%s> |' % (f.tag.name, UNFOLLOW_TAG_ADDR)
-				if len(following_tags) > 1:
-					n_str = ', '.join(following_tags)
+				tag_names = [m.tag.name for m in tag_muting]
+				if len(tag_names) > 1:
+					n_str = ', '.join(tag_names)
 					content += 'You\'re currently following the tags %s. \n' % (n_str)
 				else:
-					content += 'You\'re currently following the tag %s. \n' % (following_tags[0])
+					content += 'You\'re currently following the tag %s. \n' % (tag_names[0])
 			else:
 				content = 'You aren\'t receive any replies to this thread. Follow thread<%s>.\n' % (follow_addr)
-		for tag in tags:
-			tag_str += ' Follow %s<%s> |' % (tag.name, FOLLOW_TAG_ADDR)
-		content += tag_str
 	else:
 		mute_addr = 'mailto:%s' % (group_name + '+' + str(tid) + MUTE_SUFFIX + '@' + HOST)
 		unmute_addr = 'mailto:%s' % (group_name + '+' + str(tid) + UNMUTE_SUFFIX + '@' + HOST)
-		tag_str = 'Tags: |'
-		muting_tags = []
+
 		if muting:
 			content = 'You\'re currently muting this thread. Un-Mute thread<%s>.\n' % (unmute_addr)
 		else:
 			if tag_muting.count() > 0:
-				for m in tag_muting:
-					muting_tags.append(m.tag.name)
-					tag_str += ' Unmute %s<%s> |' % (m.tag.name, UNMUTE_TAG_ADDR)
-				if len(muting_tags) > 1:
-					n_str = ', '.join(muting_tags)
+				tag_names = [m.tag.name for m in tag_muting]
+				if len(tag_names) > 1:
+					n_str = ', '.join(tag_names)
 					content += 'You\'re currently muting the tags %s. \n' % (n_str)
 				else:
-					content += 'You\'re currently muting the tag %s. \n' % (muting_tags[0])
+					content += 'You\'re currently muting the tag %s. \n' % (tag_names[0])
 			else:
 				content = 'You\'re currently receiving emails to this thread. Mute thread<%s>.\n' % (mute_addr)
 		
-		for tag in tags:
-			tag_str += ' Mute %s<%s> |' % (tag.name, MUTE_TAG_ADDR)
-		content += tag_str
-		
+	content += _insert_plain_tag_line(group, tags, membergroup, tag_following, tag_muting)
+	
 	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
 	if membergroup.no_emails:
 		content += "\n\nYou are set to receive no emails from this group, except for the threads you follow. \nChange your settings<%s>" % (addr)

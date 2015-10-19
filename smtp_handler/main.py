@@ -352,10 +352,10 @@ def handle_post(message, address=None, host=None):
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=None):
-	name, addr = parseaddr(message['From'].lower())
+	_, addr = parseaddr(message['From'].lower())
 	res = follow_thread(thread_id, email=addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Success! You are now following the thread \"%s\". You will receive emails for all following replies to to this thread." % res['thread_name'])
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Success! You are now following the thread \"%s\". You will receive emails for all following replies to this thread." % res['thread_name'])
 		relay.deliver(mail)
 	else:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Sorry there was an error: %s" % (res['code']))
@@ -369,7 +369,7 @@ def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=No
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_unfollow(message, group_name=None, thread_id=None, suffix=None, host=None):
-	name, addr = parseaddr(message['From'].lower())
+	_, addr = parseaddr(message['From'].lower())
 	res = unfollow_thread(thread_id, email=addr)
 	if(res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "You unfollowed the thread \"%s\" successfully." % res['thread_name'])
@@ -383,7 +383,7 @@ def handle_unfollow(message, group_name=None, thread_id=None, suffix=None, host=
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=MUTE_SUFFIX+"|"+MUTE_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_mute(message, group_name=None, thread_id=None, suffix=None, host=None):
-	name, addr = parseaddr(message['From'].lower())
+	_, addr = parseaddr(message['From'].lower())
 	res = mute_thread(thread_id, email=addr)
 	if(res['status']):
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Success! You have now muted the thread \"%s\"." % res['thread_name'])
@@ -400,15 +400,80 @@ def handle_mute(message, group_name=None, thread_id=None, suffix=None, host=None
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=UNMUTE_SUFFIX+"|"+UNMUTE_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_unmute(message, group_name=None, thread_id=None, suffix=None, host=None):
-	name, addr = parseaddr(message['From'].lower())
+	_, addr = parseaddr(message['From'].lower())
 	res = unmute_thread(thread_id, email=addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "You unmuted the thread \"%s\" successfully. You will receive emails for all following replies to to this thread." % res['thread_name'])
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "You unmuted the thread \"%s\" successfully. You will receive emails for all following replies to this thread." % res['thread_name'])
 		relay.deliver(mail)
 	else:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Error Message: %s" %(res['code']))
 		relay.deliver(mail)
 	return
+
+
+
+
+@route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=FOLLOW_TAG_SUFFIX+"|"+FOLLOW_TAG_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_follow_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = follow_tag(tag_name, group_name, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Success! You are now following the tag \"%s\". You will receive emails for all following emails with this tag." % res['tag_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Sorry there was an error: %s" % (res['code']))
+		relay.deliver(mail)
+	return
+
+
+
+
+
+@route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=UNFOLLOW_TAG_SUFFIX+"|"+UNFOLLOW_TAG_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_unfollow_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = unfollow_tag(tag_name, group_name, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "You unfollowed the tag \"%s\" successfully." % res['tag_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Error Message: %s" %(res['code']))
+		relay.deliver(mail)
+	return
+
+
+@route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=MUTE_TAG_SUFFIX+"|"+MUTE_TAG_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_mute_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = mute_tag(tag_name, group_name, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Success! You have now muted the tag \"%s\"." % res['tag_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Sorry there was an error: %s" % (res['code']))
+		relay.deliver(mail)
+	return
+
+
+
+
+
+@route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=UNMUTE_TAG_SUFFIX+"|"+UNMUTE_TAG_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_unmute_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = unmute_tag(tag_name, group_name, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "You unmuted the tag \"%s\" successfully. You will receive emails for all emails to this tag." % res['tag_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Error Message: %s" %(res['code']))
+		relay.deliver(mail)
+	return
+
 
 
 """
