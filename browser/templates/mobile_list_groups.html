@@ -30,9 +30,6 @@
 					<a href="/groups/{{ group.name }}">
 						<li class="row-item" id="{{ group.name }}">
 							<span class="strong">{{ group.name }}</span>
-							{% if group.member %}
-								<span class="member label">Member</span>
-							{% endif %}
 							{% if group.admin %}
 								<span class="admin label">Admin</span>
 							{% endif %}

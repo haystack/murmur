@@ -81,7 +81,6 @@ def list_my_groups(user):
 		for mg in membergroup:
 			res['groups'].append({'name':mg.group.name, 
 								  'desc': escape(mg.group.description), 
-								  'member': True, 
 								  'admin': mg.admin, 
 								  'mod': mg.moderator})
 			
