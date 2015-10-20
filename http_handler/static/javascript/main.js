@@ -766,15 +766,17 @@ $(document).ready(function(){
 		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
 		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span> <br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp) + '</span>';
-		content += '<br /><small><a href="/thread?tid=' + res.thread_id + '">Thread Permalink</a></small>';
+		content += '<br />';
+		content += '<small><a href="/thread?tid=' + res.thread_id + '">Thread Permalink</a></small>';
 		
 		content += '</div>';
 		content += '</div>';
 		content += '<hr />';
 		content += res.post.text;
 		content += '<br />';
+		content += '<span class="label2" style="background-color: #3D7AA6;">+' + res.post.likes + '</span>';
 		
-		content += '<small><a onclick="upvote(\'' + res.post.id + '\'); return false;">+1 Post</a> ';
+		content += ' <small><a style="cursor: pointer" onclick="upvote(\'' + res.post.id + '\'); return false;">+1 Post</a> ';
 		
 		content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.post.id + '">Permalink</a></small><br /><br />';
 		content += '<div class="reply">';
@@ -785,7 +787,9 @@ $(document).ready(function(){
 			content += '<br /><br />';
 		      	content +=  res.replies[i].text;
 		      	content += '<br />';
-		      	content += '<small><a onclick="upvote(\'' + res.replies[i].id + '\'); return false;">+1 Post</a> ';
+		      	content += '<span class="label2" style="background-color: #3D7AA6;">+' + res.replies[i].likes + '</span>';
+		
+		      	content += ' <small><a style="cursor: pointer" onclick="upvote(\'' + res.replies[i].id + '\'); return false;">+1 Post</a> ';
 		      	content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.replies[i].id + '">Permalink</a></small><br /><br />';
                 content += '</div>';
                                

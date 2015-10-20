@@ -385,6 +385,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 			threads = Thread.objects.filter(timestamp__gt = t)
 		res['threads'] = []
 		for t in threads:
+			thread_likes = 0
 			following = False
 			muting = False
 			
@@ -402,12 +403,15 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 			replies = []
 			post = None
 			for p in posts:
+				post_likes = p.upvote_set.count()
+				thread_likes += post_likes
 				post_dict = {'id': p.id,
 							'msg_id': p.msg_id, 
 							'thread_id': p.thread_id, 
 							'from': p.author.email, 
 							'to': p.group.name, 
-							'subject': escape(p.subject), 
+							'subject': escape(p.subject),
+							'likes': post_likes, 
 							'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 							'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp}
 				if not p.reply_to_id:
@@ -424,6 +428,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 								   'following': following, 
 								   'muting': muting,
 								   'tags': tags,
+								   'likes': thread_likes,
 								   'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
 			res['status'] = True
 			
