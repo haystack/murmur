@@ -166,7 +166,7 @@ def post_list(request):
 		if group.public or is_member:
 			if is_member:
 				request.session['active_group'] = group_name
-			res = engine.main.list_posts(group_name=group_name, user=user, format_datetime=False, return_replies=False)
+			res = engine.main.list_posts(group_name=group_name, user=user, format_datetime=False, return_replies=True)
 			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group}
 		else:
 			return redirect('/404?e=member')

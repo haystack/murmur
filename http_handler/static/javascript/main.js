@@ -189,8 +189,8 @@ $(document).ready(function(){
 					if(res.status){
 						$("#btn-follow").hide();
                 		$("#btn-unfollow").show();
-                		$('#' + params.thread_id).children()[3].remove();
-                		$('#' + params.thread_id + ' > div:nth-child(3)').after('<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>');
+                		$('#' + params.thread_id).children().last().children()[1].remove();
+                		$('#' + params.thread_id).children().last().append('<span class="label2 following" style="background-color: #3D7AA6;">Following</span>');
 					}
 					notify(res, true);
 				}
@@ -207,8 +207,8 @@ $(document).ready(function(){
 					if(res.status){
                        $("#btn-follow").show();
                        $("#btn-unfollow").hide();
-                       $('#' + params.thread_id).children()[3].remove();
-                       $('#' + params.thread_id + ' > div:nth-child(3)').after('<div style="height: 20px;"></div>');
+                       $('#' + params.thread_id).children().last().children()[1].remove();
+                       $('#' + params.thread_id).children().last().append('<span></span>');
                     }
 					notify(res, true);
 				}
@@ -227,8 +227,8 @@ $(document).ready(function(){
 					if(res.status){
 						$("#btn-mute").hide();
                 		$("#btn-unmute").show();
-                		$('#' + params.thread_id).children()[3].remove();
-                		$('#' + params.thread_id + ' > div:nth-child(3)').after('<div><span class="label2 following" style="background-color: #3D7AA6;">Muted</span></div>');
+                		$('#' + params.thread_id).children().last().children()[1].remove();
+                		$('#' + params.thread_id).children().last().append('<span class="label2 following" style="background-color: #3D7AA6;">Muted</span>');
 					}
 					notify(res, true);
 				}
@@ -245,8 +245,8 @@ $(document).ready(function(){
 					if(res.status){
                        $("#btn-mute").show();
                        $("#btn-unmute").hide();
-                       $('#' + params.thread_id).children()[3].remove();
-                       $('#' + params.thread_id + ' > div:nth-child(3)').after('<div style="height: 20px;"></div>');
+                       $('#' + params.thread_id).children().last().children()[1].remove();
+                       $('#' + params.thread_id).children().last().append('<span></span>');
                     }
 					notify(res, true);
 				}
@@ -631,21 +631,26 @@ $(document).ready(function(){
 				content += '</div>';
 			}
 			
+			content += '<div>';
+			content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + thread_list[i].likes + '</span> ';
+
+			
 			if (member_group != undefined) {
 				if (member_group.no_emails == true || member_group.always_follow_thread == false) {
 					if (thread_list[i].following == true) {
-						content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>';
+						content += '<span class="label2 following" style="background-color: #3D7AA6;">Following</span>';
 					} else {
-						content += '<div style="height: 20px;"></div>';
+						content += '<span></span>';
 					}
 				} else {
 					if (thread_list[i].muting == true) {
-						content += '<div><span class="label2 following" style="background-color: #3D7AA6;">Muted</span></div>';
+						content += '<span class="label2 following" style="background-color: #3D7AA6;">Muted</span>';
 					} else {
-						content += '<div style="height: 20px;"></div>';
+						content += '<span></span>';
 					}
 				}
 			}
+			content += '</div>';
 
 			var curr_row = $('<li class="row-item" id="' + thread_list[i].thread_id + '">' + content + '</li>');
 			var params = {'requester_email': user,
@@ -774,7 +779,7 @@ $(document).ready(function(){
 		content += '<hr />';
 		content += res.post.text;
 		content += '<br />';
-		content += '<span class="label2" style="background-color: #3D7AA6;">+' + res.post.likes + '</span>';
+		content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.post.likes + '</span>';
 		
 		content += ' <small>  | <a style="cursor: pointer" onclick="upvote(\'' + res.post.id + '\'); return false;">+1 Post</a> ';
 		
@@ -787,7 +792,7 @@ $(document).ready(function(){
 			content += '<br /><br />';
 		      	content +=  res.replies[i].text;
 		      	content += '<br />';
-		      	content += '<span class="label2" style="background-color: #3D7AA6;">+' + res.replies[i].likes + '</span>';
+		      	content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.replies[i].likes + '</span>';
 		
 		      	content += ' <small>  | <a style="cursor: pointer" onclick="upvote(\'' + res.replies[i].id + '\'); return false;">+1 Post</a> ';
 		      	content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.replies[i].id + '">Permalink</a></small><br /><br />';

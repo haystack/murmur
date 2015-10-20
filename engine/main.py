@@ -385,7 +385,6 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 			threads = Thread.objects.filter(timestamp__gt = t)
 		res['threads'] = []
 		for t in threads:
-			thread_likes = 0
 			following = False
 			muting = False
 			
@@ -399,9 +398,11 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 					res['member_group'] = {'no_emails': member_group[0].no_emails, 
 										   'always_follow_thread': member_group[0].always_follow_thread}
 
-			posts = Post.objects.filter(thread = t)		
+			posts = Post.objects.filter(thread = t).select_related()
 			replies = []
 			post = None
+			thread_likes = 0
+			
 			for p in posts:
 				post_likes = p.upvote_set.count()
 				thread_likes += post_likes

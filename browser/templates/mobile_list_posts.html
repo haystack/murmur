@@ -45,25 +45,29 @@
 								</span>
 							</div>
 							
-							
-							{% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
-								{% if post.following %}
-									<div><span class="label2 following" style="background-color: #3D7AA6;">Following</span></div>
-								{% endif %}
-							{% endif %}
-							
-							{% if posts.member_group.always_follow_thread and post.muting %}
-								<div><span class="label2 muted" style="background-color: #3D7AA6;">Muted</span></div>
-							{% endif %}
-							
-							
+														
 							{% if post.tags|length > 0 %}
 								<div>
 									{% for tag in post.tags %}
-										<span class="label2" style="background-color: #{{tag.color}};">{{tag.name}}</span>
+										<span class="label2" style="background-color: #{{tag.color}}; float: right; position: relative; top: 5px;">{{tag.name}}</span>
 									{% endfor %}
 								</div>
 							{% endif %}
+							
+							<div>
+							<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
+
+							{% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
+								{% if post.following %}
+									<span class="label2 following" style="background-color: #3D7AA6;">Following</span>
+								{% endif %}
+							{% else %}
+								{% if post.muting %}
+									<span class="label2 muted" style="background-color: #3D7AA6;">Muted</span>
+								{% endif %}
+							{% endif %}
+							</div>
+
 						</li>
 					</a>
 				{% endfor %}
