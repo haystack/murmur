@@ -44,7 +44,9 @@
 			{% endif %}
 				{% autoescape off %}{{ thread.post.text }}{% endautoescape %}
 			</div>
+			<span class="label2" style="background-color: #3D7AA6;">+{{ thread.post.likes }}</span> | 
 			<small>
+				<a style="cursor: pointer" onclick="upvote('{{ thread.post.id }}'); return false;">+1 Post</a> | 
 				<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{thread.post.id}}">Permalink</a>
 			</small>
 			<BR>
@@ -65,7 +67,9 @@
 						
 							{% autoescape off %}{{ reply.text }}{% endautoescape %}
 						</div>
+						<span class="label2" style="background-color: #3D7AA6;">+{{ reply.likes }}</span> | 
 						<small>
+							<a style="cursor: pointer" onclick="upvote('{{ reply.id }}'); return false;">+1 Post</a> | 
 							<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{reply.id}}">Permalink</a>
 						
 						</small>

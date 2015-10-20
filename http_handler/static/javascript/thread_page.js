@@ -50,6 +50,19 @@ $(document).ready(function(){
 	$("#btn-mute").bind("click");
 	$("#btn-unmute").bind("click");
 
+
+	upvote = 
+		function(post_id){
+			$.post('upvote', {'post_id': post_id}, 
+				function(res){
+					if(res.status){
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
+		
 	insert_reply = 
 		function(params){
 			params.msg_text = CKEDITOR.instances['reply-text-input'].getData();

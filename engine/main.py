@@ -445,6 +445,7 @@ def load_thread(t, user=None, member=None):
 	no_emails = False
 	always_follow = False
 	is_member = False
+	total_likes = 0
 	if user:
 		following = Following.objects.filter(thread=t, user=user).exists()
 		muting = Mute.objects.filter(thread=t, user=user).exists()
@@ -458,11 +459,14 @@ def load_thread(t, user=None, member=None):
 	replies = []
 	post = None
 	for p in posts:
+		post_likes = p.upvote_set.count()
+		total_likes += post_likes
 		post_dict = {
 					'id': str(p.id),
 					'msg_id': p.msg_id, 
 					'thread_id': p.thread_id, 
 					'from': p.author.email, 
+					'likes': post_likes,
 					'to': p.group.name, 
 					'subject': escape(p.subject), 
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
@@ -484,6 +488,7 @@ def load_thread(t, user=None, member=None):
 		    'member': is_member,
 		    'no_emails': no_emails,
 		    'always_follow': always_follow,
+		    'likes': total_likes,
 		    'timestamp': t.timestamp}
 
 def load_post(group_name, thread_id, msg_id):
