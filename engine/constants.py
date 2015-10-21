@@ -3,12 +3,14 @@ MAX_GROUP_NAME_LENGTH = 20
 MAX_GROUP_DESC_LENGTH = 140
 
 msg_code={
+	'USER_DOES_NOT_EXIST': 'User %s does not exist in Murmur system.',
 	'PRIVILEGE_ERROR': 'Do not have the required privileges',
 	'NOT_MEMBER': 'Not a member of this Group',
 	'DUPLICATE_ERROR': 'Name already exists',
 	'GROUP_NOT_FOUND_ERROR': 'Group not found',
 	'POST_NOT_FOUND_ERROR': 'Post not found',
 	'THREAD_NOT_FOUND_ERROR': 'Thread not found',
+	'TAG_NOT_FOUND_ERROR': 'Tag not found',
 	'OWNER_UNSUBSCRIBE_ERROR': 'Can not unsubscribe the owner',
 	'REQUEST_ERROR': 'Incorrect request parameters',
 	'INCORRECT_GROUP_NAME': 'Group name cannot be of this format',

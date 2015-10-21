@@ -1,11 +1,13 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth import views as auth_views
+from browser.views import *
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
 urlpatterns = patterns('',
      url(r'^$', 'browser.views.index'),
+     url(r'^lamson_status', 'browser.views.lamson_status'),
      url(r'^about', 'browser.views.about'),
      url(r'^settings', 'browser.views.settings'),
 	 url(r'^posts$', 'browser.views.posts'),
@@ -39,16 +41,52 @@ urlpatterns = patterns('',
 	 url(r'^load_post', 'browser.views.load_post'),
 	 url(r'^insert_post', 'browser.views.insert_post'), 
 	 url(r'^insert_reply', 'browser.views.insert_reply'),
-	 url(r'^follow_thread', 'browser.views.follow_thread'),
-	 url(r'^unfollow_thread', 'browser.views.unfollow_thread'),
+     
+     url(r'^upvote_get', 'browser.views.upvote_get'),
+     url(r'^unupvote_get', 'browser.views.unupvote_get'),
+ 
+     url(r'^upvote', 'browser.views.upvote'),
+     url(r'^unupvote', 'browser.views.unupvote'),
+     
+     url(r'^follow_tag_get', 'browser.views.follow_tag_get'),
+     url(r'^unfollow_tag_get', 'browser.views.unfollow_tag_get'),
+     
+     url(r'^mute_tag_get', 'browser.views.mute_tag_get'),
+     url(r'^unmute_tag_get', 'browser.views.unmute_tag_get'),
+     
+     url(r'^follow_tag', 'browser.views.follow_tag'),
+     url(r'^unfollow_tag', 'browser.views.unfollow_tag'),
+     
+     url(r'^mute_tag', 'browser.views.mute_tag'),
+     url(r'^unmute_tag', 'browser.views.unmute_tag'),
+     
+     url(r'^follow_thread', 'browser.views.follow_thread'),
+     url(r'^unfollow_thread', 'browser.views.unfollow_thread'),
+     
+     url(r'^mute_thread', 'browser.views.mute_thread'),
+     url(r'^unmute_thread', 'browser.views.unmute_thread'),
+     
+     url(r'^follow', 'browser.views.follow_thread_get'),
+     url(r'^unfollow', 'browser.views.unfollow_thread_get'),
+
+     url(r'^mute', 'browser.views.mute_thread_get'),
+     url(r'^unmute', 'browser.views.unmute_thread_get'),
+     
+
+
+
      
     #override the registration default urls - bug with django 1.6
       url(r'^password/change/$',
-                    auth_views.password_change,
-                    name='password_change'),
+                    murmur_acct,
+                    {'acct_func': auth_views.password_change},
+                    name='password_change',
+                    ),
       url(r'^password/change/done/$',
-                    auth_views.password_change_done,
-                    name='password_change_done'),
+                    murmur_acct,
+                    {'acct_func': auth_views.password_change_done},
+                    name='password_change_done',
+                    ),
       url(r'^password/reset/$',
                     auth_views.password_reset,
                     name='password_reset'),

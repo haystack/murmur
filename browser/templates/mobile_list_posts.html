@@ -29,7 +29,7 @@
 			</div>
 		
 			<ul id="post-list-table">
-				{% for post in posts %}
+				{% for post in posts.threads %}
 					<a href="/thread?group_name={{ active_group.name }}&tid={{ post.thread_id }}">
 						<li class="row-item" id="{{ post.thread_id }}">
 							<div class="left-column-area-metadata">
@@ -37,12 +37,37 @@
 								<span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
 								<span class="unread">{{ post.num_replies }}</span> <br>
 							</div>
-							<div class="left-column-area-content">
-								<span class="strong ellipsis">{{ post.post.subject }}</span>
-								<span class="strong-gray ellipsis">{{ post.post.from }}</span>
+							<div class="middle-column-area-content">
+								<span class="strong">{{ post.post.subject }}</span>
+								<br />
+								<span class="strong-gray">{{ post.post.from }}</span><br />
 								<span class="blurb ellipsis">{{ post.post.text|striptags }}
 								</span>
 							</div>
+							
+														
+							{% if post.tags|length > 0 %}
+								<div>
+									{% for tag in post.tags %}
+										<span class="label2" style="background-color: #{{tag.color}}; float: right; position: relative; top: 5px;">{{tag.name}}</span>
+									{% endfor %}
+								</div>
+							{% endif %}
+							
+							<div>
+							<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
+
+							{% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
+								{% if post.following %}
+									<span class="label2 following" style="background-color: #3D7AA6;">Following</span>
+								{% endif %}
+							{% else %}
+								{% if post.muting %}
+									<span class="label2 muted" style="background-color: #3D7AA6;">Muted</span>
+								{% endif %}
+							{% endif %}
+							</div>
+
 						</li>
 					</a>
 				{% endfor %}

@@ -8,8 +8,27 @@ $(document).ready(function(){
 	posts_local_data = {};
 
 	groups_local_data = {};
-
  
+	window.onpopstate = function(event) {
+		if (window.location.pathname.indexOf('/posts') != -1) {
+			if (event.state.thread_id) {
+				$("#main-area").html(event.state.code);
+				posts_local_data.selected_thread = event.state.thread_id;
+				$('.row-item').css("background-color","white");
+				$('#' + event.state.thread_id).css("background-color","lightyellow");
+			} else {
+				$('.row-item').css("background-color","white");
+				$("#main-area").html(event.state.code);
+			}
+		} else {	
+			$("#group-info").html(event.state.code);
+			groups_local_data.selected_group = event.state.group_name;
+			$('.row-item').css("background-color","white");
+			$('#' + event.state.group_name).css("background-color","lightyellow");
+		}
+	};
+ 
+
 	/* Dynamic Table Definitions */	
 	
 	members_table = $('#members-table').dataTable();
@@ -199,7 +218,13 @@ $(document).ready(function(){
 		function(params){
 			$.post('list_posts', params, 
 				function(res){
-					populate_posts_table(res, params, true);
+					params.thread_id = parseInt(getUrlParameter('tid'));
+					if (params.thread_id > -1) {
+						params.load = true;
+					}
+					if (res.status) {
+						populate_posts_table(res, params, true);
+					}
 				}
 			);	
 		};
@@ -241,7 +266,9 @@ $(document).ready(function(){
 				function(res){
 					if(res.status){
 						$("#btn-follow").hide();
-                				$("#btn-unfollow").show();
+                		$("#btn-unfollow").show();
+                		$('#' + params.thread_id).children().last().children()[1].remove();
+                		$('#' + params.thread_id).children().last().append('<span class="label2 following" style="background-color: #3D7AA6;">Following</span>');
 					}
 					notify(res, true);
 				}
@@ -258,11 +285,151 @@ $(document).ready(function(){
 					if(res.status){
                        $("#btn-follow").show();
                        $("#btn-unfollow").hide();
+                       $('#' + params.thread_id).children().last().children()[1].remove();
+                       $('#' + params.thread_id).children().last().append('<span></span>');
                     }
 					notify(res, true);
 				}
 			);	
 		};
+		
+		
+	
+	mute_thread = 
+		function(params){
+			$.post('mute_thread', {'requester_email': params.requester_email, 
+						  'thread_id': params.thread_id,
+						  'msg_id': params.msg_id
+					  	}, 
+				function(res){
+					if(res.status){
+						$("#btn-mute").hide();
+                		$("#btn-unmute").show();
+                		$('#' + params.thread_id).children().last().children()[1].remove();
+                		$('#' + params.thread_id).children().last().append('<span class="label2 following" style="background-color: #3D7AA6;">Muted</span>');
+					}
+					notify(res, true);
+				}
+			);	
+		};
+	
+	unmute_thread = 
+		function(params){
+			$.post('unmute_thread', {'requester_email': params.requester_email, 
+						  'thread_id': params.thread_id,
+						  'msg_id' : params.msg_id
+					  	}, 
+				function(res){
+					if(res.status){
+                       $("#btn-mute").show();
+                       $("#btn-unmute").hide();
+                       $('#' + params.thread_id).children().last().children()[1].remove();
+                       $('#' + params.thread_id).children().last().append('<span></span>');
+                    }
+					notify(res, true);
+				}
+			);	
+		};
+		
+	upvote = 
+		function(post_id){
+			$.post('upvote', {'post_id': post_id}, 
+				function(res){
+					if(res.status){
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
+
+	unupvote = 
+		function(post_id){
+			$.post('unupvote', {'post_id': post_id}, 
+				function(res){
+					if(res.status){
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
+		
+	follow_tag = 
+		function(params){
+			$.post('follow_tag', {'group_name': params.group,
+								  'tag_name': params.tag_name}, 
+				function(res){
+					if(res.status){
+						var tag_button = $('#tag_' + params.index + '_button');
+						tag_button.text('Unfollow this tag');
+						
+						var uf_tag = bind(unfollow_tag, params);
+						tag_button.bind("click");
+						tag_button.click(uf_tag);
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
+	
+	unfollow_tag = 
+		function(params){
+			$.post('unfollow_tag', {'group_name': params.group,
+								    'tag_name': params.tag_name}, 
+				function(res){
+					if(res.status){
+						var tag_button = $('#tag_' + params.index + '_button');
+						tag_button.text('Follow this tag');
+						
+						var f_tag = bind(follow_tag, params);
+						tag_button.bind("click");
+						tag_button.click(f_tag);
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
+
+	mute_tag = 
+		function(params){
+			$.post('mute_tag', {'group_name': params.group,
+								  'tag_name': params.tag_name}, 
+				function(res){
+					if(res.status){
+						var tag_button = $('#tag_' + params.index + '_button');
+						tag_button.text('Unmute this tag');
+						
+						var um_tag = bind(unmute_tag, params);
+						tag_button.bind("click");
+						tag_button.click(um_tag);
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
+	
+	unmute_tag = 
+		function(params){
+			$.post('unmute_tag', {'group_name': params.group,
+								    'tag_name': params.tag_name}, 
+				function(res){
+					if(res.status){
+						var tag_button = $('#tag_' + params.index + '_button');
+						tag_button.text('Mute this tag');
+						
+						var m_tag = bind(mute_tag, params);
+						tag_button.bind("click");
+						tag_button.click(m_tag);
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};		
 		
 	insert_post = 
 		function(params){
@@ -272,10 +439,8 @@ $(document).ready(function(){
                         params.poster_email = params.requester_email;
 			$.post('insert_post', params, 
 				function(res){
-					if(res.status){
-                    	list_posts({'load':true, 
-                    				'active_group': params.group_name,
-                    				'thread_id':res.thread_id});
+					if (res.status) {
+						populate_posts_table(res, {'thread_id': res.thread_id, 'load': true}, false);
 					}
 					notify(res, true);
 				}
@@ -286,7 +451,7 @@ $(document).ready(function(){
 		function(params){
 			params.msg_text = CKEDITOR.instances['reply-text-input'].getData();
 			if(params.subject.substr(0,3).toLowerCase() == 're:'){
-				params.subject = params.subject.substr(3,len(params.subject)).trim();
+				params.subject = params.subject.substr(3, params.subject.length).trim();
 			}
 			params.poster_email = params.requester_email;
 			delete params.text;
@@ -330,8 +495,6 @@ $(document).ready(function(){
 				
 				var content = '<li class="row-item" id="'+ res.groups[i].name+'">';
 				content += '<span class="strong">' + res.groups[i].name + '</span>';
-				if (res.groups[i].member == true)
-					content += '<span class="member label">Member</span>';
 				
 				if (res.groups[i].admin == true)
 					content += '<span class="admin label">Admin</span>';
@@ -392,10 +555,7 @@ $(document).ready(function(){
 		members_table.fnClearTable();
 		current_group_name = res.members[0].group_name;
 		for(var i = 0; i< res.members.length; i++){
-			member = res.members[i]
-			tableData = []
-			checkbox = '<input class="checkbox" type="checkbox" id ='+ res.members[i].id + '>';
-			tableData.push(checkbox);
+			tableData = [];
 			email = res.members[i].email;
 			tableData.push(email);
 			admin = res.members[i].admin;
@@ -476,6 +636,14 @@ $(document).ready(function(){
 		info += '<br /> <br />';
 		info += '<a href="/posts?group_name=' + res.group_name + '"><button type="button">View Posts</button></a> <br /> <br />';
 		$("#group-info").html(info);
+		
+		if (getUrlParameter('group_name') == undefined) {
+			history.replaceState({'code': info, 'group_name': res.group_name}, res.group_name, "my_groups?group_name=" + res.group_name);
+		} else {
+			history.pushState({'code': info, 'group_name': res.group_name}, res.group_name, "my_groups?group_name=" + res.group_name);
+		}
+		
+   
 		$('#group-display-area').show();
 		var params = {'requester_email': res.user, 
 					  'group_name': res.group_name,
@@ -534,7 +702,7 @@ $(document).ready(function(){
 				$("#btn-activate-group").show();
 			}
 			$("#btn-add-members").show();
-			$("#btn-edit-group-info").show()
+			$("#btn-edit-group-info").show();
 		}
 		if(res.active){
 			if(res.subscribed){
@@ -547,19 +715,111 @@ $(document).ready(function(){
 
 	}
 	
-	
-	
-	function populate_posts_table(res, load_params, reset){
+	function display_posts_list(thread_list, load_params, reset, user, member_group) {
 		var posts_table = $("#posts-table"); 
 		if(reset == true){
 			posts_table.empty();
 		}
 		var selected_thread = posts_local_data.selected_thread;
 		timestamp = new Date(0);
-		if(res.status){			
-			var post_list = [];
+		
+		for (var i = 0; i< thread_list.length; i++){
+			d = format_date(new Date(thread_list[i].timestamp));
+			var content = '<div class="left-column-area-metadata">';
+			content += '<span class="gray">' + d.date + '</span><BR>';
+			content += '<span class="gray">' + d.time + '</span><BR>';
+			content += '<span class="unread">' + thread_list[i].replies.length + '</span> <br />';
+			content += '</div>';
+			content += '<div class= "left-column-area-content">';
 			
-			var params = {'requester_email': res.user};
+			subj = thread_list[i].post.subject;
+			if (subj.length > 90) {
+				content +=  '<span class="strong">' + thread_list[i].post.subject.substring(0,90) + '...</span>';
+			} else {
+				content +=  '<span class="strong">' + thread_list[i].post.subject + '</span>';
+			}
+			content += '<span class="strong-gray ellipsis">' + thread_list[i].post.from + '</span>';
+			content += '<span class="blurb ellipsis">' + strip(thread_list[i].post.text) + '</span>';
+			content += '</div>';
+			
+							
+			if (thread_list[i].tags.length > 0) {
+				content += '<div style="float: right;">';
+				for (var j = 0; j < thread_list[i].tags.length; j++) {
+					content += '<span class="label2" style="float: right; margin: 4px 2px 2px 2px; background-color: #' + thread_list[i].tags[j].color + ';">' + thread_list[i].tags[j].name + '</span> ';
+				}
+				content += '</div>';
+			}
+			
+			content += '<div>';
+			content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + thread_list[i].likes + '</span> ';
+
+			
+			if (member_group != undefined) {
+				if (member_group.no_emails == true || member_group.always_follow_thread == false) {
+					if (thread_list[i].following == true) {
+						content += '<span class="label2 following" style="background-color: #3D7AA6;">Following</span>';
+					} else {
+						content += '<span></span>';
+					}
+				} else {
+					if (thread_list[i].muting == true) {
+						content += '<span class="label2 following" style="background-color: #3D7AA6;">Muted</span>';
+					} else {
+						content += '<span></span>';
+					}
+				}
+			}
+			content += '</div>';
+
+			var curr_row = $('<li class="row-item" id="' + thread_list[i].thread_id + '">' + content + '</li>');
+			var params = {'requester_email': user,
+				'thread_id' : thread_list[i].thread_id, 
+				 'post': thread_list[i].post,
+				 'replies' : thread_list[i].replies,
+				 'following' : thread_list[i].following,
+				 'muting' : thread_list[i].muting,
+				 'tags' : thread_list[i].tags,
+				 'member_group': member_group,
+			};
+				
+			var f = bind(load_post, params);
+			if(thread_list[i].thread_id == load_params.thread_id){
+				selected_thread = thread_list[i].thread_id;
+			}
+			if(new Date(thread_list[i].timestamp) > timestamp){
+                                    timestamp = thread_list[i].timestamp;
+                            }
+
+			curr_row.on('click',f);
+			
+			if(reset){
+				posts_table.append(curr_row);
+			} else{
+			 	var row = $('#' + thread_list[i].thread_id);
+				if(row.length == 0){ 
+					posts_table.prepend(curr_row);
+				}else{
+					posts_table.prepend(curr_row);
+					row.remove();
+					if(thread_list[i].thread_id == posts_local_data.selected_thread){
+						curr_row.click();
+					}
+				}	
+			}
+		}
+		posts_local_data.timestamp = timestamp;
+		return selected_thread;
+	}
+	
+	function populate_posts_table(res, load_params, reset){
+
+		var selected_thread;
+		if (res.status){
+			selected_thread = display_posts_list(res.threads, load_params, reset, res.user, res.member_group);
+			
+			var p_list = [];
+			
 			for(var i = 0; i< res.threads.length; i++){
 				post = {'subject': res.threads[i].post.subject,
 						'text': strip(res.threads[i].post.text),
@@ -567,127 +827,89 @@ $(document).ready(function(){
 						'tid': res.threads[i].thread_id,
 						'tags': res.threads[i].tags
 						};
-				post_list.push(post);
-				d = format_date(new Date(res.threads[i].timestamp));
-				var content = '<div class="left-column-area-metadata">';
-				content += '<span class="gray">' + d.date + '</span><BR>';
-				content += '<span class="gray">' + d.time + '</span>';
-				content += '<span class="unread">' + res.threads[i].replies.length + '</span> <br />';
-				content += '</div>';
-				content += '<div class= "left-column-area-content">';
-				content +=  '<span class="strong ellipsis">' + res.threads[i].post.subject + '</span>';
-				content += '<span class="strong-gray ellipsis">' + res.threads[i].post.from + '</span>';
-				content += '<span class="blurb ellipsis">' + strip(res.threads[i].post.text) + '</span>';
-				content += '</div>';
-				
-				if (res.threads[i].tags.length > 0) {
-					content += '<div>';
-					for (var j = 0; j < res.threads[i].tags.length; j++) {
-						content += '<span class="label2" style="background-color: #' + res.threads[i].tags[j].color + ';">' + res.threads[i].tags[j].name + '</span> ';
-					}
-					content += '</div>';
-				}
-				var curr_row = $('<li class="row-item" id="' + res.threads[i].thread_id + '">' + content + '</li>');
-				var params = {'requester_email': res.user,
-						'thread_id' : res.threads[i].thread_id, 
-						 'post': res.threads[i].post,
-						 'replies' : res.threads[i].replies,
-						 'f_list' : res.threads[i].f_list,
-						 'tags' : res.threads[i].tags
-					};
-				var f = bind(load_post, params);
-				if(res.threads[i].thread_id == load_params.thread_id){
-					selected_thread = res.threads[i].thread_id;
-				}
-				if(new Date(res.threads[i].timestamp) > timestamp){
-                                        timestamp = res.threads[i].timestamp;
-                                }
-
-				curr_row.on('click',f);
-				
-				if(reset){
-					posts_table.append(curr_row);
-				}else{
-					var row = $('#' + res.threads[i].thread_id);
-					if(row.length == 0){ 
-						posts_table.prepend(curr_row);
-					}else{
-						posts_table.prepend(curr_row);
-						row.remove();
-						if(res.threads[i].thread_id == posts_local_data.selected_thread){
-							curr_row.click();
-						}
-					}	
-				}
-			
-
+				p_list.push(post);
 			}
 
-		var posts = new Bloodhound({
-			datumTokenizer: Bloodhound.tokenizers.obj.whitespace("text", "subject", "from"),
-			queryTokenizer: Bloodhound.tokenizers.whitespace,
-			local: post_list
-		});
-		posts.initialize();
+			var posts = new Bloodhound({
+				datumTokenizer: Bloodhound.tokenizers.obj.whitespace("text", "subject", "from"),
+				queryTokenizer: Bloodhound.tokenizers.whitespace,
+				local: p_list
+			});
+			posts.initialize();
 		
-		$("#text-search-post").typeahead({
-			minLength: 2,
-			highlight: true,
-			hint: false,
-		}, {
-			name: 'posts',
-			displayKey: 'subject',
-			source: posts.ttAdapter(),
-			highlighter: function(item) {
-                return item.subject + item.text;
-            },
-              templates: {
-			    empty: [
-			      '<div class="empty-message">',
-			      'unable to find any posts that match the current query',
-			      '</div>'
-			    ].join('\n'),
-			    suggestion: function (post) {
-            		return '<a href="/thread?group_name=' + res.group_name + '&tid=' + post.tid + '"><div class="suggestion">' + post.subject.trunc(43) + '<br />' + post.from + '<br />' + post.text.trunc(40) + '</div></a>';
-        }
-		  }
-            
-		}).on('typeahead:selected', function($e, datum) {
+			$("#text-search-post").typeahead({
+				minLength: 2,
+				highlight: true,
+				hint: false,
+			}, {
+				name: 'posts',
+				displayKey: 'subject',
+				source: posts.ttAdapter(),
+				highlighter: function(item) {
+	                return item.subject + item.text;
+	            },
+	            templates: {
+				    empty: [
+				      '<div class="empty-message">',
+				      'unable to find any posts that match the current query',
+				      '</div>'
+				    ].join('\n'),
+				    suggestion: function (post) {
+	            		return '<a href="/thread?group_name=' + res.group_name + '&tid=' + post.tid + '"><div class="suggestion">' + post.subject.trunc(43) + '<br />' + post.from + '<br />' + post.text.trunc(40) + '</div></a>';
+	        		}
+		 		}
+			}).on('typeahead:selected', function($e, datum) {
 				window.location.href = '/thread?group_name=' + res.group_name + '&tid=' + datum.tid;
 			});;
+		}
+		var posts_table = $("#posts-table"); 
 		
+		if (load_params.load == true){
+			posts_table.find('#' + selected_thread).click();
 		}
-		if(load_params.load == true){
-			posts_table.find('#'+selected_thread).click();
-			console.debug("load = true");
-		}
-		posts_local_data.timestamp = timestamp;
 	}
 	
 	
 	function render_post(res){
+	
 		var content = '<div class="main-area-content">';
 		content += '<div>';
 		content += '<div style="float:right">';
 		content += '<button type="button" id="btn-follow" style="margin:5px;">Follow</button>';
 		content += '<button type="button" id="btn-unfollow" style="margin:5px;">Unfollow</button>';
+		content += '<button type="button" id="btn-mute" style="margin:5px;">Mute</button>';
+		content += '<button type="button" id="btn-unmute" style="margin:5px;">Unmute</button>';
 		content += '</div>';
 		content += '<div>';
 		content += '<span class="postheader">' + res.post.subject + '</span>';
 		if (res.tags.length > 0) {
 			for (var j = 0; j < res.tags.length; j++) {
-				content += '<span class="label2" style="background-color: #' + res.tags[j].color + ';">' + res.tags[j].name + '</span> ';
+				content += '<span class="label2" style="position: relative; top: -3px; background-color: #' + res.tags[j].color + ';">' + res.tags[j].name + '</span> ';
 			}
 		}
 		content += '<br>';
 		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
 		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span> <br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp) + '</span>';
+		content += '<br />';
+		content += '<small><a href="/thread?tid=' + res.thread_id + '">Thread Permalink</a></small>';
+		
 		content += '</div>';
 		content += '</div>';
 		content += '<hr />';
 		content += res.post.text;
 		content += '<br />';
+		if (res.post.liked == true) {
+			content += '<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.post.likes + '</span>';
+			content += ' <small>  | ';
+			content += '<a style="cursor: pointer" onclick="unupvote(\'' + res.post.id + '\'); return false;">Undo +1 Post</a> ';
+		} else {
+			content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.post.likes + '</span>';
+			content += ' <small>  | ';
+			content += '<a style="cursor: pointer" onclick="upvote(\'' + res.post.id + '\'); return false;">+1 Post</a> ';
+		}
+		
+		content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.post.id + '">Permalink</a></small><br /><br />';
 		content += '<div class="reply">';
 		for(var i = 0; i< res.replies.length; i++){
                        	content += '<div class="main-area-content">';
@@ -695,7 +917,18 @@ $(document).ready(function(){
                        	content += 'on ' + new Date(res.replies[i].timestamp) + '&nbsp;';
 			content += '<br /><br />';
 		      	content +=  res.replies[i].text;
-                       	content += '</div>';
+		      	content += '<br />';
+		      	if (res.replies[i].liked == true) {
+		      		content += '<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.replies[i].likes + '</span>';
+		      		content += ' <small>  | ';
+					content += '<a style="cursor: pointer" onclick="unupvote(\'' + res.replies[i].id + '\'); return false;">Undo +1 Post</a> ';
+				} else {
+					content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.replies[i].likes + '</span>';
+		      		content += ' <small>  | ';
+		      		content += '<a style="cursor: pointer" onclick="upvote(\'' + res.replies[i].id + '\'); return false;">+1 Post</a> ';
+		        }
+		      	content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.replies[i].id + '">Permalink</a></small><br /><br />';
+                content += '</div>';
                                
                }
 		content += '</div>';
@@ -706,6 +939,9 @@ $(document).ready(function(){
 		content += '</div>';
 		$("#main-area").empty();
         $("#main-area").html(content);
+        
+        history.pushState({'code': content, 'thread_id': res.thread_id}, res.post.subject, "posts?group_name=" + $("#active_group").text() + "&tid=" + res.thread_id);
+		
         
         var gmail_quotes = $(".gmail_quote");
         var check = "---------- Forwarded message ----------";
@@ -740,26 +976,106 @@ $(document).ready(function(){
 		$("#btn-reply").unbind("click");
 		$("#btn-follow").unbind("click");
 		$("#btn-unfollow").unbind("click");
+		$("#btn-mute").unbind("click");
+		$("#btn-unmute").unbind("click");
 		$("#btn-reply").bind("click");
 		$("#btn-follow").bind("click");
 		$("#btn-unfollow").bind("click");
+		$("#btn-unfollow").bind("click");
+		$("#btn-mute").bind("click");
 		var ins_reply = bind(insert_reply, params);
 		var flw_thread = bind(follow_thread, params);
 		var unflw_thread = bind(unfollow_thread, params);
+		var m_thread = bind(mute_thread, params);
+		var um_thread = bind(unmute_thread, params);
 		$("#btn-reply").click(ins_reply);
 		$("#btn-follow").click(flw_thread);
 		$("#btn-unfollow").click(unflw_thread);
+		$("#btn-mute").click(m_thread);
+		$("#btn-unmute").click(um_thread);
 		$("#btn-follow").hide();
 		$("#btn-unfollow").hide();
-		if(res.f_list && res.f_list.indexOf(res.requester_email) != -1){
-			$("#btn-unfollow").show();
-		}else{
-			$("#btn-follow").show();
-		}  		
+		$("#btn-mute").hide();
+		$("#btn-unmute").hide();
+		if (res.member_group != undefined) {
+			var follow_mute = $('#' + res.thread_id).find('.following').text();
+
+			if (res.member_group.no_emails == true || res.member_group.always_follow_thread == false) {
+				
+				if (follow_mute == "Following") {
+					res.following = true;
+				} else {
+					res.following = false;
+				}
+
+				if (res.following){
+					$("#btn-unfollow").show();
+				} else{
+					$("#btn-follow").show();
+				} 
+			} else {
+				if (follow_mute == "Muted") {
+					res.muting = true;
+				} else {
+					res.muting = false;
+				}
+				
+				if (res.muting){
+					$("#btn-unmute").show();
+				} else{
+					$("#btn-mute").show();
+				}
+			} 
+		}		
         
 	}
 	
+	var getUrlParameter = function getUrlParameter(sParam) {
+	    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+	        sURLVariables = sPageURL.split('&'),
+	        sParameterName,
+	        i;
 	
+	    for (i = 0; i < sURLVariables.length; i++) {
+	        sParameterName = sURLVariables[i].split('=');
+	
+	        if (sParameterName[0] === sParam) {
+	            return sParameterName[1] === undefined ? true : sParameterName[1];
+	        }
+	    }
+	};
+	
+	function activate_tag_buttons(active_group) {
+		$('.tag_follow_mute').each(function(index) {
+
+			tag_type = $( this ).text();
+			tag_name = $("#tag_" + index).text();
+			
+			params = {'tag_name': tag_name, 
+					  'group': active_group,
+					  'index': index};
+			
+			if (tag_type == "Follow this tag") {
+				var f_tag = bind(follow_tag, params);
+				$(this).bind("click");
+				$(this).click(f_tag);
+			} else if (tag_type == "Unfollow this tag") {
+				var uf_tag = bind(unfollow_tag, params);
+				$(this).bind("click");
+				$(this).click(uf_tag);
+			} else if (tag_type == "Mute this tag") {
+				var m_tag = bind(mute_tag, params);
+				$(this).bind("click");
+				$(this).click(m_tag);
+			} else if (tag_type == "Unmute this tag") {
+				var um_tag = bind(unmute_tag, params);
+				$(this).bind("click");
+				$(this).click(um_tag);
+			} 
+
+			
+		});
+	}
 	
 	function new_post(res){
 		
@@ -779,6 +1095,9 @@ $(document).ready(function(){
 
         content += '</div>';
         $("#main-area").html(content);
+        
+        history.pushState({'code': content}, "New Post", "posts?group_name=" + $("#active_group").text() + '#new_post');
+		
 
 		params = {'requester_email':res.user};
 		var ins_post = bind(insert_post, params);
@@ -807,6 +1126,8 @@ $(document).ready(function(){
 
 
 	 function init_posts_page (){
+	 	history.replaceState({'code': $("#main-area").html()}, '');
+	 	
 		$.post('list_my_groups', {},
                         function(res){
                                 $("#btn-create-new-post").unbind("click");
@@ -818,6 +1139,7 @@ $(document).ready(function(){
                 );
         var active_group = $("#active_group").text();
 		list_posts({'load':false, 'active_group': active_group});
+		activate_tag_buttons(active_group);
 	}
 	
 
@@ -827,10 +1149,15 @@ $(document).ready(function(){
 	if (window.location.pathname.indexOf('/my_groups') != -1) {
 		list_groups();
 		var groups_table = $("#groups-table");
-		groups_table.children().first().click();
+		group_name = getUrlParameter('group_name');
+		if (group_name != undefined) {
+			$("#" + group_name).click();
+		} else {
+			groups_table.children().first().click();
+		}
 	} else if (window.location.pathname.indexOf('/posts') != -1) {
 		init_posts_page();	
-		setInterval(refresh_posts, 10000);
+		setInterval(refresh_posts, 50000);
 	}
 	
 	function strip(html){

@@ -59,6 +59,33 @@ class Tag(models.Model):
 	
 	class Meta:
 		unique_together = ("name", "group")
+		
+class FollowTag(models.Model):
+	id = models.AutoField(primary_key=True)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	group = models.ForeignKey('Group')
+	tag = models.ForeignKey('Tag')
+	timestamp = models.DateTimeField(auto_now=True)
+	
+	def __unicode__(self):
+		return '%s follows tag %s' % (self.user.email, self.tag.name)
+	
+	class Meta:
+		unique_together = ("user", "tag")
+
+class MuteTag(models.Model):
+	id = models.AutoField(primary_key=True)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	group = models.ForeignKey('Group')
+	tag = models.ForeignKey('Tag')
+	timestamp = models.DateTimeField(auto_now=True)
+	
+	def __unicode__(self):
+		return '%s mutes tag %s' % (self.user.email, self.tag.name)
+	
+	class Meta:
+		unique_together = ("user", "tag")
+
 
 class MemberGroup(models.Model):
 	id = models.AutoField(primary_key=True)
@@ -184,27 +211,28 @@ class Following(models.Model):
 		db_table = "mailx_following"
 
 
-class Like(models.Model):
+class Mute(models.Model):
+	id = models.AutoField(primary_key=True)
+	thread = models.ForeignKey('Thread')
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	timestamp = models.DateTimeField(auto_now=True)
+	
+	def __unicode__(self):
+		return '%s mutes Thread: %s' % (self.user.email, self.thread.id)
+
+	class Meta:
+		db_table = "mailx_mute"
+
+class Upvote(models.Model):
 	id = models.AutoField(primary_key=True)
 	post = models.ForeignKey('Post')
-	email = models.CharField(max_length=50)
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	timestamp = models.DateTimeField(auto_now=True)
+	
 	def __unicode__(self):
-		return self.name
+		return '%s likes Post %s' % (self.user.email, self.post.id)
 
 	class Meta:
 		db_table = "mailx_likes"
 
-
-
-class Dislke(models.Model):
-	id = models.AutoField(primary_key=True)
-	post = models.ForeignKey('Post')
-	email = models.CharField(max_length=50)
-	timestamp = models.DateTimeField(auto_now=True)
-	def __unicode__(self):
-		return self.name
-
-	class Meta:
-		db_table = "mailx_dislikes"
 

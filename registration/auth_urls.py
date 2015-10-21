@@ -28,6 +28,7 @@ from django.conf.urls import patterns
 from django.conf.urls import url
 
 from django.contrib.auth import views as auth_views
+from browser.views import murmur_acct
 
 
 urlpatterns = patterns('',
@@ -40,11 +41,15 @@ urlpatterns = patterns('',
                            {'template_name': 'registration/logout.html'},
                            name='auth_logout'),
                        url(r'^password/change/$',
-                           auth_views.password_change,
-                           name='auth_password_change'),
+                           murmur_acct,
+                           {'acct_func': auth_views.password_change}, 
+                           name='auth_password_change',
+                           ),
                        url(r'^password/change/done/$',
-                           auth_views.password_change_done,
-                           name='auth_password_change_done'),
+                           murmur_acct,
+                           {'acct_func': auth_views.password_change_done},
+                           name='auth_password_change_done',
+                           ),
                        url(r'^password/reset/$',
                            auth_views.password_reset,
                            name='auth_password_reset'),

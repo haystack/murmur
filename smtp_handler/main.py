@@ -157,39 +157,20 @@ def info(message, group_name=None, host=None):
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
 def handle_post(message, address=None, host=None):
-	
-	#does this fix the MySQL has gone away erro?
-	django.db.close_connection()
-	
-	address = address.lower()
-	name, addr = parseaddr(message['From'].lower())
-	reserved = filter(lambda x: address.endswith(x), RESERVED)
-	if(reserved):
+	if '+' in address and '__' in address:
 		return
 	
-	group_name = address.lower()
 	try:
-		group = Group.objects.get(name=group_name)
-	except Exception, e:
-		mail = create_error_email(addr, group_name, host, e)
-		relay.deliver(mail)
-		return
-	
-	if message['Subject'][0:4] != "Re: ":
-		orig_message = message['Subject']
-	else:
-		orig_message = re.sub("\[.*?\]", "", message['Subject'])
-	
-	email_message = email.message_from_string(str(message))
-	msg_text = get_body(email_message)
-
-	attachments = get_attachments(email_message)
-	if len(attachments['attachments']) > 0:
-		if not group.allow_attachments:
-			mail = create_error_email(addr, group_name, host, "No attachments allowed for this group.")
-			relay.deliver(mail)
+		#does this fix the MySQL has gone away erro?
+		django.db.close_connection()
+		
+		address = address.lower()
+		name, addr = parseaddr(message['From'].lower())
+		reserved = filter(lambda x: address.endswith(x), RESERVED)
+		if(reserved):
 			return
 		
+<<<<<<< HEAD
 	if attachments['error'] != '':
 		mail = create_error_email(addr, group_name, host, attachments['error'])
 		relay.deliver(mail)
@@ -217,77 +198,197 @@ def handle_post(message, address=None, host=None):
 
 	except:
 		res = {'status': False, 'code': msg_code['NOT MEMBER']}
+=======
+		group_name = address.lower()
+		try:
+			group = Group.objects.get(name=group_name)
+		except Exception, e:
+			logging.debug(e)
+			mail = create_error_email(group_name, e)
+			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = ADMIN_EMAILS)
+			return
 		
-	if(not res['status']):
-		mail = create_error_email(addr, group_name, host, res['code'])
-		relay.deliver(mail)
-		return
-
-	if message['Subject'][0:4] != "Re: ":
-		subj_tag = ''
-		for tag in res['tags']:
-			subj_tag += '[%s]' % tag
+		if message['Subject'][0:4] != "Re: ":
+			orig_message = message['Subject'].strip()
+		else:
+			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
+		
+		email_message = email.message_from_string(str(message))
+		msg_text = get_body(email_message)
+	
+		attachments = get_attachments(email_message)
+		if len(attachments['attachments']) > 0:
+			if not group.allow_attachments:
+				logging.debug("No attachments allowed for this group")
+				mail = create_error_email(group_name, "No attachments allowed for this group.")
+				relay.deliver(mail, To = addr)
+				relay.deliver(mail, To = ADMIN_EMAILS)
+				return
 			
-		subject = '[%s]%s %s' %(group_name, subj_tag,message['Subject'])
-	else:
-		subject = message['Subject']
+		if attachments['error'] != '':
+			logging.debug(attachments['error'])
+			mail = create_error_email(group_name, attachments['error'])
+			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = ADMIN_EMAILS)
+			return
+	
+		if message['Subject'][0:4] == "Re: ":
+			if 'html' in msg_text:
+				msg_text['html'] = remove_html_ps(msg_text['html'])
+			if 'plain' in msg_text:
+				msg_text['plain'] = remove_plain_ps(msg_text['plain'])
+				
+		if 'html' not in msg_text or msg_text['html'] == '':
+			msg_text['html'] = markdown(msg_text['plain'])
+		if 'plain' not in msg_text or msg_text['plain'] == '':
+			msg_text['plain'] = html2text(msg_text['html'])
+>>>>>>> upstream/master
 		
-	mail = setup_post(message['From'],
-						subject,	
-						group_name)
+		user = UserProfile.objects.get(email=addr)
 		
-	for attachment in attachments.get("attachments"):
-		mail.attach(filename=attachment['filename'],
-					content_type=attachment['mime'],
-					data=attachment['content'],
-					disposition=attachment['disposition'],
-					id=attachment['id'])
+		if message['Subject'][0:4] == "Re: ":
+			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user)
+		else:
+			res = insert_post(group_name, orig_message, msg_text['html'], user)
+			
+		if not res['status']:
+			mail = create_error_email(group_name, res['code'])
+			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = ADMIN_EMAILS)
+			return
+	
+		if message['Subject'][0:4] != "Re: ":
+			subj_tag = ''
+			for tag in res['tags']:
+				subj_tag += '[%s]' % tag['name']
+				
+			trunc_subj = re.sub("\[.*?\]", "", message['Subject'])
+			subject = '[%s]%s %s' %(group_name, subj_tag, trunc_subj)
+		else:
+			subject = message['Subject']
+			
+		mail = setup_post(message['From'],
+							subject,	
+							group_name)
+			
+		for attachment in attachments.get("attachments"):
+			mail.attach(filename=attachment['filename'],
+						content_type=attachment['mime'],
+						data=attachment['content'],
+						disposition=attachment['disposition'],
+						id=attachment['id'])
+			
+		if 'references' in message:
+			mail['References'] = message['references']
+		elif 'message-id' in message:
+			mail['References'] = message['message-id']	
+			
+	
+		if 'in-reply-to' not in message:
+			mail["In-Reply-To"] = message['message-id']
 		
-	if 'references' in message:
-		mail['References'] = message['references']
-	elif 'message-id' in message:
-		mail['References'] = message['message-id']	
+		msg_id = res['msg_id']
+		to_send =  res['recipients']
+		
+		mail['message-id'] = msg_id
+			
+		logging.debug('TO LIST: ' + str(to_send))
+		
+		g = Group.objects.get(name=group_name)
+		t = Thread.objects.get(id=res['thread_id'])
+		
+		try:
+			if len(to_send) > 0:
+				
+				recips = UserProfile.objects.filter(email__in=to_send)
+				membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
+				
+				followings = Following.objects.filter(thread=t, user__in=recips)
+				mutings = Mute.objects.filter(thread=t, user__in=recips)
+				
+				tag_followings = FollowTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+				tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+				
+				for recip in recips:
+					membergroup = membergroups.filter(member=recip)[0]
+					following = followings.filter(user=recip).exists()
+					muting = mutings.filter(user=recip).exists()
+					tag_following = tag_followings.filter(user=recip)
+					tag_muting = tag_mutings.filter(user=recip)
+				
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					
+					ps_blurb = unicode(ps_blurb)
+					
+					try:
+						# assume email is in utf-8
+						new_body = unicode(msg_text['html'], "utf-8", "ignore")
+						new_body = new_body + ps_blurb
+	
+						mail.Html = new_body
+					except UnicodeDecodeError:
+						#then try default (ascii)
+						logging.debug('unicode decode error')
+						new_body = unicode(msg_text['html'], errors="ignore")
+						new_body = new_body + ps_blurb
+	
+						mail.Html = new_body
+					except TypeError:
+						logging.debug('decoding Unicode is not supported')
+						new_body = msg_text['html']
+						mail.Html = new_body + ps_blurb
+					
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					
+					try:
+						plain_body = unicode(msg_text['plain'], "utf-8", "ignore")
+						plain_body = plain_body + ps_blurb
+						
+						mail.Body = plain_body
+					except UnicodeDecodeError:
+						# then try default (ascii)
+						logging.debug('unicode decode error')
+						plain_body = unicode(msg_text['plain'], errors="ignore")
+						plain_body = plain_body + ps_blurb
+						
+						mail.Body = plain_body
+					except TypeError:
+						logging.debug('decoding Unicode is not supported')
+						plain_body = msg_text['plain']
+						mail.Body = plain_body + ps_blurb
+		
+					relay.deliver(mail, To = recip.email)
+		except Exception, e:
+			logging.debug(e)
+			error_mail = create_error_email(group_name, e)
+			relay.deliver(error_mail, To = ADMIN_EMAILS)
+			
+			# try to deliver mail even without footers
+			mail.Html = msg_text['html']
+			mail.Body = msg_text['plain']
+			relay.deliver(mail, To = to_send)
+				
+	except Exception, e:
+		logging.debug(e)
+		mail = create_error_email(group_name, e)
+		relay.deliver(mail, To = ADMIN_EMAILS)
+		return
+	
+		
 		
 
-	if 'in-reply-to' not in message:
-		mail["In-Reply-To"] = message['message-id']
-	
-	msg_id = res['msg_id']
-	to_send =  res['recipients']
-	
-	mail['message-id'] = msg_id
 
-	ps_blurb = html_ps(group_name)
-	
-	try:
-		mail.Html = unicode(msg_text['html'] + ps_blurb)	
-	except UnicodeDecodeError:
-		mail.Html = unicode(msg_text['html'] + ps_blurb, "utf-8")
-	
-	ps_blurb = plain_ps(group_name)
-	try:
-		mail.Body = unicode(msg_text['plain'] + ps_blurb)
-	except UnicodeDecodeError:
-		mail.Body = unicode(msg_text['plain'] + ps_blurb, "utf-8")
-		
-	logging.debug('TO LIST: ' + str(to_send))
-	
-	if(len(to_send)>0):
-		relay.deliver(mail, To = to_send)
-
-
-
-@route("(group_name)\\+(thread_id)\\+(msg_id)(suffix)@(host)", group_name=".+", thread_id=".+", msg_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_follow(message, group_name=None, thread_id=None, msg_id=None, suffix=None, host=None):
-	name, addr = parseaddr(message['From'].lower())
-	msg_id = msg_id.lower()
-	res = follow_thread(thread_id, addr)
+def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = follow_thread(thread_id, email=addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Follow success.")
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Success! You are now following the thread \"%s\". You will receive emails for all following replies to this thread." % res['thread_name'])
 		relay.deliver(mail)
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message: %s" %(res['code']))
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Sorry there was an error: %s" % (res['code']))
 		relay.deliver(mail)
 	return
 
@@ -295,17 +396,111 @@ def handle_follow(message, group_name=None, thread_id=None, msg_id=None, suffix=
 
 
 
-@route("(group_name)\\+(thread_id)\\+(msg_id)(suffix)@(host)", group_name=".+", thread_id=".+", msg_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
+@route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_unfollow(message, group_name=None, thread_id=None, msg_id=None, suffix=None, host=None):
-	name, addr = parseaddr(message['From'].lower())
-	msg_id = msg_id.lower()
-	res = unfollow_thread(thread_id, addr)
+def handle_unfollow(message, group_name=None, thread_id=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = unfollow_thread(thread_id, email=addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Unfollow success")
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "You unfollowed the thread \"%s\" successfully." % res['thread_name'])
 		relay.deliver(mail)
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Error Message: %s" %(res['code']))
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Error Message: %s" %(res['code']))
+		relay.deliver(mail)
+	return
+
+
+@route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=MUTE_SUFFIX+"|"+MUTE_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_mute(message, group_name=None, thread_id=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = mute_thread(thread_id, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Success! You have now muted the thread \"%s\"." % res['thread_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Sorry there was an error: %s" % (res['code']))
+		relay.deliver(mail)
+	return
+
+
+
+
+
+@route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=UNMUTE_SUFFIX+"|"+UNMUTE_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_unmute(message, group_name=None, thread_id=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = unmute_thread(thread_id, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "You unmuted the thread \"%s\" successfully. You will receive emails for all following replies to this thread." % res['thread_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Error Message: %s" %(res['code']))
+		relay.deliver(mail)
+	return
+
+
+
+
+@route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=FOLLOW_TAG_SUFFIX+"|"+FOLLOW_TAG_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_follow_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = follow_tag(tag_name, group_name, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Success! You are now following the tag \"%s\". You will receive emails for all following emails with this tag." % res['tag_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Sorry there was an error: %s" % (res['code']))
+		relay.deliver(mail)
+	return
+
+
+
+
+
+@route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=UNFOLLOW_TAG_SUFFIX+"|"+UNFOLLOW_TAG_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_unfollow_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = unfollow_tag(tag_name, group_name, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "You unfollowed the tag \"%s\" successfully." % res['tag_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Error Message: %s" %(res['code']))
+		relay.deliver(mail)
+	return
+
+
+@route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=MUTE_TAG_SUFFIX+"|"+MUTE_TAG_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_mute_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = mute_tag(tag_name, group_name, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Success! You have now muted the tag \"%s\"." % res['tag_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Sorry there was an error: %s" % (res['code']))
+		relay.deliver(mail)
+	return
+
+
+
+
+
+@route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=UNMUTE_TAG_SUFFIX+"|"+UNMUTE_TAG_SUFFIX.upper(), host=HOST)
+@stateless
+def handle_unmute_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
+	_, addr = parseaddr(message['From'].lower())
+	res = unmute_tag(tag_name, group_name, email=addr)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "You unmuted the tag \"%s\" successfully. You will receive emails for all emails to this tag." % res['tag_name'])
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Error Message: %s" %(res['code']))
 		relay.deliver(mail)
 	return
 

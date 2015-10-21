@@ -11,15 +11,32 @@
 	<h3>Edit My Settings for <span id="group-name">{{ group_info.name }}</span></h3><hr /><br />
     <form id="group-settings-form">
 
-	{% if settings.no_emails %}
+
+		<h4>Customizing Emails: </h4> <br />
+		
+		{% if settings.always_follow_thread %}
+			<input type="radio" name="following" value="yes" id="rdo-follow" checked>
+			Receive all emails.<br />
+			<span class="italic-small">(Default) You will be emailed all emails on this list unless you mute a thread.</span><br />
+			<input type="radio" name="following" value="no" id="rdo-no-follow">
+		{% else %}
+			<input type="radio" name="following" value="yes" id="rdo-follow">
+			Receive all emails.<br />
+			<span class="italic-small">(Default) You will be emailed all emails on this list unless you mute a thread.</span><br />
+			<input type="radio" name="following" value="no" id="rdo-no-follow" checked>
+		{% endif %}
+		
+		Receive only the FIRST email in any thread.<br />
+		<span class="italic-small">You will only be emailed replies in a thread if you explicitly follow the thread. You also automatically follow a thread if you start the thread or contribute a post at any point in the thread.</span><br />
+		
+		
+			{% if settings.no_emails %}
 		<input type="checkbox" name="no-emails" value="yes" id="ck-no-email" checked>
 	{% else %}
 		<input type="checkbox" name="no-emails" value="no" id="ck-no-email">
 	{% endif %}
-	I am not interested in receiving any emails from this group except for the threads that I follow. <br />
-	<span class="italic-small"> By default this is unchecked. Check if you are not interested in getting any emails and prefer to access
-		all group communications via this website. Exceptions are made for the threads that you choose to follow by clicking on the Follow button 
-		and threads that you start or contribute to. You will receive emails from these threads.</span>
+	Receive NO emails. <br />
+	<span class="italic-small"> You will receive no emails, except for the threads you follow. You also automatically follow any threads that you start or post to.</span>
 	<br />
 	<br />
 		
@@ -28,29 +45,8 @@
 	{% else %}
 		<div id="edit-emails">
 	{% endif %}
-        
-		<h4>Customizing The Emails You Receive: </h4> <br />
-		
-		
-		<span class="strong">Replies</span>
-		<br />
-		{% if settings.always_follow_thread %}
-			<input type="radio" name="following" value="yes" id="rdo-follow" checked>
-			Always receive all replies<br />
-			<span class="italic-small">(Default) You will be emailed all replies to any posts on this list.</span><br />
-			<input type="radio" name="following" value="no" id="rdo-no-follow">
-		{% else %}
-			<input type="radio" name="following" value="yes" id="rdo-follow">
-			Always receive all replies<br />
-			<span class="italic-small">(Default) You will be emailed all replies to any posts on this list.</span><br />
-			<input type="radio" name="following" value="no" id="rdo-no-follow" checked>
-		{% endif %}
-		
-		Only receive replies when following the thread<br />
-		<span class="italic-small">You will only be emailed replies to a message if you explicitly follow the thread, started the thread, or contribute a message at any point in the thread.</span><br /><br />
-		
-	</div>
-		
+
+
 	<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Settings</button>
 	<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>
 

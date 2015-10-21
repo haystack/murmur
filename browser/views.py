@@ -15,15 +15,26 @@ import json, logging
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from annoying.decorators import render_to
-from schema.models import UserProfile, Group, MemberGroup, Tag
+from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
+	MuteTag
 from html2text import html2text
 from django.contrib.auth.forms import AuthenticationForm
 from registration.forms import RegistrationForm
 from django.conf import global_settings
 from django.db.models.aggregates import Count
+from django.http import HttpResponse
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
+
+def lamson_status(request):
+	import psutil
+	response_text = ""
+	if "lamson" in [psutil.Process(i).name() for i in psutil.pids()]:
+		response_text = "lamson running"
+	response = HttpResponse(response_text)
+	return response
+	
 
 def logout(request):
 	request.session.flush()
@@ -50,6 +61,8 @@ def error(request):
 		res['error'] = 'You do not have the admin privileges to visit this page.'
 	elif error == 'member':
 		res['error'] = 'You need to be a member of this group to visit this page.'
+	elif error == 'thread':
+		res['error'] = 'This thread no longer exists.'
 	else:
 		res['error'] = 'Unknown error.'
 	return res
@@ -68,11 +81,21 @@ def posts(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		active_group = load_groups(request, groups, user)
+		
+		thread_id = request.GET.get('tid')
+		if thread_id:
+			try:
+				group_name = Thread.objects.get(id=thread_id).group.name
+			except Thread.DoesNotExist:
+				pass
+			active_group = load_groups(request, groups, user, group_name=group_name)
+		else:
+			active_group = load_groups(request, groups, user)
+			
 		tag_info = None
 		member_info = None
 		is_member = False
-		
+
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
 			active_group['description'] = group.description
@@ -80,32 +103,36 @@ def posts(request):
 			if member.count() > 0:
 				is_member = True
 				member_info = member[0]
+	
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
+			for tag in tag_info:
+				tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
+				tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
 			
-			
-		page_info = {'user': user, "active_group": active_group, "groups": groups, "tag_info": tag_info, 'member_info': member_info}
+		page_info = {"user": user, 
+					"active_group": active_group, 
+					"groups": groups, 
+					"tag_info": tag_info, 
+					"member_info": member_info,
+					}
 		
-		if not active_group['active'] or group.public or is_member:
+		# not a member of any groups
+		if not active_group['active']:
+			return HttpResponseRedirect('/group_list')
+		elif group.public or is_member:
 			if request.flavour == "mobile":
-				if not active_group['active']:
-					return HttpResponseRedirect('/post_list')
 				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 			else:
-				if not active_group['active'] or is_member:
-					if is_member:
-						request.session['active_group'] = active_group['name']
-					#only show the default view if not mobile and no group is selected or user is member of the group
+				if is_member:
+					request.session['active_group'] = active_group['name']
 					return page_info
 				else:
-					if len(groups) == 0:
-						if request.GET.get('group_name'):
-							return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
-						else:
-							return page_info
-					else:
-						return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+					return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 		else:
-			return redirect('/404?e=member')
+			if len(groups) == 0:
+				return HttpResponseRedirect('/group_list')
+			else:
+				return redirect('/404?e=member')
 		
 	else:
 		user = None
@@ -127,17 +154,20 @@ def post_list(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
 		active_group = load_groups(request, groups, user)
 		is_member = False
+		group_name = request.GET.get('group_name')
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
-			is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+			is_member = MemberGroup.objects.filter(member=user, group=group).exists()
+			group_name = active_group['name']
 			
-		if not active_group['active'] or group.public or is_member:
+		if group.public or is_member:
 			if is_member:
-				request.session['active_group'] = active_group['name']
-			res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False, return_replies=False)
-			return {'user': request.user, 'groups': groups, 'posts': res.get('threads'), 'active_group': active_group}
+				request.session['active_group'] = group_name
+			res = engine.main.list_posts(group_name=group_name, user=user, format_datetime=False, return_replies=True)
+			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group}
 		else:
 			return redirect('/404?e=member')
 	else:
@@ -150,7 +180,7 @@ def post_list(request):
 				return redirect('/404?e=member')
 			else:
 				res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False, return_replies=False)
-				return {'user': request.user, 'groups': groups, 'posts': res.get('threads'), 'active_group': active_group}
+				return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group}
 		else:
 			return HttpResponseRedirect(global_settings.LOGIN_URL)
 		
@@ -158,20 +188,31 @@ def post_list(request):
 
 @render_to("thread.html")
 def thread(request):
+	
+	post_id = request.GET.get('post_id')
+	thread_id = request.GET.get('tid')
+	try:
+		thread = Thread.objects.get(id=int(thread_id))
+	except Thread.DoesNotExist:
+		return redirect('/404?e=thread')
+	
+	group = thread.group
+	
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		active_group = load_groups(request, groups, user)
 		
-		is_member = False
-		if active_group['active']:
-			group = Group.objects.get(name=active_group['name'])
-			is_member = MemberGroup.objects.filter(member=user, group=group).count() > 0
+		member_group = MemberGroup.objects.filter(member=user, group=group)
+		is_member = member_group.exists()
+		
+		active_group = load_groups(request, groups, user, group_name=group.name)
 			
-		if not active_group['active'] or group.public or is_member:
-			res = engine.main.load_thread(request.GET.get('group_name'), request.GET.get('tid'))
-			request.user.is_member = is_member
-			return {'user': request.user, 'groups': groups, 'thread': res, 'active_group': active_group}
+		if group.public or is_member:
+			if is_member:
+				res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
+			else:
+				res = engine.main.load_thread(thread, user=request.user)
+			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id, 'active_group': active_group}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None
@@ -179,16 +220,13 @@ def thread(request):
 	else:
 		user = None
 		groups = []
-		active_group = {'name': request.GET.get('group_name')}
-		if active_group['name']:
-			group = Group.objects.get(name=active_group['name'])
-			if not group.public:
-				return redirect('/404?e=member')
-			else:
-				res = engine.main.load_thread(request.GET.get('group_name'), request.GET.get('tid'))
-				return {'user': request.user, 'groups': groups, 'thread': res, 'active_group': active_group}
-		else:
+		active_group = {'name': group.name}
+		if not group.public:
 			return HttpResponseRedirect(global_settings.LOGIN_URL)
+		else:
+			res = engine.main.load_thread(thread)
+			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id,'active_group': active_group}
+			
 			
 
 
@@ -223,13 +261,8 @@ def my_group_list(request):
 
 @render_to("mobile_pub_list_groups.html")
 def pub_group_list(request):
-	try:
-		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = engine.main.list_groups(user)
-	except Exception:
-		user = None
-		groups = engine.main.list_groups()
-	return {'user': request.user, 'groups': groups, 'group_page': True}
+	groups = engine.main.list_groups()
+	return {'user': request.user, 'pub_groups': groups, 'group_page': True}
 
 	
 @render_to("group_page.html")
@@ -494,11 +527,11 @@ def group_info(request):
 def list_posts(request):
 	try:
 		group_name = request.POST.get('active_group')
-		res = engine.main.list_posts(group_name=group_name)
+		res = engine.main.list_posts(group_name=group_name, user=request.user.email)
 		res['user'] = request.user.email
 		res['group_name'] = group_name
 		return HttpResponse(json.dumps(res), content_type="application/json")
-	except  Exception, e:
+	except Exception, e:
 		logging.debug(e)
 		print e
 		return HttpResponse(request_error, content_type="application/json")
@@ -507,7 +540,11 @@ def list_posts(request):
 def refresh_posts(request):
 	try:
 		group_name = request.POST.get('active_group')
-		res = engine.main.list_posts(group_name=group_name, timestamp_str = request.POST['timestamp'])
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+		else:
+			user = None
+		res = engine.main.list_posts(group_name=group_name, user=user, timestamp_str = request.POST['timestamp'])
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except  Exception, e:
 		logging.debug(e)
@@ -532,19 +569,21 @@ def insert_post(request):
 		
 		msg_text = request.POST['msg_text']
 		
-		res = engine.main.insert_post(group_name, request.POST['subject'],  msg_text, user)
+		res = engine.main.insert_post_web(group_name, request.POST['subject'],  msg_text, user)
 		
 		subj_tag = ''
 		for tag in res['tags']:
-			subj_tag += '[%s]' % tag
+			subj_tag += '[%s]' % tag['name']
 			
-		subject = '[%s]%s %s' %(group_name, subj_tag, request.POST['subject'])
+		stripped_subj = re.sub("\[.*?\]", "", request.POST['subject'])
+		subject = '[%s]%s %s' %(group_name, subj_tag, stripped_subj)
 		
 		
 		msg_id = res['msg_id']
 		to_send =  res['recipients']
 		
 		post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
+<<<<<<< HEAD
 
 		mail = setup_post(user.email,
 			subject,
@@ -558,11 +597,48 @@ def insert_post(request):
 		ps_blurb = plain_ps(group_name)
 		mail.Body = html2text(msg_text) + ps_blurb	
 		
+=======
+		
+		mail = setup_post(user.email,
+					subject,	
+					group_name)
+		
+		mail['message-id'] = msg_id
+		
+		g = Group.objects.get(name=group_name)
+		t = Thread.objects.get(id=res['thread_id'])
+>>>>>>> upstream/master
 		
 		logging.debug('TO LIST: ' + str(to_send))
-		if(len(to_send)>0):
-			relay_mailer.deliver(mail, To = to_send)
+		
+		if len(to_send) > 0:
+			
+			recips = UserProfile.objects.filter(email__in=to_send)
+			membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
+			
+			followings = Following.objects.filter(thread=t, user__in=recips)
+			mutings = Mute.objects.filter(thread=t, user__in=recips)
+			
+			tag_followings = FollowTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+			tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+			
+			
+			for recip in recips:
+				membergroup = membergroups.filter(member=recip)[0]
+				following = followings.filter(user=recip).exists()
+				muting = mutings.filter(user=recip).exists()
+				tag_following = tag_followings.filter(user=recip)
+				tag_muting = tag_mutings.filter(user=recip)
 
+				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+				mail.Html = msg_text + ps_blurb	
+				
+				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+				mail.Body = html2text(msg_text) + ps_blurb	
+			
+				relay_mailer.deliver(mail, To = recip.email)
+
+		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
@@ -575,18 +651,26 @@ def insert_post(request):
 def insert_reply(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		group_name = request.POST['group_name'].encode('ascii', 'ignore')
+		thread_id = request.POST.get('thread_id')
+		group_name = request.POST.get('group_name')
+		if thread_id and not group_name:
+			group_name = Thread.objects.get(id=thread_id).group.name
+		else:
+			group_name = group_name.encode('ascii', 'ignore')
 		
 		orig_subject = request.POST['subject']
+		
 		if request.POST['subject'][0:4].lower() == "re: ":
-			orig_subject = request.POST['subject'][4:]
+			orig_subject = re.sub("\[.*?\]", "", request.POST['subject'][4:]).strip()
+		else:
+			orig_subject = re.sub("\[.*?\]", "", request.POST['subject']).strip()
 		
 		msg_text = request.POST['msg_text']
 		
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
-		thread_id = request.POST.get('thread_id', None)
 		
-		res = engine.main.insert_reply(group_name, 'Re: ' + request.POST['subject'], msg_text, user, thread_id=thread_id)
+		
+		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, thread_id=thread_id)
 		if(res['status']):
 			
 			to_send =  res['recipients']
@@ -595,7 +679,7 @@ def insert_reply(request):
 					
 			subj_tag = ''
 			for tag in res['tags']:
-				subj_tag += '[%s]' % tag
+				subj_tag += '[%s]' % tag['name']
 			
 			subject = 'Re: [%s]%s %s' %(group_name, subj_tag, orig_subject)
 
@@ -607,36 +691,242 @@ def insert_reply(request):
 			mail['message-id'] = res['msg_id']
 			
 			mail["In-Reply-To"] = msg_id
-				
-			ps_blurb = html_ps(group_name)
-			mail.Html = msg_text + ps_blurb		
 			
-			ps_blurb = plain_ps(group_name)
-			mail.Body = html2text(msg_text) + ps_blurb	
+			g = Group.objects.get(name=group_name)
+			t = Thread.objects.get(id=res['thread_id'])
 			
 			logging.debug('TO LIST: ' + str(to_send))
-			if(len(to_send)>0):
-				relay_mailer.deliver(mail, To = to_send)
+			
+			if len(to_send) > 0:
+				
+				recips = UserProfile.objects.filter(email__in=to_send)
+				membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
+				
+				followings = Following.objects.filter(thread=t, user__in=recips)
+				mutings = Mute.objects.filter(thread=t, user__in=recips)
+				
+				tag_followings = FollowTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+				tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+				
+				for recip in recips:
+					membergroup = membergroups.filter(member=recip)[0]
+					following = followings.filter(user=recip).exists()
+					muting = mutings.filter(user=recip).exists()
+					tag_following = tag_followings.filter(user=recip)
+					tag_muting = tag_mutings.filter(user=recip)
+
+	
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					mail.Html = msg_text + ps_blurb	
+					
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					mail.Body = html2text(msg_text) + ps_blurb	
+				
+					relay_mailer.deliver(mail, To = recip.email)
+					
+		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print sys.exc_info()
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 	
+@render_to("follow_tag.html")
+@login_required
+def follow_tag_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		tag_name = request.GET.get('tag')
+		group_name = request.GET.get('group')
+		res = engine.main.follow_tag(tag_name, group_name, user=user)
+		
+		active_group = load_groups(request, groups, user, group_name=group_name)
+		
+		return {'res': res, 'type': 'follow', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect("%s?next=/follow_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
+
+@render_to("follow_tag.html")
+@login_required
+def unfollow_tag_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		tag_name = request.GET.get('tag')
+		group_name = request.GET.get('group')
+		res = engine.main.unfollow_tag(tag_name, group_name, user=user)
+		
+		active_group = load_groups(request, groups, user, group_name=group_name)
+		
+		return {'res': res, 'type': 'unfollow', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect("%s?next=/unfollow_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
+
+@render_to("follow_tag.html")
+@login_required
+def mute_tag_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		tag_name = request.GET.get('tag')
+		group_name = request.GET.get('group')
+		res = engine.main.mute_tag(tag_name, group_name, user=user)
+		
+		active_group = load_groups(request, groups, user, group_name=group_name)
+		
+		return {'res': res, 'type': 'mut', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect("%s?next=/mute_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
+
+@render_to("follow_tag.html")
+@login_required
+def unmute_tag_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		tag_name = request.GET.get('tag')
+		group_name = request.GET.get('group')
+		res = engine.main.unmute_tag(tag_name, group_name, user=user)
+		
+		active_group = load_groups(request, groups, user, group_name=group_name)
+		
+		return {'res': res, 'type': 'unmut', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect("%s?next=/unmute_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
+
+	
+
+@render_to("follow_thread.html")
+@login_required
+def follow_thread_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		thread_id = request.GET.get('tid')
+		res = engine.main.follow_thread(thread_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
+		return {'res': res, 'type': 'follow', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + "?next=/follow?tid=" + request.GET.get('tid'))
+
+@render_to("follow_thread.html")
+@login_required
+def unfollow_thread_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		thread_id = request.GET.get('tid')
+		res = engine.main.unfollow_thread(thread_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
+		return {'res': res, 'type': 'unfollow', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + "?next=/unfollow?tid=" + request.GET.get('tid'))
+	
+@render_to("follow_thread.html")
+@login_required
+def mute_thread_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		
+		thread_id = request.GET.get('tid')
+		res = engine.main.mute_thread(thread_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
+		return {'res': res, 'type': 'mut', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + "?next=/mute?tid=" + request.GET.get('tid'))
+
+@render_to("follow_thread.html")
+@login_required
+def unmute_thread_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+
+		thread_id = request.GET.get('tid')
+		res = engine.main.unmute_thread(thread_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
+		return {'res': res, 'type': 'unmut', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + "?next=/unmute?tid=" + request.GET.get('tid'))
+
+
+@login_required
+def upvote(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.upvote(request.POST['post_id'], user=user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+	
+@login_required
+def unupvote(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.unupvote(request.POST['post_id'], user=user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@render_to("upvote.html")
+@login_required
+def upvote_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+
+		post_id = request.GET.get('post_id')
+		res = engine.main.upvote(post_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
+		return {'res': res, 'type': 'upvoted', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + "?next=/upvote_get?post_id=" + request.GET.get('post_id'))
+	
+@render_to("upvote.html")
+@login_required
+def unupvote_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+
+		post_id = request.GET.get('post_id')
+		res = engine.main.unupvote(post_id, user=user)
+		active_group = load_groups(request, groups, user, group_name=res['group_name'])
+		
+		return {'res': res, 'type': 'undid your upvote of', 'user': request.user, 'groups': groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + "?next=/unupvote_get?post_id=" + request.GET.get('post_id'))
+
+@login_required
 def follow_thread(request):
 	try:
 		if request.user.is_authenticated():
 			user = get_object_or_404(UserProfile, email=request.user.email)
-			res = engine.main.follow_thread(request.POST['thread_id'], user)
+			res = engine.main.follow_thread(request.POST['thread_id'], user=user)
 			return HttpResponse(json.dumps(res), content_type="application/json")
 		else:
-			group = request.POST['group_name']
 			thread = request.POST['thread_id']
 			return HttpResponse(json.dumps({'redirect': True, 
-										'url': global_settings.LOGIN_URL + "?next=/thread?group_name=" + group + "&tid=" + thread}), 
+										'url': global_settings.LOGIN_URL + "?next=/thread?tid=" + thread}), 
 										content_type="application/json")
 	except Exception, e:
-		print request
 		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
@@ -645,13 +935,95 @@ def follow_thread(request):
 def unfollow_thread(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		res = engine.main.unfollow_thread(request.POST['thread_id'], user)
+		res = engine.main.unfollow_thread(request.POST['thread_id'], user=user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def follow_tag(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.follow_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def unfollow_tag(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.unfollow_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def mute_tag(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.mute_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def unmute_tag(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.unmute_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
 
 
+@login_required
+def mute_thread(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			res = engine.main.mute_thread(request.POST['thread_id'], user=user)
+			return HttpResponse(json.dumps(res), content_type="application/json")
+		else:
+			thread = request.POST['thread_id']
+			return HttpResponse(json.dumps({'redirect': True, 
+										'url': global_settings.LOGIN_URL + "?next=/thread?tid=" + thread}), 
+										content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def unmute_thread(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.unmute_thread(request.POST['thread_id'], user=user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def murmur_acct(request, acct_func=None):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	active_group = load_groups(request, groups, user)
+	return acct_func(request, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
 
