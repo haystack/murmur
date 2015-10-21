@@ -264,6 +264,18 @@ $(document).ready(function(){
 			);	
 			
 		};
+
+	unupvote = 
+		function(post_id){
+			$.post('unupvote', {'post_id': post_id}, 
+				function(res){
+					if(res.status){
+                    }
+					notify(res, true);
+				}
+			);	
+			
+		};
 		
 	follow_tag = 
 		function(params){
@@ -779,9 +791,15 @@ $(document).ready(function(){
 		content += '<hr />';
 		content += res.post.text;
 		content += '<br />';
-		content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.post.likes + '</span>';
-		
-		content += ' <small>  | <a style="cursor: pointer" onclick="upvote(\'' + res.post.id + '\'); return false;">+1 Post</a> ';
+		if (res.post.liked == true) {
+			content += '<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.post.likes + '</span>';
+			content += ' <small>  | ';
+			content += '<a style="cursor: pointer" onclick="unupvote(\'' + res.post.id + '\'); return false;">Undo +1 Post</a> ';
+		} else {
+			content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.post.likes + '</span>';
+			content += ' <small>  | ';
+			content += '<a style="cursor: pointer" onclick="upvote(\'' + res.post.id + '\'); return false;">+1 Post</a> ';
+		}
 		
 		content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.post.id + '">Permalink</a></small><br /><br />';
 		content += '<div class="reply">';
@@ -792,9 +810,15 @@ $(document).ready(function(){
 			content += '<br /><br />';
 		      	content +=  res.replies[i].text;
 		      	content += '<br />';
-		      	content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.replies[i].likes + '</span>';
-		
-		      	content += ' <small>  | <a style="cursor: pointer" onclick="upvote(\'' + res.replies[i].id + '\'); return false;">+1 Post</a> ';
+		      	if (res.replies[i].liked == true) {
+		      		content += '<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.replies[i].likes + '</span>';
+		      		content += ' <small>  | ';
+					content += '<a style="cursor: pointer" onclick="unupvote(\'' + res.replies[i].id + '\'); return false;">Undo +1 Post</a> ';
+				} else {
+					content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.replies[i].likes + '</span>';
+		      		content += ' <small>  | ';
+		      		content += '<a style="cursor: pointer" onclick="upvote(\'' + res.replies[i].id + '\'); return false;">+1 Post</a> ';
+		        }
 		      	content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.replies[i].id + '">Permalink</a></small><br /><br />';
                 content += '</div>';
                                

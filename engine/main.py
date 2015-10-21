@@ -388,7 +388,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 			following = False
 			muting = False
 			
-			if user != None:
+			if user:
 				u = UserProfile.objects.get(email=user)
 				following = Following.objects.filter(thread=t, user=u).exists()
 				muting = Mute.objects.filter(thread=t, user=u).exists()
@@ -405,6 +405,9 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 			
 			for p in posts:
 				post_likes = p.upvote_set.count()
+				user_liked = False
+				if user:
+					user_liked = p.upvote_set.filter(user=u).exists()
 				thread_likes += post_likes
 				post_dict = {'id': p.id,
 							'msg_id': p.msg_id, 
@@ -413,6 +416,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 							'to': p.group.name, 
 							'subject': escape(p.subject),
 							'likes': post_likes, 
+							'liked': user_liked,
 							'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 							'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp}
 				if not p.reply_to_id:
@@ -462,6 +466,9 @@ def load_thread(t, user=None, member=None):
 	for p in posts:
 		post_likes = p.upvote_set.count()
 		total_likes += post_likes
+		user_liked = False
+		if user:
+			user_liked = p.upvote_set.filter(user=user).exists()
 		post_dict = {
 					'id': str(p.id),
 					'msg_id': p.msg_id, 
@@ -469,6 +476,7 @@ def load_thread(t, user=None, member=None):
 					'from': p.author.email, 
 					'likes': post_likes,
 					'to': p.group.name, 
+					'liked': user_liked,
 					'subject': escape(p.subject), 
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 					'timestamp': p.timestamp
