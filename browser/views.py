@@ -209,7 +209,8 @@ def my_groups(request):
 		return HttpResponseRedirect('/my_group_list')
 	else:
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
+		info = engine.main.check_admin(user, groups)
+		return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info': info}
 
 
 @render_to("mobile_list_groups.html")

@@ -51,7 +51,6 @@ $(document).ready(function(){
 			});	
 	};
 	
-
 	group_info = 
 		function(params){
 			$.post('group_info', params, 
@@ -60,6 +59,7 @@ $(document).ready(function(){
 					populate_group_info(res);
 					populate_members_table(res);
 					groups_local_data.selected_group = params.group_name;
+					groups_local_data.members = res.members
             		$('.row-item').css("background-color","white");
             		$('#' + params.group_name).css("background-color","lightyellow");
 					notify(res, false);
@@ -73,20 +73,32 @@ $(document).ready(function(){
 	var select_column = $("#adminSelectOnly");
 
 	var toDelete = ""
+	var toDeleteList = []
 	var toAdmin = ""
 	var	toMod = ""
 
 	edit_members_table_del=
 		function(params){
-			var c = confirm("Are you sure you want to delete the selected emails?");
-			if (c){
 				$('.checkbox').each(function() {
-				if (this.checked==true)
+				if (this.checked==true){
 					toDelete= toDelete + (this.id) + ",";
+					toDeleteList.push(this.id)}
 				});
 				params.toAdmin = toAdmin
 				params.toMod = toMod
 				params.toDelete = toDelete
+			names = []
+			for (var j=0; j<toDeleteList.length; j++){
+				for (var i = 0; i<groups_local_data.members.length; i++){
+					if (groups_local_data.members[i].id == toDeleteList[j]){
+						names.push(groups_local_data.members[i].email);
+					}
+				}
+			}
+			names = names.join(',');
+			names = "Are you sure you want to delete the selected users: "+names+"?";
+			var c = confirm(names);
+			if (c){
 				$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
@@ -382,10 +394,8 @@ $(document).ready(function(){
 		for(var i = 0; i< res.members.length; i++){
 			member = res.members[i]
 			tableData = []
-			if (res.admin){
 			checkbox = '<input class="checkbox" type="checkbox" id ='+ res.members[i].id + '>';
 			tableData.push(checkbox);
-		}
 			email = res.members[i].email;
 			tableData.push(email);
 			admin = res.members[i].admin;
