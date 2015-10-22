@@ -9,7 +9,7 @@ class Post(models.Model):
 	id = models.AutoField(primary_key=True)
 	author = models.ForeignKey(settings.AUTH_USER_MODEL)
 	subject = models.TextField()
-	msg_id = models.CharField(max_length=90, unique=True)
+	msg_id = models.CharField(max_length=120, unique=True)
 	post = models.TextField()
 	group = models.ForeignKey('Group')
 	thread = models.ForeignKey('Thread')
