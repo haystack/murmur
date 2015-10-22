@@ -247,7 +247,8 @@ def my_groups(request):
 		return HttpResponseRedirect('/my_group_list')
 	else:
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
+		info = engine.main.check_admin(user,groups)
+		return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info':info}
 
 
 @render_to("mobile_list_groups.html")
@@ -389,6 +390,17 @@ def edit_group_info(request):
 			if active_group == old_group_name:
 				request.session['active_group'] = new_group_name
 
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def edit_members(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.edit_members_table(request.POST['group_name'], request.POST['toDelete'], request.POST['toAdmin'], request.POST['toMod'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

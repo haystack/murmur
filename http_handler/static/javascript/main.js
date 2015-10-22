@@ -81,12 +81,95 @@ $(document).ready(function(){
 					populate_group_info(res);
 					populate_members_table(res);
 					groups_local_data.selected_group = params.group_name;
+					groups_local_data.members = res.members
             		$('.row-item').css("background-color","white");
             		$('#' + params.group_name).css("background-color","lightyellow");
 					notify(res, false);
 				}
 			);	
 		};
+
+	var btn_delete_members = $("#btn-delete-members");
+	var btn_set_admin = $("#btn-set-admin");
+	var btn_set_mod = $("#btn-set-mod");
+
+	var toDelete = "";
+	var toDeleteList = [];
+	var toAdmin = "";
+	var toMod = "";
+
+	edit_members_table_del=
+		function(params){
+			$('.checkbox').each(function() {
+				if (this.checked==true){
+					toDelete= toDelete + (this.id) + ",";
+					toDeleteList.push(this.id)
+				}
+			});
+			params.toDelete = toDelete
+			params.toAdmin = toAdmin
+			params.toMod = toMod
+			names = []
+			for (var j=0; j<toDeleteList.length; j++){
+				for (var i = 0; i<groups_local_data.members.length; i++){
+					if (groups_local_data.members[i].id == toDeleteList[j]){
+						names.push(groups_local_data.members[i].email);
+					}
+				}
+			}
+			names = names.join(',');
+			names = "Are you sure you want to delete the selected users: "+names+"?";
+			var c = confirm(names);
+			if (c){
+			$.post('/edit_members', params,
+					function(res){
+						notify(res,true);
+							setTimeout(function(){
+							window.location.reload();
+						},400);
+					}
+				);
+			};
+		};
+
+	edit_members_table_makeADMIN = 
+		function(params){
+			$('.checkbox').each(function() {
+			if (this.checked==true)
+				toAdmin= toAdmin + (this.id) + ",";
+		});
+			params.toDelete = toDelete
+			params.toAdmin = toAdmin
+			params.toMod = toMod
+			$.post('/edit_members', params,
+					function(res){
+						notify(res,true);
+							setTimeout(function(){
+							window.location.reload();
+						},400);
+					}
+				);
+			};
+
+	edit_members_table_makeMOD = 
+		function(params){
+			$('.checkbox').each(function() {
+				if (this.checked==true)
+ 					toMod = toMod + (this.id) + ",";
+ 			});
+ 			params.toDelete = toDelete
+			params.toAdmin = toAdmin
+			params.toMod = toMod
+			$.post('/edit_members', params,
+					function(res){
+						notify(res,true);
+							setTimeout(function(){
+							window.location.reload();
+						},400);
+					}
+				);
+			};
+
 
 	subscribe_group = 
 		function(params){
@@ -475,12 +558,16 @@ $(document).ready(function(){
 	
 	function populate_members_table(res){
 		members_table.fnClearTable();
+		current_group_name = res.members[0].group_name;
 		for(var i = 0; i< res.members.length; i++){
+			member = res.members[i];
 			tableData = [];
+			checkbox = '<input class="checkbox" type="checkbox" id ='+ res.members[i].id + '>';
 			email = res.members[i].email;
-			tableData.push(email);
 			admin = res.members[i].admin;
 			moderator = res.members[i].moderator;
+			tableData.push(checkbox);
+			tableData.push(email);
 			if (admin == true) {
 				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');					;
 			}
@@ -494,9 +581,42 @@ $(document).ready(function(){
 				tableData.push(" ");
 			}
 			curr = members_table.fnAddData(tableData);
+
+			if (!res.admin){
+				members_table.fnSetColumnVis(0, false);
+			}
+			else{
+				members_table.fnSetColumnVis(0, true);
+			}
+		}
+
+		var params = {'group_name': current_group_name,
+			};
+		var delete_members = bind(edit_members_table_del, params);
+		var make_admin = bind(edit_members_table_makeADMIN, params);
+		var make_mod = bind(edit_members_table_makeMOD, params);
+		btn_delete_members.unbind("click");
+		btn_delete_members.bind("click");
+		btn_delete_members.click(delete_members);
+		btn_set_mod.unbind("click");
+		btn_set_mod.bind("click");
+		btn_set_mod.click(make_mod);
+		btn_set_admin.unbind("click");
+		btn_set_admin.bind("click");
+		btn_set_admin.click(make_admin);
+
+		if (!res.admin){
+			btn_delete_members.hide();
+			btn_set_admin.hide();
+			btn_set_mod.hide();
+		}
+		else{
+			btn_delete_members.show();
+			btn_set_admin.show();
+			btn_set_mod.show();
 		}
 		
-	}
+	};
 	
 	function notify(res, on_success){
 		if(!res.status){
