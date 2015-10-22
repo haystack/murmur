@@ -94,34 +94,16 @@ $(document).ready(function(){
 		};	
 
 	var toDelete = ""
+	var toDeleteList = [];
 	var toAdmin = ""
 	var	toMod = ""
 
 	edit_members_table_del=
 		function(params){
-			console.log("edit members table del");
+			console.log(params);
 			$('.checkbox').each(function() {
 			if (this.checked==true)
 				toDelete= toDelete + (this.id) + ",";
-			});
-			params.toAdmin = toAdmin
-			params.toMod = toMod
-			params.toDelete = toDelete
-			console.log(params);
-			$.post('/edit_members', params,
-					function(res){
-						notify(res,true);
-						setTimeout(function(){
-						window.location.reload();
-						},400);
-					}
-				);
-			};
-	edit_members_table_makeADMIN = 
-		function(params){
-			$('.checkbox').each(function() {
-			if (this.checked==true)
-				toAdmin= toAdmin + (this.id) + ",";
 			});
 			params.toAdmin = toAdmin
 			params.toMod = toMod
@@ -135,7 +117,25 @@ $(document).ready(function(){
 					}
 				);
 			};
-	edit_members_table_makeMOD = 
+	edit_members_table_makeADMIN =
+		function(params){
+			$('.checkbox').each(function() {
+			if (this.checked==true)
+				toAdmin= toAdmin + (this.id) + ",";
+			});
+			params.toAdmin = toAdmin
+			params.toMod = toMod
+			params.toDelete = toDelete
+			$.post('/edit_members', params,
+					function(res){
+						notify(res,true);
+					setTimeout(function(){
+							window.location.reload();
+						},400);
+					}
+				);
+			};
+	edit_members_table_makeMOD =
 		function(params){
 			$('.checkbox').each(function() {
 				if (this.checked==true)
@@ -147,7 +147,7 @@ $(document).ready(function(){
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
-						setTimeout(function(){
+					setTimeout(function(){
 							window.location.reload();
 						},400);
 					}
@@ -167,7 +167,7 @@ $(document).ready(function(){
  		btn_unsubscribe_group.unbind("click");
  		btn_add_members.unbind("click");
  		btn_delete_members.unbind("click");
-		btn_set_mod.unbind("click");
+ 		btn_set_mod.unbind("click");
  		btn_set_admin.unbind("click");
  		
  		btn_edit_group_info.bind("click");
@@ -180,10 +180,9 @@ $(document).ready(function(){
  		btn_delete_members.bind("click");
  		btn_set_mod.bind("click");
  		btn_set_admin.bind("click");
-
  		
 		var params = {'group_name': group_name};
- 		
+
  		var act_group = bind(activate_group, params);
 		var deact_group = bind(deactivate_group, params);
 		var sub_group = bind(subscribe_group, params);
@@ -199,7 +198,7 @@ $(document).ready(function(){
 		btn_delete_members.click(delete_members);
 		btn_set_mod.click(make_mod);
 		btn_set_admin.click(make_admin);
-		
+
 		btn_add_members.click(function() {
 			window.location = '/groups/' + group_name + '/add_members';
 		});

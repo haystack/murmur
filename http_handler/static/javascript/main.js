@@ -5,7 +5,6 @@ String.prototype.trunc = String.prototype.trunc ||
 
 $(document).ready(function(){
 	/* Global Objects */
-
 	posts_local_data = {};
 
 	groups_local_data = {};
@@ -71,8 +70,6 @@ $(document).ready(function(){
 			});	
 	};
 	
-	
-	
 	group_info = 
 		function(params){
 			$.post('group_info', params, 
@@ -86,7 +83,7 @@ $(document).ready(function(){
             		$('#' + params.group_name).css("background-color","lightyellow");
 					notify(res, false);
 				}
-			);	
+			);
 		};
 
 	var btn_delete_members = $("#btn-delete-members");
@@ -109,6 +106,7 @@ $(document).ready(function(){
 			params.toDelete = toDelete
 			params.toAdmin = toAdmin
 			params.toMod = toMod
+
 			names = []
 			for (var j=0; j<toDeleteList.length; j++){
 				for (var i = 0; i<groups_local_data.members.length; i++){
@@ -137,14 +135,14 @@ $(document).ready(function(){
 			$('.checkbox').each(function() {
 			if (this.checked==true)
 				toAdmin= toAdmin + (this.id) + ",";
-		});
-			params.toDelete = toDelete
+			});
 			params.toAdmin = toAdmin
 			params.toMod = toMod
+			params.toDelete = toDelete
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
-							setTimeout(function(){
+						setTimeout(function(){
 							window.location.reload();
 						},400);
 					}
@@ -155,15 +153,15 @@ $(document).ready(function(){
 		function(params){
 			$('.checkbox').each(function() {
 				if (this.checked==true)
- 					toMod = toMod + (this.id) + ",";
- 			});
- 			params.toDelete = toDelete
+					toMod = toMod + (this.id) + ",";
+			});
 			params.toAdmin = toAdmin
 			params.toMod = toMod
+			params.toDelete = toDelete
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
-							setTimeout(function(){
+						setTimeout(function(){
 							window.location.reload();
 						},400);
 					}
@@ -555,7 +553,7 @@ $(document).ready(function(){
 			});
 		}
 	}
-	
+
 	function populate_members_table(res){
 		members_table.fnClearTable();
 		current_group_name = res.members[0].group_name;
@@ -569,16 +567,16 @@ $(document).ready(function(){
 			tableData.push(checkbox);
 			tableData.push(email);
 			if (admin == true) {
-				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');					;
+				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');
 			}
 			else {
-				tableData.push(" ");
+				tableData.push('');
 			}
 			if (moderator == true) {
-				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');					;
+				tableData.push('<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>');
 			}
 			else {
-				tableData.push(" ");
+				tableData.push('');
 			}
 			curr = members_table.fnAddData(tableData);
 
@@ -589,9 +587,10 @@ $(document).ready(function(){
 				members_table.fnSetColumnVis(0, true);
 			}
 		}
+		var params = {
+				'group_name': current_group_name,
+				};
 
-		var params = {'group_name': current_group_name,
-			};
 		var delete_members = bind(edit_members_table_del, params);
 		var make_admin = bind(edit_members_table_makeADMIN, params);
 		var make_mod = bind(edit_members_table_makeMOD, params);
@@ -615,8 +614,8 @@ $(document).ready(function(){
 			btn_set_admin.show();
 			btn_set_mod.show();
 		}
-		
-	};
+		};
+
 	
 	function notify(res, on_success){
 		if(!res.status){

@@ -251,6 +251,7 @@ def my_groups(request):
 		return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info':info}
 
 
+
 @render_to("mobile_list_groups.html")
 @login_required
 def my_group_list(request):

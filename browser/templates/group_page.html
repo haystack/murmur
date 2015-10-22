@@ -104,15 +104,20 @@
 					<tr>
 						{% if group_info.admin %}
 						<th>Select</th>
-						{% else %}
-
-						{% endif %}
 						<th>Email</th>
 						{% if flavour != "mobile" %}
 							<th>Joined</th>
 							<th>Admin</th>
 							<th>Moderator</th>
 						{% endif %}
+					{% else %}
+						<th>Email</th>
+						{% if flavour != "mobile" %}
+							<th>Joined</th>
+							<th>Admin</th>
+							<th>Moderator</th>
+						{% endif %}
+					{% endif %}
 					</tr>
 				</thead>
 				
@@ -120,15 +125,20 @@
 					<tr>
 						{% if group_info.admin %}
 						<th>Select</th>
-						{% else %}
-
-						{% endif %}
 						<th>Email</th>
 						{% if flavour != "mobile" %}
 							<th>Joined</th>
 							<th>Admin</th>
 							<th>Moderator</th>
 						{% endif %}
+					{% else %}
+						<th>Email</th>
+						{% if flavour != "mobile" %}
+							<th>Joined</th>
+							<th>Admin</th>
+							<th>Moderator</th>
+						{% endif %}
+					{% endif %}
 					</tr>
 				</tfoot>
 				
@@ -143,9 +153,6 @@
 						
 						{% if group_info.admin %}
 						<td><input class="checkbox" type="checkbox" id ={{ member.id }}></td>
-						{% else %}
-
-						{% endif %}
 						<td>{{ member.email }}</td>
 						{% if flavour != "mobile" %}
 							<td>{{ member.joined }}</td>
@@ -161,6 +168,23 @@
 							{% endif %}
 						{% endif %}
 					</tr>
+						{% else %}
+						<td>{{ member.email }}</td>
+						{% if flavour != "mobile" %}
+							<td>{{ member.joined }}</td>
+							{% if member.admin %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+							{% endif %}
+							{% if member.mod %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+							{% endif %}
+						{% endif %}
+					</tr>
+						{% endif %}
 					{% endfor %}
 				</tbody>
 			</table>	
