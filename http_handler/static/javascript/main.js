@@ -258,6 +258,12 @@ $(document).ready(function(){
 			$.post('upvote', {'post_id': post_id}, 
 				function(res){
 					if(res.status){
+						var upvotes = parseInt($('#post-' + post_id).children('.label2').text().substring(1)) + 1;
+						$('#post-' + post_id).children('.label2').text('+' + upvotes);
+						$('#post-' + post_id).children('.label2').css({'background-color': 'lightyellow'});
+						$('#post-' + post_id).children('small').children().eq(0).replaceWith('<a style="cursor: pointer" onclick="unupvote(\'' + post_id + '\', \'' + thread_id + '\'); return false;">Undo +1 Post</a>');
+                    	var thread_votes = parseInt($('#' + thread_id).find('.upvotes').text().substring(1)) + 1;
+                    	$('#' + thread_id).find('.upvotes').text('+' + thread_votes);
                     }
 					notify(res, true);
 				}
@@ -270,6 +276,12 @@ $(document).ready(function(){
 			$.post('unupvote', {'post_id': post_id}, 
 				function(res){
 					if(res.status){
+						var upvotes = parseInt($('#post-' + post_id).children('.label2').text().substring(1)) - 1;
+						$('#post-' + post_id).children('.label2').text('+' + upvotes);
+						$('#post-' + post_id).children('.label2').css({'background-color': '#ffffff'});
+						$('#post-' + post_id).children('small').children().eq(0).replaceWith('<a style="cursor: pointer" onclick="upvote(\'' + post_id + '\', \'' + thread_id + '\'); return false;">+1 Post</a>');
+                    	var thread_votes = parseInt($('#' + thread_id).find('.upvotes').text().substring(1)) - 1;
+                    	$('#' + thread_id).find('.upvotes').text('+' + thread_votes);
                     }
 					notify(res, true);
 				}
@@ -644,7 +656,7 @@ $(document).ready(function(){
 			}
 			
 			content += '<div>';
-			content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + thread_list[i].likes + '</span> ';
+			content += '<span class="label2 upvotes" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + thread_list[i].likes + '</span> ';
 
 			
 			if (member_group != undefined) {
