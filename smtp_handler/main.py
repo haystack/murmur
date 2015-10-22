@@ -215,7 +215,13 @@ def handle_post(message, address=None, host=None):
 		if 'plain' not in msg_text or msg_text['plain'] == '':
 			msg_text['plain'] = html2text(msg_text['html'])
 		
-		user = UserProfile.objects.get(email=addr)
+		try:
+			user = UserProfile.objects.get(email=addr)
+		except UserProfile.DoesNotExist:
+			mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = ADMIN_EMAILS)
+			return
 		
 		if message['Subject'][0:4] == "Re: ":
 			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user)
