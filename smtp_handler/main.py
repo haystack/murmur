@@ -287,6 +287,11 @@ def handle_post(message, address=None, host=None):
 				tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
 				
 				for recip in recips:
+					
+					#Don't send email to the sender if it came from email
+					if recip.email == addr:
+						continue
+					
 					membergroup = membergroups.filter(member=recip)[0]
 					following = followings.filter(user=recip).exists()
 					muting = mutings.filter(user=recip).exists()
