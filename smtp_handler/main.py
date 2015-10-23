@@ -259,20 +259,25 @@ def handle_post(message, address=None, host=None):
 			mail['References'] = message['references']
 		elif 'message-id' in message:
 			mail['References'] = message['message-id']	
-			
 	
 		if 'in-reply-to' not in message:
 			mail["In-Reply-To"] = message['message-id']
-		
+	
 		msg_id = res['msg_id']
 		to_send =  res['recipients']
 		
 		mail['message-id'] = msg_id
+		
+		ccs = email_message.get_all('cc', None)
+		if ccs:
+			mail['Cc'] = ','.join(ccs)
 			
 		logging.debug('TO LIST: ' + str(to_send))
 		
 		g = Group.objects.get(name=group_name)
 		t = Thread.objects.get(id=res['thread_id'])
+		
+		direct_recips = get_direct_recips(email_message)
 		
 		try:
 			if len(to_send) > 0:
@@ -288,8 +293,12 @@ def handle_post(message, address=None, host=None):
 				
 				for recip in recips:
 					
-					#Don't send email to the sender if it came from email
+					# Don't send email to the sender if it came from email
 					if recip.email == addr:
+						continue
+					
+					# Don't send email to people that already directly got the email via CC/BCC
+					if recip.email in direct_recips:
 						continue
 					
 					membergroup = membergroups.filter(member=recip)[0]

@@ -87,6 +87,16 @@ def create_error_email(group_name, error):
 	mail.Body = "Error Message:%s" %(error)
 	return mail
 		
+def get_direct_recips(email_message):
+	tos = email_message.get_all('to', [])
+	ccs = email_message.get_all('cc', [])
+	bccs = email_message.get_all('bcc', [])
+	resent_tos = email_message.get_all('resent-to', [])
+	resent_ccs = email_message.get_all('resent-cc', [])
+	resent_bccs = email_message.get_all('resent-bcc', [])
+	all_recipients = email.utils.getaddresses(tos + ccs + bccs + resent_tos + resent_ccs + resent_bccs)
+	emails = [recip[1] for recip in all_recipients]
+	return emails
 
 def get_attachments(email_message):
 	res = {'attachments': [],
