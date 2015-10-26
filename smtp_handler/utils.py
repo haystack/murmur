@@ -83,8 +83,8 @@ def setup_post(From, Subject, group_name):
 
 
 def create_error_email(group_name, error):
-	mail = setup_post(NO_REPLY, "Error", group_name)
-	mail.Body = "Error Message:%s" %(error)
+	mail = MurmurMailResponse(From = NO_REPLY, Subject = "Error")
+	mail.Body = "You tried to post to: %s. Error Message: %s" % (group_name, error)
 	return mail
 		
 def get_direct_recips(email_message):
