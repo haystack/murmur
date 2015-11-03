@@ -736,6 +736,8 @@ def insert_post_web(group_name, subject, message_text, user):
 						 'thread_id': thread.id,
 						 'from': user.email,
 						 'to': group_name,
+						 'likes': 0,
+						 'liked': False,
 						 'subject': escape(p.subject),
 						 'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 						 'timestamp': format_date_time(p.timestamp),
@@ -746,6 +748,7 @@ def insert_post_web(group_name, subject, message_text, user):
 								   'post': post_info,
 								   'num_replies': 0,
 								   'replies': [],
+								   'likes': 0,
 								   'following': True,
 								   'muting': False,
 								   'tags': tags,
@@ -812,21 +815,21 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			
 			orig_post_subj = subject[4:].strip()
 			
-			post = Post.objects.filter(Q(subject=orig_post_subj) | Q(subject=subject)).order_by('-timestamp')
+			post = Post.objects.filter((Q(subject=orig_post_subj) | Q(subject=subject)) & Q(group=group)).order_by('-timestamp')
 			if post.count() >= 1:
 				post = post[0]
 			else:
 				post = None
 				
 			if not thread_id:
-				thread = Thread.objects.filter(subject=orig_post_subj).order_by('-timestamp')
-				if thread.count() == 1:
+				thread = Thread.objects.filter(subject=orig_post_subj, group=group).order_by('-timestamp')
+				if thread.count() >= 1:
 					thread = thread[0]
 				else:
 					thread = None
 			else:
 				thread = Thread.objects.filter(id=thread_id)
-				if thread.count() == 1:
+				if thread.count() >= 1:
 					thread = thread[0]
 				else:
 					thread = None

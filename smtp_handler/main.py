@@ -215,7 +215,13 @@ def handle_post(message, address=None, host=None):
 		if 'plain' not in msg_text or msg_text['plain'] == '':
 			msg_text['plain'] = html2text(msg_text['html'])
 		
-		user = UserProfile.objects.get(email=addr)
+		try:
+			user = UserProfile.objects.get(email=addr)
+		except UserProfile.DoesNotExist:
+			mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = ADMIN_EMAILS)
+			return
 		
 		if message['Subject'][0:4] == "Re: ":
 			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user)
@@ -253,20 +259,25 @@ def handle_post(message, address=None, host=None):
 			mail['References'] = message['references']
 		elif 'message-id' in message:
 			mail['References'] = message['message-id']	
-			
 	
 		if 'in-reply-to' not in message:
 			mail["In-Reply-To"] = message['message-id']
-		
+	
 		msg_id = res['msg_id']
 		to_send =  res['recipients']
 		
 		mail['message-id'] = msg_id
+		
+		ccs = email_message.get_all('cc', None)
+		if ccs:
+			mail['Cc'] = ','.join(ccs)
 			
 		logging.debug('TO LIST: ' + str(to_send))
 		
 		g = Group.objects.get(name=group_name)
 		t = Thread.objects.get(id=res['thread_id'])
+		
+		direct_recips = get_direct_recips(email_message)
 		
 		try:
 			if len(to_send) > 0:
@@ -281,6 +292,15 @@ def handle_post(message, address=None, host=None):
 				tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
 				
 				for recip in recips:
+					
+					# Don't send email to the sender if it came from email
+					if recip.email == addr:
+						continue
+					
+					# Don't send email to people that already directly got the email via CC/BCC
+					if recip.email in direct_recips:
+						continue
+					
 					membergroup = membergroups.filter(member=recip)[0]
 					following = followings.filter(user=recip).exists()
 					muting = mutings.filter(user=recip).exists()
