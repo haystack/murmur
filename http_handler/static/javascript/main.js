@@ -89,6 +89,8 @@ $(document).ready(function(){
 	var btn_delete_members = $("#btn-delete-members");
 	var btn_set_admin = $("#btn-set-admin");
 	var btn_set_mod = $("#btn-set-mod");
+	// var btn_undo_admin = $("#btn-undo-admin");
+	// var btn_undo_mod = $("#btn-undo-mod");
 
 	var toDelete = "";
 	var toDeleteList = [];
@@ -603,6 +605,13 @@ $(document).ready(function(){
 		btn_set_admin.unbind("click");
 		btn_set_admin.bind("click");
 		btn_set_admin.click(make_admin);
+		// btn_undo_admin.unbind("click");
+		// btn_undo_admin.bind("click");
+		// btn_undo_admin.click(undo_admin);
+		// btn_undo_mod.unbind("click");
+		// btn_undo_mod.bind("click");
+		// btn_undo_mod.click(undo_mod);
+
 
 		if (!res.admin){
 			btn_delete_members.hide();

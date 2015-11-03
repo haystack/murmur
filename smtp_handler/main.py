@@ -170,35 +170,6 @@ def handle_post(message, address=None, host=None):
 		if(reserved):
 			return
 		
-<<<<<<< HEAD
-	if attachments['error'] != '':
-		mail = create_error_email(addr, group_name, host, attachments['error'])
-		relay.deliver(mail)
-		return
-
-	if message['Subject'][0:4] == "Re: ":
-		if 'html' in msg_text:
-			msg_text['html'] = re.sub('(?s)<div style="border-top:solid thin;padding-top:5px;margin-top:10px">.*?</div>','', msg_text['html'])
-		if 'plain' in msg_text:
-			msg_text['plain'] = re.sub('(?s)\n>  Follow <test\+__follow__@murmur.csail.mit.edu> \| Un-Follow\n> <test\+__unfollow__@murmur.csail.mit.edu>\n', '', msg_text['plain'])
-	
-	if 'html' not in msg_text:
-		msg_text['html'] = markdown(msg_text['plain'])
-	if 'plain' not in msg_text:
-		msg_text['plain'] = html2text(msg_text['html'])
-	
-	try:
-
-	user = UserProfile.objects.get(email=addr)
-	
-	if message['Subject'][0:4] == "Re: ":
-		res = insert_reply(group_name, orig_message, msg_text['html'], user)
-	else:
-		res = insert_post(group_name, orig_message, msg_text['html'], user)
-
-	except:
-		res = {'status': False, 'code': msg_code['NOT MEMBER']}
-=======
 		group_name = address.lower()
 		try:
 			group = Group.objects.get(name=group_name)
@@ -243,7 +214,6 @@ def handle_post(message, address=None, host=None):
 			msg_text['html'] = markdown(msg_text['plain'])
 		if 'plain' not in msg_text or msg_text['plain'] == '':
 			msg_text['plain'] = html2text(msg_text['html'])
->>>>>>> upstream/master
 		
 		user = UserProfile.objects.get(email=addr)
 		
