@@ -266,7 +266,7 @@ def add_members(group_name, emails, user):
 					message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
 					message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
 					message += "To see posts from this list, visit <a href='%s/posts?group_name=%s'>%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
-					message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='%s/groups'>%s/groups</a><br />" % (BASE_URL, BASE_URL)
+					message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='%s/groups'>%s/my_groups</a><br />" % (BASE_URL, BASE_URL)
 
 				mail.Html = message
 				logging.debug('TO LIST: ' + str(email))
