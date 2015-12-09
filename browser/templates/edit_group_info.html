@@ -39,12 +39,12 @@
 	<span class="strong">Attachment Policy : </span> <br />
 	{% if group_info.allow_attachments %}
 		<input type="radio" name="attach" value="yes-attach" id="rdo-attach-create-group" checked> Allow Attachments<br />
-		<span class="italic-small">All members of the group can post attachments to the list. Size of attachment cannot exceed 1MB. We currently only support images and pdfs.</span>
+		<span class="italic-small">All members of the group can post attachments to the list. Size of attachment cannot exceed 3MB. We currently only support a few filetypes (jpg, pdf, ppt, doc, txt, png).</span>
 		<input type="radio" name="attach" value="no-attach" id="rdo-noattach-create-group"> No Attachments Allowed<br />
 		<span class="italic-small">Users will not be able to post attachments to the list.</span><br />
 	{% else %}
 		<input type="radio" name="attach" value="yes-attach" id="rdo-attach-create-group"> Allow Attachments<br />
-		<span class="italic-small">All members of the group can post attachments to the list. Size of attachment cannot exceed 1MB. We currently only support images and pdfs.</span>
+		<span class="italic-small">All members of the group can post attachments to the list. Size of attachment cannot exceed 3MB. We currently only support a few filetypes (jpg, pdf, ppt, doc, txt, png).</span>
 		<input type="radio" name="attach" value="no-attach" id="rdo-noattach-create-group" checked> No Attachments Allowed<br />
 		<span class="italic-small">Users will not be able to post attachments to the list.</span><br />
 	{% endif %}

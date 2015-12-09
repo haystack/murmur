@@ -180,7 +180,7 @@ def handle_post(message, address=None, host=None):
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 		
-		if message['Subject'][0:4] != "Re: ":
+		if message['Subject'][0:4].lower() != "re: ":
 			orig_message = message['Subject'].strip()
 		else:
 			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
@@ -204,7 +204,7 @@ def handle_post(message, address=None, host=None):
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 	
-		if message['Subject'][0:4] == "Re: ":
+		if message['Subject'][0:4].lower() == "re: ":
 			if 'html' in msg_text:
 				msg_text['html'] = remove_html_ps(msg_text['html'])
 			if 'plain' in msg_text:
@@ -223,7 +223,7 @@ def handle_post(message, address=None, host=None):
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 		
-		if message['Subject'][0:4] == "Re: ":
+		if message['Subject'][0:4].lower() == "re: ":
 			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user)
 		else:
 			res = insert_post(group_name, orig_message, msg_text['html'], user)
@@ -234,7 +234,7 @@ def handle_post(message, address=None, host=None):
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 	
-		if message['Subject'][0:4] != "Re: ":
+		if message['Subject'][0:4].lower() != "re: ":
 			subj_tag = ''
 			for tag in res['tags']:
 				subj_tag += '[%s]' % tag['name']

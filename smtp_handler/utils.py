@@ -55,8 +55,10 @@ RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe',
 
 relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
 
-ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "application/pdf"]
-MAX_ATTACHMENT_SIZE = 1000000
+ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "application/pdf", "application/mspowerpoint",
+					"application/x-mspowerpoint", "application/powerpoint", "application/vnd.ms-powerpoint",
+					"application/msword", "text/plain"]
+MAX_ATTACHMENT_SIZE = 3000000
 
 def setup_post(From, Subject, group_name):
 	
