@@ -7,7 +7,7 @@ from schema.models import Group, MemberGroup, Thread, Following, Mute
 
 
 '''
-MailX Mail Utils and Constants
+Murmur Mail Utils and Constants
 
 @author: Anant Bhardwaj
 @date: Oct 20, 2012

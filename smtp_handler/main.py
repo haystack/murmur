@@ -12,7 +12,7 @@ from django.db.utils import OperationalError
 import django.db
 
 '''
-MailX Mail Interface Handler
+Murmur Mail Interface Handler
 
 @author: Anant Bhardwaj
 @date: Oct 20, 2012

@@ -20,7 +20,7 @@ class Post(models.Model):
 		return '%s %s' % (self.author.email, self.subject)
 	
 	class Meta:
-		db_table = "mailx_posts"
+		db_table = "murmur_posts"
 		ordering = ["timestamp"]
 
 
@@ -34,7 +34,7 @@ class Thread(models.Model):
 		return '%s in %s' % (self.id, self.group)
 	
 	class Meta:
-		db_table = "mailx_threads"
+		db_table = "murmur_threads"
 		ordering = ["-timestamp"]
 
 
@@ -102,7 +102,7 @@ class MemberGroup(models.Model):
 		return '%s - %s' % (self.member.email, self.group.name)
 
 	class Meta:
-		db_table = "mailx_membergroups"
+		db_table = "murmur_membergroups"
 		unique_together = ("member", "group")
 	
 
@@ -121,7 +121,7 @@ class Group(models.Model):
 		return self.name
 
 	class Meta:
-		db_table = "mailx_groups"
+		db_table = "murmur_groups"
 
 
 
@@ -208,7 +208,7 @@ class Following(models.Model):
 		return '%s follows Thread: %s' % (self.user.email, self.thread.id)
 
 	class Meta:
-		db_table = "mailx_following"
+		db_table = "murmur_following"
 
 
 class Mute(models.Model):
@@ -221,7 +221,7 @@ class Mute(models.Model):
 		return '%s mutes Thread: %s' % (self.user.email, self.thread.id)
 
 	class Meta:
-		db_table = "mailx_mute"
+		db_table = "murmur_mute"
 
 class Upvote(models.Model):
 	id = models.AutoField(primary_key=True)
@@ -233,6 +233,6 @@ class Upvote(models.Model):
 		return '%s likes Post %s' % (self.user.email, self.post.id)
 
 	class Meta:
-		db_table = "mailx_likes"
+		db_table = "murmur_likes"
 
 
