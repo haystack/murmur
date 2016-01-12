@@ -1,4 +1,4 @@
-# Django settings for mailx project.
+# Django settings for murmur project.
 
 import os
 import django
