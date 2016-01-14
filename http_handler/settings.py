@@ -46,7 +46,7 @@ if ENV == 'prod':
     MYSQL = MYSQL_PROD
 elif ENV == 'staging':
     BASE_URL = 'murmur-dev.csail.mit.edu'
-    MYSQL = MYSQL_PROD
+    MYSQL = MYSQL_DEV
 else:
     BASE_URL = 'localhost:8000'
     MYSQL = MYSQL_LOCAL
