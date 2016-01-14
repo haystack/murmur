@@ -44,6 +44,9 @@ except IOError:
 if ENV == 'prod':
     BASE_URL = 'http://murmur.csail.mit.edu'
     MYSQL = MYSQL_PROD
+elif ENV == 'staging':
+    BASE_URL = 'http://murmur-staging.csail.mit.edu'
+    MYSQL = MYSQL_PROD
 else:
     BASE_URL = 'http://localhost:8000'
     MYSQL = MYSQL_LOCAL
