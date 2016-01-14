@@ -42,13 +42,13 @@ except IOError:
     print "Unable to open configuration file!"
 
 if ENV == 'prod':
-    BASE_URL = 'http://murmur.csail.mit.edu'
+    BASE_URL = 'murmur.csail.mit.edu'
     MYSQL = MYSQL_PROD
 elif ENV == 'staging':
-    BASE_URL = 'http://murmur-staging.csail.mit.edu'
+    BASE_URL = 'murmur-dev.csail.mit.edu'
     MYSQL = MYSQL_PROD
 else:
-    BASE_URL = 'http://localhost:8000'
+    BASE_URL = 'localhost:8000'
     MYSQL = MYSQL_LOCAL
 
 TEMPLATE_DEBUG = DEBUG

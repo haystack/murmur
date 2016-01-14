@@ -245,7 +245,7 @@ def add_members(group_name, emails, user):
 			for email in email_list:
 				email = email.strip()
 				
-				mail = MailResponse(From = 'no-reply@murmur.csail.mit.edu', 
+				mail = MailResponse(From = 'no-reply@' + BASE_URL, 
 									To = email, 
 									Subject  = "You've been subscribed to %s Mailing List" % (group_name))
 				
@@ -254,19 +254,19 @@ def add_members(group_name, emails, user):
 					_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group)
 					
 					message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
-					message += "To see posts from this list, visit <a href='%s/posts?group_name=%s'>%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
-					message += "To manage your mailing list settings, subscribe, or unsubscribe, visit <a href='%s/groups/%s'>%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+					message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+					message += "To manage your mailing list settings, subscribe, or unsubscribe, visit <a href='http://%s/groups/%s'>http://%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
 				else:
 					pw = password_generator()
 					new_user = UserProfile.objects.create_user(email, pw)
 					_ = MemberGroup.objects.get_or_create(group=group, member=new_user)
 					
 					message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
-					message += "An account has been created for you at <a href='%s'>%s</a><br />" % (BASE_URL, BASE_URL)
+					message += "An account has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
 					message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
 					message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
-					message += "To see posts from this list, visit <a href='%s/posts?group_name=%s'>%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
-					message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='%s/groups'>%s/my_groups</a><br />" % (BASE_URL, BASE_URL)
+					message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+					message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a><br />" % (BASE_URL, BASE_URL)
 
 				mail.Html = message
 				logging.debug('TO LIST: ' + str(email))
@@ -550,7 +550,7 @@ def _create_post(group, subject, message_text, user):
 	thread.save()
 	
 
-	msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@murmur.csail.mit.edu'
+	msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@' + BASE_URL
 	
 	p = Post(msg_id=msg_id, author=user, subject=stripped_subj, post=message_text, group=group, thread=thread)
 	p.save()
@@ -713,7 +713,7 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			
 			tag_objs = Tag.objects.filter(tagthread__thread=thread)
 			
-			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@murmur.csail.mit.edu'
+			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@' + BASE_URL
 			
 			try:
 				message_text = message_text.decode("utf-8")
