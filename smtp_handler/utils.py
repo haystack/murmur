@@ -4,6 +4,7 @@ from config.settings import *
 
 from lamson_subclass import MurmurMailResponse
 from schema.models import Group, MemberGroup, Thread, Following, Mute
+from http_handler.settings import BASE_URL
 
 
 '''
@@ -13,8 +14,8 @@ Murmur Mail Utils and Constants
 @date: Oct 20, 2012
 '''
 
-HOST = 'murmur.csail.mit.edu'
-NO_REPLY = 'no-reply' + '@murmur.csail.mit.edu'
+HOST = BASE_URL
+NO_REPLY = 'no-reply' + '@' + BASE_URL
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
 UNFOLLOW_SUFFIX = '__unfollow__'
