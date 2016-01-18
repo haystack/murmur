@@ -34,3 +34,4 @@ def extract_hash_tags(s):
 		first_three.add(t)
 		if len(first_three) == 3: break
 	return first_three
+	
