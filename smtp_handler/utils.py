@@ -257,9 +257,9 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	tid = thread.id
 	
 	permalink = PERMALINK_POST % (HOST, tid, post_id)
-	content = '<a href="%s">Link to Post</a><br />' % (permalink)
+	content = '<a href="%s">Link to Post</a> | ' % (permalink)
 	upvote_addr = UPVOTE_ADDR % (HOST, tid, post_id)
-	content += '<a href="%s">Upvote Post</a><br/></br>' % (upvote_addr)
+	content += '<a href="%s">Upvote Post</a><BR><BR>' % (upvote_addr)
 	
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_addr = '%s%s' % (FOLLOW_ADDR, tid)
