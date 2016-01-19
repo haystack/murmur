@@ -42,6 +42,8 @@ UNMUTE_TAG_ADDR = 'http://%s/unmute_tag_get?tag=' % (HOST)
 MUTE_ADDR = 'http://%s/mute?tid=' % (HOST)
 UNMUTE_ADDR = 'http://%s/unmute?tid=' % (HOST)
 
+UPVOTE_ADDR = 'http://%s/upvote?tid=%s&post_id=%s' 
+
 EDIT_SETTINGS_ADDR = 'http://%s/groups/%s/edit_my_settings'
 
 PERMALINK_POST = 'http://%s/thread?tid=%s&post_id=%s'
@@ -255,7 +257,9 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	tid = thread.id
 	
 	permalink = PERMALINK_POST % (HOST, tid, post_id)
-	content = '<a href="%s">Link to Post</a><br /><br />' % (permalink)
+	content = '<a href="%s">Link to Post</a><br />' % (permalink)
+	upvote_addr = UPVOTE_ADDR % (HOST, tid, post_id)
+	content += '<a href="%s">Upvote Post</a><br/></br>' % (upvote_addr)
 	
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_addr = '%s%s' % (FOLLOW_ADDR, tid)
