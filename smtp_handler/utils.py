@@ -42,7 +42,7 @@ UNMUTE_TAG_ADDR = 'http://%s/unmute_tag_get?tag=' % (HOST)
 MUTE_ADDR = 'http://%s/mute?tid=' % (HOST)
 UNMUTE_ADDR = 'http://%s/unmute?tid=' % (HOST)
 
-UPVOTE_ADDR = 'http://%s/upvote?tid=%s&post_id=%s' 
+UPVOTE_ADDR = 'http://%s/upvote_get?tid=%s&post_id=%s' 
 
 EDIT_SETTINGS_ADDR = 'http://%s/groups/%s/edit_my_settings'
 
