@@ -549,3 +549,16 @@ blockquote {
   	right: 0;
   	padding: 10px;
 }
+
+.paginate_disabled_previous, .paginate_disabled_next {
+	display: none;
+}
+
+.paginate_enabled_next {
+	margin-left: 10px;
+}
+
+.paginate_enabled_previous, .paginate_enabled_next {
+	cursor: pointer;
+}
+
