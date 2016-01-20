@@ -19,19 +19,14 @@ msg_code={
 	'UNKNOWN_ERROR': 'Unknown',
 }
 
-def is_number(tag): 
-	try:
-		int(tag[1:])
-		return True
-	except ValueError:
-		return False
-
 def extract_hash_tags(s):
 	s = re.sub("<.*?>", " ", s)
-	tags = [re.sub(r'\W+', '', part).lower() for part in s.split() if part.startswith('#') and not is_number(part)]
-	first_three = set()
-	for t in tags:
-		first_three.add(t)
-		if len(first_three) == 3: break
-	return first_three
+	s = re.sub("&nbsp;", " ", s)
+	
+	tags = [re.sub(r'\W+', '', part).lower() for part in s.split() if part.startswith('#') and not part[1:].isdigit()]
+
+	tags = list(set(tags))
+	if len(tags) > 3:
+		return tags[0:3]
+	return tags
 	
