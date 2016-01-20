@@ -1,4 +1,4 @@
-# Django settings for mailx project.
+# Django settings for murmur project.
 
 import os
 import django
@@ -7,8 +7,8 @@ import django
 DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
-_ENV_FILE_PATH = '/opt/mailx/env'
-_DEBUG_FILE_PATH = '/opt/mailx/debug'
+_ENV_FILE_PATH = '/opt/murmur/env'
+_DEBUG_FILE_PATH = '/opt/murmur/debug'
 
 def _get_env():
     f = open(_ENV_FILE_PATH)
