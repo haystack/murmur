@@ -25,8 +25,10 @@ def extract_hash_tags(s):
 	
 	tags = [re.sub(r'\W+', '', part).lower() for part in s.split() if part.startswith('#') and not part[1:].isdigit()]
 
-	tags = list(set(tags))
-	if len(tags) > 3:
-		return tags[0:3]
-	return tags
+	first_three = set()
+	for t in tags:
+		first_three.add(t)
+		if len(first_three) == 3: break
+	return first_three 
+
 	
