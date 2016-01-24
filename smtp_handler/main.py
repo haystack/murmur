@@ -500,7 +500,7 @@ def handle_unmute_tag(message, group_name=None, tag_name=None, suffix=None, host
 
 @route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=UPVOTE_SUFFIX+"|"+UPVOTE_SUFFIX.upper(), host=HOST)
 @stateless
-def handle_upvote(message, post_id=None, suffix=None, host=None):
+def handle_upvote(message, group_name=None, post_id=None, suffix=None, host=None):
 	name, addr = parseaddr(message['from'].lower())
 	post_id = post_id.lower()
 	mail = None
