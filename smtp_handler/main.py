@@ -501,7 +501,15 @@ def handle_unmute_tag(message, group_name=None, tag_name=None, suffix=None, host
 @route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=UPVOTE_SUFFIX+"|"+UPVOTE_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_upvote(message, group_name=None, post_id=None, suffix=None, host=None):
-	# name, addr = parseaddr(message['from'].lower())
+	name, addr = parseaddr(message['from'].lower())
+	res = upvote(post_id, email=addr, user=None)
+	if(res['status']):
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Upvoted the  post:%s" %(post_id))
+		relay.deliver(mail)
+	else:
+		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
+		relay.deliver(mail)
+
 	# post_id = post_id.lower()
 	# mail = None
 	# post = None
@@ -516,8 +524,6 @@ def handle_upvote(message, group_name=None, post_id=None, suffix=None, host=None
 	# except Post.DoesNotExist:
 	# 	mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
 	# 	relay.deliver(mail)
-	# return
-	print "where does this output go?"
 	return
 
 
