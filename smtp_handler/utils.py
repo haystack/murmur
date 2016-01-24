@@ -314,7 +314,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	
 	permalink = PERMALINK_POST % (HOST, tid, post_id)
 	content = 'Link to Post<%s>\n\n' % (permalink)
-	upvote_addr = 'mailto%s' % (group_name + '+' + str(post_id) + UPVOTE_SUFFIX + '@' + HOST)
+	upvote_addr = 'mailto:%s' % (group_name + '+' + str(post_id) + UPVOTE_SUFFIX + '@' + HOST)
 	content += 'Upvote Post<%s>\n\n' % (upvote_addr)
 	
 	if membergroup.no_emails or not membergroup.always_follow_thread:
