@@ -505,17 +505,17 @@ def handle_upvote(message, post_id=None, suffix=None, host=None):
 	post_id = post_id.lower()
 	mail = None
 	post = None
-    try:
-        post = Post.objects.get(id=post_id)
+	try:
+    	post = Post.objects.get(id=post_id)
 		f = Like.objects.get(post = post, email=addr)
 	except Likes.DoesNotExist:
 		like = Like(post = post, email = addr)
 		like.save()
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Upvoted the  post:%s" %(post_id))
-        relay.deliver(mail)  
+    	relay.deliver(mail)  
     except Post.DoesNotExist:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
-        relay.deliver(mail)
+    	relay.deliver(mail)
 	return
 
 
