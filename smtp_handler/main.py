@@ -146,7 +146,7 @@ def info(message, group_name=None, host=None):
 	else:
 		subject = "Group Info -- Error"
 		body = "Error Message: %s" %(res['code'])
-        
+		
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 	relay.deliver(mail)
 
@@ -506,16 +506,16 @@ def handle_upvote(message, post_id=None, suffix=None, host=None):
 	mail = None
 	post = None
 	try:
-    	post = Post.objects.get(id=post_id)
+		post = Post.objects.get(id=post_id)
 		f = Like.objects.get(post = post, email=addr)
 	except Likes.DoesNotExist:
 		like = Like(post = post, email = addr)
 		like.save()
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Upvoted the  post:%s" %(post_id))
-    	relay.deliver(mail)  
-    except Post.DoesNotExist:
+		relay.deliver(mail)  
+	except Post.DoesNotExist:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
-    	relay.deliver(mail)
+		relay.deliver(mail)
 	return
 
 
@@ -528,21 +528,21 @@ def handle_downvote(message, post_id=None, suffix=None, host=None):
 	post_id = post_id.lower()
 	mail = None
 	post = None
-        try:
-                post = Post.objects.get(id=post_id)
-                dislike = Dislike.objects.get(post = post, email=addr)
+		try:
+				post = Post.objects.get(id=post_id)
+				dislike = Dislike.objects.get(post = post, email=addr)
 		like = Like.objects.get(post = post, email=addr)
 		like.delete()
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Downvoted the post:%s" %(post_id))
-                relay.deliver(mail)
+				relay.deliver(mail)
 	except Dislike.DoesNotExist:
 		dislike = Disike(post = post, email = addr)
-                dislike.save()
-        	mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Downvoted the post:%s" %(post_id))
-                relay.deliver(mail)
+				dislike.save()
+			mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Downvoted the post:%s" %(post_id))
+				relay.deliver(mail)
 	except Post.DoesNotExist:
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
-        	relay.deliver(mail)
+			relay.deliver(mail)
 	return
 
 """
