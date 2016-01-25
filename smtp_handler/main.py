@@ -159,7 +159,7 @@ def info(message, group_name=None, host=None):
 def handle_post(message, address=None, host=None):
 	if '+' in address and '__' in address:
 		return
-	
+
 	try:
 		#does this fix the MySQL has gone away erro?
 		django.db.close_connection()
@@ -187,6 +187,10 @@ def handle_post(message, address=None, host=None):
 		
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)
+
+		if msg_text['plain'].lower() == 'unsubscribe':
+			unsubscribe(message, group_name, host)
+			return
 	
 		attachments = get_attachments(email_message)
 		if len(attachments['attachments']) > 0:
