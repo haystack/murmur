@@ -96,7 +96,14 @@ def subscribe(message, group_name=None, host=None):
 	group = None
 	group_name = group_name.lower()
 	name, addr = parseaddr(message['from'].lower())
-	res = subscribe_group(group_name, addr)
+	try:
+		user = UserProfile.objects.get(email=addr)
+	except UserProfile.DoesNotExist:
+		mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+		relay.deliver(mail, To = addr)
+		relay.deliver(mail, To = ADMIN_EMAILS)
+		return
+	res = subscribe_group(group_name, user)
 	subject = "Subscribe -- Success"
 	body = "You are now subscribed to: %s@%s" %(group_name, host)
 	if(not res['status']):
@@ -114,7 +121,13 @@ def unsubscribe(message, group_name=None, host=None):
 	group = None
 	group_name = group_name.lower()
 	name, addr = parseaddr(message['from'].lower())
-	user = UserProfile.objects.get(email=addr)
+	try:
+		user = UserProfile.objects.get(email=addr)
+	except UserProfile.DoesNotExist:
+		mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+		relay.deliver(mail, To = addr)
+		relay.deliver(mail, To = ADMIN_EMAILS)
+		return
 	res = unsubscribe_group(group_name, user)
 	subject = "Un-subscribe -- Success"
 	body = "You are now un-subscribed from: %s@%s" %(group_name, host)
@@ -192,6 +205,8 @@ def handle_post(message, address=None, host=None):
 		if msg_text['plain'] == 'unsubscribe\n':
 			unsubscribe(message, group_name = group_name, host = HOST)
 			return
+		elif msg_text['plain'] == 'subscribe\n':
+			subscribe(message, group_name = group_name, host = HOST)
 
 	
 		attachments = get_attachments(email_message)
