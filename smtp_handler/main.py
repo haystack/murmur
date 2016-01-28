@@ -114,7 +114,8 @@ def unsubscribe(message, group_name=None, host=None):
 	group = None
 	group_name = group_name.lower()
 	name, addr = parseaddr(message['from'].lower())
-	res = unsubscribe_group(group_name, addr)
+	user = UserProfile.objects.get(email=addr)
+	res = unsubscribe_group(group_name, user)
 	subject = "Un-subscribe -- Success"
 	body = "You are now un-subscribed from: %s@%s" %(group_name, host)
 	if(not res['status']):
