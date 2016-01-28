@@ -188,9 +188,10 @@ def handle_post(message, address=None, host=None):
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)
 
-		if msg_text['plain'].lower() == 'unsubscribe':
-			unsubscribe(message, group_name, host)
+		if msg_text['plain'] == 'unsubscribe\n':
+			unsubscribe(message, group_name = group_name, host = HOST)
 			return
+
 	
 		attachments = get_attachments(email_message)
 		if len(attachments['attachments']) > 0:
