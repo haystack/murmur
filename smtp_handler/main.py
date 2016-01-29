@@ -201,13 +201,6 @@ def handle_post(message, address=None, host=None):
 		
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)
-
-		if msg_text['plain'].startswith('unsubscribe\n'):
-			unsubscribe(message, group_name = group_name, host = HOST)
-			return
-		elif msg_text['plain'].startswith('subscribe\n'):
-			subscribe(message, group_name = group_name, host = HOST)
-			return
 	
 		attachments = get_attachments(email_message)
 		if len(attachments['attachments']) > 0:
@@ -235,6 +228,13 @@ def handle_post(message, address=None, host=None):
 			msg_text['html'] = markdown(msg_text['plain'])
 		if 'plain' not in msg_text or msg_text['plain'] == '':
 			msg_text['plain'] = html2text(msg_text['html'])
+
+		if msg_text['plain'].startswith('unsubscribe\n'):
+			unsubscribe(message, group_name = group_name, host = HOST)
+			return
+		elif msg_text['plain'].startswith('subscribe\n'):
+			subscribe(message, group_name = group_name, host = HOST)
+			return
 		
 		try:
 			user = UserProfile.objects.get(email=addr)
