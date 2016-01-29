@@ -202,12 +202,12 @@ def handle_post(message, address=None, host=None):
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)
 
-		if msg_text['plain'] == 'unsubscribe\n':
+		if msg_text['plain'].startswith('unsubscribe\n'):
 			unsubscribe(message, group_name = group_name, host = HOST)
 			return
-		elif msg_text['plain'] == 'subscribe\n':
+		elif msg_text['plain'].startswith('subscribe\n'):
 			subscribe(message, group_name = group_name, host = HOST)
-
+			return
 	
 		attachments = get_attachments(email_message)
 		if len(attachments['attachments']) > 0:
