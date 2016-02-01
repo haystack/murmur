@@ -42,6 +42,8 @@ UNMUTE_TAG_ADDR = 'http://%s/unmute_tag_get?tag=' % (HOST)
 MUTE_ADDR = 'http://%s/mute?tid=' % (HOST)
 UNMUTE_ADDR = 'http://%s/unmute?tid=' % (HOST)
 
+UPVOTE_ADDR = 'http://%s/upvote_get?tid=%s&post_id=%s' 
+
 EDIT_SETTINGS_ADDR = 'http://%s/groups/%s/edit_my_settings'
 
 PERMALINK_POST = 'http://%s/thread?tid=%s&post_id=%s'
@@ -255,7 +257,9 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	tid = thread.id
 	
 	permalink = PERMALINK_POST % (HOST, tid, post_id)
-	content = '<a href="%s">Link to Post</a><br /><br />' % (permalink)
+	content = '<a href="%s">Link to Post</a> | ' % (permalink)
+	upvote_addr = UPVOTE_ADDR % (HOST, tid, post_id)
+	content += '<a href="%s">Upvote Post</a><BR><BR>' % (upvote_addr)
 	
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_addr = '%s%s' % (FOLLOW_ADDR, tid)
@@ -310,13 +314,15 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	
 	permalink = PERMALINK_POST % (HOST, tid, post_id)
 	content = 'Link to Post<%s>\n\n' % (permalink)
+	upvote_addr = 'mailto:%s' % (group_name + '+' + str(post_id) + UPVOTE_SUFFIX + '@' + HOST)
+	content += 'Upvote Post<%s>\n\n' % (upvote_addr)
 	
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + FOLLOW_SUFFIX + '@' + HOST)
 		unfollow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + UNFOLLOW_SUFFIX + '@' + HOST)
 
 		if following:
-			content = 'You\'re currently following this thread. Un-Follow thread<%s>.\n' % (unfollow_addr)
+			content += 'You\'re currently following this thread. Un-Follow thread<%s>.\n' % (unfollow_addr)
 		else:
 			if tag_following.count() > 0:
 				tag_names = [m.tag.name for m in tag_muting]
@@ -326,13 +332,13 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 				else:
 					content += 'You\'re currently following the tag %s. \n' % (tag_names[0])
 			else:
-				content = 'You aren\'t receive any replies to this thread. Follow thread<%s>.\n' % (follow_addr)
+				content += 'You aren\'t receive any replies to this thread. Follow thread<%s>.\n' % (follow_addr)
 	else:
 		mute_addr = 'mailto:%s' % (group_name + '+' + str(tid) + MUTE_SUFFIX + '@' + HOST)
 		unmute_addr = 'mailto:%s' % (group_name + '+' + str(tid) + UNMUTE_SUFFIX + '@' + HOST)
 
 		if muting:
-			content = 'You\'re currently muting this thread. Un-Mute thread<%s>.\n' % (unmute_addr)
+			content += 'You\'re currently muting this thread. Un-Mute thread<%s>.\n' % (unmute_addr)
 		else:
 			if tag_muting.count() > 0:
 				tag_names = [m.tag.name for m in tag_muting]
@@ -342,7 +348,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 				else:
 					content += 'You\'re currently muting the tag %s. \n' % (tag_names[0])
 			else:
-				content = 'You\'re currently receiving emails to this thread. Mute thread<%s>.\n' % (mute_addr)
+				content += 'You\'re currently receiving emails to this thread. Mute thread<%s>.\n' % (mute_addr)
 		
 	content += _insert_plain_tag_line(group, tags, membergroup, tag_following, tag_muting)
 	
