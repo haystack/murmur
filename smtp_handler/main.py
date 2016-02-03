@@ -283,8 +283,8 @@ def handle_post(message, address=None, host=None):
 			if len(to_send) > 0:
 				
 				recips = UserProfile.objects.filter(email__in=to_send)
+				logging.debug('RECIPS: ' + str(recips))
 				membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
-				
 				followings = Following.objects.filter(thread=t, user__in=recips)
 				mutings = Mute.objects.filter(thread=t, user__in=recips)
 				
@@ -302,6 +302,7 @@ def handle_post(message, address=None, host=None):
 						continue
 					
 					membergroup = membergroups.filter(member=recip)[0]
+					logging.debug('RECIP: ' + recip + ', MEMBERGROUP: ' + membergroup)
 					following = followings.filter(user=recip).exists()
 					muting = mutings.filter(user=recip).exists()
 					tag_following = tag_followings.filter(user=recip)
