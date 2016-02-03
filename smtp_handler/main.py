@@ -129,12 +129,14 @@ def unsubscribe(message, group_name=None, host=None):
 		relay.deliver(mail, To = ADMIN_EMAILS)
 		return
 	res = unsubscribe_group(group_name, user)
-	subject = "Un-subscribe -- Success"
-	body = "You are now un-subscribed from: %s@%s" %(group_name, host)
+	subject = "Unsubscribe -- Success"
+	body = "You are now unsubscribed from: %s@%s." %(group_name, host)
+	body += " To resubscribe, reply to this email."
 	if(not res['status']):
-		subject = "Un-subscribe -- Error"
+		subject = "Unsubscribe -- Error"
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
+	mail['Reply-To'] = '%s+subscribe@%s' %(group_name, host)
 	relay.deliver(mail)
 
 
@@ -229,10 +231,10 @@ def handle_post(message, address=None, host=None):
 		if 'plain' not in msg_text or msg_text['plain'] == '':
 			msg_text['plain'] = html2text(msg_text['html'])
 
-		if msg_text['plain'].startswith('unsubscribe\n'):
+		if msg_text['plain'].startswith('unsubscribe\n') or msg_text['plain'] == 'unsubscribe':
 			unsubscribe(message, group_name = group_name, host = HOST)
 			return
-		elif msg_text['plain'].startswith('subscribe\n'):
+		elif msg_text['plain'].startswith('subscribe\n') or msg_text['plain'] == 'subscribe':
 			subscribe(message, group_name = group_name, host = HOST)
 			return
 		
