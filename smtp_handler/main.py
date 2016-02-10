@@ -302,7 +302,7 @@ def handle_post(message, address=None, host=None):
 						continue
 					
 					membergroup = membergroups.filter(member=recip)[0]
-					logging.debug('RECIP: ' + recip + ', MEMBERGROUP: ' + membergroup)
+					logging.debug('RECIP: ' + str(recip) + ', MEMBERGROUP: ' + str(membergroup))
 					following = followings.filter(user=recip).exists()
 					muting = mutings.filter(user=recip).exists()
 					tag_following = tag_followings.filter(user=recip)
