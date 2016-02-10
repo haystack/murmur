@@ -305,7 +305,7 @@ def handle_post(message, address=None, host=None):
 					if host in recip.email:
 						handle_post(message, address=recip.email.split('@')[0], host=HOST)
 						logging.debug("calling handle post with address " + str(address))
-						#return
+						continue
 					
 					membergroup = membergroups.filter(member=recip)[0]
 					logging.debug('RECIP: ' + str(recip) + ', MEMBERGROUP: ' + str(membergroup))
