@@ -300,6 +300,12 @@ def handle_post(message, address=None, host=None):
 					# Don't send email to people that already directly got the email via CC/BCC
 					if recip.email in direct_recips:
 						continue
+
+					# if recip is a mailing list, send message directly on to mailing list 
+					# check if its in our list of murmur lists; if so call handle_post recursively
+					if recip.email.contains(host):
+						if Group.objects.filter(name=address.split('@')[0]).exists():
+							logging.debug('address is a murmur list')
 					
 					membergroup = membergroups.filter(member=recip)[0]
 					logging.debug('RECIP: ' + str(recip) + ', MEMBERGROUP: ' + str(membergroup))
