@@ -303,7 +303,7 @@ def handle_post(message, address=None, host=None):
 
 					# if recip is a mailing list, send message directly on to mailing list 
 					# check if its in our list of murmur lists; if so call handle_post recursively
-					if recip.email.contains(host):
+					if host in recip.email:
 						if Group.objects.filter(name=address.split('@')[0]).exists():
 							logging.debug('address is a murmur list')
 					
