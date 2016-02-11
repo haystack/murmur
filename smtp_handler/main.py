@@ -188,7 +188,7 @@ def handle_post(message, address=None, host=None):
 
 	
 		attachments = get_attachments(email_message)
-		res = handle_attachments(attachments)
+		res = handle_attachments(attachments, group.allow_attachments, group_name, addr)
 		if not res['status']:
 			return
 	
