@@ -91,6 +91,27 @@ def create_error_email(group_name, error):
 	mail = MurmurMailResponse(From = NO_REPLY, Subject = "Error")
 	mail.Body = "You tried to post to: %s. Error Message: %s" % (group_name, error)
 	return mail
+
+def handle_attachments(attachments, attachments_allowed, group_name, sender_addr):
+
+	res = {'status' : True}
+
+	if len(attachments['attachments']) > 0 and not attachments_allowed:
+			logging.debug("No attachments allowed for this group")
+			mail = create_error_email(group_name, "No attachments allowed for this group.")
+			relay.deliver(mail, To = sender_addr)
+			relay.deliver(mail, To = ADMIN_EMAILS)
+			res['status'] = False
+			return res
+
+	if attachments['error'] != '':
+		logging.debug(attachments['error'])
+		mail = create_error_email(group_name, attachments['error'])
+		relay.deliver(mail, To = sender_addr)
+		relay.deliver(mail, To = ADMIN_EMAILS)
+		res['status'] = False
+
+	return res
 		
 def get_direct_recips(email_message):
 	tos = email_message.get_all('to', [])

@@ -151,9 +151,6 @@ def info(message, group_name=None, host=None):
 	relay.deliver(mail)
 
 
-
-
-
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
 def handle_post(message, address=None, host=None):
@@ -187,21 +184,12 @@ def handle_post(message, address=None, host=None):
 		
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)
+
+
 	
 		attachments = get_attachments(email_message)
-		if len(attachments['attachments']) > 0:
-			if not group.allow_attachments:
-				logging.debug("No attachments allowed for this group")
-				mail = create_error_email(group_name, "No attachments allowed for this group.")
-				relay.deliver(mail, To = addr)
-				relay.deliver(mail, To = ADMIN_EMAILS)
-				return
-			
-		if attachments['error'] != '':
-			logging.debug(attachments['error'])
-			mail = create_error_email(group_name, attachments['error'])
-			relay.deliver(mail, To = addr)
-			relay.deliver(mail, To = ADMIN_EMAILS)
+		res = handle_attachments(attachments)
+		if not res['status']:
 			return
 	
 		if message['Subject'][0:4].lower() == "re: ":
@@ -302,10 +290,10 @@ def handle_post(message, address=None, host=None):
 						continue
 
 					# if recip is a mailing list, send message directly on to mailing list 
-					if host in recip.email:
-						handle_post(message, address=recip.email.split('@')[0], host=HOST)
-						logging.debug("calling handle post with address " + str(address))
-						continue
+					# if host in recip.email:
+					# 	handle_post(message, address=recip.email.split('@')[0], host=HOST)
+					# 	logging.debug("calling handle post with address " + str(address))
+					# 	continue
 					
 					membergroup = membergroups.filter(member=recip)[0]
 					logging.debug('RECIP: ' + str(recip) + ', MEMBERGROUP: ' + str(membergroup))
@@ -371,10 +359,8 @@ def handle_post(message, address=None, host=None):
 		mail = create_error_email(group_name, e)
 		relay.deliver(mail, To = ADMIN_EMAILS)
 		return
-	
 		
 		
-
 
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
