@@ -1,7 +1,7 @@
 import email, re
 from lamson.server import Relay
 from config.settings import *
-
+import re
 from lamson_subclass import MurmurMailResponse
 from schema.models import Group, MemberGroup, Thread, Following, Mute
 from http_handler.settings import BASE_URL
@@ -92,26 +92,53 @@ def create_error_email(group_name, error):
 	mail.Body = "You tried to post to: %s. Error Message: %s" % (group_name, error)
 	return mail
 
-def handle_attachments(attachments, attachments_allowed, group_name, sender_addr):
+def check_attachments(attachments, attachments_allowed):
 
-	res = {'status' : True}
+	res = {'status' : True, 'error' : None}
 
 	if len(attachments['attachments']) > 0 and not attachments_allowed:
-			logging.debug("No attachments allowed for this group")
-			mail = create_error_email(group_name, "No attachments allowed for this group.")
-			relay.deliver(mail, To = sender_addr)
-			relay.deliver(mail, To = ADMIN_EMAILS)
-			res['status'] = False
-			return res
+		logging.debug("No attachments allowed for this group")
+		res['error'] = "No attachments allowed for this group."
+		res['status'] = False
+		return res
 
 	if attachments['error'] != '':
 		logging.debug(attachments['error'])
-		mail = create_error_email(group_name, attachments['error'])
-		relay.deliver(mail, To = sender_addr)
-		relay.deliver(mail, To = ADMIN_EMAILS)
+		res['error'] = attachments['error']
 		res['status'] = False
 
 	return res
+
+def get_subject(message, msg_res, group_name):
+	if message['Subject'][0:4].lower() != "re: ":
+		subj_tag = ''
+		for tag in msg_res['tags']:
+			subj_tag += '[%s]' % tag['name']
+			
+		trunc_subj = re.sub("\[.*?\]", "", message['Subject'])
+		subject = '[%s]%s %s' %(group_name, subj_tag, trunc_subj)
+	else:
+		subject = message['Subject']
+
+	return subject
+
+def get_new_body(message_text, ps_blurb, plain_or_html):
+	try:
+		# assume email is in utf-8
+		new_body = unicode(message_text[plain_or_html], "utf-8", "ignore")
+		new_body = new_body + ps_blurb
+	except UnicodeDecodeError:
+		#then try default (ascii)
+		logging.debug('unicode decode error')
+		new_body = unicode(message_text[plain_or_html], errors="ignore")
+		new_body = new_body + ps_blurb
+	except TypeError:
+		logging.debug('decoding Unicode is not supported')
+		new_body = message_text[plain_or_html]
+		new_body = new_body + ps_blurb
+
+	return new_body
+
 		
 def get_direct_recips(email_message):
 	tos = email_message.get_all('to', [])
@@ -202,6 +229,7 @@ def get_body(email_message):
 			body = email_message.get_payload()
 			body = remove_plain_ps(body)
 			res['plain'] = body
+			
 	return res
 
 def remove_html_ps(body):
