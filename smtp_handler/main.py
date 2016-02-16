@@ -158,22 +158,22 @@ def handle_post(message, address=None, host=None):
 		return
 	
 	try:
-		#does this fix the MySQL has gone away erro?
+		#does this fix the MySQL has gone away error?
 		django.db.close_connection()
 		
 		address = address.lower()
-		name, addr = parseaddr(message['From'].lower())
+		name, user_addr = parseaddr(message['From'].lower())
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
 		if(reserved):
 			return
 		
-		group_name = address.lower()
+		group_name = address
 		try:
 			group = Group.objects.get(name=group_name)
 		except Exception, e:
 			logging.debug(e)
 			mail = create_error_email(group_name, e)
-			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = user_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 
@@ -191,7 +191,7 @@ def handle_post(message, address=None, host=None):
 		res = check_attachments(attachments, group.allow_attachments)
 		if not res['status']:
 			mail = create_error_email(group_name, res['error'])
-			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = user_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 	
@@ -207,10 +207,10 @@ def handle_post(message, address=None, host=None):
 			msg_text['plain'] = html2text(msg_text['html'])
 		
 		try:
-			user = UserProfile.objects.get(email=addr)
+			user = UserProfile.objects.get(email=user_addr)
 		except UserProfile.DoesNotExist:
 			mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
-			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = user_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 		
@@ -221,7 +221,7 @@ def handle_post(message, address=None, host=None):
 			
 		if not res['status']:
 			mail = create_error_email(group_name, res['code'])
-			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = user_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 	
@@ -275,11 +275,7 @@ def handle_post(message, address=None, host=None):
 					
 					# Don't send email to the sender if it came from email
 					# Don't send email to people that already directly got the email via CC/BCC
-					if recip.email == addr or recip.email in direct_recips:
-						continue
-					
-					
-					if recip.email in direct_recips:
+					if recip.email == user_addr or recip.email in direct_recips:
 						continue
 					
 					membergroup = membergroups.filter(member=recip)[0]
