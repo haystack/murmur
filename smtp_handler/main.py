@@ -209,10 +209,17 @@ def handle_post(message, address=None, host=None):
 		try:
 			user = UserProfile.objects.get(email=user_addr)
 		except UserProfile.DoesNotExist:
-			mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
-			relay.deliver(mail, To = user_addr)
-			relay.deliver(mail, To = ADMIN_EMAILS)
-			return
+
+			list_name, list_addr = parseaddr(message['To'].lower())
+			try:
+				user = UserProfile.objects.get(email=list_addr)
+			except UserProfile.DoesNotExist:
+				# probably should have a better error msg here in the mailing list case
+				# not sure how to decouple these two things
+				mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+				relay.deliver(mail, To = user_addr)
+				relay.deliver(mail, To = ADMIN_EMAILS)
+				return
 		
 		if message_is_reply:
 			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user)
@@ -254,6 +261,8 @@ def handle_post(message, address=None, host=None):
 		ccs = email_message.get_all('cc', None)
 		if ccs:
 			mail['Cc'] = ','.join(ccs)
+
+		logging.debug('TO LIST: ' + str(to_send))
 		
 		g = Group.objects.get(name=group_name)
 		t = Thread.objects.get(id=res['thread_id'])
@@ -277,6 +286,11 @@ def handle_post(message, address=None, host=None):
 					# Don't send email to people that already directly got the email via CC/BCC
 					if recip.email == user_addr or recip.email in direct_recips:
 						continue
+
+					# we're supposed to send to another murmur list
+					if HOST in recip.email:
+						handle_post(message, address=recip.email.split('@')[0], host=HOST)
+						continue
 					
 					membergroup = membergroups.filter(member=recip)[0]
 					following = followings.filter(user=recip).exists()
@@ -286,7 +300,7 @@ def handle_post(message, address=None, host=None):
 				
 					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					html_ps_blurb = unicode(html_ps_blurb)
-					mail.Html = get_new_html_body(msg_text, html_ps_blurb, 'html')
+					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					
 					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')

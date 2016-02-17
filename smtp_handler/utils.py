@@ -1,7 +1,6 @@
 import email, re
 from lamson.server import Relay
 from config.settings import *
-import re
 from lamson_subclass import MurmurMailResponse
 from schema.models import Group, MemberGroup, Thread, Following, Mute
 from http_handler.settings import BASE_URL
@@ -229,7 +228,6 @@ def get_body(email_message):
 			body = email_message.get_payload()
 			body = remove_plain_ps(body)
 			res['plain'] = body
-			
 	return res
 
 def remove_html_ps(body):
