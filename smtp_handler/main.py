@@ -163,6 +163,7 @@ def handle_post(message, address=None, host=None):
 		
 		address = address.lower()
 		name, user_addr = parseaddr(message['From'].lower())
+		to_name, to_addr = parseaddr(message['To'].lower())
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
 		if(reserved):
 			return
@@ -209,10 +210,11 @@ def handle_post(message, address=None, host=None):
 		try:
 			user = UserProfile.objects.get(email=user_addr)
 		except UserProfile.DoesNotExist:
-
-			list_name, list_addr = parseaddr(message['To'].lower())
 			try:
-				user = UserProfile.objects.get(email=list_addr)
+				# person is not a Murmur member, but the list is a valid poster.
+				# need to handle case where they are a Murmur member but are posting
+				# via a list in insert_reply/insert_post
+				user = UserProfile.objects.get(email=to_addr)
 			except UserProfile.DoesNotExist:
 				# probably should have a better error msg here in the mailing list case
 				# not sure how to decouple these two things
@@ -284,7 +286,7 @@ def handle_post(message, address=None, host=None):
 					
 					# Don't send email to the sender if it came from email
 					# Don't send email to people that already directly got the email via CC/BCC
-					if recip.email == user_addr or recip.email in direct_recips:
+					if recip.email == user_addr or recip.email in direct_recips or recip.email == to_addr:
 						continue
 
 					# we're supposed to send to another murmur list
