@@ -288,9 +288,9 @@ def handle_post(message, address=None, host=None):
 						continue
 
 					# we're supposed to send to another murmur list
-					if HOST in recip.email:
-						handle_post(message, address=recip.email.split('@')[0], host=HOST)
-						continue
+					# if HOST in recip.email:
+					# 	handle_post(message, address=recip.email.split('@')[0], host=HOST)
+					# 	continue
 					
 					membergroup = membergroups.filter(member=recip)[0]
 					following = followings.filter(user=recip).exists()
