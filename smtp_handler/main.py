@@ -163,7 +163,7 @@ def handle_post(message, address=None, host=None):
 		
 		address = address.lower()
 		name, user_addr = parseaddr(message['From'].lower())
-		to_name, to_addr = parseaddr(message['To'].lower())
+		list_name, list_addr = parseaddr(message['List-Id'])
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
 		if(reserved):
 			return
@@ -210,15 +210,20 @@ def handle_post(message, address=None, host=None):
 		try:
 			user = UserProfile.objects.get(email=user_addr)
 		except UserProfile.DoesNotExist:
+			if list_addr == '': # wasn't sent via a mailing list, either
+				mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+				relay.deliver(mail, To = user_addr)
+				relay.deliver(mail, To = ADMIN_EMAILS)
+				return
+
 			try:
 				# person is not a Murmur member, but the list is a valid poster.
-				# need to handle case where they are a Murmur member but are posting
+				# need to handle case where they are a Murmur member, but are posting
 				# via a list in insert_reply/insert_post
-				user = UserProfile.objects.get(email=to_addr)
+				user = UserProfile.objects.get(email=list_addr)
 			except UserProfile.DoesNotExist:
-				# probably should have a better error msg here in the mailing list case
-				# not sure how to decouple these two things
-				mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+
+				mail = create_error_email(group_name, 'The mailing list', list_addr, 'is not authorized to post to this Murmur list. Ask the admin of the Murmur group to authorize it.')
 				relay.deliver(mail, To = user_addr)
 				relay.deliver(mail, To = ADMIN_EMAILS)
 				return
@@ -286,7 +291,7 @@ def handle_post(message, address=None, host=None):
 					
 					# Don't send email to the sender if it came from email
 					# Don't send email to people that already directly got the email via CC/BCC
-					if recip.email == user_addr or recip.email in direct_recips or recip.email == to_addr:
+					if recip.email == user_addr or recip.email in direct_recips:
 						continue
 
 					# we're supposed to send to another murmur list
