@@ -130,7 +130,7 @@ class AuthorizedPoster(models.Model):
 		verbose_name='email address',
 		max_length=255,
 		unique=True,
-	f)
+	)
 	timestamp = models.DateTimeField(auto_now=True)
 	group = models.ForeignKey('Group')
 	url = models.URLField(blank=True)
