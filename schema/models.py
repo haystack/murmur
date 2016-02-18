@@ -124,13 +124,13 @@ class Group(models.Model):
 		db_table = "murmur_groups"
 
 
-class Authorized_Poster(models.Model):
+class AuthorizedPoster(models.Model):
 	id = models.AutoField(primary_key=True)
 	email = models.EmailField(
 		verbose_name='email address',
 		max_length=255,
 		unique=True,
-	)
+	f)
 	timestamp = models.DateTimeField(auto_now=True)
 	group = models.ForeignKey('Group')
 	url = models.URLField(blank=True)
