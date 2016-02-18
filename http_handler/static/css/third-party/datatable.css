@@ -301,6 +301,7 @@ table.dataTable td {
   clear: both;
   *zoom: 1;
   zoom: 1;
+  padding-top: 0.2cm;
 }
 .dataTables_wrapper .dataTables_length {
   float: left;

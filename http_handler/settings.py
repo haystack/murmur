@@ -241,8 +241,6 @@ LOGGING = {
     }
 }
 
-
-
 # celery settings
 try:
         from celeryconfig import *
