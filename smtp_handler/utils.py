@@ -44,6 +44,9 @@ UNMUTE_ADDR = 'http://%s/unmute?tid=' % (HOST)
 
 UPVOTE_ADDR = 'http://%s/upvote_get?tid=%s&post_id=%s' 
 
+SUBSCRIBE_ADDR = 'http://%s/subscribe_get?group_name=%s'
+UNSUBSCRIBE_ADDR = 'http://%s/unsubscribe_get?group_name=%s'
+
 EDIT_SETTINGS_ADDR = 'http://%s/groups/%s/edit_my_settings'
 
 PERMALINK_POST = 'http://%s/thread?tid=%s&post_id=%s'
@@ -303,7 +306,8 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	else:
 		content += "<BR><BR>You are set to receive only the 1st email from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>" % (addr)
 
-		
+	unsubscribe_addr = UNSUBSCRIBE_ADDR % (HOST, group.name)
+	content += '<a href=\"%s\">Unsubscribe from this group</a>' % unsubscribe_addr
 
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
@@ -360,6 +364,8 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	else:
 		content += "\n\nYou are set to receive only the 1st email from this group, except for the threads you follow. \nChange your settings<%s>" % (addr)
 
+	unsubscribe_addr = UNSUBSCRIBE_ADDR % (HOST, group.name)
+	content += '\n\nUnsubscribe from this group<%s>' % unsubscribe_addr
 		
 	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
 	

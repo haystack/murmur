@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+	
+	{% if res.status %}
+		You've {{ type }} the group "{{ group_name }}".
+	{% else %}
+		Sorry, there was an error: {{ res.code }}.
+	{% endif %}
+	<BR>
+	<BR>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+{% endblock %}
+
+
+
+
