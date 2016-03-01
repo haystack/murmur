@@ -345,7 +345,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 			content += 'You\'re currently muting this thread. Un-Mute thread<%s>.\n' % (unmute_addr)
 		else:
 			if tag_muting.count() > 0:
-			`	tag_names = [m.tag.name for m in tag_muting]
+				tag_names = [m.tag.name for m in tag_muting]
 				if len(tag_names) > 1:
 					n_str = ', '.join(tag_names)
 					content += 'You\'re currently muting the tags %s. \n' % (n_str)
