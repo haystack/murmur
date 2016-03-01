@@ -307,7 +307,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 		content += "<BR><BR>You are set to receive only the 1st email from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>" % (addr)
 
 	unsubscribe_addr = UNSUBSCRIBE_ADDR % (HOST, group.name)
-	content += '<a href=\"%s\">Unsubscribe from this group</a>' % unsubscribe_addr
+	content += ' | ''<a href=\"%s\">Unsubscribe from this group</a>' % unsubscribe_addr
 
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
@@ -345,7 +345,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 			content += 'You\'re currently muting this thread. Un-Mute thread<%s>.\n' % (unmute_addr)
 		else:
 			if tag_muting.count() > 0:
-				tag_names = [m.tag.name for m in tag_muting]
+			`	tag_names = [m.tag.name for m in tag_muting]
 				if len(tag_names) > 1:
 					n_str = ', '.join(tag_names)
 					content += 'You\'re currently muting the tags %s. \n' % (n_str)
