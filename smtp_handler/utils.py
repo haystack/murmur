@@ -307,7 +307,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 		content += "<BR><BR>You are set to receive only the 1st email from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>" % (addr)
 
 	unsubscribe_addr = UNSUBSCRIBE_ADDR % (HOST, group.name)
-	content += ' | ''<a href=\"%s\">Unsubscribe from this group</a>' % unsubscribe_addr
+	content += ' | ''<a href=\"%s\">Unsubscribe</a>' % unsubscribe_addr
 
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
@@ -365,7 +365,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 		content += "\n\nYou are set to receive only the 1st email from this group, except for the threads you follow. \nChange your settings<%s>" % (addr)
 
 	unsubscribe_addr = UNSUBSCRIBE_ADDR % (HOST, group.name)
-	content += '\n\nUnsubscribe from this group<%s>' % unsubscribe_addr
+	content += '\n\nUnsubscribe<%s>' % unsubscribe_addr
 		
 	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
 	
