@@ -103,6 +103,20 @@ def subscribe(message, group_name=None, host=None):
 		relay.deliver(mail, To = addr)
 		relay.deliver(mail, To = ADMIN_EMAILS)
 		return
+	try:
+		group = Group.objects.get(name=group_name)
+	except Group.DoesNotExist:
+		mail = create_error_email(group_name, 'The group' + group_name + 'does not exist.')
+		relay.deliver(mail, To = addr)
+		relay.deliver(mail, To = ADMIN_EMAILS)
+		return
+
+	if not group.public:
+		mail = create_error_email(group_name, 'The group' + group_name + 'is private. Ask the admin of the group to add you.')
+		relay.deliver(mail, To = addr)
+		relay.deliver(mail, To = ADMIN_EMAILS)
+		return
+
 	res = subscribe_group(group_name, user)
 	subject = "Subscribe -- Success"
 	body = "You are now subscribed to: %s@%s" %(group_name, host)
