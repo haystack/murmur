@@ -112,7 +112,7 @@ def subscribe(message, group_name=None, host=None):
 		return
 
 	if not group.public:
-		mail = create_error_email(group_name, 'The group' + group_name + 'is private. Ask the admin of the group to add you.')
+		mail = create_error_email(group_name, 'The group ' + group_name + ' is private. Ask the admin of the group to add you.')
 		relay.deliver(mail, To = addr)
 		relay.deliver(mail, To = ADMIN_EMAILS)
 		return
