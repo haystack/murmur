@@ -124,21 +124,6 @@ class Group(models.Model):
 		db_table = "murmur_groups"
 
 
-class AuthorizedPoster(models.Model):
-	id = models.AutoField(primary_key=True)
-	email = models.EmailField(
-		verbose_name='email address',
-		max_length=255,
-		unique=True,
-	)
-	timestamp = models.DateTimeField(auto_now=True)
-	group = models.ForeignKey('Group')
-	url = models.URLField(blank=True)
-
-	def __unicode__(self):
-		return self.email
-
-
 class MyUserManager(BaseUserManager):
 	def create_user(self, email, password=None):
 		"""
