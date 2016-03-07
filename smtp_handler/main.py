@@ -163,7 +163,6 @@ def handle_post(message, address=None, host=None):
 		
 		address = address.lower()
 		name, user_addr = parseaddr(message['From'].lower())
-		list_name, list_addr = parseaddr(message['List-Id'])
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
 		if(reserved):
 			return
@@ -210,24 +209,11 @@ def handle_post(message, address=None, host=None):
 		try:
 			user = UserProfile.objects.get(email=user_addr)
 		except UserProfile.DoesNotExist:
-			#if list_addr == '': # wasn't sent via a mailing list, either
 			mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
 			relay.deliver(mail, To = user_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 
-			# try:
-			# 	# person is not a Murmur member, but the list is a valid poster.
-			# 	# need to handle case where they are a Murmur member, but are posting
-			# 	# via a list in insert_reply/insert_post
-			# 	user = UserProfile.objects.get(email=list_addr)
-			# except UserProfile.DoesNotExist:
-
-			# 	mail = create_error_email(group_name, 'The mailing list', list_addr, 'is not authorized to post to this Murmur list. Ask the admin of the Murmur group to authorize it.')
-			# 	relay.deliver(mail, To = user_addr)
-			# 	relay.deliver(mail, To = ADMIN_EMAILS)
-			# 	return
-		
 		if message_is_reply:
 			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user)
 		else:
