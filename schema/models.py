@@ -124,6 +124,7 @@ class Group(models.Model):
 		db_table = "murmur_groups"
 
 
+
 class MyUserManager(BaseUserManager):
 	def create_user(self, email, password=None):
 		"""
