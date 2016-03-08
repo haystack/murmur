@@ -1,7 +1,5 @@
 $(document).ready(function(){
-	
-	var members_table = $('#members-table').dataTable();
-	
+
 	var user_name = $.trim($('#user_email').text());
 	var group_name = $.trim($("#group-name").text());
 	
@@ -9,6 +7,21 @@ $(document).ready(function(){
 	var admin = $.trim($(".admin").text()) == "Admin";
 	var mod = $.trim($(".mod").text()) == "Mod";
 	var group_active = $.trim($(".group_active").text()) == "True";
+	
+	
+	if (admin) {
+		var members_table = $('#members-table').dataTable({
+			"aoColumns": [
+				{ 'bSortable': false},
+				null,
+				null,
+				null,
+				null
+			]
+		});
+	} else {
+		var members_table = $('#members-table').dataTable({});
+	}
 	
 	var btn_edit_group_info = $("#btn-edit-group-info");
 	var btn_edit_settings = $("#btn-edit-settings");
@@ -93,70 +106,64 @@ $(document).ready(function(){
 			);	
 		};	
 
-	var toDelete = ""
+	var toDelete = "";
 	var toDeleteList = [];
-	var toAdmin = ""
-	var	toMod = ""
+	var toAdmin = "";
+	var	toMod = "";
 
-	edit_members_table_del=
-		function(params){
-			console.log(params);
-			$('.checkbox').each(function() {
-			if (this.checked==true)
-				toDelete= toDelete + (this.id) + ",";
-			});
-			params.toAdmin = toAdmin
-			params.toMod = toMod
-			params.toDelete = toDelete
-			$.post('/edit_members', params,
-					function(res){
-						notify(res,true);
-						setTimeout(function(){
-							window.location.reload();
-						},400);
-					}
-				);
-			};
-	edit_members_table_makeADMIN =
-		function(params){
-			$('.checkbox').each(function() {
-			if (this.checked==true)
-				toAdmin= toAdmin + (this.id) + ",";
-			});
-			params.toAdmin = toAdmin
-			params.toMod = toMod
-			params.toDelete = toDelete
-			$.post('/edit_members', params,
-					function(res){
-						notify(res,true);
-					setTimeout(function(){
-							window.location.reload();
-						},400);
-					}
-				);
-			};
-	edit_members_table_makeMOD =
-		function(params){
-			$('.checkbox').each(function() {
-				if (this.checked==true)
-					toMod = toMod + (this.id) + ",";
-			});
-			params.toAdmin = toAdmin
-			params.toMod = toMod
-			params.toDelete = toDelete
-			$.post('/edit_members', params,
-					function(res){
-						notify(res,true);
-					setTimeout(function(){
-							window.location.reload();
-						},400);
-					}
-				);
-			};
+	edit_members_table_del = function(params) {
+		$('.checkbox').each(function() {
+		if (this.checked==true)
+			toDelete= toDelete + (this.id) + ",";
+		});
+		
+		names = "Are you sure you want to delete the selected users?";
+		var c = confirm(names);
+		
+		if (c) {
+			params.toAdmin = toAdmin;
+			params.toMod = toMod;
+			params.toDelete = toDelete;
+			post_edit_members(params);
+		}
+	};
+	
+	edit_members_table_makeADMIN = function(params) {
+		$('.checkbox').each(function() {
+		if (this.checked==true)
+			toAdmin= toAdmin + (this.id) + ",";
+		});
+		params.toAdmin = toAdmin;
+		params.toMod = toMod;
+		params.toDelete = toDelete;
+		post_edit_members(params);
+	};
+			
+	edit_members_table_makeMOD = function(params) {
+		$('.checkbox').each(function() {
+			if (this.checked == true)
+				toMod = toMod + (this.id) + ",";
+		});
+		params.toAdmin = toAdmin;
+		params.toMod = toMod;
+		params.toDelete = toDelete;
+		post_edit_members(params);
+	};
 
 		
 	bind_buttons();
 	fix_visibility();
+	
+	function post_edit_members(params) {
+		$.post('/edit_members', params,
+			function(res){
+				notify(res,true);
+				setTimeout(function(){
+					window.location.reload();
+				},400);
+			}
+		);
+	}	
 			
 	function bind_buttons() {
 		btn_edit_group_info.unbind("click");

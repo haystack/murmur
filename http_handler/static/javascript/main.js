@@ -31,7 +31,14 @@ $(document).ready(function(){
 
 	/* Dynamic Table Definitions */	
 	
-	members_table = $('#members-table').dataTable();
+	members_table = $('#members-table').dataTable({
+			"aoColumns": [
+				{ 'bSortable': false},
+				null,
+				null,
+				null,
+			]
+		});
 
 	/* Default blur effect in textbox */
 	
@@ -102,14 +109,14 @@ $(document).ready(function(){
 			$('.checkbox').each(function() {
 				if (this.checked==true){
 					toDelete= toDelete + (this.id) + ",";
-					toDeleteList.push(this.id)
+					toDeleteList.push(this.id);
 				}
 			});
-			params.toDelete = toDelete
-			params.toAdmin = toAdmin
-			params.toMod = toMod
+			params.toDelete = toDelete;
+			params.toAdmin = toAdmin;
+			params.toMod = toMod;
 
-			names = []
+			names = [];
 			for (var j=0; j<toDeleteList.length; j++){
 				for (var i = 0; i<groups_local_data.members.length; i++){
 					if (groups_local_data.members[i].id == toDeleteList[j]){
@@ -118,17 +125,17 @@ $(document).ready(function(){
 				}
 			}
 			names = names.join(',');
-			names = "Are you sure you want to delete the selected users: "+names+"?";
+			names = "Are you sure you want to delete the selected users: " + names + "?";
 			var c = confirm(names);
-			if (c){
-			$.post('/edit_members', params,
-					function(res){
-						notify(res,true);
-							setTimeout(function(){
-							window.location.reload();
-						},400);
-					}
-				);
+			if (c) {
+				$.post('/edit_members', params,
+						function(res){
+							notify(res,true);
+								setTimeout(function(){
+								window.location.reload();
+							},400);
+						}
+					);
 			};
 		};
 
@@ -138,9 +145,9 @@ $(document).ready(function(){
 			if (this.checked==true)
 				toAdmin= toAdmin + (this.id) + ",";
 			});
-			params.toAdmin = toAdmin
-			params.toMod = toMod
-			params.toDelete = toDelete
+			params.toAdmin = toAdmin;
+			params.toMod = toMod;
+			params.toDelete = toDelete;
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
@@ -157,9 +164,9 @@ $(document).ready(function(){
 				if (this.checked==true)
 					toMod = toMod + (this.id) + ",";
 			});
-			params.toAdmin = toAdmin
-			params.toMod = toMod
-			params.toDelete = toDelete
+			params.toAdmin = toAdmin;
+			params.toMod = toMod;
+			params.toDelete = toDelete;
 			$.post('/edit_members', params,
 					function(res){
 						notify(res,true);
