@@ -151,9 +151,6 @@ def info(message, group_name=None, host=None):
 	relay.deliver(mail)
 
 
-
-
-
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
 def handle_post(message, address=None, host=None):
@@ -161,26 +158,28 @@ def handle_post(message, address=None, host=None):
 		return
 	
 	try:
-		#does this fix the MySQL has gone away erro?
+		#does this fix the MySQL has gone away error?
 		django.db.close_connection()
 		
 		address = address.lower()
-		name, addr = parseaddr(message['From'].lower())
+		name, user_addr = parseaddr(message['From'].lower())
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
 		if(reserved):
 			return
 		
-		group_name = address.lower()
+		group_name = address
 		try:
 			group = Group.objects.get(name=group_name)
 		except Exception, e:
 			logging.debug(e)
 			mail = create_error_email(group_name, e)
-			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = user_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
+
+		message_is_reply = (message['Subject'][0:4].lower() == "re: ")
 		
-		if message['Subject'][0:4].lower() != "re: ":
+		if not message_is_reply:
 			orig_message = message['Subject'].strip()
 		else:
 			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
@@ -189,22 +188,14 @@ def handle_post(message, address=None, host=None):
 		msg_text = get_body(email_message)
 	
 		attachments = get_attachments(email_message)
-		if len(attachments['attachments']) > 0:
-			if not group.allow_attachments:
-				logging.debug("No attachments allowed for this group")
-				mail = create_error_email(group_name, "No attachments allowed for this group.")
-				relay.deliver(mail, To = addr)
-				relay.deliver(mail, To = ADMIN_EMAILS)
-				return
-			
-		if attachments['error'] != '':
-			logging.debug(attachments['error'])
-			mail = create_error_email(group_name, attachments['error'])
-			relay.deliver(mail, To = addr)
+		res = check_attachments(attachments, group.allow_attachments)
+		if not res['status']:
+			mail = create_error_email(group_name, res['error'])
+			relay.deliver(mail, To = user_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 	
-		if message['Subject'][0:4].lower() == "re: ":
+		if message_is_reply:
 			if 'html' in msg_text:
 				msg_text['html'] = remove_html_ps(msg_text['html'])
 			if 'plain' in msg_text:
@@ -216,33 +207,25 @@ def handle_post(message, address=None, host=None):
 			msg_text['plain'] = html2text(msg_text['html'])
 		
 		try:
-			user = UserProfile.objects.get(email=addr)
+			user = UserProfile.objects.get(email=user_addr)
 		except UserProfile.DoesNotExist:
 			mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
-			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = user_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
-		
-		if message['Subject'][0:4].lower() == "re: ":
+
+		if message_is_reply:
 			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user)
 		else:
 			res = insert_post(group_name, orig_message, msg_text['html'], user)
 			
 		if not res['status']:
 			mail = create_error_email(group_name, res['code'])
-			relay.deliver(mail, To = addr)
+			relay.deliver(mail, To = user_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 	
-		if message['Subject'][0:4].lower() != "re: ":
-			subj_tag = ''
-			for tag in res['tags']:
-				subj_tag += '[%s]' % tag['name']
-				
-			trunc_subj = re.sub("\[.*?\]", "", message['Subject'])
-			subject = '[%s]%s %s' %(group_name, subj_tag, trunc_subj)
-		else:
-			subject = message['Subject']
+		subject = get_subject(message, res, group_name)
 			
 		mail = setup_post(message['From'],
 							subject,	
@@ -271,7 +254,7 @@ def handle_post(message, address=None, host=None):
 		ccs = email_message.get_all('cc', None)
 		if ccs:
 			mail['Cc'] = ','.join(ccs)
-			
+
 		logging.debug('TO LIST: ' + str(to_send))
 		
 		g = Group.objects.get(name=group_name)
@@ -284,7 +267,6 @@ def handle_post(message, address=None, host=None):
 				
 				recips = UserProfile.objects.filter(email__in=to_send)
 				membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
-				
 				followings = Following.objects.filter(thread=t, user__in=recips)
 				mutings = Mute.objects.filter(thread=t, user__in=recips)
 				
@@ -294,61 +276,25 @@ def handle_post(message, address=None, host=None):
 				for recip in recips:
 					
 					# Don't send email to the sender if it came from email
-					if recip.email == addr:
-						continue
-					
 					# Don't send email to people that already directly got the email via CC/BCC
-					if recip.email in direct_recips:
+					if recip.email == user_addr or recip.email in direct_recips:
 						continue
-					
+
 					membergroup = membergroups.filter(member=recip)[0]
 					following = followings.filter(user=recip).exists()
 					muting = mutings.filter(user=recip).exists()
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 				
-					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					html_ps_blurb = unicode(html_ps_blurb)
+					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					
-					ps_blurb = unicode(ps_blurb)
-					
-					try:
-						# assume email is in utf-8
-						new_body = unicode(msg_text['html'], "utf-8", "ignore")
-						new_body = new_body + ps_blurb
-	
-						mail.Html = new_body
-					except UnicodeDecodeError:
-						#then try default (ascii)
-						logging.debug('unicode decode error')
-						new_body = unicode(msg_text['html'], errors="ignore")
-						new_body = new_body + ps_blurb
-	
-						mail.Html = new_body
-					except TypeError:
-						logging.debug('decoding Unicode is not supported')
-						new_body = msg_text['html']
-						mail.Html = new_body + ps_blurb
-					
-					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
-					
-					try:
-						plain_body = unicode(msg_text['plain'], "utf-8", "ignore")
-						plain_body = plain_body + ps_blurb
-						
-						mail.Body = plain_body
-					except UnicodeDecodeError:
-						# then try default (ascii)
-						logging.debug('unicode decode error')
-						plain_body = unicode(msg_text['plain'], errors="ignore")
-						plain_body = plain_body + ps_blurb
-						
-						mail.Body = plain_body
-					except TypeError:
-						logging.debug('decoding Unicode is not supported')
-						plain_body = msg_text['plain']
-						mail.Body = plain_body + ps_blurb
+					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')
 		
 					relay.deliver(mail, To = recip.email)
+
 		except Exception, e:
 			logging.debug(e)
 			error_mail = create_error_email(group_name, e)
@@ -364,10 +310,8 @@ def handle_post(message, address=None, host=None):
 		mail = create_error_email(group_name, e)
 		relay.deliver(mail, To = ADMIN_EMAILS)
 		return
-	
 		
 		
-
 
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
 @stateless
