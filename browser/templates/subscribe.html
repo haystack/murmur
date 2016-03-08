@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+	
+	{% if res.status %}
+		You've {{ type }} the group "{{ group_name }}".
+		<BR>
+		<BR>
+		{% if type == 'unsubscribed from' %}
+		<form action="/subscribe_get?">
+			<input type='hidden' name='group_name' value={{group_name}}>
+    		<input type="submit" value="Re-subscribe">
+		</form>
+		{% else %}
+		<form action="/unsubscribe_get?">
+			<input type='hidden' name='group_name' value={{group_name}}>
+    		<input type="submit" value="Unsubscribe">
+		</form>
+		{% endif %}
+	{% else %}
+		Sorry, there was an error: {{ res.code }}.
+	{% endif %}
+	<BR>
+	<BR>
+  </div>
+</div>
+
+{% endblock %}
+
+

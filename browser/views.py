@@ -856,13 +856,47 @@ def unupvote(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
+
+@render_to('subscribe.html')
+@login_required
+def unsubscribe_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.unsubscribe_group(request.GET.get('group_name'), user)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		active_group = {'name':'No Groups Yet'}
+		if len(groups) > 0:
+			active_group = load_groups(request, groups, user, group_name=groups[0]['name'])
+		return {'res':res, 'type': 'unsubscribed from', 'user': request.user, 'group_name' : request.GET.get('group_name'),
+		'groups' : groups, 'active_group': active_group}
+	else:
+		return redirect(global_settings.LOGIN_URL + '?next=/unsubscribe_get?group_name=' + request.GET.get('group_name'))
+
+@render_to('subscribe.html')
+@login_required
+def subscribe_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		group_name = request.GET.get('group_name')
+		res = engine.main.subscribe_group(group_name, user)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		if res['status']:
+			active_group = load_groups(request, groups, user, group_name=group_name)
+		else:
+			active_group = {'name':'No Groups Yet'}
+			if len(groups) > 0:
+				active_group = load_groups(request, groups, user, group_name=groups[0]['name'])
+		return {'res':res, 'type': 'subscribed to', 'user': request.user, 'groups': groups,
+		'active_group': active_group, 'group_name' : group_name}
+	else:
+		return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + request.GET.get('group_name'))
+
 @render_to("upvote.html")
 @login_required
 def upvote_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-
 		post_id = request.GET.get('post_id')
 		res = engine.main.upvote(post_id, user=user)
 		active_group = load_groups(request, groups, user, group_name=res['group_name'])

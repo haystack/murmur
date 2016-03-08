@@ -96,7 +96,28 @@ def subscribe(message, group_name=None, host=None):
 	group = None
 	group_name = group_name.lower()
 	name, addr = parseaddr(message['from'].lower())
-	res = subscribe_group(group_name, addr)
+	try:
+		user = UserProfile.objects.get(email=addr)
+	except UserProfile.DoesNotExist:
+		mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+		relay.deliver(mail, To = addr)
+		relay.deliver(mail, To = ADMIN_EMAILS)
+		return
+	try:
+		group = Group.objects.get(name=group_name)
+	except Group.DoesNotExist:
+		mail = create_error_email(group_name, 'The group' + group_name + 'does not exist.')
+		relay.deliver(mail, To = addr)
+		relay.deliver(mail, To = ADMIN_EMAILS)
+		return
+
+	if not group.public:
+		mail = create_error_email(group_name, 'The group ' + group_name + ' is private. Ask the admin of the group to add you.')
+		relay.deliver(mail, To = addr)
+		relay.deliver(mail, To = ADMIN_EMAILS)
+		return
+
+	res = subscribe_group(group_name, user)
 	subject = "Subscribe -- Success"
 	body = "You are now subscribed to: %s@%s" %(group_name, host)
 	if(not res['status']):
@@ -114,13 +135,22 @@ def unsubscribe(message, group_name=None, host=None):
 	group = None
 	group_name = group_name.lower()
 	name, addr = parseaddr(message['from'].lower())
-	res = unsubscribe_group(group_name, addr)
-	subject = "Un-subscribe -- Success"
-	body = "You are now un-subscribed from: %s@%s" %(group_name, host)
+	try:
+		user = UserProfile.objects.get(email=addr)
+	except UserProfile.DoesNotExist:
+		mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+		relay.deliver(mail, To = addr)
+		relay.deliver(mail, To = ADMIN_EMAILS)
+		return
+	res = unsubscribe_group(group_name, user)
+	subject = "Unsubscribe -- Success"
+	body = "You are now unsubscribed from: %s@%s." %(group_name, host)
+	body += " To resubscribe, reply to this email."
 	if(not res['status']):
-		subject = "Un-subscribe -- Error"
+		subject = "Unsubscribe -- Error"
 		body = "Error Message: %s" %(res['code'])
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
+	mail['Reply-To'] = '%s+subscribe@%s' %(group_name, host)
 	relay.deliver(mail)
 
 
@@ -156,7 +186,7 @@ def info(message, group_name=None, host=None):
 def handle_post(message, address=None, host=None):
 	if '+' in address and '__' in address:
 		return
-	
+
 	try:
 		#does this fix the MySQL has gone away error?
 		django.db.close_connection()
@@ -205,6 +235,13 @@ def handle_post(message, address=None, host=None):
 			msg_text['html'] = markdown(msg_text['plain'])
 		if 'plain' not in msg_text or msg_text['plain'] == '':
 			msg_text['plain'] = html2text(msg_text['html'])
+
+		if msg_text['plain'].startswith('unsubscribe\n') or msg_text['plain'] == 'unsubscribe':
+			unsubscribe(message, group_name = group_name, host = HOST)
+			return
+		elif msg_text['plain'].startswith('subscribe\n') or msg_text['plain'] == 'subscribe':
+			subscribe(message, group_name = group_name, host = HOST)
+			return
 		
 		try:
 			user = UserProfile.objects.get(email=user_addr)

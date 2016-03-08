@@ -72,8 +72,8 @@ urlpatterns = patterns('',
      url(r'^mute', 'browser.views.mute_thread_get'),
      url(r'^unmute', 'browser.views.unmute_thread_get'),
      
-
-
+     url(r'^unsubscribe_get', 'browser.views.unsubscribe_get'),
+     url(r'^subscribe_get', 'browser.views.subscribe_get'),
 
      
     #override the registration default urls - bug with django 1.6
