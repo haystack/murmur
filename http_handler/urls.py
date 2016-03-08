@@ -35,7 +35,7 @@ urlpatterns = patterns('',
 	 url(r'^unsubscribe_group', 'browser.views.unsubscribe_group'),
 	 url(r'^group_info', 'browser.views.group_info'),
      url(r'^add_members', 'browser.views.add_members'),
-	 
+     url(r'^edit_members', 'browser.views.edit_members'),
 	 url(r'^list_posts', 'browser.views.list_posts'),
 	 url(r'^refresh_posts', 'browser.views.refresh_posts'),
 	 url(r'^load_post', 'browser.views.load_post'),

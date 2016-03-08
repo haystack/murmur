@@ -33,12 +33,18 @@
 	</div>
 	<br />
 	<h3>Members List</h3> 
-
-	<button type="button" id="btn-add-members">Add Members</button>
 	<hr />
+	<button type="button" id="btn-add-members">Add Members</button>
+	<button type="button" id="btn-delete-members">Delete Members</button>
+	<button type="button" id="btn-set-admin">Set as Admin</button>
+	<!--	<button type="button" id="btn-undo-admin">Revoke Admin Rights</button> -->
+	<button type="button" id="btn-set-mod">Set as Moderator</button>
+	<!--	<button type="button" id="btn-undo-mod">Revoke Moderator Rights</button> -->
+
 	<table id="members-table" class="display" cellspacing="0" width="100%">
 		<thead>
 			<tr>
+				<th>Select</th>
 				<th>Email</th>
 				<th>Admin</th>
 				<th>Moderator</th>
