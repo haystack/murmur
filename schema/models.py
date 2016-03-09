@@ -104,7 +104,23 @@ class MemberGroup(models.Model):
 	class Meta:
 		db_table = "murmur_membergroups"
 		unique_together = ("member", "group")
-	
+
+class ForwardingList(models.Model):
+	id = models.AutoField(primary_key=True)
+	email = models.EmailField(
+		verbose_name='email address',
+		max_length=255,
+		unique=True,
+	)
+	timestamp = models.DateTimeField(auto_now=True)
+	group = models.ForeignKey('Group')
+	url = models.URLField(blank=True)
+	can_post = models.BooleanField(default=False)
+	can_receive = models.BooleanField(default=False)
+
+	def __unicode__(self):
+		return self.email
+
 
 class Group(models.Model):
 	id = models.AutoField(primary_key=True)
