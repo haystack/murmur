@@ -7,7 +7,7 @@ from http_handler import settings
 
 class Post(models.Model):
 	id = models.AutoField(primary_key=True)
-	author = models.ForeignKey(settings.AUTH_USER_MODEL)
+	author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
 	subject = models.TextField()
 	msg_id = models.CharField(max_length=120, unique=True)
 	post = models.TextField()
@@ -15,6 +15,8 @@ class Post(models.Model):
 	thread = models.ForeignKey('Thread')
 	reply_to = models.ForeignKey('self', blank=False, null = True, related_name="replies")
 	timestamp = models.DateTimeField(auto_now=True)
+	forwarding_list = models.ForeignKey('ForwardingList', null=True)
+	poster_email = models.EmailField(max_length=255, null=True)
 
 	def __unicode__(self):
 		return '%s %s' % (self.author.email, self.subject)
@@ -107,20 +109,15 @@ class MemberGroup(models.Model):
 
 class ForwardingList(models.Model):
 	id = models.AutoField(primary_key=True)
-	email = models.EmailField(
-		verbose_name='email address',
-		max_length=255,
-		unique=True,
-	)
+	email = models.EmailField(verbose_name='email address',max_length=255)
 	timestamp = models.DateTimeField(auto_now=True)
 	group = models.ForeignKey('Group')
-	url = models.URLField(blank=True)
+	url = models.URLField(null=True)
 	can_post = models.BooleanField(default=False)
 	can_receive = models.BooleanField(default=False)
 
 	def __unicode__(self):
 		return self.email
-
 
 class Group(models.Model):
 	id = models.AutoField(primary_key=True)

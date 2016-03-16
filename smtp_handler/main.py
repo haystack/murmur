@@ -192,7 +192,8 @@ def handle_post(message, address=None, host=None):
 		django.db.close_connection()
 		
 		address = address.lower()
-		name, user_addr = parseaddr(message['From'].lower())
+		name, sender_addr = parseaddr(message['From'].lower())
+		list_name, list_addr = parseaddr(message['List-Id'])
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
 		if(reserved):
 			return
@@ -203,7 +204,7 @@ def handle_post(message, address=None, host=None):
 		except Exception, e:
 			logging.debug(e)
 			mail = create_error_email(group_name, e)
-			relay.deliver(mail, To = user_addr)
+			relay.deliver(mail, To = sender_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 
@@ -221,7 +222,7 @@ def handle_post(message, address=None, host=None):
 		res = check_attachments(attachments, group.allow_attachments)
 		if not res['status']:
 			mail = create_error_email(group_name, res['error'])
-			relay.deliver(mail, To = user_addr)
+			relay.deliver(mail, To = sender_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 	
@@ -243,22 +244,49 @@ def handle_post(message, address=None, host=None):
 			subscribe(message, group_name = group_name, host = HOST)
 			return
 		
-		try:
-			user = UserProfile.objects.get(email=user_addr)
-		except UserProfile.DoesNotExist:
-			mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
-			relay.deliver(mail, To = user_addr)
+		
+		user_lookup = UserProfile.objects.filter(email=sender_addr)
+
+		# as long as no one adds a list as a forwarding list for itself, this should
+		# prevent normal emails to Murmur lists from being mishandled as list-fwded emails 
+		fwding_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group)
+
+		# the person who sent this email is not a member of Murmur,
+		# and the email either did not come from a list or did not 
+		# come from a list that is authorized to post to this group. 
+		if not user_lookup.exists() and not fwding_list_lookup.exists():
+
+			# the email did not come from a list
+			if list_addr == '':
+				mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+				relay.deliver(mail, To = sender_addr)
+				relay.deliver(mail, To = ADMIN_EMAILS)
+				return
+
+			# the email came from a list that isn't authorized to post
+			mail = create_error_email(group_name, 'The mailing list ' + list_addr + ' is not authorized to post to this Murmur group.')
+			relay.deliver(mail, To = sender_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 
+		# if there is a Murmur user associated w/ email of sender, look them up 
+		user = None
+		if user_lookup.exists():
+			user = user_lookup[0]
+
+		# if the post came from a list 
+		fwding_list = None
+		if fwding_list_lookup.exists():
+			fwding_list = fwding_list_lookup[0]
+
 		if message_is_reply:
-			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user)
+			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, fwding_list)
 		else:
-			res = insert_post(group_name, orig_message, msg_text['html'], user)
+			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, fwding_list)
 			
 		if not res['status']:
 			mail = create_error_email(group_name, res['code'])
-			relay.deliver(mail, To = user_addr)
+			relay.deliver(mail, To = sender_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 	
@@ -314,7 +342,7 @@ def handle_post(message, address=None, host=None):
 					
 					# Don't send email to the sender if it came from email
 					# Don't send email to people that already directly got the email via CC/BCC
-					if recip.email == user_addr or recip.email in direct_recips:
+					if recip.email == sender_addr or recip.email in direct_recips:
 						continue
 
 					membergroup = membergroups.filter(member=recip)[0]

@@ -662,7 +662,7 @@ def _create_tag(group, thread, name):
 		t.save()
 	tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
-def _create_post(group, subject, message_text, user):
+def _create_post(group, subject, message_text, user, sender_addr, forwarding_list):
 
 	try:
 		message_text = message_text.decode("utf-8")
@@ -677,11 +677,11 @@ def _create_post(group, subject, message_text, user):
 	thread.subject = stripped_subj
 	thread.group = group
 	thread.save()
-	
 
 	msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@' + BASE_URL
 	
-	p = Post(msg_id=msg_id, author=user, subject=stripped_subj, post=message_text, group=group, thread=thread)
+	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
+			subject=stripped_subj, post=message_text, group=group, thread=thread)
 	p.save()
 	
 	
@@ -726,7 +726,7 @@ def insert_post_web(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
-			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user)
+			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, None)
 			res['status'] = True
 			
 			res['member_group'] = {'no_emails': user_member[0].no_emails, 
@@ -773,45 +773,58 @@ def insert_post_web(group_name, subject, message_text, user):
 	return res
 
 
-def insert_post(group_name, subject, message_text, user):
+def insert_post(group_name, subject, message_text, user, sender_addr, forwarding_list):
 	res = {'status':False}
 	thread = None
 	try:
 		group = Group.objects.get(name=group_name)
-		user_member = MemberGroup.objects.filter(group=group, member=user)
-		if user_member.exists():
-			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user)
-			res['status'] = True
-			res['post_id'] = p.id
-			res['msg_id'] = p.msg_id
-			res['thread_id'] = thread.id
-			res['tags'] = tags
-			res['tag_objs'] = tag_objs
-			res['recipients'] = recipients
-		else:
-			res['code'] = msg_code['NOT_MEMBER']
+
+		# this post did not come from a forwarding list. thus we should only
+		# post it if the user is a member of the group. 
+		if user and not forwarding_list:
+			user_member = MemberGroup.objects.filter(group=group, member=user)
+			if not user_member.exists():
+				res['code'] = msg_code['NOT_MEMBER']
+				return res
+
+		# if we make it to here, then post is valid under one of following conditions:
+		# 1) this is a normal post by a list member to the list. 
+		# 2) this is a post by a Murmur user, but it's posted to this group via fwding list. 
+		# 3) this is a post by someone who doesn't use Murmur, via fwding list. 
+		# _create_post will check which of user and forwarding list are None and post appropriately. 
+
+		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, forwarding_list)
+		res['status'] = True
+		res['post_id'] = p.id
+		res['msg_id'] = p.msg_id
+		res['thread_id'] = thread.id
+		res['tags'] = tags
+		res['tag_objs'] = tag_objs
+		res['recipients'] = recipients
+
 
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+
 	except Exception, e:
-		print e
 		logging.debug(e)
 		if(thread and thread.id):
 			thread.delete()
 		res['code'] = msg_code['UNKNOWN_ERROR']
+
 	logging.debug(res)
 	return res
 	
 
 
-def insert_reply(group_name, subject, message_text, user, thread_id=None):
+def insert_reply(group_name, subject, message_text, user, sender_addr, forwarding_list, thread_id=None):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
 		
 		group_members = UserProfile.objects.filter(membergroup__group=group)
 		
-		if user in group_members:
+		if user in group_members or forwarding_list:
 			
 			orig_post_subj = subject[4:].strip()
 			
@@ -851,7 +864,8 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			
 			message_text = message_text.encode("ascii", "ignore")
 			
-			r = Post(msg_id=msg_id, author=user, subject=subject, post = message_text, reply_to=post, group=group, thread=thread)
+			r = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
+				subject=subject, post = message_text, reply_to=post, group=group, thread=thread)
 			r.save()
 			
 			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
@@ -860,7 +874,6 @@ def insert_reply(group_name, subject, message_text, user, thread_id=None):
 			if not Following.objects.filter(user=user, thread=thread).exists(): 
 				f = Following(user=user, thread=thread)
 				f.save()
-				
 				
 			member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True, no_emails=False)
 			always_follow_members = [member_group.member.email for member_group in member_recip]
