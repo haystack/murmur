@@ -112,7 +112,7 @@ class ForwardingList(models.Model):
 	email = models.EmailField(verbose_name='email address',max_length=255)
 	timestamp = models.DateTimeField(auto_now=True)
 	group = models.ForeignKey('Group')
-	url = models.URLField(null=True)
+	url = models.URLField(null=True, blank=True)
 	can_post = models.BooleanField(default=False)
 	can_receive = models.BooleanField(default=False)
 
