@@ -697,15 +697,11 @@ def _create_post(group, subject, message_text, user, sender_addr, forwarding_lis
 	tag_objs = Tag.objects.filter(tagthread__thread=thread)
 	tags = list(tag_objs.values('name', 'color'))
 	
-	f = Following(user=user, thread=thread)
-	f.save()
-	
-	
 	group_members = MemberGroup.objects.filter(group=group)
 	
 	recipients = []
 	for m in group_members:
-		if not m.no_emails and m.member.email != user.email:
+		if not m.no_emails and m.member.email != sender_addr:
 			mute_tag = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
 			if not mute_tag:
 				recipients.append(m.member.email)
@@ -716,6 +712,8 @@ def _create_post(group, subject, message_text, user, sender_addr, forwarding_lis
 	
 	if user:
 		recipients.append(user.email)
+		f = Following(user=user, thread=thread)
+		f.save()
 	
 	return p, thread, recipients, tags, tag_objs
 
@@ -873,8 +871,9 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, forwardin
 			thread.save()
 			
 			if not Following.objects.filter(user=user, thread=thread).exists(): 
-				f = Following(user=user, thread=thread)
-				f.save()
+				if user:
+					f = Following(user=user, thread=thread)
+					f.save()
 				
 			member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True, no_emails=False)
 			always_follow_members = [member_group.member.email for member_group in member_recip]
