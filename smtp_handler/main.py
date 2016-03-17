@@ -194,6 +194,8 @@ def handle_post(message, address=None, host=None):
 		address = address.lower()
 		name, sender_addr = parseaddr(message['From'].lower())
 		list_name, list_addr = parseaddr(message['List-Id'])
+		to_name, to_addr = parseaddr(message['To'].lower())
+
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
 		if(reserved):
 			return
@@ -246,36 +248,28 @@ def handle_post(message, address=None, host=None):
 		
 		
 		user_lookup = UserProfile.objects.filter(email=sender_addr)
-
-		# as long as no one adds a list as a forwarding list for itself, this should
-		# prevent normal emails to Murmur lists from being mishandled as list-fwded emails 
 		fwding_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group)
+		fwding_list = None
+		user = None
 
-		# the person who sent this email is not a member of Murmur,
-		# and the email either did not come from a list or did not 
-		# come from a list that is authorized to post to this group. 
 		if not user_lookup.exists() and not fwding_list_lookup.exists():
+			# checkif the "to" field is an authorized list 
+			fwding_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
 
-			# the email did not come from a list
-			if list_addr == '':
+			# no user and no mailing list address in either the to field 
+			# or the list-id field. 
+			if not fwding_list_lookup.exists():
 				mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
 				relay.deliver(mail, To = sender_addr)
 				relay.deliver(mail, To = ADMIN_EMAILS)
 				return
 
-			# the email came from a list that isn't authorized to post
-			mail = create_error_email(group_name, 'The mailing list ' + list_addr + ' is not authorized to post to this Murmur group.')
-			relay.deliver(mail, To = sender_addr)
-			relay.deliver(mail, To = ADMIN_EMAILS)
-			return
-
-		# if there is a Murmur user associated w/ email of sender, look them up 
-		user = None
-		if user_lookup.exists():
+		# user does exist, but there's no forwarding list. see if the to address is a list 
+		elif not fwding_list_lookup.exists():
 			user = user_lookup[0]
+			fwding_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
 
-		# if the post came from a list 
-		fwding_list = None
+		# if we found a list in the prev statements, use it
 		if fwding_list_lookup.exists():
 			fwding_list = fwding_list_lookup[0]
 
