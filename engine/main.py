@@ -678,7 +678,7 @@ def _create_post(group, subject, message_text, user, sender_addr, forwarding_lis
 	thread.group = group
 	thread.save()
 
-	msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@' + BASE_URL
+	msg_id = base64.b64encode(sender_addr + str(datetime.datetime.now())).lower() + '@' + BASE_URL
 	
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
 			subject=stripped_subj, post=message_text, group=group, thread=thread)
@@ -713,8 +713,9 @@ def _create_post(group, subject, message_text, user, sender_addr, forwarding_lis
 			follow_tag = FollowTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
 			if follow_tag:
 				recipients.append(m.member.email)
-				
-	recipients.append(user.email)
+	
+	if user:
+		recipients.append(user.email)
 	
 	return p, thread, recipients, tags, tag_objs
 
@@ -855,7 +856,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, forwardin
 			
 			tag_objs = Tag.objects.filter(tagthread__thread=thread)
 			
-			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@' + BASE_URL
+			msg_id = base64.b64encode(sender_addr + str(datetime.datetime.now())).lower() + '@' + BASE_URL
 			
 			try:
 				message_text = message_text.decode("utf-8")
