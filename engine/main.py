@@ -541,7 +541,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 				post_dict = {'id': p.id,
 							'msg_id': p.msg_id, 
 							'thread_id': p.thread_id, 
-							'from': p.author.email, 
+							'from': p.poster_email, 
 							'to': p.group.name, 
 							'subject': escape(p.subject),
 							'likes': post_likes, 
@@ -820,7 +820,6 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, forwardin
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
-		
 		group_members = UserProfile.objects.filter(membergroup__group=group)
 		
 		if user in group_members or forwarding_list:
@@ -835,17 +834,14 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, forwardin
 				
 			if not thread_id:
 				thread = Thread.objects.filter(subject=orig_post_subj, group=group).order_by('-timestamp')
-				if thread.count() >= 1:
-					thread = thread[0]
-				else:
-					thread = None
 			else:
 				thread = Thread.objects.filter(id=thread_id)
-				if thread.count() >= 1:
-					thread = thread[0]
-				else:
-					thread = None
-			
+
+			if thread.count() >= 1:
+				thread = thread[0]
+			else:
+				thread = None
+		
 			if not thread:
 				thread = Thread()
 				thread.subject = orig_post_subj
@@ -911,11 +907,14 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, forwardin
 		
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+
 	except Post.DoesNotExist:
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
+
 	except:
 		logging.debug(sys.exc_info())
 		res['code'] = msg_code['UNKNOWN_ERROR']
+		
 	logging.debug(res)
 	return res
 

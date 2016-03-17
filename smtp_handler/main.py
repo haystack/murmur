@@ -210,13 +210,6 @@ def handle_post(message, address=None, host=None):
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
 
-		message_is_reply = (message['Subject'][0:4].lower() == "re: ")
-		
-		if not message_is_reply:
-			orig_message = message['Subject'].strip()
-		else:
-			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
-		
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)
 	
@@ -227,8 +220,13 @@ def handle_post(message, address=None, host=None):
 			relay.deliver(mail, To = sender_addr)
 			relay.deliver(mail, To = ADMIN_EMAILS)
 			return
-	
-		if message_is_reply:
+
+		message_is_reply = (message['Subject'][0:4].lower() == "re: ")
+		
+		if not message_is_reply:
+			orig_message = message['Subject'].strip()
+		else:
+			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
 			if 'html' in msg_text:
 				msg_text['html'] = remove_html_ps(msg_text['html'])
 			if 'plain' in msg_text:
@@ -246,30 +244,30 @@ def handle_post(message, address=None, host=None):
 			subscribe(message, group_name = group_name, host = HOST)
 			return
 		
-		
 		user_lookup = UserProfile.objects.filter(email=sender_addr)
+
+		# try using List-Id field from email
 		fwding_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group)
-		fwding_list = None
-		user = None
 
+		# if no valid List-Id, try email's To field
+		if not fwding_list_lookup.exists():
+			fwding_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
+
+		# neither user nor fwding list exist - reject email
 		if not user_lookup.exists() and not fwding_list_lookup.exists():
-			# checkif the "to" field is an authorized list 
-			fwding_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
 
-			# no user and no mailing list address in either the to field 
-			# or the list-id field. 
-			if not fwding_list_lookup.exists():
-				mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
-				relay.deliver(mail, To = sender_addr)
-				relay.deliver(mail, To = ADMIN_EMAILS)
-				return
+			# no valid forwarding list in List-Id field or in To field
+			mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
+			relay.deliver(mail, To = sender_addr)
+			relay.deliver(mail, To = ADMIN_EMAILS)
+			return
 
-		# user does exist, but there's no forwarding list. see if the to address is a list 
-		elif not fwding_list_lookup.exists():
+		user = None
+		fwding_list = None
+
+		if user_lookup.exists():
 			user = user_lookup[0]
-			fwding_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
 
-		# if we found a list in the prev statements, use it
 		if fwding_list_lookup.exists():
 			fwding_list = fwding_list_lookup[0]
 
