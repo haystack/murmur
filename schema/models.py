@@ -19,7 +19,9 @@ class Post(models.Model):
 	poster_email = models.EmailField(max_length=255, null=True)
 
 	def __unicode__(self):
-		return '%s %s' % (self.author.email, self.subject)
+		if self.author:
+			return '%s %s' % (self.author.email, self.subject)
+		return '%s %s' % (self.poster_email, self.subject)
 	
 	class Meta:
 		db_table = "murmur_posts"
