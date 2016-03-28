@@ -49,10 +49,6 @@ def create(message, group_name=None, host=None):
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 	relay.deliver(mail)
 
-
-
-
-
 @route("(group_name)\\+activate@(host)", group_name=".+", host=HOST)
 @stateless
 def activate(message, group_name=None, host=None):
@@ -93,36 +89,38 @@ def deactivate(message, group_name=None, host=None):
 @route("(group_name)\\+subscribe@(host)", group_name=".+", host=HOST)
 @stateless
 def subscribe(message, group_name=None, host=None):
+
 	group = None
 	group_name = group_name.lower()
 	name, addr = parseaddr(message['from'].lower())
+
 	try:
 		user = UserProfile.objects.get(email=addr)
-	except UserProfile.DoesNotExist:
-		mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
-		relay.deliver(mail, To = addr)
-		relay.deliver(mail, To = ADMIN_EMAILS)
-		return
-	try:
 		group = Group.objects.get(name=group_name)
+
+	except UserProfile.DoesNotExist:
+		error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
+		send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
+		return
+
 	except Group.DoesNotExist:
-		mail = create_error_email(group_name, 'The group' + group_name + 'does not exist.')
-		relay.deliver(mail, To = addr)
-		relay.deliver(mail, To = ADMIN_EMAILS)
+		error_msg = 'The group' + group_name + 'does not exist.'
+		send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
 		return
 
 	if not group.public:
-		mail = create_error_email(group_name, 'The group ' + group_name + ' is private. Ask the admin of the group to add you.')
-		relay.deliver(mail, To = addr)
-		relay.deliver(mail, To = ADMIN_EMAILS)
+		error_msg = 'The group ' + group_name + ' is private. Ask the admin of the group to add you.'
+		send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
 		return
 
 	res = subscribe_group(group_name, user)
 	subject = "Subscribe -- Success"
 	body = "You are now subscribed to: %s@%s" %(group_name, host)
+
 	if(not res['status']):
 		subject = "Subscribe -- Error"
 		body = "Error Message: %s" %(res['code'])
+
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body) 
 	relay.deliver(mail)
 
@@ -132,23 +130,28 @@ def subscribe(message, group_name=None, host=None):
 @route("(group_name)\\+unsubscribe@(host)", group_name=".+", host=HOST)
 @stateless
 def unsubscribe(message, group_name=None, host=None):
+
 	group = None
 	group_name = group_name.lower()
 	name, addr = parseaddr(message['from'].lower())
+
 	try:
 		user = UserProfile.objects.get(email=addr)
+
 	except UserProfile.DoesNotExist:
-		mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
-		relay.deliver(mail, To = addr)
-		relay.deliver(mail, To = ADMIN_EMAILS)
+		error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
+		send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
 		return
+
 	res = unsubscribe_group(group_name, user)
 	subject = "Unsubscribe -- Success"
 	body = "You are now unsubscribed from: %s@%s." %(group_name, host)
 	body += " To resubscribe, reply to this email."
+
 	if(not res['status']):
 		subject = "Unsubscribe -- Error"
 		body = "Error Message: %s" %(res['code'])
+
 	mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 	mail['Reply-To'] = '%s+subscribe@%s' %(group_name, host)
 	relay.deliver(mail)
@@ -205,9 +208,7 @@ def handle_post(message, address=None, host=None):
 			group = Group.objects.get(name=group_name)
 		except Exception, e:
 			logging.debug(e)
-			mail = create_error_email(group_name, e)
-			relay.deliver(mail, To = sender_addr)
-			relay.deliver(mail, To = ADMIN_EMAILS)
+			send_error_email(group_name, e, user_addr, ADMIN_EMAILS)	
 			return
 
 		email_message = email.message_from_string(str(message))
@@ -215,10 +216,9 @@ def handle_post(message, address=None, host=None):
 	
 		attachments = get_attachments(email_message)
 		res = check_attachments(attachments, group.allow_attachments)
+
 		if not res['status']:
-			mail = create_error_email(group_name, res['error'])
-			relay.deliver(mail, To = sender_addr)
-			relay.deliver(mail, To = ADMIN_EMAILS)
+			send_error_email(group_name, res['error'], user_addr, ADMIN_EMAILS)
 			return
 
 		message_is_reply = (message['Subject'][0:4].lower() == "re: ")
@@ -244,23 +244,12 @@ def handle_post(message, address=None, host=None):
 			subscribe(message, group_name = group_name, host = HOST)
 			return
 		
-		user_lookup = UserProfile.objects.filter(email=sender_addr)
+		try:
+			user = UserProfile.objects.get(email=user_addr)
+		except UserProfile.DoesNotExist:
+			error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
+			send_error_email(group_name, error_msg, user_addr, ADMIN_EMAILS)
 
-		# try using List-Id field from email
-		fwding_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group)
-
-		# if no valid List-Id, try email's To field
-		if not fwding_list_lookup.exists():
-			fwding_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
-
-		# neither user nor fwding list exist - reject email
-		if not user_lookup.exists() and not fwding_list_lookup.exists():
-
-			# no valid forwarding list in List-Id field or in To field
-			mail = create_error_email(group_name, 'Your email is not in the Murmur system. Ask the admin of the group to add you.')
-			relay.deliver(mail, To = sender_addr)
-			relay.deliver(mail, To = ADMIN_EMAILS)
-			return
 
 		user = None
 		fwding_list = None
@@ -277,10 +266,7 @@ def handle_post(message, address=None, host=None):
 			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, fwding_list)
 			
 		if not res['status']:
-			mail = create_error_email(group_name, res['code'])
-			relay.deliver(mail, To = sender_addr)
-			relay.deliver(mail, To = ADMIN_EMAILS)
-			return
+			send_error_email(group_name, res['code'], user_addr, ADMIN_EMAILS)
 	
 		subject = get_subject(message, res, group_name)
 			
@@ -366,8 +352,7 @@ def handle_post(message, address=None, host=None):
 
 		except Exception, e:
 			logging.debug(e)
-			error_mail = create_error_email(group_name, e)
-			relay.deliver(error_mail, To = ADMIN_EMAILS)
+			send_error_email(group_name, e, None, ADMIN_EMAILS)
 			
 			# try to deliver mail even without footers
 			mail.Html = msg_text['html']
@@ -376,8 +361,7 @@ def handle_post(message, address=None, host=None):
 				
 	except Exception, e:
 		logging.debug(e)
-		mail = create_error_email(group_name, e)
-		relay.deliver(mail, To = ADMIN_EMAILS)
+		send_error_email(group_name, e, None, ADMIN_EMAILS)
 		return
 		
 		
@@ -387,16 +371,14 @@ def handle_post(message, address=None, host=None):
 def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=None):
 	_, addr = parseaddr(message['From'].lower())
 	res = follow_thread(thread_id, email=addr)
-	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Success! You are now following the thread \"%s\". You will receive emails for all following replies to this thread." % res['thread_name'])
-		relay.deliver(mail)
+
+	if res['status']:
+		body = "Success! You are now following the thread \"%s\". You will receive emails for all following replies to this thread." % res['thread_name']
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Sorry there was an error: %s" % (res['code']))
-		relay.deliver(mail)
-	return
+		body = "Sorry there was an error: %s" % res['code']
 
-
-
+	mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = body)
+	relay.deliver(mail)
 
 
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=UNFOLLOW_SUFFIX+"|"+UNFOLLOW_SUFFIX.upper(), host=HOST)
@@ -404,77 +386,78 @@ def handle_follow(message, group_name=None, thread_id=None, suffix=None, host=No
 def handle_unfollow(message, group_name=None, thread_id=None, suffix=None, host=None):
 	_, addr = parseaddr(message['From'].lower())
 	res = unfollow_thread(thread_id, email=addr)
-	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "You unfollowed the thread \"%s\" successfully." % res['thread_name'])
-		relay.deliver(mail)
+
+	if res['status']:
+		body = "You unfollowed the thread \"%s\" successfully." % res['thread_name']
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Error Message: %s" %(res['code']))
-		relay.deliver(mail)
-	return
+		body =  "Error Message: %s" % res['code']
+
+	mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = body)
+	relay.deliver(mail)
 
 
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=MUTE_SUFFIX+"|"+MUTE_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_mute(message, group_name=None, thread_id=None, suffix=None, host=None):
+
 	_, addr = parseaddr(message['From'].lower())
 	res = mute_thread(thread_id, email=addr)
+
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Success! You have now muted the thread \"%s\"." % res['thread_name'])
-		relay.deliver(mail)
+		body = "Success! You have now muted the thread \"%s\"." % res['thread_name']
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Sorry there was an error: %s" % (res['code']))
-		relay.deliver(mail)
-	return
+		body = "Sorry there was an error: %s" % (res['code'])
 
-
-
+	mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = body)
+	relay.deliver(mail)
 
 
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=UNMUTE_SUFFIX+"|"+UNMUTE_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_unmute(message, group_name=None, thread_id=None, suffix=None, host=None):
+
 	_, addr = parseaddr(message['From'].lower())
 	res = unmute_thread(thread_id, email=addr)
+
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "You unmuted the thread \"%s\" successfully. You will receive emails for all following replies to this thread." % res['thread_name'])
-		relay.deliver(mail)
+		body = "You unmuted the thread \"%s\" successfully. You will receive emails for all following replies to this thread." % res['thread_name']
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = "Error Message: %s" %(res['code']))
-		relay.deliver(mail)
-	return
-
-
+		body = "Error Message: %s" %(res['code'])
+	
+	mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['thread_name'], Body = body)
+	relay.deliver(mail)
 
 
 @route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=FOLLOW_TAG_SUFFIX+"|"+FOLLOW_TAG_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_follow_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
+
 	_, addr = parseaddr(message['From'].lower())
 	res = follow_tag(tag_name, group_name, email=addr)
+
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Success! You are now following the tag \"%s\". You will receive emails for all following emails with this tag." % res['tag_name'])
-		relay.deliver(mail)
+		body = "Success! You are now following the tag \"%s\". You will receive emails for all following emails with this tag." % res['tag_name']
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Sorry there was an error: %s" % (res['code']))
-		relay.deliver(mail)
-	return
+		body = "Sorry there was an error: %s" % (res['code'])
 
-
-
+	mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = body)
+	relay.deliver(mail)
 
 
 @route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=UNFOLLOW_TAG_SUFFIX+"|"+UNFOLLOW_TAG_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_unfollow_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
+
 	_, addr = parseaddr(message['From'].lower())
 	res = unfollow_tag(tag_name, group_name, email=addr)
+
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "You unfollowed the tag \"%s\" successfully." % res['tag_name'])
-		relay.deliver(mail)
+		body = "You unfollowed the tag \"%s\" successfully." % res['tag_name']
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Error Message: %s" %(res['code']))
-		relay.deliver(mail)
-	return
+		body = "Error Message: %s" %(res['code'])
+	
+	mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = body)
+	relay.deliver(mail)
 
 
 @route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=MUTE_TAG_SUFFIX+"|"+MUTE_TAG_SUFFIX.upper(), host=HOST)
@@ -483,16 +466,12 @@ def handle_mute_tag(message, group_name=None, tag_name=None, suffix=None, host=N
 	_, addr = parseaddr(message['From'].lower())
 	res = mute_tag(tag_name, group_name, email=addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Success! You have now muted the tag \"%s\"." % res['tag_name'])
-		relay.deliver(mail)
+		body = "Success! You have now muted the tag \"%s\"." % res['tag_name']
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Sorry there was an error: %s" % (res['code']))
-		relay.deliver(mail)
-	return
+		body = "Sorry there was an error: %s" % (res['code'])
 
-
-
-
+	mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = body)
+	relay.deliver(mail)
 
 @route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=UNMUTE_TAG_SUFFIX+"|"+UNMUTE_TAG_SUFFIX.upper(), host=HOST)
 @stateless
@@ -500,16 +479,12 @@ def handle_unmute_tag(message, group_name=None, tag_name=None, suffix=None, host
 	_, addr = parseaddr(message['From'].lower())
 	res = unmute_tag(tag_name, group_name, email=addr)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "You unmuted the tag \"%s\" successfully. You will receive emails for all emails to this tag." % res['tag_name'])
-		relay.deliver(mail)
+		body = "You unmuted the tag \"%s\" successfully. You will receive emails for all emails to this tag." % res['tag_name']
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = "Error Message: %s" %(res['code']))
-		relay.deliver(mail)
-	return
-
-
-
-
+		body = "Error Message: %s" %(res['code'])
+	
+	mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = body)
+	relay.deliver(mail)
 
 @route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=UPVOTE_SUFFIX+"|"+UPVOTE_SUFFIX.upper(), host=HOST)
 @stateless
@@ -517,42 +492,15 @@ def handle_upvote(message, group_name=None, post_id=None, suffix=None, host=None
 	name, addr = parseaddr(message['from'].lower())
 	res = upvote(post_id, email=addr, user=None)
 	if(res['status']):
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Upvoted the post: %s" %(post_id))
-		relay.deliver(mail)
+		subject = 'Success'
+		body = "Upvoted the post: %s" %(post_id)
+
 	else:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post: %s" %(post_id))
-		relay.deliver(mail)
-	return
+		subject = 'Error'
+		body = "Invalid post: %s" %(post_id)
 
-
-"""
-@route("(post_id)(suffix)@(host)", post_id=".+", suffix=DOWNVOTE_SUFFIX+"|"+DOWNVOTE_SUFFIX.upper(), host=HOST)
-@stateless
-def handle_downvote(message, post_id=None, suffix=None, host=None):
-	name, addr = parseaddr(message['from'].lower())
-	post_id = post_id.lower()
-	mail = None
-	post = None
-		try:
-				post = Post.objects.get(id=post_id)
-				dislike = Dislike.objects.get(post = post, email=addr)
-		like = Like.objects.get(post = post, email=addr)
-		like.delete()
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Downvoted the post:%s" %(post_id))
-				relay.deliver(mail)
-	except Dislike.DoesNotExist:
-		dislike = Disike(post = post, email = addr)
-				dislike.save()
-			mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Success", Body = "Downvoted the post:%s" %(post_id))
-				relay.deliver(mail)
-	except Post.DoesNotExist:
-		mail = MailResponse(From = NO_REPLY, To = addr, Subject = "Error", Body = "Invalid post:%s" %(post_id))
-			relay.deliver(mail)
-	return
-
-"""
-
-
+	mail = MailResponse(From = NO_REPLY, To = addr, Subject = subject, Body = body)
+	relay.deliver(mail)
 
 @route("(address)@(host)", address="help", host=HOST)
 @stateless
