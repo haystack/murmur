@@ -352,6 +352,16 @@ def handle_post(message, address=None, host=None):
 		
 					relay.deliver(mail, To = recip.email)
 
+				fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
+
+				# basic email. do we want some special PS blurb for fwded? 
+				mail.Html = get_new_body(msg_text, '', 'html')
+				mail.Body = get_new_body(msg_text, '', 'plain')
+
+				for l in fwding_lists:
+					relay.deliver(mail, To = l.email)
+
+
 		except Exception, e:
 			logging.debug(e)
 			error_mail = create_error_email(group_name, e)
