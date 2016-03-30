@@ -88,11 +88,13 @@ def setup_post(From, Subject, group_name):
 	
 	return mail
 
-
-def create_error_email(group_name, error):
+def send_error_email(group_name, error, user_addr, admin_emails):
 	mail = MurmurMailResponse(From = NO_REPLY, Subject = "Error")
 	mail.Body = "You tried to post to: %s. Error Message: %s" % (group_name, error)
-	return mail
+	if user_addr:
+		relay.deliver(mail, To = user_addr)
+	if admin_emails:
+		relay.deliver(mail, To = ADMIN_EMAILS)
 
 def check_attachments(attachments, attachments_allowed):
 
