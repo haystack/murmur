@@ -623,6 +623,16 @@ def insert_post(request):
 			
 				relay_mailer.deliver(mail, To = recip.email)
 
+		fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
+
+		group_footer = 'This message was posted to the mailing list ' + group_name + '@' + HOST + '.'
+
+		mail.Html = get_new_body(msg_text, group_footer, 'html')
+		mail.Body = get_new_body(msg_text, group_footer, 'plain')
+
+		for l in fwding_lists:
+			relay.deliver(mail, To = l.email)
+
 		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:

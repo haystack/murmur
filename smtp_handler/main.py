@@ -355,8 +355,10 @@ def handle_post(message, address=None, host=None):
 				fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
 
 				# basic email. do we want some special PS blurb for fwded? 
-				mail.Html = get_new_body(msg_text, '', 'html')
-				mail.Body = get_new_body(msg_text, '', 'plain')
+				group_footer = 'This message was posted to the mailing list ' + address + '@' + HOST + '.'
+
+				mail.Html = get_new_body(msg_text, group_footer, 'html')
+				mail.Body = get_new_body(msg_text, group_footer, 'plain')
 
 				for l in fwding_lists:
 					relay.deliver(mail, To = l.email)
