@@ -328,7 +328,9 @@ def handle_post(message, address=None, host=None):
 					html_ps_blurb = unicode(html_ps_blurb)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					logging.debug(repr(mail.Html))
-					mail.Html = re.sub(r'[\r\n]', '', mail.Html)
+					mail.Html.replace('<BR>', '<BR>\r\n')
+					mail.Html.replace('<br>', '<BR>\r\n')
+					#mail.Html = re.sub(r'[\r\n]', '', mail.Html)
 					
 					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')
