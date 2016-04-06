@@ -627,7 +627,7 @@ def insert_post(request):
 
 		group_footer = 'This message was posted to the mailing list ' + group_name + '@' + HOST + '.'
 
-		# mail.Html = get_new_body(msg_text, group_footer, 'html')
+		mail.Html = get_new_body(msg_text, group_footer, 'html')
 		# mail.Body = get_new_body(msg_text, group_footer, 'plain')
 
 		# for l in fwding_lists:
