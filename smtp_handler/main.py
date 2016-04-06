@@ -217,7 +217,7 @@ def handle_post(message, address=None, host=None):
 		
 
 		message_string = str(message)
-		#message_string.replace('\n', '')
+		message_string.replace('\n', '')
 
 		email_message = email.message_from_string(message_string)
 		msg_text = get_body(email_message)
@@ -327,6 +327,7 @@ def handle_post(message, address=None, host=None):
 					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					html_ps_blurb = unicode(html_ps_blurb)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
+					logging.debug(repr(mail.Html))
 					
 					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')
