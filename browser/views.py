@@ -623,8 +623,7 @@ def insert_post(request):
 			
 				relay_mailer.deliver(mail, To = recip.email)
 
-		# fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
-		# #logging.debug("forwarding lists are " + str(fwding_lists))
+		fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
 
 		# group_footer = 'This message was posted to the mailing list ' + group_name + '@' + HOST + '.'
 		# logging.debug("group footer is " + group_footer)
