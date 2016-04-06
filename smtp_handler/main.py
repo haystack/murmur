@@ -217,7 +217,7 @@ def handle_post(message, address=None, host=None):
 		
 
 		message_string = str(message)
-		message_string.replace('\n', '')
+		#message_string.replace('\n', '')
 
 		email_message = email.message_from_string(message_string)
 		msg_text = get_body(email_message)
