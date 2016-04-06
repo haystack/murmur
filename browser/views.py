@@ -16,7 +16,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from annoying.decorators import render_to
 from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
-	MuteTag
+	MuteTag, ForwardingList
 from html2text import html2text
 from django.contrib.auth.forms import AuthenticationForm
 from registration.forms import RegistrationForm
@@ -623,18 +623,18 @@ def insert_post(request):
 			
 				relay_mailer.deliver(mail, To = recip.email)
 
-		fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
-		logging.debug("forwarding lists are " + str(fwding_lists))
+		# fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
+		# #logging.debug("forwarding lists are " + str(fwding_lists))
 
-		group_footer = 'This message was posted to the mailing list ' + group_name + '@' + HOST + '.'
-		logging.debug("group footer is " + group_footer)
+		# group_footer = 'This message was posted to the mailing list ' + group_name + '@' + HOST + '.'
+		# logging.debug("group footer is " + group_footer)
 
-		mail.Html = get_new_body(msg_text, group_footer, 'html')
-		mail.Body = get_new_body(msg_text, group_footer, 'plain')
+		# mail.Html = get_new_body(msg_text, group_footer, 'html')
+		# mail.Body = get_new_body(msg_text, group_footer, 'plain')
 
-		for l in fwding_lists:
-			logging.debug("here")
-			relay.deliver(mail, To = l.email)
+		# for l in fwding_lists:
+		# 	logging.debug("here")
+		# 	relay.deliver(mail, To = l.email)
 
 		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
