@@ -625,8 +625,7 @@ def insert_post(request):
 
 		fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
 
-		# group_footer = 'This message was posted to the mailing list ' + group_name + '@' + HOST + '.'
-		# logging.debug("group footer is " + group_footer)
+		group_footer = 'This message was posted to the mailing list ' + group_name + '@' + HOST + '.'
 
 		# mail.Html = get_new_body(msg_text, group_footer, 'html')
 		# mail.Body = get_new_body(msg_text, group_footer, 'plain')
