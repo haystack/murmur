@@ -329,16 +329,16 @@ def handle_post(message, address=None, host=None):
 					fixed_html = ''
 					p = re.compile('<br>', flags=re.I)
 					start = 0
-					for match in p.finditer(msg):
+					for match in p.finditer(msg_text['html']):
 						i = match.start()
-						fixed_html += msg[start:i]
-						if not msg[i+4:].startswith('\r'):
+						fixed_html += msg_text['html'][start:i]
+						if not msg_text['html'][i+4:].startswith('\r'):
 							fixed_html += '<br>\r\n'
 							start = i + 4
 						else:
 							start = i
 
-					fixed_html += msg[start:]
+					fixed_html += msg_text['html'][start:]
 					msg_text['html'] = fixed_html
 
 					html_ps_blurb = unicode(html_ps_blurb)
