@@ -216,7 +216,10 @@ def handle_post(message, address=None, host=None):
 			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
 		
 
-		email_message = email.message_from_string(str(message))
+		message_string = str(message)
+		message_string.replace('\n', '')
+
+		email_message = email.message_from_string(message_string)
 		msg_text = get_body(email_message)
 	
 		attachments = get_attachments(email_message)
@@ -321,6 +324,8 @@ def handle_post(message, address=None, host=None):
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 				
+					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					
 					fixed_html = ''
 					p = re.compile('<br>', flags=re.I)
 					start = 0
@@ -336,22 +341,7 @@ def handle_post(message, address=None, host=None):
 					fixed_html += msg_text['html'][start:]
 					msg_text['html'] = fixed_html
 
-					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					html_ps_blurb = unicode(html_ps_blurb)
-
-					# fixed_blurb = ''
-					# p = re.compile('<br>', flags=re.I)
-					# start = 0
-					# for match in p.finditer(html_ps_blurb):
-					# 	i = match.start()
-					# 	fixed_blurb += html_ps_blurb[start:i+4]
-					# 	fixed_blurb += '\r\n'
-					# 	start = i + 4
-
-					# fixed_blurb += html_ps_blurb[start:]
-
-					# html_ps_blurb = fixed_blurb
-
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					logging.debug(repr(mail.Html))
 					
