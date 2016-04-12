@@ -216,10 +216,7 @@ def handle_post(message, address=None, host=None):
 			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
 		
 
-		message_string = str(message)
-		message_string.replace('\n', '')
-
-		email_message = email.message_from_string(message_string)
+		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)
 	
 		attachments = get_attachments(email_message)
