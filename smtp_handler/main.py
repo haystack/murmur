@@ -352,7 +352,7 @@ def handle_post(message, address=None, host=None):
 
 					# fixed_blurb += html_ps_blurb[start:]
 
-					html_ps_blurb = fixed_blurb
+					# html_ps_blurb = fixed_blurb
 
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					logging.debug(repr(mail.Html))
