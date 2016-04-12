@@ -340,7 +340,8 @@ def handle_post(message, address=None, host=None):
 					msg_text['html'] = fixed_html
 
 					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
-					
+					html_ps_blurb = unicode(html_ps_blurb)
+
 					# fixed_blurb = ''
 					# p = re.compile('<br>', flags=re.I)
 					# start = 0
