@@ -341,16 +341,16 @@ def handle_post(message, address=None, host=None):
 
 					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					
-					fixed_blurb = ''
-					p = re.compile('<br>', flags=re.I)
-					start = 0
-					for match in p.finditer(html_ps_blurb):
-						i = match.start()
-						fixed_blurb += html_ps_blurb[start:i+4]
-						fixed_blurb += '\r\n'
-						start = i + 4
+					# fixed_blurb = ''
+					# p = re.compile('<br>', flags=re.I)
+					# start = 0
+					# for match in p.finditer(html_ps_blurb):
+					# 	i = match.start()
+					# 	fixed_blurb += html_ps_blurb[start:i+4]
+					# 	fixed_blurb += '\r\n'
+					# 	start = i + 4
 
-					fixed_blurb += html_ps_blurb[start:]
+					# fixed_blurb += html_ps_blurb[start:]
 
 					html_ps_blurb = fixed_blurb
 
