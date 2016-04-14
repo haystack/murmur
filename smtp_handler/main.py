@@ -341,7 +341,7 @@ def handle_post(message, address=None, host=None):
 
 					fixed_html += msg_text['html'][start:]
 					# msg_text['html'] = fixed_html
-					with_newlines = textwrap.fill(msg_text['html'], 900)
+					with_newlines = textwrap.fill(msg_text['html'], 50)
 					msg_text['html'] = with_newlines
 
 					html_ps_blurb = unicode(html_ps_blurb)
