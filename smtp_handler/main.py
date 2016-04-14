@@ -339,7 +339,7 @@ def handle_post(message, address=None, host=None):
 							start = i
 
 					fixed_html += msg_text['html'][start:]
-					msg_text['html'] = fixed_html
+					# msg_text['html'] = fixed_html
 
 					html_ps_blurb = unicode(html_ps_blurb)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
