@@ -10,6 +10,7 @@ from html2text import html2text
 from markdown2 import markdown
 from django.db.utils import OperationalError
 import django.db
+import textwrap
 
 '''
 Murmur Mail Interface Handler
@@ -340,6 +341,8 @@ def handle_post(message, address=None, host=None):
 
 					fixed_html += msg_text['html'][start:]
 					# msg_text['html'] = fixed_html
+					with_newlines = textwrap.fill(msg_text['html'], 900)
+					msg_text['html'] = with_newlines
 
 					html_ps_blurb = unicode(html_ps_blurb)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
