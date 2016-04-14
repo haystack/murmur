@@ -332,7 +332,7 @@ def handle_post(message, address=None, host=None):
 					for match in p.finditer(msg_text['html']):
 						i = match.start()
 						fixed_html += msg_text['html'][start:i]
-						if not msg_text['html'][i+4:].startswith('\r'):
+						if not msg_text['html'][i+4:].startswith('\r') and not msg_text['html'][i-6:].startswith('wrote'):
 							fixed_html += '<br>\r\n'
 							start = i + 4
 						else:
