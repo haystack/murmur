@@ -141,7 +141,7 @@ def get_new_body(message_text, ps_blurb, plain_or_html):
 	# 	logging.debug('decoding Unicode is not supported')
 	# 	new_body = message_text[plain_or_html]
 	# 	new_body = new_body + ps_blurb
-	new_body = message_text['plain_or_html'] + ps_blurb
+	new_body = message_text[plain_or_html] + ps_blurb
 
 	quoted_printable = quopri.encodestring(new_body)
 
