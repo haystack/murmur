@@ -345,7 +345,7 @@ def handle_post(message, address=None, host=None):
 					# #with_newlines = textwrap.fill(split, 700)
 					# msg_text['html'] = split
 
-					html_ps_blurb = unicode(html_ps_blurb)
+					#html_ps_blurb = unicode(html_ps_blurb)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					logging.debug(repr(mail.Html))
 					
