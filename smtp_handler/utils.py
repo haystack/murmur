@@ -4,6 +4,7 @@ from config.settings import *
 from lamson_subclass import MurmurMailResponse
 from schema.models import Group, MemberGroup, Thread, Following, Mute
 from http_handler.settings import BASE_URL
+import quopri
 
 
 '''
@@ -141,7 +142,10 @@ def get_new_body(message_text, ps_blurb, plain_or_html):
 		new_body = message_text[plain_or_html]
 		new_body = new_body + ps_blurb
 
-	return new_body
+	quoted_printable = quopri.encodestring(new_body)
+
+	#return new_body
+	return quoted_printable
 
 		
 def get_direct_recips(email_message):
