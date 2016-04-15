@@ -62,7 +62,9 @@ relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug
 
 ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "application/pdf", "application/mspowerpoint",
 					"application/x-mspowerpoint", "application/powerpoint", "application/vnd.ms-powerpoint",
-					"application/msword", "text/plain"]
+					"application/msword", "text/plain", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+					"application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+					"application/vnd.openxmlformats-officedocument.presentationml.presentation"]
 MAX_ATTACHMENT_SIZE = 3000000
 
 def setup_post(From, Subject, group_name):
