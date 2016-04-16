@@ -160,14 +160,15 @@ class MurmurMailResponse(object):
         if self.Body and self.Html:
             self.multipart = True
             self.base.content_encoding['Content-Type'] = ('multipart/alternative', {})
+            self.base.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
 
         if self.multipart:
             self.base.body = None
             if self.Body:
-                self.base.attach_text(self.Body, 'text/plain', 'quoted-printable')
+                self.base.attach_text(self.Body, 'text/plain')
 
             if self.Html:
-                self.base.attach_text(self.Html, 'text/html', 'quoted-printable')
+                self.base.attach_text(self.Html, 'text/html')
 
             for args in self.attachments:
                 self._encode_attachment(**args)
@@ -261,7 +262,7 @@ class MurmurMailBase(object):
         self.parts.append(part)
 
 
-    def attach_text(self, data, ctype, ctenc):
+    def attach_text(self, data, ctype):
         """
         This attaches a simpler text encoded part, which doesn't have a
         filename.
@@ -271,7 +272,7 @@ class MurmurMailBase(object):
         part = MurmurMailBase()
         part.body = data
         part.content_encoding['Content-Type'] = (ctype, {})
-        part.content_encoding['Content-Transfer-Encoding'] = ctenc
+        part.content_encoding['Content-Transfer-Encoding'] = self.content_encoding['Content-Transfer-Encoding']
         self.parts.append(part)
 
     def walk(self):
