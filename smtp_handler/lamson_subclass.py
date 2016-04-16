@@ -164,10 +164,10 @@ class MurmurMailResponse(object):
         if self.multipart:
             self.base.body = None
             if self.Body:
-                self.base.attach_text(self.Body, 'text/plain')
+                self.base.attach_text(self.Body, 'text/plain', 'quoted-printable')
 
             if self.Html:
-                self.base.attach_text(self.Html, 'text/html')
+                self.base.attach_text(self.Html, 'text/html', 'quoted-printable')
 
             for args in self.attachments:
                 self._encode_attachment(**args)
@@ -175,10 +175,13 @@ class MurmurMailResponse(object):
         elif self.Body:
             self.base.body = self.Body
             self.base.content_encoding['Content-Type'] = ('text/plain', {})
+            self.base.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
 
         elif self.Html:
             self.base.body = self.Html
             self.base.content_encoding['Content-Type'] = ('text/html', {})
+            self.base.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
+
 
         return encoding.to_message(self.base)
 
@@ -212,7 +215,7 @@ class MurmurMailBase(object):
         self.body = None
         self.content_encoding = {'Content-Type': (None, {}), 
                                  'Content-Disposition': (None, {}),
-                                 'Content-Transfer-Encoding': 'quoted-printable'}
+                                 'Content-Transfer-Encoding': None}
 
     def __getitem__(self, key):
         return self.headers.get(normalize_header(key), None)
@@ -258,7 +261,7 @@ class MurmurMailBase(object):
         self.parts.append(part)
 
 
-    def attach_text(self, data, ctype):
+    def attach_text(self, data, ctype, ctenc):
         """
         This attaches a simpler text encoded part, which doesn't have a
         filename.
@@ -268,6 +271,7 @@ class MurmurMailBase(object):
         part = MurmurMailBase()
         part.body = data
         part.content_encoding['Content-Type'] = (ctype, {})
+        part.content_encoding['Content-Transfer-Encoding'] = ctenc
         self.parts.append(part)
 
     def walk(self):
