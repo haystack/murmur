@@ -212,7 +212,7 @@ class MurmurMailBase(object):
         self.body = None
         self.content_encoding = {'Content-Type': (None, {}), 
                                  'Content-Disposition': (None, {}),
-                                 'Content-Transfer-Encoding': (None, {})}
+                                 'Content-Transfer-Encoding': 'quoted-printable'}
 
     def __getitem__(self, key):
         return self.headers.get(normalize_header(key), None)
