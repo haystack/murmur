@@ -216,7 +216,7 @@ class MurmurMailBase(object):
         self.body = None
         self.content_encoding = {'Content-Type': (None, {}), 
                                  'Content-Disposition': (None, {}),
-                                 'Content-Transfer-Encoding': None}
+                                 'Content-Transfer-Encoding': 'quoted-printable'}
 
     def __getitem__(self, key):
         return self.headers.get(normalize_header(key), None)
@@ -272,7 +272,7 @@ class MurmurMailBase(object):
         part = MurmurMailBase()
         part.body = data
         part.content_encoding['Content-Type'] = (ctype, {})
-        part.content_encoding['Content-Transfer-Encoding'] = self.content_encoding['Content-Transfer-Encoding']
+        part.content_encoding['Content-Transfer-Encoding'] = 'quoted_printable'
         self.parts.append(part)
 
     def walk(self):
