@@ -272,7 +272,7 @@ class MurmurMailBase(object):
         part = MurmurMailBase()
         part.body = data
         part.content_encoding['Content-Type'] = (ctype, {})
-        part.content_encoding['Content-Transfer-Encoding'] = 'quoted_printable'
+        part.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
         self.parts.append(part)
 
     def walk(self):

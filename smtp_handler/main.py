@@ -269,6 +269,8 @@ def handle_post(message, address=None, host=None):
 		mail = setup_post(message['From'],
 							subject,	
 							group_name)
+
+		mail.base.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
 			
 		for attachment in attachments.get("attachments"):
 			mail.attach(filename=attachment['filename'],
