@@ -143,10 +143,10 @@ def get_new_body(message_text, ps_blurb, plain_or_html):
 	# 	new_body = new_body + ps_blurb
 	new_body = message_text[plain_or_html] + ps_blurb
 
-	quoted_printable = quopri.encodestring(new_body)
+	#quoted_printable = quopri.encodestring(new_body)
 
 	#return new_body
-	return quoted_printable
+	return new_body
 
 		
 def get_direct_recips(email_message):
