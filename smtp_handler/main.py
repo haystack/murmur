@@ -214,7 +214,7 @@ def handle_post(message, address=None, host=None):
 			orig_message = message['Subject'].strip()
 		else:
 			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
-
+		
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)
 	
@@ -264,7 +264,7 @@ def handle_post(message, address=None, host=None):
 		mail = setup_post(message['From'],
 							subject,	
 							group_name)
-
+			
 		for attachment in attachments.get("attachments"):
 			mail.attach(filename=attachment['filename'],
 						content_type=attachment['mime'],
@@ -339,7 +339,6 @@ def handle_post(message, address=None, host=None):
 			relay.deliver(mail, To = to_send)
 				
 	except Exception, e:
-		logging.debug(e)
 		send_error_email(group_name, e, None, ADMIN_EMAILS)
 		return
 		
