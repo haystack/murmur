@@ -13,7 +13,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.utils import parseaddr
 import sys
-from lamson.encoding import normalize_header
+from lamson.encoding import normalize_header, header_to_mime_encoding
 
 ADDRESS_HEADERS_WHITELIST = ['From', 'To', 'Delivered-To', 'Cc', 'Bcc']
 
