@@ -36,7 +36,6 @@ class MurmurMailResponse(object):
         self.Body = Body
         self.Html = Html
         self.base = MurmurMailBase([('To', To), ('From', From), ('Subject', Subject)])
-        self.base.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
         self.multipart = self.Body and self.Html
         self.attachments = []
 
@@ -161,7 +160,6 @@ class MurmurMailResponse(object):
         if self.Body and self.Html:
             self.multipart = True
             self.base.content_encoding['Content-Type'] = ('multipart/alternative', {})
-            self.base.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
 
         if self.multipart:
             self.base.body = None
@@ -177,15 +175,13 @@ class MurmurMailResponse(object):
         elif self.Body:
             self.base.body = self.Body
             self.base.content_encoding['Content-Type'] = ('text/plain', {})
-            self.base.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
 
         elif self.Html:
             self.base.body = self.Html
             self.base.content_encoding['Content-Type'] = ('text/html', {})
-            self.base.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
 
 
-        return encoding.to_message(self.base)
+        return to_message(self.base)
 
     def all_parts(self):
         """
@@ -217,7 +213,7 @@ class MurmurMailBase(object):
         self.body = None
         self.content_encoding = {'Content-Type': (None, {}), 
                                  'Content-Disposition': (None, {}),
-                                 'Content-Transfer-Encoding': 'quoted-printable'}
+                                 'Content-Transfer-Encoding': (None, {})}
 
     def __getitem__(self, key):
         return self.headers.get(normalize_header(key), None)
@@ -273,7 +269,6 @@ class MurmurMailBase(object):
         part = MurmurMailBase()
         part.body = data
         part.content_encoding['Content-Type'] = (ctype, {})
-        part.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
         self.parts.append(part)
 
     def walk(self):
@@ -281,3 +276,92 @@ class MurmurMailBase(object):
             yield p
             for x in p.walk():
                 yield x
+
+def to_message(mail):
+    """
+    Given a MailBase message, this will construct a MIMEPart 
+    that is canonicalized for use with the Python email API.
+    """
+    ctype, params = mail.content_encoding['Content-Type']
+
+    if not ctype:
+        if mail.parts:
+            ctype = 'multipart/mixed'
+        else:
+            ctype = 'text/plain'
+    else:
+        if mail.parts:
+            assert ctype.startswith("multipart") or ctype.startswith("message"), "Content type should be multipart or message, not %r" % ctype
+
+    # adjust the content type according to what it should be now
+    mail.content_encoding['Content-Type'] = (ctype, params)
+
+    try:
+        out = MurmurMIMEPart(ctype, **params)
+    except TypeError, exc:
+        raise EncodingError("Content-Type malformed, not allowed: %r; %r (Python ERROR: %s" %
+                            (ctype, params, exc.message))
+
+    for k in mail.keys():
+        if k in ADDRESS_HEADERS_WHITELIST:
+            out[k.encode('ascii')] = header_to_mime_encoding(mail[k])
+        else:
+            out[k.encode('ascii')] = header_to_mime_encoding(mail[k], not_email=True)
+
+    out.extract_payload(mail)
+
+    # go through the children
+    for part in mail.parts:
+        out.attach(to_message(part))
+
+    return out
+
+
+class MurmurMIMEPart(MIMEBase):
+    """
+    A reimplementation of nearly everything in email.mime to be more useful
+    for actually attaching things.  Rather than one class for every type of
+    thing you'd encode, there's just this one, and it figures out how to
+    encode what you ask it.
+    """
+    def __init__(self, type_, **params):
+        self.maintype, self.subtype = type_.split('/')
+        if self.subtype == 'html':
+            MIMEBase.__init__(self, self.maintype, self.subtype, _charset='iso-8859-1', **params)
+        else:
+            MIMEBase.__init__(self, self.maintype, self.subtype, **params)
+
+    def add_text(self, content):
+        # this is text, so encode it in canonical form
+        try:
+            encoded = content.encode('ascii')
+            charset = 'ascii'
+        except UnicodeError:
+            encoded = content.encode('utf-8')
+            charset = 'utf-8'
+
+        self.set_payload(encoded, charset=charset)
+
+
+    def extract_payload(self, mail):
+        if mail.body == None: return  # only None, '' is still ok
+
+        ctype, ctype_params = mail.content_encoding['Content-Type']
+        cdisp, cdisp_params = mail.content_encoding['Content-Disposition']
+
+        assert ctype, "Extract payload requires that mail.content_encoding have a valid Content-Type."
+
+        if ctype.startswith("text/"):
+            self.add_text(mail.body)
+        else:
+            if cdisp:
+                # replicate the content-disposition settings
+                self.add_header('Content-Disposition', cdisp, **cdisp_params)
+
+            self.set_payload(mail.body)
+            encoders.encode_base64(self)
+
+    def __repr__(self):
+        return "<MIMEPart '%s/%s': %r, %r, multipart=%r>" % (self.subtype, self.maintype, self['Content-Type'],
+                                              self['Content-Disposition'],
+                                                            self.is_multipart())
