@@ -15,6 +15,7 @@ from email.utils import parseaddr
 import sys
 from lamson.encoding import normalize_header, header_to_mime_encoding
 import logging
+import quopri
 
 ADDRESS_HEADERS_WHITELIST = ['From', 'To', 'Delivered-To', 'Cc', 'Bcc']
 
@@ -344,7 +345,7 @@ class MurmurMIMEPart(MIMEBase):
 
     def add_html(self, content):
         content = content.encode('utf-8')
-        encoded = content.encode('quoted-printable')
+        encoded = quopri.encodestring(content)
         self.set_payload(encoded, charset='utf-8')
 
 
