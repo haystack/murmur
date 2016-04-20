@@ -359,6 +359,7 @@ class MurmurMIMEPart(MIMEBase):
             self.add_text(mail.body)
             logging.debug("CTE 1 is" + self['Content-Transfer-Encoding'])
             encoders.encode_quopri(self)
+            self['Content-Transfer-Encoding'] = 'quoted-printable'
             logging.debug("CTE 2 is" + self['Content-Transfer-Encoding'])
 
         elif ctype.startswith("text/"):
