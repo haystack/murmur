@@ -330,7 +330,7 @@ class MurmurMIMEPart(MIMEBase):
         self.maintype, self.subtype = type_.split('/')
         if self.subtype == 'html':
             #**params['charset'] = 'iso-8859-1'
-            MIMEBase.__init__(self, self.maintype, self.subtype, charset='iso-8859-1', **params)
+            MIMEBase.__init__(self, self.maintype, self.subtype, charset='iso-8859-1')
         else:
             MIMEBase.__init__(self, self.maintype, self.subtype, **params)
 
