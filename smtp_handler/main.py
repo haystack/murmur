@@ -218,7 +218,6 @@ def handle_post(message, address=None, host=None):
 		
 
 		message_string = str(message)
-		# message_string.replace('\n', '')
 
 		email_message = email.message_from_string(message_string)
 		msg_text = get_body(email_message)
@@ -271,6 +270,8 @@ def handle_post(message, address=None, host=None):
 							group_name)
 
 		mail.base.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
+		logging.debug("mail base is", mail.base)
+		logging.debug('mail is', mail)
 			
 		for attachment in attachments.get("attachments"):
 			mail.attach(filename=attachment['filename'],
