@@ -297,7 +297,6 @@ def to_message(mail):
             assert ctype.startswith("multipart") or ctype.startswith("message"), "Content type should be multipart or message, not %r" % ctype
 
     # adjust the content type according to what it should be now
-    logging.debug("params are" + str(params))
     mail.content_encoding['Content-Type'] = (ctype, params)
 
     try:
@@ -332,7 +331,6 @@ class MurmurMIMEPart(MIMEBase):
         self.maintype, self.subtype = type_.split('/')
         if self.subtype == 'html':
             #**params['charset'] = 'iso-8859-1'
-            logging.debug('params are ' + str(params))
             MIMEBase.__init__(self, self.maintype, self.subtype, **params)
         else:
             MIMEBase.__init__(self, self.maintype, self.subtype, **params)
@@ -349,7 +347,6 @@ class MurmurMIMEPart(MIMEBase):
         self.set_payload(encoded, charset=charset)
 
     def add_html(self, content):
-        # this is text, so encode it in canonical form
         encoded = content.encode('quoted-printable')
         self.set_payload(encoded, charset='utf-8')
 
@@ -363,6 +360,8 @@ class MurmurMIMEPart(MIMEBase):
         assert ctype, "Extract payload requires that mail.content_encoding have a valid Content-Type."
 
         if ctype == 'text/html':
+            self['Content-Transfer-Encoding'] = 'quoted-printable'
+            logging.debug("CTE 1 is" + self['Content-Transfer-Encoding'])
             self.add_html(mail.body)
             logging.debug("CTE 2 is" + self['Content-Transfer-Encoding'])
 
