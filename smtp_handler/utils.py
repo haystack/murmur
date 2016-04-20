@@ -4,7 +4,6 @@ from config.settings import *
 from lamson_subclass import MurmurMailResponse
 from schema.models import Group, MemberGroup, Thread, Following, Mute
 from http_handler.settings import BASE_URL
-import quopri
 
 
 '''

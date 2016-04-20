@@ -329,11 +329,7 @@ class MurmurMIMEPart(MIMEBase):
     """
     def __init__(self, type_, **params):
         self.maintype, self.subtype = type_.split('/')
-        if self.subtype == 'html':
-            #**params['charset'] = 'iso-8859-1'
-            MIMEBase.__init__(self, self.maintype, self.subtype, **params)
-        else:
-            MIMEBase.__init__(self, self.maintype, self.subtype, **params)
+        MIMEBase.__init__(self, self.maintype, self.subtype, **params)
 
     def add_text(self, content):
         # this is text, so encode it in canonical form
@@ -361,9 +357,7 @@ class MurmurMIMEPart(MIMEBase):
 
         if ctype == 'text/html':
             self['Content-Transfer-Encoding'] = 'quoted-printable'
-            logging.debug("CTE 1 is" + self['Content-Transfer-Encoding'])
             self.add_html(mail.body)
-            logging.debug("CTE 2 is" + self['Content-Transfer-Encoding'])
 
         elif ctype.startswith("text/"):
             self.add_text(mail.body)

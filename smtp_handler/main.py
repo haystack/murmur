@@ -10,7 +10,6 @@ from html2text import html2text
 from markdown2 import markdown
 from django.db.utils import OperationalError
 import django.db
-import textwrap
 
 '''
 Murmur Mail Interface Handler
@@ -325,28 +324,9 @@ def handle_post(message, address=None, host=None):
 					tag_muting = tag_mutings.filter(user=recip)
 				
 					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
-					
-					# fixed_html = ''
-					# p = re.compile('<br>', flags=re.I)
-					# start = 0
-					# for match in p.finditer(msg_text['html']):
-					# 	i = match.start()
-					# 	fixed_html += msg_text['html'][start:i]
-					# 	if not msg_text['html'][i+4:].startswith('\r') and not msg_text['html'][i-6:].startswith('wrote'):
-					# 		fixed_html += '<br>\r\n'
-					# 		start = i + 4
-					# 	else:
-					# 		start = i
+					html_ps_blurb = unicode(html_ps_blurb)
 
-					# fixed_html += msg_text['html'][start:]
-					# # msg_text['html'] = fixed_html
-					# split = '>\n<'.join(msg_text['html'].split('><'))
-					# #with_newlines = textwrap.fill(split, 700)
-					# msg_text['html'] = split
-
-					#html_ps_blurb = unicode(html_ps_blurb)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
-					logging.debug(repr(mail.Html))
 					
 					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')
