@@ -15,6 +15,8 @@ from email.utils import parseaddr
 import sys
 from lamson.encoding import normalize_header
 
+ADDRESS_HEADERS_WHITELIST = ['From', 'To', 'Delivered-To', 'Cc', 'Bcc']
+
 class MurmurMailResponse(object):
     """
     You are given MailResponse objects from the lamson.view methods, and
