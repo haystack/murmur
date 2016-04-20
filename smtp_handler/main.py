@@ -339,6 +339,7 @@ def handle_post(message, address=None, host=None):
 			relay.deliver(mail, To = to_send)
 				
 	except Exception, e:
+		logging.debug(e)
 		send_error_email(group_name, e, None, ADMIN_EMAILS)
 		return
 		
