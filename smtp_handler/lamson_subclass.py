@@ -14,6 +14,7 @@ from email.mime.base import MIMEBase
 from email.utils import parseaddr
 import sys
 from lamson.encoding import normalize_header, header_to_mime_encoding
+import logging
 
 ADDRESS_HEADERS_WHITELIST = ['From', 'To', 'Delivered-To', 'Cc', 'Bcc']
 
@@ -356,11 +357,13 @@ class MurmurMIMEPart(MIMEBase):
 
         if ctype == 'text/html':
             self.add_text(mail.body)
+            logging.debug("CTE 1 is" + self['Content-Transfer-Encoding'])
             encoders.encode_quopri(self)
+            logging.debug("CTE 2 is" + self['Content-Transfer-Encoding'])
 
         elif ctype.startswith("text/"):
             self.add_text(mail.body)
-            
+
         else:
             if cdisp:
                 # replicate the content-disposition settings
