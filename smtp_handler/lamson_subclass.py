@@ -36,6 +36,7 @@ class MurmurMailResponse(object):
         self.Body = Body
         self.Html = Html
         self.base = MurmurMailBase([('To', To), ('From', From), ('Subject', Subject)])
+        self.base.content_encoding['Content-Transfer-Encoding'] = 'quoted-printable'
         self.multipart = self.Body and self.Html
         self.attachments = []
 
