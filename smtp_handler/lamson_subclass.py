@@ -363,7 +363,6 @@ class MurmurMIMEPart(MIMEBase):
         assert ctype, "Extract payload requires that mail.content_encoding have a valid Content-Type."
 
         if ctype == 'text/html':
-            logging.debug("CTE 1 is" + self['Content-Transfer-Encoding'])
             self.add_html(mail.body)
             logging.debug("CTE 2 is" + self['Content-Transfer-Encoding'])
 
