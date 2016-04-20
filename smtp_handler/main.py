@@ -214,7 +214,6 @@ def handle_post(message, address=None, host=None):
 			orig_message = message['Subject'].strip()
 		else:
 			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
-			
 
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)
@@ -323,7 +322,6 @@ def handle_post(message, address=None, host=None):
 				
 					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					html_ps_blurb = unicode(html_ps_blurb)
-
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					
 					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
