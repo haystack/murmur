@@ -343,6 +343,7 @@ class MurmurMIMEPart(MIMEBase):
         self.set_payload(encoded, charset=charset)
 
     def add_html(self, content):
+        content = content.encode('utf-8')
         encoded = content.encode('quoted-printable')
         self.set_payload(encoded, charset='utf-8')
 
