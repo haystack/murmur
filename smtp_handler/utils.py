@@ -128,24 +128,20 @@ def get_subject(message, msg_res, group_name):
 	return subject
 
 def get_new_body(message_text, ps_blurb, plain_or_html):
-	# try:
-	# 	# assume email is in utf-8
-	# 	new_body = unicode(message_text[plain_or_html], "utf-8", "ignore")
-	# 	new_body = new_body + ps_blurb
-	# except UnicodeDecodeError:
-	# 	#then try default (ascii)
-	# 	logging.debug('unicode decode error')
-	# 	new_body = unicode(message_text[plain_or_html], errors="ignore")
-	# 	new_body = new_body + ps_blurb
-	# except TypeError:
-	# 	logging.debug('decoding Unicode is not supported')
-	# 	new_body = message_text[plain_or_html]
-	# 	new_body = new_body + ps_blurb
-	new_body = message_text[plain_or_html] + ps_blurb
+	try:
+		# assume email is in utf-8
+		new_body = unicode(message_text[plain_or_html], "utf-8", "ignore")
+		new_body = new_body + ps_blurb
+	except UnicodeDecodeError:
+		#then try default (ascii)
+		logging.debug('unicode decode error')
+		new_body = unicode(message_text[plain_or_html], errors="ignore")
+		new_body = new_body + ps_blurb
+	except TypeError:
+		logging.debug('decoding Unicode is not supported')
+		new_body = message_text[plain_or_html]
+		new_body = new_body + ps_blurb
 
-	#quoted_printable = quopri.encodestring(new_body)
-
-	#return new_body
 	return new_body
 
 		
