@@ -787,9 +787,9 @@ def insert_post(group_name, subject, message_text, user, sender_addr, forwarding
 				return res
 
 		# if we make it to here, then post is valid under one of following conditions:
-		# 1) this is a normal post by a list member to the list. 
-		# 2) this is a post by a Murmur user, but it's posted to this group via fwding list. 
-		# 3) this is a post by someone who doesn't use Murmur, via fwding list. 
+		# 1) it's a normal post by a group member to the group.
+		# 2) it's a post by a Murmur user, but it's being posted to this group via a list that fwds to this group. 
+		# 3) it's a post by someone who doesn't use Murmur, via a list that fwds to this group. 
 		# _create_post will check which of user and forwarding list are None and post appropriately. 
 
 		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, forwarding_list)

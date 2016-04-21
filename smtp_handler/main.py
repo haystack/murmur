@@ -244,19 +244,28 @@ def handle_post(message, address=None, host=None):
 			subscribe(message, group_name = group_name, host = HOST)
 			return
 		
-		try:
-			user = UserProfile.objects.get(email=user_addr)
-		except UserProfile.DoesNotExist:
+		# try looking up sender in Murmur users
+		user_lookup = UserProfile.objects.filter(email=sender_addr)
+
+		# try using List-Id field from email
+		fwding_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group)
+
+		# if no valid List-Id, try email's To field
+		if not fwding_list_lookup.exists():
+			fwding_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
+
+		# neither user nor fwding list exist so post is invalid - reject email
+		if not user_lookup.exists() and not fwding_list_lookup.exists():
 			error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
 			send_error_email(group_name, error_msg, user_addr, ADMIN_EMAILS)
 
 
+		# get user and/or forwarding list objects to pass to insert_reply or insert_post 
 		user = None
-		fwding_list = None
-
 		if user_lookup.exists():
 			user = user_lookup[0]
 
+		fwding_list = None
 		if fwding_list_lookup.exists():
 			fwding_list = fwding_list_lookup[0]
 
@@ -347,8 +356,9 @@ def handle_post(message, address=None, host=None):
 				mail.Body = get_new_body(msg_text, group_footer, 'plain')
 
 				for l in fwding_lists:
+					# still need to check if it's a murmur list to prevent the 
+					# "loops back to myself" error  
 					relay.deliver(mail, To = l.email)
-
 
 		except Exception, e:
 			logging.debug(e)
