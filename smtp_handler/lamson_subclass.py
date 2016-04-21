@@ -279,6 +279,8 @@ class MurmurMailBase(object):
             for x in p.walk():
                 yield x
 
+
+# Replaces to_message() in lamson's encoding.py to use quoted-printable
 def to_message(mail):
     """
     Given a MailBase message, this will construct a MIMEPart 
