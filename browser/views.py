@@ -625,14 +625,14 @@ def insert_post(request):
 
 		fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
 
-		group_footer = 'This message was posted to the mailing list ' + group_name + '@' + HOST + '.'
+		for l in fwding_lists:
 
-		mail.Html = get_new_body(msg_text, group_footer, 'html')
-		# mail.Body = get_new_body(msg_text, group_footer, 'plain')
+			footer_html = html_forwarded_blurb(g.name, l.email)
+			mail.Html = msg_text + footer_html
+			footer_plain = plain_forwarded_blurb(g.name, l.email)
+			mail.Body = html2text(msg_text) + footer_plain
 
-		# for l in fwding_lists:
-		# 	logging.debug("here")
-		# 	relay.deliver(mail, To = l.email)
+			relay_mailer.deliver(mail, To = l.email)
 
 		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")

@@ -725,6 +725,7 @@ def insert_post_web(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
+
 			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, None)
 			res['status'] = True
 			
@@ -741,7 +742,7 @@ def insert_post_web(group_name, subject, message_text, user):
 						 'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 						 'timestamp': format_date_time(p.timestamp),
 						}
-				
+			
 			res['threads'] = []
 			res['threads'].append({'thread_id': thread.id,
 								   'post': post_info,
@@ -758,6 +759,7 @@ def insert_post_web(group_name, subject, message_text, user):
 			res['tags'] = tags
 			res['tag_objs'] = tag_objs
 			res['recipients'] = recipients
+
 		else:
 			res['code'] = msg_code['NOT_MEMBER']
 	except Group.DoesNotExist:
