@@ -363,6 +363,20 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
+def html_forwarded_blurb(group_name, forwarding_list_email):
+	content = "You're receiving this message because the Murmur group %s (%s@%s) is set to forward \
+			posts to a mailing list you are a member of (%s)." % (group_name, group_name, HOST, forwarding_list_email)
+	content += "<BR><BR><a href='http://murmur.csail.mit.edu'>Learn more about Murmur</a>"
+	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
+	return body
+
+def plain_forwarded_blurb(group_name, forwarding_list_email):
+	content = "You\'re receiving this message because the Murmur group %s (%s@%s) is set to forward \
+			posts to a mailing list you are a member of (%s)." % (group_name, group_name, HOST, forwarding_list_email)
+	content += "\n\nLearn more about Murmur <http://murmur.csail.mit.edu>"
+	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
+	return body
+
 def plain_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags):
 	tid = thread.id
 	group_name = group.name

@@ -349,15 +349,15 @@ def handle_post(message, address=None, host=None):
 
 				fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
 
-				# basic email. do we want some special PS blurb for fwded? 
-				group_footer = 'This message was posted to the mailing list ' + address + '@' + HOST + '.'
-
-				mail.Html = get_new_body(msg_text, group_footer, 'html')
-				mail.Body = get_new_body(msg_text, group_footer, 'plain')
-
 				for l in fwding_lists:
 					# still need to check if it's a murmur list to prevent the 
 					# "loops back to myself" error  
+					footer_html = html_forwarded_blurb(g.name, l.email)
+					footer_plain = plain_forwarded_blurb(g.name, l.email)
+
+					mail.Html = get_new_body(msg_text, footer_html, 'html')
+					mail.Body = get_new_body(msg_text, footer_plain, 'plain')
+
 					relay.deliver(mail, To = l.email)
 
 		except Exception, e:
