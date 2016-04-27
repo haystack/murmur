@@ -350,23 +350,24 @@ def handle_post(message, address=None, host=None):
 		
 					relay.deliver(mail, To = recip.email)
 
-				fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
+			fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
 
-				for l in fwding_lists:
-					# still need to check if it's a murmur list to prevent the 
-					# "loops back to myself" error
+			for l in fwding_lists:
+				# non murmur list, send as usual 
+				if HOST not in l.email:
+
 					footer_html = html_forwarded_blurb(g.name, l.email, from_list_email=fwding_list_email)
 					footer_plain = plain_forwarded_blurb(g.name, l.email, from_list_email=fwding_list_email)
 
 					mail.Html = get_new_body(msg_text, footer_html, 'html')
 					mail.Body = get_new_body(msg_text, footer_plain, 'plain')
 
-					if HOST not in l.email:
-						relay.deliver(mail, To = l.email)
-					# it's another murmur list
-					else:
-						group_name = l.email.split('@')[0]
-						handle_post(message, address=group_name)
+					relay.deliver(mail, To = l.email)
+				# it's another murmur list. can't send mail to ourself ("loops back to 
+				#myself" error) so have to directly pass back to handle_post 
+				else:
+					group_name = l.email.split('@')[0]
+					handle_post(message, address=group_name)
 
 
 		except Exception, e:

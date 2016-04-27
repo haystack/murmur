@@ -633,12 +633,16 @@ def insert_post(request):
 			mail.Html = msg_text + footer_html
 			footer_plain = plain_forwarded_blurb(g.name, l.email)
 			mail.Body = html2text(msg_text) + footer_plain
+
+			# non murmur list, send on as usual
 			if HOST not in l.email:
 				relay_mailer.deliver(mail, To = l.email)
+
+			# need to bypass sending email to prevent "loops back to myself" error,
+			# so modify request object then recursively call insert_post on it
 			else: 
 				group_name = l.email.split('@')[0]
-				# request.POST is immutable; have to copy, edit,
-				# and then reassign
+				# request.POST is immutable; have to copy, edit, and then reassign
 				new_post = request.POST.copy()
 				new_post['group_name'] = group_name
 				if not new_post.__contains__('original_group'):
@@ -723,7 +727,6 @@ def insert_reply(request):
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 
-	
 					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					mail.Html = msg_text + ps_blurb	
 					
@@ -731,7 +734,32 @@ def insert_reply(request):
 					mail.Body = html2text(msg_text) + ps_blurb	
 				
 					relay_mailer.deliver(mail, To = recip.email)
-					
+
+			fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
+
+			for l in fwding_lists:
+
+				footer_html = html_forwarded_blurb(g.name, l.email)
+				mail.Html = msg_text + footer_html
+				footer_plain = plain_forwarded_blurb(g.name, l.email)
+				mail.Body = html2text(msg_text) + footer_plain
+
+				# non murmur list, send on as usual
+				if HOST not in l.email:
+					relay_mailer.deliver(mail, To = l.email)
+
+				# need to bypass sending email to prevent "loops back to myself" error,
+				# so modify request object then recursively call insert_post on it
+				else: 
+					group_name = l.email.split('@')[0]
+					# request.POST is immutable; have to copy, edit, and then reassign
+					new_post = request.POST.copy()
+					new_post['group_name'] = group_name
+					if not new_post.__contains__('original_group'):
+						new_post['original_group'] = request.POST['group_name']
+					request.POST = new_post
+					insert_reply(request)
+
 		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
