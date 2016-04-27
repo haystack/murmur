@@ -275,8 +275,7 @@ def handle_post(message, address=None, host=None):
 			
 		if not res['status']:
 			send_error_email(group_name, res['code'], sender_addr, ADMIN_EMAILS)
-			return
-	
+
 		subject = get_subject(message, res, group_name)
 			
 		mail = setup_post(message['From'],
