@@ -631,8 +631,8 @@ def insert_post(request):
 			mail.Html = msg_text + footer_html
 			footer_plain = plain_forwarded_blurb(g.name, l.email, None)
 			mail.Body = html2text(msg_text) + footer_plain
-
-			relay_mailer.deliver(mail, To = l.email)
+			if HOST not in l.email:
+				relay_mailer.deliver(mail, To = l.email)
 
 		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")

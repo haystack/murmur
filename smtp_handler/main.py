@@ -351,23 +351,20 @@ def handle_post(message, address=None, host=None):
 
 				for l in fwding_lists:
 					# still need to check if it's a murmur list to prevent the 
-					# "loops back to myself" error 
-					logging.debug("sending to list " + str(l.email))
-					if fwding_list:
-						logging.debug("fwding list is " + str(fwding_list.email))
-					else:
-						logging.debug("no fwding list")
-					if user: 
-						logging.debug("user email is " + str(user.email))
-					else:
-						logging.debug("no user email")
+					# "loops back to myself" error
 					footer_html = html_forwarded_blurb(g.name, l.email, fwding_list)
 					footer_plain = plain_forwarded_blurb(g.name, l.email, fwding_list)
 
 					mail.Html = get_new_body(msg_text, footer_html, 'html')
 					mail.Body = get_new_body(msg_text, footer_plain, 'plain')
 
-					relay.deliver(mail, To = l.email)
+					if HOST not in l.email:
+						relay.deliver(mail, To = l.email)
+					# it's another murmur list
+					else:
+						group_name = l.email.split('@')[0]
+						handle_post(message, address=group_name)
+
 
 		except Exception, e:
 			logging.debug(e)
