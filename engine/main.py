@@ -662,7 +662,7 @@ def _create_tag(group, thread, name):
 		t.save()
 	tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
-def _create_post(group, subject, message_text, user, sender_addr, forwarding_list):
+def _create_post(group, subject, message_text, user, sender_addr, forwarding_list=None):
 
 	try:
 		message_text = message_text.decode("utf-8")
@@ -726,7 +726,7 @@ def insert_post_web(group_name, subject, message_text, user):
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
 
-			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, None)
+			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email)
 			res['status'] = True
 			
 			res['member_group'] = {'no_emails': user_member[0].no_emails, 
@@ -774,7 +774,7 @@ def insert_post_web(group_name, subject, message_text, user):
 	return res
 
 
-def insert_post(group_name, subject, message_text, user, sender_addr, forwarding_list):
+def insert_post(group_name, subject, message_text, user, sender_addr, forwarding_list=None):
 	res = {'status':False}
 	thread = None
 	try:
@@ -794,7 +794,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, forwarding
 		# 3) it's a post by someone who doesn't use Murmur, via a list that fwds to this group. 
 		# _create_post will check which of user and forwarding list are None and post appropriately. 
 
-		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, forwarding_list)
+		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, forwarding_list=forwarding_list)
 		res['status'] = True
 		res['post_id'] = p.id
 		res['msg_id'] = p.msg_id
@@ -818,7 +818,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, forwarding
 	
 
 
-def insert_reply(group_name, subject, message_text, user, sender_addr, forwarding_list, thread_id=None):
+def insert_reply(group_name, subject, message_text, user, sender_addr, forwarding_list=None, thread_id=None):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)

@@ -304,7 +304,7 @@ def _insert_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	return tag_str
 
 
-def html_forwarded_blurb(group_name, to_list, from_list_email):
+def html_forwarded_blurb(group_name, to_list, from_list_email=None):
 	content = ''
 	if from_list_email:
 		content += 'This post was sent to %s@%s via the mailing list %s.<BR>' % (group_name, HOST, from_list_email)
@@ -314,7 +314,7 @@ def html_forwarded_blurb(group_name, to_list, from_list_email):
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
-def plain_forwarded_blurb(group_name, to_list, from_list_email):
+def plain_forwarded_blurb(group_name, to_list, from_list_email=None):
 	content = ''
 	if from_list_email:
 		content += 'This post was sent to %s@%s via the mailing list %s.\n' % (group_name, HOST, from_list_email)
@@ -324,7 +324,7 @@ def plain_forwarded_blurb(group_name, to_list, from_list_email):
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
-def html_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, forwarding_list_email):
+def html_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, forwarding_list_email=None):
 	#follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
 	#unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
 	content = ""
@@ -386,7 +386,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
-def plain_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, forwarding_list_email):
+def plain_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, forwarding_list_email=None):
 
 	content = ""
 	if forwarding_list_email:

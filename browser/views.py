@@ -629,9 +629,9 @@ def insert_post(request):
 
 		for l in fwding_lists:
 
-			footer_html = html_forwarded_blurb(g.name, l.email, None)
+			footer_html = html_forwarded_blurb(g.name, l.email)
 			mail.Html = msg_text + footer_html
-			footer_plain = plain_forwarded_blurb(g.name, l.email, None)
+			footer_plain = plain_forwarded_blurb(g.name, l.email)
 			mail.Body = html2text(msg_text) + footer_plain
 			if HOST not in l.email:
 				relay_mailer.deliver(mail, To = l.email)
@@ -678,7 +678,7 @@ def insert_reply(request):
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
 		
 		
-		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, None, thread_id=thread_id)
+		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, thread_id=thread_id)
 		if(res['status']):
 			
 			to_send =  res['recipients']
@@ -724,10 +724,10 @@ def insert_reply(request):
 					tag_muting = tag_mutings.filter(user=recip)
 
 	
-					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], None)
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					mail.Html = msg_text + ps_blurb	
 					
-					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], None)
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
 					mail.Body = html2text(msg_text) + ps_blurb	
 				
 					relay_mailer.deliver(mail, To = recip.email)

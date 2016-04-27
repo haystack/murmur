@@ -272,9 +272,9 @@ def handle_post(message, address=None, host=None):
 			fwding_list_email = fwding_list.email
 
 		if message_is_reply:
-			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, fwding_list)
+			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, forwarding_list=fwding_list)
 		else:
-			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, fwding_list)
+			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, forwarding_list=fwding_list)
 			
 		if not res['status']:
 			send_error_email(group_name, res['code'], sender_addr, ADMIN_EMAILS)
@@ -341,11 +341,11 @@ def handle_post(message, address=None, host=None):
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 				
-					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], fwding_list_email)
+					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], forwarding_list_email=fwding_list_email)
 					html_ps_blurb = unicode(html_ps_blurb)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					
-					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], fwding_list_email)
+					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], forwarding_list_email=fwding_list_email)
 					mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')
 		
 					relay.deliver(mail, To = recip.email)
@@ -355,8 +355,8 @@ def handle_post(message, address=None, host=None):
 				for l in fwding_lists:
 					# still need to check if it's a murmur list to prevent the 
 					# "loops back to myself" error
-					footer_html = html_forwarded_blurb(g.name, l.email, fwding_list_email)
-					footer_plain = plain_forwarded_blurb(g.name, l.email, fwding_list_email)
+					footer_html = html_forwarded_blurb(g.name, l.email, from_list_email=fwding_list_email)
+					footer_plain = plain_forwarded_blurb(g.name, l.email, from_list_email=fwding_list_email)
 
 					mail.Html = get_new_body(msg_text, footer_html, 'html')
 					mail.Body = get_new_body(msg_text, footer_plain, 'plain')
