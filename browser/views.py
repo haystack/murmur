@@ -613,10 +613,14 @@ def insert_post(request):
 				tag_following = tag_followings.filter(user=recip)
 				tag_muting = tag_mutings.filter(user=recip)
 
-				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], None)
+				original_group = None
+				if request.POST.__contains__('original_group'):
+					original_group = request.POST['original_group']
+
+				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_group)
 				mail.Html = msg_text + ps_blurb	
 				
-				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], None)
+				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_group)
 				mail.Body = html2text(msg_text) + ps_blurb	
 			
 				relay_mailer.deliver(mail, To = recip.email)
@@ -634,7 +638,13 @@ def insert_post(request):
 			else: 
 				# how to handle?
 				group_name = l.email.split('@')[0]
-				request.POST['group_name'] = group_name
+				# request.POST is immutable; have to copy, edit,
+				# and then reassign
+				new_post = request.POST.copy()
+				new_post['group_name'] = group_name
+				if not new_post.__contains__('original_group'):
+					new_post['original_group'] = request.POST['group_name']
+				request.POST = new_post
 				insert_post(request)
 
 		del res['tag_objs']
