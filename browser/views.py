@@ -681,8 +681,15 @@ def insert_reply(request):
 		
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
 		
+		original_group = None
+		original_group_object = None
+		if request.POST.__contains__('original_group'):
+			original_group = request.POST['original_group'] + '@' + HOST
+			group = Group.objects.get(name=group_name)
+			original_group_object = ForwardingList.objects.get(email=original_group, group=group)
+
+		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, forwarding_list=original_group_object, thread_id=thread_id)
 		
-		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, thread_id=thread_id)
 		if(res['status']):
 			
 			to_send =  res['recipients']
@@ -727,15 +734,10 @@ def insert_reply(request):
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 
-
-					original_group = None
-					if request.POST.__contains__('original_group'):
-						original_group = request.POST['original_group'] + '@' + HOST
-
-					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], forwarding_list_email=original_group)
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_group)
 					mail.Html = msg_text + ps_blurb	
 					
-					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], forwarding_list_email=original_group)
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_group)
 					mail.Body = html2text(msg_text) + ps_blurb
 				
 					relay_mailer.deliver(mail, To = recip.email)
@@ -761,7 +763,7 @@ def insert_reply(request):
 					new_post = request.POST.copy()
 					new_post['group_name'] = group_name
 					if not new_post.__contains__('original_group'):
-						new_post['original_group'] = request.POST['group_name']
+						new_post['original_group'] = g.name
 					request.POST = new_post
 					insert_reply(request)
 

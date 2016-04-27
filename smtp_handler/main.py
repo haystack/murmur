@@ -248,14 +248,14 @@ def handle_post(message, address=None, host=None):
 		user_lookup = UserProfile.objects.filter(email=sender_addr)
 
 		# try using List-Id field from email
-		fwding_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group)
+		original_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group)
 
 		# if no valid List-Id, try email's To field
-		if not fwding_list_lookup.exists():
-			fwding_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
+		if not original_list_lookup.exists():
+			original_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
 
 		# neither user nor fwding list exist so post is invalid - reject email
-		if not user_lookup.exists() and not fwding_list_lookup.exists():
+		if not user_lookup.exists() and not original_list_lookup.exists():
 			error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
 			send_error_email(group_name, error_msg, sender_addr, ADMIN_EMAILS)
 			return
@@ -265,16 +265,16 @@ def handle_post(message, address=None, host=None):
 		if user_lookup.exists():
 			user = user_lookup[0]
 
-		fwding_list = None
-		fwding_list_email = None
-		if fwding_list_lookup.exists():
-			fwding_list = fwding_list_lookup[0]
-			fwding_list_email = fwding_list.email
+		original_list = None
+		original_list_email = None
+		if original_list_lookup.exists():
+			original_list = fwding_list_lookup[0]
+			original_list_email = fwding_list.email
 
 		if message_is_reply:
-			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, forwarding_list=fwding_list)
+			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, forwarding_list=original_list)
 		else:
-			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, forwarding_list=fwding_list)
+			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, forwarding_list=original_list)
 			
 		if not res['status']:
 			send_error_email(group_name, res['code'], sender_addr, ADMIN_EMAILS)
@@ -341,23 +341,23 @@ def handle_post(message, address=None, host=None):
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 				
-					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], forwarding_list_email=fwding_list_email)
+					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_list_email)
 					html_ps_blurb = unicode(html_ps_blurb)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					
-					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], forwarding_list_email=fwding_list_email)
+					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_list_email)
 					mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')
 		
 					relay.deliver(mail, To = recip.email)
 
-			fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
+			fwd_to_lists = ForwardingList.objects.filter(group=g, can_receive=True)
 
-			for l in fwding_lists:
+			for l in fwd_to_lists:
 				# non murmur list, send as usual 
 				if HOST not in l.email:
 
-					footer_html = html_forwarded_blurb(g.name, l.email, from_list_email=fwding_list_email)
-					footer_plain = plain_forwarded_blurb(g.name, l.email, from_list_email=fwding_list_email)
+					footer_html = html_forwarded_blurb(g.name, l.email, original_list_email=original_list_email)
+					footer_plain = plain_forwarded_blurb(g.name, l.email, original_list_email=original_list_email)
 
 					mail.Html = get_new_body(msg_text, footer_html, 'html')
 					mail.Body = get_new_body(msg_text, footer_plain, 'plain')
