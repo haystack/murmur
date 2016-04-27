@@ -762,6 +762,7 @@ def insert_reply(request):
 					# request.POST is immutable; have to copy, edit, and then reassign
 					new_post = request.POST.copy()
 					new_post['group_name'] = group_name
+					new_post['thread_id'] = None
 					if not new_post.__contains__('original_group'):
 						new_post['original_group'] = g.name
 					request.POST = new_post

@@ -268,8 +268,8 @@ def handle_post(message, address=None, host=None):
 		original_list = None
 		original_list_email = None
 		if original_list_lookup.exists():
-			original_list = fwding_list_lookup[0]
-			original_list_email = fwding_list.email
+			original_list = original_list_lookup[0]
+			original_list_email = original_list.email
 
 		if message_is_reply:
 			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, forwarding_list=original_list)
