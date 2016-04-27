@@ -258,6 +258,7 @@ def handle_post(message, address=None, host=None):
 		if not user_lookup.exists() and not fwding_list_lookup.exists():
 			error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
 			send_error_email(group_name, error_msg, sender_addr, ADMIN_EMAILS)
+			return
 
 		# get user and/or forwarding list objects to pass to insert_reply or insert_post 
 		user = None
@@ -275,6 +276,7 @@ def handle_post(message, address=None, host=None):
 			
 		if not res['status']:
 			send_error_email(group_name, res['code'], sender_addr, ADMIN_EMAILS)
+			return
 
 		subject = get_subject(message, res, group_name)
 			
