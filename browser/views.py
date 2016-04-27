@@ -633,7 +633,9 @@ def insert_post(request):
 				relay_mailer.deliver(mail, To = l.email)
 			else: 
 				# how to handle?
-				pass
+				group_name = l.email.split('@')[0]
+				request.POST['group_name'] = group_name
+				insert_post(request)
 
 		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
