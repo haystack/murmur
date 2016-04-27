@@ -208,7 +208,7 @@ def handle_post(message, address=None, host=None):
 			group = Group.objects.get(name=group_name)
 		except Exception, e:
 			logging.debug(e)
-			send_error_email(group_name, e, user_addr, ADMIN_EMAILS)	
+			send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
 			return
 
 		email_message = email.message_from_string(str(message))
@@ -218,7 +218,7 @@ def handle_post(message, address=None, host=None):
 		res = check_attachments(attachments, group.allow_attachments)
 
 		if not res['status']:
-			send_error_email(group_name, res['error'], user_addr, ADMIN_EMAILS)
+			send_error_email(group_name, res['error'], sender_addr, ADMIN_EMAILS)
 			return
 
 		message_is_reply = (message['Subject'][0:4].lower() == "re: ")
@@ -257,8 +257,7 @@ def handle_post(message, address=None, host=None):
 		# neither user nor fwding list exist so post is invalid - reject email
 		if not user_lookup.exists() and not fwding_list_lookup.exists():
 			error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
-			send_error_email(group_name, error_msg, user_addr, ADMIN_EMAILS)
-
+			send_error_email(group_name, error_msg, sender_addr, ADMIN_EMAILS)
 
 		# get user and/or forwarding list objects to pass to insert_reply or insert_post 
 		user = None
@@ -275,7 +274,8 @@ def handle_post(message, address=None, host=None):
 			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, fwding_list)
 			
 		if not res['status']:
-			send_error_email(group_name, res['code'], user_addr, ADMIN_EMAILS)
+			send_error_email(group_name, res['code'], sender_addr, ADMIN_EMAILS)
+			return
 	
 		subject = get_subject(message, res, group_name)
 			
@@ -351,9 +351,18 @@ def handle_post(message, address=None, host=None):
 
 				for l in fwding_lists:
 					# still need to check if it's a murmur list to prevent the 
-					# "loops back to myself" error  
-					footer_html = html_forwarded_blurb(g.name, l.email)
-					footer_plain = plain_forwarded_blurb(g.name, l.email)
+					# "loops back to myself" error 
+					logging.debug("sending to list " + str(l.email))
+					if fwding_list:
+						logging.debug("fwding list is " + str(fwding_list.email))
+					else:
+						logging.debug("no fwding list")
+					if user: 
+						logging.debug("user email is " + str(user.email))
+					else:
+						logging.debug("no user email")
+					footer_html = html_forwarded_blurb(g.name, l.email, fwding_list)
+					footer_plain = plain_forwarded_blurb(g.name, l.email, fwding_list)
 
 					mail.Html = get_new_body(msg_text, footer_html, 'html')
 					mail.Body = get_new_body(msg_text, footer_plain, 'plain')

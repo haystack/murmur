@@ -627,9 +627,9 @@ def insert_post(request):
 
 		for l in fwding_lists:
 
-			footer_html = html_forwarded_blurb(g.name, l.email)
+			footer_html = html_forwarded_blurb(g.name, l.email, None)
 			mail.Html = msg_text + footer_html
-			footer_plain = plain_forwarded_blurb(g.name, l.email)
+			footer_plain = plain_forwarded_blurb(g.name, l.email, None)
 			mail.Body = html2text(msg_text) + footer_plain
 
 			relay_mailer.deliver(mail, To = l.email)
