@@ -304,33 +304,33 @@ def _insert_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	return tag_str
 
 
-def html_forwarded_blurb(group_name, to_list, from_list):
+def html_forwarded_blurb(group_name, to_list, from_list_email):
 	content = ''
-	if from_list:
-		content += 'This post was sent to %s@%s via the mailing list %s.<BR>' % (group_name, HOST, from_list.email)
+	if from_list_email:
+		content += 'This post was sent to %s@%s via the mailing list %s.<BR>' % (group_name, HOST, from_list_email)
 	content += "You're receiving this message because the Murmur group %s (%s@%s) is set to forward \
 			posts to a mailing list you are a member of (%s)." % (group_name, group_name, HOST, to_list)
 	content += "<BR><BR><a href='http://murmur.csail.mit.edu'>Learn more about Murmur</a>"
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
-def plain_forwarded_blurb(group_name, to_list, from_list):
+def plain_forwarded_blurb(group_name, to_list, from_list_email):
 	content = ''
-	if from_list:
-		content += 'This post was sent to %s@%s via the mailing list %s.\n' % (group_name, HOST, from_list.email)
+	if from_list_email:
+		content += 'This post was sent to %s@%s via the mailing list %s.\n' % (group_name, HOST, from_list_email)
 	content += "You\'re receiving this message because the Murmur group %s (%s@%s) is set to forward \
 			posts to a mailing list you are a member of (%s)." % (group_name, group_name, HOST, to_list)
 	content += "\n\nLearn more about Murmur <http://murmur.csail.mit.edu>"
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
-def html_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, forwarding_list):
+def html_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, forwarding_list_email):
 	#follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
 	#unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
 	content = ""
 
-	if forwarding_list:
-		content += "This post was sent to this group via the mailing list %s. <BR><BR>" % (forwarding_list.email)
+	if forwarding_list_email:
+		content += "This post was sent to this group via the mailing list %s. <BR><BR>" % (forwarding_list_email)
 
 	tid = thread.id
 	permalink = PERMALINK_POST % (HOST, tid, post_id)
@@ -386,11 +386,11 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
-def plain_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, forwarding_list):
+def plain_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, forwarding_list_email):
 
 	content = ""
-	if forwarding_list:
-		content += "This post was sent to this group via the mailing list %s. \n\n" % (forwarding_list.email)
+	if forwarding_list_email:
+		content += "This post was sent to this group via the mailing list %s. \n\n" % (forwarding_list_email)
 
 	tid = thread.id
 	group_name = group.name

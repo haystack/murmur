@@ -615,7 +615,7 @@ def insert_post(request):
 
 				original_group = None
 				if request.POST.__contains__('original_group'):
-					original_group = request.POST['original_group']
+					original_group = request.POST['original_group'] + '@' + HOST
 
 				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_group)
 				mail.Html = msg_text + ps_blurb	
@@ -636,7 +636,6 @@ def insert_post(request):
 			if HOST not in l.email:
 				relay_mailer.deliver(mail, To = l.email)
 			else: 
-				# how to handle?
 				group_name = l.email.split('@')[0]
 				# request.POST is immutable; have to copy, edit,
 				# and then reassign
@@ -679,7 +678,7 @@ def insert_reply(request):
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
 		
 		
-		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, thread_id=thread_id)
+		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, None, thread_id=thread_id)
 		if(res['status']):
 			
 			to_send =  res['recipients']
