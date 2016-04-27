@@ -347,6 +347,34 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
 	logging.debug(res)
 	return res
 
+def add_list(group_name, email, can_receive, can_post, list_url, user):
+
+	res = {'status' : False }
+
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+
+		if membergroup.admin:
+			email = email.strip()
+			list_url = list_url.strip()
+			f = ForwardingList(group=group, email=email, url=list_url, can_receive = can_receive, can_post = can_post)
+			f.save()
+			res['status'] = True
+		else:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
+	except Exception, e:
+		res['error'] = e
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
+
 def add_members(group_name, emails, user):
 	res = {'status':False}
 	

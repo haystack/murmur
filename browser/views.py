@@ -311,6 +311,21 @@ def add_members_view(request, group_name):
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 
+@render_to("add_list.html")
+@login_required
+def add_list_view(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.filter(member=user, group=group)
+		if membergroup.count() == 1 and membergroup[0].admin:
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+		else:
+			return redirect('/404?e=admin')
+	except Group.DoesNotExist:
+		return redirect('/404?e=gname&name=%s' % group_name)
+
 @render_to("edit_my_settings.html")
 @login_required
 def my_group_settings_view(request, group_name):
@@ -480,8 +495,24 @@ def add_members(request):
 	except Exception, e:
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
-	
 
+@login_required
+def add_list(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		can_receive = False
+		can_post = False
+		if request.POST['can_receive'] == 'true':
+			can_receive = True
+		if request.POST['can_post'] == 'true':
+			can_post = True
+		res = engine.main.add_list(request.POST['group_name'], request.POST['email'], 
+			can_receive, can_post, request.POST['list_url'], user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
 def subscribe_group(request):
 	try:
