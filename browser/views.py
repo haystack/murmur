@@ -594,8 +594,6 @@ def insert_post(request):
 		g = Group.objects.get(name=group_name)
 		t = Thread.objects.get(id=res['thread_id'])
 		
-		logging.debug('TO LIST: ' + str(to_send))
-		
 		if len(to_send) > 0:
 			
 			recips = UserProfile.objects.filter(email__in=to_send)
@@ -633,6 +631,9 @@ def insert_post(request):
 			mail.Body = html2text(msg_text) + footer_plain
 			if HOST not in l.email:
 				relay_mailer.deliver(mail, To = l.email)
+			else: 
+				# how to handle?
+				pass
 
 		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
