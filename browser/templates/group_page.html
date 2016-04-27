@@ -189,6 +189,102 @@
 				</tbody>
 			</table>	
 
+			<br />
+			<hr />
+
+			<h3>Linked Mailing Lists</h3> 
+			{% if group_info.admin %}
+				<button type="button" id="btn-add-list">Add List</button>
+				<button type="button" id="btn-del-lists">Delete Lists</button>
+			{% else %}
+				<button type="button" id="btn-add-list" style="display: none;">Add List</button>
+			{% endif %}
+			
+			<table id="lists-table" class="display" cellspacing="0" width="100%">
+				<thead>
+					<tr>
+						{% if group_info.admin %}
+						<th>Select</th>
+						<th>Email</th>
+						{% if flavour != "mobile" %}
+							<th>Added</th>
+							<th>Can Post</th>
+							<th>Can Receive</th>
+						{% endif %}
+					{% else %}
+						<th>Email</th>
+						{% if flavour != "mobile" %}
+							<th>Added</th>
+							<th>Can Post</th>
+							<th>Can Receive</th>
+						{% endif %}
+					{% endif %}
+					</tr>
+				</thead>
+				
+				<tfoot>
+					<tr>
+						{% if group_info.admin %}
+						<th>Select</th>
+						<th>Email</th>
+						{% if flavour != "mobile" %}
+							<th>Added</th>
+							<th>Can Post</th>
+							<th>Can Receive</th>
+						{% endif %}
+					{% else %}
+						<th>Email</th>
+						{% if flavour != "mobile" %}
+							<th>Added</th>
+							<th>Can Post</th>
+							<th>Can Receive</th>
+						{% endif %}
+					{% endif %}
+					</tr>
+				</tfoot>
+				
+				<tbody>
+					{% for list in group_info.lists %}
+						<tr>
+						
+						{% if group_info.admin %}
+						<td><input class="checkbox" type="checkbox" id ={{ list.id }}></td>
+						<td>{{ list.email }}</td>
+						{% if flavour != "mobile" %}
+							<td>{{ list.added }}</td>
+							{% if list.can_post %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+							{% endif %}
+							{% if l.can_receive %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+							{% endif %}
+						{% endif %}
+					</tr>
+						{% else %}
+						<td>{{ list.email }}</td>
+						{% if flavour != "mobile" %}
+							<td>{{ list.added }}</td>
+							{% if list.can_post %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+							{% endif %}
+							{% if list.can_receive %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+							{% endif %}
+						{% endif %}
+					</tr>
+						{% endif %}
+					{% endfor %}
+				</tbody>
+			</table>	
+
 
 
   </div>

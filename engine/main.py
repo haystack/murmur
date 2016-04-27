@@ -49,6 +49,7 @@ def group_info_page(user, group_name):
 
 		res['group'] = group
 		res['members'] = []
+		res['lists'] = []
 		
 		res['admin'] = False
 		res['moderator'] = False
@@ -70,6 +71,20 @@ def group_info_page(user, group_name):
 						   'mod': membergroup.moderator}
 			
 			res['members'].append(member_info)
+
+
+		lists = ForwardingList.objects.filter(group=group)
+
+		for l in lists:
+			list_obj = {'id' : l.id,
+						'email' : l.email,
+						'can_post' : l.can_post,
+						'can_receive' : l.can_receive,
+						'added': l.timestamp
+						}
+			res['lists'].append(list_obj)
+
+
 	except:
 		res['group'] = None
 	
