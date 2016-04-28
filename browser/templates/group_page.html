@@ -243,16 +243,16 @@
 					</tr>
 				</tfoot>
 				
+				
 				<tbody>
-					{% for list in group_info.lists %}
-						<tr>
-						
+					{% for l in group_info.lists %}
+					<tr>
 						{% if group_info.admin %}
-						<td><input class="checkbox" type="checkbox" id ={{ list.id }}></td>
-						<td>{{ list.email }}</td>
+						<td><input class="checkbox" type="checkbox" id ={{ l.id }}></td>
+						<td>{{ l.email }}</td>
 						{% if flavour != "mobile" %}
-							<td>{{ list.added }}</td>
-							{% if list.can_post %}
+							<td>{{ l.added }}</td>
+							{% if l.can_post %}
 							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
 							{% else %}
 							<th></th>
@@ -265,15 +265,15 @@
 						{% endif %}
 					</tr>
 						{% else %}
-						<td>{{ list.email }}</td>
+						<td>{{ l.email }}</td>
 						{% if flavour != "mobile" %}
-							<td>{{ list.added }}</td>
-							{% if list.can_post %}
+							<td>{{ l.added }}</td>
+							{% if l.can_post %}
 							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
 							{% else %}
 							<th></th>
 							{% endif %}
-							{% if list.can_receive %}
+							{% if l.can_receive %}
 							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
 							{% else %}
 							<th></th>

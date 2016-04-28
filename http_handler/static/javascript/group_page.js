@@ -19,8 +19,18 @@ $(document).ready(function(){
 				null
 			]
 		});
+		var lists_table = $('#lists-table').dataTable({
+			"aoColumns": [
+				{ 'bSortable': false},
+				null,
+				null,
+				null,
+				null
+			]
+		});
 	} else {
 		var members_table = $('#members-table').dataTable({});
+		var lists_table = $('#lists-table').dataTable({});
 	}
 	
 	var btn_edit_group_info = $("#btn-edit-group-info");
