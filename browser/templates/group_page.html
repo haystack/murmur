@@ -152,7 +152,7 @@
 					{% endif %}
 						
 						{% if group_info.admin %}
-						<td><input class="checkbox" type="checkbox" id ={{ member.id }}></td>
+						<td><input class="checkbox checkbox-user" type="checkbox" id ={{ member.id }}></td>
 						<td>{{ member.email }}</td>
 						{% if flavour != "mobile" %}
 							<td>{{ member.joined }}</td>
@@ -195,7 +195,14 @@
 			<h3>Linked Mailing Lists</h3> 
 			{% if group_info.admin %}
 				<button type="button" id="btn-add-list">Add List</button>
-				<button type="button" id="btn-del-lists">Delete Lists</button>
+				<select>
+					<option selected="true" style="display:none;">Actions</option>
+					<option value="delete">Delete</option>
+					<option value="addPost">Make Poster</option>
+					<option value="addReceive">Make Recipient</option>
+					<option value="removePost">Remove as Receipient</option>
+					<option value="removeReceive">Remove as Poster</option>
+				</select>
 			{% else %}
 				<button type="button" id="btn-add-list" style="display: none;">Add List</button>
 			{% endif %}
@@ -248,7 +255,7 @@
 					{% for l in group_info.lists %}
 					<tr>
 						{% if group_info.admin %}
-						<td><input class="checkbox" type="checkbox" id ={{ l.id }}></td>
+						<td><input class="checkbox checkbox-list" type="checkbox" id ={{ l.id }}></td>
 						<td>{{ l.email }}</td>
 						{% if flavour != "mobile" %}
 							<td>{{ l.added }}</td>

@@ -714,7 +714,7 @@ def insert_reply(request):
 		
 		original_group = None
 		original_group_object = None
-		if request.POST.__contains__('original_group'):
+		if 'original_group' in request.POST:
 			original_group = request.POST['original_group'] + '@' + HOST
 			group = Group.objects.get(name=group_name)
 			original_group_object = ForwardingList.objects.get(email=original_group, group=group)
@@ -777,13 +777,12 @@ def insert_reply(request):
 
 			for l in fwding_lists:
 
-				footer_html = html_forwarded_blurb(g.name, l.email)
-				mail.Html = msg_text + footer_html
-				footer_plain = plain_forwarded_blurb(g.name, l.email)
-				mail.Body = html2text(msg_text) + footer_plain
-
 				# non murmur list, send on as usual
 				if HOST not in l.email:
+					footer_html = html_forwarded_blurb(g.name, l.email)
+					mail.Html = msg_text + footer_html
+					footer_plain = plain_forwarded_blurb(g.name, l.email)
+					mail.Body = html2text(msg_text) + footer_plain
 					relay_mailer.deliver(mail, To = l.email)
 
 				# need to bypass sending email to prevent "loops back to myself" error,
@@ -793,8 +792,9 @@ def insert_reply(request):
 					# request.POST is immutable; have to copy, edit, and then reassign
 					new_post = request.POST.copy()
 					new_post['group_name'] = group_name
+					# delete thread_id so message won't go to the thread for the original post
 					new_post['thread_id'] = None
-					if not new_post.__contains__('original_group'):
+					if 'original_group' not in new_post:
 						new_post['original_group'] = g.name
 					request.POST = new_post
 					insert_reply(request)

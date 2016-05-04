@@ -43,6 +43,7 @@ $(document).ready(function(){
 	var btn_delete_members = $("#btn-del-members");
 	var btn_set_admin = $("#btn-set-admin");
 	var btn_set_mod = $("#btn-set-mod");
+	var btn_add_list = $('#btn-add-list');
 		
 	subscribe_group = 
 		function(params){
@@ -122,7 +123,7 @@ $(document).ready(function(){
 	var	toMod = "";
 
 	edit_members_table_del = function(params) {
-		$('.checkbox').each(function() {
+		$('.checkbox-user').each(function() {
 		if (this.checked==true)
 			toDelete= toDelete + (this.id) + ",";
 		});
@@ -139,7 +140,7 @@ $(document).ready(function(){
 	};
 	
 	edit_members_table_makeADMIN = function(params) {
-		$('.checkbox').each(function() {
+		$('.checkbox-user').each(function() {
 		if (this.checked==true)
 			toAdmin= toAdmin + (this.id) + ",";
 		});
@@ -150,7 +151,7 @@ $(document).ready(function(){
 	};
 			
 	edit_members_table_makeMOD = function(params) {
-		$('.checkbox').each(function() {
+		$('.checkbox-user').each(function() {
 			if (this.checked == true)
 				toMod = toMod + (this.id) + ",";
 		});
@@ -159,6 +160,39 @@ $(document).ready(function(){
 		params.toDelete = toDelete;
 		post_edit_members(params);
 	};
+
+	edit_lists_make_canpost = function(params) {
+		$('.checkbox-list').each(function() {
+			lists = [];
+			if (this.checked) {
+				lists.push(this.id);
+			}
+		});
+		params.make_can_post = lists;
+		add_posting_lists(params);
+	}
+
+	edit_lists_make_canreceive = function(params) {
+		$('.checkbox-list').each(function() {
+			lists = [];
+			if (this.checked) {
+				lists.push(this.id);
+			}
+		});
+		params.make_can_receive = lists;
+		add_receiving_lists(params);
+	} 
+
+	edit_lists_delete = function(params) {
+		$('.checkbox-list').each(function() {
+			lists = [];
+			if (this.checked) {
+				lists.push(this.id);
+			}
+		});
+		params.lists_to_delete = lists;
+		delete_lists(params);
+	}
 
 		
 	bind_buttons();
@@ -186,6 +220,7 @@ $(document).ready(function(){
  		btn_delete_members.unbind("click");
  		btn_set_mod.unbind("click");
  		btn_set_admin.unbind("click");
+ 		btn_add_list.unbind("click");
  		
  		btn_edit_group_info.bind("click");
  		btn_edit_settings.bind("click");
@@ -197,6 +232,7 @@ $(document).ready(function(){
  		btn_delete_members.bind("click");
  		btn_set_mod.bind("click");
  		btn_set_admin.bind("click");
+ 		btn_add_list.bind("click");
  		
 		var params = {'group_name': group_name};
 
@@ -227,6 +263,10 @@ $(document).ready(function(){
 		btn_edit_group_info.click(function() {
 			window.location = '/groups/' + group_name + '/edit_group_info';
 		});
+
+		btn_add_list.click(function() {
+			window.location ='/groups/' + group_name + '/add_list';
+		});
 	}
 	
 		
@@ -244,6 +284,7 @@ $(document).ready(function(){
 			btn_set_admin.show();
 			btn_set_mod.show();
 			btn_delete_members.show();
+			btn_add_list.show();
 			
 		} else {
 			btn_add_members.hide();
@@ -252,6 +293,7 @@ $(document).ready(function(){
 			btn_set_mod.hide();
 			btn_set_admin.hide();
 			btn_delete_members.hide();
+			btn_add_list.hide();
 		}
 		
 		if (member) {
