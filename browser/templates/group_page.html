@@ -194,17 +194,17 @@
 
 			<h3>Linked Mailing Lists</h3> 
 			{% if group_info.admin %}
-				<button type="button" id="btn-add-list">Add List</button>
+<!-- 				<button type="button" id="btn-add-list">Add List</button> -->
 				<select>
 					<option selected="true" style="display:none;">Actions</option>
-					<option value="delete">Delete</option>
+					<option value="addList">Add a new list...</option>
+					<option value="deleteList">Delete</option>
 					<option value="addPost">Make Poster</option>
 					<option value="addReceive">Make Recipient</option>
 					<option value="removePost">Remove as Receipient</option>
 					<option value="removeReceive">Remove as Poster</option>
 				</select>
-			{% else %}
-				<button type="button" id="btn-add-list" style="display: none;">Add List</button>
+				<!-- <button type="button" id="btn-add-list" style="display: none;">Add List</button> -->
 			{% endif %}
 			
 			<table id="lists-table" class="display" cellspacing="0" width="100%">
