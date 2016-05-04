@@ -160,6 +160,18 @@ $(document).ready(function(){
 		post_edit_members(params);
 	};
 
+
+	var actionSelect = $('#actionSelect');
+
+	actionSelect.change(function(){
+
+		var value = $(this).val();
+		if (value == 'addList'){
+			window.location.href = window.location.href + '/add_list';
+		}
+	});
+
+
 	edit_lists_make_canpost = function(params) {
 		$('.checkbox-list').each(function() {
 			lists = [];
