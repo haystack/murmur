@@ -194,17 +194,15 @@
 
 			<h3>Associated Mailing Lists</h3> 
 			{% if group_info.admin %}
-<!-- 				<button type="button" id="btn-add-list">Add List</button> -->
-				<select id='actionSelect'>
-					<option selected="true" style="display:none;">Actions</option>
-					<option value="addList">Add a new list...</option>
+				<button type="button" id="btn-add-list">Add List</button>
+				<select id='actionSelect' disabled='disabled' style='background-color: #d3d3d3;'>
+					<option value='label' selected="true">Other actions</option>
 					<option value="deleteList">Delete</option>
 					<option value="addPost">Make Poster</option>
 					<option value="addReceive">Make Recipient</option>
 					<option value="removePost">Remove as Receipient</option>
 					<option value="removeReceive">Remove as Poster</option>
 				</select>
-				<!-- <button type="button" id="btn-add-list" style="display: none;">Add List</button> -->
 			{% endif %}
 			
 			<table id="lists-table" class="display" cellspacing="0" width="100%">
