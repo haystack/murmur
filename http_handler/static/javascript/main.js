@@ -180,7 +180,8 @@ $(document).ready(function(){
 
 	delete_group =
 	    function(params) {
-	        var confirmation = confirm("Are you sure you want to delete the mailing list group?");
+	        warningMessage = "Are you sure? This will delete the group including all emails ever sent within this group in the archive."
+	        var confirmation = confirm(warningMessage);
 	        if (confirmation) {
 	        	$.post('delete_group', params,
 	        		function(res){
