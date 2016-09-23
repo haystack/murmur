@@ -230,7 +230,6 @@ def get_group_settings(group_name, user):
 	logging.debug(res)
 	return res
 
-
 def edit_group_settings(group_name, following, no_emails, user):
 	res = {'status':False}
 	
@@ -252,9 +251,6 @@ def edit_group_settings(group_name, following, no_emails, user):
 	logging.debug(res)
 	return res
 
-
-
-
 def activate_group(group_name, user):
 	res = {'status':False}
 	try:
@@ -275,10 +271,6 @@ def activate_group(group_name, user):
 	logging.debug(res)
 	return res
 
-
-
-
-
 def deactivate_group(group_name, user):
 	res = {'status':False}
 	try:
@@ -290,6 +282,23 @@ def deactivate_group(group_name, user):
 			res['status'] = True
 		else:
 			res['code'] = msg_code['PRIVILEGE_ERROR']
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
+def delete_group(group_name, user):
+	res = {'status':False}
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		if membergroup.admin:
+			group.delete()
+			res['status'] = True
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except MemberGroup.DoesNotExist:
