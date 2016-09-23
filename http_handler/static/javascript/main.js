@@ -98,6 +98,7 @@ $(document).ready(function(){
 	var btn_set_mod = $("#btn-set-mod");
 	// var btn_undo_admin = $("#btn-undo-admin");
 	// var btn_undo_mod = $("#btn-undo-mod");
+	var btn_delete_group = $("#btn-delete-group");
 
 	var toDelete = "";
 	var toDeleteList = [];
@@ -177,6 +178,19 @@ $(document).ready(function(){
 				);
 			};
 
+	delete_group =
+	    function(params) {
+	        var confirmation = confirm("Are you sure you want to delete the mailing list group?");
+	        if (confirmation) {
+	        	$.post('delete_group', params,
+	        		function(res){
+	        			notify(res,true);
+	        			setTimeout(function(){
+	        				window.location = '/';
+	        			},400);
+	        		});
+	        }
+	    }
 
 	subscribe_group = 
 		function(params){
@@ -615,6 +629,7 @@ $(document).ready(function(){
 		var delete_members = bind(edit_members_table_del, params);
 		var make_admin = bind(edit_members_table_makeADMIN, params);
 		var make_mod = bind(edit_members_table_makeMOD, params);
+		var del_group = bind(delete_group, params);
 		btn_delete_members.unbind("click");
 		btn_delete_members.bind("click");
 		btn_delete_members.click(delete_members);
@@ -624,6 +639,9 @@ $(document).ready(function(){
 		btn_set_admin.unbind("click");
 		btn_set_admin.bind("click");
 		btn_set_admin.click(make_admin);
+		btn_delete_group.unbind("click");
+		btn_delete_group.bind("click");
+		btn_delete_group.click(del_group);
 		// btn_undo_admin.unbind("click");
 		// btn_undo_admin.bind("click");
 		// btn_undo_admin.click(undo_admin);
@@ -636,11 +654,13 @@ $(document).ready(function(){
 			btn_delete_members.hide();
 			btn_set_admin.hide();
 			btn_set_mod.hide();
+			btn_delete_group.hide();
 		}
 		else{
 			btn_delete_members.show();
 			btn_set_admin.show();
 			btn_set_mod.show();
+			btn_delete_group.show();
 		}
 		};
 
