@@ -1,6 +1,7 @@
 $(document).ready(function(){
 	
 	var group_name = $.trim($("#group-name").text());
+	var user_name = $.trim($("#user-name").text());
 	var btn_add_list = $("#btn-add-list");
 	
 	add_list = 
@@ -30,12 +31,9 @@ $(document).ready(function(){
 			
 	function bind_buttons() {
  		btn_add_list.unbind("click");
- 		
  		btn_add_list.bind("click");
-		var params = {'group_name': group_name, 'user_email' : user_name};
- 		
+		var params = {'group_name': group_name, 'user_email' : user_name}; 		
  		var add_l = bind(add_list, params);
-		
 		btn_add_list.click(add_l);
 		
 	}
