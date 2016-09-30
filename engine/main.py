@@ -389,6 +389,78 @@ def add_list(group_name, email, can_receive, can_post, list_url, user):
 	logging.debug(res)
 	return res
 
+def delete_list(group_name, emails, user):
+	res = {'status' : False}
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		if membergroup.admin:
+			for email in emails.split("'"):
+				f = ForwardingList.objects.get(group=group, email=email)
+				f.delete()
+			res['status'] = True
+		else:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
+	except Exception, e:
+		res['error'] = e
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
+def adjust_list_can_post(group_name, emails, can_post, user):
+
+	res = {'status' : False}
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		if membergroup.admin:
+			for email in emails.split("'"):
+				f = ForwardingList.objects.get(group=group, email=email)
+				f.can_post = can_post
+				f.save()
+			res['status'] = True
+		else:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
+	except Exception, e:
+		res['error'] = e
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
+def adjust_list_can_receive(group_name, emails, can_receive, user):
+
+	res = {'status' : False}
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		if membergroup.admin:
+			for email in emails.split("'"):
+				f = ForwardingList.objects.get(group=group, email=email)
+				f.can_receive = can_receive
+				f.save()
+			res['status'] = True
+		else:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
+	except Exception, e:
+		res['error'] = e
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
 
 def add_members(group_name, emails, user):
 	res = {'status':False}

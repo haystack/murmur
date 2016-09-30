@@ -42,28 +42,34 @@ $(document).ready(function(){
 		});
 	};
 
-	var delete_list = function(params) {
-		$.post('/delete_list', params, function(res){
-			if (res.status) notify(res, true);
+	var edit_lists_adjust_can_post = function(selected, can_post) {
+		var params = {'group_name' : group_name, 'lists' : selected, 'can_post' : can_post};
+		$.post('/adjust_list_can_post', params, function(res){
+			notify(res, true);
+			setTimeout(function(){
+				window.location.reload();
+			}, 400);
 		});
 	}
 
-	var edit_lists_make_canpost = function() {
-		var selected = get_selected('list'),
-			params = {'group_name' : group_name, 'make_can_post' : selected};
-		add_posting_lists(params);
-	}
-
-	var edit_lists_make_canreceive = function() {
-		var selected = get_selected('list'),
-			params = {'group_name' : group_name, 'make_can_receive' : selected};
-		add_receiving_lists(params);
-	} 
-
-	var edit_lists_delete = function() {
-		var selected = get_selected('list'),
-			params = {'group_name' : group_name, 'to_delete' : selected};
-		delete_lists(params);
+	var edit_lists_adjust_can_receive = function(selected, can_receive) {
+		var params = {'group_name' : group_name, 'lists' : selected, 'can_receive' : can_receive};
+		$.post('/adjust_list_can_receive', params, function(res){
+			notify(res, true);
+			setTimeout(function(){
+				window.location.reload();
+			}, 400);
+		});
+	}		
+		
+	var edit_lists_delete = function(selected) {
+		var params = {'group_name' : group_name, 'lists' : selected};
+		$.post('/delete_list', params, function(res){
+			notify(res, true);
+			setTimeout(function(){
+				window.location.reload();
+			}, 400);
+		});
 	}
 
 	// attach handlers to buttons 
@@ -86,9 +92,7 @@ $(document).ready(function(){
 
 
 	btn_subscribe_group.click(function(){
-
 		var params = {'group_name' : group_name};
-
 		$.post('/subscribe_group', params, function(res){
 			if (res.status) {
 				member = true;
@@ -105,9 +109,7 @@ $(document).ready(function(){
 	});
 
 	btn_unsubscribe_group.click(function(){
-
 		var params = {'group_name' : group_name};
-
 		$.post('/unsubscribe_group', params, function(res){
 			if (res.status) {
 				member = false;
@@ -121,69 +123,60 @@ $(document).ready(function(){
 	});
 
 
-	btn_delete_members.click(function(){
-
-		var c = confirm("Are you sure you want to delete the selected users?");
-		
-		if (c) {
-			var selected = get_selected('user'),
-				params = {'group_name' : group_name, 
-							'toAdmin' : [],
-							'toMod' : [],
-							'toDelete' : selected
+	btn_delete_members.click(function(){		
+		console.log("selected: " + get_selected('user'));
+		if (confirm("Are you sure you want to delete the selected users?")) {
+			var params = {'group_name' : group_name, 
+							'toAdmin' : '',
+							'toMod' : '',
+							'toDelete' : get_selected('user').join(',')
 						};
-
 			post_edit_members(params);
 		}
 	});
 
 	btn_set_mod.click(function(){
-
-		var selected = get_selected('user'),
-			params = {'group_name' : group_name, 
-						'toAdmin' : [],
-						'toMod' : selected,
-						'toDelete' : []
+		var params = {'group_name' : group_name, 
+						'toAdmin' : '',
+						'toMod' : get_selected('user').join(','),
+						'toDelete' : ''
 					};
-
 		post_edit_members(params);
 	});
 
 	btn_set_admin.click(function(){
-
-		var selected = get_selected('user'),
-			params = {'group_name' : group_name, 
-						'toAdmin' : selected,
-						'toMod' : [],
-						'toDelete' : []
+		var params = {'group_name' : group_name, 
+						'toAdmin' : get_selected('user').join(','),
+						'toMod' : '',
+						'toDelete' : ''
 					};
-
 		post_edit_members(params);
 	});
 
 	action_select.change(function(){
+		var selected = get_selected('list');
 
+		if (selected.length == 0) {
+			alert("You must select one or more lists to perform this action on");
+			$(this).val('label');
+			return;
+		}
+		selected = selected.join(',');
 		var value = $(this).val();
-
 		if (value == 'deleteList'){
-			var c = confirm("Are you sure you want to delete the selected lists?");
-			if (c) {
-				edit_lists_delete();
+			if (confirm("Are you sure you want to delete the selected lists?")) {
+				edit_lists_delete(selected);
 			} else {
-				$(this).val("label");
+				$(this).setVal("label");
 			}
-		}
-		else if (value == 'addPost'){
-			edit_lists_make_canpost();
-		}
-		else if (value == 'addReceive'){
-			edit_lists_make_canreceive();
-		}
-		else if (value =='removePost'){
-			edit_lists_remove_canpost();
-		}
-		else if (value == 'removeReceive'){
-			edit_lists_remove_canreceive();
+		} else if (value == 'addPost'){
+			edit_lists_adjust_can_post(selected, true);
+		} else if (value == 'addReceive'){
+			edit_lists_adjust_can_receive(selected, true);
+		} else if (value =='removePost'){
+			edit_lists_adjust_can_post(selected, false);
+		} else if (value == 'removeReceive'){
+			edit_lists_adjust_can_receive(selected, false);
 		}
 	});
 
@@ -209,8 +202,7 @@ $(document).ready(function(){
 	}
 
 	function get_selected(typeString) {
-
-		var className = 'checkbox-' + typeString;
+		var className = '.checkbox-' + typeString;
 		var lists = [];
 		$(className).each(function() {
 			if (this.checked) lists.push(this.id);	

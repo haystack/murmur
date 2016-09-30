@@ -514,6 +514,45 @@ def add_list(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
+@login_required
+def delete_list(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.delete_list(request.POST['group_name'], request.POST['lists'], user)
+		return HttpResponse(json.dumps(res), content_type='application/json')
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def adjust_list_can_post(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		can_post = False 
+		if request.POST['can_post'] == 'true':
+			can_post = True
+		res = engine.main.adjust_list_can_post(request.POST['group_name'], request.POST['lists'], can_post, user)
+		return HttpResponse(json.dumps(res), content_type='application/json')
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def adjust_list_can_receive(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		can_receive = False 
+		if request.POST['can_receive'] == 'true':
+			can_receive = True
+		res = engine.main.adjust_list_can_receive(request.POST['group_name'], request.POST['lists'], can_receive, user)
+		return HttpResponse(json.dumps(res), content_type='application/json')
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
 def subscribe_group(request):
 	try:
 		if request.user.is_authenticated():
