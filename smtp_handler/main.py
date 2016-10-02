@@ -547,7 +547,8 @@ def help(message, address=None, host=None):
 @route("(address)@(host)", address=".+", host=".+")
 @stateless
 def send_account_info(message, address=None, host=None):
-	if str(message['From']) == "no-reply@murmur.csail.mit.com" and ("Account activation on Murmur" in str(message['Subject']) or "Password reset on Murmur" in str(message['Subject'])):
+	logging.debug(message['Subject'])
+	if str(message['From']) == "no-reply@" + HOST and ("Account activation on Murmur" in str(message['Subject']) or "Password reset on Murmur" in str(message['Subject'])):
 		logging.debug(message['Subject'])
 		logging.debug(message['To'])
 		logging.debug(message['From'])

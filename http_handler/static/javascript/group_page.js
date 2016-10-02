@@ -14,10 +14,11 @@ $(document).ready(function(){
 		btn_set_admin = $("#btn-set-admin"),
 		btn_set_mod = $("#btn-set-mod"),
 		btn_add_list = $('#btn-add-list'),
-		action_select = $('#actionSelect');
+		action_select = $('#actionSelect'),
+		btn_delete_group = $("#btn-delete-group");
 
 	var admin_buttons = [btn_add_members, btn_edit_group_info, btn_set_admin, btn_set_mod, 
-						btn_delete_members, btn_add_list, action_select];
+						btn_delete_members, btn_add_list, action_select, btn_delete_group];
 
 	if (admin) {
 		var members_table = $('#members-table').dataTable({
@@ -32,6 +33,51 @@ $(document).ready(function(){
 			lists_table = $('#lists-table').dataTable({});
 	}
 
+	delete_group =
+	    function(params) {
+	    	warningMessage = "Are you sure? This will delete the group including all emails ever sent within this group in the archive."
+	        var confirmation = confirm(warningMessage);
+	        if (confirmation) {
+	        	$.post('/delete_group', params,
+	        		function(res){
+	        			notify(res,true);
+	        			setTimeout(function(){
+	        				window.location = '/';
+	        			},400);
+	        		});
+	        }
+	    }
+		
+	// activating and deactivating does nothing
+
+	// activate_group = 
+	// 	function(params){
+	// 		$.post('/activate_group', params, 
+	// 			function(res){
+	// 				if (res.status) {
+	// 					$(".group_active").text('True');
+	// 					group_active = true;
+	// 					fix_visibility();
+	// 				}
+	// 				notify(res, true);
+	// 			}
+	// 		);	
+	// 	};
+		
+	
+	// deactivate_group = 
+	// 	function(params){
+	// 		$.post('/deactivate_group', params, 
+	// 			function(res){
+	// 				if (res.status) {
+	// 					$(".group_active").text('False');
+	// 					group_active = false;
+	// 					fix_visibility();
+	// 				}
+	// 				notify(res, true);
+	// 			}
+	// 		);	
+	// 	};	
 
 	var post_edit_members = function(params) {
 		$.post('/edit_members', params, function(res){
@@ -73,7 +119,6 @@ $(document).ready(function(){
 	}
 
 	// attach handlers to buttons 
-
 	btn_add_members.click(function() {
 		go_to('add_members');
 	});
@@ -90,6 +135,16 @@ $(document).ready(function(){
 		go_to('add_list');
 	});
 
+	function post_edit_members(params) {
+		$.post('/edit_members', params,
+			function(res){
+				notify(res,true);
+				setTimeout(function(){
+					window.location.reload();
+				},400);
+			}
+		);
+	}	
 
 	btn_subscribe_group.click(function(){
 		var params = {'group_name' : group_name};
@@ -122,9 +177,12 @@ $(document).ready(function(){
 		});
 	});
 
+	btn_delete_group.click(function(){
+		delete_group({'group_name' : group_name});
+	});
+
 
 	btn_delete_members.click(function(){		
-		console.log("selected: " + get_selected('user'));
 		if (confirm("Are you sure you want to delete the selected users?")) {
 			var params = {'group_name' : group_name, 
 							'toAdmin' : '',
