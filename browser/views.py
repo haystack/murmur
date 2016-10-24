@@ -9,6 +9,7 @@ from browser.util import load_groups
 
 from lamson.mail import MailResponse
 from smtp_handler.utils import *
+from http_handler.settings import WEBSITE
 
 from django.core.context_processors import csrf
 import json, logging
@@ -71,8 +72,14 @@ def error(request):
 @render_to('home.html')
 def index(request):
 	if not request.user.is_authenticated():
-		return {'form': AuthenticationForm(),
-				'reg_form': RegistrationForm()}
+		if WEBSITE == 'murmur':
+			return render_to_response('home.html',
+									  {'form': AuthenticationForm(),
+									   'reg_form': RegistrationForm()})
+		elif WEBSITE == 'squadbox':
+			return render_to_response('squadbox/home.html',
+									  {'form': AuthenticationForm(),
+									   'reg_form': RegistrationForm()})
 	else:
 		return HttpResponseRedirect('/posts')
 	
