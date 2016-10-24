@@ -85,6 +85,11 @@
 					<button type="button" id="btn-unsubscribe-group" style="display: none;">Un-Subscribe</button>
 					<button type="button" id="btn-subscribe-group">Subscribe</button>
 				{% endif %}
+
+				{% if group_info.admin %}
+					<button type="button" id="btn-delete-group">Delete Group</button>
+				{% endif %}
+
 			</div>
 			<br />
 			<hr />
