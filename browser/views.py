@@ -24,6 +24,7 @@ from registration.forms import RegistrationForm
 from django.conf import global_settings
 from django.db.models.aggregates import Count
 from django.http import HttpResponse
+from django.template.context import RequestContext
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
@@ -75,11 +76,13 @@ def index(request):
 		if WEBSITE == 'murmur':
 			return render_to_response('home.html',
 									  {'form': AuthenticationForm(),
-									   'reg_form': RegistrationForm()})
+									   'reg_form': RegistrationForm()},
+									   context_instance=RequestContext(request))
 		elif WEBSITE == 'squadbox':
 			return render_to_response('squadbox/home.html',
 									  {'form': AuthenticationForm(),
-									   'reg_form': RegistrationForm()})
+									   'reg_form': RegistrationForm()},
+									   context_instance=RequestContext(request))
 	else:
 		return HttpResponseRedirect('/posts')
 	
