@@ -1,6 +1,7 @@
 import logging, time, base64
 from lamson.routing import route, stateless
 from config.settings import relay
+from http_handler.settings import WEBSITE
 from schema.models import *
 from lamson.mail import MailResponse
 from email.utils import *
@@ -99,7 +100,7 @@ def subscribe(message, group_name=None, host=None):
 		group = Group.objects.get(name=group_name)
 
 	except UserProfile.DoesNotExist:
-		error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
+		error_msg = 'Your email is not in the %s system. Ask the admin of the group to add you.' % WEBSITE
 		send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
 		return
 
@@ -139,7 +140,7 @@ def unsubscribe(message, group_name=None, host=None):
 		user = UserProfile.objects.get(email=addr)
 
 	except UserProfile.DoesNotExist:
-		error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
+		error_msg = 'Your email is not in the %s system. Ask the admin of the group to add you.' % WEBSITE
 		send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
 		return
 
@@ -246,7 +247,7 @@ def handle_post(message, address=None, host=None):
 		try:
 			user = UserProfile.objects.get(email=user_addr)
 		except UserProfile.DoesNotExist:
-			error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
+			error_msg = 'Your email is not in the %s system. Ask the admin of the group to add you.' % WEBSITE
 			send_error_email(group_name, error_msg, user_addr, ADMIN_EMAILS)
 			return
 
@@ -507,7 +508,7 @@ def help(message, address=None, host=None):
 @stateless
 def send_account_info(message, address=None, host=None):
 	logging.debug(message['Subject'])
-	if str(message['From']) == "no-reply@" + HOST and ("Account activation on Murmur" in str(message['Subject']) or "Password reset on Murmur" in str(message['Subject'])):
+	if str(message['From']) == "no-reply@" + HOST and ("Account activation on %s" % WEBSITE in str(message['Subject']) or "Password reset on %s" % WEBSITE in str(message['Subject'])):
 		logging.debug(message['Subject'])
 		logging.debug(message['To'])
 		logging.debug(message['From'])
