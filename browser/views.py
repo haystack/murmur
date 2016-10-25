@@ -277,7 +277,7 @@ def group_page(request, group_name):
 		
 	group_info = engine.main.group_info_page(user, group_name)
 	if group_info['group']:
-		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True}
+		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True, 'admin_address' : group_name + '+admins@' + HOST}
 	else:
 		return redirect('/404?e=gname&name=%s' % group_name)
 	
@@ -529,6 +529,7 @@ def group_info(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.group_info(request.POST['group_name'], user)
+		res['admin_email'] = request.POST['group_name'] + '+admins@' + HOST
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

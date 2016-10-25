@@ -695,6 +695,9 @@ $(document).ready(function(){
 		} else {
 			info += 'Attachments <span class="strong">are allowed</span>.';
 		}
+
+		info += '</br>';
+		info += "You can contact the group administrators at <a href='mailto:" + res.admin_email + "'>" + res.admin_email + "</a>.";
 		
 		info += '<br /> <br />';
 		info += '<a href="/posts?group_name=' + res.group_name + '"><button type="button">View Posts</button></a> <br /> <br />';
