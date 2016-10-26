@@ -1,0 +1,117 @@
+{% load staticfiles %}
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>{% block title %}SQUADBOX{% endblock %}</title>
+	<link href="/static/css/third-party/bootstrap.min.css" rel="stylesheet">
+	<link href="/static/css/squadbox/base.css" rel="stylesheet">
+
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400|Permanent+Marker" rel="stylesheet">
+	
+	<link rel="apple-touch-icon" sizes="57x57" href="/static/images/favicon/apple-touch-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/static/images/favicon/apple-touch-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/static/images/favicon/apple-touch-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/static/images/favicon/apple-touch-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/static/images/favicon/apple-touch-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/static/images/favicon/apple-touch-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/static/images/favicon/apple-touch-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/static/images/favicon/apple-touch-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/images/favicon/apple-touch-icon-180x180.png">
+	<link rel="icon" type="image/png" href="/static/images/favicon/favicon-32x32.png" sizes="32x32">
+	<link rel="icon" type="image/png" href="/static/images/favicon/favicon-194x194.png" sizes="194x194">
+	<link rel="icon" type="image/png" href="/static/images/favicon/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="/static/images/favicon/android-chrome-192x192.png" sizes="192x192">
+	<link rel="icon" type="image/png" href="/static/images/favicon/favicon-16x16.png" sizes="16x16">
+	<link rel="manifest" href="/static/images/favicon/android-chrome-manifest.json">
+	<link rel="shortcut icon" href="/static/images/favicon/favicon.ico">
+	<meta name="apple-mobile-web-app-title" content="Murmur">
+	<meta name="application-name" content="Murmur">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="msapplication-TileImage" content="/static/images/favicon/mstile-144x144.png">
+	<meta name="msapplication-config" content="/static/images/favicon/browserconfig.xml">
+	<meta name="theme-color" content="#ffffff">
+	
+</head>
+
+<body>
+	
+
+{% if flavour != "mobile" %}
+<div class="container-home">
+{% else %}
+<div class="container">
+{% endif %}
+
+{% if flavour != "mobile" %}
+  <div class="home-left">
+  	{% else %}
+  	<div class="home-left-mobile">
+  	{% endif %}
+  	
+     <h3><span id="logo">SQUADBOX</span></h3>
+     
+     <h5>Fight harrassment.</h5>
+     <br />
+     <br />
+     <a href="/about">Learn More</a>
+     
+     <br />
+     <br />
+     <a href="/groups/murmur-discuss">Join our Murmur list to keep informed about Murmur</a>
+     
+     <br />
+     <br />
+     <a href="/group_list">Explore All Public Groups</a>
+
+  </div>
+{% if flavour != "mobile" %}
+  <div class="home-right">
+  	{% else %}
+  	<div class="home-right-mobile">
+  	{% endif %}
+  	
+  	<form method="POST" action="{% url "auth_login" %}">
+		{% csrf_token %}
+		<h3>Login</h3>
+		{{ form.as_p }}
+		<a href="{% url "auth_password_reset" %}">Forgot your password?</a>
+		<br /><br />
+		<input type="submit" class="btn btn-primary" value="Log In" />
+	</form>
+	<br />
+	
+   
+   <p>
+       <form method='post' action="{% url "registration_register" %}">
+        	{% csrf_token %}
+        	
+		<h3>Register Account</h3>
+		Create an account to join or start a group!<br />
+		<br />
+        {{ reg_form.as_p }}
+
+        <input type="submit" class="btn btn-primary" value="Register!" />
+
+        </form>
+  </p>
+  </div>
+  
+
+</div>
+
+
+	<script type="text/javascript" src="/static/javascript/third-party/jquery.min.js"></script>	
+	<script src="/static/javascript/third-party/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/csrf.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/tiny_mce/tiny_mce.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/noty/jquery.noty.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/noty/layouts/topRight.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/noty/themes/default.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>
+</body>
+</html>
+

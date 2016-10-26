@@ -9,6 +9,7 @@ SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 _ENV_FILE_PATH = '/opt/murmur/env'
 _DEBUG_FILE_PATH = '/opt/murmur/debug'
+_WEBSITE_FILE_PATH = '/opt/murmur/website'
 
 def _get_env():
     f = open(_ENV_FILE_PATH)
@@ -36,13 +37,28 @@ def _get_debug():
     
 DEBUG = _get_debug()
 
+def _get_website():
+    f = open(_WEBSITE_FILE_PATH)
+    website = f.read()
+
+    if website[-1] == '\n':
+        website = website[:-1]
+    
+    f.close()
+    return website
+    
+WEBSITE = _get_website()
+
 try:
     execfile(SITE_ROOT + '/../private.py')
 except IOError:
     print "Unable to open configuration file!"
 
 if ENV == 'prod':
-    BASE_URL = 'murmur.csail.mit.edu'
+    if WEBSITE == 'murmur':
+        BASE_URL = 'murmur.csail.mit.edu'
+    else:
+        BASE_URL = 'squadbox.csail.mit.edu'
     MYSQL = MYSQL_PROD
 elif ENV == 'staging':
     BASE_URL = 'murmur-dev.csail.mit.edu'
@@ -61,7 +77,7 @@ EMAIL_PORT = 25
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
-DEFAULT_EMAIL = 'no-reply@murmur.csail.mit.com'
+DEFAULT_EMAIL = 'no-reply@' + BASE_URL
 DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
 

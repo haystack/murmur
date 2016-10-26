@@ -33,7 +33,23 @@ $(document).ready(function(){
 	var btn_delete_members = $("#btn-del-members");
 	var btn_set_admin = $("#btn-set-admin");
 	var btn_set_mod = $("#btn-set-mod");
-		
+	var btn_delete_group = $("#btn-delete-group");
+
+	delete_group =
+	    function(params) {
+	    	warningMessage = "Are you sure? This will delete the group including all emails ever sent within this group in the archive."
+	        var confirmation = confirm(warningMessage);
+	        if (confirmation) {
+	        	$.post('/delete_group', params,
+	        		function(res){
+	        			notify(res,true);
+	        			setTimeout(function(){
+	        				window.location = '/';
+	        			},400);
+	        		});
+	        }
+	    }
+
 	subscribe_group = 
 		function(params){
 			$.post('/subscribe_group', params, 
@@ -176,6 +192,7 @@ $(document).ready(function(){
  		btn_delete_members.unbind("click");
  		btn_set_mod.unbind("click");
  		btn_set_admin.unbind("click");
+ 		btn_delete_group.unbind("click");
  		
  		btn_edit_group_info.bind("click");
  		btn_edit_settings.bind("click");
@@ -187,6 +204,7 @@ $(document).ready(function(){
  		btn_delete_members.bind("click");
  		btn_set_mod.bind("click");
  		btn_set_admin.bind("click");
+ 		btn_delete_group.bind("click");
  		
 		var params = {'group_name': group_name};
 
@@ -197,6 +215,7 @@ $(document).ready(function(){
 		var delete_members = bind(edit_members_table_del, params);
 		var make_admin = bind(edit_members_table_makeADMIN, params);
 		var make_mod = bind(edit_members_table_makeMOD, params);
+		var del_group = bind(delete_group, params);
 		
 		btn_activate_group.click(act_group);
 		btn_deactivate_group.click(deact_group);
@@ -205,6 +224,7 @@ $(document).ready(function(){
 		btn_delete_members.click(delete_members);
 		btn_set_mod.click(make_mod);
 		btn_set_admin.click(make_admin);
+		btn_delete_group.click(del_group);
 
 		btn_add_members.click(function() {
 			window.location = '/groups/' + group_name + '/add_members';
