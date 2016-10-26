@@ -56,7 +56,7 @@ HTML_SUBTAIL = '</div>'
 PLAIN_SUBHEAD = '***\nMurmur\n'
 PLAIN_SUBTAIL = '\n***\n'
 
-RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe', '+info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, MUTE_SUFFIX, UNMUTE_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
+RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe', '+admins', '+info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, MUTE_SUFFIX, UNMUTE_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
 
 relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
 
