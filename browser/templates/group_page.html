@@ -90,8 +90,9 @@
 				</div>
 				<br />
 				<hr />
-				<h3>Members List</h3>
 				{% if group_info.admin %}
+				<h3>Members List</h3>
+
 					<button type="button" id="btn-add-members">Add Members</button>
 					<button type="button" id="btn-del-members">Delete Members</button>
 					<button type="button" id="btn-set-admin">Set as Admin</button>
@@ -232,7 +233,7 @@
 								{% endfor %}
 							</tbody>
 						</table>
-					{% endif %}
+				{% endif %}
 				</div>
 			</div>
 		{% endif %}

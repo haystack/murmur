@@ -404,7 +404,7 @@ def delete_list(group_name, emails, user):
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		if membergroup.admin:
-			for email in emails.split("'"):
+			for email in emails.split(','):
 				f = ForwardingList.objects.get(group=group, email=email)
 				f.delete()
 			res['status'] = True
@@ -422,13 +422,12 @@ def delete_list(group_name, emails, user):
 	return res
 
 def adjust_list_can_post(group_name, emails, can_post, user):
-
 	res = {'status' : False}
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		if membergroup.admin:
-			for email in emails.split("'"):
+			for email in emails.split(','):
 				f = ForwardingList.objects.get(group=group, email=email)
 				f.can_post = can_post
 				f.save()
@@ -453,7 +452,7 @@ def adjust_list_can_receive(group_name, emails, can_receive, user):
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		if membergroup.admin:
-			for email in emails.split("'"):
+			for email in emails.split(','):
 				f = ForwardingList.objects.get(group=group, email=email)
 				f.can_receive = can_receive
 				f.save()
