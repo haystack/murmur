@@ -671,6 +671,8 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 							'liked': user_liked,
 							'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 							'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp}
+				if p.forwarding_list:
+					post_dict['forwarding_list'] = p.forwarding_list.email
 				if not p.reply_to_id:
 					post = post_dict
 					if not return_replies:
@@ -727,12 +729,14 @@ def load_thread(t, user=None, member=None):
 					'thread_id': p.thread_id, 
 					'from': p.author.email, 
 					'likes': post_likes,
-					'to': p.group.name, 
+					'to': p.group.name,
 					'liked': user_liked,
 					'subject': escape(p.subject), 
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 					'timestamp': p.timestamp
 					}
+		if p.forwarding_list:
+			post_dict['forwarding_list'] = p.forwarding_list.email
 		if not p.reply_to_id:
 			post = post_dict
 		else:
@@ -766,6 +770,8 @@ def load_post(group_name, thread_id, msg_id):
 		res['subject'] = escape(p.subject)
 		res['text'] = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
 		res['to'] = p.group.name
+		if p.forwarding_list:
+			res['forwarding_list'] = p.forwarding_list.email
 	except Thread.DoesNotExist:
 		res['code'] = msg_code['THREAD_NOT_FOUND_ERROR']
 	except Post.DoesNotExist:
