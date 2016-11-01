@@ -9,6 +9,7 @@ from browser.util import load_groups
 
 from lamson.mail import MailResponse
 from smtp_handler.utils import *
+from http_handler.settings import WEBSITE
 
 from django.core.context_processors import csrf
 import json, logging
@@ -23,6 +24,7 @@ from registration.forms import RegistrationForm
 from django.conf import global_settings
 from django.db.models.aggregates import Count
 from django.http import HttpResponse
+from django.template.context import RequestContext
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
@@ -71,8 +73,16 @@ def error(request):
 @render_to('home.html')
 def index(request):
 	if not request.user.is_authenticated():
-		return {'form': AuthenticationForm(),
-				'reg_form': RegistrationForm()}
+		if WEBSITE == 'murmur':
+			return render_to_response('home.html',
+									  {'form': AuthenticationForm(),
+									   'reg_form': RegistrationForm()},
+									   context_instance=RequestContext(request))
+		elif WEBSITE == 'squadbox':
+			return render_to_response('squadbox/home.html',
+									  {'form': AuthenticationForm(),
+									   'reg_form': RegistrationForm()},
+									   context_instance=RequestContext(request))
 	else:
 		return HttpResponseRedirect('/posts')
 	
@@ -277,7 +287,7 @@ def group_page(request, group_name):
 		
 	group_info = engine.main.group_info_page(user, group_name)
 	if group_info['group']:
-		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True}
+		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True, 'admin_address' : group_name + '+admins@' + HOST}
 	else:
 		return redirect('/404?e=gname&name=%s' % group_name)
 	
@@ -599,6 +609,7 @@ def group_info(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.group_info(request.POST['group_name'], user)
+		res['admin_email'] = request.POST['group_name'] + '+admins@' + HOST
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

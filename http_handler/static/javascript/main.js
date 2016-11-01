@@ -591,6 +591,7 @@ $(document).ready(function(){
 	}
 
 	function populate_members_table(res){
+
 		members_table.fnClearTable();
 		current_group_name = res.members[0].group_name;
 		for(var i = 0; i< res.members.length; i++){
@@ -656,12 +657,14 @@ $(document).ready(function(){
 			btn_set_admin.hide();
 			btn_set_mod.hide();
 			btn_delete_group.hide();
+			$('#members-list-area').css('display', 'none');
 		}
 		else{
 			btn_delete_members.show();
 			btn_set_admin.show();
 			btn_set_mod.show();
 			btn_delete_group.show();
+			$('#members-list-area').css('display', '');
 		}
 		};
 
@@ -692,6 +695,9 @@ $(document).ready(function(){
 		} else {
 			info += 'Attachments <span class="strong">are allowed</span>.';
 		}
+
+		info += '</br>';
+		info += "You can contact the group administrators at <a href='mailto:" + res.admin_email + "'>" + res.admin_email + "</a>.";
 		
 		info += '<br /> <br />';
 		info += '<a href="/posts?group_name=' + res.group_name + '"><button type="button">View Posts</button></a> <br /> <br />';

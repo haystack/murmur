@@ -1,9 +1,11 @@
 import logging, time, base64
 from lamson.routing import route, stateless
 from config.settings import relay
+from http_handler.settings import WEBSITE
 from schema.models import *
 from lamson.mail import MailResponse
 from email.utils import *
+from email import message_from_string
 from engine.main import *
 from utils import *
 from html2text import html2text
@@ -83,7 +85,49 @@ def deactivate(message, group_name=None, host=None):
 	relay.deliver(mail)
 
 
+@route("(group_name)\\+admins@(host)", group_name=".+", host=HOST)
+@stateless
+def admins(message, group_name=None, host=None):
 
+	group_name = group_name.lower()
+	name, sender_addr = parseaddr(message['From'].lower())
+
+	try:
+		group = Group.objects.get(name=group_name)
+	except Exception, e:
+		logging.debug(e)
+		send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
+		return
+
+	email_message = message_from_string(str(message))
+	msg_text = get_body(email_message)
+
+	if 'html' not in msg_text or msg_text['html'] == '':
+		msg_text['html'] = markdown(msg_text['plain'])
+	if 'plain' not in msg_text or msg_text['plain'] == '':
+		msg_text['plain'] = html2text(msg_text['html'])
+
+	mail = MurmurMailResponse(From = sender_addr, 
+			To = group_name+"+admins@" + HOST, 
+			Subject = message['Subject'])
+
+	mail.Html = msg_text['html']
+	mail.Body = msg_text['plain']
+
+	mail.Body += '\n\nYou are receiving this message because you are an admin of the Murmur group %s.' %(group_name)
+	mail.Html += '<BR><BR>You are receiving this message because you are an admin of the Murmur group %s.' %(group_name)
+
+	try:
+		admins = MemberGroup.objects.filter(group=group, admin=True)
+	except Exception, e:
+		logging.debug(e)
+		send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
+		return
+
+	logging.debug(admins)
+	for a in admins:
+		email = a.member.email
+		relay.deliver(mail, To = email)
 
 
 @route("(group_name)\\+subscribe@(host)", group_name=".+", host=HOST)
@@ -99,7 +143,7 @@ def subscribe(message, group_name=None, host=None):
 		group = Group.objects.get(name=group_name)
 
 	except UserProfile.DoesNotExist:
-		error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
+		error_msg = 'Your email is not in the %s system. Ask the admin of the group to add you.' % WEBSITE
 		send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
 		return
 
@@ -139,7 +183,7 @@ def unsubscribe(message, group_name=None, host=None):
 		user = UserProfile.objects.get(email=addr)
 
 	except UserProfile.DoesNotExist:
-		error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
+		error_msg = 'Your email is not in the %s system. Ask the admin of the group to add you.' % WEBSITE
 		send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
 		return
 
@@ -210,13 +254,12 @@ def handle_post(message, address=None, host=None):
 			logging.debug(e)
 			send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
 			return
-
-		email_message = email.message_from_string(str(message))
+		
+		email_message = message_from_string(str(message))
 		msg_text = get_body(email_message)
 	
 		attachments = get_attachments(email_message)
 		res = check_attachments(attachments, group.allow_attachments)
-
 		if not res['status']:
 			send_error_email(group_name, res['error'], sender_addr, ADMIN_EMAILS)
 			return
@@ -548,7 +591,7 @@ def help(message, address=None, host=None):
 @stateless
 def send_account_info(message, address=None, host=None):
 	logging.debug(message['Subject'])
-	if str(message['From']) == "no-reply@" + HOST and ("Account activation on Murmur" in str(message['Subject']) or "Password reset on Murmur" in str(message['Subject'])):
+	if str(message['From']) == "no-reply@" + HOST and ("Account activation on %s" % WEBSITE in str(message['Subject']) or "Password reset on %s" % WEBSITE in str(message['Subject'])):
 		logging.debug(message['Subject'])
 		logging.debug(message['To'])
 		logging.debug(message['From'])
