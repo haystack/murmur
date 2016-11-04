@@ -27,7 +27,10 @@
 					<br>
 					<h3><span id="post-subject">{{ thread.post.subject }}</span></h3>
 					<span class="strong">From: </span> 
-					<span class="strong-gray" id="post-from">{{ thread.post.from }}</span>
+					<span class="strong-gray" id="post-from">{{ thread.post.from }} </span>
+					{% if thread.post.forwarding_list != None %}
+					via {{ thread.post.forwarding_list }}
+					{% endif %}
 					<br><span class="strong">To: </span>
 					<span class="strong-gray">{{ active_group.name }}</span> 
 					<br>
