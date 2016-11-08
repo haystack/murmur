@@ -242,6 +242,8 @@ def handle_post(message, address=None, host=None):
 		name, sender_addr = parseaddr(message['From'].lower())
 		list_name, list_addr = parseaddr(message['List-Id'])
 		to_name, to_addr = parseaddr(message['To'].lower())
+		msg_id = Message['Message-ID']
+		logging.debug("msg id is " + msg_id)
 
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
 		if(reserved):
@@ -315,9 +317,9 @@ def handle_post(message, address=None, host=None):
 			original_list_email = original_list.email
 
 		if message_is_reply:
-			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, forwarding_list=original_list)
+			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list)
 		else:
-			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, forwarding_list=original_list)
+			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list)
 			
 		if not res['status']:
 			send_error_email(group_name, res['code'], sender_addr, ADMIN_EMAILS)

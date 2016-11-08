@@ -230,11 +230,13 @@
 													<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
 												{% endif %}
 											</th>
-											<th>
+											
+											<td>
 												{% if l.url != None %}
-												{{ l.url }}
+													<a href=//{{l.url}}>{{ l.url }}</a>
 												{% endif %}
-											</th>
+											</td>
+											
 										{% endif %}
 									</tr>
 								{% endfor %}

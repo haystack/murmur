@@ -16,6 +16,12 @@ class Post(models.Model):
 	reply_to = models.ForeignKey('self', blank=False, null = True, related_name="replies")
 	timestamp = models.DateTimeField(auto_now=True)
 	forwarding_list = models.ForeignKey('ForwardingList', null=True)
+	# a post's author is the Murmur user (if any) who wrote the post.
+	# a post's poster_email is the email address of the user who originally
+	# wrote the post. so if author is not null, author.email = poster_email.
+	# if the author is null, then the person who wrote the message isn't actually
+	# a member of this group on Murmur, and it was likely received via a list that
+	# fwds to this Murmur group
 	poster_email = models.EmailField(max_length=255, null=True)
 
 	def __unicode__(self):
