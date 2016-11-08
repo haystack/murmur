@@ -195,6 +195,7 @@
 									<th>Added</th>
 									<th>Can Post</th>
 									<th>Can Receive</th>
+									<th>List URL</th>
 								</tr>
 							</thead>
 							
@@ -206,6 +207,7 @@
 									<th>Added</th>
 									<th>Can Post</th>
 									<th>Can Receive</th>
+									<th>List URL</th>
 								{% endif %}
 							</tr>
 							</tfoot>
@@ -226,6 +228,11 @@
 											<th>
 												{% if l.can_receive %}
 													<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+												{% endif %}
+											</th>
+											<th>
+												{% if l.url != None %}
+												{{ l.url }}
 												{% endif %}
 											</th>
 										{% endif %}

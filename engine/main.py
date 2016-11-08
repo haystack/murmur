@@ -80,7 +80,8 @@ def group_info_page(user, group_name):
 						'email' : l.email,
 						'can_post' : l.can_post,
 						'can_receive' : l.can_receive,
-						'added': l.timestamp
+						'added': l.timestamp,
+						'url' : l.url
 						}
 			res['lists'].append(list_obj)
 
