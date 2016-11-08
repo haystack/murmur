@@ -256,6 +256,11 @@ def handle_post(message, address=None, host=None):
 			logging.debug(e)
 			send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
 			return
+
+		# check if we already got a post to this group with the same message_id
+		existing_post = Post.objects.filter(msg_id=msg_id, group=group)
+		if existing_post.exists():
+			return 
 		
 		email_message = message_from_string(str(message))
 		msg_text = get_body(email_message)
