@@ -242,7 +242,7 @@ def handle_post(message, address=None, host=None):
 		name, sender_addr = parseaddr(message['From'].lower())
 		list_name, list_addr = parseaddr(message['List-Id'])
 		to_name, to_addr = parseaddr(message['To'].lower())
-		msg_id = Message['Message-ID']
+		msg_id = message['Message-ID']
 		logging.debug("msg id is " + msg_id)
 
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
