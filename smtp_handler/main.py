@@ -277,6 +277,9 @@ def handle_post(message, address=None, host=None):
 		if 'X-Original-Sender' in message and message['X-Original-Sender'] == group_name:
 			logging.debug('This message originally came from this list; not reposting')
 			return
+
+		logging.debug("passed all those checks... message is ")
+		logging.debug(message)
 		
 		email_message = message_from_string(str(message))
 		msg_text = get_body(email_message)
