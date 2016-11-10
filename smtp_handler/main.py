@@ -274,13 +274,11 @@ def handle_post(message, address=None, host=None):
 			logging.debug("Post with same sender and subject sent to this group < 10 min ago")
 			return
 
+		# this is the case where we forward a message to a google group, and it forwards back to us
 		if 'X-Original-Sender' in message and message['X-Original-Sender'].split('@')[0] == group_name:
 			logging.debug('This message originally came from this list; not reposting')
 			return
 
-		# logging.debug("passed all those checks... message is ")
-		# logging.debug(message)
-		
 		email_message = message_from_string(str(message))
 		msg_text = get_body(email_message)
 	

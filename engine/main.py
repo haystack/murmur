@@ -807,8 +807,6 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, forwar
 	thread.subject = stripped_subj
 	thread.group = group
 	thread.save()
-
-	#msg_id = base64.b64encode(sender_addr + str(datetime.datetime.now())).lower() + '@' + BASE_URL
 	
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
 			subject=stripped_subj, post=message_text, group=group, thread=thread)
@@ -981,8 +979,6 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, f
 				thread.save()
 			
 			tag_objs = Tag.objects.filter(tagthread__thread=thread)
-			
-			#msg_id = base64.b64encode(sender_addr + str(datetime.datetime.now())).lower() + '@' + BASE_URL
 			
 			try:
 				message_text = message_text.decode("utf-8")
