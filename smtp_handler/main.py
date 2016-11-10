@@ -309,11 +309,11 @@ def handle_post(message, address=None, host=None):
 		user_lookup = UserProfile.objects.filter(email=sender_addr)
 
 		# try using List-Id field from email
-		original_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group)
+		original_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group, can_post=True)
 
 		# if no valid List-Id, try email's To field
 		if not original_list_lookup.exists():
-			original_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
+			original_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group, can_post=True)
 
 		# neither user nor fwding list exist so post is invalid - reject email
 		if not user_lookup.exists() and not original_list_lookup.exists():

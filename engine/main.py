@@ -728,7 +728,7 @@ def load_thread(t, user=None, member=None):
 					'id': str(p.id),
 					'msg_id': p.msg_id, 
 					'thread_id': p.thread_id, 
-					'from': p.poster.email, 
+					'from': p.poster_email, 
 					'likes': post_likes,
 					'to': p.group.name,
 					'liked': user_liked,
