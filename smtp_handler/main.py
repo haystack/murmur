@@ -274,12 +274,9 @@ def handle_post(message, address=None, host=None):
 			logging.debug("Post with same sender and subject sent to this group < 10 min ago")
 			return
 
-		original_sender = message.get('X-Original-Sender', None)
-		if original_sender is not None and original_sender.lower() == group_name:
+		if 'X-Original-Sender' in message and message['X-Original-Sender'] == group_name:
 			logging.debug('This message originally came from this list; not reposting')
 			return
-
-
 		
 		email_message = message_from_string(str(message))
 		msg_text = get_body(email_message)
