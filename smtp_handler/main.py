@@ -259,6 +259,8 @@ def handle_post(message, address=None, host=None):
 			send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
 			return
 
+		# try to detect and prevent duplicate posts 
+
 		# check if we already got a post to this group with the same message_id
 		existing_post_matching_id = Post.objects.filter(msg_id=msg_id, group=group)
 		if existing_post_matching_id.exists():
@@ -271,6 +273,12 @@ def handle_post(message, address=None, host=None):
 		if existing_post_recent.exists():
 			logging.debug("Post with same sender and subject sent to this group < 10 min ago")
 			return
+
+		original_sender = message.get('X-Original-Sender', None)
+		if original_sender is not None and original_sender.lower() == group_name:
+			logging.debug('This message originally came from this list; not reposting')
+			return
+
 
 		
 		email_message = message_from_string(str(message))
