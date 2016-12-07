@@ -25,7 +25,7 @@ $(document).ready(function(){
 			"aoColumns": [ { 'bSortable': false}, null, null, null, null]
 		}),
 			lists_table = $('#lists-table').dataTable({
-			"aoColumns": [ { 'bSortable': false}, null, null, null, null]
+			"aoColumns": [ { 'bSortable': false}, null, null, null, null, null]
 		});
 
 	} else {

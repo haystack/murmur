@@ -11,6 +11,8 @@ from utils import *
 from html2text import html2text
 from markdown2 import markdown
 from django.db.utils import OperationalError
+from datetime import datetime, timedelta
+import pytz
 import django.db
 
 '''
@@ -242,6 +244,8 @@ def handle_post(message, address=None, host=None):
 		name, sender_addr = parseaddr(message['From'].lower())
 		list_name, list_addr = parseaddr(message['List-Id'])
 		to_name, to_addr = parseaddr(message['To'].lower())
+		msg_id = message['Message-ID']
+		logging.debug("msg id is " + msg_id)
 
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
 		if(reserved):
@@ -254,7 +258,27 @@ def handle_post(message, address=None, host=None):
 			logging.debug(e)
 			send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
 			return
-		
+
+		# try to detect and prevent duplicate posts 
+
+		# check if we already got a post to this group with the same message_id
+		existing_post_matching_id = Post.objects.filter(msg_id=msg_id, group=group)
+		if existing_post_matching_id.exists():
+			logging.debug("Already received post with same msg-id to this group")
+			return
+
+		ten_minutes_ago = datetime.now(pytz.utc) + timedelta(minutes=-10)
+		existing_post_recent = Post.objects.filter(poster_email=sender_addr, group=group, 
+										subject=message['Subject'], timestamp__gte = ten_minutes_ago)
+		if existing_post_recent.exists():
+			logging.debug("Post with same sender and subject sent to this group < 10 min ago")
+			return
+
+		# this is the case where we forward a message to a google group, and it forwards back to us
+		if 'X-Original-Sender' in message and message['X-Original-Sender'].split('@')[0] == group_name:
+			logging.debug('This message originally came from this list; not reposting')
+			return
+
 		email_message = message_from_string(str(message))
 		msg_text = get_body(email_message)
 	
@@ -291,11 +315,11 @@ def handle_post(message, address=None, host=None):
 		user_lookup = UserProfile.objects.filter(email=sender_addr)
 
 		# try using List-Id field from email
-		original_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group)
+		original_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group, can_post=True)
 
 		# if no valid List-Id, try email's To field
 		if not original_list_lookup.exists():
-			original_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group)
+			original_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group, can_post=True)
 
 		# neither user nor fwding list exist so post is invalid - reject email
 		if not user_lookup.exists() and not original_list_lookup.exists():
@@ -315,9 +339,9 @@ def handle_post(message, address=None, host=None):
 			original_list_email = original_list.email
 
 		if message_is_reply:
-			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, forwarding_list=original_list)
+			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list)
 		else:
-			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, forwarding_list=original_list)
+			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list)
 			
 		if not res['status']:
 			send_error_email(group_name, res['code'], sender_addr, ADMIN_EMAILS)
