@@ -583,9 +583,15 @@ def subscribe_group(request):
 		
 		else:
 			group = request.POST['group_name']
-			return HttpResponse(json.dumps({'redirect': True, 
-										'url': global_settings.LOGIN_URL + "?next=/groups/" + group}), 
-										content_type="application/json")
+			
+			if request.POST.get('email'):
+				res = engine.main.add_members(request.POST['group_name'], request.POST['emails'], None)
+				return HttpResponse(json.dumps(res), content_type="application/json")
+			
+			else:
+				return HttpResponse(json.dumps({'redirect': True, 
+											'url': global_settings.LOGIN_URL + "?next=/groups/" + group}), 
+											content_type="application/json")
 	
 
 	except Exception, e:

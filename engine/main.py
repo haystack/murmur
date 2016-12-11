@@ -476,39 +476,45 @@ def add_members(group_name, emails, user):
 	
 	try:
 		group = Group.objects.get(name=group_name)
-		membergroup = MemberGroup.objects.get(group=group, member=user)
-		if membergroup.admin:
+		if user:
+			membergroup = MemberGroup.objects.get(group=group, member=user)
+		if not user or membergroup.admin:
 			email_list = emails.strip().lower().split(',')
 			for email in email_list:
 				email = email.strip()
 				
-				mail = MailResponse(From = 'no-reply@' + BASE_URL, 
-									To = email, 
-									Subject  = "You've been subscribed to %s Mailing List" % (group_name))
-				
 				email_user = UserProfile.objects.filter(email=email)
+				member = False
 				if email_user.count() == 1:
-					_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group)
-					
-					message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
-					message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
-					message += "To manage your mailing list settings, subscribe, or unsubscribe, visit <a href='http://%s/groups/%s'>http://%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
-				else:
-					pw = password_generator()
-					new_user = UserProfile.objects.create_user(email, pw)
-					_ = MemberGroup.objects.get_or_create(group=group, member=new_user)
-					
-					message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
-					message += "An account has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
-					message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
-					message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
-					message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
-					message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a><br />" % (BASE_URL, BASE_URL)
-
-				mail.Html = message
-				logging.debug('TO LIST: ' + str(email))
+					member = MemberGroup.objects.filter(member=email_user[0], group=group).exists()
+				if not member:
 				
-				relay_mailer.deliver(mail, To = [email])
+					mail = MailResponse(From = 'no-reply@' + BASE_URL, 
+										To = email, 
+										Subject  = "You've been subscribed to %s Mailing List" % (group_name))
+					
+					if email_user.count() == 1:
+						_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group)
+						
+						message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
+						message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+						message += "To manage your mailing list settings, subscribe, or unsubscribe, visit <a href='http://%s/groups/%s'>http://%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+					else:
+						pw = password_generator()
+						new_user = UserProfile.objects.create_user(email, pw)
+						_ = MemberGroup.objects.get_or_create(group=group, member=new_user)
+						
+						message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
+						message += "An account has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
+						message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
+						message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
+						message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+						message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a><br />" % (BASE_URL, BASE_URL)
+	
+					mail.Html = message
+					logging.debug('TO LIST: ' + str(email))
+					
+					relay_mailer.deliver(mail, To = [email])
 			res['status'] = True
 		else:
 			res['code'] = msg_code['PRIVILEGE_ERROR']
