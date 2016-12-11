@@ -476,9 +476,8 @@ def add_members(group_name, emails, user):
 	
 	try:
 		group = Group.objects.get(name=group_name)
-		if user:
-			membergroup = MemberGroup.objects.get(group=group, member=user)
-		if not user or membergroup.admin:
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		if membergroup.admin:
 			email_list = emails.strip().lower().split(',')
 			for email in email_list:
 				email = email.strip()
