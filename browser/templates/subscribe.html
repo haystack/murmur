@@ -12,6 +12,9 @@
 		You've {{ type }} the group "{{ group_name }}". Emails will be sent to the following email: {{ email }}.
 		<BR>
 		<BR>
+		View <a href="/groups/{{ group_name }}">{{ group_name }}</a> group information.
+		<BR>
+		<BR>
 		{% if type == 'unsubscribed from' %}
 		<form action="/subscribe_get?">
 			<input type='hidden' name='group_name' value={{group_name}}>
