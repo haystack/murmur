@@ -476,8 +476,12 @@ def add_members(group_name, emails, user):
 	
 	try:
 		group = Group.objects.get(name=group_name)
-		membergroup = MemberGroup.objects.get(group=group, member=user)
-		if membergroup.admin:
+		is_public = group.public
+		is_admin = False
+		if user:
+			membergroup = MemberGroup.objects.get(group=group, member=user)
+			is_admin = membergroup.admin
+		if is_public or is_admin:
 			email_list = emails.strip().lower().split(',')
 			for email in email_list:
 				email = email.strip()
@@ -504,7 +508,7 @@ def add_members(group_name, emails, user):
 						_ = MemberGroup.objects.get_or_create(group=group, member=new_user)
 						
 						message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
-						message += "An account has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
+						message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
 						message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
 						message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
 						message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)

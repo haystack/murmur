@@ -1050,9 +1050,16 @@ def subscribe_get(request):
 			if len(groups) > 0:
 				active_group = load_groups(request, groups, user, group_name=groups[0]['name'])
 		return {'res':res, 'type': 'subscribed to', 'user': request.user, 'groups': groups,
-		'active_group': active_group, 'group_name' : group_name}
+				'active_group': active_group, 'group_name' : group_name,
+				'email': request.user.email}
 	else:
-		return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + request.GET.get('group_name'))
+		if request.GET.get('email'):
+			email = request.GET.get('email')
+			group_name = request.GET.get('group_name')
+			res = engine.main.add_members(request.POST['group_name'], request.POST['emails'], None)
+			return {'res':res, 'type': 'subscribed to', 'email': email, 'group_name' : group_name}
+		else:
+			return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + request.GET.get('group_name'))
 
 @render_to("upvote.html")
 @login_required
