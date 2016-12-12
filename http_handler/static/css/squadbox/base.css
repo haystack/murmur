@@ -575,13 +575,14 @@ body > section {
     padding-top: 25px;
 }
 
-h2{
-     word-wrap: break-word;
-     -webkit-hyphens: auto;
-     -moz-hyphens: auto;
-     -ms-hyphens: auto;
-     -o-hyphens: auto;
-     hyphens: auto;
+@media only screen and (max-width: 767px) {
+	body > header #logo {
+      font-size: 2em;
+	}
+	body > section {
+		font-size: 20px;
+	}
+
 }
 
 p {
@@ -603,4 +604,5 @@ strong {
 .img-circle {
 	border: 5px #FFFFFF solid;
 	margin-bottom: 5px;
+	margin-top: 15px;
 }
