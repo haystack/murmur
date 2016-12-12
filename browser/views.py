@@ -1036,7 +1036,6 @@ def unsubscribe_get(request):
 		return redirect(global_settings.LOGIN_URL + '?next=/unsubscribe_get?group_name=' + request.GET.get('group_name'))
 
 @render_to('subscribe.html')
-@login_required
 def subscribe_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -1056,7 +1055,7 @@ def subscribe_get(request):
 		if request.GET.get('email'):
 			email = request.GET.get('email')
 			group_name = request.GET.get('group_name')
-			res = engine.main.add_members(request.POST['group_name'], request.POST['emails'], None)
+			res = engine.main.add_members(group_name, email, None)
 			return {'res':res, 'type': 'subscribed to', 'email': email, 'group_name' : group_name}
 		else:
 			return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + request.GET.get('group_name'))
