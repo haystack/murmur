@@ -17,7 +17,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from annoying.decorators import render_to
 from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
-	MuteTag
+	MuteTag, ForwardingList
 from html2text import html2text
 from django.contrib.auth.forms import AuthenticationForm
 from registration.forms import RegistrationForm
@@ -287,7 +287,7 @@ def group_page(request, group_name):
 		
 	group_info = engine.main.group_info_page(user, group_name)
 	if group_info['group']:
-		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True}
+		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True, 'admin_address' : group_name + '+admins@' + HOST}
 	else:
 		return redirect('/404?e=gname&name=%s' % group_name)
 	
@@ -309,6 +309,21 @@ def group_list(request):
 @render_to("add_members.html")
 @login_required
 def add_members_view(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.filter(member=user, group=group)
+		if membergroup.count() == 1 and membergroup[0].admin:
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+		else:
+			return redirect('/404?e=admin')
+	except Group.DoesNotExist:
+		return redirect('/404?e=gname&name=%s' % group_name)
+
+@render_to("add_list.html")
+@login_required
+def add_list_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	try:
@@ -500,8 +515,63 @@ def add_members(request):
 	except Exception, e:
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
-	
 
+@login_required
+def add_list(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		can_receive = False
+		can_post = False
+		if request.POST['can_receive'] == 'true':
+			can_receive = True
+		if request.POST['can_post'] == 'true':
+			can_post = True
+		res = engine.main.add_list(request.POST['group_name'], request.POST['email'], 
+			can_receive, can_post, request.POST['list_url'], user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def delete_list(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.delete_list(request.POST['group_name'], request.POST['lists'], user)
+		return HttpResponse(json.dumps(res), content_type='application/json')
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def adjust_list_can_post(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		can_post = False 
+		if request.POST['can_post'] == 'true':
+			can_post = True
+		res = engine.main.adjust_list_can_post(request.POST['group_name'], request.POST['lists'], can_post, user)
+		return HttpResponse(json.dumps(res), content_type='application/json')
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def adjust_list_can_receive(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		can_receive = False 
+		if request.POST['can_receive'] == 'true':
+			can_receive = True
+		res = engine.main.adjust_list_can_receive(request.POST['group_name'], request.POST['lists'], can_receive, user)
+		return HttpResponse(json.dumps(res), content_type='application/json')
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
 def subscribe_group(request):
 	try:
@@ -539,6 +609,7 @@ def group_info(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.group_info(request.POST['group_name'], user)
+		res['admin_email'] = request.POST['group_name'] + '+admins@' + HOST
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -614,8 +685,6 @@ def insert_post(request):
 		g = Group.objects.get(name=group_name)
 		t = Thread.objects.get(id=res['thread_id'])
 		
-		logging.debug('TO LIST: ' + str(to_send))
-		
 		if len(to_send) > 0:
 			
 			recips = UserProfile.objects.filter(email__in=to_send)
@@ -635,13 +704,42 @@ def insert_post(request):
 				tag_following = tag_followings.filter(user=recip)
 				tag_muting = tag_mutings.filter(user=recip)
 
-				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+				original_group = None
+				if request.POST.__contains__('original_group'):
+					original_group = request.POST['original_group'] + '@' + HOST
+
+				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_group)
 				mail.Html = msg_text + ps_blurb	
 				
-				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_group)
 				mail.Body = html2text(msg_text) + ps_blurb	
 			
 				relay_mailer.deliver(mail, To = recip.email)
+
+		fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
+
+		for l in fwding_lists:
+
+			footer_html = html_forwarded_blurb(g.name, l.email)
+			mail.Html = msg_text + footer_html
+			footer_plain = plain_forwarded_blurb(g.name, l.email)
+			mail.Body = html2text(msg_text) + footer_plain
+
+			# non murmur list, send on as usual
+			if HOST not in l.email:
+				relay_mailer.deliver(mail, To = l.email)
+
+			# need to bypass sending email to prevent "loops back to myself" error,
+			# so modify request object then recursively call insert_post on it
+			else: 
+				group_name = l.email.split('@')[0]
+				# request.POST is immutable; have to copy, edit, and then reassign
+				new_post = request.POST.copy()
+				new_post['group_name'] = group_name
+				if not new_post.__contains__('original_group'):
+					new_post['original_group'] = request.POST['group_name']
+				request.POST = new_post
+				insert_post(request)
 
 		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
@@ -674,8 +772,15 @@ def insert_reply(request):
 		
 		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
 		
+		original_group = None
+		original_group_object = None
+		if 'original_group' in request.POST:
+			original_group = request.POST['original_group'] + '@' + HOST
+			group = Group.objects.get(name=group_name)
+			original_group_object = ForwardingList.objects.get(email=original_group, group=group)
+
+		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, forwarding_list=original_group_object, thread_id=thread_id)
 		
-		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, thread_id=thread_id)
 		if(res['status']):
 			
 			to_send =  res['recipients']
@@ -720,15 +825,40 @@ def insert_reply(request):
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 
-	
-					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_group)
 					mail.Html = msg_text + ps_blurb	
 					
-					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
-					mail.Body = html2text(msg_text) + ps_blurb	
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_group)
+					mail.Body = html2text(msg_text) + ps_blurb
 				
 					relay_mailer.deliver(mail, To = recip.email)
-					
+
+			fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
+
+			for l in fwding_lists:
+
+				# non murmur list, send on as usual
+				if HOST not in l.email:
+					footer_html = html_forwarded_blurb(g.name, l.email)
+					mail.Html = msg_text + footer_html
+					footer_plain = plain_forwarded_blurb(g.name, l.email)
+					mail.Body = html2text(msg_text) + footer_plain
+					relay_mailer.deliver(mail, To = l.email)
+
+				# need to bypass sending email to prevent "loops back to myself" error,
+				# so modify request object then recursively call insert_post on it
+				else: 
+					group_name = l.email.split('@')[0]
+					# request.POST is immutable; have to copy, edit, and then reassign
+					new_post = request.POST.copy()
+					new_post['group_name'] = group_name
+					# delete thread_id so message won't go to the thread for the original post
+					new_post['thread_id'] = None
+					if 'original_group' not in new_post:
+						new_post['original_group'] = g.name
+					request.POST = new_post
+					insert_reply(request)
+
 		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
@@ -906,7 +1036,6 @@ def unsubscribe_get(request):
 		return redirect(global_settings.LOGIN_URL + '?next=/unsubscribe_get?group_name=' + request.GET.get('group_name'))
 
 @render_to('subscribe.html')
-@login_required
 def subscribe_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -920,9 +1049,16 @@ def subscribe_get(request):
 			if len(groups) > 0:
 				active_group = load_groups(request, groups, user, group_name=groups[0]['name'])
 		return {'res':res, 'type': 'subscribed to', 'user': request.user, 'groups': groups,
-		'active_group': active_group, 'group_name' : group_name}
+				'active_group': active_group, 'group_name' : group_name,
+				'email': request.user.email}
 	else:
-		return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + request.GET.get('group_name'))
+		if request.GET.get('email'):
+			email = request.GET.get('email')
+			group_name = request.GET.get('group_name')
+			res = engine.main.add_members(group_name, email, None)
+			return {'res':res, 'type': 'subscribed to', 'email': email, 'group_name' : group_name}
+		else:
+			return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + request.GET.get('group_name'))
 
 @render_to("upvote.html")
 @login_required

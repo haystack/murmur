@@ -5,11 +5,14 @@ from http_handler.settings import WEBSITE
 from schema.models import *
 from lamson.mail import MailResponse
 from email.utils import *
+from email import message_from_string
 from engine.main import *
 from utils import *
 from html2text import html2text
 from markdown2 import markdown
 from django.db.utils import OperationalError
+from datetime import datetime, timedelta
+import pytz
 import django.db
 
 '''
@@ -84,7 +87,49 @@ def deactivate(message, group_name=None, host=None):
 	relay.deliver(mail)
 
 
+@route("(group_name)\\+admins@(host)", group_name=".+", host=HOST)
+@stateless
+def admins(message, group_name=None, host=None):
 
+	group_name = group_name.lower()
+	name, sender_addr = parseaddr(message['From'].lower())
+
+	try:
+		group = Group.objects.get(name=group_name)
+	except Exception, e:
+		logging.debug(e)
+		send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
+		return
+
+	email_message = message_from_string(str(message))
+	msg_text = get_body(email_message)
+
+	if 'html' not in msg_text or msg_text['html'] == '':
+		msg_text['html'] = markdown(msg_text['plain'])
+	if 'plain' not in msg_text or msg_text['plain'] == '':
+		msg_text['plain'] = html2text(msg_text['html'])
+
+	mail = MurmurMailResponse(From = sender_addr, 
+			To = group_name+"+admins@" + HOST, 
+			Subject = message['Subject'])
+
+	mail.Html = msg_text['html']
+	mail.Body = msg_text['plain']
+
+	mail.Body += '\n\nYou are receiving this message because you are an admin of the Murmur group %s.' %(group_name)
+	mail.Html += '<BR><BR>You are receiving this message because you are an admin of the Murmur group %s.' %(group_name)
+
+	try:
+		admins = MemberGroup.objects.filter(group=group, admin=True)
+	except Exception, e:
+		logging.debug(e)
+		send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
+		return
+
+	logging.debug(admins)
+	for a in admins:
+		email = a.member.email
+		relay.deliver(mail, To = email)
 
 
 @route("(group_name)\\+subscribe@(host)", group_name=".+", host=HOST)
@@ -196,7 +241,12 @@ def handle_post(message, address=None, host=None):
 		django.db.close_connection()
 		
 		address = address.lower()
-		name, user_addr = parseaddr(message['From'].lower())
+		name, sender_addr = parseaddr(message['From'].lower())
+		list_name, list_addr = parseaddr(message['List-Id'])
+		to_name, to_addr = parseaddr(message['To'].lower())
+		msg_id = message['Message-ID']
+		logging.debug("msg id is " + msg_id)
+
 		reserved = filter(lambda x: address.endswith(x), RESERVED)
 		if(reserved):
 			return
@@ -206,7 +256,36 @@ def handle_post(message, address=None, host=None):
 			group = Group.objects.get(name=group_name)
 		except Exception, e:
 			logging.debug(e)
-			send_error_email(group_name, e, user_addr, ADMIN_EMAILS)	
+			send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
+			return
+
+		# try to detect and prevent duplicate posts 
+
+		# check if we already got a post to this group with the same message_id
+		existing_post_matching_id = Post.objects.filter(msg_id=msg_id, group=group)
+		if existing_post_matching_id.exists():
+			logging.debug("Already received post with same msg-id to this group")
+			return
+
+		ten_minutes_ago = datetime.now(pytz.utc) + timedelta(minutes=-10)
+		existing_post_recent = Post.objects.filter(poster_email=sender_addr, group=group, 
+										subject=message['Subject'], timestamp__gte = ten_minutes_ago)
+		if existing_post_recent.exists():
+			logging.debug("Post with same sender and subject sent to this group < 10 min ago")
+			return
+
+		# this is the case where we forward a message to a google group, and it forwards back to us
+		if 'X-Original-Sender' in message and message['X-Original-Sender'].split('@')[0] == group_name:
+			logging.debug('This message originally came from this list; not reposting')
+			return
+
+		email_message = message_from_string(str(message))
+		msg_text = get_body(email_message)
+	
+		attachments = get_attachments(email_message)
+		res = check_attachments(attachments, group.allow_attachments)
+		if not res['status']:
+			send_error_email(group_name, res['error'], sender_addr, ADMIN_EMAILS)
 			return
 
 		message_is_reply = (message['Subject'][0:4].lower() == "re: ")
@@ -215,18 +294,6 @@ def handle_post(message, address=None, host=None):
 			orig_message = message['Subject'].strip()
 		else:
 			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
-		
-		email_message = email.message_from_string(str(message))
-		msg_text = get_body(email_message)
-	
-		attachments = get_attachments(email_message)
-		res = check_attachments(attachments, group.allow_attachments)
-
-		if not res['status']:
-			send_error_email(group_name, res['error'], user_addr, ADMIN_EMAILS)
-			return
-	
-		if message_is_reply:
 			if 'html' in msg_text:
 				msg_text['html'] = remove_html_ps(msg_text['html'])
 			if 'plain' in msg_text:
@@ -244,22 +311,42 @@ def handle_post(message, address=None, host=None):
 			subscribe(message, group_name = group_name, host = HOST)
 			return
 		
-		try:
-			user = UserProfile.objects.get(email=user_addr)
-		except UserProfile.DoesNotExist:
-			error_msg = 'Your email is not in the %s system. Ask the admin of the group to add you.' % WEBSITE
-			send_error_email(group_name, error_msg, user_addr, ADMIN_EMAILS)
+		# try looking up sender in Murmur users
+		user_lookup = UserProfile.objects.filter(email=sender_addr)
+
+		# try using List-Id field from email
+		original_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group, can_post=True)
+
+		# if no valid List-Id, try email's To field
+		if not original_list_lookup.exists():
+			original_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group, can_post=True)
+
+		# neither user nor fwding list exist so post is invalid - reject email
+		if not user_lookup.exists() and not original_list_lookup.exists():
+			error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
+			send_error_email(group_name, error_msg, sender_addr, ADMIN_EMAILS)
 			return
 
+		# get user and/or forwarding list objects to pass to insert_reply or insert_post 
+		user = None
+		if user_lookup.exists():
+			user = user_lookup[0]
+
+		original_list = None
+		original_list_email = None
+		if original_list_lookup.exists():
+			original_list = original_list_lookup[0]
+			original_list_email = original_list.email
+
 		if message_is_reply:
-			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user)
+			res = insert_reply(group_name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list)
 		else:
-			res = insert_post(group_name, orig_message, msg_text['html'], user)
+			res = insert_post(group_name, orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list)
 			
 		if not res['status']:
-			send_error_email(group_name, res['code'], user_addr, ADMIN_EMAILS)
+			send_error_email(group_name, res['code'], sender_addr, ADMIN_EMAILS)
 			return
-	
+
 		subject = get_subject(message, res, group_name)
 			
 		mail = setup_post(message['From'],
@@ -312,7 +399,7 @@ def handle_post(message, address=None, host=None):
 					
 					# Don't send email to the sender if it came from email
 					# Don't send email to people that already directly got the email via CC/BCC
-					if recip.email == user_addr or recip.email in direct_recips:
+					if recip.email == sender_addr or recip.email in direct_recips:
 						continue
 
 					membergroup = membergroups.filter(member=recip)[0]
@@ -321,14 +408,34 @@ def handle_post(message, address=None, host=None):
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 				
-					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_list_email)
 					html_ps_blurb = unicode(html_ps_blurb)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					
-					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'])
+					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_list_email)
 					mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')
 		
 					relay.deliver(mail, To = recip.email)
+
+			fwd_to_lists = ForwardingList.objects.filter(group=g, can_receive=True)
+
+			for l in fwd_to_lists:
+				# non murmur list, send as usual 
+				if HOST not in l.email:
+
+					footer_html = html_forwarded_blurb(g.name, l.email, original_list_email=original_list_email)
+					footer_plain = plain_forwarded_blurb(g.name, l.email, original_list_email=original_list_email)
+
+					mail.Html = get_new_body(msg_text, footer_html, 'html')
+					mail.Body = get_new_body(msg_text, footer_plain, 'plain')
+
+					relay.deliver(mail, To = l.email)
+				# it's another murmur list. can't send mail to ourself ("loops back to 
+				#myself" error) so have to directly pass back to handle_post 
+				else:
+					group_name = l.email.split('@')[0]
+					handle_post(message, address=group_name)
+
 
 		except Exception, e:
 			logging.debug(e)

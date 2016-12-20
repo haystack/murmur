@@ -7,7 +7,7 @@ from http_handler import settings
 
 class Post(models.Model):
 	id = models.AutoField(primary_key=True)
-	author = models.ForeignKey(settings.AUTH_USER_MODEL)
+	author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
 	subject = models.TextField()
 	msg_id = models.CharField(max_length=120, unique=True)
 	post = models.TextField()
@@ -15,9 +15,19 @@ class Post(models.Model):
 	thread = models.ForeignKey('Thread')
 	reply_to = models.ForeignKey('self', blank=False, null = True, related_name="replies")
 	timestamp = models.DateTimeField(auto_now=True)
+	forwarding_list = models.ForeignKey('ForwardingList', null=True)
+	# a post's author is the Murmur user (if any) who wrote the post.
+	# a post's poster_email is the email address of the user who originally
+	# wrote the post. so if author is not null, author.email = poster_email.
+	# if the author is null, then the person who wrote the message isn't actually
+	# a member of this group on Murmur, and it was likely received via a list that
+	# fwds to this Murmur group
+	poster_email = models.EmailField(max_length=255, null=True)
 
 	def __unicode__(self):
-		return '%s %s' % (self.author.email, self.subject)
+		if self.author:
+			return '%s %s' % (self.author.email, self.subject)
+		return '%s %s' % (self.poster_email, self.subject)
 	
 	class Meta:
 		db_table = "murmur_posts"
@@ -94,7 +104,6 @@ class MemberGroup(models.Model):
 	timestamp = models.DateTimeField(auto_now=True)
 	admin = models.BooleanField(default=False)
 	moderator = models.BooleanField(default=False)
-	
 	no_emails = models.BooleanField(default=False)
 	always_follow_thread = models.BooleanField(default=True)
 	
@@ -104,7 +113,18 @@ class MemberGroup(models.Model):
 	class Meta:
 		db_table = "murmur_membergroups"
 		unique_together = ("member", "group")
-	
+
+class ForwardingList(models.Model):
+	id = models.AutoField(primary_key=True)
+	email = models.EmailField(verbose_name='email address',max_length=255)
+	timestamp = models.DateTimeField(auto_now=True)
+	group = models.ForeignKey('Group')
+	url = models.URLField(null=True, blank=True)
+	can_post = models.BooleanField(default=False)
+	can_receive = models.BooleanField(default=False)
+
+	def __unicode__(self):
+		return self.email
 
 class Group(models.Model):
 	id = models.AutoField(primary_key=True)

@@ -9,7 +9,10 @@
   <div class="group-container">
 	
 	{% if res.status %}
-		You've {{ type }} the group "{{ group_name }}".
+		You've {{ type }} the group "{{ group_name }}". Emails will be sent to the following email: {{ email }}.
+		<BR>
+		<BR>
+		View <a href="/groups/{{ group_name }}">{{ group_name }}</a> group information.
 		<BR>
 		<BR>
 		{% if type == 'unsubscribed from' %}

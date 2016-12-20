@@ -1,212 +1,252 @@
 {% extends "base.html" %}
-
 {% block customcss %}
 	<link href="/static/css/third-party/datatable.css" rel="stylesheet">
 {% endblock %}
-
 {% block content %}
-
-<div class="container">
-  <div class="group-container">
-  	
-	{% if group_info.subscribed %}
-		<span class="member label">Member</span>
-	{% else %}
-		<span class="member label" style="display: none;"></span>
-	{% endif %}
-  	
-  	{% if group_info.admin %}
-		<span class="admin label">Admin</span>
-	{% else %}
-		<span class="admin label" style="display: none;"></span>
-	{% endif %}
-	
-	{% if group_info.moderator %}
-		<span class="mod label">Mod</span>
-	{% else %}
-		<span class="mod label" style="display: none;"></span>
-	{% endif %}
-	
-     <h3><span id="group-name">{{ group_info.group.name }}</span></h3>
-
-     <hr />
-     	{% if group_info.group.description == "" %}
-     		<span class="italic-med">No description</span>
-     	{% else %}
-			<span class="italic-med">{{ group_info.group.description }}</span>
-		{% endif %}
-		
-		<br /><br />
-		
-		This group is <span class="strong">
-		{% if group_info.group.public %}
-			Public{% else %}
-			Private{% endif %}</span>.
-		<br />
-
-		{% if not group_info.group.allow_attachments %}
-			<span class="strong">No Attachments</span> are allowed.
-		{% else %}
-			Attachments <span class="strong">are allowed</span>.
-		{% endif %}
-		<br />
-		<br />
-		
-		<a href="/posts?group_name={{ group_info.group.name }}">View Posts</a> <br /> <br />
-	
-			<div id="group-options">
-				{% if group_info.subscribed %}
-					<button type="button" id="btn-edit-settings">Edit My Settings</button>
-					{% if group_info.admin %}
-						<button type="button" id="btn-edit-group-info">Edit Group Information</button>
-					{% endif %}
-					<br /><br />
-				{% else %}
-					<button type="button" id="btn-edit-settings" style="display: none;">Edit My Settings</button>
-				{% endif %}
-				
-				{% if group_info.admin %}
-					{% if group_info.group.active %}
-						<button type="button" id="btn-deactivate-group">De-Activate</button>
-						<button type="button" id="btn-activate-group" style="display: none;">Activate</button>
-					{% else %}
-						<button type="button" id="btn-deactivate-group" style="display: none;">De-Activate</button>
-						<button type="button" id="btn-activate-group">Activate</button>
-					{% endif %}
-				{% else %}
-					<button type="button" id="btn-deactivate-group" style="display: none;">De-Activate</button>
-					<button type="button" id="btn-activate-group" style="display: none;">Activate</button>
-				{% endif %}
-				
-				{% if group_info.subscribed %}
-					<button type="button" id="btn-unsubscribe-group">Un-Subscribe</button>
-					<button type="button" id="btn-subscribe-group" style="display: none;">Subscribe</button>
-				{% else %}
-					<button type="button" id="btn-unsubscribe-group" style="display: none;">Un-Subscribe</button>
-					<button type="button" id="btn-subscribe-group">Subscribe</button>
-				{% endif %}
-
-				{% if group_info.admin %}
-					<button type="button" id="btn-delete-group">Delete Group</button>
-				{% endif %}
-
-			</div>
-			<br />
-			<hr />
-			{% if group_info.admin %}
-			<h3>Members List</h3> 
-			{% if group_info.admin %}
-				<button type="button" id="btn-add-members">Add Members</button>
-				<button type="button" id="btn-del-members">Delete Members</button>
-				<button type="button" id="btn-set-admin">Set as Admin</button>
-			    <button type="button" id="btn-set-mod">Set as Moderator</button>
+	<div class="container">
+		<div class="group-container">
+			
+			{% if group_info.subscribed %}
+				<span class="member label">Member</span>
 			{% else %}
-				<button type="button" id="btn-add-members" style="display: none;">Add Members</button>
+				<span class="member label" style="display: none;"></span>
 			{% endif %}
 			
-			<table id="members-table" class="display" cellspacing="0" width="100%">
-				<thead>
-					<tr>
-						{% if group_info.admin %}
-						<th>Select</th>
-						<th>Email</th>
-						{% if flavour != "mobile" %}
-							<th>Joined</th>
-							<th>Admin</th>
-							<th>Moderator</th>
-						{% endif %}
-					{% else %}
-						<th>Email</th>
-						{% if flavour != "mobile" %}
-							<th>Joined</th>
-							<th>Admin</th>
-							<th>Moderator</th>
-						{% endif %}
-					{% endif %}
-					</tr>
-				</thead>
-				
-				<tfoot>
-					<tr>
-						{% if group_info.admin %}
-						<th>Select</th>
-						<th>Email</th>
-						{% if flavour != "mobile" %}
-							<th>Joined</th>
-							<th>Admin</th>
-							<th>Moderator</th>
-						{% endif %}
-					{% else %}
-						<th>Email</th>
-						{% if flavour != "mobile" %}
-							<th>Joined</th>
-							<th>Admin</th>
-							<th>Moderator</th>
-						{% endif %}
-					{% endif %}
-					</tr>
-				</tfoot>
-				
-				<tbody>
-					{% for member in group_info.members %}
-					
-					{% if member.email == user.email %}
-						<tr class="my_row">
-					{% else %}
-						<tr>
-					{% endif %}
-						
-						{% if group_info.admin %}
-						<td><input class="checkbox" type="checkbox" id ={{ member.id }}></td>
-						<td>{{ member.email }}</td>
-						{% if flavour != "mobile" %}
-							<td>{{ member.joined }}</td>
-							{% if member.admin %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-							{% else %}
-							<th></th>
-							{% endif %}
-							{% if member.mod %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-							{% else %}
-							<th></th>
-							{% endif %}
-						{% endif %}
-					</tr>
-						{% else %}
-						<td>{{ member.email }}</td>
-						{% if flavour != "mobile" %}
-							<td>{{ member.joined }}</td>
-							{% if member.admin %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-							{% else %}
-							<th></th>
-							{% endif %}
-							{% if member.mod %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-							{% else %}
-							<th></th>
-							{% endif %}
-						{% endif %}
-					</tr>
-						{% endif %}
-					{% endfor %}
-				</tbody>
-			</table>	
+			{% if group_info.admin %}
+				<span class="admin label">Admin</span>
+			{% else %}
+				<span class="admin label" style="display: none;"></span>
 			{% endif %}
+			
+			{% if group_info.moderator %}
+				<span class="mod label">Mod</span>
+			{% else %}
+				<span class="mod label" style="display: none;"></span>
+			{% endif %}
+			
+			<h3><span id="group-name">{{ group_info.group.name }}</span></h3>
+			<hr/>
+			{% if group_info.group.description == "" %}
+				<span class="italic-med">No description</span>
+			{% else %}
+				<span class="italic-med">{{ group_info.group.description }}</span>
+			{% endif %}
+			
+			<br/><br/>
+			
+			This group is <span class="strong">
+				{% if group_info.group.public %}
+					Public
+				{% else %}
+					Private
+				{% endif %}</span>.
+				<br />
+				{% if not group_info.group.allow_attachments %}
+					<span class="strong">No Attachments</span> are allowed.
+				{% else %}
+					Attachments <span class="strong">are allowed</span>.
+				{% endif %}
+				<br />
+				You can contact the group administrators at <a href="mailto:{{admin_address}}" target="_newtab">{{admin_address}}</a>.
+				<br />
+				<br />
+				
+				<a href="/posts?group_name={{ group_info.group.name }}">View Posts</a> <br /> <br />
+				
+				<div id="group-options">
+					{% if group_info.subscribed %}
+						<button type="button" id="btn-edit-settings">Edit My Settings</button>
+						{% if group_info.admin %}
+							<button type="button" id="btn-edit-group-info">Edit Group Information</button>
+						{% endif %}
+						<br /><br />
+					{% else %}
+						<button type="button" id="btn-edit-settings" style="display: none;">Edit My Settings</button>
+					{% endif %}
+					
+					{% if group_info.admin %}
+						{% if group_info.group.active %}
+							<button type="button" id="btn-deactivate-group">De-Activate</button>
+							<button type="button" id="btn-activate-group" style="display: none;">Activate</button>
+						{% else %}
+							<button type="button" id="btn-deactivate-group" style="display: none;">De-Activate</button>
+							<button type="button" id="btn-activate-group">Activate</button>
+						{% endif %}
+					{% else %}
+						<button type="button" id="btn-deactivate-group" style="display: none;">De-Activate</button>
+						<button type="button" id="btn-activate-group" style="display: none;">Activate</button>
+					{% endif %}
+					
+					{% if group_info.subscribed %}
+						<button type="button" id="btn-unsubscribe-group">Un-Subscribe</button>
+						<button type="button" id="btn-subscribe-group" style="display: none;">Subscribe</button>
+					{% else %}
+						<button type="button" id="btn-unsubscribe-group" style="display: none;">Un-Subscribe</button>
+						<button type="button" id="btn-subscribe-group">Subscribe</button>
+					{% endif %}
+					{% if group_info.admin %}
+						<button type="button" id="btn-delete-group">Delete Group</button>
+					{% endif %}
+				</div>
+				<br />
+				<hr />
+				{% if group_info.admin %}
+				<h3>Members List</h3>
 
-
-  </div>
-</div>
-
-{% endblock %}
-
-{% block customjs %}
-
-<script type="text/javascript" src="/static/javascript/group_page.js"></script>
-
-{% endblock %}
-
-
-
-
+					<button type="button" id="btn-add-members">Add Members</button>
+					<button type="button" id="btn-del-members">Delete Members</button>
+					<button type="button" id="btn-set-admin">Set as Admin</button>
+					<button type="button" id="btn-set-mod">Set as Moderator</button>
+				{% else %}
+					<button type="button" id="btn-add-members" style="display: none;">Add Members</button>
+				{% endif %}
+				{% if group_info.admin %}
+					<table id="members-table" class="display" cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th>Select</th>
+								<th>Email</th>
+								{% if flavour != "mobile" %}
+									<th>Joined</th>
+									<th>Admin</th>
+									<th>Moderator</th>
+								{% endif %}
+							</tr>
+						</thead>
+						
+						<tfoot>
+						<tr>
+							<th>Select</th>
+							<th>Email</th>
+							{% if flavour != "mobile" %}
+								<th>Joined</th>
+								<th>Admin</th>
+								<th>Moderator</th>
+							{% endif %}
+						</tr>
+						</tfoot>
+						
+						<tbody>
+							{% for member in group_info.members %}
+								
+								{% if member.email == user.email %}
+									<tr class="my_row">
+									{% else %}
+										<tr>
+										{% endif %}
+										
+										{% if group_info.admin %}
+											<td><input class="checkbox checkbox-user" type="checkbox" id ={{ member.id }}></td>
+											<td>{{ member.email }}</td>
+											{% if flavour != "mobile" %}
+												<td>{{ member.joined }}</td>
+												{% if member.admin %}
+													<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+												{% else %}
+													<th></th>
+												{% endif %}
+												{% if member.mod %}
+													<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+												{% else %}
+													<th></th>
+												{% endif %}
+											{% endif %}
+										</tr>
+									{% else %}
+										<td>{{ member.email }}</td>
+										{% if flavour != "mobile" %}
+											<td>{{ member.joined }}</td>
+											{% if member.admin %}
+												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+											{% else %}
+												<th></th>
+											{% endif %}
+											{% if member.mod %}
+												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+											{% else %}
+												<th></th>
+											{% endif %}
+										{% endif %}
+									</tr>
+								{% endif %}
+							{% endfor %}
+						</tbody>
+					</table>
+					<br />
+					<hr />
+					<h3>Associated Mailing Lists</h3>
+					
+					<button type="button" id="btn-add-list">Add List</button>
+					<select id='actionSelect'>
+						<option value='label' selected="true">Other actions</option>
+						<option value="deleteList">Delete</option>
+						<option value="addPost">Make Poster</option>
+						<option value="addReceive">Make Recipient</option>
+						<option value="removePost">Remove as Poster</option>
+						<option value="removeReceive">Remove as Recipient</option>
+					</select>
+					
+					<table id="lists-table" class="display" cellspacing="0" width="100%">
+						<thead>
+							<tr>
+								<th>Select</th>
+								<th>Email</th>
+								{% if flavour != "mobile" %}
+									<th>Added</th>
+									<th>Can Post</th>
+									<th>Can Receive</th>
+									<th>List URL</th>
+								</tr>
+							</thead>
+							
+							<tfoot>
+							<tr>
+								<th>Select</th>
+								<th>Email</th>
+								{% if flavour != "mobile" %}
+									<th>Added</th>
+									<th>Can Post</th>
+									<th>Can Receive</th>
+									<th>List URL</th>
+								{% endif %}
+							</tr>
+							</tfoot>
+							
+							
+							<tbody>
+								{% for l in group_info.lists %}
+									<tr>
+										<td><input class="checkbox checkbox-list" type="checkbox" id ={{ l.email }}></td>
+										<td>{{ l.email }}</td>
+										{% if flavour != "mobile" %}
+											<td>{{ l.added }}</td>
+											<th>
+												{% if l.can_post %}
+													<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+												{% endif %}
+											</th>
+											<th>
+												{% if l.can_receive %}
+													<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+												{% endif %}
+											</th>
+											
+											<td>
+												{% if l.url != None %}
+													<a href=//{{l.url}}>{{ l.url }}</a>
+												{% endif %}
+											</td>
+											
+										{% endif %}
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+				{% endif %}
+				</div>
+			</div>
+		{% endif %}
+	{% endblock %}
+	{% block customjs %}
+		<script type="text/javascript" src="/static/javascript/group_page.js"></script>
+	{% endblock %}

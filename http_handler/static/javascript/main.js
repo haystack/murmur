@@ -695,6 +695,9 @@ $(document).ready(function(){
 		} else {
 			info += 'Attachments <span class="strong">are allowed</span>.';
 		}
+
+		info += '</br>';
+		info += "You can contact the group administrators at <a href='mailto:" + res.admin_email + "'>" + res.admin_email + "</a>.";
 		
 		info += '<br /> <br />';
 		info += '<a href="/posts?group_name=' + res.group_name + '"><button type="button">View Posts</button></a> <br /> <br />';
@@ -934,7 +937,6 @@ $(document).ready(function(){
 	
 	
 	function render_post(res){
-	
 		var content = '<div class="main-area-content">';
 		content += '<div>';
 		content += '<div style="float:right">';
@@ -952,7 +954,9 @@ $(document).ready(function(){
 		}
 		content += '<br>';
 		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
-		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span> <br />';
+		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span>';
+		if (res.post.forwarding_list) content += ' via ' + res.post.forwarding_list;
+		content += '<br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp) + '</span>';
 		content += '<br />';
 		content += '<small><a href="/thread?tid=' + res.thread_id + '">Thread Permalink</a></small>';
