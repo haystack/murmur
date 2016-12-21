@@ -614,10 +614,14 @@ def help(message, address=None, host=None):
 @route("(address)@(host)", address=".+", host=".+")
 @stateless
 def send_account_info(message, address=None, host=None):
-	logging.debug("here!")
-	logging.debug("subject: %s" % message['Subject'])
-	logging.debug("website: %s" % WEBSITE)
-	if str(message['From']) == "no-reply@" + HOST and ("Account activation on %s" % WEBSITE in str(message['Subject']) or "Password reset on %s" % WEBSITE in str(message['Subject'])):
+	# logging.debug("here!")
+	# logging.debug("subject: %s" % message['Subject'])
+	# logging.debug("website: %s" % WEBSITE)
+	subj_string = str(message['Subject']).lower()
+	activation_str = ("account activation on %s" % WEBSITE).lower()
+	reset_str = ("password reset on %s" % WEBSITE).lower()
+	
+	if str(message['From']) == "no-reply@" + HOST and (activation_str in subj_string or reset_str in subj_string):
 		logging.debug(message['Subject'])
 		logging.debug(message['To'])
 		logging.debug(message['From'])
