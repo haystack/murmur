@@ -614,7 +614,9 @@ def help(message, address=None, host=None):
 @route("(address)@(host)", address=".+", host=".+")
 @stateless
 def send_account_info(message, address=None, host=None):
-	logging.debug(message['Subject'])
+	logging.debug("here!")
+	logging.debug("subject: %s" % message['Subject'])
+	logging.debug("website: %s" % WEBSITE)
 	if str(message['From']) == "no-reply@" + HOST and ("Account activation on %s" % WEBSITE in str(message['Subject']) or "Password reset on %s" % WEBSITE in str(message['Subject'])):
 		logging.debug(message['Subject'])
 		logging.debug(message['To'])
