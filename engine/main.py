@@ -10,9 +10,9 @@ from bleach import clean
 from cgi import escape
 import re
 
-from http_handler.settings import BASE_URL
+from http_handler.settings import BASE_URL, WEBSITE
 import json
-from engine.constants import extract_hash_tags
+from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
 
 
 def list_groups(user=None):
@@ -801,7 +801,7 @@ def _create_tag(group, thread, name):
 		t.save()
 	tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
-def _create_post(group, subject, message_text, user, sender_addr, msg_id, forwarding_list=None):
+def _create_post(group, subject, message_text, user, sender_addr, msg_id, forwarding_list=None, post_status=None):
 
 	try:
 		message_text = message_text.decode("utf-8")
@@ -816,41 +816,51 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, forwar
 	thread.subject = stripped_subj
 	thread.group = group
 	thread.save()
+
+	if post_status == None:
+		post_status = 'A'
 	
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-			subject=stripped_subj, post=message_text, group=group, thread=thread)
+			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status)
 	p.save()
 	
-	
-	for match in re.findall(r"[^[]*\[([^]]*)\]", subject):
-		if match.lower() != group.name:
-			_create_tag(group, thread, match)
-	
-	tags = list(extract_hash_tags(message_text))
-	for tag in tags:
-		if tag.lower() != group.name:
-			_create_tag(group, thread, tag)
-	
-	tag_objs = Tag.objects.filter(tagthread__thread=thread)
-	tags = list(tag_objs.values('name', 'color'))
-	
-	group_members = MemberGroup.objects.filter(group=group)
-	
-	recipients = []
-	for m in group_members:
-		if not m.no_emails and m.member.email != sender_addr:
-			mute_tag = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
-			if not mute_tag:
-				recipients.append(m.member.email)
-		else:
-			follow_tag = FollowTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
-			if follow_tag:
-				recipients.append(m.member.email)
-	
-	if user:
-		recipients.append(user.email)
-		f = Following(user=user, thread=thread)
-		f.save()
+	if WEBSITE == 'murmur':
+		for match in re.findall(r"[^[]*\[([^]]*)\]", subject):
+			if match.lower() != group.name:
+				_create_tag(group, thread, match)
+		
+		tags = list(extract_hash_tags(message_text))
+		for tag in tags:
+			if tag.lower() != group.name:
+				_create_tag(group, thread, tag)
+		
+		tag_objs = Tag.objects.filter(tagthread__thread=thread)
+		tags = list(tag_objs.values('name', 'color'))
+		
+		group_members = MemberGroup.objects.filter(group=group)
+		
+		recipients = []
+		for m in group_members:
+			if not m.no_emails and m.member.email != sender_addr:
+				mute_tag = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
+				if not mute_tag:
+					recipients.append(m.member.email)
+			else:
+				follow_tag = FollowTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
+				if follow_tag:
+					recipients.append(m.member.email)
+		
+		if user:
+			recipients.append(user.email)
+			f = Following(user=user, thread=thread)
+			f.save()
+
+	elif WEBSITE == 'squadbox':
+		# later on there will be various user options for this. for now just choose 
+		# to send to all moderators.
+		recipients = [m.member.email for m in MemberGroup.objects.filter(group=group, moderator=True)]
+		tags = None
+		tag_objs = None 
 	
 	return p, thread, recipients, tags, tag_objs
 
@@ -911,27 +921,29 @@ def insert_post_web(group_name, subject, message_text, user):
 	return res
 
 
-def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, forwarding_list=None):
+def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, forwarding_list=None, post_status=None):
 	res = {'status':False}
 	thread = None
 	try:
 		group = Group.objects.get(name=group_name)
 
-		# this post did not come from a forwarding list. thus we should only
-		# post it if the user is a member of the group. 
-		if user and not forwarding_list:
-			user_member = MemberGroup.objects.filter(group=group, member=user)
-			if not user_member.exists():
-				res['code'] = msg_code['NOT_MEMBER']
-				return res
+		if WEBSITE == 'murmur':
+			# this post did not come from a forwarding list. thus we should only
+			# post it if the user is a member of the group. 
+			if user and not forwarding_list:
+				user_member = MemberGroup.objects.filter(group=group, member=user)
+				if not user_member.exists():
+					res['code'] = msg_code['NOT_MEMBER']
+					return res
 
 		# if we make it to here, then post is valid under one of following conditions:
 		# 1) it's a normal post by a group member to the group.
 		# 2) it's a post by a Murmur user, but it's being posted to this group via a list that fwds to this group. 
 		# 3) it's a post by someone who doesn't use Murmur, via a list that fwds to this group. 
+		# 4) it's a Squadbox post, so we don't care if the sender has an account / is authorized. 
 		# _create_post will check which of user and forwarding list are None and post appropriately. 
 
-		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, forwarding_list=forwarding_list)
+		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, forwarding_list=forwarding_list, post_status=post_status)
 		res['status'] = True
 		res['post_id'] = p.id
 		res['msg_id'] = p.msg_id
@@ -952,7 +964,6 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, fo
 
 	logging.debug(res)
 	return res
-	
 
 
 def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, forwarding_list=None, thread_id=None):
