@@ -6,6 +6,7 @@ from engine.constants import *
 
 from browser.util import load_groups
 
+from browser.util import paginator
 
 from lamson.mail import MailResponse
 from smtp_handler.utils import *
@@ -27,7 +28,6 @@ from django.http import HttpResponse
 from django.template.context import RequestContext
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
-
 
 def lamson_status(request):
 	import psutil
@@ -177,6 +177,7 @@ def post_list(request):
 			if is_member:
 				request.session['active_group'] = group_name
 			res = engine.main.list_posts(group_name=group_name, user=user, format_datetime=False, return_replies=True)
+			res['threads'] = paginator(request.GET.get('page'), res['threads'])
 			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group}
 		else:
 			return redirect('/404?e=member')
