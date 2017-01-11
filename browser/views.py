@@ -1000,10 +1000,8 @@ def unmute_thread_get(request):
 
 @login_required
 def upvote(request):
-	logging.debug('trying to send email for upvote')
 	mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'you got upvoted', Body = 'message contents')
 	relay_mailer.deliver(mail, To = ['ojd@mit.edu'])
-	# THIS LINE IS GETTING TO WHEN YOU CLICK UPVOTE BUT WHY NOT SENDING MESSAGE?
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.upvote(request.POST['post_id'], user=user)
@@ -1069,9 +1067,8 @@ def subscribe_get(request):
 @login_required
 def upvote_get(request):
 	if request.user.is_authenticated():
-		logging.debug('trying to send email for upvote from upvote_get')
-		mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'you got upvoted(get)', Body = 'message contents')
-		relay_mailer.deliver(mail, To = ['ojd@mit.edu'])
+		#mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'you got upvoted(get)', Body = 'message contents')
+		#relay_mailer.deliver(mail, To = ['ojd@mit.edu'])
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		post_id = request.GET.get('post_id')
