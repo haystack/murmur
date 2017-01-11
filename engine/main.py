@@ -3,6 +3,7 @@ from schema.models import *
 from constants import *
 from django.utils.timezone import utc
 from django.db.models import Q
+from django.core.mail import send_mail
 from browser.util import *
 from lamson.mail import MailResponse
 from smtp_handler.utils import relay_mailer

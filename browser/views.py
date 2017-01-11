@@ -26,6 +26,7 @@ from django.conf import global_settings
 from django.db.models.aggregates import Count
 from django.http import HttpResponse
 from django.template.context import RequestContext
+from django.core.mail import send_mail
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
@@ -1003,6 +1004,7 @@ def upvote(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.upvote(request.POST['post_id'], user=user)
+		send_mail("someone just upvoted your post", "FROM VIEWS. message body", 'no_reply@murmur-dev.csail.mit.edu', ['ojd@mit.edu'])
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
