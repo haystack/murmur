@@ -3,7 +3,6 @@ from schema.models import *
 from constants import *
 from django.utils.timezone import utc
 from django.db.models import Q
-from django.core.mail import send_mail
 from browser.util import *
 from lamson.mail import MailResponse
 from smtp_handler.utils import relay_mailer
@@ -1073,7 +1072,10 @@ def upvote(post_id, email=None, user=None):
 		# post author is p.author so that is who the email is being sent *to*
 		# upvoter's email is just email (from the function call) so include that in the text
 		#so we want to send_mail
-		send_mail("someone just upvoted your post", "message body", 'no_reply@murmur-dev.csail.mit.edu', ['ojd@mit.edu'])
+		#send_mail("someone just upvoted your post", "message body", 'no_reply@murmur-dev.csail.mit.edu', ['ojd@mit.edu'])
+
+		mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'you got upvoted', Body = 'message contents')
+		relay.deliver(mail)
 
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
