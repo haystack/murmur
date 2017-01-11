@@ -1056,7 +1056,8 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, f
 	return res
 
 def upvote(post_id, email=None, user=None):
-	mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'you got upvoted(func)', Body = 'message contents')
+	p = Post.objects.get(id=int(post_id))
+	mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'Your message was upvoted by '+email, Body = '')
 	relay_mailer.deliver(mail, To = ['ojd@mit.edu'])
 
 	res = {'status':False}

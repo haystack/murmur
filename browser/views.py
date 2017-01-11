@@ -1000,8 +1000,6 @@ def unmute_thread_get(request):
 
 @login_required
 def upvote(request):
-	mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'you got upvoted', Body = 'message contents')
-	relay_mailer.deliver(mail, To = ['ojd@mit.edu'])
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.upvote(request.POST['post_id'], user=user)
@@ -1067,8 +1065,6 @@ def subscribe_get(request):
 @login_required
 def upvote_get(request):
 	if request.user.is_authenticated():
-		#mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'you got upvoted(get)', Body = 'message contents')
-		#relay_mailer.deliver(mail, To = ['ojd@mit.edu'])
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		post_id = request.GET.get('post_id')
