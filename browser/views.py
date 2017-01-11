@@ -1089,6 +1089,19 @@ def unupvote_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unupvote_get?post_id=" + request.GET.get('post_id'))
 
+# @login_required
+# def blacklist_whitelist_get(request):
+# 	if request.user_is_authenticated():
+# 		user = get_object_or_404(UserProfile, email=request.user.email)
+# 		group_name = request.GET.get('group_name')
+# 		sender_email = request.GET.get('sender_email')
+		
+# 		res = engine.main.update_blacklist_whitelist()
+# 	else:
+# 		# TODO: send them to login page and redirect
+# 		error = 'You are not logged in.'
+# 		return HttpResponse(error, content_type="application/json")
+
 @login_required
 def follow_thread(request):
 	try:
