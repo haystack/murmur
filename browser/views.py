@@ -1004,9 +1004,10 @@ def upvote(request):
 		logging.debug('trying to send email for upvote')
 		mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'you got upvoted', Body = 'message contents')
 		relay_mailer.deliver(mail, To = ['ojd@mit.edu'])
-		#user = get_object_or_404(UserProfile, email=request.user.email)
-		#res = engine.main.upvote(request.POST['post_id'], user=user)
-		#return HttpResponse(json.dumps(res), content_type="application/json")
+		# THIS LINE IS GETTING TO WHEN YOU CLICK UPVOTE BUT WHY NOT SENDING MESSAGE?
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.upvote(request.POST['post_id'], user=user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
 		logging.debug(e)
