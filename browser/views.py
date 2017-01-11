@@ -1001,12 +1001,12 @@ def unmute_thread_get(request):
 @login_required
 def upvote(request):
 	try:
-		user = get_object_or_404(UserProfile, email=request.user.email)
-		res = engine.main.upvote(request.POST['post_id'], user=user)
-		return HttpResponse(json.dumps(res), content_type="application/json")
 		logging.debug('trying to send email for upvote')
 		mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'you got upvoted', Body = 'message contents')
 		relay_mailer.deliver(mail, To = ['ojd@mit.edu'])
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.upvote(request.POST['post_id'], user=user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
 		logging.debug(e)
