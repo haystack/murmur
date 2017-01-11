@@ -1075,7 +1075,7 @@ def upvote(post_id, email=None, user=None):
 		#send_mail("someone just upvoted your post", "message body", 'no_reply@murmur-dev.csail.mit.edu', ['ojd@mit.edu'])
 
 		mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = 'ojd@mit.edu', Subject = 'you got upvoted', Body = 'message contents')
-		relay.deliver(mail)
+		relay_mailer.deliver(mail)
 
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
