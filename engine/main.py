@@ -659,7 +659,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 				
 				member_group = MemberGroup.objects.filter(member=u, group=g)
 				if member_group.exists():
-					res['member_group'] = {'no_emails': member_group[0].no_emails, 'upvote_emails': member_group[0].upvote_emails, 
+					res['member_group'] = {'no_emails': member_group[0].no_emails,
 										   'always_follow_thread': member_group[0].always_follow_thread}
 
 			posts = Post.objects.filter(thread = t).select_related()
@@ -869,7 +869,7 @@ def insert_post_web(group_name, subject, message_text, user):
 			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id)
 			res['status'] = True
 			
-			res['member_group'] = {'no_emails': user_member[0].no_emails, 'upvote_emails': user_member[0].upvote_emails,
+			res['member_group'] = {'no_emails': user_member[0].no_emails,
 								   'always_follow_thread': user_member[0].always_follow_thread}
 	
 			post_info = {'msg_id': p.msg_id,
