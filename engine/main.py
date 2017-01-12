@@ -1344,6 +1344,14 @@ def unmute_tag(tag_name, group_name, user=None, email=None):
 # email is the address to be blacklisted/whitelsited)
 def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 	res = {'status' : False}
+
+	# illegal to have both set to true
+	if whitelist and blacklist:
+		res['code'] = msg_code['REQUEST_ERROR']
+		logging.debug("Both whitelist and blacklist cannot be true")
+		logging.debug(res)
+		return res
+
 	try:
 		g = Group.objects.get(name=group_name)
 		mg = MemberGroup.objects.get(member=user, group=g, admin=True)
@@ -1352,11 +1360,10 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 			entry = current[0]
 			entry.whitelist = whitelist
 			entry.blacklist = blacklist
-			entry.save()
 		else:
-			new_entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
-			new_entry.save()
-
+			entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
+		
+		entry.save()
 		res['status'] = True
 		res['group_name'] = group_name
 		res['email'] = email
@@ -1378,10 +1385,14 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 	logging.debug(res)
 	return res 
 
-def update_post_status(post_id, new_status):
+def update_post_status(user, group_name, post_id, new_status):
 	res = {'status' : False}
 	try:
 		p = Post.objects.get(id=post_id)
+		g = Group.objects.get(name=group_name)
+		# only admins or moderators of a group can change post statuses
+		mg = MemberGroup.objects.get(Q(admin=True) | Q(moderator=True), member=user, group=g)
+
 		if new_status not in ALLOWED_MESSAGE_STATUSES:
 			res['code'] = msg_code['INVALID_STATUS_ERROR'] % new_status
 		else:
@@ -1393,6 +1404,12 @@ def update_post_status(post_id, new_status):
 
 	except Post.DoesNotExist:
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
+
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['PRIVILEGE_ERROR']
 
 	except Exception, e:
 		print e

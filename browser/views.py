@@ -72,14 +72,15 @@ def error(request):
 
 @render_to('home.html')
 def index(request):
+	if WEBSITE == 'squadbox':
+		return render_to_response('squadbox/home.html',
+									{'form': AuthenticationForm(),
+									'reg_form': RegistrationForm()},
+									context_instance=RequestContext(request))
+
 	if not request.user.is_authenticated():
 		if WEBSITE == 'murmur':
 			return render_to_response('home.html',
-									  {'form': AuthenticationForm(),
-									   'reg_form': RegistrationForm()},
-									   context_instance=RequestContext(request))
-		elif WEBSITE == 'squadbox':
-			return render_to_response('squadbox/home.html',
 									  {'form': AuthenticationForm(),
 									   'reg_form': RegistrationForm()},
 									   context_instance=RequestContext(request))
@@ -1089,18 +1090,61 @@ def unupvote_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unupvote_get?post_id=" + request.GET.get('post_id'))
 
-# @login_required
-# def blacklist_whitelist_get(request):
-# 	if request.user_is_authenticated():
-# 		user = get_object_or_404(UserProfile, email=request.user.email)
-# 		group_name = request.GET.get('group_name')
-# 		sender_email = request.GET.get('sender_email')
-		
-# 		res = engine.main.update_blacklist_whitelist()
-# 	else:
-# 		# TODO: send them to login page and redirect
-# 		error = 'You are not logged in.'
-# 		return HttpResponse(error, content_type="application/json")
+# TODO: make a page for this. 
+@login_required
+def blacklist_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.GET.get('group_name')
+		sender_email = request.GET.get('sender_email')
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, False, True)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	else:
+		# TODO: send them to login page and redirect
+		error = 'You are not logged in.'
+		return HttpResponse(error, content_type="application/json")
+
+# TODO: make a page for this. 
+@login_required
+def whitelist_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.GET.get('group_name')
+		sender_email = request.GET.get('sender_email')
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, True, False)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	else:
+		# TODO: send them to login page and redirect
+		error = 'You are not logged in.'
+		return HttpResponse(error, content_type="application/json")
+
+@login_required
+def approve_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		group_name = request.GET.get('group_name')
+		post_id = request.GET.get('post_id')
+		res = engine.main.update_post_status(user, group_name, post_id, 'A')
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	else:
+		# TODO: send them to login page and redirect
+		error = 'You are not logged in.'
+		return HttpResponse(error, content_type="application/json")
+
+@login_required
+def reject_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		group_name = request.GET.get('group_name')
+		post_id = request.GET.get('post_id')
+		res = engine.main.update_post_status(user, group_name, post_id, 'R')
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	else:
+		# TODO: send them to login page and redirect
+		error = 'You are not logged in.'
+		return HttpResponse(error, content_type="application/json")
 
 @login_required
 def follow_thread(request):
@@ -1176,9 +1220,6 @@ def unmute_tag(request):
 		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
-
-
-
 
 @login_required
 def mute_thread(request):
