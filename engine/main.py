@@ -246,13 +246,14 @@ def get_group_settings(group_name, user):
 	logging.debug(res)
 	return res
 
-def edit_group_settings(group_name, following, no_emails, user):
+def edit_group_settings(group_name, following, upvote_emails, no_emails, user):
 	res = {'status':False}
 	
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		membergroup.always_follow_thread = following
+		membergroup.upvote_emails = upvote_emails
 		membergroup.no_emails = no_emails
 		membergroup.save()
 		
@@ -1057,9 +1058,12 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, f
 
 def upvote(post_id, email=None, user=None):
 	p = Post.objects.get(id=int(post_id))
-	body = "Your post, \"" + p.subject + "\" was upvoted by " + user.email + ".<br /><br /><hr /><br /> You can turn off these notifications in your <a href=\"http://" + BASE_URL + "/groups/" + p.group.name + "/edit_my_settings\">group settings</a>."
-	mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = p.poster_email, Subject = '['+p.group.name+'] Your post was upvoted by '+user.email, Html = body)
-	relay_mailer.deliver(mail, To = [p.poster_email])
+	membergroup = MemberGroup.objects.get(group=p.group, member=user)
+	if membergroup:
+		if membergroup.upvote_emails:
+			body = "Your post, \"" + p.subject + "\" was upvoted by " + user.email + ".<br /><br /><hr /><br /> You can turn off these notifications in your <a href=\"http://" + BASE_URL + "/groups/" + p.group.name + "/edit_my_settings\">group settings</a>."
+			mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = p.poster_email, Subject = '['+p.group.name+'] Your post was upvoted by '+user.email, Html = body)
+			relay_mailer.deliver(mail, To = [p.poster_email])
 
 	res = {'status':False}
 	p = None

@@ -29,12 +29,15 @@
 		Receive only the FIRST email in any thread.<br />
 		<span class="italic-small">You will only be emailed replies in a thread if you explicitly follow the thread. You also automatically follow a thread if you start the thread or contribute a post at any point in the thread.</span><br />
 		
+		{% if settings.upvote_emails %}
+			<input type="checkbox" name="upvote-emails" value="yes" id="ck-upvote-emails" checked>
+		{% else %}
+			<input type="checkbox" name="upvote-emails" value="no" id="ck-upvote-emails">
+		{% endif %}
+		Receive upvote notification emails.
+		<br /><br />
 
-	<input type="checkbox" name="upvote-emails" value="no" id="ck-upvote-emails">
-	Receive upvote notification emails.
-	<br /><br />
-
-			{% if settings.no_emails %}
+	{% if settings.no_emails %}
 		<input type="checkbox" name="no-emails" value="yes" id="ck-no-email" checked>
 	{% else %}
 		<input type="checkbox" name="no-emails" value="no" id="ck-no-email">
