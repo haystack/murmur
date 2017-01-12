@@ -1057,8 +1057,8 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, f
 
 def upvote(post_id, email=None, user=None):
 	p = Post.objects.get(id=int(post_id))
-	body = "Your post, \"" + p.subject + "\" was upvoted by " + user.email
-	mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = p.poster_email, Subject = '['+p.group.name+'] Your post was upvoted by '+user.email, Body = body)
+	#body = "Your post, \"" + p.subject + "\" was upvoted by " + user.email
+	mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = p.poster_email, Subject = '['+p.group.name+'] Your post was upvoted by '+user.email, Body = '')
 	relay_mailer.deliver(mail, To = [p.poster_email])
 
 	res = {'status':False}
