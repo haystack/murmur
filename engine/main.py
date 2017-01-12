@@ -1061,7 +1061,9 @@ def upvote(post_id, email=None, user=None):
 	p = Post.objects.get(id=int(post_id))
 	membergroup = MemberGroup.objects.get(group=p.group, member=user)
 	if membergroup:
-		if membergroup.upvote_emails:
+		authormembergroup = MemberGroup.objects.get(group=p.group, member=p.author)
+	if authormembergroup:
+		if authormembergroup.upvote_emails:
 			body = "Your post, \"" + p.subject + "\" in group [" + p.group.name + "] was upvoted by " + user.email + ".<br /><br /><hr /><br /> You can turn off these notifications in your <a href=\"http://" + BASE_URL + "/groups/" + p.group.name + "/edit_my_settings\">group settings</a>."
 			mail = MailResponse(From = 'no_reply@murmur-dev.csail.mit.edu', To = p.poster_email, Subject = '['+p.group.name+'] Your post was upvoted by '+user.email, Html = body)
 			relay_mailer.deliver(mail, To = [p.poster_email])
