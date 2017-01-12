@@ -764,7 +764,6 @@ def load_thread(t, user=None, member=None):
 		    'muting': muting,
 		    'member': is_member,
 		    'no_emails': no_emails,
-			'upvote_emails': upvote_emails,
 		    'always_follow': always_follow,
 		    'likes': total_likes,
 		    'timestamp': t.timestamp}
