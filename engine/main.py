@@ -1339,59 +1339,64 @@ def unmute_tag(tag_name, group_name, user=None, email=None):
 	logging.debug(res)
 	return res
 
-# # add a new entry to whitelist/blacklist table, or update existing one
-# def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
-# 	res = {'status' : False}
-# 	try:
-# 		g = Group.objects.get(name=group_name)
-# 		mg = MemberGroup.objects.get(member=user, group=g, admin=True)
-# 		current = WhiteOrBlacklist.objects.filter(group=g, email=email)
-# 		if current.exists():
-# 			entry = current[0]
-# 			entry.whitelist = whitelist
-# 			entry.blacklist = blacklist
-# 			entry.save()
-# 		else:
-# 			new_entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
-# 			new_entry.save()
+# add a new entry to whitelist/blacklist table, or update existing one
+# user is the user who is adding them(we need to make sure they are authorized,
+# email is the address to be blacklisted/whitelsited)
+def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
+	res = {'status' : False}
+	try:
+		g = Group.objects.get(name=group_name)
+		mg = MemberGroup.objects.get(member=user, group=g, admin=True)
+		current = WhiteOrBlacklist.objects.filter(group=g, email=email)
+		if current.exists():
+			entry = current[0]
+			entry.whitelist = whitelist
+			entry.blacklist = blacklist
+			entry.save()
+		else:
+			new_entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
+			new_entry.save()
 
-# 		res['status'] = Trues
-# 		res['group_name'] = group_name
-# 		res['email'] = email
-# 		res['email_whitelisted'] = whitelist
-# 		res['email_blacklisted'] = blacklist
+		res['status'] = True
+		res['group_name'] = group_name
+		res['email'] = email
+		res['email_whitelisted'] = whitelist
+		res['email_blacklisted'] = blacklist
 
-# 	except Group.DoesNotExist:
-# 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 
-# 	except MemberGroup.DoesNotExist:
-		
+	# they are not in the group or are not an admin of the group
+	# later on should give people the option to also have mods add to list. 
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['PRIVILEGE_ERROR']
 
-# 	except Exception, e:
-# 		print e
-# 		res['code'] = msg_code['UNKNOWN_ERROR']
+	except Exception, e:
+		print e
+		res['code'] = msg_code['UNKNOWN_ERROR']
 
-# 	logging.debug(res)
-# 	return res 
+	logging.debug(res)
+	return res 
 
-# def update_post_status(post_id, new_status):
-# 	res = {'status' : False}
-# 	try:
-# 		p = Post.objects.get(id=post_id)
-# 		if new_status not in ALLOWED_MESSAGE_STATUSES:
-# 			res['code'] = msg_code['INVALID_STATUS_ERROR'] % new_status
-# 		else:
-# 			p.status = new_status
-# 			p.save()
-# 			res['post_id'] = post_id
-# 			res['new_status'] = new_status
+def update_post_status(post_id, new_status):
+	res = {'status' : False}
+	try:
+		p = Post.objects.get(id=post_id)
+		if new_status not in ALLOWED_MESSAGE_STATUSES:
+			res['code'] = msg_code['INVALID_STATUS_ERROR'] % new_status
+		else:
+			p.status = new_status
+			p.save()
+			res['status'] = True
+			res['post_id'] = post_id
+			res['new_status'] = new_status
 
-# 	except Post.DoesNotExist:
-# 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
+	except Post.DoesNotExist:
+		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 
-# 	except Exception, e:
-# 		print e
-# 		res['code'] = msg_code['UNKNOWN_ERROR']
+	except Exception, e:
+		print e
+		res['code'] = msg_code['UNKNOWN_ERROR']
 
-# 	logging.debug(res)
-# 	return res 
+	logging.debug(res)
+	return res 
