@@ -267,7 +267,6 @@ def edit_group_settings(group_name, following, upvote_emails, no_emails, user):
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	
 	logging.debug(res)
-	logging.debug("test")
 	return res
 
 def activate_group(group_name, user):
