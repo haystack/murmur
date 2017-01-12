@@ -474,8 +474,8 @@ def edit_group_settings(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		following = request.POST['following'] == 'yes'
-		#upvote_emails = request.POST['upvote_emails'] == 'true'
-		upvote_emails = False
+		upvote_emails = request.POST['upvote_emails'] == 'true'
+		#upvote_emails = False
 		no_emails = request.POST['no_emails'] == 'true'
 		res = engine.main.edit_group_settings(request.POST['group_name'], following, upvote_emails, no_emails, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")

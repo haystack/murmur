@@ -16,7 +16,8 @@ $(document).ready(function(){
 	edit_group_settings =
 		function(params){
 			params.no_emails = $('#ck-no-email').is(":checked");
-			params.upvote_emails = $('#ck-upvote-emails').is(":checked");
+			//params.upvote_emails = $('#ck-upvote-emails').is(":checked");
+			params.upvote_emails = false;
 			params.following = $('input[name=following]:checked', '#group-settings-form').val();
 			$.post('/edit_group_settings', params, 
 				function(res){
