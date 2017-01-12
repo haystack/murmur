@@ -471,7 +471,6 @@ def get_group_settings(request):
 
 @login_required
 def edit_group_settings(request):
-	logging.dbug("GOT HERE")
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		following = request.POST['following'] == 'yes'
