@@ -2,6 +2,7 @@ from django.http import *
 from django.contrib.auth.decorators import login_required
 from django.utils.encoding import *
 import engine.main
+import base64
 from engine.constants import *
 
 from browser.util import load_groups
@@ -771,7 +772,8 @@ def insert_reply(request):
 		
 		msg_text = request.POST['msg_text']
 		
-		msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
+		#msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
+		msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@' + BASE_URL
 		
 		original_group = None
 		original_group_object = None
@@ -780,7 +782,7 @@ def insert_reply(request):
 			group = Group.objects.get(name=group_name)
 			original_group_object = ForwardingList.objects.get(email=original_group, group=group)
 
-		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, forwarding_list=original_group_object, thread_id=thread_id)
+		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, msg_id, forwarding_list=original_group_object, thread_id=thread_id)
 		
 		if(res['status']):
 			
