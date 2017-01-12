@@ -235,6 +235,7 @@ def get_group_settings(group_name, user):
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		res['following'] = membergroup.always_follow_thread
 		res['no_emails'] = membergroup.no_emails
+		res['upvote_emails'] = membergroup.upvote_emails
 		res['status'] = True
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
