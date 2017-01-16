@@ -1081,11 +1081,6 @@ def upvote(post_id, email=None, user=None):
 		res['post_id'] = p.id
 		res['group_name'] = p.group.name
 
-		# post author is p.author so that is who the email is being sent *to*
-		# upvoter's email is just email (from the function call) so include that in the text
-		#so we want to send_mail
-		#send_mail("someone just upvoted your post", "message body", 'no_reply@murmur-dev.csail.mit.edu', ['ojd@mit.edu'])
-
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Upvote.DoesNotExist:
