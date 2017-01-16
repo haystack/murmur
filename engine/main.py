@@ -5,7 +5,7 @@ from django.utils.timezone import utc
 from django.db.models import Q
 from browser.util import *
 from lamson.mail import MailResponse
-from smtp_handler.utils import relay_mailer
+from smtp_handler.utils import relay_mailer, NO_REPLY
 from bleach import clean
 from cgi import escape
 import re
@@ -157,6 +157,8 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
 			if membergroup.id in toDelete_realList:
 				membergroup.delete()
 				# send delete email here
+				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You were removed from group', Html = '')
+				relay_mailer.deliver(mail, To = [membergroup.member.email])
 		for membergroup in membergroups:
 			if membergroup.id in toAdmin_realList:
 				membergroup.admin = True
