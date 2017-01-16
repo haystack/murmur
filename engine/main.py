@@ -156,19 +156,19 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
 		for membergroup in membergroups:
 			if membergroup.id in toDelete_realList:
 				membergroup.delete()
-				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You were removed from group ' + membergroup.group.name, Html = 'You were removed from group ' + membergroup.group.name)
+				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You\'ve been removed from group ' + membergroup.group.name, Html = 'You\'ve been removed from group ' + membergroup.group.name + "<br />To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a><br /><br />" % (BASE_URL, BASE_URL))
 				relay_mailer.deliver(mail, To = [membergroup.member.email])
 		for membergroup in membergroups:
 			if membergroup.id in toAdmin_realList:
 				membergroup.admin = True
 				membergroup.save()
-				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You were made an admin in group ' + membergroup.group.name, Html = 'You were made an admin in group ' + membergroup.group.name)
+				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You\'ve been made an admin in group ' + membergroup.group.name, Html = 'You\'ve been made an admin in group ' + membergroup.group.name + "<br />To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a><br /><br />" % (BASE_URL, BASE_URL))
 				relay_mailer.deliver(mail, To = [membergroup.member.email])
 		for membergroup in membergroups:
 			if membergroup.id in toMod_realList:
 				membergroup.moderator = True
 				membergroup.save()
-				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You were made a moderator in group ' + membergroup.group.name, Html = 'You were made a moderator in group ' + membergroup.group.name)
+				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You\'ve been made a moderator in group ' + membergroup.group.name, Html = 'You\'ve been made a moderator in group ' + membergroup.group.name + "<br />To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a><br /><br />" % (BASE_URL, BASE_URL))
 				relay_mailer.deliver(mail, To = [membergroup.member.email])
 		res['status'] = True
 	except Exception, e:
