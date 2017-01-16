@@ -156,19 +156,20 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
 		for membergroup in membergroups:
 			if membergroup.id in toDelete_realList:
 				membergroup.delete()
-				# send delete email here
-				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You were removed from group', Html = '')
+				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You were removed from group ' + membergroup.group.name, Html = 'You were removed from group ' + membergroup.group.name)
 				relay_mailer.deliver(mail, To = [membergroup.member.email])
 		for membergroup in membergroups:
 			if membergroup.id in toAdmin_realList:
 				membergroup.admin = True
 				membergroup.save()
-				# send adminify email here
+				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You were made an admin in group ' + membergroup.group.name, Html = 'You were made an admin in group ' + membergroup.group.name)
+				relay_mailer.deliver(mail, To = [membergroup.member.email])
 		for membergroup in membergroups:
 			if membergroup.id in toMod_realList:
 				membergroup.moderator = True
 				membergroup.save()
-				# send mod-ify email here
+				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You were made a moderator in group ' + membergroup.group.name, Html = 'You were made a moderator in group ' + membergroup.group.name)
+				relay_mailer.deliver(mail, To = [membergroup.member.email])
 		res['status'] = True
 	except Exception, e:
 		print e
