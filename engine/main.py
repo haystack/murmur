@@ -156,14 +156,17 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
 		for membergroup in membergroups:
 			if membergroup.id in toDelete_realList:
 				membergroup.delete()
+				# send delete email here
 		for membergroup in membergroups:
 			if membergroup.id in toAdmin_realList:
 				membergroup.admin = True
 				membergroup.save()
+				# send adminify email here
 		for membergroup in membergroups:
 			if membergroup.id in toMod_realList:
 				membergroup.moderator = True
 				membergroup.save()
+				# send mod-ify email here
 		res['status'] = True
 	except Exception, e:
 		print e
@@ -319,54 +322,6 @@ def delete_group(group_name, user):
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except MemberGroup.DoesNotExist:
 		res['code'] = msg_code['NOT_MEMBER']
-	except:
-		res['code'] = msg_code['UNKNOWN_ERROR']
-	logging.debug(res)
-	return res
-
-def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
-	res = {'status':False}
-	try:
-		group = Group.objects.get(name=group_name)
-		membergroups = MemberGroup.objects.filter(group=group).select_related()
-		toDelete_list = toDelete.split(',')
-		toAdmin_list = toAdmin.split(',')
-		toMod_list = toMod.split(',')
-		toDelete_realList = []
-		toAdmin_realList = []
-		toMod_realList = []
-		for item in toDelete_list:
-			if item == '':
-				continue
-			else:
-				toDelete_realList.append(int(item))
-		for item in toAdmin_list:
-			if item == '':
-				continue
-			else:
-				toAdmin_realList.append(int(item))
-		for item in toMod_list:
-			if item == '':
-				continue
-			else:
-				toMod_realList.append(int(item))
-		for membergroup in membergroups:
-			if membergroup.id in toDelete_realList:
-				membergroup.delete()
-		for membergroup in membergroups:
-			if membergroup.id in toAdmin_realList:
-				membergroup.admin = True
-				membergroup.save()
-		for membergroup in membergroups:
-			if membergroup.id in toMod_realList:
-				membergroup.moderator = True
-				membergroup.save()
-		res['status'] = True
-	except Exception, e:
-		print e
-		logging.debug(e)
-	except Group.DoesNotExist:
-		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
