@@ -58,12 +58,15 @@ function generateACMjournal(authors, year, title, journal, volume, issue, pages,
   var res = formatAuthorList(authors) + ' ' + year + '. ' + title + '. ';
   if (!(plain)) res += '<i>';
   res += journal;
-  if (volume.length > 0) res += ', ' + volume;
   if (!(plain)) res += '</i>';
-  if (issue.length > 0) res += ', ' + issue;
+  if (volume.length > 0) res += ', ' + volume;
+  if (issue.length > 0) res += ' (' + issue + ')';
   if (pages.length > 0) res += ', ' + pages;
   return res + '.';
 }
+
+var res = generateACMjournal(['Mahar, Kaitlin', 'Zhang, Amy X.'], '2017', 'Title here', 'journal here', '10', '5', '5-10', false);
+console.log(res);
 
 /* generate ACM format citation for a conference paper. */
 function generateACMconfpaper(authors, year, title, proceedings, confPlace, confDate, procCity, procPub, pages, plain) {
@@ -109,7 +112,8 @@ function generateEmails(formData) {
     volume,
     issue,
     venue,
-    other;
+    other,
+    keywords;
 
   if (type == 'Conference publication') {
     proceedings = formData[10];
@@ -119,16 +123,19 @@ function generateEmails(formData) {
     proceedingsPublisher = formData[14];
     pages = formData[15];
     other = formData[16];
+    keywords = formData[17];
   } else if (type == 'Journal article') {
     journal = formData[10];
     volume = formData[11];
     issue = formData[12];
     pages = formData[13];
     other = formData[14];
+    keywords = formData[15];
   } else {
     venue = formData[10];
     pages = formData[11];
     other = formData[12];
+    keywords = formData[13];
   }
 
   var HTML = '<b>Paper submitted by</b>: ' + submitterEmail + '<br><br>';
@@ -159,6 +166,11 @@ function generateEmails(formData) {
 
   HTML += "<a href='" + pubLink + "'>Publication link</a><br><br>";
   plain.push('Publication link: <' +  pubLink + '>\n');
+
+  if (keywords.length > 0) {
+    HTML += '<b>Keywords</b>: ' + keywords + '<br><br>';
+    plain.push('Keywords: ' + keywords + '\n');
+  }
 
   HTML += '<b>Abstract</b>: ' + abstract + '<br>';
   plain.push('Abstract: ' + abstract);
