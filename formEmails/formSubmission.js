@@ -65,9 +65,6 @@ function generateACMjournal(authors, year, title, journal, volume, issue, pages,
   return res + '.';
 }
 
-var res = generateACMjournal(['Mahar, Kaitlin', 'Zhang, Amy X.'], '2017', 'Title here', 'journal here', '10', '5', '5-10', false);
-console.log(res);
-
 /* generate ACM format citation for a conference paper. */
 function generateACMconfpaper(authors, year, title, proceedings, confPlace, confDate, procCity, procPub, pages, plain) {
   var res = formatAuthorList(authors) + ' ' + year + '. ' + title + '. ';
