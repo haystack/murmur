@@ -51,7 +51,7 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 
 #### install schema and create superuser
 * `python manage.py syncdb`and create superuser
-* Convert schema app to be managed by South.
+* Convert schema app to be managed by South: `python manage.py schemamigration schema --initial`
 * Then do fake migration:  `python manage.py migrate schema 0001 --fake`
 
 #### run murmur server
