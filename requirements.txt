@@ -25,3 +25,5 @@ python-modargs==1.7
 six==1.8.0
 wsgiref==0.1.2
 pytz==2016.7
+social-auth-app-django==0.1.0
+django-google-credentials==0.0.2

@@ -1203,3 +1203,7 @@ def murmur_acct(request, acct_func=None):
 	active_group = load_groups(request, groups, user)
 	return acct_func(request, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
 
+@render_to("contacts_setup.html")
+@login_required
+def contacts_setup(request):
+	return {}

@@ -224,7 +224,8 @@ INSTALLED_APPS = (
     #third party apps
     'registration',
     'south',
-    'django_mobile'
+    'django_mobile',
+    'social_django'
 
 )
 
@@ -272,3 +273,9 @@ except ImportError:
         pass
 
 
+# Google auth settings
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend')
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '632580153713-2e07rou6venv6ib3rllr97tp10l0jfia'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'JUWcCl5Yz6IbXX5TUC9cfchP'

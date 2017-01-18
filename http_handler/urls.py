@@ -108,4 +108,6 @@ urlpatterns = patterns('',
                        
      (r'^accounts/', include('registration.backends.default.urls')),
 
+     url(r'^contacts_setup/', 'browser.views.contacts_setup'),
+     url(r'^google-test/', include('social_django.urls', namespace='social'))
 )
