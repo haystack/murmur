@@ -153,23 +153,32 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
 				continue
 			else:
 				toMod_realList.append(int(item))
+		def email_on_role_change(type, group, email):
+			if type == "delete":
+				subject = "removed from the group"
+				html = "removed from the group"
+			elif type == "admin":
+				subject = "made an admin in group"
+				html = "made an admin in group"
+			elif type == "mod":
+				subject = "made a moderator in group"
+				html = "made a moderator in group"
+			mail = MailResponse(From = NO_REPLY, To = email, Subject = "You've been " + subject + " " + group, Html = "You've been " + html + " " + group + "<br /><br />To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a>" % (BASE_URL, BASE_URL))
+			relay_mailer.deliver(mail, To = [email])
 		for membergroup in membergroups:
 			if membergroup.id in toDelete_realList:
 				membergroup.delete()
-				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You\'ve been removed from group ' + membergroup.group.name, Html = 'You\'ve been removed from group ' + membergroup.group.name + "<br /><br />To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a>" % (BASE_URL, BASE_URL))
-				relay_mailer.deliver(mail, To = [membergroup.member.email])
+				email_on_role_change("delete", membergroup.group.name, membergroup.member.email)
 		for membergroup in membergroups:
 			if membergroup.id in toAdmin_realList:
 				membergroup.admin = True
 				membergroup.save()
-				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You\'ve been made an admin in group ' + membergroup.group.name, Html = 'You\'ve been made an admin in group ' + membergroup.group.name + "<br /><br />To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a>" % (BASE_URL, BASE_URL))
-				relay_mailer.deliver(mail, To = [membergroup.member.email])
+				email_on_role_change("admin", membergroup.group.name, membergroup.member.email)
 		for membergroup in membergroups:
 			if membergroup.id in toMod_realList:
 				membergroup.moderator = True
 				membergroup.save()
-				mail = MailResponse(From = NO_REPLY, To = membergroup.member.email, Subject = 'You\'ve been made a moderator in group ' + membergroup.group.name, Html = 'You\'ve been made a moderator in group ' + membergroup.group.name + "<br /><br />To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a>" % (BASE_URL, BASE_URL))
-				relay_mailer.deliver(mail, To = [membergroup.member.email])
+				email_on_role_change("mod", membergroup.group.name, membergroup.member.email)
 		res['status'] = True
 	except Exception, e:
 		print e
