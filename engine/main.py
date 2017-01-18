@@ -156,14 +156,11 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
 		def email_on_role_change(type, group, email):
 			if type == "delete":
 				subject = "removed from the group"
-				html = "removed from the group"
 			elif type == "admin":
 				subject = "made an admin in group"
-				html = "made an admin in group"
 			elif type == "mod":
 				subject = "made a moderator in group"
-				html = "made a moderator in group"
-			mail = MailResponse(From = NO_REPLY, To = email, Subject = "You've been " + subject + " " + group, Html = "You've been " + html + " " + group + "<br /><br />To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a>" % (BASE_URL, BASE_URL))
+			mail = MailResponse(From = NO_REPLY, To = email, Subject = "You've been " + subject + " " + group, Html = "You've been " + subject + " " + group + "<br /><br />To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a>" % (BASE_URL, BASE_URL))
 			relay_mailer.deliver(mail, To = [email])
 		for membergroup in membergroups:
 			if membergroup.id in toDelete_realList:
