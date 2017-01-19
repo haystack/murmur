@@ -17,6 +17,7 @@ msg_code={
 	'MAX_GROUP_NAME_LENGTH': 'Group name is too long',
 	'MAX_GROUP_DESC_LENGTH': 'Group description is too long',
 	'UNKNOWN_ERROR': 'Unknown',
+	'INVALID_STATUS_ERROR' : '%s is not a valid post status',
 }
 
 def extract_hash_tags(s):
