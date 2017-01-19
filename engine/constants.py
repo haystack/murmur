@@ -31,4 +31,8 @@ def extract_hash_tags(s):
 		if len(first_three) == 3: break
 	return first_three 
 
-	
+ALLOWED_MESSAGE_STATUSES = {
+	'R' : 'rejected',
+	'P' : 'pending',
+	'A' : 'approved'
+}
