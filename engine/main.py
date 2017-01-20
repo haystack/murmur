@@ -5,7 +5,7 @@ from django.utils.timezone import utc
 from django.db.models import Q
 from browser.util import *
 from lamson.mail import MailResponse
-from smtp_handler.utils import relay_mailer
+from smtp_handler.utils import relay_mailer, NO_REPLY
 from bleach import clean
 from cgi import escape
 import re
@@ -235,6 +235,7 @@ def get_group_settings(group_name, user):
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		res['following'] = membergroup.always_follow_thread
 		res['no_emails'] = membergroup.no_emails
+		res['upvote_emails'] = membergroup.upvote_emails
 		res['status'] = True
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -246,13 +247,14 @@ def get_group_settings(group_name, user):
 	logging.debug(res)
 	return res
 
-def edit_group_settings(group_name, following, no_emails, user):
+def edit_group_settings(group_name, following, upvote_emails, no_emails, user):
 	res = {'status':False}
 	
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		membergroup.always_follow_thread = following
+		membergroup.upvote_emails = upvote_emails
 		membergroup.no_emails = no_emails
 		membergroup.save()
 		
@@ -657,7 +659,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 				
 				member_group = MemberGroup.objects.filter(member=u, group=g)
 				if member_group.exists():
-					res['member_group'] = {'no_emails': member_group[0].no_emails, 
+					res['member_group'] = {'no_emails': member_group[0].no_emails,
 										   'always_follow_thread': member_group[0].always_follow_thread}
 
 			posts = Post.objects.filter(thread = t).select_related()
@@ -866,7 +868,7 @@ def insert_post_web(group_name, subject, message_text, user):
 			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id)
 			res['status'] = True
 			
-			res['member_group'] = {'no_emails': user_member[0].no_emails, 
+			res['member_group'] = {'no_emails': user_member[0].no_emails,
 								   'always_follow_thread': user_member[0].always_follow_thread}
 	
 			post_info = {'msg_id': p.msg_id,
@@ -1056,18 +1058,29 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, f
 	return res
 
 def upvote(post_id, email=None, user=None):
+	p = Post.objects.get(id=int(post_id))
+	membergroup = MemberGroup.objects.get(group=p.group, member=user)
+	if membergroup:
+		authormembergroup = MemberGroup.objects.get(group=p.group, member=p.author)
+	if authormembergroup:
+		if authormembergroup.upvote_emails:
+			body = "Your post, \"" + p.subject + "\" in group [" + p.group.name + "] was upvoted by " + user.email + ".<br /><br /><hr /><br /> You can turn off these notifications in your <a href=\"http://" + BASE_URL + "/groups/" + p.group.name + "/edit_my_settings\">group settings</a>."
+			mail = MailResponse(From = NO_REPLY, To = p.poster_email, Subject = '['+p.group.name+'] Your post was upvoted by '+user.email, Html = body)
+			relay_mailer.deliver(mail, To = [p.poster_email])
+
 	res = {'status':False}
 	p = None
 	try:
+		p = Post.objects.get(id=int(post_id))
 		if email:
 			user = UserProfile.objects.get(email=email)
-		p = Post.objects.get(id=int(post_id))
 		l = Upvote.objects.get(post=p, user=user)
 		res['status'] = True
 		res['thread_id'] = p.thread.id
 		res['post_name'] = p.subject
 		res['post_id'] = p.id
 		res['group_name'] = p.group.name
+
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Upvote.DoesNotExist:

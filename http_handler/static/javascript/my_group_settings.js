@@ -15,6 +15,7 @@ $(document).ready(function(){
 	
 	edit_group_settings =
 		function(params){
+			params.upvote_emails = $('#ck-upvote-emails').is(":checked");
 			params.no_emails = $('#ck-no-email').is(":checked");
 			params.following = $('input[name=following]:checked', '#group-settings-form').val();
 			$.post('/edit_group_settings', params, 
@@ -33,10 +34,13 @@ $(document).ready(function(){
 			$('#edit-emails').css({"color": "gray"});
 			$('#rdo-follow').attr('disabled', true);
 			$('#rdo-no-follow').attr('disabled', true);
+			$('#ck-upvote-emails').attr('disabled', true);
+			$('#ck-upvote-emails').attr('checked', false);
 		} else {
 			$('#edit-emails').css({"color": "black"});
 			$('#rdo-follow').attr('disabled', false);
 			$('#rdo-no-follow').attr('disabled', false);
+			$('#ck-upvote-emails').attr('disabled', false);
 		}
 	}
 			
