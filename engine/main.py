@@ -5,12 +5,12 @@ from django.utils.timezone import utc
 from django.db.models import Q
 from browser.util import *
 from lamson.mail import MailResponse
-from smtp_handler.utils import relay_mailer
+from smtp_handler.utils import relay_mailer, NO_REPLY
 from bleach import clean
 from cgi import escape
 import re
 
-from http_handler.settings import BASE_URL
+from http_handler.settings import BASE_URL, WEBSITE
 import json
 from engine.constants import extract_hash_tags
 
@@ -153,17 +153,29 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
 				continue
 			else:
 				toMod_realList.append(int(item))
+		def email_on_role_change(type, group, email):
+			if type == "delete":
+				subject = "removed from the group"
+			elif type == "admin":
+				subject = "made an admin in group"
+			elif type == "mod":
+				subject = "made a moderator in group"
+			mail = MailResponse(From = NO_REPLY, To = email, Subject = "You've been " + subject + " " + group, Html = "You've been " + subject + " " + group + "<br /><br />To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a>" % (BASE_URL, BASE_URL))
+			relay_mailer.deliver(mail, To = [email])
 		for membergroup in membergroups:
 			if membergroup.id in toDelete_realList:
 				membergroup.delete()
+				email_on_role_change("delete", membergroup.group.name, membergroup.member.email)
 		for membergroup in membergroups:
 			if membergroup.id in toAdmin_realList:
 				membergroup.admin = True
 				membergroup.save()
+				email_on_role_change("admin", membergroup.group.name, membergroup.member.email)
 		for membergroup in membergroups:
 			if membergroup.id in toMod_realList:
 				membergroup.moderator = True
 				membergroup.save()
+				email_on_role_change("mod", membergroup.group.name, membergroup.member.email)
 		res['status'] = True
 	except Exception, e:
 		print e
@@ -235,6 +247,7 @@ def get_group_settings(group_name, user):
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		res['following'] = membergroup.always_follow_thread
 		res['no_emails'] = membergroup.no_emails
+		res['upvote_emails'] = membergroup.upvote_emails
 		res['status'] = True
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -246,13 +259,14 @@ def get_group_settings(group_name, user):
 	logging.debug(res)
 	return res
 
-def edit_group_settings(group_name, following, no_emails, user):
+def edit_group_settings(group_name, following, upvote_emails, no_emails, user):
 	res = {'status':False}
 	
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		membergroup.always_follow_thread = following
+		membergroup.upvote_emails = upvote_emails
 		membergroup.no_emails = no_emails
 		membergroup.save()
 		
@@ -319,54 +333,6 @@ def delete_group(group_name, user):
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except MemberGroup.DoesNotExist:
 		res['code'] = msg_code['NOT_MEMBER']
-	except:
-		res['code'] = msg_code['UNKNOWN_ERROR']
-	logging.debug(res)
-	return res
-
-def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
-	res = {'status':False}
-	try:
-		group = Group.objects.get(name=group_name)
-		membergroups = MemberGroup.objects.filter(group=group).select_related()
-		toDelete_list = toDelete.split(',')
-		toAdmin_list = toAdmin.split(',')
-		toMod_list = toMod.split(',')
-		toDelete_realList = []
-		toAdmin_realList = []
-		toMod_realList = []
-		for item in toDelete_list:
-			if item == '':
-				continue
-			else:
-				toDelete_realList.append(int(item))
-		for item in toAdmin_list:
-			if item == '':
-				continue
-			else:
-				toAdmin_realList.append(int(item))
-		for item in toMod_list:
-			if item == '':
-				continue
-			else:
-				toMod_realList.append(int(item))
-		for membergroup in membergroups:
-			if membergroup.id in toDelete_realList:
-				membergroup.delete()
-		for membergroup in membergroups:
-			if membergroup.id in toAdmin_realList:
-				membergroup.admin = True
-				membergroup.save()
-		for membergroup in membergroups:
-			if membergroup.id in toMod_realList:
-				membergroup.moderator = True
-				membergroup.save()
-		res['status'] = True
-	except Exception, e:
-		print e
-		logging.debug(e)
-	except Group.DoesNotExist:
-		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except:
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
@@ -491,31 +457,56 @@ def add_members(group_name, emails, user):
 				if email_user.count() == 1:
 					member = MemberGroup.objects.filter(member=email_user[0], group=group).exists()
 				if not member:
-				
-					mail = MailResponse(From = 'no-reply@' + BASE_URL, 
-										To = email, 
-										Subject  = "You've been subscribed to %s Mailing List" % (group_name))
-					
-					if email_user.count() == 1:
-						_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group)
+					if WEBSITE == "murmur":
+						mail = MailResponse(From = 'no-reply@' + BASE_URL, 
+											To = email, 
+											Subject  = "You've been subscribed to %s Mailing List" % (group_name))
 						
-						message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
-						message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
-						message += "To manage your mailing list settings, subscribe, or unsubscribe, visit <a href='http://%s/groups/%s'>http://%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
-					else:
-						pw = password_generator()
-						new_user = UserProfile.objects.create_user(email, pw)
-						_ = MemberGroup.objects.get_or_create(group=group, member=new_user)
+						if email_user.count() == 1:
+							_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group)
+							
+							message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
+							message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+							message += "To manage your mailing list settings, subscribe, or unsubscribe, visit <a href='http://%s/groups/%s'>http://%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+						else:
+							pw = password_generator()
+							new_user = UserProfile.objects.create_user(email, pw)
+							_ = MemberGroup.objects.get_or_create(group=group, member=new_user)
+							
+							message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
+							message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
+							message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
+							message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
+							message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+							message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a><br />" % (BASE_URL, BASE_URL)
+		
+						mail.Html = message
+						logging.debug('TO LIST: ' + str(email))
+					elif WEBSITE == "squadbox":
+						mail = MailResponse(From = 'no-reply@' + BASE_URL, 
+											To = email, 
+											Subject  = "You've been added as a moderator to %s squad" % (group_name))
 						
-						message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
-						message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
-						message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
-						message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
-						message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
-						message += "To manage your mailing lists, subscribe, or unsubscribe from groups, visit <a href='http://%s/groups'>http://%s/my_groups</a><br />" % (BASE_URL, BASE_URL)
-	
-					mail.Html = message
-					logging.debug('TO LIST: ' + str(email))
+						if email_user.count() == 1:
+							_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group)
+							
+							message = "You've been added as a moderator to %s squad. <br />" % (group_name)
+							message += "To see posts for this squad, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+							message += "To manage your squad settings, subscribe, or unsubscribe, visit <a href='http://%s/groups/%s'>http://%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+						else:
+							pw = password_generator()
+							new_user = UserProfile.objects.create_user(email, pw)
+							_ = MemberGroup.objects.get_or_create(group=group, member=new_user)
+							
+							message = "You've been added as a moderator to %s squad. <br />" % (group_name)
+							message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
+							message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
+							message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
+							message += "To see posts from this squad, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
+							message += "To manage your squads, subscribe, or unsubscribe, visit <a href='http://%s/groups'>http://%s/my_groups</a><br />" % (BASE_URL, BASE_URL)
+		
+						mail.Html = message
+						logging.debug('TO LIST: ' + str(email))
 					
 					relay_mailer.deliver(mail, To = [email])
 			res['status'] = True
@@ -657,7 +648,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 				
 				member_group = MemberGroup.objects.filter(member=u, group=g)
 				if member_group.exists():
-					res['member_group'] = {'no_emails': member_group[0].no_emails, 
+					res['member_group'] = {'no_emails': member_group[0].no_emails,
 										   'always_follow_thread': member_group[0].always_follow_thread}
 
 			posts = Post.objects.filter(thread = t).select_related()
@@ -866,7 +857,7 @@ def insert_post_web(group_name, subject, message_text, user):
 			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id)
 			res['status'] = True
 			
-			res['member_group'] = {'no_emails': user_member[0].no_emails, 
+			res['member_group'] = {'no_emails': user_member[0].no_emails,
 								   'always_follow_thread': user_member[0].always_follow_thread}
 	
 			post_info = {'msg_id': p.msg_id,
@@ -1056,18 +1047,29 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, f
 	return res
 
 def upvote(post_id, email=None, user=None):
+	p = Post.objects.get(id=int(post_id))
+	membergroup = MemberGroup.objects.get(group=p.group, member=user)
+	if membergroup:
+		authormembergroup = MemberGroup.objects.get(group=p.group, member=p.author)
+	if authormembergroup:
+		if authormembergroup.upvote_emails:
+			body = "Your post, \"" + p.subject + "\" in group [" + p.group.name + "] was upvoted by " + user.email + ".<br /><br /><hr /><br /> You can turn off these notifications in your <a href=\"http://" + BASE_URL + "/groups/" + p.group.name + "/edit_my_settings\">group settings</a>."
+			mail = MailResponse(From = NO_REPLY, To = p.poster_email, Subject = '['+p.group.name+'] Your post was upvoted by '+user.email, Html = body)
+			relay_mailer.deliver(mail, To = [p.poster_email])
+
 	res = {'status':False}
 	p = None
 	try:
+		p = Post.objects.get(id=int(post_id))
 		if email:
 			user = UserProfile.objects.get(email=email)
-		p = Post.objects.get(id=int(post_id))
 		l = Upvote.objects.get(post=p, user=user)
 		res['status'] = True
 		res['thread_id'] = p.thread.id
 		res['post_name'] = p.subject
 		res['post_id'] = p.id
 		res['group_name'] = p.group.name
+
 	except UserProfile.DoesNotExist:
 		res['code'] = msg_code['USER_DOES_NOT_EXIST'] % email
 	except Upvote.DoesNotExist:
