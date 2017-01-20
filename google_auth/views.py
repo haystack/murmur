@@ -3,9 +3,9 @@ import httplib2
 from oauth2client import xsrfutil
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.django_orm import Storage
- 
+
 from apiclient.discovery import build
- 
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
@@ -14,13 +14,13 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import get_current_site
- 
+
 from .models import CredentialsModel, FlowModel
 import api
- 
+
 CLIENT_SECRETS = os.path.join(
     os.path.dirname(__file__), 'client_secrets.json')
- 
+
 @login_required
 def index(request):
     # use the first REDIRECT_URI if you are developing your app
@@ -29,7 +29,7 @@ def index(request):
     #REDIRECT_URI = "https://%s%s" % (get_current_site(request).domain, reverse("oauth2:return"))
     FLOW = flow_from_clientsecrets(
         CLIENT_SECRETS,
-        scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly',
+        scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic https://www.googleapis.com/auth/gmail.settings.sharing',
         redirect_uri=REDIRECT_URI
     )
     user = request.user
@@ -41,7 +41,6 @@ def index(request):
         authorize_url = FLOW.step1_get_authorize_url()
         f = FlowModel(id=user, flow=FLOW)
         f.save()
-        print "waiting for callback..."
         return HttpResponseRedirect(authorize_url)
     else:
         http = httplib2.Http()
@@ -49,16 +48,24 @@ def index(request):
         service_people = build('people', 'v1', http=http)
         service_mail = build('gmail', 'v1', http=http)
 
-        api.parse_contacts(service_people)
-        api.parse_gmail(service_mail)
+        contacts_emails = api.parse_contacts(service_people)
+        gmail_emails = api.parse_gmail(service_mail)
 
-        return render(request, 'google_auth.html',) #{'contacts':response})
+        print "Creating gmail filter:"
+        all_emails = set()
+        if contacts_emails:
+            all_emails.update(set(contacts_emails))
+        if gmail_emails:
+            all_emails.update(set(gmail_emails))
+
+        print api.create_gmail_filter(service_mail, all_emails)
+
+        return render(request, 'google_auth.html', {'contacts_emails': contacts_emails, 'gmail_emails': gmail_emails})
  
 @login_required
 def auth_return(request):
     user = request.user
     if not xsrfutil.validate_token(settings.SECRET_KEY, str(request.REQUEST['state']), user):
-        print "token not validated"
         return HttpResponseBadRequest()
     FLOW = FlowModel.objects.get(id=user).flow
     credential = FLOW.step2_exchange(request.REQUEST)
