@@ -20,16 +20,6 @@ from .models import CredentialsModel, FlowModel
 CLIENT_SECRETS = os.path.join(
     os.path.dirname(__file__), 'client_secrets.json')
  
- 
-def get_account_ids(service):
-    accounts = service.management().accounts().list().execute()
-    ids = []
-    if accounts.get('items'):
-        for account in accounts['items']:
-            ids.append(account['id'])
-    return ids
- 
- 
 @login_required
 def index(request):
     # use the first REDIRECT_URI if you are developing your app
@@ -38,7 +28,7 @@ def index(request):
     #REDIRECT_URI = "https://%s%s" % (get_current_site(request).domain, reverse("oauth2:return"))
     FLOW = flow_from_clientsecrets(
         CLIENT_SECRETS,
-        scope='https://www.googleapis.com/auth/analytics.readonly',
+        scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly',
         redirect_uri=REDIRECT_URI
     )
     user = request.user
@@ -55,10 +45,36 @@ def index(request):
     else:
         http = httplib2.Http()
         http = credential.authorize(http)
-        service = build('analytics', 'v3', http=http)
-        ids = get_account_ids(service)
-        return render(
-            request, 'google_auth.html', {'ids':ids})
+        service_people = build('people', 'v1', http=http)
+        
+        response = None
+
+        pageToken = ""
+        while pageToken != None:
+            response = service_people.people().connections().list(resourceName='people/me',pageSize=500,requestMask_includeField="person.email_addresses", pageToken=pageToken).execute()
+            for person in response["connections"]:
+                if "emailAddresses" in person:
+                    for email in person["emailAddresses"]:
+                        print email["value"]
+            if "nextPageToken" in response:
+                pageToken = response["nextPageToken"]
+            else:
+                pageToken = None
+
+        service_mail = build('gmail', 'v1', http=http)
+        mail_response = service_mail.users().messages().list(userId='me', q='from:me').execute()
+        messages = mail_response['messages']
+        for message in messages:
+            message = service_mail.users().messages().get(userId='me', id=message['id']).execute()
+            for pair in message['payload']['headers']:
+                if pair["name"] == "To":
+                    print pair["value"].encode('UTF-8')
+                    nameandemail = pair["value"].encode('UTF-8').split('<')
+                    #name = nameandemail[0]
+                    #email = nameandemail[1]
+                    #print name, email
+
+        return render(request, 'google_auth.html', {'contacts':response})
  
  
 @login_required
