@@ -87,3 +87,7 @@ def check_forwarding_address(service_mail, forward_address):
         if item['forwardingEmail'] == forward_address:
             return item['verificationStatus']
     return False
+
+def extract_emails_from_csv(email_string):
+    emails = re.findall(r'[\w\.-]+@[\w\.-]+', email_string)
+    return emails

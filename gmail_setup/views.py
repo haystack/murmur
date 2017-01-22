@@ -101,15 +101,26 @@ def import_start(request):
     if gmail_emails:
         all_emails.update(set(gmail_emails))
     
-    print request
+    #print request
 
     if request.method == 'POST':
         # process submitted form here
-        emails_to_add = [i[0] for i in request.POST.items()[1:]]
+        raw_response = request.POST.items()
+        emails_to_add = []
+        for item in raw_response:
+            if item[0] == 'csrfmiddlewaretoken':
+                pass
+            elif item[0] == 'custom_email_box':
+                custom_emails = api.extract_emails_from_csv(item[1])
+                for email in custom_emails:
+                    if email != '':
+                        emails_to_add.append(email)
+            else:
+                emails_to_add.append(item[0])
+
         group_name = request.GET.get('group_name')
         print "GROUP NAME:", group_name
         for email in emails_to_add:
-            print(email)
             # add these to whitelist / create form here!
             res = update_blacklist_whitelist(user=user, group_name=group_name, email=email, whitelist=True, blacklist=False)
             print(res)

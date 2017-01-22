@@ -1,7 +1,7 @@
 <form action="import" method="post">
     {% csrf_token %}
 
-    <p>Below are your contact emails and emails you've messaged frequency in the last year. Deselect any you don't want whitelisted, then click "Add to whitelist" below.</p>
+    <p>Below are your contacts and email addresses you've messaged frequency in the last year. Deselect any you don't want whitelisted, then click "Add to whitelist" below.</p>
 
     <p>The list of email addresses from your contacts is:</p>
 
@@ -16,10 +16,12 @@
     {% endfor %}
 
     <p>
-        Add any extra emails you wish to whitelist by entering them here. Separate each email with a comma.
-        <input type="text">
+        Add any extra email addresses you wish to whitelist by entering them here. Separate each address with a comma (only valid ones will be added).<br />
+        <input type="text" name="custom_email_box" size="70">
     </p>
 
     <input type="submit" value="Add to whitelist">
+
+    <p>* This will (a) add the email addresses above to our whitelist associated with your Squadbox account, so that messages from those addresses sent to your public Squadbox address are forwarded straight onto you with no moderation, and (b) add a filter to your Gmail account that forwards every email sent directly to you that's not from someone on this whitelist to your squad, where it is hidden from you and held for moderation.</p>
 
 </form>
