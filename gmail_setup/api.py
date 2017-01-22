@@ -57,19 +57,33 @@ def get_google_emails(service_people, service_mail):
     emails = parse_gmail(service_mail)
     return list(set(contacts).union(set(emails)))
 
-def create_gmail_filter(service_mail, whitelist_emails):
-    result = service_mail.users().settings().forwardingAddresses().create(userId='me', body={'forwadingEmail': 'squadbox@dunkley.me'}).execute()
-    print "Creating forwarding address:", result
+def create_gmail_filter(service_mail, whitelist_emails, forward_address):
+    response = service_mail.users().settings().filters().list(userId='me').execute()
+    if 'filter' in response:
+        existing_filters = response['filter']
+        for filter in existing_filters:
+            if 'forward' in filter['action']:
+                if filter['action']['forward'] == forward_address:
+                    service_mail.users().settings().filters().delete(userId='me', id=filter['id']).execute()
     email_list_piped = "|".join(whitelist_emails)
     filter = {
         'criteria': {
-            'from': email_list_piped,
-            'subject': 'squadbox'
+            'from': email_list_piped
         },
         'action': {
             'removeLabelIds': ['INBOX'],
-            'forward': 'squadbox@dunkley.me'
+            'forward': forward_address
         }
     }
     result = service_mail.users().settings().filters().create(userId='me', body=filter).execute()
     return result
+
+def add_to_whitelist(emails):
+    return
+
+def check_forwarding_address(service_mail, forward_address):
+    result = service_mail.users().settings().forwardingAddresses().list(userId='me').execute()
+    for item in result['forwardingAddresses']:
+        if item['forwardingEmail'] == forward_address:
+            return item['verificationStatus']
+    return False

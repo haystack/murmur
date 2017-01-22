@@ -1,0 +1,21 @@
+<p>Here, you can setup your gmail and contacts with your squadbox account.</p>
+
+{% if is_authorized %}
+    <p>Step 1: done - your Google account is authorized.</p>
+    {% if gmail_forwarding_verified == 'accepted' %}
+        <p>Step 2: done - your Gmail forwarding address is verified.</p>
+        {% if is_done %}
+            <p>Step 3: done - your contacts have been imported to the whitelist and Gmail redirect filter has been set up. <a href="import">Click here</a> or come back here any time to update your whitelist emails.</p>
+        {% else %}
+            <p>Step 3: <a href="import">click here</a> to begin the contacts import process.</p>
+        {% endif %}
+    {% elif gmail_forwarding_verified == 'pending' %}
+        <p>Step 2: forwarding address is still waiting for verification - please click the confirmation link in the email you received.</p>
+    {% else %}
+        <p>Step 2: <a href="https://mail.google.com/mail/#settings/fwdandpop" target="_blank">click here</a> to go to gmail, click "add a forwarding address" and enter "mydynamicallygeneratedsquadboxaddres@squadbox_base_url", then press 'next' and then click 'proceed'. <a href="">Refresh</a> if you've done this.</p>
+    {% endif %}
+{% else %}
+    <p>Step 1: <a href="authorize">click here</a> and authorize your gmail account (don't worry, we never read your emails)</p>
+{% endif %}
+
+<script type="text/javascript" src="/static/javascript/gmail_setup.js"></script>

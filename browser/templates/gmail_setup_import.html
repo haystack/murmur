@@ -1,0 +1,25 @@
+<form action="import" method="post">
+    {% csrf_token %}
+
+    <p>Below are your contact emails and emails you've messaged frequency in the last year. Deselect any you don't want whitelisted, then click "Add to whitelist" below.</p>
+
+    <p>The list of email addresses from your contacts is:</p>
+
+    {% for email in contacts_emails %}
+        <label><input type="checkbox" name="{{email}}" checked>{{email}}</label><br />
+    {% endfor %}
+
+    <p>The list of email addresses you've sent messages to in the past year, sorted by frequency, is:</p>
+
+    {%for email in gmail_emails %}
+        <label><input type="checkbox" name="{{email}}" checked>{{email}}</label><br />
+    {% endfor %}
+
+    <p>
+        Add any extra emails you wish to whitelist by entering them here. Separate each email with a comma.
+        <input type="text">
+    </p>
+
+    <input type="submit" value="Add to whitelist">
+
+</form>

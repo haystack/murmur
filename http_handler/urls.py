@@ -110,5 +110,5 @@ urlpatterns = patterns('',
 
      url(r'^contacts_setup/', 'browser.views.contacts_setup'),
 
-     url(r'^google_auth/', include('google_auth.urls', namespace="oauth2"))
+     url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2"))
 )

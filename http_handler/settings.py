@@ -220,7 +220,7 @@ INSTALLED_APPS = (
     'schema',
     'browser',
     'smtp_handler',
-    'google_auth',
+    'gmail_setup',
     
     #third party apps
     'registration',
