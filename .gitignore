@@ -12,3 +12,6 @@ private.py
 
 # Local Settings
 local_settings.py
+
+# migrations 
+schema/migrations/*
