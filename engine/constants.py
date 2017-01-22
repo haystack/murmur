@@ -17,6 +17,7 @@ msg_code={
 	'MAX_GROUP_NAME_LENGTH': 'Group name is too long',
 	'MAX_GROUP_DESC_LENGTH': 'Group description is too long',
 	'UNKNOWN_ERROR': 'Unknown',
+	'INVALID_STATUS_ERROR' : '%s is not a valid post status',
 }
 
 def extract_hash_tags(s):
@@ -31,4 +32,8 @@ def extract_hash_tags(s):
 		if len(first_three) == 3: break
 	return first_three 
 
-	
+ALLOWED_MESSAGE_STATUSES = {
+	'R' : 'rejected',
+	'P' : 'pending',
+	'A' : 'approved'
+}

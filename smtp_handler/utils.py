@@ -90,6 +90,30 @@ def setup_post(From, Subject, group_name):
 	
 	return mail
 
+def setup_moderation_post(group_name, msg_text, post_id):
+
+	subject = 'Post to Squadbox group %s requires approval' % group_name 
+	to = '%s Moderators <%s+mods@%s>' % (group_name, group_name, HOST)
+	from_addr = 'Squadbox Notifications <%s+notifications@%s>' % (group_name, HOST)
+
+	mail = MurmurMailResponse(From=from_addr, To=to, Subject=subject)
+	mail.update({
+		"Sender" : from_addr,
+		"Reply-To" : from_addr,
+		"List-Id" : from_addr,
+		"Return-Path": from_addr,
+		"Precedence": 'list'
+		})
+
+	html_ps_blurb = 'replace this with a blurb later on!'
+	html_ps_blurb = unicode(html_ps_blurb)
+	mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
+	
+	plain_ps_blurb = 'replace this with a blurb later on!'
+	mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')
+		
+	return mail
+
 def send_error_email(group_name, error, user_addr, admin_emails):
 	mail = MurmurMailResponse(From = NO_REPLY, Subject = "Error")
 	mail.Body = "You tried to post to: %s. Error Message: %s" % (group_name, error)

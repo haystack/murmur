@@ -13,7 +13,7 @@ class Post(models.Model):
 	post = models.TextField()
 	group = models.ForeignKey('Group')
 	thread = models.ForeignKey('Thread')
-	reply_to = models.ForeignKey('self', blank=False, null = True, related_name="replies")
+	reply_to = models.ForeignKey('self', blank=False, null=True, related_name="replies")
 	timestamp = models.DateTimeField(auto_now=True)
 	forwarding_list = models.ForeignKey('ForwardingList', null=True)
 	# a post's author is the Murmur user (if any) who wrote the post.
@@ -23,6 +23,9 @@ class Post(models.Model):
 	# a member of this group on Murmur, and it was likely received via a list that
 	# fwds to this Murmur group
 	poster_email = models.EmailField(max_length=255, null=True)
+
+	STATUS_CHOICES = (('R', 'rejected'), ('P', 'pending'), ('A', 'approved'))
+	status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
 
 	def __unicode__(self):
 		if self.author:
@@ -144,7 +147,18 @@ class Group(models.Model):
 	class Meta:
 		db_table = "murmur_groups"
 
+class WhiteOrBlacklist(models.Model):
 
+	id = models.AutoField(primary_key=True)
+	group = models.ForeignKey('Group')
+	email = models.EmailField(max_length=255)
+
+	# only one of the following can be true
+	whitelist = models.BooleanField(default=False)
+	blacklist = models.BooleanField(default=False)
+
+	# timestamp (for temporary bans)
+	timestamp = models.DateTimeField(auto_now=True)
 
 class MyUserManager(BaseUserManager):
 	def create_user(self, email, password=None):
