@@ -18,7 +18,7 @@ from annoying.decorators import render_to
 
 from engine.main import update_blacklist_whitelist
 
-from .models import CredentialsModel, FlowModel
+from schema.models import CredentialsModel, FlowModel
 import api
 
 from http_handler.settings import BASE_URL
