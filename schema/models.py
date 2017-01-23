@@ -285,3 +285,5 @@ class CredentialsModel(models.Model):
 from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], ["^schema\.fields\.FlowModel"])
 add_introspection_rules([], ["^schema\.fields\.CredentialsModel"])
+add_introspection_rules([], ["^oauth2client\.django_orm\.CredentialsField"])
+add_introspection_rules([], ["^oauth2client\.django_orm\.FlowField"])
