@@ -83,9 +83,10 @@ def add_to_whitelist(emails):
 
 def check_forwarding_address(service_mail, forward_address):
     result = service_mail.users().settings().forwardingAddresses().list(userId='me').execute()
-    for item in result['forwardingAddresses']:
-        if item['forwardingEmail'] == forward_address:
-            return item['verificationStatus']
+    if 'forwardingAddresses' in result:
+        for item in result['forwardingAddresses']:
+            if item['forwardingEmail'] == forward_address:
+                return item['verificationStatus']
     return False
 
 def extract_emails_from_csv(email_string):

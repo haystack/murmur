@@ -1,27 +1,47 @@
-<form action="import" method="post">
-    {% csrf_token %}
+{% extends "squadbox/base.html" %}
 
-    <p>Below are your contacts and email addresses you've messaged frequency in the last year. Deselect any you don't want whitelisted, then click "Add to whitelist" below.</p>
+{% block customcss %}
+{% endblock %}
 
-    <p>The list of email addresses from your contacts is:</p>
+{% block content %}
 
-    {% for email in contacts_emails %}
-        <label><input type="checkbox" name="{{email}}" checked>{{email}}</label><br />
-    {% endfor %}
+<div class="container">
+    <div class="group-container">
+        {% if group_name %}
+            <p><a href="/gmail_setup?group={{group_name}}">&laquo; Back to start</a></p>
+            <h2>Begin Gmail import for {{group_name}}</h2>
+            <form action="import" method="post">
+                {% csrf_token %}
 
-    <p>The list of email addresses you've sent messages to in the past year, sorted by frequency, is:</p>
+                <p>Below are your contacts and email addresses you've messaged frequency in the last year. Deselect any you don't want whitelisted, then click "Add to whitelist" below.</p>
 
-    {%for email in gmail_emails %}
-        <label><input type="checkbox" name="{{email}}" checked>{{email}}</label><br />
-    {% endfor %}
+                <p>The list of email addresses from your contacts is:</p>
 
-    <p>
-        Add any extra email addresses you wish to whitelist by entering them here. Separate each address with a comma (only valid ones will be added).<br />
-        <input type="text" name="custom_email_box" size="70">
-    </p>
+                {% for email in contacts_emails %}
+                    <label><input type="checkbox" name="{{email}}" checked> {{email}}</label><br />
+                {% endfor %}
+                <br />
 
-    <input type="submit" value="Add to whitelist">
+                <p>The list of email addresses you've sent messages to in the past year, sorted by frequency, is:</p>
 
-    <p>* This will (a) add the email addresses above to our whitelist associated with your Squadbox account, so that messages from those addresses sent to your public Squadbox address are forwarded straight onto you with no moderation, and (b) add a filter to your Gmail account that forwards every email sent directly to you that's not from someone on this whitelist to your squad, where it is hidden from you and held for moderation.</p>
+                {%for email in gmail_emails %}
+                    <label><input type="checkbox" name="{{email}}" checked> {{email}}</label><br />
+                {% endfor %}
 
-</form>
+                <p>
+                    Add any extra email addresses you wish to whitelist by entering them here. Separate each with a comma (only valid ones will be added).<br />
+                    <input type="text" name="custom_email_box" size="70">
+                </p>
+                <input type="hidden" name="group_name" value="{{group_name}}" />
+                <input type="submit" value="Add to whitelist">
+                <br /><br />
+                <p>* This will (a) add the email addresses above to our whitelist associated with your Squadbox account, so that messages from those addresses sent to your public Squadbox address are forwarded straight onto you with no moderation, and (b) add a filter to your Gmail account that forwards every email sent directly to you that's not from someone on this whitelist to your squad, where it is hidden from you and held for moderation.</p>
+
+            </form>
+        {% else %}
+            <h3>Invalid request: please start again from the <a href="/my_groups">My Groups</a> page.</h3>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

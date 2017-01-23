@@ -6,6 +6,7 @@
 body, html {
 	height: 100%;
 	font-family: 'Raleway', sans-serif;
+	
 }
 
 hr{
@@ -80,7 +81,7 @@ hr{
 
 .group-container {
 	margin:0px auto;
-	margin-top:30px; 
+	margin-top:75px; 
 	padding:30px; 
 	vertical-align:top;
 	background-color: #D7ECFA;
@@ -587,6 +588,7 @@ body > section {
 
 p {
 	max-width: 80%;
+	padding-bottom: 10px;
 }
 
 a:hover {
@@ -605,4 +607,9 @@ strong {
 	border: 5px #FFFFFF solid;
 	margin-bottom: 5px;
 	margin-top: 15px;
+}
+
+h2 {
+	margin-top: 0;
+	padding-bottom: 10px;
 }

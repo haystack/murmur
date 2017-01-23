@@ -21,8 +21,9 @@ from engine.main import update_blacklist_whitelist
 from .models import CredentialsModel, FlowModel
 import api
 
+from http_handler.settings import BASE_URL
+
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
-FORWARD_ADDRESS = 'squadbox@dunkley.me'
 
 @login_required
 @render_to("gmail_setup_start.html")
@@ -30,23 +31,29 @@ def index(request):
     is_done = False
     if request.path_info == '/gmail_setup/done':
         is_done = True
+    if 'group' not in request.GET:
+        return {'group_name': None}
+    group_name = request.GET['group']
+
+    forward_address = group_name + '@' + BASE_URL
+    forward_address = "squadbox@dunkley.me"
 
     user = request.user
     storage = Storage(CredentialsModel, 'id', user, 'credential')
     credential = storage.get()
-    http = httplib2.Http()
-    http = credential.authorize(http)
 
     is_authorized = False
+    gmail_forwarding_verified = False
     if credential is None or credential.invalid is True:
         pass
     else:
         is_authorized = True
-    
-    service_mail = build('gmail', 'v1', http=http)
-    gmail_forwarding_verified = api.check_forwarding_address(service_mail, FORWARD_ADDRESS)
+        http = httplib2.Http()
+        http = credential.authorize(http)
+        service_mail = build('gmail', 'v1', http=http)
+        gmail_forwarding_verified = api.check_forwarding_address(service_mail, forward_address)
 
-    return {'is_authorized': is_authorized, 'gmail_forwarding_verified': gmail_forwarding_verified, 'is_done': is_done}
+    return {'user': user, 'is_authorized': is_authorized, 'gmail_forwarding_verified': gmail_forwarding_verified, 'is_done': is_done, 'group_name': group_name, 'forward_address': forward_address}
 
 @login_required
 def auth(request):
@@ -55,32 +62,50 @@ def auth(request):
     #REDIRECT_URI = "https://%s%s" % (get_current_site(request).domain, reverse("oauth2:return"))
     FLOW = flow_from_clientsecrets(
         CLIENT_SECRETS,
-        scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic https://www.googleapis.com/auth/gmail.settings.sharing',
+        scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic',
         redirect_uri=REDIRECT_URI
     )
     user = request.user
     storage = Storage(CredentialsModel, 'id', user, 'credential')
     credential = storage.get()
     if credential is None or credential.invalid is True:
-        FLOW.params['state'] = xsrfutil.generate_token(
-            settings.SECRET_KEY, user)
-        authorize_url = FLOW.step1_get_authorize_url()
-        f = FlowModel(id=user, flow=FLOW)
-        f.save()
-        return HttpResponseRedirect(authorize_url)
+        if 'group' in request.GET:
+            group_name = request.GET['group']
+            FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY, user) + '___' + group_name
+            print FLOW.params['state']
+            authorize_url = FLOW.step1_get_authorize_url()
+            f = FlowModel(id=user, flow=FLOW)
+            f.save()
+            return HttpResponseRedirect(authorize_url)
+        else:
+            return HttpResponseRedirect("/gmail_setup")
     else:
         return HttpResponseRedirect("/gmail_setup")
  
 @login_required
 def auth_return(request):
     user = request.user
-    if not xsrfutil.validate_token(settings.SECRET_KEY, str(request.REQUEST['state']), user):
+    secret = request.REQUEST['state'].split('___')[0]
+    group_name = request.REQUEST['state'].split('___')[1]
+    if not xsrfutil.validate_token(settings.SECRET_KEY, str(secret), user):
         return HttpResponseBadRequest()
     FLOW = FlowModel.objects.get(id=user).flow
     credential = FLOW.step2_exchange(request.REQUEST)
     storage = Storage(CredentialsModel, 'id', user, 'credential')
     storage.put(credential)
-    return HttpResponseRedirect("/gmail_setup")
+    return HttpResponseRedirect("/gmail_setup?group=" + group_name)
+
+@login_required
+def deauth(request):
+    user = request.user
+    credential = None
+    storage = Storage(CredentialsModel, 'id', user, 'credential')
+    storage.delete()
+    if 'group' in request.GET:
+        group_name = request.GET['group']
+        return HttpResponseRedirect("authorize?group=" + group_name)
+    else:
+        return HttpResponseRedirect("authorize")
 
 @login_required
 def import_start(request):
@@ -101,12 +126,11 @@ def import_start(request):
     if gmail_emails:
         all_emails.update(set(gmail_emails))
     
-    #print request
-
     if request.method == 'POST':
         # process submitted form here
         raw_response = request.POST.items()
         emails_to_add = []
+        group_name = None
         for item in raw_response:
             if item[0] == 'csrfmiddlewaretoken':
                 pass
@@ -115,17 +139,22 @@ def import_start(request):
                 for email in custom_emails:
                     if email != '':
                         emails_to_add.append(email)
+            elif item[0] == 'group_name':
+                group_name = item[1]
             else:
                 emails_to_add.append(item[0])
 
-        group_name = request.GET.get('group_name')
         print "GROUP NAME:", group_name
         for email in emails_to_add:
             # add these to whitelist / create form here!
             res = update_blacklist_whitelist(user=user, group_name=group_name, email=email, whitelist=True, blacklist=False)
             print(res)
-        res = api.create_gmail_filter(service_mail, emails_to_add, FORWARD_ADDRESS)
-        return HttpResponseRedirect('/gmail_setup/done')
+        forward_address = "squadbox@dunkley.me"
+        res = api.create_gmail_filter(service_mail, emails_to_add, forward_address)
+        return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)
     else:
         # generate form objects for first load here
-        return render(request, 'gmail_setup_import.html', {'contacts_emails': contacts_emails, 'gmail_emails': gmail_emails})
+        group_name = None
+        if 'group' in request.GET:
+            group_name = request.GET['group']
+        return render(request, 'gmail_setup_import.html', {'user': user, 'contacts_emails': contacts_emails, 'gmail_emails': gmail_emails, 'group_name': group_name})
