@@ -59,7 +59,8 @@ def index(request):
 def auth(request):
     # use the first REDIRECT_URI if you are developing your app locally, and the second in production
     #REDIRECT_URI = 'http://localhost:8000/gmail_setup/callback'
-    REDIRECT_URI = "https://%s%s" % (get_current_site(request).domain, reverse("oauth2:return"))
+    REDIRECT_URI = "http://%s%s" % (BASE_URL, reverse("oauth2:return"))
+    #REDIRECT_URI = 'https://' + BASE_URL + '/gmail_setup/callback'
     FLOW = flow_from_clientsecrets(
         CLIENT_SECRETS,
         scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic',
