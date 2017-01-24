@@ -570,7 +570,7 @@ def handle_post(message, address=None, host=None):
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)['plain']
 		forward_to = msg_text.split(' ', 1)[0]
-		mail = MailResponse(From = NO_REPLY, To = forward_to, Subject = "Setup: please click the confirmation link inside", Body = msg_text)
+		mail = MailResponse(From = NO_REPLY, To = forward_to, Subject = (WEBSITE + " setup: please click the confirmation link inside"), Body = msg_text)
 		relay.deliver(mail)
 		return
 
