@@ -471,6 +471,15 @@ def handle_post_squadbox(message, group, host):
 
 	_, sender_addr = parseaddr(message['From'].lower())
 
+	# deal with Gmail forwarding verification emails:
+	if sender_addr == "forwarding-noreply@google.com":
+		email_message = email.message_from_string(str(message))
+		msg_text = get_body(email_message)
+		forward_to = msg_text.split(' ', 1)[0]
+		mail = MailResponse(From = NO_REPLY, To = forward_to, Subject = "Squadbox Setup: please click the confirmation link inside", Body = msg_text)
+		relay.deliver(mail)
+		return
+
 	# whitelist/blacklist checking
 	white_or_blacklist = WhiteOrBlacklist.objects.filter(group=group, email=sender_addr)
 	if white_or_blacklist.exists():
@@ -800,18 +809,3 @@ def send_account_info(message, address=None, host=None):
 		msg_text = get_body(email_message)
 		mail = MailResponse(From = NO_REPLY, To = message['To'], Subject = message['Subject'], Body = msg_text['plain'])
 		relay.deliver(mail)
-
-@route("forwarding-noreply@google.com")
-@stateless
-def forward_gmail_setup(message):
-	# TODO: set this up so that emails from forwarding_noreply@google.com get sent to the email addresss that is the first word of the message, with subject changed to:
-	# "Squadbox Setup: please click the confirmation link inside"
-
-	email_message = email.message_from_string(str(message))
-	msg_text = get_body(email_message)
-	forward_to = msg_text.split(' ', 1)[0]
-
-	mail = MailResponse(From = NO_REPLY, To = forward_to, Subject = "Squadbox Setup: please click the confirmation link inside", Body = msg_text)
-	relay.deliver(mail)
-
-	return
