@@ -471,15 +471,6 @@ def handle_post_squadbox(message, group, host):
 
 	_, sender_addr = parseaddr(message['From'].lower())
 
-	# deal with Gmail forwarding verification emails:
-	if sender_addr == "forwarding-noreply@google.com":
-		email_message = email.message_from_string(str(message))
-		msg_text = get_body(email_message)
-		forward_to = msg_text.split(' ', 1)[0]
-		mail = MailResponse(From = NO_REPLY, To = forward_to, Subject = "Squadbox Setup: please click the confirmation link inside", Body = msg_text)
-		relay.deliver(mail)
-		return
-
 	# whitelist/blacklist checking
 	white_or_blacklist = WhiteOrBlacklist.objects.filter(group=group, email=sender_addr)
 	if white_or_blacklist.exists():
@@ -572,6 +563,15 @@ def handle_post(message, address=None, host=None):
 	res = check_attachments(attachments, group.allow_attachments)
 	if not res['status']:
 		send_error_email(group_name, res['error'], sender_addr, ADMIN_EMAILS)
+		return
+	
+	# deal with Gmail forwarding verification emails:
+	if sender_addr == "forwarding-noreply@google.com":
+		email_message = email.message_from_string(str(message))
+		msg_text = get_body(email_message)
+		forward_to = msg_text.split(' ', 1)[0]
+		mail = MailResponse(From = NO_REPLY, To = forward_to, Subject = "Setup: please click the confirmation link inside", Body = msg_text)
+		relay.deliver(mail)
 		return
 
 	if WEBSITE == 'squadbox':
