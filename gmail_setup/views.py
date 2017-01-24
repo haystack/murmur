@@ -21,7 +21,7 @@ from engine.main import update_blacklist_whitelist
 from schema.models import CredentialsModel, FlowModel
 import api
 
-from http_handler.settings import BASE_URL
+from http_handler.settings import BASE_URL, WEBSITE
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 
