@@ -36,7 +36,6 @@ def index(request):
     group_name = request.GET['group']
 
     forward_address = group_name + '@' + BASE_URL
-    forward_address = "squadbox@dunkley.me"
 
     user = request.user
     storage = Storage(CredentialsModel, 'id', user, 'credential')
@@ -66,7 +65,7 @@ def auth(request):
         scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic',
         redirect_uri=REDIRECT_URI
     )
-    
+
     user = request.user
     storage = Storage(CredentialsModel, 'id', user, 'credential')
     credential = storage.get()
@@ -151,7 +150,9 @@ def import_start(request):
             # add these to whitelist / create form here!
             res = update_blacklist_whitelist(user=user, group_name=group_name, email=email, whitelist=True, blacklist=False)
             print(res)
-        forward_address = "squadbox@dunkley.me"
+        
+        forward_address = group_name + '@' + BASE_URL
+
         res = api.create_gmail_filter(service_mail, emails_to_add, forward_address)
         return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)
     else:
