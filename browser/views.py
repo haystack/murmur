@@ -43,11 +43,11 @@ def logout(request):
 	request.session.flush()
 	return HttpResponseRedirect('/')
 
-@render_to('about.html')
+@render_to(WEBSITE+'/about.html')
 def about(request):
 	return {}
 
-@render_to('404.html')
+@render_to(WEBSITE+'/404.html')
 def error(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -71,24 +71,23 @@ def error(request):
 	return res
 
 
-@render_to('home.html')
+@render_to(WEBSITE+'/home.html')
 def index(request):
-	if WEBSITE == 'squadbox':
-		return render_to_response('squadbox/home.html',
-									{'form': AuthenticationForm(),
-									'reg_form': RegistrationForm()},
-									context_instance=RequestContext(request))
-
 	if not request.user.is_authenticated():
 		if WEBSITE == 'murmur':
-			return render_to_response('home.html',
+			return render_to_response('murmur/home.html',
 									  {'form': AuthenticationForm(),
 									   'reg_form': RegistrationForm()},
 									   context_instance=RequestContext(request))
+		elif WEBSITE == 'squadbox':
+			return render_to_response('squadbox/home.html',
+										{'form': AuthenticationForm(),
+										'reg_form': RegistrationForm()},
+										context_instance=RequestContext(request))
 	else:
 		return HttpResponseRedirect('/posts')
 	
-@render_to("posts.html")
+@render_to(WEBSITE+'/posts.html')
 def posts(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -161,7 +160,7 @@ def posts(request):
 		
 		
 
-@render_to("mobile_list_posts.html")
+@render_to(WEBSITE+'/mobile_list_posts.html')
 def post_list(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -199,7 +198,7 @@ def post_list(request):
 		
 	
 
-@render_to("thread.html")
+@render_to(WEBSITE+"/thread.html")
 def thread(request):
 	
 	post_id = request.GET.get('post_id')
@@ -244,7 +243,7 @@ def thread(request):
 
 
 
-@render_to("settings.html")
+@render_to(WEBSITE+"/settings.html")
 @login_required
 def settings(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
@@ -252,7 +251,7 @@ def settings(request):
 	active_group = load_groups(request, groups, user)
 	return {'user': request.user, "active_group": active_group, "groups": groups}
 	
-@render_to("groups.html")
+@render_to(WEBSITE+"/groups.html")
 @login_required
 def my_groups(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
@@ -265,7 +264,7 @@ def my_groups(request):
 
 
 
-@render_to("mobile_list_groups.html")
+@render_to(WEBSITE+"/mobile_list_groups.html")
 @login_required
 def my_group_list(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
@@ -273,13 +272,13 @@ def my_group_list(request):
 	return {'user': request.user, 'groups': groups['groups'], 'group_page': True, 'my_groups': True}
 
 
-@render_to("mobile_pub_list_groups.html")
+@render_to(WEBSITE+"/mobile_pub_list_groups.html")
 def pub_group_list(request):
 	groups = engine.main.list_groups()
 	return {'user': request.user, 'pub_groups': groups, 'group_page': True}
 
 	
-@render_to("group_page.html")
+@render_to(WEBSITE+"/group_page.html")
 def group_page(request, group_name):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -295,7 +294,7 @@ def group_page(request, group_name):
 		return redirect('/404?e=gname&name=%s' % group_name)
 	
 	
-@render_to("list_groups.html")
+@render_to(WEBSITE+"/list_groups.html")
 def group_list(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -309,7 +308,7 @@ def group_list(request):
 	else:
 		return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
 
-@render_to("add_members.html")
+@render_to(WEBSITE+"/add_members.html")
 @login_required
 def add_members_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
@@ -324,7 +323,7 @@ def add_members_view(request, group_name):
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 
-@render_to("add_list.html")
+@render_to(WEBSITE+"/add_list.html")
 @login_required
 def add_list_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
@@ -339,7 +338,7 @@ def add_list_view(request, group_name):
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 
-@render_to("edit_my_settings.html")
+@render_to(WEBSITE+"/edit_my_settings.html")
 @login_required
 def my_group_settings_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
@@ -353,7 +352,7 @@ def my_group_settings_view(request, group_name):
 	except MemberGroup.DoesNotExist:
 		return redirect('/404?e=member')
 	
-@render_to("create_post.html")
+@render_to(WEBSITE+"/create_post.html")
 @login_required
 def my_group_create_post_view(request, group_name):
 	if request.user.is_authenticated():
@@ -380,7 +379,7 @@ def list_my_groups(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
-@render_to("create_group.html")
+@render_to(WEBSITE+"/create_group.html")
 @login_required
 def create_group_view(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
@@ -388,7 +387,7 @@ def create_group_view(request):
 	return {'user': request.user, 'groups': groups, 'group_page': True}
 
 
-@render_to("edit_group_info.html")
+@render_to(WEBSITE+"/edit_group_info.html")
 @login_required
 def edit_group_info_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)  
@@ -871,7 +870,7 @@ def insert_reply(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 	
-@render_to("follow_tag.html")
+@render_to(WEBSITE+"/follow_tag.html")
 @login_required
 def follow_tag_get(request):
 	if request.user.is_authenticated():
@@ -888,7 +887,7 @@ def follow_tag_get(request):
 	else:
 		return redirect("%s?next=/follow_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
 
-@render_to("follow_tag.html")
+@render_to(WEBSITE+"/follow_tag.html")
 @login_required
 def unfollow_tag_get(request):
 	if request.user.is_authenticated():
@@ -905,7 +904,7 @@ def unfollow_tag_get(request):
 	else:
 		return redirect("%s?next=/unfollow_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
 
-@render_to("follow_tag.html")
+@render_to(WEBSITE+"/follow_tag.html")
 @login_required
 def mute_tag_get(request):
 	if request.user.is_authenticated():
@@ -922,7 +921,7 @@ def mute_tag_get(request):
 	else:
 		return redirect("%s?next=/mute_tag_get?tag=%s&group=%s" % (global_settings.LOGIN_URL, request.GET.get('tag'), request.GET.get('group')))
 
-@render_to("follow_tag.html")
+@render_to(WEBSITE+"/follow_tag.html")
 @login_required
 def unmute_tag_get(request):
 	if request.user.is_authenticated():
@@ -941,7 +940,7 @@ def unmute_tag_get(request):
 
 	
 
-@render_to("follow_thread.html")
+@render_to(WEBSITE+"/follow_thread.html")
 @login_required
 def follow_thread_get(request):
 	if request.user.is_authenticated():
@@ -956,7 +955,7 @@ def follow_thread_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/follow?tid=" + request.GET.get('tid'))
 
-@render_to("follow_thread.html")
+@render_to(WEBSITE+"/follow_thread.html")
 @login_required
 def unfollow_thread_get(request):
 	if request.user.is_authenticated():
@@ -971,7 +970,7 @@ def unfollow_thread_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unfollow?tid=" + request.GET.get('tid'))
 	
-@render_to("follow_thread.html")
+@render_to(WEBSITE+"/follow_thread.html")
 @login_required
 def mute_thread_get(request):
 	if request.user.is_authenticated():
@@ -986,7 +985,7 @@ def mute_thread_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/mute?tid=" + request.GET.get('tid'))
 
-@render_to("follow_thread.html")
+@render_to(WEBSITE+"/follow_thread.html")
 @login_required
 def unmute_thread_get(request):
 	if request.user.is_authenticated():
@@ -1025,7 +1024,7 @@ def unupvote(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 
-@render_to('subscribe.html')
+@render_to(WEBSITE+'/subscribe.html')
 @login_required
 def unsubscribe_get(request):
 	if request.user.is_authenticated():
@@ -1040,7 +1039,7 @@ def unsubscribe_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + '?next=/unsubscribe_get?group_name=' + request.GET.get('group_name'))
 
-@render_to('subscribe.html')
+@render_to(WEBSITE+'/subscribe.html')
 def subscribe_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -1065,7 +1064,7 @@ def subscribe_get(request):
 		else:
 			return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + request.GET.get('group_name'))
 
-@render_to("upvote.html")
+@render_to(WEBSITE+"/upvote.html")
 @login_required
 def upvote_get(request):
 	if request.user.is_authenticated():
@@ -1079,7 +1078,7 @@ def upvote_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/upvote_get?post_id=" + request.GET.get('post_id'))
 	
-@render_to("upvote.html")
+@render_to(WEBSITE+"/upvote.html")
 @login_required
 def unupvote_get(request):
 	if request.user.is_authenticated():

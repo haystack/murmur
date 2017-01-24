@@ -1,0 +1,111 @@
+{% extends "murmur/base.html" %}
+
+	{% block customcss %}
+	<style>
+		body { 
+			background: url(/static/images/murmurations/4227243_a0587ccefe_o.jpg) no-repeat center center fixed; 
+			-webkit-background-size: cover;
+			-moz-background-size: cover;
+			-o-background-size: cover;
+			background-size: cover;
+		}
+		</style>
+	{% endblock %}
+
+{% block content %}
+
+{% if flavour != "mobile" %}
+<div class="container-home">
+{% else %}
+<div class="container">
+{% endif %}
+{% if flavour != "mobile" %}
+  <div class="home-left">
+  	{% else %}
+  	<div class="home-left-mobile">
+  	{% endif %}
+  	
+     
+     <h4>We're re-imagining mailing lists and community discourse for the age of social media.</h4>
+
+	Murmur is a new tool for group communication that blends concepts from mailing lists, forums, and social media.
+	Now members can choose how they receive emails and collaboratively moderate discussion.
+	<br /><br />
+	Murmur is a research project from the <a href="http://haystack.csail.mit.edu">Haystack Group</a> at <a href="http://csail.mit.edu">MIT CSAIL</a>.
+     <br />
+     <br />
+     
+     
+          <h4>Publications</h4>
+     Amy X. Zhang, Mark S. Ackerman, David R. Karger.
+     <span class="strong">Mailing Lists: Why Are They Still Here, What’s Wrong With Them, and How Can We Fix Them?</span>
+     In Proceedings of the ACM Conference on Human Factors in Computing Systems
+	 (CHI 2015). Seoul, Korea. April 2015. <br />
+	 <a href="http://people.csail.mit.edu/axz/papers/mailinglists.pdf"><button class="btn btn-xs">PDF</button></a>
+	 <a href="http://people.csail.mit.edu/axz/mailinglists.html"><button class="btn btn-xs">Slides</button></a>
+	 <a href="http://haystack.csail.mit.edu/blog/2015/05/05/mailing-lists-why-are-they-still-here-whats-wrong-with-them-and-how-can-we-fix-them/"><button class="btn btn-xs">Blog Post</button></a>
+	 
+     
+     <br />
+     <br />
+     <h4>Code</h4>
+     Check out our <a href="https://github.com/haystack/murmur">Github page</a> to run your own version, report an issue, see what we're currently
+     working on, or get involved!
+     <br />
+     <br />
+     <br />
+     Still curious about Murmur? Then
+     <a href="/group_list">explore some public groups</a>!
+
+     
+     
+   
+    </div>
+    
+    
+{% if flavour != "mobile" %}
+  <div class="home-right">
+  	{% else %}
+  	<div class="home-right-mobile">
+  	{% endif %}
+  	
+  
+	<div style="text-align: center;">
+	  	<h4>Our Research Team</h4>
+	  <img class="img-circle" src="http://people.csail.mit.edu/axz/img/pic2.jpg" width=70><BR>
+	     <h5>Amy X. Zhang</h5>
+	     Ph.D. Student,
+	     Haystack and UID Group<br />
+	     MIT CSAIL<br />
+	     <a href="http://people.csail.mit.edu/axz">website</a>
+	
+	     <br />
+	     <br />
+	     <img class="img-circle" src="http://www.csail.mit.edu/biographies/PI/72dpi/karger.jpg" width=70><BR>
+	     <h5>David Karger</h5>
+	     Professor, Haystack Group<br />
+	     MIT CSAIL<br />
+	      <a href="http://people.csail.mit.edu/karger">website</a>
+	    
+	     <br />
+	     <br />
+	     </div>
+  </div>
+  
+
+</div>
+
+  
+ <div id="image-attrib">
+
+ </div>
+	
+
+
+{% endblock %}
+
+{% block customjs %}
+
+<script type="text/javascript" src="/static/javascript/home.js"></script>
+
+{% endblock %}

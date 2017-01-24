@@ -1,0 +1,77 @@
+{% extends "squadbox/base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+	
+	<h3>Edit My Settings for <span id="group-name">{{ group_info.name }}</span></h3><hr /><br />
+    <form id="group-settings-form">
+
+
+		<h4>Customizing Emails: </h4> <br />
+		
+		{% if settings.always_follow_thread %}
+			<input type="radio" name="following" value="yes" id="rdo-follow" checked>
+			Receive all emails.<br />
+			<span class="italic-small">(Default) You will be emailed all emails on this list unless you mute a thread.</span><br />
+			<input type="radio" name="following" value="no" id="rdo-no-follow">
+		{% else %}
+			<input type="radio" name="following" value="yes" id="rdo-follow">
+			Receive all emails.<br />
+			<span class="italic-small">(Default) You will be emailed all emails on this list unless you mute a thread.</span><br />
+			<input type="radio" name="following" value="no" id="rdo-no-follow" checked>
+		{% endif %}
+		
+		Receive only the FIRST email in any thread.<br />
+		<span class="italic-small">You will only be emailed replies in a thread if you explicitly follow the thread. You also automatically follow a thread if you start the thread or contribute a post at any point in the thread.</span><br />
+		
+		{% if settings.upvote_emails %}
+			<input type="checkbox" name="upvote-emails" value="yes" id="ck-upvote-emails" checked>
+		{% else %}
+			<input type="checkbox" name="upvote-emails" value="no" id="ck-upvote-emails">
+		{% endif %}
+		Receive upvote notification emails.
+		<br /><br />
+
+	{% if settings.no_emails %}
+		<input type="checkbox" name="no-emails" value="yes" id="ck-no-email" checked>
+	{% else %}
+		<input type="checkbox" name="no-emails" value="no" id="ck-no-email">
+	{% endif %}
+	Receive NO emails. <br />
+	<span class="italic-small"> You will receive no emails, except for the threads you follow. You also automatically follow any threads that you start or post to.</span>
+	<br />
+	<br />
+		
+	{% if settings.no_emails %}
+		<div id="edit-emails" style="color: gray;">
+	{% else %}
+		<div id="edit-emails">
+	{% endif %}
+
+	<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Settings</button>
+	<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>
+
+	</form>
+	
+		<br /><br />
+		     
+	<a href="/groups/{{group_info.name}}">Group Info Page</a>
+     
+      
+  </div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/my_group_settings.js"></script>
+{% endblock %}
+
+
+
+

@@ -1,0 +1,37 @@
+{% extends "murmur/base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+	
+     <h3>Add New Members to <span id="group-name">{{ group_info.name }}</span></h3>
+
+     <hr />
+        
+        <form id="new-members-form">
+			<span class="strong">Emails Separated by Commas : </span> <br />
+	        <input id="new-member-emails" type="text" style="width: 100%; box-sizing: border-box;"></input> 
+	        <br /> <br />
+			<button type="button" id="btn-add-members" style="margin-top:10px;">Add Members</button>
+		</form>
+		
+	<br /><br />
+		     
+	<a href="/groups/{{group_info.name}}">Group Info Page</a>
+     
+  </div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/add_members.js"></script>
+{% endblock %}
+
+
+
+

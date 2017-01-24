@@ -1,0 +1,131 @@
+{% extends "squadbox/base.html" %}
+
+{% block customcss %}
+	<link href="/static/css/third-party/jquery-ui.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<div class="group-container-posts">
+		<div class="main-area-content">
+			<div>
+				<input type="hidden" id="follow" name="follow" value="{{ thread.following }}" readonly>
+				<input type="hidden" id="mute" name="mute" value="{{ thread.muting }}" readonly>
+				<input type="hidden" id="member" name="member" value="{{ thread.member }}" readonly>
+				<input type="hidden" id="no_emails" name="no_emails" value="{{ thread.no_emails }}" readonly>
+				<input type="hidden" id="always_follow" name="always_follow" value="{{ thread.always_follow }}" readonly>
+				<div style="float:right">
+					<button type="button" id="btn-follow" style="margin: 5px; display: none;">Follow</button>
+					<button type="button" id="btn-unfollow" style="margin: 5px; display: none;">Unfollow</button>
+					<button type="button" id="btn-mute" style="margin: 5px; display: none;">Mute</button>
+					<button type="button" id="btn-unmute" style="margin: 5px; display: none;">Unmute</button>
+				</div>
+				<div>
+					<a href="/posts?group_name={{ active_group.name }}"><button type="button" style="margin: 5px;">View Posts</button></a>
+					<a href="/groups/{{ active_group.name }}"><button type="button" style="margin: 5px;">Group Info</button></a>
+					<br>
+					<h3><span id="post-subject">{{ thread.post.subject }}</span></h3>
+					<span class="strong">From: </span> 
+					<span class="strong-gray" id="post-from">{{ thread.post.from }} </span>
+					{% if thread.post.forwarding_list != None %}
+					via {{ thread.post.forwarding_list }}
+					{% endif %}
+					<br><span class="strong">To: </span>
+					<span class="strong-gray">{{ active_group.name }}</span> 
+					<br>
+					<span class="strong">Date: </span>
+					<span class="strong-gray">{{ thread.post.timestamp }}</span>
+					<input type="hidden" id="post_info" name="post_info" value="{{ thread.post.msg_id }}" readonly>
+				</div>
+			</div>
+			<hr>
+			{% if post_id == thread.post.id %}
+				<div id="highlight_post">
+			{% else %}
+			<div>
+			{% endif %}
+				{% autoescape off %}{{ thread.post.text }}{% endautoescape %}
+			</div>
+			
+			<span id="post-{{ thread.post.id }}">
+				{% if thread.post.liked %}
+					<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ thread.post.likes }}</span>
+					<small>
+					 | 
+					<a style="cursor: pointer" onclick="unupvote('{{ thread.post.id }}', '{{ thread.thread_id }}'); return false;">Undo +1 Post</a> | 
+				{% else %}
+					<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ thread.post.likes }}</span>
+					<small>
+					 | 
+					<a style="cursor: pointer" onclick="upvote('{{ thread.post.id }}', '{{ thread.thread_id }}'); return false;">+1 Post</a> | 
+				{% endif %}
+				
+				<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{thread.post.id}}">Permalink</a>
+				</small>
+				
+			</span>	
+			<BR>
+				<BR>
+			{% for reply in thread.replies %}
+				<div class="reply">
+					<div class="main-area-content">
+						<span class="strong">{{ reply.from }}</span> 
+						on {{ reply.timestamp }}&nbsp;
+						
+						<br>
+						
+						{% if post_id == reply.id %}
+							<div id="highlight_post">
+						{% else %}
+						<div>
+						{% endif %}
+						
+							{% autoescape off %}{{ reply.text }}{% endautoescape %}
+						</div>
+						
+						<span id="post-{{ reply.id }}">
+							{% if reply.liked %}
+								<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ reply.likes }}</span>
+								<small>
+								 | 
+								<a style="cursor: pointer" onclick="unupvote('{{ reply.id }}', '{{ thread.thread_id }}'); return false;">Undo +1 Post</a> | 
+							{% else %}
+								<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ reply.likes }}</span>
+								<small>
+								 | 
+								<a style="cursor: pointer" onclick="upvote('{{ reply.id }}', '{{ thread.thread_id }}'); return false;">+1 Post</a> | 
+							{% endif %}
+							<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{reply.id}}">Permalink</a>
+							</small>
+						</span>
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+		{% if user.is_authenticated %}
+			{% if thread.member %}
+				<div class="main-area-content">
+					<textarea id="reply-text-input"></textarea>
+					<button type="button" id="btn-reply" style="margin-top:10px;">Reply</button>
+				</div>
+			{% else %}
+				<a href="/groups/{{ active_group.name }}">You must be a member to reply.</a>
+			{% endif %}
+		{% else %}
+			<a href="/accounts/login">Login to reply</a>
+		{% endif %}
+	</div>
+</div>
+
+
+{% endblock %}
+
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/thread_page.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/ckeditor/ckeditor.js"></script>
+{% endblock %}
+
+

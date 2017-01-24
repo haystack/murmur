@@ -1,0 +1,56 @@
+{% extends "murmur/base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+
+		<div id="post-column-area-wrapper">
+		<div id="post-column-area">
+			
+			<h3>My Groups</h3>
+			
+			<div class="post-list-container">
+				
+				{% if active_group.name != "No Groups Yet" %}
+				<a href="/create_new_group"><button type="button" id="btn-create-group">+ New Group</button></a>
+				<input type="text" id="text-search-group" class="default-text" value="Search within groups" title="Search within groups"/>
+
+				{% else %}
+				<i>You are not in any groups yet. <a href="/group_list">Join or create a new group.</a>
+				</i>
+			{% endif %}
+			</div>
+		
+			<ul id="post-list-table">
+				{% for group in groups %}
+					<a href="/groups/{{ group.name }}">
+						<li class="row-item" id="{{ group.name }}">
+							<span class="strong">{{ group.name }}</span>
+							{% if group.admin %}
+								<span class="admin label">Admin</span>
+							{% endif %}
+							{% if group.mod %}
+								<span class="mod label">Mod</span>
+							{% endif %}
+							<br>
+							<span class="italic-med">{{ group.desc }}</span></li>
+					</a>
+				{% endfor %}
+			</ul>	
+		</div>
+		</div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block customjs %}
+
+{% endblock %}
+
+
