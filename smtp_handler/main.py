@@ -570,7 +570,8 @@ def handle_post(message, address=None, host=None):
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)['plain']
 		forward_to = msg_text.split(' ', 1)[0]
-		mail = MailResponse(From = NO_REPLY, To = forward_to, Subject = (WEBSITE + " setup: please click the confirmation link inside"), Body = msg_text)
+		content = "The message below is forwarded to you from Gmail - to complete the setup of your Gmail integration, please click the confirmation link below.\n\n"
+		mail = MailResponse(From = NO_REPLY, To = forward_to, Subject = (WEBSITE + " setup: please click the confirmation link inside"), Body = content + msg_text)
 		relay.deliver(mail)
 		return
 
