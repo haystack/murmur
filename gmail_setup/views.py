@@ -26,7 +26,7 @@ from http_handler.settings import BASE_URL, WEBSITE
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 
 @login_required
-@render_to("gmail_setup_start.html")
+@render_to(WEBSITE+"/gmail_setup_start.html")
 def index(request):
     is_done = False
     if request.path_info == '/gmail_setup/done':
@@ -156,12 +156,12 @@ def import_start(request):
         
         forward_address = group_name + '@' + BASE_URL
         forward_address = "squadbox@dunkley.me"
-
-        res = api.create_gmail_filter(service_mail, emails_to_add, forward_address)
+        if WEBSITE == "squadbox":
+            res = api.create_gmail_filter(service_mail, emails_to_add, forward_address)
         return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)
     else:
         # generate form objects for first load here
         group_name = None
         if 'group' in request.GET:
             group_name = request.GET['group']
-        return render(request, 'gmail_setup_import.html', {'user': user, 'contacts_emails': contacts_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list})
+        return render(request, WEBSITE+'/gmail_setup_import.html', {'user': user, 'contacts_emails': contacts_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list})

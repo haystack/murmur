@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block customcss %}
+    <link rel="stylesheet" type="text/css" href="/static/css/third-party/jquery-ui.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/gmail_setup.css">
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="group-container">
+        {% if group_name %}
+            <p><a href="/gmail_setup?group={{group_name}}">&laquo; Back to start</a></p>
+            <h2>Begin Gmail import for {{group_name}}</h2>
+            <form action="import" method="post">
+                {% csrf_token %}
+
+                <p>Below are your contacts and email addresses you've messaged frequency in the last year. Deselect any you don't want whitelisted, then click "Add to whitelist" below.</p>
+
+                <p>The list of email addresses from your contacts is: <a href="#" class="btn-toggle" id="btn-toggle-contacts" onclick='return false;'>Toggle all</a></p>
+
+                {% for email in contacts_emails %}
+                    <span class="item-contacts"><label><input type="checkbox" class="contacts-checkbox" name="{{email}}" checked> {{email}}</label></span><br />
+                {% endfor %}
+                <br />
+
+                <p>The list of people you've received messages from in the past year, sorted by frequency, is: <a href="#" class="btn-toggle" id="btn-toggle-received" onclick='return false;'>Toggle all</a></p>
+                <p>Click on a label to toggle all emails with that label. Move the slider to adjust cutoff point by frequency: <div id="slider"></div></p>
+
+                <div id="gmail-list">
+                    {% for email, frequency, name, label in sorted_gmail_list %}
+                        <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="label" class="label-{{label}}"><a href="#" class="toggle-{{label}}" onclick='return false;'>{{label}}</a></span> <span id="frequency">{{frequency}}</span></span><br />
+                    {% endfor %}
+                </div>
+                <p>
+                    Add any extra email addresses you wish to whitelist by entering them here. Separate each with a comma (only valid ones will be added).<br />
+                    <input type="text" name="custom_email_box" size="70">
+                </p>
+                <input type="hidden" name="group_name" value="{{group_name}}" />
+                <input type="submit" value="Add to whitelist">
+                <br /><br />
+                <p>* This will add the email addresses above to our the whitelist for this Murmur mailing list, so that messages from those addresses are forwarded straight through to list members with no moderation.</p>
+
+            </form>
+        {% else %}
+            <h3>Invalid request: please start again from the <a href="/my_groups">My Groups</a> page.</h3>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+    <script src="/static/javascript/third-party/jquery-ui.min.js"></script>
+    <script>
+        var max = {{max_frequency}};
+        var min = {{min_frequency}};
+        var slider_max = {{frequency_list|length}};
+        var map = new Object();
+        var i=1;
+        {% for freq in frequency_list %}
+            map[i] = {{freq}}
+            i++;
+        {% endfor %}
+    </script>
+    <script src="/static/javascript/gmail_setup.js"></script>
+{% endblock %}
