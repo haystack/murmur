@@ -124,6 +124,11 @@ def import_start(request):
     sorted_gmail_list = api.parse_gmail(service_mail)
     max_frequency = sorted_gmail_list[0][1]
     min_frequency = sorted_gmail_list[-1][1]-1
+    frequency_list = []
+    for i in range(len(sorted_gmail_list)):
+        if sorted_gmail_list[i][1] not in frequency_list:
+            frequency_list.append(sorted_gmail_list[i][1])
+    frequency_list.reverse()
     
     if request.method == 'POST':
         # process submitted form here
@@ -159,4 +164,4 @@ def import_start(request):
         group_name = None
         if 'group' in request.GET:
             group_name = request.GET['group']
-        return render(request, 'gmail_setup_import.html', {'user': user, 'contacts_emails': contacts_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency})
+        return render(request, 'gmail_setup_import.html', {'user': user, 'contacts_emails': contacts_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list})

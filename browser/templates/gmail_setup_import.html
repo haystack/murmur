@@ -2,49 +2,7 @@
 
 {% block customcss %}
     <link rel="stylesheet" type="text/css" href="/static/css/third-party/jquery-ui.min.css">
-    <style type="text/css">
-        #gmail-list {
-            padding-bottom: 1em;
-        }
-        #gmail-list #email {
-            font-style: italic;
-            font-size: 90%;
-            margin-left: 1em;
-            color: #555;
-        }
-        #gmail-list #frequency {
-            font-size: 80%;
-            color: #999;
-            margin-left: 0.5em;
-        }
-        #gmail-list #label {
-            font-size: 80%;
-            border: 0.1em solid;
-            border-radius: 0.3em;
-            padding: 0.2em;
-            margin-left: 1em;
-        }
-        #gmail-list .label-personal {
-            color: #0FAD24;
-            border-color: #0FAD24;
-        }
-        #gmail-list .label-social {
-            color: #C824D5;
-            border-color: #C824D5;
-        }
-        #gmail-list .label-updates {
-            color: #FF5733;
-            border-color: #FF5733;
-        }
-        #gmail-list .label-forums {
-            color: #24A7D5;
-            border-color: #24A7D5;
-        }
-        #gmail-list .label-promotions {
-            color: #D5245A;
-            border-color: #D5245A;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/static/css/gmail_setup.css">
 {% endblock %}
 
 {% block content %}
@@ -59,21 +17,19 @@
 
                 <p>Below are your contacts and email addresses you've messaged frequency in the last year. Deselect any you don't want whitelisted, then click "Add to whitelist" below.</p>
 
-                <p>The list of email addresses from your contacts is:</p>
+                <p>The list of email addresses from your contacts is: <a href="#" class="btn-toggle" id="btn-toggle-contacts" onclick='return false;'>Toggle all</a></p>
 
                 {% for email in contacts_emails %}
-                    <label><input type="checkbox" name="{{email}}" checked> {{email}}</label><br />
+                    <span class="item-contacts"><label><input type="checkbox" class="contacts-checkbox" name="{{email}}" checked> {{email}}</label></span><br />
                 {% endfor %}
                 <br />
 
-                <p>The list of people you've received messages from in the past year, sorted by frequency, is:</p>
-                <p>Slide to adjust cutoff point by frequency</p>
-                <div id="slider"></div>
-                <div id="randomdiv"></div>
-                <br />
+                <p>The list of people you've received messages from in the past year, sorted by frequency, is: <a href="#" class="btn-toggle" id="btn-toggle-received" onclick='return false;'>Toggle all</a></p>
+                <p>Click on a label to toggle all emails with that label. Move the slider to adjust cutoff point by frequency: <div id="slider"></div></p>
+
                 <div id="gmail-list">
                     {% for email, frequency, name, label in sorted_gmail_list %}
-                        <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="freq-{{frequency}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="label" class="label-{{label}}">{{label}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                        <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="label" class="label-{{label}}"><a href="#" class="toggle-{{label}}" onclick='return false;'>{{label}}</a></span> <span id="frequency">{{frequency}}</span></span><br />
                     {% endfor %}
                 </div>
                 <p>
@@ -97,36 +53,15 @@
 {% block customjs %}
     <script src="/static/javascript/third-party/jquery-ui.min.js"></script>
     <script>
-    var max = {{max_frequency}};
-    var min = {{min_frequency}};
-    $(document).ready( function() {
-        $("#slider").slider({
-            max: max,
-            min: min,
-            value: 0,
-            slide: function(event, ui) {
-                // TODO: create a map between 0,1,2,... on the slider to the *actual* frequency values that occur, so that one step on the slider always changes some checkboxes
-                var current_val = 0;
-                while (current_val <= ui.value) {
-                    $('.freq-' + current_val.toString()).prop("checked", false);
-                    $('.item-freq-' + current_val.toString()).css('opacity', '0.5');
-                    current_val++;
-                }
-                while (current_val <= max) {
-                    $('.freq-' + current_val.toString()).prop("checked", true);
-                    $('.item-freq-' + current_val.toString()).css('opacity', '1.0');
-                    current_val++;
-                }
-            }
-        });
-
-        $(":checkbox").change(function() {
-            if(this.checked) {
-                $(this).parent().parent().css('opacity', '1.0');
-            } else {
-                $(this).parent().parent().css('opacity', '0.5');
-            }
-        });
-    });
+        var max = {{max_frequency}};
+        var min = {{min_frequency}};
+        var slider_max = {{frequency_list|length}};
+        var map = new Object();
+        var i=1;
+        {% for freq in frequency_list %}
+            map[i] = {{freq}}
+            i++;
+        {% endfor %}
     </script>
+    <script src="/static/javascript/gmail_setup.js"></script>
 {% endblock %}
