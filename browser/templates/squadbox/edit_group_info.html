@@ -13,28 +13,13 @@
      <hr />
      
      <form id="group-info-form">
-	 <span class="strong">Group Name : </span> <br />
+	 <span class="strong">Squad Name : </span> <br />
 	 <span class="italic-med">
 	 	Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed
 	 </span><br />
      <textarea id="edit-group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box; height:25px;">{{ group_info.name }}</textarea> <br /> <br />
 		
-	<span class="strong">Group Description :</span><br /><span class="italic-med">Maximum 140 characters</span><br /><textarea id="edit-group-description" maxlength="140">{{ group_info.description}}</textarea><br /><br />
-		
-	<span class="strong">Group Privacy Settings : </span> <br />
-	{% if group_info.public %}
-		<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked> Public<br />
-		<span class="italic-small">All users will be able to view and search for this group by name.</span>
-			
-		<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group"> Private<br />
-		<span class="italic-small">Only users added to this group by admins will be notified about the group.</span><br />
-	{% else %}
-		<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group"> Public<br />
-		<span class="italic-small">All users will be able to view and search for this group by name.</span>
-			
-		<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group" checked> Private<br />
-		<span class="italic-small">Only users added to this group by admins will be notified about the group.</span><br />
-	{% endif %}
+	<span class="strong">Squad Description :</span><br /><span class="italic-med">Maximum 140 characters</span><br /><textarea id="edit-group-description" maxlength="140">{{ group_info.description}}</textarea><br /><br />
 		
 	<span class="strong">Attachment Policy : </span> <br />
 	{% if group_info.allow_attachments %}
@@ -64,7 +49,7 @@
 {% endblock %}
 
 {% block customjs %}
-	<script type="text/javascript" src="/static/javascript/edit_group_info.js"></script>
+	<script type="text/javascript" src="/static/javascript/squadbox/edit_group_info.js"></script>
 {% endblock %}
 
 

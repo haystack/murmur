@@ -33,21 +33,14 @@
 			{% endif %}
 			
 			<br/><br/>
-			
-			This group is <span class="strong">
-				{% if group_info.group.public %}
-					Public
-				{% else %}
-					Private
-				{% endif %}</span>.
-				<br />
+
 				{% if not group_info.group.allow_attachments %}
 					<span class="strong">No Attachments</span> are allowed.
 				{% else %}
 					Attachments <span class="strong">are allowed</span>.
 				{% endif %}
 				<br />
-				You can contact the group administrators at <a href="mailto:{{admin_address}}" target="_newtab">{{admin_address}}</a>.
+				You can contact the squad's administrators at <a href="mailto:{{admin_address}}" target="_newtab">{{admin_address}}</a>.
 				<br />
 				<br />
 				
@@ -57,7 +50,7 @@
 					{% if group_info.subscribed %}
 						<button type="button" id="btn-edit-settings">Edit My Settings</button>
 						{% if group_info.admin %}
-							<button type="button" id="btn-edit-group-info">Edit Group Information</button>
+							<button type="button" id="btn-edit-group-info">Edit Squad Information</button>
 						{% endif %}
 						<br /><br />
 					{% else %}
@@ -91,7 +84,7 @@
 				<br />
 				<hr />
 				{% if group_info.admin %}
-				<h3>Members List</h3>
+				<h3>Squad Members</h3>
 
 					<button type="button" id="btn-add-members">Add Members</button>
 					<button type="button" id="btn-del-members">Delete Members</button>

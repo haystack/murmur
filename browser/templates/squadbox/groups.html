@@ -7,8 +7,8 @@
 <div id="left-column-area-wrapper">
 <div id="left-column-area">
 	<div class="post-container">
-		<a href="/create_new_group"><button type="button" id="btn-create-group">+ New Group</button></a>
-		<input type="text" id="text-search-group" class="default-text" value="Search within groups" title="Search within groups"/>
+		<a href="/create_new_group"><button type="button" id="btn-create-group">+ New Squad</button></a>
+		<input type="text" id="text-search-group" class="default-text" value="Search within groups" title="Search within squads"/>
 
 	</div>
 	<ul id="groups-table" class="table">
@@ -25,16 +25,16 @@
 	</div>
 	<div id="group-options">
 		<button type="button" id="btn-edit-settings">Edit My Settings</button>
-		<button type="button" id="btn-edit-group-info">Edit Group Information</button><br /><br />
+		<button type="button" id="btn-edit-group-info">Edit Squad Information</button><br /><br />
 		<button type="button" id="btn-activate-group">Activate</button>
 		<button type="button" id="btn-deactivate-group">De-Activate</button>
 		<button type="button" id="btn-subscribe-group">Subscribe</button>
 		<button type="button" id="btn-unsubscribe-group">Un-Subscribe</button>
-		<button type="button" id="btn-delete-group">Delete Group</button>
+		<button type="button" id="btn-delete-group">Delete Squad</button>
 	</div>
 	<br />
 	<div id='members-list-area' style='display:none;'>
-	<h3>Members List</h3> 
+	<h3>Squad Members</h3> 
 	<hr />
 	<button type="button" id="btn-add-members">Add Members</button>
 	<button type="button" id="btn-delete-members">Delete Members</button>
@@ -64,6 +64,6 @@
 	<script type="text/javascript" src="/static/javascript/third-party/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/typeahead.js/typeahead.jquery.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/typeahead.js/bloodhound.min.js"></script>
-	<script type="text/javascript" src="/static/javascript/main.js"></script>
+	<script type="text/javascript" src="/static/javascript/squadbox/main.js"></script>
 
 {% endblock %}

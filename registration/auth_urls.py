@@ -30,15 +30,16 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 from browser.views import murmur_acct
 
+from http_handler.settings import WEBSITE
 
 urlpatterns = patterns('',
                        url(r'^login/$',
                            auth_views.login,
-                           {'template_name': 'murmur/registration/login.html'},
+                           {'template_name': WEBSITE+'/registration/login.html'},
                            name='auth_login'),
                        url(r'^logout/$',
                            auth_views.logout,
-                           {'template_name': 'murmur/registration/logout.html'},
+                           {'template_name': WEBSITE+'/registration/logout.html'},
                            name='auth_logout'),
                        url(r'^password/change/$',
                            murmur_acct,
