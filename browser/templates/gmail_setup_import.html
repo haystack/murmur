@@ -73,7 +73,7 @@
                 <br />
                 <div id="gmail-list">
                     {% for email, frequency, name, label in sorted_gmail_list %}
-                        <label><input type="checkbox" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="label" class="label-{{label}}">{{label}}</span> <span id="frequency">{{frequency}}</span><br />
+                        <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="freq-{{frequency}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="label" class="label-{{label}}">{{label}}</span> <span id="frequency">{{frequency}}</span></span><br />
                     {% endfor %}
                 </div>
                 <p>
@@ -97,8 +97,36 @@
 {% block customjs %}
     <script src="/static/javascript/third-party/jquery-ui.min.js"></script>
     <script>
+    var max = {{max_frequency}};
+    var min = {{min_frequency}};
     $(document).ready( function() {
-        $( "#slider" ).slider();
-    } );
+        $("#slider").slider({
+            max: max,
+            min: min,
+            value: max,
+            slide: function(event, ui) {
+                // TODO: create a map between 0,1,2,... on the slider to the *actual* frequency values that occur, so that one step on the slider always changes some checkboxes
+                var current_val = 0;
+                while (current_val <= ui.value) {
+                    $('.freq-' + current_val.toString()).prop("checked", true);
+                    $('.item-freq-' + current_val.toString()).css('opacity', '1.0');
+                    current_val++;
+                }
+                while (current_val <= max) {
+                    $('.freq-' + current_val.toString()).prop("checked", false);
+                    $('.item-freq-' + current_val.toString()).css('opacity', '0.5');
+                    current_val++;
+                }
+            }
+        });
+
+        $(":checkbox").change(function() {
+            if(this.checked) {
+                $(this).parent().parent().css('opacity', '1.0');
+            } else {
+                $(this).parent().parent().css('opacity', '0.5');
+            }
+        });
+    });
     </script>
 {% endblock %}
