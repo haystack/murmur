@@ -20,11 +20,69 @@ def parse_contacts(service_people):
 
 def parse_gmail(service_mail):
     email_dict = dict()
+    received_dict = dict()
+    received_list = []
+    frequency_dict = dict()
     page_token = ""
     current_time = time.time()*1000
     time_back = 3.154e+10 # get messages from the last year
+    time_back = 2e+8 # shorter time for testing
     time_not_over = True
     ans = None
+
+    # receieved:
+    while (page_token != None) and time_not_over:
+        response = service_mail.users().messages().list(userId='me', q='!in:draft', pageToken=page_token, maxResults=100).execute()
+        if 'messages' not in response:
+            page_token = None
+            break
+        for message in response['messages']:
+            list_message_object = {}
+            # TODO batchify all 100 requests from this page here (limited to 100 so works out perfectly)
+            message = service_mail.users().messages().get(userId='me', id=message['id']).execute()
+            if int(message["internalDate"]) < int(current_time - time_back):
+                time_not_over = False
+                break
+            for pair in message['payload']['headers']:
+                if pair["name"] == "From":
+                    emailstring = pair["value"].encode('UTF-8')
+                    list_message_object['email'] = re.findall(r'[\w\.-]+@[\w\.-]+', emailstring)[0]
+                    name = emailstring.split('<')[0].strip()
+                    if name.startswith('"') and name.endswith('"'):
+                        name = name[1:-1]
+                    list_message_object['name'] = name
+            list_message_object['label'] = None
+            for label in message['labelIds']:
+                if label == "CATEGORY_PERSONAL": list_message_object['label'] = 'personal'
+                if label == "CATEGORY_SOCIAL": list_message_object['label'] = 'social'
+                if label == "CATEGORY_PROMOTIONS": list_message_object['label'] = 'promotions'
+                if label == "CATEGORY_UPDATES": list_message_object['label'] = 'updates'
+                if label == "CATEGORY_FORUMS": list_message_object['label'] = 'forums'
+            if list_message_object['label'] != None:
+                received_list.append(list_message_object)
+        if "nextPageToken" in response:
+            page_token = response["nextPageToken"]
+        else:
+            page_token = None
+
+    for message in received_list:
+        if message['email'] in frequency_dict:
+            frequency_dict[message['email']] += 1
+        else:
+            frequency_dict[message['email']] = 1
+            received_dict[message['email']] = {'name': message['name'], 'label': message['label']}
+    for email in frequency_dict:
+        received_dict[email]['frequency'] = frequency_dict[email]
+    sorted_list_temp = sorted(frequency_dict, key=frequency_dict.get, reverse=True)
+    sorted_list = []
+    for email in sorted_list_temp:
+        sorted_list.append((email, received_dict[email]['frequency'], received_dict[email]['name'], received_dict[email]['label']))
+    return sorted_list
+
+    # sent:
+    '''
+    page_token = ""
+    time_not_over = True
     while (page_token != None) and time_not_over:
         response = service_mail.users().messages().list(userId='me', q='from:me !in:draft', pageToken=page_token, maxResults=100).execute()
         if 'messages' in response:
@@ -49,8 +107,9 @@ def parse_gmail(service_mail):
                 page_token = None
         else:
             page_token = None
-    sorted(email_dict, key=email_dict.get, reverse=True)
+    ans = sorted(received_dict, key=received_dict.get, reverse=True)
     return ans
+    '''
 
 def get_google_emails(service_people, service_mail):
     contacts = parse_contacts(service_people)

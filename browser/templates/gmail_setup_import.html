@@ -1,6 +1,50 @@
 {% extends "squadbox/base.html" %}
 
 {% block customcss %}
+    <link rel="stylesheet" type="text/css" href="/static/css/third-party/jquery-ui.min.css">
+    <style type="text/css">
+        #gmail-list {
+            padding-bottom: 1em;
+        }
+        #gmail-list #email {
+            font-style: italic;
+            font-size: 90%;
+            margin-left: 1em;
+            color: #555;
+        }
+        #gmail-list #frequency {
+            font-size: 80%;
+            color: #999;
+            margin-left: 0.5em;
+        }
+        #gmail-list #label {
+            font-size: 80%;
+            border: 0.1em solid;
+            border-radius: 0.3em;
+            padding: 0.2em;
+            margin-left: 1em;
+        }
+        #gmail-list .label-personal {
+            color: #0FAD24;
+            border-color: #0FAD24;
+        }
+        #gmail-list .label-social {
+            color: #C824D5;
+            border-color: #C824D5;
+        }
+        #gmail-list .label-updates {
+            color: #FF5733;
+            border-color: #FF5733;
+        }
+        #gmail-list .label-forums {
+            color: #24A7D5;
+            border-color: #24A7D5;
+        }
+        #gmail-list .label-promotions {
+            color: #D5245A;
+            border-color: #D5245A;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -22,12 +66,14 @@
                 {% endfor %}
                 <br />
 
-                <p>The list of email addresses you've sent messages to in the past year, sorted by frequency, is:</p>
-
-                {%for email in gmail_emails %}
-                    <label><input type="checkbox" name="{{email}}" checked> {{email}}</label><br />
-                {% endfor %}
-
+                <p>The list of people you've received messages from in the past year, sorted by frequency, is:</p>
+                <p>Slide to adjust cutoff point by frequency</p>
+                <div id="slider"></div>
+                <div id="gmail-list">
+                    {% for email, frequency, name, label in sorted_gmail_list %}
+                        <label><input type="checkbox" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="label" class="label-{{label}}">{{label}}</span> <span id="frequency">{{frequency}}</span><br />
+                    {% endfor %}
+                </div>
                 <p>
                     Add any extra email addresses you wish to whitelist by entering them here. Separate each with a comma (only valid ones will be added).<br />
                     <input type="text" name="custom_email_box" size="70">
@@ -44,4 +90,13 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block customjs %}
+    <script src="/static/javascript/third-party/jquery-ui.min.js"></script>
+    <script>
+    $( function() {
+        $( "#slider" ).slider();
+    } );
+    </script>
 {% endblock %}

@@ -36,6 +36,7 @@ def index(request):
     group_name = request.GET['group']
 
     forward_address = group_name + '@' + BASE_URL
+    forward_address = "squadbox@dunkley.me"
 
     user = request.user
     storage = Storage(CredentialsModel, 'id', user, 'credential')
@@ -119,13 +120,8 @@ def import_start(request):
     service_mail = build('gmail', 'v1', http=http)
 
     contacts_emails = api.parse_contacts(service_people)
-    gmail_emails = api.parse_gmail(service_mail)
 
-    all_emails = set()
-    if contacts_emails:
-        all_emails.update(set(contacts_emails))
-    if gmail_emails:
-        all_emails.update(set(gmail_emails))
+    sorted_gmail_list = api.parse_gmail(service_mail)
     
     if request.method == 'POST':
         # process submitted form here
@@ -152,6 +148,7 @@ def import_start(request):
             print(res)
         
         forward_address = group_name + '@' + BASE_URL
+        forward_address = "squadbox@dunkley.me"
 
         res = api.create_gmail_filter(service_mail, emails_to_add, forward_address)
         return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)
@@ -160,4 +157,4 @@ def import_start(request):
         group_name = None
         if 'group' in request.GET:
             group_name = request.GET['group']
-        return render(request, 'gmail_setup_import.html', {'user': user, 'contacts_emails': contacts_emails, 'gmail_emails': gmail_emails, 'group_name': group_name})
+        return render(request, 'gmail_setup_import.html', {'user': user, 'contacts_emails': contacts_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name})
