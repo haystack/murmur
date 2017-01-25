@@ -103,18 +103,18 @@
         $("#slider").slider({
             max: max,
             min: min,
-            value: max,
+            value: 0,
             slide: function(event, ui) {
                 // TODO: create a map between 0,1,2,... on the slider to the *actual* frequency values that occur, so that one step on the slider always changes some checkboxes
                 var current_val = 0;
                 while (current_val <= ui.value) {
-                    $('.freq-' + current_val.toString()).prop("checked", true);
-                    $('.item-freq-' + current_val.toString()).css('opacity', '1.0');
+                    $('.freq-' + current_val.toString()).prop("checked", false);
+                    $('.item-freq-' + current_val.toString()).css('opacity', '0.5');
                     current_val++;
                 }
                 while (current_val <= max) {
-                    $('.freq-' + current_val.toString()).prop("checked", false);
-                    $('.item-freq-' + current_val.toString()).css('opacity', '0.5');
+                    $('.freq-' + current_val.toString()).prop("checked", true);
+                    $('.item-freq-' + current_val.toString()).css('opacity', '1.0');
                     current_val++;
                 }
             }
