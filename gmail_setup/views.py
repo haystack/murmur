@@ -36,7 +36,7 @@ def index(request):
     group_name = request.GET['group']
 
     forward_address = group_name + '@' + BASE_URL
-    forward_address = "squadbox@dunkley.me"
+    forward_address = "squadbox@dunkley.me" # TODO change this back before production upload (and the one below)
 
     user = request.user
     storage = Storage(CredentialsModel, 'id', user, 'credential')

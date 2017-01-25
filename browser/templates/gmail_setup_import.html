@@ -69,6 +69,8 @@
                 <p>The list of people you've received messages from in the past year, sorted by frequency, is:</p>
                 <p>Slide to adjust cutoff point by frequency</p>
                 <div id="slider"></div>
+                <div id="randomdiv"></div>
+                <br />
                 <div id="gmail-list">
                     {% for email, frequency, name, label in sorted_gmail_list %}
                         <label><input type="checkbox" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="label" class="label-{{label}}">{{label}}</span> <span id="frequency">{{frequency}}</span><br />
@@ -95,7 +97,7 @@
 {% block customjs %}
     <script src="/static/javascript/third-party/jquery-ui.min.js"></script>
     <script>
-    $( function() {
+    $(document).ready( function() {
         $( "#slider" ).slider();
     } );
     </script>

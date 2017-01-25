@@ -9,14 +9,12 @@ def parse_contacts(service_people):
         for person in response["connections"]:
             if "emailAddresses" in person:
                 for email in person["emailAddresses"]:
-                    #print email["value"]
                     emails.append(email["value"])
         if "nextPageToken" in response:
             page_token = response["nextPageToken"]
         else:
             page_token = None
     return emails
-
 
 def parse_gmail(service_mail):
     email_dict = dict()
@@ -26,9 +24,35 @@ def parse_gmail(service_mail):
     page_token = ""
     current_time = time.time()*1000
     time_back = 3.154e+10 # get messages from the last year
-    time_back = 2e+8 # shorter time for testing
+    time_back = 2e+8 # shorter time for testing, TODO delete this line
     time_not_over = True
     ans = None
+
+    def batch_cb(request_id, response, exception):
+        message = response
+        list_message_object = {}
+        batch_cb.stop = False
+        if int(message["internalDate"]) < int(current_time - time_back):
+            batch_cb.stop = True
+            return
+        for pair in message['payload']['headers']:
+            if pair["name"] == "From":
+                emailstring = pair["value"].encode('UTF-8')
+                list_message_object['email'] = re.findall(r'[\w\.-]+@[\w\.-]+', emailstring)[0]
+                name = emailstring.split('<')[0].strip()
+                if name.startswith('"') and name.endswith('"'):
+                    name = name[1:-1]
+                list_message_object['name'] = name
+        list_message_object['label'] = None
+        for label in message['labelIds']:
+            if label == "CATEGORY_PERSONAL": list_message_object['label'] = 'personal'
+            if label == "CATEGORY_SOCIAL": list_message_object['label'] = 'social'
+            if label == "CATEGORY_PROMOTIONS": list_message_object['label'] = 'promotions'
+            if label == "CATEGORY_UPDATES": list_message_object['label'] = 'updates'
+            if label == "CATEGORY_FORUMS": list_message_object['label'] = 'forums'
+        # TODO: labels at the moment are only decided based on most recent email; change to be mode
+        if list_message_object['label'] != None:
+            received_list.append(list_message_object)
 
     # receieved:
     while (page_token != None) and time_not_over:
@@ -36,30 +60,13 @@ def parse_gmail(service_mail):
         if 'messages' not in response:
             page_token = None
             break
+        response_messages = None
+        batch = service_mail.new_batch_http_request(callback=batch_cb)
         for message in response['messages']:
-            list_message_object = {}
-            # TODO batchify all 100 requests from this page here (limited to 100 so works out perfectly)
-            message = service_mail.users().messages().get(userId='me', id=message['id']).execute()
-            if int(message["internalDate"]) < int(current_time - time_back):
-                time_not_over = False
-                break
-            for pair in message['payload']['headers']:
-                if pair["name"] == "From":
-                    emailstring = pair["value"].encode('UTF-8')
-                    list_message_object['email'] = re.findall(r'[\w\.-]+@[\w\.-]+', emailstring)[0]
-                    name = emailstring.split('<')[0].strip()
-                    if name.startswith('"') and name.endswith('"'):
-                        name = name[1:-1]
-                    list_message_object['name'] = name
-            list_message_object['label'] = None
-            for label in message['labelIds']:
-                if label == "CATEGORY_PERSONAL": list_message_object['label'] = 'personal'
-                if label == "CATEGORY_SOCIAL": list_message_object['label'] = 'social'
-                if label == "CATEGORY_PROMOTIONS": list_message_object['label'] = 'promotions'
-                if label == "CATEGORY_UPDATES": list_message_object['label'] = 'updates'
-                if label == "CATEGORY_FORUMS": list_message_object['label'] = 'forums'
-            if list_message_object['label'] != None:
-                received_list.append(list_message_object)
+            batch.add(service_mail.users().messages().get(userId='me', id=message['id']))
+        batch.execute()
+        if batch_cb.stop:
+            time_not_over = False       
         if "nextPageToken" in response:
             page_token = response["nextPageToken"]
         else:
