@@ -1264,4 +1264,4 @@ def murmur_acct(request, acct_func=None, template_name=None):
 	elif request.path_info == "/accounts/password/reset/complete/": template=WEBSITE+"/registration/password_reset_complete.html"
 	else: template=WEBSITE+"/registration/password_reset_confirm.html"
 	return acct_func(request, template_name=template, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
-
+# TODO: password reset workflow seems to redirect to the wrong page (password changes successfuly but redirects to 'confirm password reset' page)
