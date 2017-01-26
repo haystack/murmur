@@ -19,8 +19,8 @@
 
                 <p>The list of email addresses from your contacts is: <a href="#" class="btn-toggle" id="btn-toggle-contacts" onclick='return false;'>Toggle all</a></p>
 
-                {% for email in contacts_emails %}
-                    <span class="item-contacts"><label><input type="checkbox" class="contacts-checkbox" name="{{email}}" checked> {{email}}</label></span><br />
+                {% for name, email in contacts_names_emails %}
+                    <span class="item-contacts"><label><input type="checkbox" class="contacts-checkbox" name="{{email}}" checked> {{name}}</label> {{email}}</span><br />
                 {% endfor %}
                 <br />
 

@@ -2,19 +2,22 @@ import re
 import time
 
 def parse_contacts(service_people):
-    emails = []
+    res_tuple = []
     page_token = ""
     while page_token != None:
-        response = service_people.people().connections().list(resourceName='people/me', pageSize=500, requestMask_includeField="person.email_addresses", pageToken=page_token).execute()
+        response = service_people.people().connections().list(resourceName='people/me', pageSize=500, requestMask_includeField="person.email_addresses,person.names", pageToken=page_token).execute()
         for person in response["connections"]:
+            the_name = ""
+            if "names" in person:
+                the_name = person["names"][0]["displayName"]
             if "emailAddresses" in person:
                 for email in person["emailAddresses"]:
-                    emails.append(email["value"])
+                    res_tuple.append((the_name, email["value"]))
         if "nextPageToken" in response:
             page_token = response["nextPageToken"]
         else:
             page_token = None
-    return emails
+    return res_tuple
 
 def parse_gmail(service_mail):
     email_dict = dict()

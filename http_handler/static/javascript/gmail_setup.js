@@ -1,10 +1,15 @@
 $(document).ready( function() {
+    $("#tabs").tabs({
+        activate: function (event, ui) {
+            var active = $('#tabs').tabs('option', 'active');
+        }
+    });
+
     $("#slider").slider({
         max: slider_max,
         min: 0,
         value: 0,
         slide: function(event, ui) {
-            // TODO: create a map between 0,1,2,... on the slider to the *actual* frequency values that occur, so that one step on the slider always changes some checkboxes
             var current_val = 0;
             while (current_val <= ui.value) {
                 $('.freq-' + map[current_val]).prop("checked", false);
@@ -18,40 +23,42 @@ $(document).ready( function() {
             }
         }
     });
-
-    $(":checkbox").change(function() {
+    $('#toggle-all-contacts').change(function() {
         if(this.checked) {
-            $(this).parent().parent().css('opacity', '1.0');
-        } else {
-            $(this).parent().parent().css('opacity', '0.5');
-        }
-    });
-    var contacts_checked = true
-    $('#btn-toggle-contacts').click(function(){
-        if (contacts_checked) {
-            $('.contacts-checkbox').prop('checked', false);
-            $('.contacts-checkbox').parent().parent().css('opacity', '0.5');
-            $(this).css('opacity', '0.5');
-            contacts_checked = false;
-        } else {
             $('.contacts-checkbox').prop('checked', true);
             $('.contacts-checkbox').parent().parent().css('opacity', '1.0');
             $(this).css('opacity', '1.0');
             contacts_checked = true;
+        } else {
+            $('.contacts-checkbox').prop('checked', false);
+            $('.contacts-checkbox').parent().parent().css('opacity', '0.5');
+            $(this).css('opacity', '0.5');
+            contacts_checked = false;
         }
     });
-    var emails_checked = true
-    $('#btn-toggle-received').click(function(){
-        if (emails_checked) {
-            $('.received-checkbox').prop('checked', false);
-            $('.received-checkbox').parent().parent().css('opacity', '0.5');
-            $(this).css('opacity', '0.5');
-            emails_checked = false;
-        } else {
+    $('#toggle-all-received').change(function() {
+        if(this.checked) {
             $('.received-checkbox').prop('checked', true);
             $('.received-checkbox').parent().parent().css('opacity', '1.0');
             $(this).css('opacity', '1.0');
             emails_checked = true;
+        } else {
+            $('.received-checkbox').prop('checked', false);
+            $('.received-checkbox').parent().parent().css('opacity', '0.5');
+            $(this).css('opacity', '0.5');
+            emails_checked = false;
+        }
+    });
+    $(":checkbox").change(function() {
+        name = $(this).attr('name')
+        if(this.checked) {
+            $(this).parent().parent().css('opacity', '1.0');
+            $("input[name='"+name+"']").prop('checked', true);
+            $("input[name='"+name+"']").parent().parent().css('opacity', '1.0');
+        } else {
+            $(this).parent().parent().css('opacity', '0.5');
+            $("input[name='"+name+"']").prop('checked', false);
+            $("input[name='"+name+"']").parent().parent().css('opacity', '0.5');
         }
     });
     var personal_checked = true;

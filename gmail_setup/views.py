@@ -119,7 +119,7 @@ def import_start(request):
     service_people = build('people', 'v1', http=http)
     service_mail = build('gmail', 'v1', http=http)
 
-    contacts_emails = api.parse_contacts(service_people)
+    contacts_names_emails = api.parse_contacts(service_people)
 
     sorted_gmail_list = api.parse_gmail(service_mail)
     max_frequency = sorted_gmail_list[0][1]
@@ -164,4 +164,5 @@ def import_start(request):
         group_name = None
         if 'group' in request.GET:
             group_name = request.GET['group']
-        return render(request, WEBSITE+'/gmail_setup_import.html', {'user': user, 'contacts_emails': contacts_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list})
+        # TODO: combine multiple email addresses for same contact in contacts view
+        return render(request, WEBSITE+'/gmail_setup_import.html', {'user': user, 'contacts_names_emails': contacts_names_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list})
