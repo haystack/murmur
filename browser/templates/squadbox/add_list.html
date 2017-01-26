@@ -1,0 +1,41 @@
+{% extends "squadbox/base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+	
+     <h3>Add New Mailing List to <span id="group-name">{{ group_info.name }}</span></h3>
+
+     <hr />
+        <form id="new-list-form">
+			<span class="strong">List email address: </span> <br />
+	        <input id="new-list-email" type="text" size="40"></input><br/>
+	        <span class="strong">List URL (optional): </span> <br />
+	        <input id="new-list-url" type="text" size="40"></input><br/> 
+	        <br/>
+			<input type="checkbox" id="can_post"> Allow emails from this mailing list to be posted to the squad <br/>
+			<input type="checkbox" id="can_receive"> Forward posts from the group to this mailing list<br/>
+	        <br /> <br />
+			<button type="button" id="btn-add-list" style="margin-top:10px;">Add List</button>
+		</form>
+		
+	<br /><br />
+		     
+	<a href="/groups/{{group_info.name}}">Squad Info Page</a>
+     
+  </div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/squadbox/add_list.js"></script>
+{% endblock %}
+
+
+
+

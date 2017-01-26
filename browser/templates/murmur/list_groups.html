@@ -1,0 +1,84 @@
+{% extends "murmur/base.html" %}
+
+{% block customcss %}
+	<link href="/static/css/third-party/datatable.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+  	
+  	<a href="/create_new_group"><button type="button">Create New Group</button></a>
+  	<br />
+  	
+     <h3>Explore Public Groups</h3>
+     <hr />
+		<div>
+			<table id="members-table" class="display" cellspacing="0" width="100%">
+				<thead>
+					<tr>
+						<th>Group Name</th>
+						<th>Description</th>
+						<th>Admin</th>
+						<th>Moderator</th>
+						<th>Member</th>
+						<th>Created</th>
+						<th>Num Members</th>
+					</tr>
+				</thead>
+				
+				<tfoot>
+					<tr>
+						<th>Group Name</th>
+						<th>Description</th>
+						<th>Admin</th>
+						<th>Moderator</th>
+						<th>Member</th>
+						<th>Created</th>
+						<th>Num Members</th>
+					</tr>
+				</tfoot>
+				
+				<tbody>
+					{% for group in pub_groups %}
+					<tr>
+						<td><a href="/groups/{{ group.name }}">{{group.name}}</a></td>
+						<td><span class="italic-med">{{ group.desc }}</span></td>
+						{% if group.admin %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+						{% endif %}
+						{% if group.mod %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+						{% endif %}
+						{% if group.member %}
+							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							{% else %}
+							<th></th>
+						{% endif %}
+						<th>{{ group.created }}</th>
+						<th>{{ group.count }}</th>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>	
+
+
+		</div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block customjs %}
+
+<script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>
+
+{% endblock %}
+
+
