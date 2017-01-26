@@ -782,7 +782,7 @@ $(document).ready(function(){
 		timestamp = new Date(0);
 		
 		for (var i = 0; i< thread_list.length; i++){
-			d = format_date(new Date(thread_list[i].timestamp));
+			d = format_date(new Date(thread_list[i].timestamp + ' UTC'));
 			var content = '<div class="left-column-area-metadata">';
 			content += '<span class="gray">' + d.date + '</span><BR>';
 			content += '<span class="gray">' + d.time + '</span><BR>';
@@ -949,7 +949,7 @@ $(document).ready(function(){
 		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span>';
 		if (res.post.forwarding_list) content += ' via ' + res.post.forwarding_list;
 		content += '<br />';
-		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp) + '</span>';
+		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp + ' UTC') + '</span>';
 		content += '<br />';
 		content += '<small><a href="/thread?tid=' + res.thread_id + '">Thread Permalink</a></small>';
 		
