@@ -560,6 +560,16 @@ body > header #logo {
     padding-bottom: 30px;
 }
 
+
+li > a {
+	font-size: 18px;
+}
+
+.navbar-default {
+	background-color: #ffffff;
+    border-color: #ffffff;
+}
+
 body > section {
     -ms-flex: 1;
     flex: 1;
@@ -573,6 +583,7 @@ body > section {
     font-size: 24px;
     text-align: center;
     padding-top: 25px;
+    width: 100%;
 }
 
 @media only screen and (max-width: 767px) {
