@@ -1,0 +1,24 @@
+{% extends "squadbox/base.html" %}
+{% block headlink-right %}
+{% endblock %}
+
+{% block content %}
+<div class="accounts">
+    {% if account %}
+     	<h3>Activation complete </h3>
+		<hr />
+        <p>
+            <strong> Thanks {{ account }}! </strong>
+        </p>
+        <p>
+            You may now <a href='{% url auth_login %}'>login</a>.
+        </p>
+    {% else %}
+    	<h3>Activation problem</h3>
+		<hr />
+    <p>
+        <strong> Oops &ndash; </strong> it seems that your activation key is invalid. Please check the url again.
+    </p>
+    {% endif %}
+</div> 
+{% endblock %}
