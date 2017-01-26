@@ -1,0 +1,16 @@
+{% extends "squadbox/base.html" %}
+{% block headlink-right %}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="accounts">
+     	<h3>Activation complete </h3>
+		<hr />
+    <p>
+        <a class="btn btn-primary" href="{% url "auth_login" %}"> Login</a>
+    </p>
+</div>
+{% endblock %}
+

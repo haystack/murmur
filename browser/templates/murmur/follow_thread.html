@@ -1,0 +1,31 @@
+{% extends "murmur/base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+	
+	{% if res.status %}
+		You've now {{ type }}ed the thread "{{ res.thread_name }}"!
+	{% else %}
+		Sorry, there was an error: {{ res.code }}.
+	{% endif %}
+	<BR>
+		<BR>
+		<a href="/posts?tid={{res.thread_id}}">View the thread on Murmur.</a><BR><BR>
+		<a href="/groups/{{active_group.name}}/edit_my_settings">Edit your settings for Group: {{active_group.name}}.</a>
+      
+  </div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+{% endblock %}
+
+
+
+

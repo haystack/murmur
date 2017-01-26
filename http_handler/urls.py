@@ -85,7 +85,7 @@ urlpatterns = patterns('',
     #override the registration default urls - bug with django 1.6
       url(r'^password/change/$',
                     murmur_acct,
-                    {'acct_func': auth_views.password_change},
+                    {'acct_func': auth_views.password_change, 'template_name': 'password_change_form.html'},
                     name='password_change',
                     ),
       url(r'^password/change/done/$',

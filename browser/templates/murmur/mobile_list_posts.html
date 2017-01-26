@@ -1,0 +1,96 @@
+{% extends "murmur/base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+
+		<div id="post-column-area-wrapper">
+		<div id="post-column-area">
+			
+			<h3>{{ active_group.name }}</h3>
+			
+			<div class="post-list-container">
+				
+				{% if active_group.name != "No Groups Yet" %}
+					<a href="/groups/{{ active_group.name }}/create_post"><button type="button">+ New Post</button></a>
+					<a href="/groups/{{ active_group.name }}"><button type="button">View Group Info</button></a>
+					<BR><BR>
+					<input type="text" class="default-text" value="Search within posts" title="Search within posts"/>
+		    	
+				{% else %}
+				<i>You are not in any groups yet. <a href="/group_list">Join or create a new group.</a>
+				</i>
+			{% endif %}
+			<BR><BR>
+			</div>
+		
+			<ul id="post-list-table">
+				{% for post in posts.threads %}
+				<a href="/thread?group_name={{ active_group.name }}&tid={{ post.thread_id }}">
+					<li class="row-item" id="{{ post.thread_id }}">
+						<div class="left-column-area-metadata">
+							<span class="gray">{{ post.timestamp|date:"n/j/Y" }}</span>
+							<span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
+							<span class="unread">{{ post.num_replies }}</span> <br>
+						</div>
+						<div class="middle-column-area-content">
+							<span class="strong">{{ post.post.subject }}</span>
+							<br />
+							<span class="strong-gray">{{ post.post.from }}</span><br />
+							<span class="blurb ellipsis">{{ post.post.text|striptags }}
+							</span>
+						</div>
+													
+						{% if post.tags|length > 0 %}
+							<div>
+								{% for tag in post.tags %}
+									<span class="label2" style="background-color: #{{tag.color}}; float: right; position: relative; top: 5px;">{{tag.name}}</span>
+								{% endfor %}
+							</div>
+						{% endif %}
+						
+						<div>
+						<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
+
+						{% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
+							{% if post.following %}
+								<span class="label2 following" style="background-color: #3D7AA6;">Following</span>
+							{% endif %}
+						{% else %}
+							{% if post.muting %}
+								<span class="label2 muted" style="background-color: #3D7AA6;">Muted</span>
+							{% endif %}
+						{% endif %}
+						</div>
+
+					</li>
+				</a>
+			{% endfor %}
+			</ul>
+			<div id="scroll_trigger"></div>
+			<!--{% if posts.threads.has_previous %}
+				<a class="prev-link" href="?page={{ posts.threads.previous_page_number }}{{ link_mod }}">
+					&larr; previous
+				</a>
+			{% endif %}
+			{% if posts.threads.has_next %}
+				<a class="next-link" href="?page={{ posts.threads.next_page_number }}{{ link_mod }}">
+                next &rarr;
+				</a>
+			{% endif %} -->
+		</div>
+		</div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+<script src="/static/javascript/murmur/pagination.js"></script>
+
+{% endblock %}
+

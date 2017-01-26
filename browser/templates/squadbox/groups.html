@@ -1,0 +1,69 @@
+{% extends "squadbox/base.html" %}
+{% block customcss %}
+	<link href="/static/css/third-party/datatable.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+
+<div id="left-column-area-wrapper">
+<div id="left-column-area">
+	<div class="post-container">
+		<a href="/create_new_group"><button type="button" id="btn-create-group">+ New Squad</button></a>
+		<input type="text" id="text-search-group" class="default-text" value="Search within groups" title="Search within squads"/>
+
+	</div>
+	<ul id="groups-table" class="table">
+	</ul>
+</div>
+</div>
+
+<div id="main-area-wrapper">
+<div id="main-area">
+	<div id="new-group-area" class="main-area-content" style="display:none;">
+	</div>
+	<div id="group-display-area" class="main-area-content" style="display:none;">
+	<div id="group-info">
+	</div>
+	<div id="group-options">
+		<button type="button" id="btn-edit-settings">Edit My Settings</button>
+		<button type="button" id="btn-edit-group-info">Edit Squad Information</button><br /><br />
+		<button type="button" id="btn-activate-group">Activate</button>
+		<button type="button" id="btn-deactivate-group">De-Activate</button>
+		<button type="button" id="btn-subscribe-group">Subscribe</button>
+		<button type="button" id="btn-unsubscribe-group">Un-Subscribe</button>
+		<button type="button" id="btn-delete-group">Delete Squad</button>
+	</div>
+	<br />
+	<div id='members-list-area' style='display:none;'>
+	<h3>Squad Members</h3> 
+	<hr />
+	<button type="button" id="btn-add-members">Add Members</button>
+	<button type="button" id="btn-delete-members">Delete Members</button>
+	<button type="button" id="btn-set-admin">Set as Admin</button>
+	<!--	<button type="button" id="btn-undo-admin">Revoke Admin Rights</button> -->
+	<button type="button" id="btn-set-mod">Set as Moderator</button>
+	<!--	<button type="button" id="btn-undo-mod">Revoke Moderator Rights</button> -->
+	
+	<table id="members-table" class="display" cellspacing="0" width="100%">
+		<thead>
+			<tr>
+				<th>Select</th>
+				<th>Email</th>
+				<th>Admin</th>
+				<th>Moderator</th>
+			</tr>
+		</thead>
+	</table>	
+	</div>
+</div>	
+</div>
+</div>
+
+{% endblock %}
+{% block customjs %}
+
+	<script type="text/javascript" src="/static/javascript/third-party/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/typeahead.js/typeahead.jquery.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/typeahead.js/bloodhound.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/squadbox/main.js"></script>
+
+{% endblock %}

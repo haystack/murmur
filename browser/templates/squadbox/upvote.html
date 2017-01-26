@@ -1,0 +1,29 @@
+{% extends "squadbox/base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <div class="group-container">
+	
+	{% if res.status %}
+		You've {{ type }} the post "{{ res.post_name }}"!
+	{% else %}
+		Sorry, there was an error: {{ res.code }}.
+	{% endif %}
+	<BR>
+	<BR>
+	<a href="/thread?group_name={{active_group.name}}&tid={{res.thread_id}}&post_id={{res.post_id}}">View the post on Murmur.</a><BR><BR>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+{% endblock %}
+
+
+
+
