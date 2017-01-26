@@ -180,7 +180,7 @@ $(document).ready(function(){
 
 	delete_group =
 	    function(params) {
-	        warningMessage = "Are you sure? This will delete the group including all emails ever sent within this group in the archive."
+	        warningMessage = "Are you sure? This will delete the squad including all emails ever sent within this squad in the archive."
 	        var confirmation = confirm(warningMessage);
 	        if (confirmation) {
 	        	$.post('delete_group', params,

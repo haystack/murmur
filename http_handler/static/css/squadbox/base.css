@@ -56,8 +56,6 @@ hr{
 	max-width: 320px;
 }
 
-
-
 .navbar-default .navbar-brand {
 	color: #000000;
 }
@@ -482,7 +480,7 @@ textarea {
 }
 
 #btn-create-new-post {
-	width: 202px;
+	width: 200px;
 }
 
 .table, #post-list-table{
