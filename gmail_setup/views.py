@@ -36,13 +36,13 @@ def index(request):
     group_name = request.GET['group']
 
     forward_address = group_name + '@' + BASE_URL
-    forward_address = "squadbox@dunkley.me" # TODO change this back before production upload (and the one below)
 
     user = request.user
     storage = Storage(CredentialsModel, 'id', user, 'credential')
     credential = storage.get()
 
     is_authorized = False
+    # Used for Squadbox only:
     gmail_forwarding_verified = False
     if credential is None or credential.invalid is True:
         pass
@@ -155,7 +155,6 @@ def import_start(request):
             print(res)
         
         forward_address = group_name + '@' + BASE_URL
-        forward_address = "squadbox@dunkley.me"
         if WEBSITE == "squadbox":
             res = api.create_gmail_filter(service_mail, emails_to_add, forward_address)
         return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)

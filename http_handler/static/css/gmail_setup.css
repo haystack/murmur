@@ -1,4 +1,4 @@
-#gmail-list {
+.gmail-list {
     padding-bottom: 1em;
 }
 #email {
@@ -7,39 +7,39 @@
     margin-left: 1em;
     color: #555;
 }
-#gmail-list #frequency {
+.gmail-list #frequency {
     font-size: 80%;
     color: #999;
     margin-left: 0.5em;
 }
-#gmail-list #label {
+.gmail-list #label {
     font-size: 80%;
     border: 0.1em solid;
     border-radius: 0.3em;
     padding: 0.2em;
     margin-left: 1em;
 }
-#gmail-list .label-personal, a.toggle-personal, a.toggle-personal:visited, a.toggle-personal:hover {
+.gmail-list .label-personal, a.toggle-personal, a.toggle-personal:visited, a.toggle-personal:hover {
     color: #0FAD24;
     border-color: #0FAD24;
     text-decoration: none;
 }
-#gmail-list .label-social, a.toggle-social, a.toggle-social:visited, a.toggle-social:hover {
+.gmail-list .label-social, a.toggle-social, a.toggle-social:visited, a.toggle-social:hover {
     color: #C824D5;
     border-color: #C824D5;
     text-decoration: none;
 }
-#gmail-list .label-updates, a.toggle-updates, a.toggle-updates:visited, a.toggle-updates:hover {
+.gmail-list .label-updates, a.toggle-updates, a.toggle-updates:visited, a.toggle-updates:hover {
     color: #FF5733;
     border-color: #FF5733;
     text-decoration: none;
 }
-#gmail-list .label-forums, a.toggle-forums, a.toggle-forums:visited, a.toggle-forums:hover {
+.gmail-list .label-forums, a.toggle-forums, a.toggle-forums:visited, a.toggle-forums:hover {
     color: #24A7D5;
     border-color: #24A7D5;
     text-decoration: none;
 }
-#gmail-list .label-promotions, a.toggle-promotions, a.toggle-promotions:visited, a.toggle-promotions:hover {
+.gmail-list .label-promotions, a.toggle-promotions, a.toggle-promotions:visited, a.toggle-promotions:hover {
     color: #D5245A;
     border-color: #D5245A;
     text-decoration: none;
@@ -47,4 +47,45 @@
 .toggle-all {
     font-size: 0.85em;
     letter-spacing: 0.1em;
+}
+
+.ui-widget-header {
+    background: none;
+    border: none;
+}
+
+.ui-widget-content {
+    background: none;
+    border: none;
+}
+
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+    background: #a6cbe6;
+}
+
+.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+    background: none;
+    border: none;
+}
+
+.ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
+    color: black;
+}
+
+.ui-state-hover a, .ui-state-hover a:hover, .ui-state-hover a:link, .ui-state-hover a:visited, .ui-state-focus a, .ui-state-focus a:hover, .ui-state-focus a:link, .ui-state-focus a:visited {
+    color: black;
+}
+
+.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+    border: 1px solid #ccc;
+}
+
+#slider {
+    border: 1px solid #ddd;
+    background: #eee url(images/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top repeat-x;
+    color: #333;
+}
+
+#slider .ui-state-default, #slider .ui-widget-content .ui-state-default, #slider .ui-widget-header .ui-state-default {
+    background: #f6f6f6 url(images/ui-bg_glass_100_f6f6f6_1x400.png) 50% 50% repeat-x;
 }

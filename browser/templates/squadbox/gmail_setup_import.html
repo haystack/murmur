@@ -17,21 +17,71 @@
 
                 <p>Below are your contacts and email addresses you've messaged frequency in the last year. Deselect any you don't want whitelisted, then click "Add to whitelist" below.</p>
 
-                <p>The list of email addresses from your contacts is: <a href="#" class="btn-toggle" id="btn-toggle-contacts" onclick='return false;'>Toggle all</a></p>
-
+                <p>The list of email addresses from your contacts is:</p>
+                <span class="toggle-all"><label><input type="checkbox" id="toggle-all-contacts" checked> TOGGLE ALL</label></span><br />
                 {% for name, email in contacts_names_emails %}
-                    <span class="item-contacts"><label><input type="checkbox" class="contacts-checkbox" name="{{email}}" checked> {{name}}</label> {{email}}</span><br />
+                    <span class="item-contacts"><label><input type="checkbox" class="contacts-checkbox" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span></span><br />
                 {% endfor %}
                 <br />
 
-                <p>The list of people you've received messages from in the past year, sorted by frequency, is: <a href="#" class="btn-toggle" id="btn-toggle-received" onclick='return false;'>Toggle all</a></p>
+                <p>The list of people you've received messages from in the past year, sorted by frequency, is:</p>
                 <p>Click on a label to toggle all emails with that label. Move the slider to adjust cutoff point by frequency: <div id="slider"></div></p>
 
-                <div id="gmail-list">
-                    {% for email, frequency, name, label in sorted_gmail_list %}
-                        <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="label" class="label-{{label}}"><a href="#" class="toggle-{{label}}" onclick='return false;'>{{label}}</a></span> <span id="frequency">{{frequency}}</span></span><br />
-                    {% endfor %}
+                <div id="tabs" class="gmail-list">
+                    <ul>
+                        <li><a href="#tabs-1">Personal</a>
+                        </li>
+                        <li><a href="#tabs-2">Social</a>
+                        </li>
+                        <li><a href="#tabs-3">Forums</a>
+                        </li>
+                        <li><a href="#tabs-4">Updates</a>
+                        </li>
+                        <li><a href="#tabs-5">Promotions</a>
+                        </li>
+                    </ul>
+                    <div id="tabs-1">
+                        <span class="toggle-all"><label><input type="checkbox" id="toggle-all-personal" checked> TOGGLE ALL</label></span><br />
+                        {% for email, frequency, name, label in sorted_gmail_list %}
+                            {% if label == "personal" %}
+                                <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div id="tabs-2">
+                        <span class="toggle-all"><label><input type="checkbox" id="toggle-all-social" checked> TOGGLE ALL</label></span><br />
+                        {% for email, frequency, name, label in sorted_gmail_list %}
+                            {% if label == "social" %}
+                                <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div id="tabs-3">
+                        <span class="toggle-all"><label><input type="checkbox" id="toggle-all-forums" checked> TOGGLE ALL</label></span><br />
+                        {% for email, frequency, name, label in sorted_gmail_list %}
+                            {% if label == "forums" %}
+                                <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div id="tabs-4">
+                        <span class="toggle-all"><label><input type="checkbox" id="toggle-all-updates" checked> TOGGLE ALL</label></span><br />
+                        {% for email, frequency, name, label in sorted_gmail_list %}
+                            {% if label == "updates" %}
+                                <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div id="tabs-5">
+                        <span class="toggle-all"><label><input type="checkbox" id="toggle-all-promotions" checked> TOGGLE ALL</label></span><br />
+                        {% for email, frequency, name, label in sorted_gmail_list %}
+                            {% if label == "promotions" %}
+                                <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
+
                 <p>
                     Add any extra email addresses you wish to whitelist by entering them here. Separate each with a comma (only valid ones will be added).<br />
                     <input type="text" name="custom_email_box" size="70">

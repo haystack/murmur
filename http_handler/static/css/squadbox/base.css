@@ -35,6 +35,11 @@ hr{
     }
 }
 
+#squadbox-header {
+	background-color: #f7f7f7;
+	border-bottom: 1px solid #e8e8e8;
+}
+
 .home-left, .home-right, .home-left-mobile, .home-right-mobile {
 	
 	float: left;
@@ -561,7 +566,7 @@ body > header #logo {
 
 
 li > a {
-	font-size: 18px;
+	font-size: 16px;
 }
 
 .navbar-default {

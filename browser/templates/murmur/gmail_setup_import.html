@@ -27,14 +27,7 @@
                 <p>The list of people you've received messages from in the past year, sorted by frequency, is:</p>
                 <p>Click on a label to toggle all emails with that label. Move the slider to adjust cutoff point by frequency: <div id="slider"></div></p>
 
-                <div id="gmail-list">
-                    <span class="toggle-all"><label><input type="checkbox" id="toggle-all-received" checked> TOGGLE ALL</label></span><br />
-                    {% for email, frequency, name, label in sorted_gmail_list %}
-                        <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="label" class="label-{{label}}"><a href="#" class="toggle-{{label}}" onclick='return false;'>{{label}}</a></span> <span id="frequency">{{frequency}}</span></span><br />
-                    {% endfor %}
-                </div>
-
-                <div id="tabs">
+                <div id="tabs" class="gmail-list">
                     <ul>
                         <li><a href="#tabs-1">Personal</a>
                         </li>
@@ -48,19 +41,44 @@
                         </li>
                     </ul>
                     <div id="tabs-1">
-                        <p>Content for Tab 1</p>
+                        <span class="toggle-all"><label><input type="checkbox" id="toggle-all-personal" checked> TOGGLE ALL</label></span><br />
+                        {% for email, frequency, name, label in sorted_gmail_list %}
+                            {% if label == "personal" %}
+                                <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                            {% endif %}
+                        {% endfor %}
                     </div>
                     <div id="tabs-2">
-                        <p>Content for Tab 2</p>
+                        <span class="toggle-all"><label><input type="checkbox" id="toggle-all-social" checked> TOGGLE ALL</label></span><br />
+                        {% for email, frequency, name, label in sorted_gmail_list %}
+                            {% if label == "social" %}
+                                <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                            {% endif %}
+                        {% endfor %}
                     </div>
                     <div id="tabs-3">
-                        <p>Content for Tab 3</p>
+                        <span class="toggle-all"><label><input type="checkbox" id="toggle-all-forums" checked> TOGGLE ALL</label></span><br />
+                        {% for email, frequency, name, label in sorted_gmail_list %}
+                            {% if label == "forums" %}
+                                <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                            {% endif %}
+                        {% endfor %}
                     </div>
                     <div id="tabs-4">
-                        <p>Content for Tab 4</p>
+                        <span class="toggle-all"><label><input type="checkbox" id="toggle-all-updates" checked> TOGGLE ALL</label></span><br />
+                        {% for email, frequency, name, label in sorted_gmail_list %}
+                            {% if label == "updates" %}
+                                <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                            {% endif %}
+                        {% endfor %}
                     </div>
                     <div id="tabs-5">
-                        <p>Content for Tab 5</p>
+                        <span class="toggle-all"><label><input type="checkbox" id="toggle-all-promotions" checked> TOGGLE ALL</label></span><br />
+                        {% for email, frequency, name, label in sorted_gmail_list %}
+                            {% if label == "promotions" %}
+                                <span class="item-freq-{{frequency}}"><label><input type="checkbox" class="received-checkbox freq-{{frequency}} box-label-{{label}}" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span> <span id="frequency">{{frequency}}</span></span><br />
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
 

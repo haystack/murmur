@@ -13,17 +13,10 @@
 
             {% if is_authorized %}
                 <p><b>Step 1:</b> <span style="color:#0DA10D">&#x2714; done</span> - your Google account is authorized. <a href="forget?group={{group_name}}">Click here</a> to re-authorize or use a different account.</p>
-                {% if gmail_forwarding_verified == 'accepted' %}
-                    <p><b>Step 2:</b> <span style="color:#0DA10D">&#x2714; done</span> - your Gmail forwarding address for "{{forward_address}}" is verified.</p>
-                    {% if is_done %}
-                        <p><b>Step 3:</b> <span style="color:#0DA10D">&#x2714; done</span> - your contacts have been imported to the whitelist and Gmail redirect filter has been set up. <a href="import?group={{group_name}}">Click here</a> or come back here any time to update your whitelist emails.</p>
-                    {% else %}
-                        <p><b>Step 3:</b> ready - <a href="import?group={{group_name}}">click here</a> to begin the contacts import process.</p>
-                    {% endif %}
-                {% elif gmail_forwarding_verified == 'pending' %}
-                    <p><b>Step 2:</b> <span style="color:#e59319">&#x231b; pending</span> - we forwarded you the confirmation email; please click the link inside. <a href="">Refresh</a> once you've done this.</p>
+                {% if is_done %}
+                    <p><b>Step 3:</b> <span style="color:#0DA10D">&#x2714; done</span> - your contacts have been imported to the whitelist and Gmail redirect filter has been set up. <a href="import?group={{group_name}}">Click here</a> or come back here any time to update your whitelist emails.</p>
                 {% else %}
-                    <p><b>Step 2:</b> <a href="https://mail.google.com/mail/#settings/fwdandpop" target="_blank">click here</a> to go to Gmail, click "add a forwarding address" and enter "{{forward_address}}", then press 'next' and then click 'proceed'. <a href="">Refresh</a> once you've done this.</p>
+                    <p><b>Step 3:</b> ready - <a href="import?group={{group_name}}">click here</a> to begin the contacts import process.</p>
                 {% endif %}
             {% else %}
                 <p><b>Step 1:</b> <a href="authorize?group={{group_name}}">click here</a> and authorize your Google account (don't worry, we never read your emails).</p>
