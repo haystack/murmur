@@ -74,7 +74,6 @@ def auth(request):
         if 'group' in request.GET:
             group_name = request.GET['group']
             FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY, user) + '___' + group_name
-            print FLOW.params['state']
             authorize_url = FLOW.step1_get_authorize_url()
             f = FlowModel(id=user, flow=FLOW)
             f.save()
@@ -121,14 +120,17 @@ def import_start(request):
 
     contacts_names_emails = api.parse_contacts(service_people)
 
-    sorted_gmail_list = api.parse_gmail(service_mail)
-    max_frequency = sorted_gmail_list[0][1]
-    min_frequency = sorted_gmail_list[-1][1]-1
+    max_frequency = 0
+    min_frequency = 0
     frequency_list = []
-    for i in range(len(sorted_gmail_list)):
-        if sorted_gmail_list[i][1] not in frequency_list:
-            frequency_list.append(sorted_gmail_list[i][1])
-    frequency_list.reverse()
+    sorted_gmail_list = api.parse_gmail(service_mail)
+    if sorted_gmail_list:
+        max_frequency = sorted_gmail_list[0][1]
+        min_frequency = sorted_gmail_list[-1][1]-1
+        for i in range(len(sorted_gmail_list)):
+            if sorted_gmail_list[i][1] not in frequency_list:
+                frequency_list.append(sorted_gmail_list[i][1])
+        frequency_list.reverse()
     
     if request.method == 'POST':
         # process submitted form here
@@ -148,7 +150,6 @@ def import_start(request):
             else:
                 emails_to_add.append(item[0])
 
-        print "GROUP NAME:", group_name
         for email in emails_to_add:
             # add these to whitelist / create form here!
             res = update_blacklist_whitelist(user=user, group_name=group_name, email=email, whitelist=True, blacklist=False)

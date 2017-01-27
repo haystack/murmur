@@ -26,8 +26,8 @@ def parse_gmail(service_mail):
     frequency_dict = dict()
     page_token = ""
     current_time = time.time()*1000
-    time_back = 3.154e+10 # get messages from the last year
-    time_back = 2e+8 # shorter time for testing, TODO delete this line
+    time_back = 1.577e+10 # get messages from the last 6 months
+    # time_back = 2e+8 # shorter time for testing
     time_not_over = True
     ans = None
 
