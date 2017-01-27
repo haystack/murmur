@@ -76,11 +76,12 @@ def parse_gmail(service_mail):
             page_token = None
 
     for message in received_list:
-        if message['email'] in frequency_dict:
-            frequency_dict[message['email']] += 1
-        else:
-            frequency_dict[message['email']] = 1
-            received_dict[message['email']] = {'name': message['name'], 'label': message['label']}
+        if 'email' in message:
+            if message['email'] in frequency_dict:
+                frequency_dict[message['email']] += 1
+            else:
+                frequency_dict[message['email']] = 1
+                received_dict[message['email']] = {'name': message['name'], 'label': message['label']}
     for email in frequency_dict:
         received_dict[email]['frequency'] = frequency_dict[email]
     sorted_list_temp = sorted(frequency_dict, key=frequency_dict.get, reverse=True)
