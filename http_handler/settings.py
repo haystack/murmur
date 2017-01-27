@@ -226,8 +226,6 @@ INSTALLED_APPS = (
     'registration',
     'south',
     'django_mobile'
-    #'social.apps.django_app.default'
-
 )
 
 # A sample logging configuration. The only tangible logging
@@ -272,15 +270,3 @@ try:
         from local_settings import *
 except ImportError:
         pass
-
-
-# Google auth settings
-# AUTHENTICATION_BACKENDS = (
-#     'social.backends.google.GoogleOAuth2',
-#     'django.contrib.auth.backends.ModelBackend')
-# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '632580153713-2e07rou6venv6ib3rllr97tp10l0jfia'
-# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'JUWcCl5Yz6IbXX5TUC9cfchP'
-# GA_CLIENT_ID = '632580153713-2e07rou6venv6ib3rllr97tp10l0jfia.apps.googleusercontent.com'
-# GA_CLIENT_SECRET = 'JUWcCl5Yz6IbXX5TUC9cfchP'
-# GA_SCOPE = 'https://www.googleapis.com/auth/analytics.readonly'
-# GA_REDIRECT_URI = 'http://your.domain.com/google-credentials/callback'
