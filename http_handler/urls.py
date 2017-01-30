@@ -108,7 +108,5 @@ urlpatterns = patterns('',
                        
      (r'^accounts/', include('registration.backends.default.urls')),
 
-     url(r'^contacts_setup/', 'browser.views.contacts_setup'),
-
      url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2"))
 )
