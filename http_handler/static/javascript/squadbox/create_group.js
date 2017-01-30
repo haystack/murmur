@@ -53,5 +53,4 @@ function notify(res, on_success){
 		}
 	}
 }
-	
-	
+

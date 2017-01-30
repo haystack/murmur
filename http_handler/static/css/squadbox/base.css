@@ -1,16 +1,16 @@
-/*
-@author: Anant Bhardwaj
-@date: 08/11/2012
-*/
-
 body, html {
 	height: 100%;
+	padding-top: 50px;
+}
+
+#home-body, #home-html {
 	font-family: 'Raleway', sans-serif;
+	padding-top: 0px;
 }
 
 hr{
-	background-color: #447EAC;
-	border: thin #447EAC solid;
+	background-color: #46b4da;
+	border: thin #46b4da solid;
 }
 
 .container-home {
@@ -56,6 +56,27 @@ hr{
 	max-width: 320px;
 }
 
+#site-name, #user_email, #email_dropdown, #groups_dropdown {
+	font-family: 'Quicksand', sans-serif;
+	font-weight: bold;
+}
+
+#login-form {
+	display: table;
+}
+
+#login-form > p {
+	display: table-row;
+}
+
+#login-form > p > label, input {
+	display: table-cell;
+}
+
+.h3 {
+	font-weight: bold;
+}
+
 .navbar-default .navbar-brand {
 	color: #000000;
 }
@@ -72,16 +93,18 @@ hr{
 	margin-top:30px; 
 	padding:30px; 
 	vertical-align:top;
-	background-color: #D7ECFA;
+	background-color: rgba(183, 233, 250, 0.5);
 	max-width:380px;
+	font-family: 'Raleway', sans-serif;
 }
 
 .group-container {
 	margin:0px auto;
-	margin-top:70px; 
+	margin-top:30px; 
 	padding:30px; 
 	vertical-align:top;
-	background-color: #D7ECFA;
+	background-color: rgba(183, 233, 250, 0.5);
+	font-family: 'Raleway', sans-serif;
 }
 
 .group-container-posts {
@@ -89,7 +112,7 @@ hr{
 	margin-top:30px; 
 	padding:8px; 
 	vertical-align:top;
-	background-color: #D7ECFA;
+	background-color: rgba(183, 233, 250, 0.5);
 }
 
 #text-search-post {
@@ -277,13 +300,12 @@ hr{
 }
 
 .post-container {
-        background: #D7ECFA;
+        background: rgba(183, 233, 250, 0.5);
         padding: 5px 10px 5px 10px;
         margin:0px;
 }
 
 .post-list-container {
-    background: #D7ECFA;
     padding: 5px 0px 5px 0px;
     margin:0px;
 }
@@ -304,9 +326,9 @@ input, select{
 }
 
 button, input[type="button"], input[type="submit"]{
-	background-color: #46b4da;
+	background-color: #357ebd;
 	color: #FFF;
-	border: #46b4da solid thin;
+	border: #357ebd solid thin;
 	padding:5px 10px 5px 10px;
 }
 
@@ -480,7 +502,7 @@ textarea {
 }
 
 #btn-create-new-post {
-	width: 200px;
+	width: 202px;
 }
 
 .table, #post-list-table{
@@ -558,16 +580,6 @@ body > header #logo {
     padding-bottom: 30px;
 }
 
-
-li > a {
-	font-size: 18px;
-}
-
-.navbar-default {
-	background-color: #ffffff;
-    border-color: #ffffff;
-}
-
 body > section {
     -ms-flex: 1;
     flex: 1;
@@ -581,7 +593,6 @@ body > section {
     font-size: 24px;
     text-align: center;
     padding-top: 25px;
-    width: 100%;
 }
 
 @media only screen and (max-width: 767px) {
