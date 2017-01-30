@@ -27,6 +27,8 @@ class Post(models.Model):
 	STATUS_CHOICES = (('R', 'rejected'), ('P', 'pending'), ('A', 'approved'))
 	status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
 
+	attachments = models.TextField()
+
 	def __unicode__(self):
 		if self.author:
 			return '%s %s' % (self.author.email, self.subject)

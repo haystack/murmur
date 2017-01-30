@@ -1274,9 +1274,14 @@ def murmur_acct(request, acct_func=None, template_name=None):
 def s3_test(request):
 	if request.method == 'POST':
 		uploaded_file = request.FILES['uploadedfile']
-		print uploaded_file
-		file = default_storage.open('storage_test', 'w')
-		file.write(uploaded_file)
-		file.close()
-		return {'content': 'uploaded?'}
+		print str(uploaded_file)
+		#file = default_storage.open('storage_test', 'w')
+		#file.write(uploaded_file)
+		#file.close()
+
+		with default_storage.open(str(uploaded_file), 'wb+') as destination:
+				for chunk in uploaded_file.chunks():
+					destination.write(chunk)
+
+		return {'content': 'uploaded.'}
 	return {'content': 'not uploaded yet'}
