@@ -71,17 +71,9 @@
 				</a>
 			{% endfor %}
 			</ul>
+			<div id="loading"><img src="static/images/spinner.gif" width="16px" /> Loading more posts...</div>
+			<div id="nomoreposts" style="display:none;">No more posts to show</div>
 			<div id="scroll_trigger"></div>
-			<!--{% if posts.threads.has_previous %}
-				<a class="prev-link" href="?page={{ posts.threads.previous_page_number }}{{ link_mod }}">
-					&larr; previous
-				</a>
-			{% endif %}
-			{% if posts.threads.has_next %}
-				<a class="next-link" href="?page={{ posts.threads.next_page_number }}{{ link_mod }}">
-                next &rarr;
-				</a>
-			{% endif %} -->
 		</div>
 		</div>
   </div>
@@ -90,7 +82,7 @@
 {% endblock %}
 
 {% block customjs %}
-<script src="/static/javascript/squadbox/pagination.js"></script>
+<script src="/static/javascript/pagination.js"></script>
 
 {% endblock %}
 
