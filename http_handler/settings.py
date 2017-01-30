@@ -273,7 +273,6 @@ except ImportError:
         pass
 
 # Amazon S3 setup for attachments
+USE_S3_FOR_ATTACHMENTS = True
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-AWS_ACCESS_KEY_ID = 'key_goes_here'
-AWS_SECRET_ACCESS_KEY = 'secret_key_goes_here'
 AWS_STORAGE_BUCKET_NAME = 'murmur-dev'
