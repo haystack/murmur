@@ -28,7 +28,7 @@ from http_handler.settings import BASE_URL, WEBSITE
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 
 @login_required
-@render_to(WEBSITE+"/gmail_setup_start.html")
+@render_to("gmail_setup_start.html")
 def index(request):
     is_done = False
     if request.path_info == '/gmail_setup/done':
@@ -55,7 +55,7 @@ def index(request):
         service_mail = build('gmail', 'v1', http=http)
         gmail_forwarding_verified = api.check_forwarding_address(service_mail, forward_address)
 
-    return {'user': user, 'is_authorized': is_authorized, 'gmail_forwarding_verified': gmail_forwarding_verified, 'is_done': is_done, 'group_name': group_name, 'forward_address': forward_address}
+    return {'website': WEBSITE, 'user': user, 'is_authorized': is_authorized, 'gmail_forwarding_verified': gmail_forwarding_verified, 'is_done': is_done, 'group_name': group_name, 'forward_address': forward_address}
 
 @login_required
 def auth(request):
@@ -172,4 +172,4 @@ def import_start(request):
         if 'group' in request.GET:
             group_name = request.GET['group']
         # TODO: combine multiple email addresses for same contact in contacts view
-        return render(request, WEBSITE+'/gmail_setup_import.html', {'user': user, 'contacts_names_emails': contacts_names_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list})
+        return render(request, 'gmail_setup_import.html', {'website': WEBSITE, 'user': user, 'contacts_names_emails': contacts_names_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list})

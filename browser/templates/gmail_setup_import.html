@@ -1,4 +1,4 @@
-{% extends "murmur/base.html" %}
+{% extends website|add:"/base.html" %}
 
 {% block customcss %}
     <link rel="stylesheet" type="text/css" href="/static/css/third-party/jquery-ui.min.css">
@@ -89,7 +89,11 @@
                 <input type="hidden" name="group_name" value="{{group_name}}" />
                 <input type="submit" value="Add to whitelist">
                 <br /><br />
-                <p>* This will add the email addresses above to our the whitelist for this Murmur mailing list, so that messages from those addresses are forwarded straight through to list members with no moderation.</p>
+                {% if website == "murmur" %}
+                    <p>* This will add the email addresses above to our the whitelist for this Murmur mailing list, so that messages from those addresses are forwarded straight through to list members with no moderation.</p>
+                {% elif website == "squadbox" %}
+                    <p>* This will (a) add the email addresses above to our whitelist associated with your Squadbox account, so that messages from those addresses sent to your public Squadbox address are forwarded straight onto you with no moderation, and (b) add a filter to your Gmail account that forwards every email sent directly to you that's not from someone on this whitelist to your squad, where it is hidden from you and held for moderation.</p>
+                {% endif %}
 
             </form>
         {% else %}
