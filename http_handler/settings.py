@@ -49,6 +49,9 @@ def _get_website():
     
 WEBSITE = _get_website()
 
+# Google authentication if client_secrets not used:
+CLIENT_SECRETS_JSON = ""
+
 try:
     execfile(SITE_ROOT + '/../private.py')
 except IOError:

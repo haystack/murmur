@@ -1,5 +1,6 @@
 import os
 import httplib2
+import json
 from oauth2client import xsrfutil
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.django_orm import Storage
@@ -7,6 +8,7 @@ from oauth2client.django_orm import Storage
 from apiclient.discovery import build
 
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, render_to_response
@@ -21,9 +23,16 @@ from engine.main import update_blacklist_whitelist
 from schema.models import CredentialsModel, FlowModel
 import api
 
-from http_handler.settings import BASE_URL, WEBSITE
+from http_handler.settings import BASE_URL, WEBSITE, CLIENT_SECRETS_JSON
 
-CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
+def client_secrets_file():
+    path = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
+    if not os.path.isfile(path):
+        with open(path, 'w') as outfile:
+            json.dump(CLIENT_SECRETS_JSON, outfile)
+    return path
+
+CLIENT_SECRETS = client_secrets_file()
 
 @login_required
 @render_to(WEBSITE+"/gmail_setup_start.html")
