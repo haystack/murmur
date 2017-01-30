@@ -224,7 +224,8 @@ INSTALLED_APPS = (
     #third party apps
     'registration',
     'south',
-    'django_mobile'
+    'django_mobile',
+    'storages'
 
 )
 
@@ -271,4 +272,8 @@ try:
 except ImportError:
         pass
 
-
+# Amazon S3 setup for attachments
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_ACCESS_KEY_ID = 'key_goes_here'
+AWS_SECRET_ACCESS_KEY = 'secret_key_goes_here'
+AWS_STORAGE_BUCKET_NAME = 'murmur-dev'

@@ -107,5 +107,6 @@ urlpatterns = patterns('',
                     name='password_reset_confirm'),
                        
      (r'^accounts/', include('registration.backends.default.urls')),
+     url(r'^s3_test', 'browser.views.s3_test'),
 
 )

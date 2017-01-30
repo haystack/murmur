@@ -25,3 +25,5 @@ python-modargs==1.7
 six==1.8.0
 wsgiref==0.1.2
 pytz==2016.7
+django-storages==1.4.1
+boto==2.45.0

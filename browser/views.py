@@ -28,6 +28,9 @@ from django.db.models.aggregates import Count
 from django.http import HttpResponse
 from django.template.context import RequestContext
 
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
 def lamson_status(request):
@@ -1265,3 +1268,15 @@ def murmur_acct(request, acct_func=None, template_name=None):
 	else: template=WEBSITE+"/registration/password_reset_confirm.html"
 	return acct_func(request, template_name=template, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
 # TODO: password reset workflow seems to redirect to the wrong page (password changes successfuly but redirects to 'confirm password reset' page)
+
+@render_to("s3_test.html")
+@login_required
+def s3_test(request):
+	if request.method == 'POST':
+		uploaded_file = request.FILES['uploadedfile']
+		print uploaded_file
+		file = default_storage.open('storage_test', 'w')
+		file.write(uploaded_file)
+		file.close()
+		return {'content': 'uploaded?'}
+	return {'content': 'not uploaded yet'}

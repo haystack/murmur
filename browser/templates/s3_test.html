@@ -1,0 +1,7 @@
+{{content}}
+
+<form action="s3_test" enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+    <input type="file" name="uploadedfile">
+    <input type="submit">
+</form>
