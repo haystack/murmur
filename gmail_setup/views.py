@@ -23,16 +23,9 @@ from engine.main import update_blacklist_whitelist
 from schema.models import CredentialsModel, FlowModel
 import api
 
-from http_handler.settings import BASE_URL, WEBSITE, CLIENT_SECRETS_JSON
+from http_handler.settings import BASE_URL, WEBSITE
 
-def client_secrets_file():
-    path = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
-    if not os.path.isfile(path):
-        with open(path, 'w') as outfile:
-            json.dump(CLIENT_SECRETS_JSON, outfile)
-    return path
-
-CLIENT_SECRETS = client_secrets_file()
+CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 
 @login_required
 @render_to(WEBSITE+"/gmail_setup_start.html")
@@ -70,6 +63,11 @@ def auth(request):
     #REDIRECT_URI = 'http://localhost:8000/gmail_setup/callback'
     REDIRECT_URI = "http://%s%s" % (BASE_URL, reverse("oauth2:return")) 
     #REDIRECT_URI = 'https://' + BASE_URL + '/gmail_setup/callback'
+    print "ACCESSING CLIENT SECRETS"
+    with open(CLIENT_SECRETS) as json_data:
+        d = json.load(json_data)
+        print "DATA:", d
+
     FLOW = flow_from_clientsecrets(
         CLIENT_SECRETS,
         scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic',
