@@ -656,13 +656,16 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 			replies = []
 			post = None
 			thread_likes = 0
-			
 			for p in posts:
 				post_likes = p.upvote_set.count()
 				user_liked = False
 				if user:
 					user_liked = p.upvote_set.filter(user=u).exists()
 				thread_likes += post_likes
+				attachments = []
+				for attachment in Attachment.objects.filter(msg_id=p.msg_id):
+					url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + attachment.hash_filename + "/" + attachment.true_filename
+					attachments.append((attachment.true_filename, url))
 				post_dict = {'id': p.id,
 							'msg_id': p.msg_id, 
 							'thread_id': p.thread_id, 
@@ -672,7 +675,9 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 							'likes': post_likes, 
 							'liked': user_liked,
 							'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
-							'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp}
+							'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp,
+							'attachments': attachments
+							}
 				if p.forwarding_list:
 					post_dict['forwarding_list'] = p.forwarding_list.email
 				if not p.reply_to_id:
@@ -771,6 +776,10 @@ def load_post(group_name, thread_id, msg_id):
 		t = Thread.objects.get(id=thread_id)
 		p = Post.objects.get(msg_id=msg_id, thread= t)
 		tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
+		attachments = []
+		for attachment in Attachment.objects.filter(msg_id=p.msg_id):
+			url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + attachment.hash_filename + "/" + attachment.true_filename
+			attachments.append((attachment.true_filename, url))
 		res['status'] = True
 		res['msg_id'] = p.msg_id
 		res['thread_id'] = p.thread_id
@@ -779,6 +788,8 @@ def load_post(group_name, thread_id, msg_id):
 		res['subject'] = escape(p.subject)
 		res['text'] = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
 		res['to'] = p.group.name
+		res['attachments'] = attachments
+		print "HERE"
 		if p.forwarding_list:
 			res['forwarding_list'] = p.forwarding_list.email
 	except Thread.DoesNotExist:

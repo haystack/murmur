@@ -622,6 +622,7 @@ def group_info(request):
 
 @login_required
 def list_posts(request):
+	print "LIST POST"
 	try:
 		group_name = request.POST.get('active_group')
 		res = engine.main.list_posts(group_name=group_name, user=request.user.email)
@@ -650,6 +651,7 @@ def refresh_posts(request):
 
 @login_required
 def load_post(request):
+	print "LOAD_POST" #todo
 	try:
 		res = engine.main.load_post(group_name=None, thread_id = request.POST['thread_id'], msg_id=request.POST['msg_id'])
 		return HttpResponse(json.dumps(res), content_type="application/json")

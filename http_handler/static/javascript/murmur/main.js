@@ -959,8 +959,13 @@ $(document).ready(function(){
 		content += '<br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp + ' UTC') + '</span>';
 		content += '<br />';
-		content += "hello";
-		if (res.post.attachments) content += "Attachment: <a href=\"" + res.post.attachments[0].hash_filename + "\">" + res.post.attachments[0].true_filename + "</a><br />";
+		if (res.post.attachments.length > 0) {
+			content += "<span class=\"strong>\">Attachments: </span><span class=\"strong-gray\">"
+			for (var j = 0; j < res.post.attachments.length; j++) {
+				content += "<a href=\""+ res.post.attachments[j][1] + "\">" + res.post.attachments[j][0] + "</a> ";
+			}
+			content += "</span><br />"
+		}
 		content += '<small><a href="/thread?tid=' + res.thread_id + '">Thread Permalink</a></small>';
 		
 		content += '</div>';
@@ -986,6 +991,12 @@ $(document).ready(function(){
                        	content += '<div class="main-area-content">';
 			content += '<span class="strong">' + res.replies[i].from + '</span>&nbsp;';
                        	content += 'on ' + new Date(res.replies[i].timestamp) + '&nbsp;';
+			if (res.replies[i].attachments.length > 0) {
+				content += "| Attachments: "
+				for (var j = 0; j < res.replies[i].attachments.length; j++) {
+					content += "<a href=\""+ res.replies[i].attachments[j][1] + "\">" + res.replies[i].attachments[j][0] + "</a> ";
+				}
+			}
 			content += '<br /><br />';
 		      	content +=  res.replies[i].text;
 		      	content += '<br />';

@@ -21,4 +21,3 @@ def upload_attachments(attachments, msg_id):
             a = Attachment(msg_id=msg_id, hash_filename=hash_filename, true_filename=filename)
             a.save()
     return res
-    # TODO this only deals with a single attachment; will probably fail for multiple attachments (or just keep the last one?)
