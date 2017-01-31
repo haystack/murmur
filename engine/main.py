@@ -815,7 +815,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, attach
 	res = upload_attachments(attachments, msg_id)
 
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, attachment_names=attachment_names, attachment_ids=attachment_ids)
+			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, attachment_ids=attachment_ids)
 	p.save()
 	
 	if WEBSITE == 'murmur':
