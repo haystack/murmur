@@ -371,12 +371,17 @@ def list_my_groups(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
-@render_to(WEBSITE+"/create_group.html")
+@render_to("create_group.html")
 @login_required
 def create_group_view(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
-	return {'user': request.user, 'groups': groups, 'group_page': True}
+	if WEBSITE == "murmur":
+		group_or_squad = "group"
+	elif WEBSITE == "squadbox":
+		group_or_squad = "squad"
+	return {'user': request.user, 'groups': groups, 'group_page': True, 
+			'website' : WEBSITE, 'group_or_squad' : group_or_squad}
 
 
 @render_to(WEBSITE+"/edit_group_info.html")

@@ -20,6 +20,8 @@ urlpatterns = patterns('',
     url(r'^404', 'browser.views.error'),
 
     url(r'^create_new_group', 'browser.views.create_group_view'), 
+    url(r'^create_group', 'browser.views.create_group'),
+    
     url(r'^groups/(?P<group_name>[\w-]+)$', 'browser.views.group_page'),
     url(r'^groups/(?P<group_name>[\w-]+)/add_members', 'browser.views.add_members_view'),
     url(r'^add_members', 'browser.views.add_members'),
@@ -98,7 +100,6 @@ if WEBSITE == 'murmur':
                     url(r'^my_group_list', 'browser.views.my_group_list'),
                     url(r'^group_settings', 'browser.views.get_group_settings'),
                     url(r'^unsubscribe_group', 'browser.views.unsubscribe_group'),
-                    url(r'^create_group', 'browser.views.create_group'),
                     url(r'^edit_members', 'browser.views.edit_members'),
                     url(r'^load_post', 'browser.views.load_post'),
                     url(r'^list_my_groups', 'browser.views.list_my_groups'), 
