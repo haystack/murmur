@@ -8,6 +8,8 @@ from registration.backends.default.views import ActivationView
 # from django.contrib import admin
 # admin.autodiscover()
 
+website_context = {'website' : WEBSITE}
+
 # shared URL patterns 
 urlpatterns = patterns('',
 
@@ -38,26 +40,30 @@ urlpatterns = patterns('',
                     ),
     url(r'^password/reset/$',
                     auth_views.password_reset,
+                    'extra_context' : website_context,
                     name='password_reset'),
     url(r'^password/reset/done/$',
                     auth_views.password_reset_done,
+                    'extra_context' : website_context,
                     name='password_reset_done'),
     url(r'^password/reset/complete/$',
                     auth_views.password_reset_complete,
+                    'extra_context' : website_context,
                     name='password_reset_complete'),
     url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
                     auth_views.password_reset_confirm,
+                    'extra_context' : website_context,
                     name='password_reset_confirm'),
 
     url(r'^accounts/activate/complete/$',
        TemplateView.as_view(template_name='registration/activation_complete.html'),
-       {'website' : WEBSITE},
+       website_context,
        name='registration_activation_complete',
     ),
 
     url(r'^accounts/activate/(?P<activation_key>\w+)/$',
         ActivationView.as_view(),
-        {'website' : WEBSITE},
+        website_context,
         name='registration_activate',
     ),
 
