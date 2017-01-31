@@ -815,7 +815,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, attach
 	attachment_names, attachment_ids = attachments.upload(attachments)
 
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, attachments_names=attachment_names, attachment_ids=attachment_ids)
+			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, attachment_names=attachment_names, attachment_ids=attachment_ids)
 	p.save()
 	
 	if WEBSITE == 'murmur':
@@ -867,7 +867,7 @@ def insert_post_web(group_name, subject, message_text, user):
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
 			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@' + BASE_URL
-			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id, "")
+			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id)
 			res['status'] = True
 			
 			res['member_group'] = {'no_emails': user_member[0].no_emails,

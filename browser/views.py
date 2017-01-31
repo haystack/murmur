@@ -667,7 +667,7 @@ def insert_post(request):
 		
 		msg_text = request.POST['msg_text']
 		
-		res = engine.main.insert_post_web(group_name, request.POST['subject'],  msg_text, user)
+		res = engine.main.insert_post_web(group_name, request.POST['subject'], msg_text, user)
 		
 		subj_tag = ''
 		for tag in res['tags']:
