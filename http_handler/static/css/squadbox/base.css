@@ -6,6 +6,7 @@
 body, html {
 	height: 100%;
 	font-family: 'Raleway', sans-serif;
+	
 }
 
 hr{
@@ -32,6 +33,11 @@ hr{
     .navbar-header {
         float:none;
     }
+}
+
+#squadbox-header {
+	background-color: #f7f7f7;
+	border-bottom: 1px solid #e8e8e8;
 }
 
 .home-left, .home-right, .home-left-mobile, .home-right-mobile {
@@ -78,7 +84,7 @@ hr{
 
 .group-container {
 	margin:0px auto;
-	margin-top:70px; 
+	margin-top:70px;
 	padding:30px; 
 	vertical-align:top;
 	background-color: #D7ECFA;
@@ -560,7 +566,7 @@ body > header #logo {
 
 
 li > a {
-	font-size: 18px;
+	font-size: 16px;
 }
 
 .navbar-default {
@@ -596,6 +602,7 @@ body > section {
 
 p {
 	max-width: 80%;
+	padding-bottom: 10px;
 }
 
 a:hover {
@@ -614,4 +621,9 @@ strong {
 	border: 5px #FFFFFF solid;
 	margin-bottom: 5px;
 	margin-top: 15px;
+}
+
+h2 {
+	margin-top: 0;
+	padding-bottom: 10px;
 }
