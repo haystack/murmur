@@ -955,11 +955,11 @@ $(document).ready(function(){
 		content += '<br>';
 		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
 		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span>';
-		if (res.post.attachments) content += "Attachment: <a href=\"" + res.post.attachments[0].hash_filename + "\">" + res.post.attachments[0].true_filename + "</a>";
 		if (res.post.forwarding_list) content += ' via ' + res.post.forwarding_list;
 		content += '<br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp + ' UTC') + '</span>';
 		content += '<br />';
+		if (res.post.attachments) content += "Attachment: <a href=\"" + res.post.attachments[0].hash_filename + "\">" + res.post.attachments[0].true_filename + "</a><br />";
 		content += '<small><a href="/thread?tid=' + res.thread_id + '">Thread Permalink</a></small>';
 		
 		content += '</div>';
