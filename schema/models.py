@@ -38,8 +38,8 @@ class Post(models.Model):
 
 class Attachment(models.Model):
 	id = models.AutoField(primary_key=True)
-	msg_id = models.CharField(max_length=120, unique=True)
-	hash_filename = models.TextField()
+	msg_id = models.CharField(max_length=120)
+	hash_filename = models.TextField(max_length=40, unique=True)
 	true_filename = models.TextField()
 	timestamp = models.DateTimeField(auto_now=True)
 
