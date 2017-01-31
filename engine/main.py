@@ -733,7 +733,6 @@ def load_thread(t, user=None, member=None):
 		for attachment in Attachment.objects.filter(msg_id=p.msg_id):
 			url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + attachment.hash_filename + "/" + attachment.true_filename
 			attachments.append((attachment.true_filename, url))
-		print attachments
 		post_dict = {
 					'id': str(p.id),
 					'msg_id': p.msg_id, 
@@ -751,9 +750,7 @@ def load_thread(t, user=None, member=None):
 			post_dict['forwarding_list'] = p.forwarding_list.email
 		if not p.reply_to_id:
 			post = post_dict
-			print "original"
 		else:
-			print "reply"
 			replies.append(post_dict)
 	tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
 	
@@ -789,7 +786,6 @@ def load_post(group_name, thread_id, msg_id):
 		res['text'] = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
 		res['to'] = p.group.name
 		res['attachments'] = attachments
-		print "HERE"
 		if p.forwarding_list:
 			res['forwarding_list'] = p.forwarding_list.email
 	except Thread.DoesNotExist:

@@ -651,7 +651,6 @@ def refresh_posts(request):
 
 @login_required
 def load_post(request):
-	print "LOAD_POST" #todo
 	try:
 		res = engine.main.load_post(group_name=None, thread_id = request.POST['thread_id'], msg_id=request.POST['msg_id'])
 		return HttpResponse(json.dumps(res), content_type="application/json")
