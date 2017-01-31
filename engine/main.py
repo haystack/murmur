@@ -664,7 +664,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 				thread_likes += post_likes
 				attachments = []
 				for attachment in Attachment.objects.filter(msg_id=p.msg_id):
-					url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + attachment.hash_filename + "/" + attachment.true_filename
+					url = "attachment/" + attachment.hash_filename
 					attachments.append((attachment.true_filename, url))
 				post_dict = {'id': p.id,
 							'msg_id': p.msg_id, 
@@ -731,7 +731,7 @@ def load_thread(t, user=None, member=None):
 			user_liked = p.upvote_set.filter(user=user).exists()
 		attachments = []
 		for attachment in Attachment.objects.filter(msg_id=p.msg_id):
-			url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + attachment.hash_filename + "/" + attachment.true_filename
+			url = "attachment/" + attachment.hash_filename
 			attachments.append((attachment.true_filename, url))
 		post_dict = {
 					'id': str(p.id),
@@ -775,7 +775,7 @@ def load_post(group_name, thread_id, msg_id):
 		tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
 		attachments = []
 		for attachment in Attachment.objects.filter(msg_id=p.msg_id):
-			url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + attachment.hash_filename + "/" + attachment.true_filename
+			url = "attachment/" + attachment.hash_filename
 			attachments.append((attachment.true_filename, url))
 		res['status'] = True
 		res['msg_id'] = p.msg_id

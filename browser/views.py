@@ -11,7 +11,7 @@ from browser.util import paginator
 
 from lamson.mail import MailResponse
 from smtp_handler.utils import *
-from http_handler.settings import WEBSITE
+from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME
 
 from django.core.context_processors import csrf
 import json, logging
@@ -19,7 +19,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from annoying.decorators import render_to
 from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
-	MuteTag, ForwardingList
+	MuteTag, ForwardingList, Attachment
 from html2text import html2text
 from django.contrib.auth.forms import AuthenticationForm
 from registration.forms import RegistrationForm
@@ -1284,3 +1284,11 @@ def s3_test(request):
 
 		return {'content': 'uploaded.'}
 	return {'content': 'not uploaded yet'}
+
+def serve_attachment(request, hash_filename):
+	if Attachment.objects.filter(hash_filename=hash_filename):
+		filename = Attachment.objects.filter(hash_filename=hash_filename)[0].true_filename
+		url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + hash_filename + "/" + filename
+		return HttpResponseRedirect(url)
+	else:
+		return HttpResponseRedirect('/404')
