@@ -31,8 +31,6 @@ from django.template.context import RequestContext
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-S3_BASE = "https://s3.amazonaws.com/"
-
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
 def lamson_status(request):

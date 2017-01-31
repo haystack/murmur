@@ -726,7 +726,7 @@ def load_thread(t, user=None, member=None):
 			user_liked = p.upvote_set.filter(user=user).exists()
 		attachments = []
 		for attachment in Attachment.objects.filter(msg_id=p.msg_id):
-			url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + attachment.hash_filename
+			url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + attachment.hash_filename + "/" + attachment.true_filename
 			attachments.append((attachment.true_filename, url))
 		print attachments
 		post_dict = {
