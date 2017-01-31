@@ -510,7 +510,8 @@ def deactivate_group(request):
 def add_members(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		res = engine.main.add_members(request.POST['group_name'], request.POST['emails'], user)
+		add_as_mods = request.POST['add_as_mods'] == 'true'
+		res = engine.main.add_members(request.POST['group_name'], request.POST['emails'], add_as_mods, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

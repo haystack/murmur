@@ -437,7 +437,7 @@ def adjust_list_can_receive(group_name, emails, can_receive, user):
 	logging.debug(res)
 	return res
 
-def add_members(group_name, emails, user):
+def add_members(group_name, emails, add_as_mods, user):
 	res = {'status':False}
 	
 	try:
@@ -463,7 +463,7 @@ def add_members(group_name, emails, user):
 											Subject  = "You've been subscribed to %s Mailing List" % (group_name))
 						
 						if email_user.count() == 1:
-							_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group)
+							_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group, moderator=add_as_mods)
 							
 							message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
 							message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
@@ -471,7 +471,7 @@ def add_members(group_name, emails, user):
 						else:
 							pw = password_generator()
 							new_user = UserProfile.objects.create_user(email, pw)
-							_ = MemberGroup.objects.get_or_create(group=group, member=new_user)
+							_ = MemberGroup.objects.get_or_create(group=group, member=new_user, moderator=add_as_mods)
 							
 							message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
 							message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
@@ -488,7 +488,7 @@ def add_members(group_name, emails, user):
 											Subject  = "You've been added as a moderator to %s squad" % (group_name))
 						
 						if email_user.count() == 1:
-							_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group)
+							_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group, moderator=add_as_mods)
 							
 							message = "You've been added as a moderator to %s squad. <br />" % (group_name)
 							message += "To see posts for this squad, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
@@ -496,7 +496,7 @@ def add_members(group_name, emails, user):
 						else:
 							pw = password_generator()
 							new_user = UserProfile.objects.create_user(email, pw)
-							_ = MemberGroup.objects.get_or_create(group=group, member=new_user)
+							_ = MemberGroup.objects.get_or_create(group=group, member=new_user, moderator=add_as_mods)
 							
 							message = "You've been added as a moderator to %s squad. <br />" % (group_name)
 							message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
