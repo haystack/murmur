@@ -41,6 +41,11 @@ class Attachment(models.Model):
 	msg_id = models.CharField(max_length=120, unique=True)
 	hash_filename = models.TextField()
 	true_filename = models.TextField()
+	timestamp = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		db_table = "murmur_attachments"
+		ordering = ["timestamp"]
 
 class Thread(models.Model):
 	id = models.AutoField(primary_key=True)

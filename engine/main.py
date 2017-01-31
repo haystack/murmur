@@ -700,7 +700,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 	return res
 	
 def load_thread(t, user=None, member=None):
-
+	print "LOAD THREAD"
 	following = False
 	muting = False
 	no_emails = False
@@ -736,8 +736,9 @@ def load_thread(t, user=None, member=None):
 					'subject': escape(p.subject), 
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 					'timestamp': p.timestamp,
-					'attachments': Attachment.objects.filter(msg_id=p.msg_id)
+					'attachments': Attachment.objects.filter(msg_id=(p.msg_id))
 					}
+		# filename = post_dict["attachments"].get().true_filename # but only if post_dict["attachments"] exists
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
 		if not p.reply_to_id:
