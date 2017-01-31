@@ -1280,8 +1280,7 @@ def s3_test(request):
 		#file.close()
 
 		with default_storage.open(str(uploaded_file), 'wb+') as destination:
-				for chunk in uploaded_file.chunks():
-					destination.write(chunk)
+			destination.write(uploaded_file)
 
 		return {'content': 'uploaded.'}
 	return {'content': 'not uploaded yet'}

@@ -17,8 +17,7 @@ def upload_attachments(attachments):
             hash_filename = hashlib.sha1(filename + salt + thetime).hexdigest()
             attachment_file = attachment['content']
             with default_storage.open(hash_filename, 'wb+') as destination:
-                    for chunk in attachment_file.chunks():
-                        destination.write(chunk)
+                destination.write(attachment_file)
             attachment_names = filename
             attachment_ids = hash_filename
             print "FILENAME OF UPLOADED FILE:", hash_filename
