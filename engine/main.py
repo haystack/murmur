@@ -735,7 +735,8 @@ def load_thread(t, user=None, member=None):
 					'liked': user_liked,
 					'subject': escape(p.subject), 
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
-					'timestamp': p.timestamp
+					'timestamp': p.timestamp,
+					'attachments': Attachment.objects.filter(msg_id=p.msg_id)
 					}
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
