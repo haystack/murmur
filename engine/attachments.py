@@ -16,7 +16,7 @@ def upload_attachments(attachments, msg_id):
             filename = attachment['filename']
             hash_filename = hashlib.sha1(filename + salt + thetime).hexdigest()
             attachment_file = attachment['content']
-            with default_storage.open(hash_filename, 'wb+') as destination:
+            with default_storage.open(hash_filename+'/'+filename, 'wb+') as destination:
                 destination.write(attachment_file)
             a = Attachment(msg_id=msg_id, hash_filename=hash_filename, true_filename=filename)
             a.save()
