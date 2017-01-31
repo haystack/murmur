@@ -6,7 +6,6 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
 def upload_attachments(attachments):
-    print "ABOUT TO UPLOAD FILE"
     attachment_names = ""
     attachment_ids = ""
     if attachments:
@@ -20,5 +19,4 @@ def upload_attachments(attachments):
                 destination.write(attachment_file)
             attachment_names = filename
             attachment_ids = hash_filename
-            print "FILENAME OF UPLOADED FILE:", hash_filename
     return (attachment_names, attachment_ids)
