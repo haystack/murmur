@@ -27,8 +27,8 @@ class Post(models.Model):
 	STATUS_CHOICES = (('R', 'rejected'), ('P', 'pending'), ('A', 'approved'))
 	status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
 
-	attachment_names = models.TextField()
-	attachment_ids = models.TextField()
+	attachment_names = models.TextField('')
+	attachment_ids = models.TextField('')
 
 	def __unicode__(self):
 		if self.author:

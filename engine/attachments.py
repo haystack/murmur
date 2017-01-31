@@ -6,6 +6,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
 def upload(attachments):
+    print "ABOUT TO UPLOAD FILE"
     attachment_names = ""
     attachment_ids = ""
     for attachment in attachments.get("attachments"):
