@@ -2,10 +2,12 @@ import hashlib
 import time
 import random
 
+from schema.models import *
+
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-def upload_attachments(attachments):
+def upload_attachments(attachments, msg_id):
     attachment_names = ""
     attachment_ids = ""
     if attachments:
@@ -17,6 +19,7 @@ def upload_attachments(attachments):
             attachment_file = attachment['content']
             with default_storage.open(hash_filename, 'wb+') as destination:
                 destination.write(attachment_file)
-            attachment_names = filename
-            attachment_ids = hash_filename
+            a = Attachment(msg_id=msg_id, hash_filename=hash_filename, true_filename=filename)
+            a.save()
     return (attachment_names, attachment_ids)
+    # TODO this only deals with a single attachment; will probably fail for multiple attachments (or just keep the last one?)
