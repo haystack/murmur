@@ -5,7 +5,7 @@ import random
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-def upload(attachments):
+def upload_attachments(attachments):
     print "ABOUT TO UPLOAD FILE"
     attachment_names = ""
     attachment_ids = ""

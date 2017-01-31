@@ -8,8 +8,8 @@ from lamson.mail import MailResponse
 from smtp_handler.utils import relay_mailer, NO_REPLY
 from bleach import clean
 from cgi import escape
+from attachments import upload_attachments
 import re
-import attachments
 
 from http_handler.settings import BASE_URL, WEBSITE
 import json
