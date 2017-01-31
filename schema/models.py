@@ -40,7 +40,7 @@ class Attachment(models.Model):
 	id = models.AutoField(primary_key=True)
 	msg_id = models.CharField(max_length=120, unique=True)
 	hash_filename = models.TextField()
-	true=filename = models.TextField()
+	true_filename = models.TextField()
 
 class Thread(models.Model):
 	id = models.AutoField(primary_key=True)
