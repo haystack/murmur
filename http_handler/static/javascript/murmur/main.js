@@ -959,6 +959,7 @@ $(document).ready(function(){
 		content += '<br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp + ' UTC') + '</span>';
 		content += '<br />';
+		content += "hello";
 		if (res.post.attachments) content += "Attachment: <a href=\"" + res.post.attachments[0].hash_filename + "\">" + res.post.attachments[0].true_filename + "</a><br />";
 		content += '<small><a href="/thread?tid=' + res.thread_id + '">Thread Permalink</a></small>';
 		
