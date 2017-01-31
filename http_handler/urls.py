@@ -109,4 +109,5 @@ urlpatterns = patterns('',
      (r'^accounts/', include('registration.backends.default.urls')),
      url(r'^attachment/(?P<hash_filename>[0-9A-Za-z_]+)', 'browser.views.serve_attachment'),
 
+     url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2"))
 )

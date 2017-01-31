@@ -564,6 +564,16 @@ def handle_post(message, address=None, host=None):
 	if not res['status']:
 		send_error_email(group_name, res['error'], sender_addr, ADMIN_EMAILS)
 		return
+	
+	# deal with Gmail forwarding verification emails:
+	if sender_addr == "forwarding-noreply@google.com":
+		email_message = email.message_from_string(str(message))
+		msg_text = get_body(email_message)['plain']
+		forward_to = msg_text.split(' ', 1)[0]
+		content = "The message below is forwarded to you from Gmail - to complete the setup of your Gmail integration, please click the confirmation link below.\n\n"
+		mail = MailResponse(From = NO_REPLY, To = forward_to, Subject = (WEBSITE + " setup: please click the confirmation link inside"), Body = content + msg_text)
+		relay.deliver(mail)
+		return
 
 	if WEBSITE == 'squadbox':
 		handle_post_squadbox(message, group, host)

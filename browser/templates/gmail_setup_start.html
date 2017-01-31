@@ -1,0 +1,44 @@
+{% extends website|add:"/base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="group-container">
+        {% if group_name %}
+            <h2>Setup Gmail integration for {{ group_name }}</h2>
+            <p>Here, you can setup your Gmail and contacts with your {% if website == "murmur"%}Murmur{% elif website == "squadbox" %}Squadbox{% endif %} account.</p>
+
+            {% if is_authorized %}
+                <p><b>Step 1:</b> <span style="color:#0DA10D">&#x2714; done</span> - your Google account is authorized. <a href="forget?group={{group_name}}">Click here</a> to re-authorize or use a different account.</p>
+
+                {% if website == "squadbox" %}
+                    {% if gmail_forwarding_verified == 'accepted' %}
+                        <p><b>Step 2:</b> <span style="color:#0DA10D">&#x2714; done</span> - your Gmail forwarding address for "{{forward_address}}" is verified.</p>
+                    {% elif gmail_forwarding_verified == "pending" %}
+                        <p><b>Step 2:</b> <span style="color:#e59319">&#x231b; pending</span> - we forwarded you the confirmation email; please click the link inside. <a href="">Refresh</a> once you've done this.</p>
+                    {% else %}
+                        <p><b>Step 2:</b> <a href="https://mail.google.com/mail/#settings/fwdandpop" target="_blank">click here</a> to go to Gmail, click "add a forwarding address" and enter "{{forward_address}}", then press 'next' and then click 'proceed'. <a href="">Refresh</a> once you've done this.</p>
+                    {% endif %}
+                {% endif %}
+
+                {% if website == "murmur" or website == "squadbox" and gmail_forwarding_verified == "accepted" %}
+                    {% if is_done %}
+                        <p><b>Step {% if website == "squadbox" %}3{% else %}2{% endif %}:</b> <span style="color:#0DA10D">&#x2714; done</span> - your contacts have been imported to the whitelist and Gmail redirect filter has been set up. <a href="import?group={{group_name}}">Click here</a> or come back here any time to update your whitelist emails.</p>
+                    {% else %}
+                        <p><b>Step {% if website == "squadbox" %}3{% else %}2{% endif %}:</b> ready - <a href="import?group={{group_name}}">click here</a> to begin the contacts import process.</p>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                <p><b>Step 1:</b> <a href="authorize?group={{group_name}}">click here</a> and authorize your Google account (don't worry, we never read your emails).</p>
+            {% endif %}
+
+        {% else %}
+            <h3>Invalid request: please start again from the <a href="/my_groups">My Groups</a> page.</h3>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

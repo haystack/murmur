@@ -42,6 +42,7 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 * create file /opt/murmur/env with single word containing "dev", "staging", or "prod" for the type of server you are setting up
 * create file /opt/murmur/debug with single word containing "true" or "false" to turn on debug mode
 * edit file /opt/murmur/website with single word containing "murmur" or "squadbox" to direct to the respective landing page
+* If using Google integration, create a Google API project and enable the Gmail, People and Contacts APIs; generate an Oauth2 client_secrets.json file for this project and put this in the /gmail_setup/ directory
 
 #### if setting up a local email server (not necessary to run webserver)
 * configure your relay_server (postfix or something else) in config/settings.py

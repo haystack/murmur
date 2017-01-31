@@ -220,13 +220,13 @@ INSTALLED_APPS = (
     'schema',
     'browser',
     'smtp_handler',
+    'gmail_setup',
     
     #third party apps
     'registration',
     'south',
     'django_mobile',
     'storages'
-
 )
 
 # A sample logging configuration. The only tangible logging
