@@ -1258,10 +1258,9 @@ def murmur_acct(request, acct_func=None, template_name=None):
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	active_group = load_groups(request, groups, user)
 	if request.path_info == "/accounts/password/change/": template=WEBSITE+"/registration/password_change_form.html"
-	elif request.path_info == "/accounts/password/change/done/": template=WEBSITE+"/registration/password_change_done.html"
+	elif request.path_info == "/password/change/done/": template=WEBSITE+"/registration/password_change_done.html"
 	elif request.path_info == "/accounts/password/reset/": template=WEBSITE+"/registration/password_reset_form.html"
-	elif request.path_info == "/accounts/password/reset/done/": template=WEBSITE+"/registration/password_reset_done.html"
-	elif request.path_info == "/accounts/password/reset/complete/": template=WEBSITE+"/registration/password_reset_complete.html"
+	elif request.path_info == "/password/reset/done/": template=WEBSITE+"/registration/password_reset_done.html"
+	elif request.path_info == "/password/reset/complete/": template=WEBSITE+"/registration/password_reset_complete.html"
 	else: template=WEBSITE+"/registration/password_reset_confirm.html"
 	return acct_func(request, template_name=template, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
-# TODO: password reset workflow seems to redirect to the wrong page (password changes successfuly but redirects to 'confirm password reset' page)

@@ -1,9 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, User
 
 from django.utils.http import urlquote
 from django.core.mail import send_mail
 from http_handler import settings
+
+from oauth2client.django_orm import FlowField, CredentialsField
+from http_handler.settings import AUTH_USER_MODEL
 
 class Post(models.Model):
 	id = models.AutoField(primary_key=True)
@@ -270,4 +273,17 @@ class Upvote(models.Model):
 	class Meta:
 		db_table = "murmur_likes"
 
+class FlowModel(models.Model):
+    id = models.ForeignKey(AUTH_USER_MODEL, primary_key=True)
+    flow = FlowField()
+ 
+ 
+class CredentialsModel(models.Model):
+    id = models.ForeignKey(AUTH_USER_MODEL, primary_key=True)
+    credential = CredentialsField()
 
+from south.modelsinspector import add_introspection_rules
+add_introspection_rules([], ["^schema\.fields\.FlowModel"])
+add_introspection_rules([], ["^schema\.fields\.CredentialsModel"])
+add_introspection_rules([], ["^oauth2client\.django_orm\.CredentialsField"])
+add_introspection_rules([], ["^oauth2client\.django_orm\.FlowField"])
