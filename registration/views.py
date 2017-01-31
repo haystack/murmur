@@ -137,6 +137,11 @@ class ActivationView(TemplateView):
                 return redirect(success_url)
         return super(ActivationView, self).get(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super(ActivationView, self).get_context_data(**kwargs)
+        context['website'] = WEBSITE
+        return context
+
     def activate(self, request, *args, **kwargs):
         """
         Implement account-activation logic here.

@@ -61,15 +61,15 @@ hr{
 	font-weight: bold;
 }
 
-#login-form {
+#login-form, #reg-form {
 	display: table;
 }
 
-#login-form > p {
+#login-form, #reg-form > p {
 	display: table-row;
 }
 
-#login-form > p > label, input {
+#login-form, #reg-form > p > label, input {
 	display: table-cell;
 }
 

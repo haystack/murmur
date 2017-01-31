@@ -4,6 +4,7 @@ from django.views.generic.base import TemplateView
 from browser.views import *
 from http_handler.settings import WEBSITE
 from registration.backends.default.views import ActivationView
+from registration.forms import MurmurPasswordResetForm
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
@@ -21,38 +22,35 @@ urlpatterns = patterns('',
     url(r'^create_new_group', 'browser.views.create_group_view'), 
     url(r'^groups/(?P<group_name>[\w-]+)$', 'browser.views.group_page'),
     url(r'^groups/(?P<group_name>[\w-]+)/add_members', 'browser.views.add_members_view'),
-    url(r'^groups/(?P<group_name>[\w-]+)/edit_my_settings', 'browser.views.my_group_settings_view'),
-    url(r'^groups/(?P<group_name>[\w-]+)/edit_group_info', 'browser.views.edit_group_info_view'),
-    url(r'^edit_group_info', 'browser.views.edit_group_info'),
-    url(r'^delete_group', 'browser.views.delete_group'),
     url(r'^add_members', 'browser.views.add_members'),
      
     #override the registration default urls - bug with django 1.6
-    url(r'^password/change/$',
+    url(r'^accounts/password/change/$',
                     murmur_acct,
-                    {'acct_func': auth_views.password_change, 'template_name': 'password_change_form.html'},
+                    {'acct_func': auth_views.password_change, 'template_name': 'registration/password_change_form.html'},
                     name='password_change',
                     ),
-    url(r'^password/change/done/$',
+    url(r'^accounts/password/change/done/$',
                     murmur_acct,
-                    {'acct_func': auth_views.password_change_done},
+                    {'acct_func': auth_views.password_change_done, 'template_name': 'registration/password_change_done.html'},
                     name='password_change_done',
                     ),
-    url(r'^password/reset/$',
+    url(r'^accounts/password/reset/$',
                     auth_views.password_reset,
-                    'extra_context' : website_context,
+                    {'password_reset_form' : MurmurPasswordResetForm,
+                    'extra_context' : website_context},
                     name='password_reset'),
-    url(r'^password/reset/done/$',
+    url(r'^accounts/password/reset/done/$',
                     auth_views.password_reset_done,
-                    'extra_context' : website_context,
+                    {'extra_context' : website_context},
                     name='password_reset_done'),
-    url(r'^password/reset/complete/$',
+    url(r'^accounts/password/reset/complete/$',
                     auth_views.password_reset_complete,
-                    'extra_context' : website_context,
+                    {'extra_context' : website_context},
                     name='password_reset_complete'),
-    url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
+    url(r'^accounts/password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
                     auth_views.password_reset_confirm,
-                    'extra_context' : website_context,
+                    {'extra_context' : website_context},
                     name='password_reset_confirm'),
 
     url(r'^accounts/activate/complete/$',
@@ -63,8 +61,13 @@ urlpatterns = patterns('',
 
     url(r'^accounts/activate/(?P<activation_key>\w+)/$',
         ActivationView.as_view(),
-        website_context,
         name='registration_activate',
+    ),
+
+    url(r'^accounts/register/complete/$',
+        TemplateView.as_view(template_name='registration/registration_complete.html'),
+        website_context,
+        name='registration_complete',
     ),
 
     url(r'^accounts/', include('registration.backends.default.urls')),
@@ -86,7 +89,11 @@ if WEBSITE == 'murmur':
                     url(r'^deactivate_group', 'browser.views.deactivate_group'),
                     url(r'^subscribe_group', 'browser.views.subscribe_group'),
 
-                    # TODO: make all of these work for both squadbox and murmur. 
+                    # TODO: make all of these work/customize for squadbox
+                    url(r'^groups/(?P<group_name>[\w-]+)/edit_my_settings', 'browser.views.my_group_settings_view'),
+                    url(r'^groups/(?P<group_name>[\w-]+)/edit_group_info', 'browser.views.edit_group_info_view'),
+                    url(r'^edit_group_info', 'browser.views.edit_group_info'),
+                    url(r'^delete_group', 'browser.views.delete_group'),
                     url(r'^my_groups', 'browser.views.my_groups'),
                     url(r'^my_group_list', 'browser.views.my_group_list'),
                     url(r'^group_settings', 'browser.views.get_group_settings'),
