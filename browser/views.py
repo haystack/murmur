@@ -238,7 +238,7 @@ def thread(request):
 
 
 
-@render_to(WEBSITE+"/settings.html")
+@render_to("settings.html")
 @login_required
 def settings(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
