@@ -107,7 +107,6 @@ urlpatterns = patterns('',
                     name='password_reset_confirm'),
                        
      (r'^accounts/', include('registration.backends.default.urls')),
-     url(r'^s3_test', 'browser.views.s3_test'),
      url(r'^attachment/(?P<hash_filename>[0-9A-Za-z_]+)', 'browser.views.serve_attachment'),
 
 )

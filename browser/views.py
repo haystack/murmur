@@ -1268,22 +1268,6 @@ def murmur_acct(request, acct_func=None, template_name=None):
 	else: template=WEBSITE+"/registration/password_reset_confirm.html"
 	return acct_func(request, template_name=template, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
 
-@render_to("s3_test.html")
-@login_required
-def s3_test(request):
-	if request.method == 'POST':
-		uploaded_file = request.FILES['uploadedfile']
-		print str(uploaded_file)
-		#file = default_storage.open('storage_test', 'w')
-		#file.write(uploaded_file)
-		#file.close()
-
-		with default_storage.open(str(uploaded_file), 'wb+') as destination:
-			destination.write(uploaded_file)
-
-		return {'content': 'uploaded.'}
-	return {'content': 'not uploaded yet'}
-
 def serve_attachment(request, hash_filename):
 	if Attachment.objects.filter(hash_filename=hash_filename):
 		filename = Attachment.objects.filter(hash_filename=hash_filename)[0].true_filename
