@@ -35,6 +35,10 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 	  'PASSWORD': 'password',  
 	  'HOST': 'localhost'  
   }`
+* also in this private.py file, add your Amazon S3 settings:
+	`AWS_STORAGE_BUCKET_NAME = 'bucket-name-goes-here'
+	AWS_ACCESS_KEY_ID = 'key-goes-here'
+	AWS_SECRET_ACCESS_KEY = 'secret-key-goes-here'`
 * create file /opt/murmur/env with single word containing "dev", "staging", or "prod" for the type of server you are setting up
 * create file /opt/murmur/debug with single word containing "true" or "false" to turn on debug mode
 * edit file /opt/murmur/website with single word containing "murmur" or "squadbox" to direct to the respective landing page
