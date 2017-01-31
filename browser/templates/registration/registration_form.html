@@ -1,4 +1,4 @@
-{% extends "murmur/base.html" %}
+{% extends website|add:"/base.html" %}
 {% block headlink-right %}
 {% endblock %}
 {% block content %}
@@ -17,3 +17,5 @@
         </form>
 </div>
 {% endblock %}
+
+<!-- # TODO fix links to this and registration_complete -->

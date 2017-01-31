@@ -1,11 +1,12 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth import views as auth_views
+from django.views.generic.base import TemplateView
 from browser.views import *
 from http_handler.settings import WEBSITE
+from registration.backends.default.views import ActivationView
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
-
 
 # shared URL patterns 
 urlpatterns = patterns('',
@@ -47,9 +48,20 @@ urlpatterns = patterns('',
     url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
                     auth_views.password_reset_confirm,
                     name='password_reset_confirm'),
-                       
-    url(r'^accounts/', include('registration.backends.default.urls')),
 
+    url(r'^accounts/activate/complete/$',
+       TemplateView.as_view(template_name='registration/activation_complete.html'),
+       {'website' : WEBSITE},
+       name='registration_activation_complete',
+    ),
+
+    url(r'^accounts/activate/(?P<activation_key>\w+)/$',
+        ActivationView.as_view(),
+        {'website' : WEBSITE},
+        name='registration_activate',
+    ),
+
+    url(r'^accounts/', include('registration.backends.default.urls')),
     )
 
 # murmur-only patterns
