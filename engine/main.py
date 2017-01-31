@@ -9,6 +9,7 @@ from smtp_handler.utils import relay_mailer, NO_REPLY
 from bleach import clean
 from cgi import escape
 import re
+import attachments
 
 from http_handler.settings import BASE_URL, WEBSITE
 import json
@@ -811,8 +812,10 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, attach
 	if post_status == None:
 		post_status = 'A'
 	
+	attachment_names, attachment_ids = attachments.upload(attachments)
+
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, attachments=attachments)
+			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, attachments_names=attachment_names, attachment_ids=attachment_ids)
 	p.save()
 	
 	if WEBSITE == 'murmur':
