@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.encoding import *
 import engine.main
 import base64
+import hashlib
 from engine.constants import *
 
 from browser.util import load_groups
@@ -1264,3 +1265,13 @@ def murmur_acct(request, acct_func=None, template_name=None):
 	elif request.path_info == "/password/reset/complete/": template=WEBSITE+"/registration/password_reset_complete.html"
 	else: template=WEBSITE+"/registration/password_reset_confirm.html"
 	return acct_func(request, template_name=template, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
+
+
+def subscribe_confirm(request, membergroup_id, token):
+	mg = MemberGroup.objects.get(id=membergroup_id)
+	confirm_code = hashlib.sha1(mg.member.email+mg.group.name+mg.timestamp).hexdigest()
+	if confirm_code == token:
+		mg.active = True
+		return HttpResponseRedirect('/')
+	else:
+		return HttpResponseRedirect('/404')

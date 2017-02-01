@@ -113,6 +113,7 @@ class MemberGroup(models.Model):
 	no_emails = models.BooleanField(default=False)
 	always_follow_thread = models.BooleanField(default=True)
 	upvote_emails = models.BooleanField(default=True)
+	active = models.BooleanField(default=False)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)
