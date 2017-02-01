@@ -1270,6 +1270,7 @@ def murmur_acct(request, acct_func=None, template_name=None):
 	else: template=WEBSITE+"/registration/password_reset_confirm.html"
 	return acct_func(request, template_name=template, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
 
+@login_required
 def serve_attachment(request, hash_filename):
 	if Attachment.objects.filter(hash_filename=hash_filename):
 		#url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + hash_filename + "/" + filename
