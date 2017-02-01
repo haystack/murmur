@@ -1286,6 +1286,6 @@ def serve_attachment(request, hash_filename):
 				temporary_auth_url = s3.generate_url(60, 'GET', bucket=AWS_STORAGE_BUCKET_NAME, key=filepath)
 				return HttpResponseRedirect(temporary_auth_url)
 			else:
-				return return HttpResponseRedirect('/404')
+				return HttpResponseRedirect('/404')
 	else:
 		return HttpResponseRedirect('/404')
