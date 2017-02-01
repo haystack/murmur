@@ -384,7 +384,7 @@ def create_group_view(request):
 			'website' : WEBSITE, 'group_or_squad' : group_or_squad}
 
 
-@render_to(WEBSITE+"/edit_group_info.html")
+@render_to("edit_group_info.html")
 @login_required
 def edit_group_info_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)  
@@ -393,7 +393,12 @@ def edit_group_info_view(request, group_name):
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
 		if membergroup[0].admin:
-			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+			if WEBSITE == "murmur":
+				group_or_squad = "group"
+			elif WEBSITE == "squadbox":
+				group_or_squad = "squad"
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 
+					'website' : WEBSITE, 'group_or_squad' : group_or_squad}
 		else:
 			return redirect('/404?e=admin')
 	except Group.DoesNotExist:

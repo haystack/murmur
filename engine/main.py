@@ -225,7 +225,8 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, 
 	res = {'status':False}	
 	try:
 		group = Group.objects.get(name=old_group_name)
-		group.name = new_group_name
+		if len(new_group_name) > 0:
+			group.name = new_group_name
 		group.description = group_desc
 		group.public = public
 		group.allow_attachments = attach

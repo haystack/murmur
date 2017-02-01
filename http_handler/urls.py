@@ -21,6 +21,9 @@ urlpatterns = patterns('',
 
     url(r'^create_new_group', 'browser.views.create_group_view'), 
     url(r'^create_group', 'browser.views.create_group'),
+
+    url(r'^groups/(?P<group_name>[\w-]+)/edit_group_info', 'browser.views.edit_group_info_view'),
+    url(r'^edit_group_info', 'browser.views.edit_group_info'),
     
     url(r'^groups/(?P<group_name>[\w-]+)$', 'browser.views.group_page'),
     url(r'^groups/(?P<group_name>[\w-]+)/add_members', 'browser.views.add_members_view'),
@@ -95,8 +98,6 @@ if WEBSITE == 'murmur':
 
                     # TODO: make all of these work/customize for squadbox
                     url(r'^groups/(?P<group_name>[\w-]+)/edit_my_settings', 'browser.views.my_group_settings_view'),
-                    url(r'^groups/(?P<group_name>[\w-]+)/edit_group_info', 'browser.views.edit_group_info_view'),
-                    url(r'^edit_group_info', 'browser.views.edit_group_info'),
                     url(r'^delete_group', 'browser.views.delete_group'),
                     url(r'^my_groups', 'browser.views.my_groups'),
                     url(r'^my_group_list', 'browser.views.my_group_list'),
@@ -166,7 +167,3 @@ elif WEBSITE == 'squadbox':
                     ]
 
     urlpatterns.extend(new_patterns)
-<<<<<<< HEAD
-
-=======
->>>>>>> haystack/master
