@@ -57,7 +57,6 @@ urlpatterns = patterns('',
                     {'extra_context' : website_context},
                     name='password_reset_confirm'),
 
-<<<<<<< HEAD
     url(r'^accounts/activate/complete/$',
        TemplateView.as_view(template_name='registration/activation_complete.html'),
        website_context,
