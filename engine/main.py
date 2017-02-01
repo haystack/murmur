@@ -440,7 +440,6 @@ def adjust_list_can_receive(group_name, emails, can_receive, user):
 
 def add_members(group_name, emails, user):
 	res = {'status':False}
-	print "ADDING MEMBERS"
 	try:
 		group = Group.objects.get(name=group_name)
 		is_public = group.public
@@ -468,7 +467,7 @@ def add_members(group_name, emails, user):
 							confirm_code = hashlib.sha1(email+group_name+str(mg.timestamp)).hexdigest()
 							confirm_url = 'http://' + BASE_URL + '/subscribe/confirm/' + mg.id + '/' + confirm_code
 							message = "You've been invited to join %s Mailing List. <br />" % (group_name)
-							message += "To confirm your subscription to this list, visit <a href='%s'>%s</a><br />" % (confirm_url)
+							message += "To confirm your subscription to this list, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
 							message += "To manage your mailing list settings, subscribe, or unsubscribe, visit <a href='http://%s/groups/%s'>http://%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
 						else:
@@ -478,7 +477,7 @@ def add_members(group_name, emails, user):
 							confirm_code = hashlib.sha1(email+group_name+str(mg.timestamp)).hexdigest()
 							confirm_url = 'http://' + BASE_URL + '/subscribe/confirm/' + str(mg.id) + '/' + confirm_code
 							message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
-							message += "To confirm your subscription to this list, visit <a href='%s'>%s</a><br />" % (confirm_url)
+							message += "To confirm your subscription to this list, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
 							message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
 							message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
@@ -497,7 +496,7 @@ def add_members(group_name, emails, user):
 							confirm_code = hashlib.sha1(email+group_name+str(mg.timestamp)).hexdigest()
 							confirm_url = 'http://' + BASE_URL + '/subscribe/confirm/' + mg.id + '/' + confirm_code
 							message = "You've been invited to join %s squad. <br />" % (group_name)
-							message += "To confirm your membership of this squad, visit <a href='%s'>%s</a><br />" % (confirm_url)
+							message += "To confirm your membership of this squad, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "To see posts for this squad, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
 							message += "To manage your squad settings, subscribe, or unsubscribe, visit <a href='http://%s/groups/%s'>http://%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
 						else:
@@ -507,7 +506,7 @@ def add_members(group_name, emails, user):
 							confirm_code = hashlib.sha1(email+group_name+str(mg.timestamp)).hexdigest()
 							confirm_url = 'http://' + BASE_URL + '/subscribe/confirm/' + mg.id + '/' + confirm_code
 							message = "You've been added as a moderator to %s squad. <br />" % (group_name)
-							message += "To confirm your membership of this squad, visit <a href='%s'>%s</a><br />" % (confirm_url)
+							message += "To confirm your membership of this squad, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
 							message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
 							message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
