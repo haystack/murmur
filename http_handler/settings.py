@@ -274,3 +274,4 @@ except ImportError:
 
 # Storage for attachments
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_DEFAULT_ACL = 'private'
