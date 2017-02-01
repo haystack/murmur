@@ -260,13 +260,14 @@ class RegistrationProfile(models.Model):
         """
         ctx_dict = {'activation_key': self.activation_key,
                     'expiration_days': settings.ACCOUNT_ACTIVATION_DAYS,
-                    'site': site}
-        subject = render_to_string(WEBSITE+'/registration/activation_email_subject.txt',
+                    'website': WEBSITE,
+                    'domain': site.domain}
+        subject = render_to_string('registration/activation_email_subject.txt',
                                    ctx_dict)
         # Email subject *must not* contain newlines
         subject = ''.join(subject.splitlines())
         
-        message = render_to_string(WEBSITE+'/registration/activation_email.txt',
+        message = render_to_string('registration/activation_email.txt',
                                    ctx_dict)
         
         self.user.email_user(subject, message, settings.DEFAULT_FROM_EMAIL)
