@@ -1269,7 +1269,7 @@ def murmur_acct(request, acct_func=None, template_name=None):
 
 def subscribe_confirm(request, membergroup_id, token):
 	mg = MemberGroup.objects.get(id=membergroup_id)
-	confirm_code = hashlib.sha1(mg.member.email+mg.group.name+mg.timestamp).hexdigest()
+	confirm_code = hashlib.sha1(mg.member.email+mg.group.name+str(mg.timestamp)).hexdigest()
 	if confirm_code == token:
 		mg.active = True
 		return HttpResponseRedirect('/')
