@@ -1,0 +1,14 @@
+{% extends website|add:"/base.html" %}
+{% block headlink-right %}
+{% endblock %}
+{% block content %}
+	<div class="accounts">
+		<h3>Register Account</h3>
+		<hr />
+		<form method='post' id='reg-form'>
+			{% csrf_token %}		
+			{{ form.as_p }}
+			<input type="submit" class="btn btn-primary" value="Register!" />
+		</form>
+	</div>
+{% endblock %}

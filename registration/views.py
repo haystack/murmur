@@ -67,7 +67,7 @@ class RegistrationView(_RequestPassingFormView):
     form_class = RegistrationFormUniqueEmail
     http_method_names = ['get', 'post', 'head', 'options', 'trace']
     success_url = None
-    template_name = WEBSITE+'/registration/registration_form.html'
+    template_name = 'registration/registration_form.html'
 
     def dispatch(self, request, *args, **kwargs):
         """
@@ -91,6 +91,11 @@ class RegistrationView(_RequestPassingFormView):
             return redirect(to, *args, **kwargs)
         except ValueError:
             return redirect(success_url)
+
+    def get_context_data(self, **kwargs):
+        context = super(RegistrationView, self).get_context_data(**kwargs)
+        context['website'] = WEBSITE
+        return context
 
     def registration_allowed(self, request):
         """
@@ -116,7 +121,7 @@ class ActivationView(TemplateView):
     
     """
     http_method_names = ['get']
-    template_name = WEBSITE+'/registration/activate.html'
+    template_name = 'registration/activate.html'
 
     def get(self, request, *args, **kwargs):
         activated_user = self.activate(request, *args, **kwargs)
@@ -131,6 +136,11 @@ class ActivationView(TemplateView):
             except ValueError:
                 return redirect(success_url)
         return super(ActivationView, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(ActivationView, self).get_context_data(**kwargs)
+        context['website'] = WEBSITE
+        return context
 
     def activate(self, request, *args, **kwargs):
         """

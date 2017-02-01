@@ -801,10 +801,11 @@ def send_account_info(message, address=None, host=None):
 	activation_str = ("account activation on %s" % WEBSITE).lower()
 	reset_str = ("password reset on %s" % WEBSITE).lower()
 
+	logging.debug(message['Subject'])
+	logging.debug(message['To'])
+	logging.debug(message['From'])
+
 	if str(message['From']) == "no-reply@" + HOST and (activation_str in subj_string or reset_str in subj_string):
-		logging.debug(message['Subject'])
-		logging.debug(message['To'])
-		logging.debug(message['From'])
 		
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)

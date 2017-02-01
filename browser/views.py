@@ -1,14 +1,7 @@
-from django.http import *
-from django.contrib.auth.decorators import login_required
-from django.utils.encoding import *
-import engine.main
 import base64
 from engine.constants import *
-
 from browser.util import load_groups
-
 from browser.util import paginator
-
 from lamson.mail import MailResponse
 from smtp_handler.utils import *
 from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
@@ -23,10 +16,30 @@ from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
 from html2text import html2text
 from django.contrib.auth.forms import AuthenticationForm
 from registration.forms import RegistrationForm
+
+import json
+import logging
+
 from django.conf import global_settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+from django.core.context_processors import csrf
 from django.db.models.aggregates import Count
-from django.http import HttpResponse
+from django.http import *
+from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template.context import RequestContext
+from django.utils.encoding import *
+from html2text import html2text
+from lamson.mail import MailResponse
+from registration.forms import RegistrationForm
+
+import engine.main
+from browser.util import load_groups, paginator
+from engine.constants import *
+from http_handler.settings import WEBSITE
+from schema.models import (FollowTag, ForwardingList, Group, MemberGroup,
+                           MuteTag, Tag, UserProfile)
+from smtp_handler.utils import *
 
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -52,7 +65,7 @@ def logout(request):
 def about(request):
 	return {}
 
-@render_to(WEBSITE+'/404.html')
+@render_to('404.html')
 def error(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -60,7 +73,8 @@ def error(request):
 	else:
 		user = None
 		groups = []
-	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
+
+	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'website': WEBSITE}
 	
 	error = request.GET.get('e')
 	if error == 'gname':
@@ -76,21 +90,19 @@ def error(request):
 	return res
 
 
-@render_to(WEBSITE+'/home.html')
 def index(request):
+	homepage = "%s/home.html" % WEBSITE
 	if not request.user.is_authenticated():
-		if WEBSITE == 'murmur':
-			return render_to_response('murmur/home.html',
-									  {'form': AuthenticationForm(),
-									   'reg_form': RegistrationForm()},
-									   context_instance=RequestContext(request))
-		elif WEBSITE == 'squadbox':
-			return render_to_response('squadbox/home.html',
-										{'form': AuthenticationForm(),
-										'reg_form': RegistrationForm()},
-										context_instance=RequestContext(request))
+		return render_to_response(homepage,
+					  			{'form': AuthenticationForm(),
+					  			'reg_form': RegistrationForm()},
+					   			context_instance=RequestContext(request))
 	else:
-		return HttpResponseRedirect('/posts')
+		if WEBSITE == 'murmur':
+			return HttpResponseRedirect('/posts')
+		elif WEBSITE == 'squadbox':
+			return HttpResponseRedirect('/dashboard')
+	
 	
 @render_to(WEBSITE+'/posts.html')
 def posts(request):
@@ -244,16 +256,13 @@ def thread(request):
 			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id,'active_group': active_group}
 			
 			
-
-
-
-@render_to(WEBSITE+"/settings.html")
+@render_to("settings.html")
 @login_required
 def settings(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	active_group = load_groups(request, groups, user)
-	return {'user': request.user, "active_group": active_group, "groups": groups}
+	return {'user': request.user, "active_group": active_group, "groups": groups, 'website' : WEBSITE}
 	
 @render_to(WEBSITE+"/groups.html")
 @login_required
@@ -321,7 +330,7 @@ def add_members_view(request, group_name):
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
 		if membergroup.count() == 1 and membergroup[0].admin:
-			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 'website': WEBSITE}
 		else:
 			return redirect('/404?e=admin')
 	except Group.DoesNotExist:
@@ -1289,3 +1298,12 @@ def serve_attachment(request, hash_filename):
 				return HttpResponseRedirect('/404')
 	else:
 		return HttpResponseRedirect('/404')
+
+@render_to('squadbox/dashboard.html')
+def dashboard(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		return {'user' : request.user, 'groups' : groups}
+	else:
+		return redirect(global_settings.LOGIN_URL)
