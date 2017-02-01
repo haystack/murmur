@@ -166,4 +166,7 @@ elif WEBSITE == 'squadbox':
                     ]
 
     urlpatterns.extend(new_patterns)
+<<<<<<< HEAD
 
+=======
+>>>>>>> haystack/master
