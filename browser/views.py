@@ -19,7 +19,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from annoying.decorators import render_to
 from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
-	MuteTag, ForwardingList, Attachment
+	MuteTag, ForwardingList, Attachment, Post
 from html2text import html2text
 from django.contrib.auth.forms import AuthenticationForm
 from registration.forms import RegistrationForm
@@ -1273,13 +1273,16 @@ def murmur_acct(request, acct_func=None, template_name=None):
 @login_required
 def serve_attachment(request, hash_filename):
 	if Attachment.objects.filter(hash_filename=hash_filename):
-		#url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + hash_filename + "/" + filename
-		s3 = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, is_secure=True)
-		# Create a URL valid for 60 seconds.
-		filename = Attachment.objects.filter(hash_filename=hash_filename)[0].true_filename
-		# filepath = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + hash_filename + "/" + filename
-		filepath = hash_filename + "/" + filename
-		url = s3.generate_url(60, 'GET', bucket=AWS_STORAGE_BUCKET_NAME, key=filepath)
-		return HttpResponseRedirect(url)
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			user_groups = Group.objects.filter(membergroup__member=user).values("name")
+			msg_id = Attachment.objects.filter(hash_filename=hash_filename)[0].msg_id
+			authorized_group = Post.objects.filter(msg_id=msg_id)[0].group.values("name")[0]
+			if authorized_group in user_groups:
+				s3 = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, is_secure=True)
+				filename = Attachment.objects.filter(hash_filename=hash_filename)[0].true_filename
+				filepath = hash_filename + "/" + filename
+				temporary_auth_url = s3.generate_url(60, 'GET', bucket=AWS_STORAGE_BUCKET_NAME, key=filepath)
+				return HttpResponseRedirect(temporary_auth_url)
 	else:
 		return HttpResponseRedirect('/404')
