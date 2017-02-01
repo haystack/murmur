@@ -1275,10 +1275,11 @@ def serve_attachment(request, hash_filename):
 	if Attachment.objects.filter(hash_filename=hash_filename):
 		if request.user.is_authenticated():
 			user = get_object_or_404(UserProfile, email=request.user.email)
-			user_groups = Group.objects.filter(membergroup__member=user).values("name")
+			user_groups = Group.objects.filter(membergroup__member=user)
+			user_groups_names = [group.name for group in user_groups]
 			msg_id = Attachment.objects.filter(hash_filename=hash_filename)[0].msg_id
 			authorized_group = Post.objects.filter(msg_id=msg_id)[0].group.name
-			if authorized_group in user_groups:
+			if authorized_group in user_groups_names:
 				s3 = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, is_secure=True)
 				filename = Attachment.objects.filter(hash_filename=hash_filename)[0].true_filename
 				filepath = hash_filename + "/" + filename
