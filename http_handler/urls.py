@@ -23,6 +23,8 @@ urlpatterns = patterns('',
     url(r'^groups/(?P<group_name>[\w-]+)$', 'browser.views.group_page'),
     url(r'^groups/(?P<group_name>[\w-]+)/add_members', 'browser.views.add_members_view'),
     url(r'^add_members', 'browser.views.add_members'),
+                       
+   url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2")),
      
     #override the registration default urls - bug with django 1.6
     url(r'^accounts/password/change/$',
@@ -163,4 +165,3 @@ elif WEBSITE == 'squadbox':
                     ]
 
     urlpatterns.extend(new_patterns)
-
