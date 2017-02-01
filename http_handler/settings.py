@@ -220,12 +220,12 @@ INSTALLED_APPS = (
     'schema',
     'browser',
     'smtp_handler',
+    'gmail_setup',
     
     #third party apps
     'registration',
     'south',
     'django_mobile'
-
 )
 
 # A sample logging configuration. The only tangible logging
@@ -270,5 +270,3 @@ try:
         from local_settings import *
 except ImportError:
         pass
-
-

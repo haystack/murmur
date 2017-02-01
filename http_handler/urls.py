@@ -25,6 +25,8 @@ urlpatterns = patterns('',
     url(r'^groups/(?P<group_name>[\w-]+)$', 'browser.views.group_page'),
     url(r'^groups/(?P<group_name>[\w-]+)/add_members', 'browser.views.add_members_view'),
     url(r'^add_members', 'browser.views.add_members'),
+
+    url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2")),
      
     #override the registration default urls - bug with django 1.6
     url(r'^accounts/password/change/$',
@@ -55,6 +57,7 @@ urlpatterns = patterns('',
                     {'extra_context' : website_context},
                     name='password_reset_confirm'),
 
+<<<<<<< HEAD
     url(r'^accounts/activate/complete/$',
        TemplateView.as_view(template_name='registration/activation_complete.html'),
        website_context,
