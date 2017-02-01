@@ -1,32 +1,28 @@
-from django.http import *
-from django.contrib.auth.decorators import login_required
-from django.utils.encoding import *
-import engine.main
 import base64
-from engine.constants import *
-
-from browser.util import load_groups
-
-from browser.util import paginator
-
-from lamson.mail import MailResponse
-from smtp_handler.utils import *
-from http_handler.settings import WEBSITE
-
-from django.core.context_processors import csrf
-import json, logging
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+import json
+import logging
 
 from annoying.decorators import render_to
-from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
-	MuteTag, ForwardingList
-from html2text import html2text
-from django.contrib.auth.forms import AuthenticationForm
-from registration.forms import RegistrationForm
 from django.conf import global_settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+from django.core.context_processors import csrf
 from django.db.models.aggregates import Count
-from django.http import HttpResponse
+from django.http import *
+from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template.context import RequestContext
+from django.utils.encoding import *
+from html2text import html2text
+from lamson.mail import MailResponse
+from registration.forms import RegistrationForm
+
+import engine.main
+from browser.util import load_groups, paginator
+from engine.constants import *
+from http_handler.settings import WEBSITE
+from schema.models import (FollowTag, ForwardingList, Group, MemberGroup,
+                           MuteTag, Tag, UserProfile)
+from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
@@ -47,7 +43,7 @@ def logout(request):
 def about(request):
 	return {}
 
-@render_to(WEBSITE+'/404.html')
+@render_to('404.html')
 def error(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -55,7 +51,8 @@ def error(request):
 	else:
 		user = None
 		groups = []
-	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True}
+
+	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'website': WEBSITE}
 	
 	error = request.GET.get('e')
 	if error == 'gname':
@@ -71,21 +68,19 @@ def error(request):
 	return res
 
 
-@render_to(WEBSITE+'/home.html')
 def index(request):
+	homepage = "%s/home.html" % WEBSITE
 	if not request.user.is_authenticated():
-		if WEBSITE == 'murmur':
-			return render_to_response('murmur/home.html',
-									  {'form': AuthenticationForm(),
-									   'reg_form': RegistrationForm()},
-									   context_instance=RequestContext(request))
-		elif WEBSITE == 'squadbox':
-			return render_to_response('squadbox/home.html',
-										{'form': AuthenticationForm(),
-										'reg_form': RegistrationForm()},
-										context_instance=RequestContext(request))
+		return render_to_response(homepage,
+					  			{'form': AuthenticationForm(),
+					  			'reg_form': RegistrationForm()},
+					   			context_instance=RequestContext(request))
 	else:
-		return HttpResponseRedirect('/posts')
+		if WEBSITE == 'murmur':
+			return HttpResponseRedirect('/posts')
+		elif WEBSITE == 'squadbox':
+			return HttpResponseRedirect('/dashboard')
+	
 	
 @render_to(WEBSITE+'/posts.html')
 def posts(request):
@@ -240,16 +235,13 @@ def thread(request):
 			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id,'active_group': active_group}
 			
 			
-
-
-
-@render_to(WEBSITE+"/settings.html")
+@render_to("settings.html")
 @login_required
 def settings(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	active_group = load_groups(request, groups, user)
-	return {'user': request.user, "active_group": active_group, "groups": groups}
+	return {'user': request.user, "active_group": active_group, "groups": groups, 'website' : WEBSITE}
 	
 @render_to(WEBSITE+"/groups.html")
 @login_required
@@ -317,7 +309,7 @@ def add_members_view(request, group_name):
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
 		if membergroup.count() == 1 and membergroup[0].admin:
-			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 'website': WEBSITE}
 		else:
 			return redirect('/404?e=admin')
 	except Group.DoesNotExist:
@@ -1257,10 +1249,14 @@ def murmur_acct(request, acct_func=None, template_name=None):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	active_group = load_groups(request, groups, user)
-	if request.path_info == "/accounts/password/change/": template=WEBSITE+"/registration/password_change_form.html"
-	elif request.path_info == "/password/change/done/": template=WEBSITE+"/registration/password_change_done.html"
-	elif request.path_info == "/accounts/password/reset/": template=WEBSITE+"/registration/password_reset_form.html"
-	elif request.path_info == "/password/reset/done/": template=WEBSITE+"/registration/password_reset_done.html"
-	elif request.path_info == "/password/reset/complete/": template=WEBSITE+"/registration/password_reset_complete.html"
-	else: template=WEBSITE+"/registration/password_reset_confirm.html"
-	return acct_func(request, template_name=template, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
+	return acct_func(request, template_name=template_name, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user, 'website' : WEBSITE})
+# TODO: password reset workflow seems to redirect to the wrong page (password changes successfuly but redirects to 'confirm password reset' page)
+
+@render_to('squadbox/dashboard.html')
+def dashboard(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		return {'user' : request.user, 'groups' : groups}
+	else:
+		return redirect(global_settings.LOGIN_URL)
