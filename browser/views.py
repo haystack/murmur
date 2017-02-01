@@ -31,6 +31,8 @@ from django.template.context import RequestContext
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
+from boto.s3.connection import S3Connection
+
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
 def lamson_status(request):
@@ -1270,8 +1272,19 @@ def murmur_acct(request, acct_func=None, template_name=None):
 
 def serve_attachment(request, hash_filename):
 	if Attachment.objects.filter(hash_filename=hash_filename):
-		filename = Attachment.objects.filter(hash_filename=hash_filename)[0].true_filename
-		url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + hash_filename + "/" + filename
+		s3 = S3Connection(settings.AWS_ACCESS_KEY_ID,
+                            settings.AWS_SECRET_ACCESS_KEY,
+                            is_secure=True)
+        # Create a URL valid for 60 seconds.
+		filepath = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + hash_filename + "/" + filename
+        url = s3.generate_url(60, 'GET',
+                            bucket=AWS_STORAGE_BUCKET_NAME,
+                            key=filepath
+                            force_http=True)
+
+		#filename = Attachment.objects.filter(hash_filename=hash_filename)[0].true_filename
+		#url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + hash_filename + "/" + filename
+		
 		return HttpResponseRedirect(url)
 	else:
 		return HttpResponseRedirect('/404')
