@@ -1277,10 +1277,7 @@ def serve_attachment(request, hash_filename):
                             is_secure=True)
         # Create a URL valid for 60 seconds.
 		filepath = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + hash_filename + "/" + filename
-        url = s3.generate_url(60, 'GET',
-                            bucket=AWS_STORAGE_BUCKET_NAME,
-                            key=filepath
-                            force_http=True)
+        url = s3.generate_url(60, 'GET', bucket=AWS_STORAGE_BUCKET_NAME, key=filepath, force_http=True)
 
 		#filename = Attachment.objects.filter(hash_filename=hash_filename)[0].true_filename
 		#url = "https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + hash_filename + "/" + filename
