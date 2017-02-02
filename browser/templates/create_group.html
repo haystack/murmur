@@ -1,0 +1,58 @@
+{% extends "group_container_base.html" %}
+{% block container-content %}
+	<h3>Create New {{ group_or_squad | title }} </h3>
+	<hr/>
+	<form id="new-group-form">
+		<span class="strong">New {{ group_or_squad | title }} Name:</span>
+		<br/>
+		<span class="italic-med">
+			Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed.
+		</span>
+		<br/>
+		<input id="new-group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;">
+		</input>
+		<br/><br/>
+		<span class="strong">{{ group_or_squad | title }} Description:</span> <br/>
+		<span class="italic-med">Maximum 140 characters</span><br/>
+		<textarea id="new-group-description" maxlength="140"></textarea><br /><br/>
+
+		{% if website == "murmur" %}
+		<span class="strong">Privacy Settings:</span>
+		<br/>
+		<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked> Public
+		<br/>
+		<span class="italic-small">All Murmur users will be able to view and search for this group by name and description.</span>
+		<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group"> Private
+		<br/>
+		<span class="italic-small">Only users added to this group by admins will be notified about the group.</span>
+		<br/>
+		{% endif %}
+
+		<span class="strong">Attachment Policy: </span> <br/>
+		<input type="radio" name="attach" value="yes-attach" id="rdo-attach-create-group" checked> Allow Attachments
+		<br/>
+		<span class="italic-small">
+		{% if website == "murmur" %}
+		All members of the group can post attachments. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
+		{% elif website == "squadbox" %}
+		Emails with attachments that reach your Squadbox will be moderated as usual. Your squad's moderators will be able to see them when they review messages, and you'll see the attachments on approved messages. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
+		{% endif %}
+		</span>
+		<input type="radio" name="attach" value="no-attach" id="rdo-noattach-create-group"> No Attachments Allowed
+		<br/>
+		<span class="italic-small">
+		{% if website == "murmur" %}
+		Users will not be able to post attachments. Messages with attachments will be rejected.
+		{% elif website == "squadbox" %}
+		Emails that reach your Squadbox with attachments will automically be rejected. 
+		{% endif %}
+		</span>
+		<br/>
+		<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>
+	</form>
+{% endblock %}
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/notify.js"></script>
+	<script type="text/javascript" src="/static/javascript/create_group.js"></script>
+{% endblock %}
