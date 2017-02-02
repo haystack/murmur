@@ -459,6 +459,7 @@ def add_members(group_name, emails, user):
 					member = MemberGroup.objects.filter(member=email_user[0], group=group).exists()
 				if not member:
 					confirm_code = hashlib.sha1(email+group_name+str(random.random())).hexdigest()
+					confirm_url = 'http://' + BASE_URL + '/subscribe/confirm/' + confirm_code
 					if WEBSITE == "murmur":
 						mail = MailResponse(From = 'no-reply@' + BASE_URL, 
 											To = email, 
@@ -466,7 +467,7 @@ def add_members(group_name, emails, user):
 						
 						if email_user.count() == 1:
 							mg,_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group, hash=confirm_code)
-							confirm_url = 'http://' + BASE_URL + '/subscribe/confirm/' + mg.id + '/' + confirm_code
+							
 							message = "You've been invited to join %s Mailing List. <br />" % (group_name)
 							message += "To confirm your subscription to this list, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
@@ -475,10 +476,6 @@ def add_members(group_name, emails, user):
 							pw = password_generator()
 							new_user = UserProfile.objects.create_user(email, pw)
 							mg,_ = MemberGroup.objects.get_or_create(group=group, member=new_user, hash=confirm_code)
-							print "prehash =", email + group_name + str(mg.timestamp)
-							print "id =", str(mg.id)
-							print "hash =", confirm_code
-							confirm_url = 'http://' + BASE_URL + '/subscribe/confirm/' + str(mg.id) + '/' + confirm_code
 							message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
 							message += "To confirm your subscription to this list, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
@@ -496,7 +493,6 @@ def add_members(group_name, emails, user):
 						
 						if email_user.count() == 1:
 							mg,_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group, hash=confirm_code)
-							confirm_url = 'http://' + BASE_URL + '/subscribe/confirm/' + mg.id + '/' + confirm_code
 							message = "You've been invited to join %s squad. <br />" % (group_name)
 							message += "To confirm your membership of this squad, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "To see posts for this squad, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
@@ -505,7 +501,6 @@ def add_members(group_name, emails, user):
 							pw = password_generator()
 							new_user = UserProfile.objects.create_user(email, pw)
 							mg,_ = MemberGroup.objects.get_or_create(group=group, member=new_user, hash=confirm_code)
-							confirm_url = 'http://' + BASE_URL + '/subscribe/confirm/' + mg.id + '/' + confirm_code
 							message = "You've been added as a moderator to %s squad. <br />" % (group_name)
 							message += "To confirm your membership of this squad, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)

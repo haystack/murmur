@@ -110,5 +110,5 @@ urlpatterns = patterns('',
 
      url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2")),
 
-     url(r'^subscribe/confirm/(?P<membergroup_id>[0-9]+)/(?P<token>.+)$', 'browser.views.subscribe_confirm'),
+     url(r'^subscribe/confirm/(?P<token>.+)$', 'browser.views.subscribe_confirm'),
 )

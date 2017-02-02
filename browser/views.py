@@ -1268,7 +1268,6 @@ def murmur_acct(request, acct_func=None, template_name=None):
 
 
 def subscribe_confirm(request, token):
-	print "SUBCRIBE_CONFIRM"
 	mg = MemberGroup.objects.get(hash=token)
 	if mg:
 		mg.active = True
