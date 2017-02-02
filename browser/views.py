@@ -20,7 +20,7 @@ import engine.main
 from browser.util import load_groups, paginator
 from engine.constants import *
 from http_handler.settings import WEBSITE
-from schema.models import (FollowTag, ForwardingList, Group, MemberGroup,
+from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
                            MuteTag, Tag, UserProfile)
 from smtp_handler.utils import *
 
@@ -371,15 +371,20 @@ def list_my_groups(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
-@render_to(WEBSITE+"/create_group.html")
+@render_to("create_group.html")
 @login_required
 def create_group_view(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
-	return {'user': request.user, 'groups': groups, 'group_page': True}
+	if WEBSITE == "murmur":
+		group_or_squad = "group"
+	elif WEBSITE == "squadbox":
+		group_or_squad = "squad"
+	return {'user': request.user, 'groups': groups, 'group_page': True, 
+			'website' : WEBSITE, 'group_or_squad' : group_or_squad}
 
 
-@render_to(WEBSITE+"/edit_group_info.html")
+@render_to("edit_group_info.html")
 @login_required
 def edit_group_info_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)  
@@ -388,7 +393,12 @@ def edit_group_info_view(request, group_name):
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
 		if membergroup[0].admin:
-			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+			if WEBSITE == "murmur":
+				group_or_squad = "group"
+			elif WEBSITE == "squadbox":
+				group_or_squad = "squad"
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 
+					'website' : WEBSITE, 'group_or_squad' : group_or_squad}
 		else:
 			return redirect('/404?e=admin')
 	except Group.DoesNotExist:
@@ -505,7 +515,8 @@ def deactivate_group(request):
 def add_members(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		res = engine.main.add_members(request.POST['group_name'], request.POST['emails'], user)
+		add_as_mods = request.POST['add_as_mods'] == 'true'
+		res = engine.main.add_members(request.POST['group_name'], request.POST['emails'], add_as_mods, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)
@@ -1260,3 +1271,12 @@ def dashboard(request):
 		return {'user' : request.user, 'groups' : groups}
 	else:
 		return redirect(global_settings.LOGIN_URL)
+
+def subscribe_confirm(request, token):
+	mgp = MemberGroupPending.objects.get(hash=token)
+	if mgp:
+		mg,_ = MemberGroup.objects.get_or_create(member=mgp.member, group=mgp.group)
+		MemberGroupPending.objects.get(hash=token).delete()
+		return HttpResponseRedirect('/')
+	else:
+		return HttpResponseRedirect('/404')

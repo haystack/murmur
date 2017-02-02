@@ -805,7 +805,7 @@ def send_account_info(message, address=None, host=None):
 	logging.debug(message['To'])
 	logging.debug(message['From'])
 
-	if str(message['From']) == "no-reply@" + HOST and (activation_str in subj_string or reset_str in subj_string):
+	if str(message['From']) == NO_REPLY and (activation_str in subj_string or reset_str in subj_string):
 		
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)

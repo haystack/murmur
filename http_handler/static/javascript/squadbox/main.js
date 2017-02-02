@@ -36,7 +36,7 @@ $(document).ready(function(){
 				{ 'bSortable': false},
 				null,
 				null,
-				null,
+				null
 			]
 		});
 
@@ -623,6 +623,14 @@ $(document).ready(function(){
 			else{
 				members_table.fnSetColumnVis(0, true);
 			}
+		}
+		for(var i = 0; i< res.members_pending.length; i++) {
+			tableData = []
+			tableData.push('')
+			tableData.push("<i>" + res.members_pending[i].email + " (pending)</i>")
+			tableData.push('')
+			tableData.push('')
+			members_table.fnAddData(tableData);
 		}
 		var params = {
 				'group_name': current_group_name,
