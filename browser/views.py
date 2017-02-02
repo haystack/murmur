@@ -1274,4 +1274,4 @@ def subscribe_confirm(request, membergroup_id, token):
 		mg.active = True
 		return HttpResponseRedirect('/')
 	else:
-		return HttpResponseRedirect('/404')
+		return HttpResponseRedirect('404/?id='+membergroup_id+'&token='+token+'&hashstring='+mg.member.email+mg.group.name.str(mg.timestamp))
