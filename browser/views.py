@@ -1268,10 +1268,9 @@ def murmur_acct(request, acct_func=None, template_name=None):
 
 
 def subscribe_confirm(request, token):
-	mg = MemberGroup.objects.get(hash=token)
-	if mg:
-		mg.active = True
-		mg.save()
+	mgp = MemberGroupPending.objects.get(hash=token)
+	if mgp:
+		mg,_ = MemberGroup.objects.get_or_create(member=mgp.member, group=mgp.group)
 		return HttpResponseRedirect('/')
 	else:
 		return HttpResponseRedirect('/404')

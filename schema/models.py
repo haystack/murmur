@@ -113,14 +113,26 @@ class MemberGroup(models.Model):
 	no_emails = models.BooleanField(default=False)
 	always_follow_thread = models.BooleanField(default=True)
 	upvote_emails = models.BooleanField(default=True)
-	active = models.BooleanField(default=True)
-	hash = models.CharField(max_length=40)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)
 
 	class Meta:
 		db_table = "murmur_membergroups"
+		unique_together = ("member", "group")
+
+class MemberGroupPending(models.Model):
+	id = models.AutoField(primary_key=True)
+	member = models.ForeignKey(settings.AUTH_USER_MODEL)
+	group = models.ForeignKey('Group')
+	timestamp = models.DateTimeField(auto_now=True)
+	hash = models.CharField(max_length=40)
+	
+	def __unicode__(self):
+		return '%s - %s' % (self.member.email, self.group.name)
+
+	class Meta:
+		db_table = "murmur_membergroupspending"
 		unique_together = ("member", "group")
 
 class ForwardingList(models.Model):
