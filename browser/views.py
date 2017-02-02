@@ -1271,6 +1271,7 @@ def subscribe_confirm(request, token):
 	mg = MemberGroup.objects.get(hash=token)
 	if mg:
 		mg.active = True
+		mg.save()
 		return HttpResponseRedirect('/')
 	else:
 		return HttpResponseRedirect('/404')

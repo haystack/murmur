@@ -113,7 +113,7 @@ class MemberGroup(models.Model):
 	no_emails = models.BooleanField(default=False)
 	always_follow_thread = models.BooleanField(default=True)
 	upvote_emails = models.BooleanField(default=True)
-	active = models.BooleanField(default=False)
+	active = models.BooleanField(default=True)
 	hash = models.CharField(max_length=40)
 	
 	def __unicode__(self):
