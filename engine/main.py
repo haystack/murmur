@@ -9,6 +9,8 @@ from smtp_handler.utils import relay_mailer, NO_REPLY
 from bleach import clean
 from cgi import escape
 import re
+import hashlib
+import random
 
 from http_handler.settings import BASE_URL, WEBSITE
 import json
@@ -46,9 +48,11 @@ def group_info_page(user, group_name):
 	try:
 		group = Group.objects.get(name=group_name)
 		members = MemberGroup.objects.filter(group=group)
+		members_pending = MemberGroupPending.objects.filter(group=group)
 
 		res['group'] = group
 		res['members'] = []
+		res['members_pending'] = []
 		res['lists'] = []
 		
 		res['admin'] = False
@@ -72,6 +76,12 @@ def group_info_page(user, group_name):
 			
 			res['members'].append(member_info)
 
+		for membergroup in members_pending:
+			member_info = {'id':membergroup.id,
+							'email': membergroup.member.email,
+						   'admin': False,
+						   'mod': False}
+			res['members_pending'].append(member_info)
 
 		lists = ForwardingList.objects.filter(group=group)
 
@@ -440,7 +450,6 @@ def adjust_list_can_receive(group_name, emails, can_receive, user):
 
 def add_members(group_name, emails, add_as_mods, user):
 	res = {'status':False}
-	
 	try:
 		group = Group.objects.get(name=group_name)
 		is_public = group.public
@@ -456,25 +465,27 @@ def add_members(group_name, emails, add_as_mods, user):
 				email_user = UserProfile.objects.filter(email=email)
 				member = False
 				if email_user.count() == 1:
-					member = MemberGroup.objects.filter(member=email_user[0], group=group).exists()
+					member = MemberGroup.objects.filter(member=email_user[0], group=group).exists() or MemberGroupPending.objects.filter(member=email_user[0], group=group).exists()
 				if not member:
+					confirm_code = hashlib.sha1(email+group_name+str(random.random())).hexdigest()
+					confirm_url = 'http://' + BASE_URL + '/subscribe/confirm/' + confirm_code
 					if WEBSITE == "murmur":
 						mail = MailResponse(From = NO_REPLY, 
 											To = email, 
-											Subject  = "You've been subscribed to %s Mailing List" % (group_name))
+											Subject  = "You've been invited to join %s Mailing List" % (group_name))
 						
 						if email_user.count() == 1:
-							_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group, moderator=add_as_mods)
-							
-							message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
+							mg,_ = MemberGroupPending.objects.get_or_create(member=email_user[0], group=group, hash=confirm_code)
+							message = "You've been invited to join %s Mailing List. <br />" % (group_name)
+							message += "To confirm your subscription to this list, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "To see posts from this list, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
 							message += "To manage your mailing list settings, subscribe, or unsubscribe, visit <a href='http://%s/groups/%s'>http://%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
 						else:
 							pw = password_generator()
 							new_user = UserProfile.objects.create_user(email, pw)
-							_ = MemberGroup.objects.get_or_create(group=group, member=new_user, moderator=add_as_mods)
-							
+							mg,_ = MemberGroupPending.objects.get_or_create(group=group, member=new_user, hash=confirm_code)
 							message = "You've been subscribed to %s Mailing List. <br />" % (group_name)
+							message += "To confirm your subscription to this list, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
 							message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
 							message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
@@ -486,20 +497,20 @@ def add_members(group_name, emails, add_as_mods, user):
 					elif WEBSITE == "squadbox":
 						mail = MailResponse(From = NO_REPLY, 
 											To = email, 
-											Subject  = "You've been added as a moderator to %s squad" % (group_name))
+											Subject  = "You've been invited to join %s squad" % (group_name))
 						
 						if email_user.count() == 1:
-							_ = MemberGroup.objects.get_or_create(member=email_user[0], group=group, moderator=add_as_mods)
-							
-							message = "You've been added as a moderator to %s squad. <br />" % (group_name)
+							mg,_ = MemberGroupPending.objects.get_or_create(member=email_user[0], group=group, hash=confirm_code)
+							message = "You've been invited to join %s squad. <br />" % (group_name)
+							message += "To confirm your membership of this squad, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "To see posts for this squad, visit <a href='http://%s/posts?group_name=%s'>http://%s/posts?group_name=%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
 							message += "To manage your squad settings, subscribe, or unsubscribe, visit <a href='http://%s/groups/%s'>http://%s/groups/%s</a><br />" % (BASE_URL, group_name, BASE_URL, group_name)
 						else:
 							pw = password_generator()
 							new_user = UserProfile.objects.create_user(email, pw)
-							_ = MemberGroup.objects.get_or_create(group=group, member=new_user, moderator=add_as_mods)
-							
+							mg,_ = MemberGroupPending.objects.get_or_create(group=group, member=new_user, hash=confirm_code)
 							message = "You've been added as a moderator to %s squad. <br />" % (group_name)
+							message += "To confirm your membership of this squad, visit <a href='%s'>%s</a><br />" % (confirm_url, confirm_url)
 							message += "An account to manage your settings has been created for you at <a href='http://%s'>http://%s</a><br />" % (BASE_URL, BASE_URL)
 							message += "Your username is your email, which is %s and your auto-generated password is %s <br />" % (email, pw)
 							message += "If you would like to change your password, please log in at the link above and then you can change it under your settings. <br />"
@@ -569,6 +580,7 @@ def group_info(group_name, user):
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroups = MemberGroup.objects.filter(group=group).select_related()
+		membergroups_pending = MemberGroupPending.objects.filter(group=group).select_related()
 		
 		res['status'] = True
 		res['group_name'] = group_name
@@ -576,6 +588,7 @@ def group_info(group_name, user):
 		res['public'] = group.public
 		res['allow_attachments'] = group.allow_attachments
 		res['members'] = []
+		res['members_pending'] = []
 		for membergroup in membergroups:
 
 			admin = membergroup.admin
@@ -595,6 +608,16 @@ def group_info(group_name, user):
 						   'active': membergroup.member.is_active}
 			
 			res['members'].append(member_info)
+		for membergroup in membergroups_pending:
+			member_info = {'id': membergroup.id,
+						   'email': membergroup.member.email,
+						   'group_name': group_name, 
+						   'admin': False,
+						   'member': True,
+						   'moderator': False,
+						   'active': membergroup.member.is_active}
+			res['members_pending'].append(member_info)
+
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']	
 	except:

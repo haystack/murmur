@@ -20,7 +20,7 @@ import engine.main
 from browser.util import load_groups, paginator
 from engine.constants import *
 from http_handler.settings import WEBSITE
-from schema.models import (FollowTag, ForwardingList, Group, MemberGroup,
+from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
                            MuteTag, Tag, UserProfile)
 from smtp_handler.utils import *
 
@@ -1271,3 +1271,12 @@ def dashboard(request):
 		return {'user' : request.user, 'groups' : groups}
 	else:
 		return redirect(global_settings.LOGIN_URL)
+
+def subscribe_confirm(request, token):
+	mgp = MemberGroupPending.objects.get(hash=token)
+	if mgp:
+		mg,_ = MemberGroup.objects.get_or_create(member=mgp.member, group=mgp.group)
+		MemberGroupPending.objects.get(hash=token).delete()
+		return HttpResponseRedirect('/')
+	else:
+		return HttpResponseRedirect('/404')
