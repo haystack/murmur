@@ -19,7 +19,7 @@ import json, logging
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 
 from annoying.decorators import render_to
-from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
+from schema.models import UserProfile, Group, MemberGroup, MemberGroupPending, Tag, FollowTag,\
 	MuteTag, ForwardingList
 from html2text import html2text
 from django.contrib.auth.forms import AuthenticationForm
