@@ -1271,6 +1271,7 @@ def subscribe_confirm(request, token):
 	mgp = MemberGroupPending.objects.get(hash=token)
 	if mgp:
 		mg,_ = MemberGroup.objects.get_or_create(member=mgp.member, group=mgp.group)
+		MemberGroupPending.objects.get(hash=token).delete()
 		return HttpResponseRedirect('/')
 	else:
 		return HttpResponseRedirect('/404')
