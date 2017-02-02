@@ -1,0 +1,11 @@
+{% extends website|add:"/base.html" %}
+{% block customcss %}
+{% endblock %}
+{% block content %}
+	<div class="container">
+		<div class="group-container">
+			{% block container-content %}
+			{% endblock %}			
+		</div>
+	</div>
+{% endblock %}

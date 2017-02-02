@@ -1,0 +1,48 @@
+{% extends "squadbox/base.html" %}
+
+{% block customcss %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+	<div class="group-container">
+		<div id="post-column-area-wrapper">
+			<div id="post-column-area">
+				
+				<div class="post-list-container">
+						You are not in any groups yet. <a href="/create_new_group">Create a new group.</a>
+					<BR><BR>
+				</div>
+				
+				<ul id="post-list-table">
+<!-- 					{% for post in posts.threads %}
+						<a href="/thread?group_name={{ active_group.name }}&tid={{ post.thread_id }}">
+							<li class="row-item" id="{{ post.thread_id }}">
+								<div class="left-column-area-metadata">
+									<span class="gray">{{ post.timestamp|date:"n/j/Y" }}</span>
+									<span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
+ 								<br>
+								</div>
+								<div class="middle-column-area-content">
+									<span class="strong">{{ post.post.subject }}</span>
+									<br />
+									<span class="strong-gray">{{ post.post.from }}</span><br />
+									<span class="blurb ellipsis">{{ post.post.text|striptags }}
+									</span>
+								</div>
+							</li>
+						</a>
+					{% endfor %} -->
+				</ul>
+				<div id="scroll_trigger"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block customjs %}
+<script src="/static/javascript/pagination.js"></script>
+{% endblock %}
