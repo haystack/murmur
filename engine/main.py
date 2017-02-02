@@ -235,7 +235,8 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, 
 	res = {'status':False}	
 	try:
 		group = Group.objects.get(name=old_group_name)
-		group.name = new_group_name
+		if len(new_group_name) > 0:
+			group.name = new_group_name
 		group.description = group_desc
 		group.public = public
 		group.allow_attachments = attach
@@ -447,7 +448,7 @@ def adjust_list_can_receive(group_name, emails, can_receive, user):
 	logging.debug(res)
 	return res
 
-def add_members(group_name, emails, user):
+def add_members(group_name, emails, add_as_mods, user):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
