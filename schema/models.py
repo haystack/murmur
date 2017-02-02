@@ -114,6 +114,7 @@ class MemberGroup(models.Model):
 	always_follow_thread = models.BooleanField(default=True)
 	upvote_emails = models.BooleanField(default=True)
 	active = models.BooleanField(default=False)
+	hash = models.CharField(max_length=40, unique=True)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)

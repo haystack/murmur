@@ -1267,11 +1267,10 @@ def murmur_acct(request, acct_func=None, template_name=None):
 	return acct_func(request, template_name=template, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user})
 
 
-def subscribe_confirm(request, membergroup_id, token):
+def subscribe_confirm(request, token):
 	print "SUBCRIBE_CONFIRM"
-	mg = MemberGroup.objects.get(id=membergroup_id)
-	confirm_code = hashlib.sha1(mg.member.email+mg.group.name+str(mg.timestamp)).hexdigest()
-	if confirm_code == token:
+	mg = MemberGroup.objects.get(hash=token)
+	if mg:
 		mg.active = True
 		return HttpResponseRedirect('/')
 	else:
