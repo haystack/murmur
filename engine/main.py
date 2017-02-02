@@ -458,7 +458,7 @@ def add_members(group_name, emails, user):
 					member = MemberGroup.objects.filter(member=email_user[0], group=group).exists()
 				if not member:
 					if WEBSITE == "murmur":
-						mail = MailResponse(From = 'no-reply@' + BASE_URL, 
+						mail = MailResponse(From = NO_REPLY, 
 											To = email, 
 											Subject  = "You've been subscribed to %s Mailing List" % (group_name))
 						
@@ -483,7 +483,7 @@ def add_members(group_name, emails, user):
 						mail.Html = message
 						logging.debug('TO LIST: ' + str(email))
 					elif WEBSITE == "squadbox":
-						mail = MailResponse(From = 'no-reply@' + BASE_URL, 
+						mail = MailResponse(From = NO_REPLY, 
 											To = email, 
 											Subject  = "You've been added as a moderator to %s squad" % (group_name))
 						
