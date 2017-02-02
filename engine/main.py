@@ -48,9 +48,11 @@ def group_info_page(user, group_name):
 	try:
 		group = Group.objects.get(name=group_name)
 		members = MemberGroup.objects.filter(group=group)
+		members_pending = MemberGroupPending.objects.filter(group=group)
 
 		res['group'] = group
 		res['members'] = []
+		res['members_pending'] = []
 		res['lists'] = []
 		
 		res['admin'] = False
@@ -74,6 +76,12 @@ def group_info_page(user, group_name):
 			
 			res['members'].append(member_info)
 
+		for membergroup in members_pending:
+			member_info = {'id':membergroup.id,
+							'email': membergroup.member.email,
+						   'admin': False,
+						   'mod': False}
+			res['members_pending'].append(member_info)
 
 		lists = ForwardingList.objects.filter(group=group)
 
@@ -571,6 +579,7 @@ def group_info(group_name, user):
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroups = MemberGroup.objects.filter(group=group).select_related()
+		membergroups_pending = MemberGroupPending.objects.filter(group=group).select_related()
 		
 		res['status'] = True
 		res['group_name'] = group_name
@@ -578,6 +587,7 @@ def group_info(group_name, user):
 		res['public'] = group.public
 		res['allow_attachments'] = group.allow_attachments
 		res['members'] = []
+		res['members_pending'] = []
 		for membergroup in membergroups:
 
 			admin = membergroup.admin
@@ -597,6 +607,16 @@ def group_info(group_name, user):
 						   'active': membergroup.member.is_active}
 			
 			res['members'].append(member_info)
+		for membergroup in membergroups_pending:
+			member_info = {'id': membergroup.id,
+						   'email': membergroup.member.email,
+						   'group_name': group_name, 
+						   'admin': False,
+						   'member': True,
+						   'moderator': False,
+						   'active': membergroup.member.is_active}
+			res['members_pending'].append(member_info)
+
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']	
 	except:
