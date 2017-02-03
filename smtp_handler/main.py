@@ -417,7 +417,6 @@ def handle_post_murmur(message, group, host):
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 
-					attachment_notify = ""
 					if membergroup.receive_attachments:
 						for attachment in attachments.get("attachments"):
 							mail.attach(filename=attachment['filename'],
@@ -425,10 +424,8 @@ def handle_post_murmur(message, group, host):
 										data=attachment['content'],
 										disposition=attachment['disposition'],
 										id=attachment['id'])
-					else:
-						attachment_notify = "This message came with attachments, which you have turned off. To see the attachments, view the original post:<br />"
 				
-					html_ps_blurb = attachment_notify + html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_list_email)
+					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_list_email)
 					html_ps_blurb = unicode(html_ps_blurb)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					
