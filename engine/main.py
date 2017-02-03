@@ -249,6 +249,7 @@ def get_group_settings(group_name, user):
 		res['following'] = membergroup.always_follow_thread
 		res['no_emails'] = membergroup.no_emails
 		res['upvote_emails'] = membergroup.upvote_emails
+		res['receive_attachments'] = membergroup.receive_attachments
 		res['status'] = True
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -260,7 +261,7 @@ def get_group_settings(group_name, user):
 	logging.debug(res)
 	return res
 
-def edit_group_settings(group_name, following, upvote_emails, no_emails, user):
+def edit_group_settings(group_name, following, upvote_emails, receive_attachments, no_emails, user):
 	res = {'status':False}
 	
 	try:
@@ -268,6 +269,7 @@ def edit_group_settings(group_name, following, upvote_emails, no_emails, user):
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		membergroup.always_follow_thread = following
 		membergroup.upvote_emails = upvote_emails
+		membergroup.receive_attachments = receive_attachments
 		membergroup.no_emails = no_emails
 		membergroup.save()
 		

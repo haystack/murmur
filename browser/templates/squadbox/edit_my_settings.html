@@ -29,6 +29,14 @@
 		Receive only the FIRST email in any thread.<br />
 		<span class="italic-small">You will only be emailed replies in a thread if you explicitly follow the thread. You also automatically follow a thread if you start the thread or contribute a post at any point in the thread.</span><br />
 
+		{% if settings.receive_attachments %}
+			<input type="checkbox" name="receive-attachments" value="yes" id="ck-receive-attachments" checked>
+		{% else %}
+			<input type="checkbox" name="receive-attachments" value="no" id="ck-receive-attachments">
+		{% endif %}
+		Receive attachments with emails.
+		<br /><br />
+
 	{% if settings.no_emails %}
 		<input type="checkbox" name="no-emails" value="yes" id="ck-no-email" checked>
 	{% else %}
