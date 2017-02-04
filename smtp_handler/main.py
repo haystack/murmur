@@ -285,8 +285,6 @@ def handle_post_murmur(message, group, host):
 	attachments = get_attachments(email_message)
 
 	try:
-		# restart the db connection
-		django.db.close_connection()
 		
 		# try to detect and prevent duplicate posts 
 
@@ -471,9 +469,6 @@ def handle_post_murmur(message, group, host):
 		return
 		
 def handle_post_squadbox(message, group, host):
-	
-	# restart the db connection
-	django.db.close_connection()
 
 	_, sender_addr = parseaddr(message['From'].lower())
 
@@ -545,6 +540,10 @@ def handle_post_squadbox(message, group, host):
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
 def handle_post(message, address=None, host=None):
+	
+	# restart the db connection
+	django.db.close_connection()
+	
 	if '+' in address and '__' in address:
 		return
 
