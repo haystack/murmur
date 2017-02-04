@@ -285,6 +285,9 @@ def handle_post_murmur(message, group, host):
 	attachments = get_attachments(email_message)
 
 	try:
+		# restart the db connection
+		django.db.close_connection()
+		
 		# try to detect and prevent duplicate posts 
 
 		# check if we already got a post to this group with the same message_id
@@ -468,6 +471,9 @@ def handle_post_murmur(message, group, host):
 		return
 		
 def handle_post_squadbox(message, group, host):
+	
+	# restart the db connection
+	django.db.close_connection()
 
 	_, sender_addr = parseaddr(message['From'].lower())
 
