@@ -285,6 +285,7 @@ def handle_post_murmur(message, group, host):
 	attachments = get_attachments(email_message)
 
 	try:
+		
 		# try to detect and prevent duplicate posts 
 
 		# check if we already got a post to this group with the same message_id
@@ -539,6 +540,10 @@ def handle_post_squadbox(message, group, host):
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
 def handle_post(message, address=None, host=None):
+	
+	# restart the db connection
+	django.db.close_connection()
+	
 	if '+' in address and '__' in address:
 		return
 
@@ -805,7 +810,7 @@ def send_account_info(message, address=None, host=None):
 	logging.debug(message['To'])
 	logging.debug(message['From'])
 
-	if str(message['From']) == "no-reply@" + HOST and (activation_str in subj_string or reset_str in subj_string):
+	if str(message['From']) == NO_REPLY and (activation_str in subj_string or reset_str in subj_string):
 		
 		email_message = email.message_from_string(str(message))
 		msg_text = get_body(email_message)

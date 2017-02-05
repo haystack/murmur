@@ -86,6 +86,8 @@ urlpatterns = patterns('',
     ),
 
     url(r'^accounts/', include('registration.backends.default.urls')),
+
+    url(r'^subscribe/confirm/(?P<token>.+)$', 'browser.views.subscribe_confirm'),
     )
 
 # murmur-only patterns
