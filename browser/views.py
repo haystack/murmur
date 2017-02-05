@@ -1057,6 +1057,7 @@ def unsubscribe_get(request):
 		'active_group': active_group,
 		'group_or_squad' : group_or_squad,
 		'public' : g.public,
+		'website' : WEBSITE,
 		}
 
 
@@ -1066,7 +1067,7 @@ def subscribe_get(request):
 	group_name = request.GET.get('group_name')
 	email_param = request.GET.get('email')
 
-	if not request.user_is_authenticated() and not email_param:
+	if not request.user.is_authenticated() and not email_param:
 		return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + group_name)
 
 	if WEBSITE == 'murmur':
@@ -1078,6 +1079,7 @@ def subscribe_get(request):
 		'type': action_type,
 		'group_name' : group_name,
 		'group_or_squad' : group_or_squad,
+		'website' : WEBSITE,
 	}
 
 	# users shouldn't be able to subscribe themselves to a non-public group 
@@ -1088,9 +1090,7 @@ def subscribe_get(request):
 	if request.user.is_authenticated():
 
 		user = get_object_or_404(UserProfile, email=request.user.email)
-
 		res = engine.main.subscribe_group(group_name, user)
-
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 
 		if res['status']:
