@@ -1,0 +1,29 @@
+{% extends "group_container_base.html" %}
+{% block container-content %}
+	
+	{% if res.status %}
+		You've {{ type }} the {{group_or_squad }} "{{ group_name }}". Emails will be sent to the following address: {{ email }}.
+		<BR>
+		<BR>
+		View <a href="/groups/{{ group_name }}">{{ group_name }}</a> {{group_or_squad}} information.
+		<BR>
+		<BR>
+		{% if public and (type == 'unsubscribed from' or type == 'left') %}
+			<form action="/subscribe_get?">
+				<input type='hidden' name='group_name' value={{group_name}}>
+				<input type="submit" value="Re-subscribe">
+			</form>
+		{% else %}
+			<form action="/unsubscribe_get?">
+				<input type='hidden' name='group_name' value={{group_name}}>
+				<input type="submit" value="Unsubscribe">
+			</form>
+		{% endif %}
+	{% else %}
+		Sorry, there was an error: {{ res.code }}.
+	{% endif %}
+	<BR>
+	<BR>
+</div>
+</div>
+{% endblock %}
