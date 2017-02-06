@@ -25,6 +25,10 @@ from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, Member
 from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
+if WEBSITE == 'murmur':
+	group_or_squad = 'group'
+elif WEBSITE == 'squadbox':
+	group_or_squad = 'squad'
 
 def lamson_status(request):
 	import psutil
@@ -61,6 +65,8 @@ def error(request):
 		res['error'] = 'You do not have the admin privileges to visit this page.'
 	elif error == 'member':
 		res['error'] = 'You need to be a member of this group to visit this page.'
+	elif error == 'perm':
+		res['error'] = 'You do not have permission to visit this page.'
 	elif error == 'thread':
 		res['error'] = 'This thread no longer exists.'
 	else:
@@ -377,10 +383,6 @@ def list_my_groups(request):
 def create_group_view(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
-	if WEBSITE == "murmur":
-		group_or_squad = "group"
-	elif WEBSITE == "squadbox":
-		group_or_squad = "squad"
 	return {'user': request.user, 'groups': groups, 'group_page': True, 
 			'website' : WEBSITE, 'group_or_squad' : group_or_squad}
 
@@ -394,10 +396,6 @@ def edit_group_info_view(request, group_name):
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
 		if membergroup[0].admin:
-			if WEBSITE == "murmur":
-				group_or_squad = "group"
-			elif WEBSITE == "squadbox":
-				group_or_squad = "squad"
 			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 
 					'website' : WEBSITE, 'group_or_squad' : group_or_squad}
 		else:
@@ -1028,45 +1026,99 @@ def unupvote(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 
-@render_to(WEBSITE+'/subscribe.html')
+@render_to('subscribe.html')
 @login_required
 def unsubscribe_get(request):
-	if request.user.is_authenticated():
-		user = get_object_or_404(UserProfile, email=request.user.email)
-		res = engine.main.unsubscribe_group(request.GET.get('group_name'), user)
-		groups = Group.objects.filter(membergroup__member=user).values("name")
-		active_group = {'name':'No Groups Yet'}
-		if len(groups) > 0:
-			active_group = load_groups(request, groups, user, group_name=groups[0]['name'])
-		return {'res':res, 'type': 'unsubscribed from', 'user': request.user, 'group_name' : request.GET.get('group_name'),
-		'groups' : groups, 'active_group': active_group}
-	else:
-		return redirect(global_settings.LOGIN_URL + '?next=/unsubscribe_get?group_name=' + request.GET.get('group_name'))
+	group_name = request.GET.get('group_name')
 
-@render_to(WEBSITE+'/subscribe.html')
+	if not request.user.is_authenticated():
+		return redirect(global_settings.LOGIN_URL + '?next=/unsubscribe_get?group_name=' + group_name)
+
+	if WEBSITE == 'murmur':
+		action_type = 'unsubscribed from'
+	elif WEBSITE == 'squadbox':
+		action_type = 'left'
+
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	res = engine.main.unsubscribe_group(group_name, user)
+
+	g = get_object_or_404(Group, name=group_name)
+
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	active_group = {'name':'No Groups Yet'}
+	if len(groups) > 0:
+		active_group = load_groups(request, groups, user, group_name=groups[0]['name'])
+
+	return {
+		'res':res,
+		'type': action_type,
+		'user': request.user,
+		'group_name' : group_name,
+		'groups' : groups,
+		'active_group': active_group,
+		'group_or_squad' : group_or_squad,
+		'public' : g.public,
+		'website' : WEBSITE,
+		}
+
+
+@render_to('subscribe.html')
 def subscribe_get(request):
+
+	group_name = request.GET.get('group_name')
+	email_param = request.GET.get('email')
+
+	if not request.user.is_authenticated() and not email_param:
+		return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + group_name)
+
+	if WEBSITE == 'murmur':
+		action_type = 'subscribed to'
+	elif WEBSITE == 'squadbox':
+		action_type = 'joined'
+
+	response = {
+		'type': action_type,
+		'group_name' : group_name,
+		'group_or_squad' : group_or_squad,
+		'website' : WEBSITE,
+	}
+
+	# users shouldn't be able to subscribe themselves to a non-public group 
+	g = get_object_or_404(Group, name=group_name)
+	if not g.public:
+		return redirect('/404?e=perm')
+
 	if request.user.is_authenticated():
+
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		group_name = request.GET.get('group_name')
 		res = engine.main.subscribe_group(group_name, user)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
+
 		if res['status']:
 			active_group = load_groups(request, groups, user, group_name=group_name)
 		else:
 			active_group = {'name':'No Groups Yet'}
 			if len(groups) > 0:
 				active_group = load_groups(request, groups, user, group_name=groups[0]['name'])
-		return {'res':res, 'type': 'subscribed to', 'user': request.user, 'groups': groups,
-				'active_group': active_group, 'group_name' : group_name,
-				'email': request.user.email}
-	else:
-		if request.GET.get('email'):
-			email = request.GET.get('email')
-			group_name = request.GET.get('group_name')
-			res = engine.main.add_members(group_name, email, None)
-			return {'res':res, 'type': 'subscribed to', 'email': email, 'group_name' : group_name}
-		else:
-			return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + request.GET.get('group_name'))
+
+		response.update({
+			'res' : res,
+			'user' : request.user,
+			'groups' : groups,
+			'active_group' : active_group,
+			'email' : request.user.email,
+			});
+
+	elif email_param:
+
+		response.update({
+			'res' : engine.main.add_members(group_name, email_param, None), 
+			'email' : email_param,
+			});
+
+	return response
+
+
 
 @render_to(WEBSITE+"/upvote.html")
 @login_required
