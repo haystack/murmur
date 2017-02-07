@@ -80,6 +80,8 @@ urlpatterns = patterns('',
     url(r'^accounts/', include('registration.backends.default.urls')),
 
     url(r'^subscribe/confirm/(?P<token>.+)$', 'browser.views.subscribe_confirm'),
+
+    url(r'^delete_post', 'browser.views.delete_post'),
     )
 
 # murmur-only patterns

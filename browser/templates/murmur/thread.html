@@ -61,7 +61,10 @@
 					<a style="cursor: pointer" onclick="upvote('{{ thread.post.id }}', '{{ thread.thread_id }}'); return false;">+1 Post</a> | 
 				{% endif %}
 				
-				<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{thread.post.id}}">Permalink</a>
+				<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{thread.post.id}}">Permalink</a> |
+
+				<a style="cursor: pointer" onclick="delete_thread( '{{ thread.post.id }}', '{{thread.thread_id}}' ); return false;">Remove Thread</a>
+
 				</small>
 				
 			</span>	
@@ -96,7 +99,9 @@
 								 | 
 								<a style="cursor: pointer" onclick="upvote('{{ reply.id }}', '{{ thread.thread_id }}'); return false;">+1 Post</a> | 
 							{% endif %}
-							<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{reply.id}}">Permalink</a>
+							<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{reply.id}}">Permalink</a> |
+
+							<a style="cursor: pointer" onclick="delete_post( '{{ reply.id }}' ); return false;">Remove Post</a>
 							</small>
 						</span>
 					</div>

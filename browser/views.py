@@ -460,6 +460,16 @@ def create_group(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
+@login_required
+def delete_post(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.delete_post(user, request.POST['id'], request.POST['thread_id'])
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
 def get_group_settings(request):
 	try:
