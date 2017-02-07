@@ -506,6 +506,38 @@ $(document).ready(function(){
 					notify(res, true);
 				}
 			);	
+		};
+
+	delete_thread = 
+		function(id, thread_id){
+			warningMessage = "Are you sure? This will remove all posts in this thread from the website, but users who received them will still have the original emails.";
+	        var confirmation = confirm(warningMessage);
+	        if (confirmation) {
+				$.post('delete_post', {'id': id, 'thread_id': thread_id},
+					function(res){
+						if(res.status){
+							window.location.href = "/";
+						}
+						notify(res, true);
+					}
+				);
+			};
+		};
+
+	delete_post = 
+		function(id){
+			warningMessage = "Are you sure? This will remove the post and all subsequent posts in this thread from the website, but users who received them will still have the original emails.";
+	        var confirmation = confirm(warningMessage);
+	        if (confirmation) {
+				$.post('delete_post', {'id': id, 'thread_id': 0},
+					function(res){
+						if(res.status){
+							window.location.reload();
+						}
+						notify(res, true);
+					}
+				);
+			};
 		};		
 
 	/* To avoid closure */	
@@ -985,7 +1017,7 @@ $(document).ready(function(){
 			content += ' <small>  | ';
 			content += '<a style="cursor: pointer" onclick="upvote(\'' + res.post.id + '\', \'' + res.thread_id + '\'); return false;">+1 Post</a> ';
 		}
-		content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.post.id + '">Permalink</a></small><br /><br />';
+		content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.post.id + '">Permalink</a> | <a style="cursor: pointer" onclick="delete_thread(' + res.post.id + ', ' + res.thread_id + ' ); return false;">Remove Thread</a></small><br /><br />';
 		content += '</span>';
 		
 		content += '<div class="reply">';
@@ -1007,7 +1039,7 @@ $(document).ready(function(){
 		      		content += ' <small>  | ';
 		      		content += '<a style="cursor: pointer" onclick="upvote(\'' + res.replies[i].id + '\', \'' + res.thread_id + '\'); return false;">+1 Post</a> ';
 		        }
-		      	content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.replies[i].id + '">Permalink</a></small><br /><br />';
+		      	content += ' | <a href="/thread?tid=' + res.thread_id + '&post_id=' + res.replies[i].id + '">Permalink</a> | <a style="cursor: pointer" onclick="delete_post(' + res.replies[i].id + ' ); return false;">Remove Post</a></small><br /><br />';
                 
                 content += '</span>';
                 content += '</div>';

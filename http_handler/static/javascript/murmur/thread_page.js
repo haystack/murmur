@@ -82,6 +82,38 @@ $(document).ready(function(){
 			);	
 			
 		};
+	
+	delete_thread = 
+		function(id, thread_id){
+			warningMessage = "Are you sure? This will remove all posts in this thread from the website, but users who received them will still have the original emails.";
+	        var confirmation = confirm(warningMessage);
+	        if (confirmation) {
+				$.post('delete_post', {'id': id, 'thread_id': thread_id},
+					function(res){
+						if(res.status){
+							window.location.href = "/";
+						}
+						notify(res, true);
+					}
+				);
+			};
+		};
+
+	delete_post = 
+		function(id){
+			warningMessage = "Are you sure? This will remove the post and all subsequent posts in this thread from the website,but users who received them will still have the original emails.";
+	        var confirmation = confirm(warningMessage);
+	        if (confirmation) {
+				$.post('delete_post', {'id': id, 'thread_id': 0},
+					function(res){
+						if(res.status){
+							window.location.reload();
+						}
+						notify(res, true);
+					}
+				);
+			};
+		};
 		
 	insert_reply = 
 		function(params){
