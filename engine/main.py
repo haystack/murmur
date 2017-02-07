@@ -1447,11 +1447,12 @@ def update_post_status(user, group_name, post_id, new_status):
 def load_pending_posts(user):
 	res = {'status' : False}
 	try:
-		mgs = MemberGroup.objects.filter(member=user, moderator=True)
-		posts = Post.objects.filter(group__in=mgs, status='P')
+		groups = Group.objects.filter(membergroup__member=user, membergroup__moderator=True)
+		posts = Post.objects.filter(group__in=groups, status='P')
 		res['status'] = True
 		res['posts'] = posts
 		return res
 	except Exception, e:
 		logging.debug(e)
 		res['code'] = msg_code['UNKNOWN_ERROR']
+		res['error'] = e

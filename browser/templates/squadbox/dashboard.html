@@ -1,46 +1,52 @@
-{% extends "squadbox/base.html" %}
+{% extends "group_container_base.html" %}
 
-{% block customcss %}
-{% endblock %}
-
-{% block content %}
-
-<div class="container">
-	<div class="group-container">
-		<div id="post-column-area-wrapper">
-			<div id="post-column-area">
-				
-				<div class="post-list-container">
-						You are not in any squads yet. <a href="/create_new_group">Create a new squad.</a>
-					<BR><BR>
-				</div>
-				
-				<ul id="post-list-table">
-<!-- 					{% for post in posts.threads %}
-						<a href="/thread?group_name={{ active_group.name }}&tid={{ post.thread_id }}">
-							<li class="row-item" id="{{ post.thread_id }}">
-								<div class="left-column-area-metadata">
-									<span class="gray">{{ post.timestamp|date:"n/j/Y" }}</span>
-									<span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
- 								<br>
-								</div>
-								<div class="middle-column-area-content">
-									<span class="strong">{{ post.post.subject }}</span>
-									<br />
-									<span class="strong-gray">{{ post.post.from }}</span><br />
-									<span class="blurb ellipsis">{{ post.post.text|striptags }}
-									</span>
-								</div>
-							</li>
-						</a>
-					{% endfor %} -->
-				</ul>
-				<div id="scroll_trigger"></div>
-			</div>
+{% block container-content %}
+<h3><b>Pending Emails</b></h3>
+<div id="post-column-area-wrapper">
+	<div id="post-column-area">
+		<div class="post-list-container">
+			{% if groups|length == 0 %}
+				You are not in any squads yet. <a href="/create_new_group">Create a new squad.</a>
+			{% elif mod_group_count == 0 %}
+				You aren't a moderator for any squads yet.
+			{% elif pending_posts|length == 0 %}
+				There are no pending emails in any squads you moderate.
+			{% else %}
+				<i>Click on an email to view its full text, and approve or reject it.</i><BR><BR>
+			{% endif %}
 		</div>
+
+		<!-- <ul id="post-list-table">
+			{% for p in pending_posts %}
+				<a href="/thread?group_name={{ post.group.name }}&tid={{ post.thread.id }}">
+					<li class="row-item" id="{{ post.thread.id }}">
+						<div class="right-column-area-metadata">
+							<span class="gray">{{ p.timestamp|date:"n/j/Y" }}</span>
+							<span class="gray">{{ p.timestamp|date:"h:i A" }}</span>
+							<br>
+						</div>
+						<div class="left-column-area-metadata">
+							hi
+						</div>
+						<div>
+							<span class="strong">{{ p.subject }}</span>
+							<br />
+							<span class="strong-gray">{{ p.poster_email }}</span><br />
+							<span class="blurb ellipsis">{{ p.post|striptags }}
+							</span>
+						</div>
+					</li>
+				</a>
+			{% endfor %}
+		</ul> -->
+		<ul class="nav nav-tabs">
+			<li role="presentation"><a href="#">Home</a></li>
+			<li role="presentation"><a href="#">Profile</a></li>
+		 	<li role="presentation"><a href="#">Messages</a></li>
+		</ul>
+		<div id="scroll_trigger"></div>
 	</div>
 </div>
-
 {% endblock %}
 
 {% block customjs %}

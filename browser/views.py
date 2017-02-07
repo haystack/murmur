@@ -1322,7 +1322,16 @@ def dashboard(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		return {'user' : request.user, 'groups' : groups}
+		mod_group_count = len(Group.objects.filter(membergroup__member=user, membergroup__moderator=True))
+		res = engine.main.load_pending_posts(user)
+		if not res['status']:
+			logging.debug('Error loading pending posts: ' + res['error'])
+			pending_posts = []
+		else:
+			pending_posts = res['posts']
+
+		return {'user' : request.user, 'groups' : groups, 'mod_group_count' : mod_group_count,
+				'pending_posts' : pending_posts, 'website' : WEBSITE}
 	else:
 		return redirect(global_settings.LOGIN_URL)
 

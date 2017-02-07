@@ -228,6 +228,17 @@ hr{
 }
 
 .left-column-area-metadata{
+	float:left;
+	width:70px;
+	text-align:left;
+}
+
+#right-column-area{
+      margin:0;
+      padding:0;
+}
+
+.right-column-area-metadata{
 	float:right;
 	width:70px;
 	text-align:right;
