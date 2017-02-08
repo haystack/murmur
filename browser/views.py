@@ -262,12 +262,13 @@ def my_groups(request):
 
 
 
-@render_to(WEBSITE+"/mobile_list_groups.html")
+@render_to("mobile_list_groups.html")
 @login_required
 def my_group_list(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = engine.main.list_my_groups(user)
-	return {'user': request.user, 'groups': groups['groups'], 'group_page': True, 'my_groups': True}
+	return {'user': request.user, 'groups': groups['groups'], 'group_page': True, 
+			'my_groups': True, 'website' : WEBSITE, 'group_or_squad' : group_or_squad}
 
 
 @render_to(WEBSITE+"/mobile_pub_list_groups.html")
@@ -345,7 +346,8 @@ def my_group_settings_view(request, group_name):
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(member=user, group=group)
-		return {'user': request.user, 'groups': groups, 'group_info': group, 'settings': membergroup, 'group_page': True}
+		return {'user': request.user, 'groups': groups, 'group_info': group, 'settings': membergroup, 
+			'group_page': True, 'website' : WEBSITE}
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 	except MemberGroup.DoesNotExist:
@@ -459,7 +461,7 @@ def create_group(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
-
+@login_required
 def get_group_settings(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
