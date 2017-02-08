@@ -282,7 +282,7 @@ def handle_post_murmur(message, group, host):
 	to_header = email_message.get_all('to', [])
 
 	# returns tuples of form (realname, address); only need second 
-	to_emails = [i[1] for i in get_addresses(to_header)]
+	to_emails = [i[1] for i in getaddresses(to_header)]
 
 	msg_text = get_body(email_message)
 	_, sender_addr = parseaddr(message['From'].lower())
