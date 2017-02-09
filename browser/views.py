@@ -282,7 +282,8 @@ def group_page(request, group_name):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-	except Exception:
+	except Exception, e:
+		logging.debug(e)
 		user = None
 		groups = []
 		
