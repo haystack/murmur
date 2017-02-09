@@ -1,0 +1,23 @@
+{% extends "group_container_base.html" %}
+
+{% block container-content %}
+	
+	{% if res.status %}
+		You've {{ type }} the email address {{ email_address }} for the {{ group_or_squad }} "{{group_name}}".
+
+		{% if type == 'whitelisted' %}
+			Emails from {{ email_address }} will now be automatically approved.
+		{% elif type == 'blacklisted' %}
+			Emails from {{ email_address }} will now be automatically rejected. 
+		{% endif %}
+
+		<BR>
+		<BR>
+
+		To edit your whitelist and blacklist, go to the {{ group_or_squad }}'s <a href="/groups/{{ group_name }}">info page</a>. 
+
+	{% else %}
+		Sorry, there was an error: {{ res.code | lower }}.
+	{% endif %}
+
+{% endblock %}
