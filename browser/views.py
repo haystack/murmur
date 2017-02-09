@@ -1161,7 +1161,8 @@ def blacklist_get(request):
 		sender_email = request.GET.get('sender')
 		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, False, True)
 		return {'res' : res, 'type' : 'blacklisted', 'email_address' : sender_email, 
-				'group_or_squad' : group_or_squad, 'website' : WEBSITE}
+				'group_or_squad' : group_or_squad, 'website' : WEBSITE, 'group_name' : group_name,
+				'user' : request.user}
 	else:
 		return redirect(global_settings.LOGIN_URL + '?next=/blacklist_get?group_name=%s&sender=%s' + (group_name. sender_email))
  
@@ -1175,7 +1176,8 @@ def whitelist_get(request):
 		sender_email = request.GET.get('sender')
 		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, True, False)
 		return {'res' : res, 'type' : 'whitelisted', 'email_address' : sender_email, 
-				'group_or_squad' : group_or_squad, 'website' : WEBSITE}
+				'group_or_squad' : group_or_squad, 'website' : WEBSITE, 'group_name' : group_name,
+				'user' : request.user}
 	else:
 		return redirect(global_settings.LOGIN_URL + '?next=/whitelist_get?group_name=%s&sender=%s' % (group_name. sender_email))
 
