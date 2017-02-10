@@ -96,8 +96,13 @@ def group_info_page(user, group_name):
 			res['lists'].append(list_obj)
 
 
-	except:
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 		res['group'] = None
+
+	except Exception, e:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+		logging.debug(e)
 	
 	return res
 

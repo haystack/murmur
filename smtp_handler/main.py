@@ -277,14 +277,19 @@ def info(message, group_name=None, host=None):
 def handle_post_murmur(message, group, host):
 
 	_, list_addr = parseaddr(message['List-Id'])
-	_, to_addr = parseaddr(message['To'].lower())
 	msg_id = message['Message-ID']
 	email_message = message_from_string(str(message))
+	to_header = email_message.get_all('to', [])
+
+	# returns tuples of form (realname, address); only need second 
+	to_emails = [i[1] for i in getaddresses(to_header)]
+
 	msg_text = get_body(email_message)
 	_, sender_addr = parseaddr(message['From'].lower())
 	attachments = get_attachments(email_message)
 
 	try:
+		
 		# try to detect and prevent duplicate posts 
 
 		# check if we already got a post to this group with the same message_id
@@ -336,7 +341,7 @@ def handle_post_murmur(message, group, host):
 
 		# if no valid List-Id, try email's To field
 		if not original_list_lookup.exists():
-			original_list_lookup = ForwardingList.objects.filter(email=to_addr, group=group, can_post=True)
+			original_list_lookup = ForwardingList.objects.filter(email__in=to_emails, group=group, can_post=True)
 
 		# neither user nor fwding list exist so post is invalid - reject email
 		if not user_lookup.exists() and not original_list_lookup.exists():
@@ -539,6 +544,10 @@ def handle_post_squadbox(message, group, host):
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
 def handle_post(message, address=None, host=None):
+	
+	# restart the db connection
+	django.db.close_connection()
+	
 	if '+' in address and '__' in address:
 		return
 
