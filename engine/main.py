@@ -1392,7 +1392,9 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 			entry.whitelist = whitelist
 			entry.blacklist = blacklist
 		else:
-			entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
+			hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
+			entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist, hash=hash)
+			send_whitelist_hash_email(entry.id)
 		
 		entry.save()
 		res['status'] = True
@@ -1460,3 +1462,14 @@ def load_pending_posts(user):
 	except Exception, e:
 		logging.debug(e)
 		res['code'] = msg_code['UNKNOWN_ERROR']
+
+def send_whitelist_hash_email(whitelist_id):
+	whitelist = WhiteOrBlacklist.objects.get(id=whitelist_id)
+	group = whitelist.group
+	hash = whitelist.hash
+
+	if whitelist:
+		from_address = group.name + '+' + hash + '@' + BASE_URL
+		body = "Please add the sender of this email (" + from_address + ") to your contacts list and send emails to this address when trying to contact " + group.name + ". This way, your messages will be received and verified automatically. To protect the privacy of the recipient(s), do not share this secret email address with anyone else."
+		mail = MailResponse(From = from_address, To = whitelist.email, Subject = 'Your secret email address for '+group.name, Html = body)
+		relay_mailer.deliver(mail, To = [whitelist.emai])

@@ -174,6 +174,9 @@ class WhiteOrBlacklist(models.Model):
 	whitelist = models.BooleanField(default=False)
 	blacklist = models.BooleanField(default=False)
 
+	# hash for email sender verification
+	hash = models.CharField(max_length=40)
+
 	# timestamp (for temporary bans)
 	timestamp = models.DateTimeField(auto_now=True)
 
