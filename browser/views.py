@@ -21,7 +21,7 @@ from browser.util import load_groups, paginator
 from engine.constants import *
 from http_handler.settings import WEBSITE
 from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
-                           MuteTag, Tag, UserProfile)
+                           MuteTag, Tag, UserProfile, Post)
 from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
@@ -1192,7 +1192,7 @@ def approve_get(request):
 		post = Post.objects.get(id=post_id)
 		return {'res' : res, 'website' : WEBSITE, 'group_name' : group_name,
 				'type' : 'approved', 'email_address' : post.poster_email, 
-				'email_subject' : post.subject}
+				'email_subject' : post.subject, 'post_id' : post_id}
 	else:
 		return redirect(global_settings.LOGIN_URL + '?next=/approve_get?group_name=%s&post_id=%s' % (group_name, post_id))
 
@@ -1207,9 +1207,37 @@ def reject_get(request):
 		post = Post.objects.get(id=post_id)
 		return {'res' : res, 'website' : WEBSITE, 'group_name' : group_name,
 				'type' : 'rejected', 'email_address' : post.poster_email, 
-				'email_subject' : post.subject}
+				'email_subject' : post.subject, 'post_id' : post_id}
 	else:
 		redirect(global_settings.LOGIN_URL + '?next=/reject_get?group_name=%s&post_id=%s' % (group_name, post_id))
+
+@login_required
+def approve_post(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			group_name = request.POST['group_name']
+			post_id = request.POST['post_id']
+			res = engine.main.update_post_status(user, group_name, post_id, 'A')
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def reject_post(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			group_name = request.POST['group_name']
+			post_id = request.POST['post_id']
+			res = engine.main.update_post_status(user, group_name, post_id, 'R')
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
 def follow_thread(request):
