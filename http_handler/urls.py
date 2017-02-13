@@ -43,12 +43,6 @@ urlpatterns = patterns('',
     url(r'^group_settings', 'browser.views.get_group_settings'),
     url(r'^groups/(?P<group_name>[\w-]+)/edit_my_settings', 'browser.views.my_group_settings_view'),
 
-    url(r'^approve_get', 'browser.views.approve_get'),
-    url(r'^reject_get', 'browser.views.reject_get'),
-
-    url(r'^approve_post', 'browser.views.approve_post'),
-    url(r'^reject_post', 'browser.views.reject_post'),
-
     url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2")),
      
     #override the registration default urls - bug with django 1.6
@@ -172,6 +166,10 @@ elif WEBSITE == 'squadbox':
 
     new_patterns = [
                     url(r'^dashboard', 'browser.views.dashboard'),
+                    url(r'^approve_get', 'browser.views.approve_get'),
+                    url(r'^reject_get', 'browser.views.reject_get'),
+                    url(r'^approve_post', 'browser.views.approve_post'),
+                    url(r'^reject_post', 'browser.views.reject_post'),
                     ]
 
     urlpatterns.extend(new_patterns)
