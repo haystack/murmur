@@ -166,6 +166,10 @@ elif WEBSITE == 'squadbox':
 
     new_patterns = [
                     url(r'^dashboard', 'browser.views.dashboard'),
+                    url(r'^blacklist_get', 'browser.views.blacklist_get'),
+                    url(r'^whitelist_get', 'browser.views.whitelist_get'),
+                    url(r'^whitelist', 'browser.views.whitelist'),
+                    url(r'^blacklist', 'browser.views.blacklist'),
                     ]
 
     urlpatterns.extend(new_patterns)

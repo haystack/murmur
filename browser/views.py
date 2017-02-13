@@ -1151,35 +1151,63 @@ def unupvote_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unupvote_get?post_id=" + request.GET.get('post_id'))
 
-# TODO: make a page for this. 
+@render_to("whitelist.html")
 @login_required
 def blacklist_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.GET.get('group_name')
-		sender_email = request.GET.get('sender_email')
+		sender_email = request.GET.get('sender')
 		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, False, True)
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		return {'res' : res, 'type' : 'blacklisted', 'email_address' : sender_email, 
+				'group_or_squad' : group_or_squad, 'website' : WEBSITE, 'group_name' : group_name,
+				'user' : request.user}
 	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
-
-# TODO: make a page for this. 
+		return redirect(global_settings.LOGIN_URL + '?next=/blacklist_get?group_name=%s&sender=%s' + (group_name. sender_email))
+ 
+@render_to("whitelist.html")
 @login_required
 def whitelist_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.GET.get('group_name')
-		sender_email = request.GET.get('sender_email')
+		sender_email = request.GET.get('sender')
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, True, False)
+		return {'res' : res, 'type' : 'whitelisted', 'email_address' : sender_email, 
+				'group_or_squad' : group_or_squad, 'website' : WEBSITE, 'group_name' : group_name,
+				'user' : request.user}
+	else:
+		return redirect(global_settings.LOGIN_URL + '?next=/whitelist_get?group_name=%s&sender=%s' % (group_name. sender_email))
+
+@login_required
+def whitelist(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.POST['group_name']
+		sender_email = request.POST['sender']
 		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, True, False)
 		return HttpResponse(json.dumps(res), content_type="application/json")
-	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+	
+@login_required
+def blacklist(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.POST['group_name']
+		sender_email = request.POST['sender']
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, False, True)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
 def approve_get(request):
