@@ -1181,6 +1181,7 @@ def whitelist_get(request):
 		error = 'You are not logged in.'
 		return HttpResponse(error, content_type="application/json")
 
+@render_to("approve_reject.html")
 @login_required
 def approve_get(request):
 	if request.user.is_authenticated():
@@ -1188,12 +1189,14 @@ def approve_get(request):
 		group_name = request.GET.get('group_name')
 		post_id = request.GET.get('post_id')
 		res = engine.main.update_post_status(user, group_name, post_id, 'A')
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		post = Post.objects.get(id=post_id)
+		return {'res' : res, 'website' : WEBSITE, 'group_name' : group_name,
+				'type' : 'approved', 'email_address' : post.poster_email, 
+				'email_subject' : post.subject}
 	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
+		return redirect(global_settings.LOGIN_URL + '?next=/approve_get?group_name=%s&post_id=%s' % (group_name, post_id))
 
+@render_to("approve_reject.html")
 @login_required
 def reject_get(request):
 	if request.user.is_authenticated():
@@ -1201,11 +1204,12 @@ def reject_get(request):
 		group_name = request.GET.get('group_name')
 		post_id = request.GET.get('post_id')
 		res = engine.main.update_post_status(user, group_name, post_id, 'R')
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		post = Post.objects.get(id=post_id)
+		return {'res' : res, 'website' : WEBSITE, 'group_name' : group_name,
+				'type' : 'rejected', 'email_address' : post.poster_email, 
+				'email_subject' : post.subject}
 	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
+		redirect(global_settings.LOGIN_URL + '?next=/reject_get?group_name=%s&post_id=%s' % (group_name, post_id))
 
 @login_required
 def follow_thread(request):

@@ -1,0 +1,21 @@
+{% extends "group_container_base.html" %}
+
+{% block container-content %}
+	
+	{% if res.status %}
+		You've {{ type }} the email from {{ email_address }} with subject {{ email_subject }}. 
+		{% if type == 'approved' %}
+			{% if website == 'squadbox' %}
+				The message has been sent on to its intended recipient.
+			{% elif website == 'murmur' %}
+				The message has been posted to the group "{{ group_name }}". 
+			{% endif %}
+		{% elif type == 'rejected' %}
+			The message has been discarded.
+		{% endif %}
+
+	{% else %}
+		Sorry, there was an error: {{ res.code | lower }}.
+	{% endif %}
+
+{% endblock %}
