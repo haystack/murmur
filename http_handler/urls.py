@@ -39,6 +39,9 @@ urlpatterns = patterns('',
 
     url(r'^my_group_list', 'browser.views.my_group_list'),
 
+    url(r'^whitelist', 'browser.views.whitelist'),
+    url(r'^blacklist', 'browser.views.blacklist'),
+
     url(r'^edit_group_settings', 'browser.views.edit_group_settings'),
     url(r'^group_settings', 'browser.views.get_group_settings'),
     url(r'^groups/(?P<group_name>[\w-]+)/edit_my_settings', 'browser.views.my_group_settings_view'),
