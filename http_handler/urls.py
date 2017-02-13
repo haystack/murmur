@@ -166,6 +166,10 @@ elif WEBSITE == 'squadbox':
 
     new_patterns = [
                     url(r'^dashboard', 'browser.views.dashboard'),
+                    url(r'^approve_get', 'browser.views.approve_get'),
+                    url(r'^reject_get', 'browser.views.reject_get'),
+                    url(r'^approve_post', 'browser.views.approve_post'),
+                    url(r'^reject_post', 'browser.views.reject_post'),
                     url(r'^blacklist_get', 'browser.views.blacklist_get'),
                     url(r'^whitelist_get', 'browser.views.whitelist_get'),
                     url(r'^whitelist', 'browser.views.whitelist'),
