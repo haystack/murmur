@@ -1395,6 +1395,7 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 			hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
 			entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist, hash=hash)
 			send_whitelist_hash_email(entry.id)
+			res['hash'] = hash
 		
 		entry.save()
 		res['status'] = True

@@ -475,6 +475,7 @@ def handle_post_murmur(message, group, host):
 def handle_post_squadbox(message, group, host):
 
 	_, sender_addr = parseaddr(message['From'].lower())
+	_, to_addr = parseaddr(message['To'].lower())
 
 	# whitelist/blacklist checking
 	white_or_blacklist = WhiteOrBlacklist.objects.filter(group=group, email=sender_addr)
@@ -485,6 +486,13 @@ def handle_post_squadbox(message, group, host):
 			logging.debug("Sender %s blacklisted; rejecting message" % sender_addr)
 			return
 		elif w_or_b.whitelist:
+			# check hash in to-email matches hash in whitelist:
+			hash = re.search(r'\+(.*?)\@', to_addr)
+			if hash:
+				if hash[0] != w_or_b.hash:
+					# reject message
+					logging.debug("Sender hash doesn't match; rejecting message" % sender_addr)
+					return
 			logging.debug("Sender %s whitelisted; accepting message" % sender_addr)
 			return
 			# send message on to intended recipient (aka group admin)
