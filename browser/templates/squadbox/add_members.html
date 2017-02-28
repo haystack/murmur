@@ -6,7 +6,7 @@
 	<hr />
 	
 	<form id="new-members-form">
-		<span class="strong">Moderators</span>: Will review moderated emails before you see them. Enter moderator email addresses, separated by commas:<br />
+		<span class="strong">Moderators</span>: Will review moderated emails before you see them. If they don't have accounts, we will create new ones for them. Enter email addresses, separated by commas:<br />
 		<input id="new-member-emails" type="text" style="width: 100%; box-sizing: border-box;"></input>
 		<br /> <br />
 		<button type="button" id="btn-add-members" style="margin-top:10px;">Add Members</button>
@@ -17,5 +17,6 @@
 {% endblock %}
 
 {% block customjs %}
-	<script type="text/javascript" src="/static/javascript/squadbox/add_members.js"></script>
+	<script type="text/javascript" src="/static/javascript/notify.js"></script>
+	<script type="text/javascript" src="/static/javascript/add_members.js"></script>
 {% endblock %}

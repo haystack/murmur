@@ -163,6 +163,25 @@
 									</tr>
 								{% endif %}
 							{% endfor %}
+							{% for member in group_info.members_pending %}
+								<tr>
+									<td></td>
+									<td><i>{{ member.email }} (pending)</i></td>
+										{% if flavour != "mobile" %}
+											<td>{{ member.joined }}</td>
+											{% if member.admin %}
+												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+											{% else %}
+												<th></th>
+											{% endif %}
+											{% if member.mod %}
+												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+											{% else %}
+												<th></th>
+											{% endif %}
+										{% endif %}
+								</tr>
+							{% endfor %}
 						</tbody>
 					</table>
 					<br />

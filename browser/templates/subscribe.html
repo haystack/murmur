@@ -1,0 +1,38 @@
+{% extends "group_container_base.html" %}
+
+{% block container-content %}
+	
+	{% if res.status %}
+		You've {{ type }} the {{group_or_squad }} "{{ group_name }}".
+
+		{% if type == 'subscribed to' or type == 'joined' %}
+			Emails will be sent to the following address: {{ email }}.
+		{% endif %}
+
+		<BR>
+		<BR>
+
+		{% if type == 'subscribed to' or type == 'joined' %}
+				View <a href="/groups/{{ group_name }}">{{ group_name }}</a> {{group_or_squad}} information.
+				<BR>
+				<BR>
+			<form action="/unsubscribe_get?">
+				<input type='hidden' name='group_name' value={{group_name}}>
+				<input type="submit" value="Unsubscribe">
+			</form>
+		<!-- only want to show info and let resubscribe if it's public -->
+		{% elif public %}
+			View <a href="/groups/{{ group_name }}">{{ group_name }}</a> {{group_or_squad}} information.
+			<BR>
+			<BR>
+			<form action="/subscribe_get?">
+				<input type='hidden' name='group_name' value={{group_name}}>
+				<input type="submit" value="Re-subscribe">
+			</form>
+		{% endif %}
+
+	{% else %}
+		Sorry, there was an error: {{ res.code | lower }}.
+	{% endif %}
+
+{% endblock %}

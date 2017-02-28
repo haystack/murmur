@@ -132,6 +132,20 @@ class MemberGroup(models.Model):
 		db_table = "murmur_membergroups"
 		unique_together = ("member", "group")
 
+class MemberGroupPending(models.Model):
+	id = models.AutoField(primary_key=True)
+	member = models.ForeignKey(settings.AUTH_USER_MODEL)
+	group = models.ForeignKey('Group')
+	timestamp = models.DateTimeField(auto_now=True)
+	hash = models.CharField(max_length=40)
+	
+	def __unicode__(self):
+		return '%s - %s' % (self.member.email, self.group.name)
+
+	class Meta:
+		db_table = "murmur_membergroupspending"
+		unique_together = ("member", "group")
+
 class ForwardingList(models.Model):
 	id = models.AutoField(primary_key=True)
 	email = models.EmailField(verbose_name='email address',max_length=255)

@@ -20,12 +20,30 @@ urlpatterns = patterns('',
     url(r'^404', 'browser.views.error'),
 
     url(r'^create_new_group', 'browser.views.create_group_view'), 
+    url(r'^create_group', 'browser.views.create_group'),
+    url(r'^delete_group', 'browser.views.delete_group'),
+
+    url(r'^groups/(?P<group_name>[\w-]+)/edit_group_info', 'browser.views.edit_group_info_view'),
+    url(r'^edit_group_info', 'browser.views.edit_group_info'),
+    url(r'^group_info', 'browser.views.group_info'),
     url(r'^groups/(?P<group_name>[\w-]+)$', 'browser.views.group_page'),
+
     url(r'^groups/(?P<group_name>[\w-]+)/add_members', 'browser.views.add_members_view'),
     url(r'^add_members', 'browser.views.add_members'),
-          
-    url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2")),
+    url(r'^edit_members', 'browser.views.edit_members'),
 
+    url(r'^unsubscribe_get', 'browser.views.unsubscribe_get'),
+    url(r'^subscribe_get', 'browser.views.subscribe_get'),
+    url(r'^unsubscribe_group', 'browser.views.unsubscribe_group'),
+    url(r'^subscribe_group', 'browser.views.subscribe_group'),
+
+    url(r'^my_group_list', 'browser.views.my_group_list'),
+
+    url(r'^edit_group_settings', 'browser.views.edit_group_settings'),
+    url(r'^group_settings', 'browser.views.get_group_settings'),
+    url(r'^groups/(?P<group_name>[\w-]+)/edit_my_settings', 'browser.views.my_group_settings_view'),
+
+    url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2")),
      
     #override the registration default urls - bug with django 1.6
     url(r'^accounts/password/change/$',
@@ -77,6 +95,8 @@ urlpatterns = patterns('',
     ),
 
     url(r'^accounts/', include('registration.backends.default.urls')),
+
+    url(r'^subscribe/confirm/(?P<token>.+)$', 'browser.views.subscribe_confirm'),
     )
 
 # murmur-only patterns
@@ -88,28 +108,14 @@ if WEBSITE == 'murmur':
                     url(r'^post_list', 'browser.views.post_list'),
                     url(r'^pub_group_list', 'browser.views.pub_group_list'),
                     url(r'^group_list', 'browser.views.group_list'),
-                    url(r'^group_info', 'browser.views.group_info'),
                     url(r'^groups/(?P<group_name>[\w-]+)/add_list', 'browser.views.add_list_view'),
                     url(r'^groups/(?P<group_name>[\w-]+)/create_post', 'browser.views.my_group_create_post_view'),
                     url(r'^activate_group', 'browser.views.activate_group'),
                     url(r'^deactivate_group', 'browser.views.deactivate_group'),
-                    url(r'^subscribe_group', 'browser.views.subscribe_group'),
-
-                    # TODO: make all of these work/customize for squadbox
-                    url(r'^groups/(?P<group_name>[\w-]+)/edit_my_settings', 'browser.views.my_group_settings_view'),
-                    url(r'^groups/(?P<group_name>[\w-]+)/edit_group_info', 'browser.views.edit_group_info_view'),
-                    url(r'^edit_group_info', 'browser.views.edit_group_info'),
-                    url(r'^delete_group', 'browser.views.delete_group'),
                     url(r'^my_groups', 'browser.views.my_groups'),
-                    url(r'^my_group_list', 'browser.views.my_group_list'),
-                    url(r'^group_settings', 'browser.views.get_group_settings'),
-                    url(r'^unsubscribe_group', 'browser.views.unsubscribe_group'),
-                    url(r'^create_group', 'browser.views.create_group'),
-                    url(r'^edit_members', 'browser.views.edit_members'),
-                    url(r'^load_post', 'browser.views.load_post'),
                     url(r'^list_my_groups', 'browser.views.list_my_groups'), 
-                    url(r'^edit_group_settings', 'browser.views.edit_group_settings'),
-                    # end TODO
+
+                    url(r'^load_post', 'browser.views.load_post'),
 
                     url(r'^list_posts', 'browser.views.list_posts'),
                     url(r'^refresh_posts', 'browser.views.refresh_posts'),
@@ -146,9 +152,6 @@ if WEBSITE == 'murmur':
 
                     url(r'^mute', 'browser.views.mute_thread_get'),
                     url(r'^unmute', 'browser.views.unmute_thread_get'),
-                     
-                    url(r'^unsubscribe_get', 'browser.views.unsubscribe_get'),
-                    url(r'^subscribe_get', 'browser.views.subscribe_get'),
 
                     url(r'^add_list', 'browser.views.add_list'),
                     url(r'^delete_list', 'browser.views.delete_list'),
@@ -166,6 +169,14 @@ elif WEBSITE == 'squadbox':
 
     new_patterns = [
                     url(r'^dashboard', 'browser.views.dashboard'),
+                    url(r'^approve_get', 'browser.views.approve_get'),
+                    url(r'^reject_get', 'browser.views.reject_get'),
+                    url(r'^approve_post', 'browser.views.approve_post'),
+                    url(r'^reject_post', 'browser.views.reject_post'),
+                    url(r'^blacklist_get', 'browser.views.blacklist_get'),
+                    url(r'^whitelist_get', 'browser.views.whitelist_get'),
+                    url(r'^whitelist', 'browser.views.whitelist'),
+                    url(r'^blacklist', 'browser.views.blacklist'),
                     ]
 
     urlpatterns.extend(new_patterns)

@@ -3,7 +3,7 @@ from lamson.server import Relay
 from config.settings import *
 from lamson_subclass import MurmurMailResponse
 from schema.models import Group, MemberGroup, Thread, Following, Mute
-from http_handler.settings import BASE_URL
+from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL
 
 
 '''
@@ -14,7 +14,7 @@ Murmur Mail Utils and Constants
 '''
 
 HOST = BASE_URL
-NO_REPLY = 'no-reply' + '@' + BASE_URL
+NO_REPLY = DEFAULT_FROM_EMAIL
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
 UNFOLLOW_SUFFIX = '__unfollow__'
