@@ -21,7 +21,7 @@ from browser.util import load_groups, paginator
 from engine.constants import *
 from http_handler.settings import WEBSITE
 from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
-                           MuteTag, Tag, UserProfile)
+                           MuteTag, Tag, UserProfile, Post)
 from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
@@ -1151,36 +1151,65 @@ def unupvote_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unupvote_get?post_id=" + request.GET.get('post_id'))
 
-# TODO: make a page for this. 
+@render_to("whitelist.html")
 @login_required
 def blacklist_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.GET.get('group_name')
-		sender_email = request.GET.get('sender_email')
+		sender_email = request.GET.get('sender')
 		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, False, True)
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		return {'res' : res, 'type' : 'blacklisted', 'email_address' : sender_email, 
+				'group_or_squad' : group_or_squad, 'website' : WEBSITE, 'group_name' : group_name,
+				'user' : request.user}
 	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
-
-# TODO: make a page for this. 
+		return redirect(global_settings.LOGIN_URL + '?next=/blacklist_get?group_name=%s&sender=%s' + (group_name. sender_email))
+ 
+@render_to("whitelist.html")
 @login_required
 def whitelist_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.GET.get('group_name')
-		sender_email = request.GET.get('sender_email')
+		sender_email = request.GET.get('sender')
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, True, False)
+		return {'res' : res, 'type' : 'whitelisted', 'email_address' : sender_email, 
+				'group_or_squad' : group_or_squad, 'website' : WEBSITE, 'group_name' : group_name,
+				'user' : request.user}
+	else:
+		return redirect(global_settings.LOGIN_URL + '?next=/whitelist_get?group_name=%s&sender=%s' % (group_name. sender_email))
+
+@login_required
+def whitelist(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.POST['group_name']
+		sender_email = request.POST['sender']
 		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, True, False)
 		return HttpResponse(json.dumps(res), content_type="application/json")
-	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+	
+@login_required
+def blacklist(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.POST['group_name']
+		sender_email = request.POST['sender']
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, False, True)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
+@render_to("approve_reject.html")
 @login_required
 def approve_get(request):
 	if request.user.is_authenticated():
@@ -1188,12 +1217,14 @@ def approve_get(request):
 		group_name = request.GET.get('group_name')
 		post_id = request.GET.get('post_id')
 		res = engine.main.update_post_status(user, group_name, post_id, 'A')
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		post = Post.objects.get(id=post_id)
+		return {'res' : res, 'website' : WEBSITE, 'group_name' : group_name,
+				'type' : 'approved', 'email_address' : post.poster_email, 
+				'email_subject' : post.subject, 'post_id' : post_id}
 	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
+		return redirect(global_settings.LOGIN_URL + '?next=/approve_get?group_name=%s&post_id=%s' % (group_name, post_id))
 
+@render_to("approve_reject.html")
 @login_required
 def reject_get(request):
 	if request.user.is_authenticated():
@@ -1201,11 +1232,40 @@ def reject_get(request):
 		group_name = request.GET.get('group_name')
 		post_id = request.GET.get('post_id')
 		res = engine.main.update_post_status(user, group_name, post_id, 'R')
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		post = Post.objects.get(id=post_id)
+		return {'res' : res, 'website' : WEBSITE, 'group_name' : group_name,
+				'type' : 'rejected', 'email_address' : post.poster_email, 
+				'email_subject' : post.subject, 'post_id' : post_id}
 	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
+		redirect(global_settings.LOGIN_URL + '?next=/reject_get?group_name=%s&post_id=%s' % (group_name, post_id))
+
+@login_required
+def approve_post(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			group_name = request.POST['group_name']
+			post_id = request.POST['post_id']
+			res = engine.main.update_post_status(user, group_name, post_id, 'A')
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def reject_post(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			group_name = request.POST['group_name']
+			post_id = request.POST['post_id']
+			res = engine.main.update_post_status(user, group_name, post_id, 'R')
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
 def follow_thread(request):
