@@ -225,7 +225,7 @@ def thread(request):
 				res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
 			else:
 				res = engine.main.load_thread(thread, user=request.user)
-			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id, 'active_group': active_group}
+			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None
@@ -238,7 +238,7 @@ def thread(request):
 			return HttpResponseRedirect(global_settings.LOGIN_URL)
 		else:
 			res = engine.main.load_thread(thread)
-			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id,'active_group': active_group}
+			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id,'active_group': active_group, 'website' : WEBSITE}
 			
 			
 @render_to("settings.html")
@@ -1386,8 +1386,9 @@ def dashboard(request):
 		mod_group_count = len(Group.objects.filter(membergroup__member=user, membergroup__moderator=True))
 		res = engine.main.load_pending_posts(user)
 		if not res['status']:
-			logging.debug('Error loading pending posts: ' + res['error'])
+			logging.debug('Error loading pending posts: ' + str(res['error']))
 			pending_posts = []
+			print 'Error loading pending posts: ' + str(res['error'])
 		else:
 			pending_posts = res['posts']
 

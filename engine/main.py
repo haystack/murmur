@@ -1385,7 +1385,7 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 
 	try:
 		g = Group.objects.get(name=group_name)
-		mg = MemberGroup.objects.get(member=user, group=g, admin=True)
+		mg = MemberGroup.objects.get(Q(member=user, group=g), Q(admin=True) | Q(moderator=True))
 		current = WhiteOrBlacklist.objects.filter(group=g, email=email)
 		if current.exists():
 			entry = current[0]
@@ -1418,6 +1418,7 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 
 def update_post_status(user, group_name, post_id, new_status):
 	res = {'status' : False}
+	print "updating status of post %s" % post_id 
 	try:
 		p = Post.objects.get(id=post_id)
 		g = Group.objects.get(name=group_name)
@@ -1429,6 +1430,7 @@ def update_post_status(user, group_name, post_id, new_status):
 		else:
 			p.status = new_status
 			p.save()
+			print "saved post"
 			res['status'] = True
 			res['post_id'] = post_id
 			res['new_status'] = new_status
@@ -1447,6 +1449,8 @@ def update_post_status(user, group_name, post_id, new_status):
 		res['code'] = msg_code['UNKNOWN_ERROR']
 
 	logging.debug(res)
+
+	print "res:", res
 	return res 
 
 def load_pending_posts(user):
@@ -1454,10 +1458,25 @@ def load_pending_posts(user):
 	try:
 		groups = Group.objects.filter(membergroup__member=user, membergroup__moderator=True)
 		posts = Post.objects.filter(group__in=groups, status='P')
+		posts_fixed = []
+		for p in posts:
+			post_dict = {'id': p.id,
+						'msg_id': p.msg_id, 
+						'from': p.author.email if p.author else p.poster_email,
+						'to': p.group.name, 
+						'subject': escape(p.subject),
+						'text': p.post,
+						'thread_id' : p.thread.id, 
+						'timestamp': p.timestamp,
+						}
+			posts_fixed.append(post_dict)
 		res['status'] = True
-		res['posts'] = posts
-		return res
+		res['posts'] = posts_fixed
+
 	except Exception, e:
 		logging.debug(e)
+		res['status'] = False
 		res['code'] = msg_code['UNKNOWN_ERROR']
 		res['error'] = e
+
+	return res
