@@ -1418,7 +1418,7 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 
 def update_post_status(user, group_name, post_id, new_status):
 	res = {'status' : False}
-	print "updating status of post %s" % post_id 
+
 	try:
 		p = Post.objects.get(id=post_id)
 		g = Group.objects.get(name=group_name)
@@ -1430,7 +1430,6 @@ def update_post_status(user, group_name, post_id, new_status):
 		else:
 			p.status = new_status
 			p.save()
-			print "saved post"
 			res['status'] = True
 			res['post_id'] = post_id
 			res['new_status'] = new_status
@@ -1449,8 +1448,6 @@ def update_post_status(user, group_name, post_id, new_status):
 		res['code'] = msg_code['UNKNOWN_ERROR']
 
 	logging.debug(res)
-
-	print "res:", res
 	return res 
 
 def load_pending_posts(user):

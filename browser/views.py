@@ -1388,7 +1388,6 @@ def dashboard(request):
 		if not res['status']:
 			logging.debug('Error loading pending posts: ' + str(res['error']))
 			pending_posts = []
-			print 'Error loading pending posts: ' + str(res['error'])
 		else:
 			pending_posts = res['posts']
 
