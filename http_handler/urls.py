@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^settings', 'browser.views.settings'),
     url(r'^404', 'browser.views.error'),
 
+    url(r'^thread$', 'browser.views.thread'),
+
     url(r'^create_new_group', 'browser.views.create_group_view'), 
     url(r'^create_group', 'browser.views.create_group'),
     url(r'^delete_group', 'browser.views.delete_group'),
@@ -104,7 +106,7 @@ if WEBSITE == 'murmur':
     new_patterns = [
                     url(r'^about', 'browser.views.about'),
                     url(r'^posts$', 'browser.views.posts'),
-                    url(r'^thread$', 'browser.views.thread'),
+
                     url(r'^post_list', 'browser.views.post_list'),
                     url(r'^pub_group_list', 'browser.views.pub_group_list'),
                     url(r'^group_list', 'browser.views.group_list'),

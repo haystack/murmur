@@ -1,4 +1,4 @@
-MAILING_LIST = ''
+MAILING_LIST = '';
 
 
 /* on form submission event e, send an email to MAILING_LIST */
@@ -21,6 +21,24 @@ function sendEmail(e) {
     subject: 'New publication: ' + formData[1],
     htmlBody: email.HTML,
     body: email.plain
+  });
+
+  // send confirmation email
+  var submitterEmail = formData[0];
+  var pubName = formData[1];
+  var editLink = e.response.getEditResponseUrl();
+
+  var confEmailPlain = 'Your publication "' + pubName + '" has been successfully submitted.\n'; 
+  confEmailPlain += 'To edit your submission, visit the following URL: ' + editLink; 
+
+  var confEmailHTML = 'Your publication "' + pubName + '" has been successfully submitted.<br>';
+  confEmailHTML += 'To edit your submission, visit <a href="' + editLink + '">this link.</a>'; 
+
+  MailApp.sendEmail({
+    to: submitterEmail,
+    subject: 'Publication submitted',
+    htmlBody: confEmailHTML,
+    body: confEmailPlain
   });
 }
 
@@ -87,6 +105,30 @@ function generateOther(authors, year, title, venue, pages, plain) {
   return res + '.';
 }
 
+var cats = {
+  'Artificial Intelligence' : 'AI',
+  'Communications' : 'comm',
+  'Computational Biology' : 'comp_bio',
+  'Architecture' : 'architecture',
+  'Graphics and Vision' : 'graphics_vision',
+  'Networks' : 'networks',
+  'Control and Decision Systems' : 'control_decision_sys',
+  'Human-Computer Interaction' : 'HCI',
+  'Inference' : 'inference',
+  'Machine Learning' : 'ML',
+  'Natural Language and Speech Processing' : 'NLP_speech',
+  'Programming Languages' : 'languages',
+  'Software Engineering and Design' : 'sw_eng_design',
+  'Robotics' : 'robotics',
+  'Signal Processing' : 'signal_processing',
+  'Systems' : 'systems',
+  'Theory' : 'theory',
+  'Operating Systems' : 'OS',
+  'Databases' : 'DB',
+  'Security' : 'security', 
+
+}
+
 /* generate plainText and HTML emails using data from publications form. */ 
 function generateEmails(formData) {
   var submitterEmail = formData[0],
@@ -109,6 +151,7 @@ function generateEmails(formData) {
     volume,
     issue,
     venue,
+    categories,
     other,
     keywords;
 
@@ -119,28 +162,34 @@ function generateEmails(formData) {
     pubCity = formData[13];
     proceedingsPublisher = formData[14];
     pages = formData[15];
-    other = formData[16];
-    keywords = formData[17];
+    categories = formData[16];
+    other = formData[17];
+    keywords = formData[18];
   } else if (type == 'Journal article') {
     journal = formData[10];
     volume = formData[11];
     issue = formData[12];
     pages = formData[13];
-    other = formData[14];
-    keywords = formData[15];
+    categories = formData[14];
+    other = formData[15];
+    keywords = formData[16];
   } else {
     venue = formData[10];
     pages = formData[11];
-    other = formData[12];
-    keywords = formData[13];
+    categories = formdata[12];
+    other = formData[13];
+    keywords = formData[14];
   }
 
   var HTML = '<b>Paper submitted by</b>: ' + submitterEmail + '<br><br>';
   var plain = ['Paper submitted by: ' + submitterEmail];
   if (group.length > 0) {
-    HTML += '<b>CSAIL Group</b>: ' + group + '<br><br>';
+    HTML += '<b>CSAIL Group</b>: ' + group + '<br>';
     plain.push('CSAIL Group: ' + group); 
   }
+  
+  HTML += '<b>Categories</b>: ' + categories.join(', ') + '<br><br>';
+  plain.push('Categories: ' + categories.join(', '));
 
   var authorList = [];
   authors.split('\n').forEach(function(a){
@@ -181,6 +230,14 @@ function generateEmails(formData) {
     HTML += '<br><b>Other info</b>: ' + other;
     plain.push('\nOther info: ' + other);
   }
+  
+  var tag_line = '';
+  categories.forEach(function(c){
+    tag_line += '#' + cats[c] + ' ';
+  });
+  
+  HTML += '<br>' + tag_line + '<br>';
+  plain.push('\n' + tag_line);
 
   return {
     'HTML' : HTML,

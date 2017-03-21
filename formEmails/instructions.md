@@ -1,11 +1,14 @@
 # Sending Emails via Google Forms Submission
 
-The code in its current state does as follows:
+The code in its current state in [formSubmission.js](formSubmission.js) does as follows:
 1) Parse a response to a Google Form, which collects information about new publications by members of our lab
 2) Generate HTML and plaintext for an email containing that info
 3) Post the message to a Murmur group
+4) Send a confirmation email with an "edit response" link to the submitter
 
 You can see what our form looks like [here]() (TODO: put a link to a copy of the form here.) 
+
+The code in [logEditURL.js](logEditURL.js) is run as a script in the spreadsheet where form responses are gathered, and logs the edit URLs for each form response in the spreadsheet. 
 
 Instructions for using with your own forms:
 1) Create a Google Form with your desired questions/form fields.
