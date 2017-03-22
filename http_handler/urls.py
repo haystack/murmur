@@ -75,6 +75,9 @@ urlpatterns = patterns('',
                     auth_views.password_reset_confirm,
                     {'extra_context' : website_context},
                     name='password_reset_confirm'),
+                       
+     (r'^accounts/', include('registration.backends.default.urls')),
+     url(r'^attachment/(?P<hash_filename>[0-9A-Za-z_]+)', 'browser.views.serve_attachment'),
 
     url(r'^accounts/activate/complete/$',
        TemplateView.as_view(template_name='registration/activation_complete.html'),

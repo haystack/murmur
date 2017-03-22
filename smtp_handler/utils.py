@@ -356,6 +356,8 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	if original_list_email:
 		content += "This post was sent to this group via the mailing list %s. <BR><BR>" % (original_list_email)
 
+	if not membergroup.receive_attachments:
+		content += "This message came with attachments, which you have turned off. To see the attachments, view the original post:<br />"
 	tid = thread.id
 	permalink = PERMALINK_POST % (HOST, tid, post_id)
 	content += '<a href="%s">Link to Post</a> | ' % (permalink)
