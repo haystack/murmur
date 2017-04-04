@@ -13,6 +13,13 @@
 		
 		<a href="/groups/{{group_info.name}}">Squad Info Page</a>
 		
+		{% if settings.receive_attachments %}
+			<input type="checkbox" name="receive-attachments" value="yes" id="ck-receive-attachments" checked>
+		{% else %}
+			<input type="checkbox" name="receive-attachments" value="no" id="ck-receive-attachments">
+		{% endif %}
+		Receive attachments with emails.
+		<br /><br />
 		
 {% endblock %}
 {% block customjs %}

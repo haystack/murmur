@@ -363,7 +363,7 @@ def handle_post_murmur(message, group, host):
 		if message_is_reply:
 			res = insert_reply(group.name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list)
 		else:
-			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list)
+			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, attachments, forwarding_list=original_list)
 			
 		if not res['status']:
 			send_error_email(group.name, res['code'], sender_addr, ADMIN_EMAILS)
@@ -374,13 +374,6 @@ def handle_post_murmur(message, group, host):
 		mail = setup_post(message['From'],
 							subject,	
 							group.name)
-			
-		for attachment in attachments.get("attachments"):
-			mail.attach(filename=attachment['filename'],
-						content_type=attachment['mime'],
-						data=attachment['content'],
-						disposition=attachment['disposition'],
-						id=attachment['id'])
 			
 		if 'references' in message:
 			mail['References'] = message['references']
@@ -428,6 +421,14 @@ def handle_post_murmur(message, group, host):
 					muting = mutings.filter(user=recip).exists()
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
+
+					if membergroup.receive_attachments:
+						for attachment in attachments.get("attachments"):
+							mail.attach(filename=attachment['filename'],
+										content_type=attachment['mime'],
+										data=attachment['content'],
+										disposition=attachment['disposition'],
+										id=attachment['id'])
 				
 					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_list_email)
 					html_ps_blurb = unicode(html_ps_blurb)
@@ -520,6 +521,7 @@ def handle_post_squadbox(message, group, host):
 		msg_text['plain'] = html2text(msg_text['html'])
 
 	res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, forwarding_list=None, post_status='P')
+	# TODO: deal with attachments here the same way they are in handle_post_murmur (and consider membergroup.receive_attachments)
 
 	if not res['status']:
 		send_error_email(group.name, res['code'], None, ADMIN_EMAILS)

@@ -35,7 +35,15 @@
 					<span class="strong-gray">{{ active_group.name }}</span> 
 					<br>
 					<span class="strong">Date: </span>
-					<span class="strong-gray">{{ thread.post.timestamp }}</span>
+					<span class="strong-gray">{{ thread.post.timestamp }}</span> <br />
+					{% if thread.post.attachments %}
+						<span class="strong">Attachments: </span>
+						<span class="strong-gray">
+							{% for name, url in thread.post.attachments %}
+								<a href="{{url}}">{{name}}</a>
+							{% endfor %}
+						</span>
+					{% endif %}
 					<input type="hidden" id="post_info" name="post_info" value="{{ thread.post.msg_id }}" readonly>
 				</div>
 			</div>
@@ -71,8 +79,13 @@
 				<div class="reply">
 					<div class="main-area-content">
 						<span class="strong">{{ reply.from }}</span> 
-						on {{ reply.timestamp }}&nbsp;
-						
+						on {{ reply.timestamp }}
+						{% if reply.attachments %}
+							| Attachments:
+							{% for name, url in reply.attachments %}
+								<a href="{{url}}">{{name}}</a>
+							{% endfor %}
+						{% endif %}
 						<br>
 						
 						{% if post_id == reply.id %}

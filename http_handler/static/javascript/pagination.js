@@ -17,7 +17,8 @@ function loadMorePosts(current_page){
             }
         },
         error: function (data) {
-             alert("Error loading posts.");
+             console.log("Error loading posts.");
+             console.log(data);
         }
     });
 }

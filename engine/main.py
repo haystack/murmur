@@ -8,11 +8,12 @@ from lamson.mail import MailResponse
 from smtp_handler.utils import relay_mailer, NO_REPLY
 from bleach import clean
 from cgi import escape
+from attachments import upload_attachments
 import re
 import hashlib
 import random
 
-from http_handler.settings import BASE_URL, WEBSITE
+from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME
 import json
 from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
 
@@ -264,6 +265,7 @@ def get_group_settings(group_name, user):
 		res['following'] = membergroup.always_follow_thread
 		res['no_emails'] = membergroup.no_emails
 		res['upvote_emails'] = membergroup.upvote_emails
+		res['receive_attachments'] = membergroup.receive_attachments
 		res['status'] = True
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -275,7 +277,7 @@ def get_group_settings(group_name, user):
 	logging.debug(res)
 	return res
 
-def edit_group_settings(group_name, following, upvote_emails, no_emails, user):
+def edit_group_settings(group_name, following, upvote_emails, receive_attachments, no_emails, user):
 	res = {'status':False}
 	
 	try:
@@ -283,6 +285,7 @@ def edit_group_settings(group_name, following, upvote_emails, no_emails, user):
 		membergroup = MemberGroup.objects.get(group=group, member=user)
 		membergroup.always_follow_thread = following
 		membergroup.upvote_emails = upvote_emails
+		membergroup.receive_attachments = receive_attachments
 		membergroup.no_emails = no_emails
 		membergroup.save()
 		
@@ -630,27 +633,76 @@ def group_info(group_name, user):
 	logging.debug(res)
 	return res
 
-def check_admin(user, groups):
-	res = []
-	try:
-		for group in groups:
-			group_name = group['name']
-			group = Group.objects.get(name=group_name)
-			membergroups = MemberGroup.objects.filter(group=group).select_related()
-			for membergroup in membergroups:
-				admin = membergroup.admin
-				if user.email == membergroup.member.email:
-					res.append({'name':group_name, 'admin':admin})
-
-	except Group.DoesNotExist:
-		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
-	except:
-		res['code'] = msg_code['UNKNOWN_ERROR']
-	logging.debug(res)
-	return res
-
 def format_date_time(d):
 	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
+
+
+def list_posts_page(threads, group, res, user=None, format_datetime=True, return_replies=True, text_limit=None):
+	res['threads'] = []
+	for t in threads:
+		following = False
+		muting = False
+		
+		if user:
+			u = UserProfile.objects.get(email=user)
+			following = Following.objects.filter(thread=t, user=u).exists()
+			muting = Mute.objects.filter(thread=t, user=u).exists()
+			
+			member_group = MemberGroup.objects.filter(member=u, group=group)
+			if member_group.exists():
+				res['member_group'] = {'no_emails': member_group[0].no_emails,
+									   'always_follow_thread': member_group[0].always_follow_thread}
+
+		posts = Post.objects.filter(thread = t).select_related()
+		replies = []
+		post = None
+		thread_likes = 0
+		for p in posts:
+			post_likes = p.upvote_set.count()
+			user_liked = False
+			if user:
+				user_liked = p.upvote_set.filter(user=u).exists()
+			thread_likes += post_likes
+			attachments = []
+			for attachment in Attachment.objects.filter(msg_id=p.msg_id):
+				url = "attachment/" + attachment.hash_filename
+				attachments.append((attachment.true_filename, url))
+			
+			text = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
+			if text_limit:
+				text = text[:text_limit]
+			
+			post_dict = {'id': p.id,
+						'msg_id': p.msg_id, 
+						'thread_id': p.thread_id, 
+						'from': p.author.email if p.author else p.poster_email,
+						'to': p.group.name, 
+						'subject': escape(p.subject),
+						'likes': post_likes, 
+						'liked': user_liked,
+						'text': text, 
+						'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp,
+						'attachments': attachments
+						}
+			if p.forwarding_list:
+				post_dict['forwarding_list'] = p.forwarding_list.email
+			if not p.reply_to_id:
+				post = post_dict
+				if not return_replies:
+					break
+			else:
+				replies.append(post_dict)
+		tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
+		res['threads'].append({'thread_id': t.id, 
+							   'post': post, 
+							   'num_replies': posts.count() - 1,
+							   'replies': replies, 
+							   'following': following, 
+							   'muting': muting,
+							   'tags': tags,
+							   'likes': thread_likes,
+							   'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
+		res['status'] = True
 
 def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=True, format_datetime=True):
 	res = {'status':False}
@@ -665,61 +717,8 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 			threads = Thread.objects.filter(timestamp__gt = t, group = g)
 		else:
 			threads = Thread.objects.filter(timestamp__gt = t)
-		res['threads'] = []
-		for t in threads:
-			following = False
-			muting = False
-			
-			if user:
-				u = UserProfile.objects.get(email=user)
-				following = Following.objects.filter(thread=t, user=u).exists()
-				muting = Mute.objects.filter(thread=t, user=u).exists()
-				
-				member_group = MemberGroup.objects.filter(member=u, group=g)
-				if member_group.exists():
-					res['member_group'] = {'no_emails': member_group[0].no_emails,
-										   'always_follow_thread': member_group[0].always_follow_thread}
-
-			posts = Post.objects.filter(thread = t).select_related()
-			replies = []
-			post = None
-			thread_likes = 0
-			
-			for p in posts:
-				post_likes = p.upvote_set.count()
-				user_liked = False
-				if user:
-					user_liked = p.upvote_set.filter(user=u).exists()
-				thread_likes += post_likes
-				post_dict = {'id': p.id,
-							'msg_id': p.msg_id, 
-							'thread_id': p.thread_id, 
-							'from': p.author.email if p.author else p.poster_email,
-							'to': p.group.name, 
-							'subject': escape(p.subject),
-							'likes': post_likes, 
-							'liked': user_liked,
-							'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
-							'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp}
-				if p.forwarding_list:
-					post_dict['forwarding_list'] = p.forwarding_list.email
-				if not p.reply_to_id:
-					post = post_dict
-					if not return_replies:
-						break
-				else:
-					replies.append(post_dict)
-			tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
-			res['threads'].append({'thread_id': t.id, 
-								   'post': post, 
-								   'num_replies': posts.count() - 1,
-								   'replies': replies, 
-								   'following': following, 
-								   'muting': muting,
-								   'tags': tags,
-								   'likes': thread_likes,
-								   'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
-			res['status'] = True
+		
+		list_posts_page(threads, g, res, user=user, format_datetime=format_datetime, return_replies=return_replies)
 			
 	except Exception, e:
 		print e
@@ -728,7 +727,6 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 	return res
 	
 def load_thread(t, user=None, member=None):
-
 	following = False
 	muting = False
 	no_emails = False
@@ -753,6 +751,10 @@ def load_thread(t, user=None, member=None):
 		user_liked = False
 		if user:
 			user_liked = p.upvote_set.filter(user=user).exists()
+		attachments = []
+		for attachment in Attachment.objects.filter(msg_id=p.msg_id):
+			url = "attachment/" + attachment.hash_filename
+			attachments.append((attachment.true_filename, url))
 		post_dict = {
 					'id': str(p.id),
 					'msg_id': p.msg_id, 
@@ -763,7 +765,8 @@ def load_thread(t, user=None, member=None):
 					'liked': user_liked,
 					'subject': escape(p.subject), 
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
-					'timestamp': p.timestamp
+					'timestamp': p.timestamp,
+					'attachments': attachments
 					}
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
@@ -792,6 +795,10 @@ def load_post(group_name, thread_id, msg_id):
 		t = Thread.objects.get(id=thread_id)
 		p = Post.objects.get(msg_id=msg_id, thread= t)
 		tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
+		attachments = []
+		for attachment in Attachment.objects.filter(msg_id=p.msg_id):
+			url = "attachment/" + attachment.hash_filename
+			attachments.append((attachment.true_filename, url))
 		res['status'] = True
 		res['msg_id'] = p.msg_id
 		res['thread_id'] = p.thread_id
@@ -800,6 +807,7 @@ def load_post(group_name, thread_id, msg_id):
 		res['subject'] = escape(p.subject)
 		res['text'] = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
 		res['to'] = p.group.name
+		res['attachments'] = attachments
 		if p.forwarding_list:
 			res['forwarding_list'] = p.forwarding_list.email
 	except Thread.DoesNotExist:
@@ -821,7 +829,7 @@ def _create_tag(group, thread, name):
 		t.save()
 	tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
-def _create_post(group, subject, message_text, user, sender_addr, msg_id, forwarding_list=None, post_status=None):
+def _create_post(group, subject, message_text, user, sender_addr, msg_id, attachments=None, forwarding_list=None, post_status=None):
 
 	try:
 		message_text = message_text.decode("utf-8")
@@ -840,6 +848,8 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, forwar
 	if post_status == None:
 		post_status = 'A'
 	
+	res = upload_attachments(attachments, msg_id)
+
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
 			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status)
 	p.save()
@@ -941,7 +951,7 @@ def insert_post_web(group_name, subject, message_text, user):
 	return res
 
 
-def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, forwarding_list=None, post_status=None):
+def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, attachments=None, forwarding_list=None, post_status=None):
 	res = {'status':False}
 	thread = None
 	try:
@@ -963,7 +973,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, fo
 		# 4) it's a Squadbox post, so we don't care if the sender has an account / is authorized. 
 		# _create_post will check which of user and forwarding list are None and post appropriately. 
 
-		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, forwarding_list=forwarding_list, post_status=post_status)
+		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, attachments, forwarding_list=forwarding_list, post_status=post_status)
 		res['status'] = True
 		res['post_id'] = p.id
 		res['msg_id'] = p.msg_id
@@ -1385,7 +1395,7 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 
 	try:
 		g = Group.objects.get(name=group_name)
-		mg = MemberGroup.objects.get(member=user, group=g, admin=True)
+		mg = MemberGroup.objects.get(Q(member=user, group=g), Q(admin=True) | Q(moderator=True))
 		current = WhiteOrBlacklist.objects.filter(group=g, email=email)
 		if current.exists():
 			entry = current[0]
@@ -1421,6 +1431,7 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 
 def update_post_status(user, group_name, post_id, new_status):
 	res = {'status' : False}
+
 	try:
 		p = Post.objects.get(id=post_id)
 		g = Group.objects.get(name=group_name)
@@ -1455,14 +1466,30 @@ def update_post_status(user, group_name, post_id, new_status):
 def load_pending_posts(user):
 	res = {'status' : False}
 	try:
-		mgs = MemberGroup.objects.filter(member=user, moderator=True)
-		posts = Post.objects.filter(group__in=mgs, status='P')
+		groups = Group.objects.filter(membergroup__member=user, membergroup__moderator=True)
+		posts = Post.objects.filter(group__in=groups, status='P')
+		posts_fixed = []
+		for p in posts:
+			post_dict = {'id': p.id,
+						'msg_id': p.msg_id, 
+						'from': p.author.email if p.author else p.poster_email,
+						'to': p.group.name, 
+						'subject': escape(p.subject),
+						'text': p.post,
+						'thread_id' : p.thread.id, 
+						'timestamp': p.timestamp,
+						}
+			posts_fixed.append(post_dict)
 		res['status'] = True
-		res['posts'] = posts
-		return res
+		res['posts'] = posts_fixed
+
 	except Exception, e:
 		logging.debug(e)
+		res['status'] = False
 		res['code'] = msg_code['UNKNOWN_ERROR']
+		res['error'] = e
+
+	return res
 
 def send_whitelist_hash_email(whitelist_id):
 	whitelist = WhiteOrBlacklist.objects.get(id=whitelist_id)

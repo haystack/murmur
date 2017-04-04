@@ -225,7 +225,8 @@ INSTALLED_APPS = (
     #third party apps
     'registration',
     'south',
-    'django_mobile'
+    'django_mobile',
+    'storages'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -270,3 +271,7 @@ try:
         from local_settings import *
 except ImportError:
         pass
+
+# Storage for attachments
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+AWS_DEFAULT_ACL = 'private'

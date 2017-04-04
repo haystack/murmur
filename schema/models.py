@@ -39,6 +39,16 @@ class Post(models.Model):
 		db_table = "murmur_posts"
 		ordering = ["timestamp"]
 
+class Attachment(models.Model):
+	id = models.AutoField(primary_key=True)
+	msg_id = models.CharField(max_length=120)
+	hash_filename = models.TextField(max_length=40)
+	true_filename = models.TextField()
+	timestamp = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		db_table = "murmur_attachments"
+		ordering = ["timestamp"]
 
 class Thread(models.Model):
 	id = models.AutoField(primary_key=True)
@@ -113,6 +123,7 @@ class MemberGroup(models.Model):
 	no_emails = models.BooleanField(default=False)
 	always_follow_thread = models.BooleanField(default=True)
 	upvote_emails = models.BooleanField(default=True)
+	receive_attachments = models.BooleanField(default=True)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)
