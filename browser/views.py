@@ -200,8 +200,21 @@ def post_list(request):
 		if group.public or is_member:
 			if is_member:
 				request.session['active_group'] = group_name
-			res = engine.main.list_posts(group_name=group_name, user=user, format_datetime=False, return_replies=True)
-			res['threads'] = paginator(request.GET.get('page'), res['threads'])
+				
+			
+			res = {'status':False}
+			try:
+				if (group_name != None):
+					g = Group.objects.get(name=group_name)
+					threads = Thread.objects.filter(group = g)
+					threads = paginator(request.GET.get('page'), threads)
+					
+					engine.main.list_posts_page(threads, g, res, user=user, format_datetime=False, return_replies=False)
+			except Exception, e:
+				print e
+				res['code'] = msg_code['UNKNOWN_ERROR']
+			logging.debug(res)
+					
 			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group}
 		else:
 			return redirect('/404?e=member')

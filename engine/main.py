@@ -655,6 +655,69 @@ def check_admin(user, groups):
 def format_date_time(d):
 	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
+
+def list_posts_page(threads, group, res, user=None, format_datetime=True, return_replies=True):
+	res['threads'] = []
+	for t in threads:
+		following = False
+		muting = False
+		
+		if user:
+			u = UserProfile.objects.get(email=user)
+			following = Following.objects.filter(thread=t, user=u).exists()
+			muting = Mute.objects.filter(thread=t, user=u).exists()
+			
+			member_group = MemberGroup.objects.filter(member=u, group=group)
+			if member_group.exists():
+				res['member_group'] = {'no_emails': member_group[0].no_emails,
+									   'always_follow_thread': member_group[0].always_follow_thread}
+
+		posts = Post.objects.filter(thread = t).select_related()
+		replies = []
+		post = None
+		thread_likes = 0
+		for p in posts:
+			post_likes = p.upvote_set.count()
+			user_liked = False
+			if user:
+				user_liked = p.upvote_set.filter(user=u).exists()
+			thread_likes += post_likes
+			attachments = []
+			for attachment in Attachment.objects.filter(msg_id=p.msg_id):
+				url = "attachment/" + attachment.hash_filename
+				attachments.append((attachment.true_filename, url))
+			post_dict = {'id': p.id,
+						'msg_id': p.msg_id, 
+						'thread_id': p.thread_id, 
+						'from': p.author.email if p.author else p.poster_email,
+						'to': p.group.name, 
+						'subject': escape(p.subject),
+						'likes': post_likes, 
+						'liked': user_liked,
+						'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
+						'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp,
+						'attachments': attachments
+						}
+			if p.forwarding_list:
+				post_dict['forwarding_list'] = p.forwarding_list.email
+			if not p.reply_to_id:
+				post = post_dict
+				if not return_replies:
+					break
+			else:
+				replies.append(post_dict)
+		tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
+		res['threads'].append({'thread_id': t.id, 
+							   'post': post, 
+							   'num_replies': posts.count() - 1,
+							   'replies': replies, 
+							   'following': following, 
+							   'muting': muting,
+							   'tags': tags,
+							   'likes': thread_likes,
+							   'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
+		res['status'] = True
+
 def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=True, format_datetime=True):
 	res = {'status':False}
 	try:
@@ -668,66 +731,8 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 			threads = Thread.objects.filter(timestamp__gt = t, group = g)
 		else:
 			threads = Thread.objects.filter(timestamp__gt = t)
-		res['threads'] = []
-		for t in threads:
-			following = False
-			muting = False
-			
-			if user:
-				u = UserProfile.objects.get(email=user)
-				following = Following.objects.filter(thread=t, user=u).exists()
-				muting = Mute.objects.filter(thread=t, user=u).exists()
-				
-				member_group = MemberGroup.objects.filter(member=u, group=g)
-				if member_group.exists():
-					res['member_group'] = {'no_emails': member_group[0].no_emails,
-										   'always_follow_thread': member_group[0].always_follow_thread}
-
-			posts = Post.objects.filter(thread = t).select_related()
-			replies = []
-			post = None
-			thread_likes = 0
-			for p in posts:
-				post_likes = p.upvote_set.count()
-				user_liked = False
-				if user:
-					user_liked = p.upvote_set.filter(user=u).exists()
-				thread_likes += post_likes
-				attachments = []
-				for attachment in Attachment.objects.filter(msg_id=p.msg_id):
-					url = "attachment/" + attachment.hash_filename
-					attachments.append((attachment.true_filename, url))
-				post_dict = {'id': p.id,
-							'msg_id': p.msg_id, 
-							'thread_id': p.thread_id, 
-							'from': p.author.email if p.author else p.poster_email,
-							'to': p.group.name, 
-							'subject': escape(p.subject),
-							'likes': post_likes, 
-							'liked': user_liked,
-							'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
-							'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp,
-							'attachments': attachments
-							}
-				if p.forwarding_list:
-					post_dict['forwarding_list'] = p.forwarding_list.email
-				if not p.reply_to_id:
-					post = post_dict
-					if not return_replies:
-						break
-				else:
-					replies.append(post_dict)
-			tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
-			res['threads'].append({'thread_id': t.id, 
-								   'post': post, 
-								   'num_replies': posts.count() - 1,
-								   'replies': replies, 
-								   'following': following, 
-								   'muting': muting,
-								   'tags': tags,
-								   'likes': thread_likes,
-								   'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
-			res['status'] = True
+		
+		list_posts_page(threads, g, res, user=user, format_datetime=format_datetime, return_replies=return_replies)
 			
 	except Exception, e:
 		print e
