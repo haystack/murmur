@@ -222,31 +222,33 @@ def get_attachments(email_message):
 
 def get_body(email_message):
 	res = {}
-	
+
 	maintype = email_message.get_content_maintype()
-	subtype = email_message.get_content_maintype()
+	subtype = email_message.get_content_subtype()
 
 	if maintype == 'multipart':
 		res['html'] = ''
 		res['plain'] = ''
+
 		for part in email_message.get_payload():
+			d = (part['Content-Transfer-Encoding'] == 'base64')
 			if part.get_content_maintype() == 'text':
 				if part.get_content_subtype() == 'html':
-					body = part.get_payload()
+					body = part.get_payload(decode=d)
 					body = remove_html_ps(body)
 					res['html'] += body
 				else:
-					body = part.get_payload()
+					body = part.get_payload(decode=d)
 					body = remove_plain_ps(body)
 					res['plain'] += body
 			elif part.get_content_maintype() == 'multipart':
 				for part2 in part.get_payload():
 					if part2.get_content_subtype() == 'html':
-						body = part2.get_payload()
+						body = part2.get_payload(decode=d)
 						body = remove_html_ps(body)
 						res['html'] += body
 					elif part2.get_content_subtype() == 'plain':
-						body = part2.get_payload()
+						body = part2.get_payload(decode=d)
 						body = remove_plain_ps(body)
 						res['plain'] += body
 	elif maintype == 'text':
@@ -260,6 +262,7 @@ def get_body(email_message):
 			body = remove_plain_ps(body)
 			res['plain'] = body
 	return res
+
 
 def remove_html_ps(body):
 	head, _, x = body.partition(HTML_SUBHEAD)
