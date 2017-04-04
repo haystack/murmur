@@ -17,47 +17,70 @@
 		<span class="italic-med">Maximum 140 characters</span><br/>
 		<textarea id="edit-group-description" maxlength="140">{{group_info.description.strip }}</textarea>
 		<br/><br/>
-
 		{% if website == "murmur" %}
-		<span class="strong">Privacy Settings:</span>
-		<br/>
-		<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked> Public
-		<br/>
-		<span class="italic-small">All Murmur users will be able to view and search for this group by name and description.</span>
-		<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group"> Private
-		<br/>
-		<span class="italic-small">Only users added to this group by admins will be notified about the group.</span>
-		<br/>
-		{% endif %}
+			<span class="strong">Privacy Settings:</span>
+			<br/>
+			{% if group_info.public %}
+				<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked>
+			{% else %}
+				<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group">
+			{% endif %}
 
+			Public
+			<br/>
+			<span class="italic-small">All Murmur users will be able to view and search for this group by name and description.</span>
+
+			{% if group_info.public %}
+				<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group">
+			{% else %}
+				<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group" checked>
+			{% endif %}
+			
+			Private
+			<br/>
+			<span class="italic-small">Only users added to this group by admins will be notified about the group.</span>
+			<br/>
+		{% endif %}
 		<span class="strong">Attachment Policy: </span> <br/>
-		<input type="radio" name="attach" value="yes-attach" id="rdo-attach-create-group" checked> Allow Attachments
+		{% if group_info.allow_attachments %}
+			<input type="radio" name="attach" value="yes-attach" id="rdo-attach-create-group" checked>
+		{% else %}
+			<input type="radio" name="attach" value="yes-attach" id="rdo-attach-create-group">
+		{% endif %}
+		Allow Attachments
 		<br/>
 		<span class="italic-small">
-		{% if website == "murmur" %}
-		All members of the group can post attachments. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
-		{% elif website == "squadbox" %}
-		Emails with attachments that reach your Squadbox will be moderated as usual. Your squad's moderators will be able to see them when they review messages, and you'll see the attachments on approved messages. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
-		{% endif %}
+			{% if website == "murmur" %}
+				All members of the group can post attachments. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
+			{% elif website == "squadbox" %}
+				Emails with attachments that reach your Squadbox will be moderated as usual. Your squad's moderators will be able to see them when they review messages, and you'll see the attachments on approved messages. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
+			{% endif %}
 		</span>
-		<input type="radio" name="attach" value="no-attach" id="rdo-noattach-create-group"> No Attachments Allowed
+		{% if group_info.allow_attachments %}
+			<input type="radio" name="attach" value="attach" id="rdo-attach-create-group">
+		{% else %}
+			<input type="radio" name="attach" value="no-attach" id="rdo-noattach-create-group" checked>
+		{% endif %}
+		No Attachments Allowed
 		<br/>
 		<span class="italic-small">
-		{% if website == "murmur" %}
-		Users will not be able to post attachments. Messages with attachments will be rejected.
-		{% elif website == "squadbox" %}
-		Emails that reach your Squadbox with attachments will automically be rejected. 
-		{% endif %}
+			{% if website == "murmur" %}
+				Users will not be able to post attachments. Messages with attachments will be rejected.
+				{% elif website == "squadbox" %}
+				Emails that reach your Squadbox with attachments will automically be rejected.
+			{% endif %}
 		</span>
 		<br/>
 		<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Changes</button>
 		<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>
 	</form>
 	<br/>
-    <h4><a href='/gmail_setup?group={{group_info.name}}'>Setup automatic forwarding and import Gmail contacts to this squad's whitelist &raquo;</a></h4>  
-{% endblock %}
 
-{% block customjs %}
-	<script type="text/javascript" src="/static/javascript/notify.js"></script>
-	<script type="text/javascript" src="/static/javascript/edit_group_info.js"></script>
-{% endblock %}
+	{% if website == 'squadbox' %}
+		<h4><a href='/gmail_setup?group={{group_info.name}}'>Setup automatic forwarding and import Gmail contacts to this squad's whitelist &raquo;</a></h4>
+	{% endif %}
+	{% endblock %}
+	{% block customjs %}
+		<script type="text/javascript" src="/static/javascript/notify.js"></script>
+		<script type="text/javascript" src="/static/javascript/edit_group_info.js"></script>
+	{% endblock %}
