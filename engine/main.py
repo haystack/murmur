@@ -633,25 +633,6 @@ def group_info(group_name, user):
 	logging.debug(res)
 	return res
 
-def check_admin(user, groups):
-	res = []
-	try:
-		for group in groups:
-			group_name = group['name']
-			group = Group.objects.get(name=group_name)
-			membergroups = MemberGroup.objects.filter(group=group).select_related()
-			for membergroup in membergroups:
-				admin = membergroup.admin
-				if user.email == membergroup.member.email:
-					res.append({'name':group_name, 'admin':admin})
-
-	except Group.DoesNotExist:
-		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
-	except:
-		res['code'] = msg_code['UNKNOWN_ERROR']
-	logging.debug(res)
-	return res
-
 def format_date_time(d):
 	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 

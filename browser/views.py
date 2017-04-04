@@ -204,12 +204,10 @@ def post_list(request):
 			
 			res = {'status':False}
 			try:
-				if (group_name != None):
-					g = Group.objects.get(name=group_name)
-					threads = Thread.objects.filter(group = g)
-					threads = paginator(request.GET.get('page'), threads)
-					
-					engine.main.list_posts_page(threads, g, res, user=user, format_datetime=False, return_replies=False, text_limit=150)
+				threads = Thread.objects.filter(group=group)
+				threads = paginator(request.GET.get('page'), threads)
+				
+				engine.main.list_posts_page(threads, group, res, user=user, format_datetime=False, return_replies=False, text_limit=250)
 			except Exception, e:
 				print e
 				res['code'] = msg_code['UNKNOWN_ERROR']
