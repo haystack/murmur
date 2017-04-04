@@ -656,7 +656,7 @@ def format_date_time(d):
 	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
 
-def list_posts_page(threads, group, res, user=None, format_datetime=True, return_replies=True):
+def list_posts_page(threads, group, res, user=None, format_datetime=True, return_replies=True, text_limit=None):
 	res['threads'] = []
 	for t in threads:
 		following = False
@@ -686,6 +686,11 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
 			for attachment in Attachment.objects.filter(msg_id=p.msg_id):
 				url = "attachment/" + attachment.hash_filename
 				attachments.append((attachment.true_filename, url))
+			
+			text = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
+			if text_limit:
+				text = text[:text_limit]
+			
 			post_dict = {'id': p.id,
 						'msg_id': p.msg_id, 
 						'thread_id': p.thread_id, 
@@ -694,7 +699,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
 						'subject': escape(p.subject),
 						'likes': post_likes, 
 						'liked': user_liked,
-						'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
+						'text': text, 
 						'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp,
 						'attachments': attachments
 						}

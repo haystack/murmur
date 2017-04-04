@@ -209,7 +209,7 @@ def post_list(request):
 					threads = Thread.objects.filter(group = g)
 					threads = paginator(request.GET.get('page'), threads)
 					
-					engine.main.list_posts_page(threads, g, res, user=user, format_datetime=False, return_replies=False)
+					engine.main.list_posts_page(threads, g, res, user=user, format_datetime=False, return_replies=False, text_limit=150)
 			except Exception, e:
 				print e
 				res['code'] = msg_code['UNKNOWN_ERROR']
