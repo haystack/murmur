@@ -19,6 +19,8 @@ urlpatterns = patterns('',
     url(r'^settings', 'browser.views.settings'),
     url(r'^404', 'browser.views.error'),
 
+    url(r'^thread$', 'browser.views.thread'),
+
     url(r'^create_new_group', 'browser.views.create_group_view'), 
     url(r'^create_group', 'browser.views.create_group'),
     url(r'^delete_group', 'browser.views.delete_group'),
@@ -73,6 +75,8 @@ urlpatterns = patterns('',
                     auth_views.password_reset_confirm,
                     {'extra_context' : website_context},
                     name='password_reset_confirm'),
+                       
+    url(r'^attachment/(?P<hash_filename>[0-9A-Za-z_]+)', 'browser.views.serve_attachment'),
 
     url(r'^accounts/activate/complete/$',
        TemplateView.as_view(template_name='registration/activation_complete.html'),
@@ -101,7 +105,7 @@ if WEBSITE == 'murmur':
     new_patterns = [
                     url(r'^about', 'browser.views.about'),
                     url(r'^posts$', 'browser.views.posts'),
-                    url(r'^thread$', 'browser.views.thread'),
+
                     url(r'^post_list', 'browser.views.post_list'),
                     url(r'^pub_group_list', 'browser.views.pub_group_list'),
                     url(r'^group_list', 'browser.views.group_list'),
@@ -166,6 +170,14 @@ elif WEBSITE == 'squadbox':
 
     new_patterns = [
                     url(r'^dashboard', 'browser.views.dashboard'),
+                    url(r'^approve_get', 'browser.views.approve_get'),
+                    url(r'^reject_get', 'browser.views.reject_get'),
+                    url(r'^approve_post', 'browser.views.approve_post'),
+                    url(r'^reject_post', 'browser.views.reject_post'),
+                    url(r'^blacklist_get', 'browser.views.blacklist_get'),
+                    url(r'^whitelist_get', 'browser.views.whitelist_get'),
+                    url(r'^whitelist', 'browser.views.whitelist'),
+                    url(r'^blacklist', 'browser.views.blacklist'),
                     ]
 
     urlpatterns.extend(new_patterns)

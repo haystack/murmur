@@ -204,6 +204,7 @@ hr{
     color: #333;
 }
 
+
 #left-column-area-wrapper{
     position: absolute;
         top: 50px;
@@ -215,6 +216,7 @@ hr{
         z-index:100;
         border-right: #999 solid 1px;
 }
+
 
 #post-column-area{
       margin:0;
@@ -228,6 +230,17 @@ hr{
 }
 
 .left-column-area-metadata{
+	float:right;
+	width:70px;
+	text-align:right;
+}
+
+#right-column-area{
+      margin:0;
+      padding:0;
+}
+
+.right-column-area-metadata{
 	float:right;
 	width:70px;
 	text-align:right;

@@ -1,0 +1,46 @@
+{% extends "group_container_base.html" %}
+
+{% block container-content %}
+	<div class="main-area-content">
+	<div hidden id='group-name'>{{ active_group.name }} </div>
+	<div hidden id='post-id'>{{ thread.post.id }}</div>
+	<div hidden id='sender-email'>{{ thread.post.from }}</div>
+		<div>
+			<div>
+				<h3><span id="post-subject">{{ thread.post.subject }}</span></h3>
+				<span class="strong">From: </span> 
+				<span class="strong-gray" id="post-from">{{ thread.post.from }} </span>
+				<br><span class="strong">To: </span>
+				<span class="strong-gray">{{ active_group.name }}</span> 
+				<br>
+				<span class="strong">Date: </span>
+				<span class="strong-gray">{{ thread.post.timestamp }}</span>
+				<input type="hidden" id="post_info" name="post_info" value="{{ thread.post.msg_id }}" readonly>
+			</div>
+		</div>
+		<hr>
+		<div>			
+		{% autoescape off %}
+		{{ thread.post.text }}
+		{% endautoescape %}
+		</div>
+		<BR>
+		<BR>
+	</div>
+	<br>
+	<div class='text-center'>
+	<input type="checkbox" id='whitelist-check'>Add sender {{thread.post.from}} to whitelist</input><br>
+	<input type="checkbox" id='blacklist-check'>Add sender {{thread.post.from}} to blacklist</input><br>
+	<br>
+	<button type="button" id="btn-approve" style="margin: 5px; background-color:#28850f; border:none;">Approve</button>
+	<button type="button" id="btn-reject" style="margin: 5px; background-color:#a52312; border:none;">Reject</button>
+	</div>
+
+{% endblock %}
+
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/notify.js"></script>
+	<script type="text/javascript" src="/static/javascript/third-party/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/squadbox/thread.js"></script>
+{% endblock %}

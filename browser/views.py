@@ -1,8 +1,25 @@
 import base64
+from engine.constants import *
+from browser.util import load_groups
+from browser.util import paginator
+from lamson.mail import MailResponse
+from smtp_handler.utils import *
+from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+
+from django.core.context_processors import csrf
+import json, logging
+from django.shortcuts import render_to_response, get_object_or_404, redirect
+
+from annoying.decorators import render_to
+from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
+	MuteTag, ForwardingList, Attachment, Post
+from html2text import html2text
+from django.contrib.auth.forms import AuthenticationForm
+from registration.forms import RegistrationForm
+
 import json
 import logging
 
-from annoying.decorators import render_to
 from django.conf import global_settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -21,8 +38,13 @@ from browser.util import load_groups, paginator
 from engine.constants import *
 from http_handler.settings import WEBSITE
 from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
-                           MuteTag, Tag, UserProfile)
+                           MuteTag, Tag, UserProfile, Post)
 from smtp_handler.utils import *
+
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+
+from boto.s3.connection import S3Connection
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 if WEBSITE == 'murmur':
@@ -178,8 +200,19 @@ def post_list(request):
 		if group.public or is_member:
 			if is_member:
 				request.session['active_group'] = group_name
-			res = engine.main.list_posts(group_name=group_name, user=user, format_datetime=False, return_replies=True)
-			res['threads'] = paginator(request.GET.get('page'), res['threads'])
+				
+			
+			res = {'status':False}
+			try:
+				threads = Thread.objects.filter(group=group)
+				threads = paginator(request.GET.get('page'), threads)
+				
+				engine.main.list_posts_page(threads, group, res, user=user, format_datetime=False, return_replies=False, text_limit=250)
+			except Exception, e:
+				print e
+				res['code'] = msg_code['UNKNOWN_ERROR']
+			logging.debug(res)
+					
 			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group}
 		else:
 			return redirect('/404?e=member')
@@ -219,13 +252,12 @@ def thread(request):
 		is_member = member_group.exists()
 		
 		active_group = load_groups(request, groups, user, group_name=group.name)
-			
 		if group.public or is_member:
 			if is_member:
 				res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
 			else:
 				res = engine.main.load_thread(thread, user=request.user)
-			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id, 'active_group': active_group}
+			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None
@@ -238,7 +270,7 @@ def thread(request):
 			return HttpResponseRedirect(global_settings.LOGIN_URL)
 		else:
 			res = engine.main.load_thread(thread)
-			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id,'active_group': active_group}
+			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id,'active_group': active_group, 'website' : WEBSITE}
 			
 			
 @render_to("settings.html")
@@ -479,8 +511,9 @@ def edit_group_settings(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		following = request.POST['following'] == 'yes'
 		upvote_emails = request.POST['upvote_emails'] == 'true'
+		receive_attachments = request.POST['receive_attachments'] == 'true'
 		no_emails = request.POST['no_emails'] == 'true'
-		res = engine.main.edit_group_settings(request.POST['group_name'], following, upvote_emails, no_emails, user)
+		res = engine.main.edit_group_settings(request.POST['group_name'], following, upvote_emails, receive_attachments, no_emails, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
@@ -624,6 +657,7 @@ def group_info(request):
 
 @login_required
 def list_posts(request):
+	print "LIST POST"
 	try:
 		group_name = request.POST.get('active_group')
 		res = engine.main.list_posts(group_name=group_name, user=request.user.email)
@@ -668,7 +702,7 @@ def insert_post(request):
 		
 		msg_text = request.POST['msg_text']
 		
-		res = engine.main.insert_post_web(group_name, request.POST['subject'],  msg_text, user)
+		res = engine.main.insert_post_web(group_name, request.POST['subject'], msg_text, user)
 		
 		subj_tag = ''
 		for tag in res['tags']:
@@ -1151,36 +1185,65 @@ def unupvote_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + "?next=/unupvote_get?post_id=" + request.GET.get('post_id'))
 
-# TODO: make a page for this. 
+@render_to("whitelist.html")
 @login_required
 def blacklist_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.GET.get('group_name')
-		sender_email = request.GET.get('sender_email')
+		sender_email = request.GET.get('sender')
 		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, False, True)
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		return {'res' : res, 'type' : 'blacklisted', 'email_address' : sender_email, 
+				'group_or_squad' : group_or_squad, 'website' : WEBSITE, 'group_name' : group_name,
+				'user' : request.user}
 	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
-
-# TODO: make a page for this. 
+		return redirect(global_settings.LOGIN_URL + '?next=/blacklist_get?group_name=%s&sender=%s' + (group_name. sender_email))
+ 
+@render_to("whitelist.html")
 @login_required
 def whitelist_get(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.GET.get('group_name')
-		sender_email = request.GET.get('sender_email')
+		sender_email = request.GET.get('sender')
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, True, False)
+		return {'res' : res, 'type' : 'whitelisted', 'email_address' : sender_email, 
+				'group_or_squad' : group_or_squad, 'website' : WEBSITE, 'group_name' : group_name,
+				'user' : request.user}
+	else:
+		return redirect(global_settings.LOGIN_URL + '?next=/whitelist_get?group_name=%s&sender=%s' % (group_name. sender_email))
+
+@login_required
+def whitelist(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.POST['group_name']
+		sender_email = request.POST['sender']
 		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, True, False)
 		return HttpResponse(json.dumps(res), content_type="application/json")
-	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+	
+@login_required
+def blacklist(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.POST['group_name']
+		sender_email = request.POST['sender']
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, False, True)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
+@render_to("approve_reject.html")
 @login_required
 def approve_get(request):
 	if request.user.is_authenticated():
@@ -1188,12 +1251,14 @@ def approve_get(request):
 		group_name = request.GET.get('group_name')
 		post_id = request.GET.get('post_id')
 		res = engine.main.update_post_status(user, group_name, post_id, 'A')
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		post = Post.objects.get(id=post_id)
+		return {'res' : res, 'website' : WEBSITE, 'group_name' : group_name,
+				'type' : 'approved', 'email_address' : post.poster_email, 
+				'email_subject' : post.subject, 'post_id' : post_id}
 	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
+		return redirect(global_settings.LOGIN_URL + '?next=/approve_get?group_name=%s&post_id=%s' % (group_name, post_id))
 
+@render_to("approve_reject.html")
 @login_required
 def reject_get(request):
 	if request.user.is_authenticated():
@@ -1201,11 +1266,40 @@ def reject_get(request):
 		group_name = request.GET.get('group_name')
 		post_id = request.GET.get('post_id')
 		res = engine.main.update_post_status(user, group_name, post_id, 'R')
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		post = Post.objects.get(id=post_id)
+		return {'res' : res, 'website' : WEBSITE, 'group_name' : group_name,
+				'type' : 'rejected', 'email_address' : post.poster_email, 
+				'email_subject' : post.subject, 'post_id' : post_id}
 	else:
-		# TODO: send them to login page and redirect
-		error = 'You are not logged in.'
-		return HttpResponse(error, content_type="application/json")
+		redirect(global_settings.LOGIN_URL + '?next=/reject_get?group_name=%s&post_id=%s' % (group_name, post_id))
+
+@login_required
+def approve_post(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			group_name = request.POST['group_name']
+			post_id = request.POST['post_id']
+			res = engine.main.update_post_status(user, group_name, post_id, 'A')
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def reject_post(request):
+	try:
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			group_name = request.POST['group_name']
+			post_id = request.POST['post_id']
+			res = engine.main.update_post_status(user, group_name, post_id, 'R')
+			return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
 def follow_thread(request):
@@ -1316,14 +1410,42 @@ def murmur_acct(request, acct_func=None, template_name=None):
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	active_group = load_groups(request, groups, user)
 	return acct_func(request, template_name=template_name, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user, 'website' : WEBSITE})
-# TODO: password reset workflow seems to redirect to the wrong page (password changes successfuly but redirects to 'confirm password reset' page)
+
+@login_required
+def serve_attachment(request, hash_filename):
+	if Attachment.objects.filter(hash_filename=hash_filename):
+		if request.user.is_authenticated():
+			user = get_object_or_404(UserProfile, email=request.user.email)
+			user_groups = Group.objects.filter(membergroup__member=user)
+			user_groups_names = [group.name for group in user_groups]
+			msg_id = Attachment.objects.filter(hash_filename=hash_filename)[0].msg_id
+			authorized_group = Post.objects.filter(msg_id=msg_id)[0].group.name
+			if authorized_group in user_groups_names:
+				s3 = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, is_secure=True)
+				filename = Attachment.objects.filter(hash_filename=hash_filename)[0].true_filename
+				filepath = hash_filename + "/" + filename
+				temporary_auth_url = s3.generate_url(60, 'GET', bucket=AWS_STORAGE_BUCKET_NAME, key=filepath)
+				return HttpResponseRedirect(temporary_auth_url)
+			else:
+				return HttpResponseRedirect('/404')
+	else:
+		return HttpResponseRedirect('/404')
 
 @render_to('squadbox/dashboard.html')
 def dashboard(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		return {'user' : request.user, 'groups' : groups}
+		mod_group_count = len(Group.objects.filter(membergroup__member=user, membergroup__moderator=True))
+		res = engine.main.load_pending_posts(user)
+		if not res['status']:
+			logging.debug('Error loading pending posts: ' + str(res['error']))
+			pending_posts = []
+		else:
+			pending_posts = res['posts']
+
+		return {'user' : request.user, 'groups' : groups, 'mod_group_count' : mod_group_count,
+				'pending_posts' : pending_posts, 'website' : WEBSITE}
 	else:
 		return redirect(global_settings.LOGIN_URL)
 
