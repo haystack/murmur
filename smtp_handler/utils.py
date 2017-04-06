@@ -506,7 +506,7 @@ def isSenderVerified(sender_addr, to_addr):
 
 def cleanEmailAddress(email):
 	cleanEmail = email
-	hash_group = re.search(r'\+(.\{40}\?)\@', to_addr)
+	hash_group = re.search(r'\+(.\{40}\?)\@', email)
 	if hash_group:
 		sender_hash = hash_group.group(0)
 		re.sub('+'+sender_hash, '', cleanEmail)
