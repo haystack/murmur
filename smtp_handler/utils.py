@@ -502,7 +502,7 @@ def isSenderVerified(sender_addr, to_addr):
 			mail.Body = "In future, please email with hash %s for your incoming mail to be verified." % (new_hash)
 			relay.deliver(mail, To = sender_addr)
 
-		if sender_hash:
+		if hash_group:
 			if sender_hash == user.hash:
 				verified = True
 
