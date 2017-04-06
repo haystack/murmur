@@ -485,20 +485,25 @@ def isSenderVerified(sender_addr, to_addr):
 
 	if not verified:
 		# check if userprofile has a hash, if not generate one and send it to them
+		
+		hash_group = re.search(r'\+(.*?)\@', to_addr)
+		clean_sender_addr = sender_addr
+		if hash_group:
+			sender_hash = hash_group.group(0)
+			clean_sender_addr = re.sub('+'+sender_hash, '', clean_sender_addr)
+
 		user = UserProfile.objects.get(email=sender_addr)
 		if not user.hash:
 			salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()[:5]
 			new_hash = hashlib.sha1(sender_addr+to_addr+salt).hexdigest()
 			user.hash = new_hash
 			user.save()
-			# TODO send it to user in an email
 			mail = MurmurMailResponse(From = NO_REPLY, Subject = "Your new secret email for sender verification")
 			mail.Body = "In future, please email with hash %s for your incoming mail to be verified." % (new_hash)
 			relay.deliver(mail, To = sender_addr)
 
-		sender_hash = re.search(r'\+(.*?)\@', to_addr)
 		if sender_hash:
-			if sender_hash.group(0) == user.hash:
+			if sender_hash == user.hash:
 				verified = True
 
 	return verified
