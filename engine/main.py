@@ -1500,4 +1500,4 @@ def send_whitelist_hash_email(whitelist_id):
 		from_address = group.name + '+' + hash + '@' + BASE_URL
 		body = "Please add the sender of this email (" + from_address + ") to your contacts list and send emails to this address when trying to contact " + group.name + ". This way, your messages will be received and verified automatically. To protect the privacy of the recipient(s), do not share this secret email address with anyone else."
 		mail = MailResponse(From = from_address, To = whitelist.email, Subject = 'Your secret email address for '+group.name, Html = body)
-		relay_mailer.deliver(mail, To = [whitelist.emai])
+		relay_mailer.deliver(mail, To = [whitelist.email])
