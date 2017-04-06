@@ -19,6 +19,7 @@ class Post(models.Model):
 	reply_to = models.ForeignKey('self', blank=False, null=True, related_name="replies")
 	timestamp = models.DateTimeField(auto_now=True)
 	forwarding_list = models.ForeignKey('ForwardingList', null=True)
+	verified_sender = models.BooleanField(default=False)
 	# a post's author is the Murmur user (if any) who wrote the post.
 	# a post's poster_email is the email address of the user who originally
 	# wrote the post. so if author is not null, author.email = poster_email.
@@ -176,7 +177,6 @@ class Group(models.Model):
 		db_table = "murmur_groups"
 
 class WhiteOrBlacklist(models.Model):
-
 	id = models.AutoField(primary_key=True)
 	group = models.ForeignKey('Group')
 	email = models.EmailField(max_length=255)
@@ -184,9 +184,6 @@ class WhiteOrBlacklist(models.Model):
 	# only one of the following can be true
 	whitelist = models.BooleanField(default=False)
 	blacklist = models.BooleanField(default=False)
-
-	# hash for email sender verification
-	hash = models.CharField(max_length=40)
 
 	# timestamp (for temporary bans)
 	timestamp = models.DateTimeField(auto_now=True)
@@ -228,6 +225,7 @@ class UserProfile(AbstractBaseUser):
 	is_active = models.BooleanField(default=True)
 	is_admin = models.BooleanField(default=False)
 	date_joined = models.DateTimeField(auto_now=True)
+	hash = models.CharField(max_length=40)
 
 	objects = MyUserManager()
 

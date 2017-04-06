@@ -1,10 +1,9 @@
-import email, re
+import email, re, time, hashlib
 from lamson.server import Relay
 from config.settings import *
 from lamson_subclass import MurmurMailResponse
-from schema.models import Group, MemberGroup, Thread, Following, Mute
+from schema.models import Group, MemberGroup, Thread, Following, Mute, UserProfile
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL
-
 
 '''
 Murmur Mail Utils and Constants
@@ -478,3 +477,28 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
 	
 	return body
+
+def isSenderVerified(sender_addr, to_addr):
+	verified = False
+
+	# TODO: implement DKIM check here on sender_addr using dkimpy before checking the old-fashioned hash way
+
+	if not verified:
+		# check if userprofile has a hash, if not generate one and send it to them
+		user = UserProfile.objects.get(email=sender_addr)
+		if not user.hash:
+			salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()[:5]
+			new_hash = hashlib.sha1(sender_addr+to_addr+salt).hexdigest()
+			user.hash = new_hash
+			user.save()
+			# TODO send it to user in an email
+			mail = MurmurMailResponse(From = NO_REPLY, Subject = "Your new secret email for sender verification")
+			mail.Body = "In future, please email with hash %s for your incoming mail to be verified." % (new_hash)
+			relay.deliver(mail, To = sender_addr)
+
+		sender_hash = re.search(r'\+(.*?)\@', to_addr)
+		if sender_hash:
+			if sender_hash[0] == user.hash:
+				verified = True
+
+	return verified

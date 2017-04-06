@@ -274,7 +274,7 @@ def info(message, group_name=None, host=None):
 		mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 		relay.deliver(mail)
 
-def handle_post_murmur(message, group, host):
+def handle_post_murmur(message, group, host, verified):
 
 	_, list_addr = parseaddr(message['List-Id'])
 	msg_id = message['Message-ID']
@@ -361,9 +361,9 @@ def handle_post_murmur(message, group, host):
 			original_list_email = original_list.email
 
 		if message_is_reply:
-			res = insert_reply(group.name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list)
+			res = insert_reply(group.name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list, verified=verified)
 		else:
-			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, attachments, forwarding_list=original_list)
+			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, attachments, forwarding_list=original_list, verified=verified)
 			
 		if not res['status']:
 			send_error_email(group.name, res['code'], sender_addr, ADMIN_EMAILS)
@@ -473,7 +473,7 @@ def handle_post_murmur(message, group, host):
 		send_error_email(group.name, e, None, ADMIN_EMAILS)
 		return
 		
-def handle_post_squadbox(message, group, host):
+def handle_post_squadbox(message, group, host, verified):
 
 	_, sender_addr = parseaddr(message['From'].lower())
 	_, to_addr = parseaddr(message['To'].lower())
@@ -487,13 +487,6 @@ def handle_post_squadbox(message, group, host):
 			logging.debug("Sender %s blacklisted; rejecting message" % sender_addr)
 			return
 		elif w_or_b.whitelist:
-			# check hash in to-email matches hash in whitelist:
-			hash = re.search(r'\+(.*?)\@', to_addr)
-			if hash:
-				if hash[0] != w_or_b.hash:
-					# reject message
-					logging.debug("Sender hash doesn't match; rejecting message" % sender_addr)
-					return
 			logging.debug("Sender %s whitelisted; accepting message" % sender_addr)
 			return
 			# send message on to intended recipient (aka group admin)
@@ -520,7 +513,7 @@ def handle_post_squadbox(message, group, host):
 	if 'plain' not in msg_text or msg_text['plain'] == '':
 		msg_text['plain'] = html2text(msg_text['html'])
 
-	res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, forwarding_list=None, post_status='P')
+	res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, forwarding_list=None, post_status='P', verified=verified)
 	# TODO: deal with attachments here the same way they are in handle_post_murmur (and consider membergroup.receive_attachments)
 
 	if not res['status']:
@@ -568,6 +561,10 @@ def handle_post(message, address=None, host=None):
 		return
 	
 	_, sender_addr = parseaddr(message['From'].lower())
+	_, to_addr = parseaddr(message['To'].lower())
+
+	verified = isSenderVerified(sender_addr=sender_addr, to_addr=to_addr)
+
 	group_name = address
 	try:
 		group = Group.objects.get(name=group_name)
@@ -595,10 +592,10 @@ def handle_post(message, address=None, host=None):
 		return
 
 	if WEBSITE == 'squadbox':
-		handle_post_squadbox(message, group, host)
+		handle_post_squadbox(message, group, host, verified)
 
 	elif WEBSITE == 'murmur':
-		handle_post_murmur(message, group, host)
+		handle_post_murmur(message, group, host, verified)
 
 
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)

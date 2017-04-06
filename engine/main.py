@@ -829,7 +829,7 @@ def _create_tag(group, thread, name):
 		t.save()
 	tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
-def _create_post(group, subject, message_text, user, sender_addr, msg_id, attachments=None, forwarding_list=None, post_status=None):
+def _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None):
 
 	try:
 		message_text = message_text.decode("utf-8")
@@ -851,7 +851,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, attach
 	res = upload_attachments(attachments, msg_id)
 
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status)
+			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, verified=verified)
 	p.save()
 	
 	if WEBSITE == 'murmur':
@@ -951,7 +951,7 @@ def insert_post_web(group_name, subject, message_text, user):
 	return res
 
 
-def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, attachments=None, forwarding_list=None, post_status=None):
+def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None):
 	res = {'status':False}
 	thread = None
 	try:
@@ -973,7 +973,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, at
 		# 4) it's a Squadbox post, so we don't care if the sender has an account / is authorized. 
 		# _create_post will check which of user and forwarding list are None and post appropriately. 
 
-		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, attachments, forwarding_list=forwarding_list, post_status=post_status)
+		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, attachments, forwarding_list=forwarding_list, post_status=post_status, verified=verified)
 		res['status'] = True
 		res['post_id'] = p.id
 		res['msg_id'] = p.msg_id
@@ -981,6 +981,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, at
 		res['tags'] = tags
 		res['tag_objs'] = tag_objs
 		res['recipients'] = recipients
+		res['verified'] = verified
 
 
 	except Group.DoesNotExist:
@@ -996,7 +997,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, at
 	return res
 
 
-def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, forwarding_list=None, thread_id=None):
+def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, forwarding_list=None, thread_id=None):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
@@ -1038,7 +1039,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, f
 			message_text = message_text.encode("ascii", "ignore")
 			
 			r = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-				subject=subject, post = message_text, reply_to=post, group=group, thread=thread)
+				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified=verified)
 			r.save()
 			
 			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
@@ -1402,11 +1403,11 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 			entry.whitelist = whitelist
 			entry.blacklist = blacklist
 		else:
-			hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
-			entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist, hash=hash)
-			send_whitelist_hash_email(entry.id)
-			res['hash'] = hash
-		
+			#hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
+			#send_whitelist_hash_email(entry.id)
+			#res['hash'] = hash
+			entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
+			
 		entry.save()
 		res['status'] = True
 		res['group_name'] = group_name
@@ -1491,13 +1492,13 @@ def load_pending_posts(user):
 
 	return res
 
-def send_whitelist_hash_email(whitelist_id):
-	whitelist = WhiteOrBlacklist.objects.get(id=whitelist_id)
-	group = whitelist.group
-	hash = whitelist.hash
+# def send_whitelist_hash_email(whitelist_id):
+# 	whitelist = WhiteOrBlacklist.objects.get(id=whitelist_id)
+# 	group = whitelist.group
+# 	hash = whitelist.hash
 
-	if whitelist:
-		from_address = group.name + '+' + hash + '@' + BASE_URL
-		body = "Please add the sender of this email (" + from_address + ") to your contacts list and send emails to this address when trying to contact " + group.name + ". This way, your messages will be received and verified automatically. To protect the privacy of the recipient(s), do not share this secret email address with anyone else."
-		mail = MailResponse(From = from_address, To = whitelist.email, Subject = 'Your secret email address for '+group.name, Html = body)
-		relay_mailer.deliver(mail, To = [whitelist.email])
+# 	if whitelist:
+# 		from_address = group.name + '+' + hash + '@' + BASE_URL
+# 		body = "Please add the sender of this email (" + from_address + ") to your contacts list and send emails to this address when trying to contact " + group.name + ". This way, your messages will be received and verified automatically. To protect the privacy of the recipient(s), do not share this secret email address with anyone else."
+# 		mail = MailResponse(From = from_address, To = whitelist.email, Subject = 'Your secret email address for '+group.name, Html = body)
+# 		relay_mailer.deliver(mail, To = [whitelist.email])
