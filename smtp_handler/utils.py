@@ -505,9 +505,4 @@ def isSenderVerified(sender_addr, to_addr):
 	return verified
 
 def cleanAddress(address):
-	cleanAddress = address
-	hash_group = re.search(r'\+(.\{40}\?)', address)
-	if hash_group:
-		sender_hash = hash_group.group(0)
-		re.sub('+'+sender_hash, '', cleanAddress)
-	return cleanAddress
+	return address.split('+')[0].lower()
