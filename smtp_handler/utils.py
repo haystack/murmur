@@ -504,10 +504,10 @@ def isSenderVerified(sender_addr, to_addr):
 
 	return verified
 
-def cleanEmailAddress(email):
-	cleanEmail = email
-	hash_group = re.search(r'\+(.\{40}\?)\@', email)
+def cleanAddress(address):
+	cleanAddress = address
+	hash_group = re.search(r'\+(.\{40}\?)', address)
 	if hash_group:
 		sender_hash = hash_group.group(0)
-		re.sub('+'+sender_hash, '', cleanEmail)
-	return cleanEmail
+		re.sub('+'+sender_hash, '', cleanAddress)
+	return cleanAddress
