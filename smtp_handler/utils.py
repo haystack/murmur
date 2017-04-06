@@ -485,12 +485,6 @@ def isSenderVerified(sender_addr, to_addr):
 
 	if not verified:
 		# check if userprofile has a hash, if not generate one and send it to them
-		
-		hash_group = re.search(r'\+(.\{40}\?)\@', to_addr)
-		clean_sender_addr = sender_addr
-		if hash_group:
-			sender_hash = hash_group.group(0)
-			clean_sender_addr = re.sub('+'+sender_hash, '', clean_sender_addr)
 
 		user = UserProfile.objects.get(email=sender_addr)
 		if not user.hash:
@@ -502,8 +496,18 @@ def isSenderVerified(sender_addr, to_addr):
 			mail.Body = "In future, please email with hash %s for your incoming mail to be verified." % (new_hash)
 			relay.deliver(mail, To = sender_addr)
 
+		hash_group = re.search(r'\+(.\{40}\?)\@', to_addr)
 		if hash_group:
+			sender_hash = hash_group.group(0)
 			if sender_hash == user.hash:
 				verified = True
 
 	return verified
+
+def cleanEmailAddress(email):
+	cleanEmail = email
+	hash_group = re.search(r'\+(.\{40}\?)\@', to_addr)
+	if hash_group:
+		sender_hash = hash_group.group(0)
+		re.sub('+'+sender_hash, '', cleanEmail)
+	return cleanEmail

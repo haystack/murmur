@@ -554,7 +554,7 @@ def handle_post(message, address=None, host=None):
 	if '+' in address and '__' in address:
 		return
 
-	address = address.lower()
+	address = cleanEmailAddress(address.lower())
 
 	reserved = filter(lambda x: address.endswith(x), RESERVED)
 	if(reserved):
