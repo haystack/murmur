@@ -1,4 +1,4 @@
-import email, re, time, hashlib
+import email, re, time, hashlib, random
 from lamson.server import Relay
 from config.settings import *
 from lamson_subclass import MurmurMailResponse
