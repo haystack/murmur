@@ -498,7 +498,7 @@ def isSenderVerified(sender_addr, to_addr):
 
 		sender_hash = re.search(r'\+(.*?)\@', to_addr)
 		if sender_hash:
-			if sender_hash[0] == user.hash:
+			if sender_hash.group(0) == user.hash:
 				verified = True
 
 	return verified
