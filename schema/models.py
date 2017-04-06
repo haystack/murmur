@@ -225,7 +225,7 @@ class UserProfile(AbstractBaseUser):
 	is_active = models.BooleanField(default=True)
 	is_admin = models.BooleanField(default=False)
 	date_joined = models.DateTimeField(auto_now=True)
-	hash = models.CharField(max_length=40)
+	hash = models.CharField(max_length=40, default="")
 
 	objects = MyUserManager()
 
