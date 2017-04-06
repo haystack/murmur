@@ -257,7 +257,7 @@ def get_body(email_message):
 			body = remove_html_ps(body)
 			res['html'] = body
 			
-		elif subtype == 'text':
+		elif subtype == 'plain':
 			body = email_message.get_payload()
 			body = remove_plain_ps(body)
 			res['plain'] = body
