@@ -851,7 +851,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 	res = upload_attachments(attachments, msg_id)
 
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, verified=verified)
+			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, verified_sender=verified)
 	p.save()
 	
 	if WEBSITE == 'murmur':
@@ -1039,7 +1039,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
 			message_text = message_text.encode("ascii", "ignore")
 			
 			r = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified=verified)
+				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified_sender=verified)
 			r.save()
 			
 			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
