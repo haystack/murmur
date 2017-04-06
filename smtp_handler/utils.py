@@ -499,12 +499,12 @@ def isSenderVerified(sender_addr, to_addr):
 		hash_group = re.search(r'\+(.\{40}\?)\@', to_addr)
 		if hash_group:
 			sender_hash = hash_group.group(0)
-			print "sender hash found:", sender_hash
+			logging.debug("sender hash found:", sender_hash)
 			if sender_hash == user.hash:
-				print "sender hash = user hash"
+				logging.debug("sender hash = user hash")
 				verified = True
 			else:
-				print "sender hash doesn't match user hash"
+				logging.debug("sender hash doesn't match user hash")
 
 	return verified
 
