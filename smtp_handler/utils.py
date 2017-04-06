@@ -486,7 +486,7 @@ def isSenderVerified(sender_addr, to_addr):
 	if not verified:
 		# check if userprofile has a hash, if not generate one and send it to them
 		
-		hash_group = re.search(r'\+(.*?)\@', to_addr)
+		hash_group = re.search(r'\+(.\{40}\?)\@', to_addr)
 		clean_sender_addr = sender_addr
 		if hash_group:
 			sender_hash = hash_group.group(0)
