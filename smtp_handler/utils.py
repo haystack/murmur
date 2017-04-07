@@ -491,6 +491,9 @@ def isSenderVerified(message):
 			user = UserProfile.objects.get(email=sender_addr)
 		except UserProfile.DoesNotExist:
 			user = None
+		if not user:
+			# TODO: create new user here; for now just ignore the sender address
+			user.hash = "ahash"
 		if not user.hash:
 			salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()[:5]
 			new_hash = hashlib.sha1(sender_addr+to_addr+salt).hexdigest()[:20]
