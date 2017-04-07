@@ -470,6 +470,9 @@ def add_members(group_name, emails, add_as_mods, user):
 
 			for address in email_list:
 				e = address.strip()
+				logging.debug("address: " + e)
+				match = re.match(r'[\S]+@[\S]+\.[\S]+', e)
+				logging.debug("match: " + match)
 				if not re.match(r'[\S]+@[\S]+\.[\S]+', e):
 					res['code'] = msg_code['REQUEST_ERROR']
 					res['error'] = "Improperly formatted email address"
