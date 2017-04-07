@@ -562,3 +562,10 @@ blockquote {
 	cursor: pointer;
 }
 
+.verified {
+	color: green;
+}
+
+.not-verified {
+	color: red;
+}

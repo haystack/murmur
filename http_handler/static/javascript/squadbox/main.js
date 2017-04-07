@@ -954,6 +954,11 @@ $(document).ready(function(){
 		}
 		content += '<br>';
 		content += '<span class="strong">From: </span> <span class="strong-gray">' + res.post.from + '</span><br />';
+		if (res.post.verified) {
+			content += '<span class="verified" title="The sender\'s identity has been verified"> &#10004;</span>';
+		} else {
+			content += '<span class="not-verified" title="We could not verify the sender\'s identity"> &#9888;</span>';
+		}
 		content += '<span class="strong">To: </span><span class="strong-gray">' + res.post.to + '</span>';
 		if (res.post.forwarding_list) content += ' via ' + res.post.forwarding_list;
 		content += '<br />';

@@ -659,3 +659,11 @@ h2 {
 	margin-top: 0;
 	padding-bottom: 10px;
 }
+
+.verified {
+	color: green;
+}
+
+.not-verified {
+	color: red;
+}

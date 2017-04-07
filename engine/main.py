@@ -682,7 +682,8 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
 						'liked': user_liked,
 						'text': text, 
 						'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp,
-						'attachments': attachments
+						'attachments': attachments,
+						'verified': p.verified_sender
 						}
 			if p.forwarding_list:
 				post_dict['forwarding_list'] = p.forwarding_list.email
@@ -766,7 +767,8 @@ def load_thread(t, user=None, member=None):
 					'subject': escape(p.subject), 
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 					'timestamp': p.timestamp,
-					'attachments': attachments
+					'attachments': attachments,
+					'verified': p.verified_sender
 					}
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
@@ -793,7 +795,7 @@ def load_post(group_name, thread_id, msg_id):
 	res = {'status':False}
 	try:
 		t = Thread.objects.get(id=thread_id)
-		p = Post.objects.get(msg_id=msg_id, thread= t)
+		p = Post.objects.get(msg_id=msg_id, thread=t)
 		tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
 		attachments = []
 		for attachment in Attachment.objects.filter(msg_id=p.msg_id):
@@ -808,6 +810,7 @@ def load_post(group_name, thread_id, msg_id):
 		res['text'] = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
 		res['to'] = p.group.name
 		res['attachments'] = attachments
+		res['verified'] = p.verified_sender
 		if p.forwarding_list:
 			res['forwarding_list'] = p.forwarding_list.email
 	except Thread.DoesNotExist:
