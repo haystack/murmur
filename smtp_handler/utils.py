@@ -482,12 +482,13 @@ def isSenderVerified(sender_addr, to_addr):
 	verified = False
 	sender_hash = ""
 	user_hash = ""
+	got_to = ""
 
 	# TODO: implement DKIM check here on sender_addr using dkimpy before checking the old-fashioned hash way
 
 	if not verified:
 		# check if userprofile has a hash, if not generate one and send it to them
-
+		got_to += "1"
 		user = UserProfile.objects.get(email=sender_addr)
 		if not user.hash:
 			salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()[:5]
@@ -498,20 +499,18 @@ def isSenderVerified(sender_addr, to_addr):
 			mail.Body = "In future, please email with hash %s for your incoming mail to be verified." % (new_hash)
 			relay.deliver(mail, To = sender_addr)
 		user = UserProfile.objects.get(email=sender_addr)
+		got_to += "2"
 		hash_group = re.search(r'\+(.\{40}\?)\@', to_addr)
+		got_to += "3"
 		if hash_group:
+			got_to += "4"
 			sender_hash = hash_group.group(0)
-			logging.debug("sender hash:")
-			logging.debug(sender_hash)
-			logging.debug("user hash:")
-			logging.debug(user.hash)
+			got_to += "5"
 			if sender_hash == user.hash:
-				logging.debug("sender hash = user hash")
+				got_to += "6"
 				verified = True
-			else:
-				logging.debug("sender hash doesn't match user hash")
 
-	return verified, sender_hash, user_hash
+	return verified, sender_hash, user_hash, got_to
 
 def cleanAddress(address):
 	return address.split('+')[0].lower()
