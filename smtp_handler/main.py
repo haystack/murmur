@@ -564,7 +564,8 @@ def handle_post(message, address=None, host=None):
 	_, to_addr = parseaddr(message['To'].lower())
 
 	verified = isSenderVerified(sender_addr=sender_addr, to_addr=to_addr)
-	logging.debug("verified status:", verified)
+	logging.debug("verified status:")
+	logging.debug(str(verified))
 	# TODO: this is not actually verifying even when the hash is present??
 
 	group_name = address
