@@ -500,11 +500,11 @@ def isSenderVerified(sender_addr, to_addr):
 			relay.deliver(mail, To = sender_addr)
 		user = UserProfile.objects.get(email=sender_addr)
 		got_to += "2"
-		hash_group = re.search(r'\+(.\{40}\?)\@', to_addr)
+		hash_group = re.search(r'\+(.{40}?)\@', to_addr)
 		got_to += "3"
 		if hash_group:
 			got_to += "4"
-			sender_hash = hash_group.group(0)
+			sender_hash = hash_group.group(1)
 			got_to += "5"
 			if sender_hash == user.hash:
 				got_to += "6"
