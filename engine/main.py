@@ -467,6 +467,14 @@ def add_members(group_name, emails, add_as_mods, user):
 			is_admin = membergroup.admin
 		if is_public or is_admin:
 			email_list = emails.strip().lower().split(',')
+
+			for address in email_list:
+				e = address.strip()
+				if not re.match(r'[\S]+@[\S]+\.[\S]+', e):
+					res['code'] = msg_code['REQUEST_ERROR']
+					res['error'] = "Improperly formatted email address"
+					return res
+
 			for email in email_list:
 				email = email.strip()
 				
