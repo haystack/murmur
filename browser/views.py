@@ -1148,7 +1148,7 @@ def subscribe_get(request):
 	elif email_param:
 
 		response.update({
-			'res' : engine.main.add_members(group_name, email_param, None), 
+			'res' : engine.main.add_members(group_name, email_param, False, None), 
 			'email' : email_param,
 			});
 
