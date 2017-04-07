@@ -495,11 +495,14 @@ def isSenderVerified(sender_addr, to_addr):
 			mail = MurmurMailResponse(From = NO_REPLY, Subject = "Your new secret email for sender verification")
 			mail.Body = "In future, please email with hash %s for your incoming mail to be verified." % (new_hash)
 			relay.deliver(mail, To = sender_addr)
-
+		user = UserProfile.objects.get(email=sender_addr)
 		hash_group = re.search(r'\+(.\{40}\?)\@', to_addr)
 		if hash_group:
 			sender_hash = hash_group.group(0)
-			logging.debug("sender hash found:", sender_hash)
+			logging.debug("sender hash:")
+			logging.debug(sender_hash)
+			logging.debug("user hash:")
+			logging.debug(user.hash)
 			if sender_hash == user.hash:
 				logging.debug("sender hash = user hash")
 				verified = True
