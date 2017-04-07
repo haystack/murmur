@@ -563,8 +563,6 @@ def handle_post(message, address=None, host=None):
 	_, sender_addr = parseaddr(message['From'].lower())
 	_, to_addr = parseaddr(message['To'].lower())
 
-	logging.debug('original "message":')
-	logging.debug(message)
 	verified = isSenderVerified(message)
 
 	group_name = address

@@ -484,7 +484,7 @@ def isSenderVerified(message):
 	email_message = str(message)
 	_, sender_addr = parseaddr(message['From'].lower())
 	_, to_addr = parseaddr(message['To'].lower())
-	verified = dkim.verify(email_message)
+	#verified = dkim.verify(email_message)
 	if not verified:
 		# check if UserProfile has a hash, if not generate one and send it to them
 		user = UserProfile.objects.get(email=sender_addr)
