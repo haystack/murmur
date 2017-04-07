@@ -487,7 +487,10 @@ def isSenderVerified(message):
 	verified = dkim.verify(email_message)
 	if not verified:
 		# check if UserProfile has a hash, if not generate one and send it to them
-		user = UserProfile.objects.get(email=sender_addr)
+		try:
+			user = UserProfile.objects.get(email=sender_addr)
+		except model.DoesNotExist:
+			user = None
 		if not user.hash:
 			salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()[:5]
 			new_hash = hashlib.sha1(sender_addr+to_addr+salt).hexdigest()[:20]
