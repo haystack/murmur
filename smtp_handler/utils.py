@@ -489,7 +489,7 @@ def isSenderVerified(message):
 		# check if UserProfile has a hash, if not generate one and send it to them
 		try:
 			user = UserProfile.objects.get(email=sender_addr)
-		except model.DoesNotExist:
+		except UserProfile.DoesNotExist:
 			user = None
 		if not user.hash:
 			salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()[:5]
