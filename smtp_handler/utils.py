@@ -1,4 +1,4 @@
-import email, re, time, hashlib, random
+import email, re, time, hashlib, random, dkim
 from lamson.server import Relay
 from config.settings import *
 from lamson_subclass import MurmurMailResponse
@@ -478,9 +478,10 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	
 	return body
 
-def isSenderVerified(sender_addr, to_addr):
-	verified = False
-	# TODO: implement DKIM check here on sender_addr using dkimpy before checking the old-fashioned hash way
+def isSenderVerified(message):
+	_, sender_addr = parseaddr(message['From'].lower())
+	_, to_addr = parseaddr(message['To'].lower())
+	verified = dkim.verify(message)
 	if not verified:
 		# check if UserProfile has a hash, if not generate one and send it to them
 		user = UserProfile.objects.get(email=sender_addr)
