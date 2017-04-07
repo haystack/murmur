@@ -31,3 +31,4 @@ python-gnupg==0.4.0
 django-storages==1.4.1
 boto==2.45.0
 dkimpy==0.6.1
+dnspython==1.15.0
