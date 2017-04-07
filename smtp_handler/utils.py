@@ -480,6 +480,8 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 
 def isSenderVerified(sender_addr, to_addr):
 	verified = False
+	sender_hash = ""
+	user_hash = ""
 
 	# TODO: implement DKIM check here on sender_addr using dkimpy before checking the old-fashioned hash way
 
@@ -509,7 +511,7 @@ def isSenderVerified(sender_addr, to_addr):
 			else:
 				logging.debug("sender hash doesn't match user hash")
 
-	return verified
+	return verified, sender_hash, user_hash
 
 def cleanAddress(address):
 	return address.split('+')[0].lower()
