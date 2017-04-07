@@ -4,6 +4,7 @@ from config.settings import *
 from lamson_subclass import MurmurMailResponse
 from schema.models import Group, MemberGroup, Thread, Following, Mute, UserProfile
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL
+from email.utils import *
 
 '''
 Murmur Mail Utils and Constants
