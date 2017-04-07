@@ -564,7 +564,8 @@ def handle_post(message, address=None, host=None):
 	_, to_addr = parseaddr(message['To'].lower())
 
 	verified, sender_hash, user_hash = isSenderVerified(sender_addr=sender_addr, to_addr=to_addr)
-	logging.debug("verified status/sender_hash/user_hash:")
+	logging.debug("to_addr/verified status/sender_hash/user_hash:")
+	logging.debug(to_addr)
 	logging.debug(str(verified))
 	logging.debug(sender_hash)
 	logging.debug(user_hash)
