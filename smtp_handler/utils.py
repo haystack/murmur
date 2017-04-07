@@ -5,6 +5,7 @@ from lamson_subclass import MurmurMailResponse
 from schema.models import Group, MemberGroup, Thread, Following, Mute, UserProfile
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL
 from email.utils import *
+from email import message_from_string
 
 '''
 Murmur Mail Utils and Constants
@@ -480,9 +481,10 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	return body
 
 def isSenderVerified(message):
+	email_message = message_from_string(str(message))
 	_, sender_addr = parseaddr(message['From'].lower())
 	_, to_addr = parseaddr(message['To'].lower())
-	verified = dkim.verify(message)
+	verified = dkim.verify(email_message)
 	if not verified:
 		# check if UserProfile has a hash, if not generate one and send it to them
 		user = UserProfile.objects.get(email=sender_addr)
