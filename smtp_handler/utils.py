@@ -480,37 +480,25 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 
 def isSenderVerified(sender_addr, to_addr):
 	verified = False
-	sender_hash = ""
-	user_hash = ""
-	got_to = ""
-
 	# TODO: implement DKIM check here on sender_addr using dkimpy before checking the old-fashioned hash way
-
 	if not verified:
-		# check if userprofile has a hash, if not generate one and send it to them
-		got_to += "1"
+		# check if UserProfile has a hash, if not generate one and send it to them
 		user = UserProfile.objects.get(email=sender_addr)
 		if not user.hash:
 			salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()[:5]
-			new_hash = hashlib.sha1(sender_addr+to_addr+salt).hexdigest()
+			new_hash = hashlib.sha1(sender_addr+to_addr+salt).hexdigest()[:20]
 			user.hash = new_hash
 			user.save()
-			mail = MurmurMailResponse(From = NO_REPLY, Subject = "Your new secret email for sender verification")
-			mail.Body = "In future, please email with hash %s for your incoming mail to be verified." % (new_hash)
+			mail = MurmurMailResponse(From = NO_REPLY, Subject = "Please use your secret code in future emails")
+			mail.Body = "In future, to ensure your message is delivered, please include the code %s within the address of your emails, before the '@' symbol and after a '+' symbol. E.g. if you are emailing testgroup@%s, you should now email testgroup+%s@%s to ensure your email is verified as coming directly from you, and thus delivered correctly." % (new_hash, HOST, new_hash, HOST)
 			relay.deliver(mail, To = sender_addr)
 		user = UserProfile.objects.get(email=sender_addr)
-		got_to += "2"
-		hash_group = re.search(r'\+(.{40}?)\@', to_addr)
-		got_to += "3"
+		hash_group = re.search(r'\+(.{20,40}?)\@', to_addr)
 		if hash_group:
-			got_to += "4"
 			sender_hash = hash_group.group(1)
-			got_to += "5"
 			if sender_hash == user.hash:
-				got_to += "6"
 				verified = True
-
-	return verified, sender_hash, user_hash, got_to
+	return verified
 
 def cleanAddress(address):
 	return address.split('+')[0].lower()
