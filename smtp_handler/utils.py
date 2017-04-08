@@ -1,7 +1,7 @@
 import email, re, time, hashlib, random, dkim
 from lamson.server import Relay
 from config.settings import *
-from lamson_subclass import MurmurMailResponse, MailRequest
+from lamson_subclass import MurmurMailResponse
 from schema.models import Group, MemberGroup, Thread, Following, Mute, UserProfile
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL
 from email.utils import *
@@ -482,7 +482,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 
 def isSenderVerified(message):
 	#email_message = str(message)
-	email_message = message.raw()
+	email_message = message.original
 	_, sender_addr = parseaddr(message['From'].lower())
 	_, to_addr = parseaddr(message['To'].lower())
 	verified = dkim.verify(email_message)

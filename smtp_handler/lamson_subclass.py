@@ -376,6 +376,6 @@ class MurmurMIMEPart(MIMEBase):
                                               self['Content-Disposition'],
                                                             self.is_multipart())
 
-class MailRequest(mail.MailRequest):
-    def raw(self):
-        return self.original
+# class MailRequest(mail.MailRequest):
+#     def raw(self):
+#         return self.original
