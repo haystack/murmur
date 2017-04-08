@@ -481,7 +481,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	return body
 
 def isSenderVerified(message):
-	email_message = str(message)
+	email_message = message
 	_, sender_addr = parseaddr(message['From'].lower())
 	_, to_addr = parseaddr(message['To'].lower())
 	verified = dkim.verify(email_message)
