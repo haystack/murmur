@@ -1,7 +1,7 @@
 import email, re, time, hashlib, random, dkim
 from lamson.server import Relay
 from config.settings import *
-from lamson_subclass import MurmurMailResponse, MurmurMailRequest
+from lamson_subclass import MurmurMailResponse, MailRequest
 from schema.models import Group, MemberGroup, Thread, Following, Mute, UserProfile
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL
 from email.utils import *

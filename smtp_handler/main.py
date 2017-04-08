@@ -4,6 +4,7 @@ from config.settings import relay
 from http_handler.settings import WEBSITE
 from schema.models import *
 from lamson.mail import MailResponse
+from lamson_subclass import MailRequest
 from email.utils import *
 from email import message_from_string
 from engine.main import *
@@ -564,7 +565,7 @@ def handle_post(message, address=None, host=None):
 	_, to_addr = parseaddr(message['To'].lower())
 
 	logging.debug("raw message:")
-	#logging.debug(message.raw())
+	logging.debug(message.raw())
 	verified = isSenderVerified(message)
 
 	group_name = address
