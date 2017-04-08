@@ -4,6 +4,7 @@ from config.settings import relay
 from http_handler.settings import WEBSITE
 from schema.models import *
 from lamson.mail import MailResponse
+from lamson_subclass import MurmurMailRequest
 from email.utils import *
 from email import message_from_string
 from engine.main import *

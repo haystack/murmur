@@ -376,6 +376,122 @@ class MurmurMIMEPart(MIMEBase):
                                               self['Content-Disposition'],
                                                             self.is_multipart())
 
-class MailRequest(mail.MailRequest):
+class MurmurMailRequest(object):
+    """
+    This is what's handed to your handlers for you to process.  The information
+    you get out of this is *ALWAYS* in Python unicode and should be usable 
+    by any API.  Modifying this object will cause other handlers that deal
+    with it to get your modifications, but in general you don't want to do
+    more than maybe tag a few headers.
+    """
+    def __init__(self, Peer, From, To, Data):
+        """
+        Peer is the remote peer making the connection (sometimes the queue
+        name).  From and To are what you think they are.  Data is the raw
+        full email as received by the server.
+
+        NOTE:  It does not handle multiple From headers, if that's even
+        possible.  It will parse the From into a list and take the first
+        one.
+        """
+
+        self.original = Data
+        self.base = encoding.from_string(Data)
+        self.Peer = Peer
+        self.From = From or self.base['from']
+        self.To = To or self.base[ROUTABLE_TO_HEADER]
+
+        if 'from' not in self.base: 
+            self.base['from'] = self.From
+        if 'to' not in self.base:
+            # do NOT use ROUTABLE_TO here
+            self.base['to'] = self.To
+
+        self.route_to = _decode_header_randomness(self.To)
+        self.route_from = _decode_header_randomness(self.From)
+
+        if self.route_from:
+            self.route_from = self.route_from.pop()
+        else:
+            self.route_from = None
+
+        self.bounce = None
+
+
+    def all_parts(self):
+        """Returns all multipart mime parts.  This could be an empty list."""
+        return self.base.parts
+
+
+    def body(self):
+        """
+        Always returns a body if there is one.  If the message
+        is multipart then it returns the first part's body, if
+        it's not then it just returns the body.  If returns
+        None then this message has nothing for a body.
+        """
+        if self.base.parts:
+            return self.base.parts[0].body
+        else:
+            return self.base.body
+
+
+    def __contains__(self, key):
+        return self.base.__contains__(key)
+
+    def __getitem__(self, name):
+        return self.base.__getitem__(name)
+
+    def __setitem__(self, name, val):
+        self.base.__setitem__(name, val)
+
+    def __delitem__(self, name):
+        del self.base[name]
+
+    def __str__(self):
+        """
+        Converts this to a string usable for storage into a queue or 
+        transmission.
+        """
+        return encoding.to_string(self.base)
+
+    def __repr__(self):
+        return "From: %r" % [self.Peer, self.From, self.To]
+
+    def keys(self):
+        return self.base.keys()
+
+    def to_message(self):
+        """
+        Converts this to a Python email message you can use to
+        interact with the python mail APIs.
+        """
+        return encoding.to_message(self.base)
+
+    def walk(self):
+        """Recursively walks all attached parts and their children."""
+        for x in self.base.walk():
+            yield x
+    
     def raw_message(self):
         return self.original
+
+    def is_bounce(self, threshold=0.3):
+        """
+        Determines whether the message is a bounce message based on 
+        lamson.bounce.BounceAnalzyer given threshold.  0.3 is a good
+        conservative base.
+        """
+        if not self.bounce:
+            self.bounce = bounce.detect(self)
+
+        if self.bounce.score > threshold:
+            return True
+        else:
+            return False
+
+    @property
+    def msg(self):
+        warnings.warn("The .msg attribute is deprecated, use .base instead.  This will be gone in Lamson 1.0",
+                          category=DeprecationWarning, stacklevel=2)
+        return self.base
