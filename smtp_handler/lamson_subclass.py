@@ -1,5 +1,5 @@
 import mimetypes
-from lamson import encoding, bounce, mail
+from lamson import encoding, bounce
 from email.utils import parseaddr
 import os
 import warnings
@@ -375,7 +375,3 @@ class MurmurMIMEPart(MIMEBase):
         return "<MIMEPart '%s/%s': %r, %r, multipart=%r>" % (self.subtype, self.maintype, self['Content-Type'],
                                               self['Content-Disposition'],
                                                             self.is_multipart())
-
-# class MailRequest(mail.MailRequest):
-#     def raw(self):
-#         return self.original
