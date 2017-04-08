@@ -473,7 +473,7 @@ class MurmurMailRequest(object):
         for x in self.base.walk():
             yield x
     
-    def raw_message(self):
+    def raw(self):
         return self.original
 
     def is_bounce(self, threshold=0.3):
