@@ -470,7 +470,7 @@ def add_members(group_name, emails, add_as_mods, user):
 			email_list = emails.strip().lower().split(',')
 
 			for email in email_list:
-				name, email = parseaddr(email)
+				_, email = parseaddr(email)
 				email_user = UserProfile.objects.filter(email=email)
 				member = False
 				if email_user.count() == 1:
