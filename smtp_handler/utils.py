@@ -231,24 +231,25 @@ def get_body(email_message):
 		res['plain'] = ''
 
 		for part in email_message.get_payload():
-			d = (part['Content-Transfer-Encoding'] == 'base64')
+			d1 = (part['Content-Transfer-Encoding'] == 'base64')
 			if part.get_content_maintype() == 'text':
 				if part.get_content_subtype() == 'html':
-					body = part.get_payload(decode=d)
+					body = part.get_payload(decode=d1)
 					body = remove_html_ps(body)
 					res['html'] += body
 				else:
-					body = part.get_payload(decode=d)
+					body = part.get_payload(decode=d1)
 					body = remove_plain_ps(body)
 					res['plain'] += body
 			elif part.get_content_maintype() == 'multipart':
+				d2 = (part2['Content-Transfer-Encoding'] == 'base64')
 				for part2 in part.get_payload():
 					if part2.get_content_subtype() == 'html':
-						body = part2.get_payload(decode=d)
+						body = part2.get_payload(decode=d2)
 						body = remove_html_ps(body)
 						res['html'] += body
 					elif part2.get_content_subtype() == 'plain':
-						body = part2.get_payload(decode=d)
+						body = part2.get_payload(decode=d2)
 						body = remove_plain_ps(body)
 						res['plain'] += body
 	elif maintype == 'text':
