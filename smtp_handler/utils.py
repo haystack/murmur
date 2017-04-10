@@ -242,8 +242,8 @@ def get_body(email_message):
 					body = remove_plain_ps(body)
 					res['plain'] += body
 			elif part.get_content_maintype() == 'multipart':
-				d2 = (part2['Content-Transfer-Encoding'] == 'base64')
 				for part2 in part.get_payload():
+					d2 = (part2['Content-Transfer-Encoding'] == 'base64')
 					if part2.get_content_subtype() == 'html':
 						body = part2.get_payload(decode=d2)
 						body = remove_html_ps(body)
