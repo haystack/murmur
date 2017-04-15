@@ -32,3 +32,6 @@ django-storages==1.4.1
 boto==2.45.0
 dkimpy==0.6.1
 dnspython==1.15.0
+pyspf==2.0.11
+ipaddr==2.1.11
+pydns==2.3.6
