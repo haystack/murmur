@@ -12,6 +12,7 @@ from attachments import upload_attachments
 import re
 import hashlib
 import random
+from email.utils import parseaddr
 
 from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME
 import json
@@ -467,9 +468,9 @@ def add_members(group_name, emails, add_as_mods, user):
 			is_admin = membergroup.admin
 		if is_public or is_admin:
 			email_list = emails.strip().lower().split(',')
+
 			for email in email_list:
-				email = email.strip()
-				
+				_, email = parseaddr(email)
 				email_user = UserProfile.objects.filter(email=email)
 				member = False
 				if email_user.count() == 1:
