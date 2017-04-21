@@ -887,9 +887,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, attach
 			f.save()
 
 	elif WEBSITE == 'squadbox':
-		# later on there will be various user options for this. for now just choose 
-		# to send to all moderators.
-		recipients = [m.member.email for m in MemberGroup.objects.filter(group=group, moderator=True)]
+		recipients = []
 		tags = None
 		tag_objs = None 
 	
