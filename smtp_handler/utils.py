@@ -261,13 +261,14 @@ def get_body(email_message):
 						body = remove_plain_ps(body)
 						res['plain'] += body
 	elif maintype == 'text':
+		d = (email_message['Content-Transfer-Encoding'] == 'base64')
 		if subtype == 'html':
-			body = email_message.get_payload()
+			body = email_message.get_payload(decode=d)
 			body = remove_html_ps(body)
 			res['html'] = body
 			
 		elif subtype == 'plain':
-			body = email_message.get_payload()
+			body = email_message.get_payload(decode=d)
 			body = remove_plain_ps(body)
 			res['plain'] = body
 	return res
