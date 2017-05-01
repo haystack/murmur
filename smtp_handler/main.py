@@ -569,7 +569,7 @@ def handle_post_squadbox(message, group, host):
 	
 	# if pending or rejected, we need to put it in the DB 
 	if status == 'P' or status == 'R':
-		res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, forwarding_list=None, post_status=status)
+		res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, attachments, None, status)
 		if not res['status']:
 			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
 			return
