@@ -25,6 +25,11 @@
 		{% endautoescape %}
 		</div>
 		<BR>
+		<span class="strong-gray">
+		{% for name, url in thread.post.attachments %}
+		<a href="{{url}}">{{name}}</a>
+			{% endfor %}
+		</span>
 		<BR>
 	</div>
 	<br>
