@@ -25,11 +25,14 @@
 		{% endautoescape %}
 		</div>
 		<BR>
-		<span class="strong-gray">
-		{% for name, url in thread.post.attachments %}
-		<a href="{{url}}">{{name}}</a>
-			{% endfor %}
-		</span>
+		{% if thread.post.attachments %}
+			<b>Attachments</b>:
+			<span class="strong-gray">
+			{% for name, url in thread.post.attachments %}
+			<a href="{{url}}">{{name}}</a>
+				{% endfor %}
+			</span>
+		{% endif %}
 		<BR>
 	</div>
 	<br>
