@@ -28,7 +28,7 @@ def upload_attachments(attachments, msg_id):
 def download_attachments(msg_id):
 
     files = []
-    attachments = Attachment.objects.filter(msg_id=p.msg_id)
+    attachments = Attachment.objects.filter(msg_id=msg_id)
     for a in attachments:
         path = a.hash_filename + '/' + a.true_filename 
         with default_storage.open(path, 'r') as f:
