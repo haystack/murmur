@@ -33,7 +33,7 @@ def download_attachments(msg_id):
         path = a.hash_filename + '/' + a.true_filename 
         with default_storage.open(path, 'r') as f:
             file = {
-                'name' : true_filename,
+                'name' : a.true_filename,
                 'data' : f.read()
             }
             files.append(file)
