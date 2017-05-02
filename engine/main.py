@@ -8,7 +8,7 @@ from lamson.mail import MailResponse
 from smtp_handler.utils import *
 from bleach import clean
 from cgi import escape
-from attachments import upload_attachments
+from attachments import upload_attachments, download_attachments
 import re
 import hashlib
 import random
@@ -1461,7 +1461,9 @@ def update_post_status(user, group_name, post_id, new_status):
 				mail = MailResponse(From = p.poster_email, To = admin.email, Subject = new_subj)
 				mail['message-id'] = p.msg_id
 
-				# TODO: need to readd attachments here...
+				attachments = download_attachments(p.msg_id)
+				for a in attachments:
+					mail.attach(filename=a['name'], data=a['data'])
 
 				html_blurb = unicode(html_ps_squadbox(group_name, p.poster_email, reason))
 				plain_blurb = plain_ps_squadbox(group_name, p.poster_email, reason)
