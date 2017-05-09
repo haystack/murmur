@@ -521,7 +521,7 @@ def isSenderVerified(message):
 	_, to_addr = parseaddr(message['To'].lower())
 	verified = dkim.verify(email_message)
 
-	# check 2: SPF - TODO not implemented
+	# check 2: SPF - TODO: SPF not implemented - need to find incoming mail server IP address
 	# if not verified:
 	# 	spf_i = ""
 	# 	spf_h = ""
@@ -537,7 +537,8 @@ def isSenderVerified(message):
 		except UserProfile.DoesNotExist:
 			user = None
 		if user:
-			# TODO: create new user here; for now just ignore the sender address
+			# TODO: create new user here if it doesn't exist or otherwise handle posts from non-users
+			# for now just mark as un-verified if DKIM and SPF fail
 			if not user.hash:
 				salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()[:5]
 				new_hash = hashlib.sha1(sender_addr+to_addr+salt).hexdigest()[:20]
