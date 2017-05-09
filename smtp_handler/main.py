@@ -475,74 +475,104 @@ def handle_post_murmur(message, group, host, verified):
 		
 def handle_post_squadbox(message, group, host, verified):
 
-	_, sender_addr = parseaddr(message['From'].lower())
-	_, to_addr = parseaddr(message['To'].lower())
-
-	# whitelist/blacklist checking
-	white_or_blacklist = WhiteOrBlacklist.objects.filter(group=group, email=sender_addr)
-	if white_or_blacklist.exists():
-		w_or_b = white_or_blacklist[0]
-		if w_or_b.blacklist:
-			# reject message - store in database
-			logging.debug("Sender %s blacklisted; rejecting message" % sender_addr)
-			return
-		elif w_or_b.whitelist:
-			logging.debug("Sender %s whitelisted; accepting message" % sender_addr)
-			return
-			# send message on to intended recipient (aka group admin)
-			# try:
-			# 	group_admin = MemberGroup.objects.get(group=group, admin=True)
-			# 	# 1) create new email
-			# 	# 2) send
-			# except Exception, e:
-			# 	error_msg = "Admin of group %s not found: %s" % (group.name, e)
-			# 	logging.debug(error_msg)
-			# 	send_error_email(group.name, error_msg, None, ADMIN_EMAILS)
-			# 	return
-			# pass
-
-	# TODO: should see if things are replies/add-ons to a thread (for the case where
-	# a moderator keeps following a thread due to user request)
-	subj = message['Subject'].strip()
 	msg_id = message['Message-ID']
-
 	email_message = message_from_string(str(message))
 	msg_text = get_body(email_message)
+	_, sender_addr = parseaddr(message['From'].lower())
+	subj = message['Subject'].strip()
+
 	if 'html' not in msg_text or msg_text['html'] == '':
 		msg_text['html'] = markdown(msg_text['plain'])
 	if 'plain' not in msg_text or msg_text['plain'] == '':
 		msg_text['plain'] = html2text(msg_text['html'])
 
-	res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, verified, forwarding_list=None, post_status='P')
-	# TODO: deal with attachments here the same way they are in handle_post_murmur (and consider membergroup.receive_attachments)
-
-	if not res['status']:
-		send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
-		return
-
-	moderators = res['recipients']
-	if len(moderators) == 0:
-		error_msg = 'Error: the group %s has no moderators' % group.name
-		logging.debug(error_msg)
-		send_error_email(group.name, error_msg, None, ADMIN_EMAILS)
-		# maybe here we should just send the original email on to the admin here then? 
-		return
-
-	outgoing_msg = setup_moderation_post(group.name, msg_text, res['post_id'])
-
 	attachments = get_attachments(email_message)
-	for attachment in attachments.get("attachments"):
-		outgoing_msg.attach(filename=attachment['filename'],
-				content_type=attachment['mime'],
-				data=attachment['content'],
-				disposition=attachment['disposition'],
-				id=attachment['id'])
 
-	outgoing_msg['message-id'] = res['msg_id']
+	# initially, assume that it's pending and will go through moderation. 
+	status = 'P'
 
-	for m in moderators:
-		relay.deliver(outgoing_msg, To=m)
-		logging.debug("sending msg to moderator %s" % m)
+	# if whitelisted, accept; if blacklisted, reject 
+	white_or_blacklist = WhiteOrBlacklist.objects.filter(group=group, email=sender_addr)
+	if white_or_blacklist.exists():
+		w_or_b = white_or_blacklist[0]
+		if w_or_b.blacklist:
+			status = 'R' # if blacklist could means "gets moderated", need to change. 
+		elif w_or_b.whitelist:
+			status = 'A' # sender is whitelisted, so we can accept the mesasge 
+
+	# either:
+	# 1) sender is whitelisted
+	# 2) sender is blacklisted, but the user still wants rejected messages. 
+	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
+		# we can just send it on to the intended recipient, i.e. the admin of the group. 
+		mg = MemberGroup.objects.get(group=group, admin=True)
+		admin = mg.member
+
+		new_subj = subj
+		if status == 'R':
+			new_subj = '[Rejected] ' + new_subj 
+
+		mail = MurmurMailResponse(From = message['From'], To = admin.email, Subject = new_subj)
+
+		if 'references' in message:
+			mail['References'] = message['references']
+		elif 'message-id' in message:
+			mail['References'] = message['message-id']	
+	
+		if 'in-reply-to' not in message:
+			mail["In-Reply-To"] = message['message-id']
+
+		mail['message-id'] = msg_id
+		ccs = email_message.get_all('cc', None)
+		if ccs:
+			mail['Cc'] = ','.join(ccs)
+
+		for attachment in attachments.get("attachments"):
+			mail.attach(filename=attachment['filename'],
+						content_type=attachment['mime'],
+						data=attachment['content'],
+						disposition=attachment['disposition'],
+						id=attachment['id'])
+
+		if status == 'A':
+			reason = 'whitelist'
+		elif status == 'R':
+			reason = 'blacklist'
+
+		html_blurb = unicode(html_ps_squadbox(group.name, sender_addr, reason))
+		mail.Html = get_new_body(msg_text, html_blurb, 'html')
+
+		plain_blurb = plain_ps_squadbox(group.name, sender_addr, reason)
+		mail.Body = get_new_body(msg_text, plain_blurb, 'plain')
+
+		relay.deliver(mail, To = admin.email)
+
+	# send notification to mods (probably should change to not do this every time)
+	elif status == 'P':
+
+		moderators = MemberGroup.objects.filter(group=group, moderator=True)
+
+		if len(moderators) == 0:
+			error_msg = 'Error: the group %s has no moderators' % group.name
+			logging.debug(error_msg)
+			send_error_email(group.name, error_msg, None, ADMIN_EMAILS)
+			# maybe here we should just send the original email on to the admin here then? 
+			return
+
+		outgoing_msg = setup_moderation_post(group.name)
+		outgoing_msg['message-id'] = base64.b64encode(group.name + str(datetime.now())).lower() + '@' + BASE_URL
+
+		for m in moderators:
+			member = m.member
+			relay.deliver(outgoing_msg, To=member.email)
+			logging.debug("sending msg to moderator %s" % member.email)
+	
+	# if pending or rejected, we need to put it in the DB 
+	if status == 'P' or status == 'R':
+		res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, verified, attachments, None, status)
+		if not res['status']:
+			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
+			return
 
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless

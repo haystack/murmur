@@ -3,7 +3,7 @@ from lamson.server import Relay
 from config.settings import *
 from lamson_subclass import MurmurMailResponse
 from schema.models import Group, MemberGroup, Thread, Following, Mute, UserProfile
-from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL
+from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE
 from email.utils import *
 from email import message_from_string
 
@@ -54,7 +54,11 @@ PERMALINK_POST = 'http://%s/thread?tid=%s&post_id=%s'
 HTML_SUBHEAD = '<div style="border-top:solid thin;padding-top:5px;margin-top:10px">'
 HTML_SUBTAIL = '</div>'
 
-PLAIN_SUBHEAD = '***\nMurmur\n'
+if WEBSITE == 'murmur':
+	PLAIN_SUBHEAD = '***\nMurmur\n'
+elif WEBSITE == 'squadbox':
+	PLAIN_SUBHEAD = '***\nSquadbox\n'
+
 PLAIN_SUBTAIL = '\n***\n'
 
 RESERVED = ['+create', '+activate', '+deactivate', '+subscribe', '+unsubscribe', '+admins', '+info', 'help', 'no-reply', 'all', POST_SUFFIX, FOLLOW_SUFFIX, UNFOLLOW_SUFFIX, MUTE_SUFFIX, UNMUTE_SUFFIX, UPVOTE_SUFFIX, DOWNVOTE_SUFFIX, FETCH_SUFFIX]
@@ -91,9 +95,9 @@ def setup_post(From, Subject, group_name):
 	
 	return mail
 
-def setup_moderation_post(group_name, msg_text, post_id):
+def setup_moderation_post(group_name):
 
-	subject = 'Post to Squadbox group %s requires approval' % group_name 
+	subject = 'New post to Squadbox squad %s requires approval' % group_name 
 	to = '%s Moderators <%s+mods@%s>' % (group_name, group_name, HOST)
 	from_addr = 'Squadbox Notifications <%s+notifications@%s>' % (group_name, HOST)
 
@@ -106,14 +110,18 @@ def setup_moderation_post(group_name, msg_text, post_id):
 		"Precedence": 'list'
 		})
 
-	html_ps_blurb = 'replace this with a blurb later on!'
-	html_ps_blurb = unicode(html_ps_blurb)
-	mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
+	plain_body = "To view all pending posts to the squad, visit your dashboard: %s/dashboard" % BASE_URL
+	html_body = "To view all pending posts to the squad, visit your <a href='%s/dashboard'>dashboard</a>." % BASE_URL 
+
+	blurb = "You're receiving this message because you're a moderator of the squad %s." % group_name
+	html_ps_blurb = '%s%s%s' % (HTML_SUBHEAD, blurb, HTML_SUBTAIL)
+	plain_ps_blurb = '%s%s%s' % (PLAIN_SUBHEAD, blurb, PLAIN_SUBTAIL)
+
+	mail.Html = html_body + html_ps_blurb
+	mail.Body = plain_body + plain_ps_blurb
 	
-	plain_ps_blurb = 'replace this with a blurb later on!'
-	mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')
-		
 	return mail
+
 
 def send_error_email(group_name, error, user_addr, admin_emails):
 	mail = MurmurMailResponse(From = NO_REPLY, Subject = "Error")
@@ -254,13 +262,14 @@ def get_body(email_message):
 						body = remove_plain_ps(body)
 						res['plain'] += body
 	elif maintype == 'text':
+		d = (email_message['Content-Transfer-Encoding'] == 'base64')
 		if subtype == 'html':
-			body = email_message.get_payload()
+			body = email_message.get_payload(decode=d)
 			body = remove_html_ps(body)
 			res['html'] = body
 			
 		elif subtype == 'plain':
-			body = email_message.get_payload()
+			body = email_message.get_payload(decode=d)
 			body = remove_plain_ps(body)
 			res['plain'] = body
 	return res
@@ -351,6 +360,30 @@ def plain_forwarded_blurb(group_name, to_list, original_list_email=None):
 			posts to a mailing list you are a member of (%s)." % (group_name, group_name, HOST, to_list)
 	content += "\n\nLearn more about Murmur <http://murmur.csail.mit.edu>"
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
+	return body
+
+def html_ps_squadbox(squad_name, sender, reason):
+	content = ''
+	if reason == 'whitelist':
+		content = 'This message was automatically approved by Squadbox because the sender %s is on your whitelist.' % sender
+	elif reason == 'blacklist':
+		content = 'This message was automatically rejected by Squadbox because the sender %s is on your blacklist.' % sender
+	elif reason.startswith('approved') or reason.startswith('rejected'):
+		content = 'This message was ' + reason 
+
+	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
+	return body
+
+def plain_ps_squadbox(squadbox, sender, reason):
+	content = ''
+	if reason == 'whitelist':
+		content = 'This message was automatically approved by Squadbox because the sender %s is on your whitelist.' % sender
+	elif reason == 'blacklist':
+		content = 'This message was automatically rejected by Squadbox because the sender %s is on your blacklist.' % sender
+	elif reason.startswith('approved') or reason.startswith('rejected'):
+		content = 'This message was ' + reason 
+
+	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
 	return body
 
 def html_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, original_list_email=None):

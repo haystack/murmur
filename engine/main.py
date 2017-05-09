@@ -5,14 +5,15 @@ from django.utils.timezone import utc
 from django.db.models import Q
 from browser.util import *
 from lamson.mail import MailResponse
-from smtp_handler.utils import relay_mailer, NO_REPLY
+from smtp_handler.utils import *
 from bleach import clean
 from cgi import escape
-from attachments import upload_attachments
+from attachments import upload_attachments, download_attachments
 import re
 import hashlib
 import random
 from email.utils import parseaddr
+from html2text import html2text
 
 from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME
 import json
@@ -890,9 +891,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 			f.save()
 
 	elif WEBSITE == 'squadbox':
-		# later on there will be various user options for this. for now just choose 
-		# to send to all moderators.
-		recipients = [m.member.email for m in MemberGroup.objects.filter(group=group, moderator=True)]
+		recipients = []
 		tags = None
 		tag_objs = None 
 	
@@ -1440,6 +1439,7 @@ def update_post_status(user, group_name, post_id, new_status):
 	try:
 		p = Post.objects.get(id=post_id)
 		g = Group.objects.get(name=group_name)
+		
 		# only admins or moderators of a group can change post statuses
 		mg = MemberGroup.objects.get(Q(admin=True) | Q(moderator=True), member=user, group=g)
 
@@ -1451,6 +1451,35 @@ def update_post_status(user, group_name, post_id, new_status):
 			res['status'] = True
 			res['post_id'] = post_id
 			res['new_status'] = new_status
+
+			# now send message on to the intended recipient if it was approved,
+			# or if it was rejected but the recipient wants rejected emails with tag
+			if new_status == 'A' or (new_status == 'R' and g.send_rejected_tagged):
+				mg = MemberGroup.objects.get(group=g, admin=True)
+				admin = mg.member
+
+				if new_status == 'A':
+					new_subj = p.subject
+					reason = 'approved by moderator %s.' % user.email
+				elif new_status == 'R':
+					new_subj = "[Rejected] " + p.subject
+					reason = 'rejected by moderator %s.' % user.email
+
+				mail = MailResponse(From = p.poster_email, To = admin.email, Subject = new_subj)
+				mail['message-id'] = p.msg_id
+
+				attachments = download_attachments(p.msg_id)
+				for a in attachments:
+					mail.attach(filename=a['name'], data=a['data'])
+
+				html_blurb = unicode(html_ps_squadbox(group_name, p.poster_email, reason))
+				plain_blurb = plain_ps_squadbox(group_name, p.poster_email, reason)
+
+				message_text = {'html' : p.post}
+				message_text['plain'] = html2text(p.post)
+				mail.Html = get_new_body(message_text, html_blurb, 'html')
+				mail.Body = get_new_body(message_text, plain_blurb, 'plain')
+				relay_mailer.deliver(mail, To = admin.email)
 
 	except Post.DoesNotExist:
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']
