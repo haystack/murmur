@@ -164,10 +164,10 @@ class Group(models.Model):
 	description = models.CharField(max_length=140)
 	public = models.BooleanField(default=True)
 	active = models.BooleanField(default=True)
-	
 	allow_attachments = models.BooleanField(default=True)
-	
 	timestamp = models.DateTimeField(auto_now=True)
+	show_rejected_site = models.BooleanField(default=True)
+	send_rejected_tagged = models.BooleanField(default=True)
 	
 	def __unicode__(self):
 		return self.name

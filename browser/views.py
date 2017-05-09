@@ -1438,11 +1438,13 @@ def dashboard(request):
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		mod_group_count = len(Group.objects.filter(membergroup__member=user, membergroup__moderator=True))
 		res = engine.main.load_pending_posts(user)
+		pending_posts = []
 		if not res['status']:
 			logging.debug('Error loading pending posts: ' + str(res['error']))
-			pending_posts = []
 		else:
-			pending_posts = res['posts']
+			for p in res['posts']:
+				p['text'] = html2text(p['text'])
+				pending_posts.append(p)
 
 		return {'user' : request.user, 'groups' : groups, 'mod_group_count' : mod_group_count,
 				'pending_posts' : pending_posts, 'website' : WEBSITE}

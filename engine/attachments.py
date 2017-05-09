@@ -24,3 +24,17 @@ def upload_attachments(attachments, msg_id):
             a = Attachment(msg_id=msg_id, hash_filename=hash_filename, true_filename=filename)
             a.save()
     return res
+
+def download_attachments(msg_id):
+
+    files = []
+    attachments = Attachment.objects.filter(msg_id=msg_id)
+    for a in attachments:
+        path = a.hash_filename + '/' + a.true_filename 
+        with default_storage.open(path, 'r') as f:
+            file = {
+                'name' : a.true_filename,
+                'data' : f.read()
+            }
+            files.append(file)
+    return files
