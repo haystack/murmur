@@ -105,7 +105,9 @@ hr{
 
 .group-container {
 	margin:0px auto;
-	margin-top:70px;
+	margin-top:40px;
+	margin-left: 100px;
+	margin-right: 100px;
 	padding:30px; 
 	vertical-align:top;
 	background-color: rgba(183, 233, 250, 0.5);
@@ -658,4 +660,13 @@ strong {
 h2 {
 	margin-top: 0;
 	padding-bottom: 10px;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 10px 0;
+}
+
+td {
+  padding: 0px 10px;
 }
