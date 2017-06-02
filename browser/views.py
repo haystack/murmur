@@ -1,52 +1,33 @@
-import base64
-from engine.constants import *
-from browser.util import load_groups
-from browser.util import paginator
-from lamson.mail import MailResponse
-from smtp_handler.utils import *
-from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
-
-from django.core.context_processors import csrf
-import json, logging
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+import base64, json, logging
 
 from annoying.decorators import render_to
-from schema.models import UserProfile, Group, MemberGroup, Tag, FollowTag,\
-	MuteTag, ForwardingList, Attachment, Post
+from boto.s3.connection import S3Connection
 from html2text import html2text
-from django.contrib.auth.forms import AuthenticationForm
-from registration.forms import RegistrationForm
-
-import json
-import logging
+from lamson.mail import MailResponse
 
 from django.conf import global_settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.context_processors import csrf
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.db.models.aggregates import Count
 from django.http import *
 from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template.context import RequestContext
 from django.utils.encoding import *
-from html2text import html2text
-from lamson.mail import MailResponse
-from registration.forms import RegistrationForm
 
-import engine.main
 from browser.util import load_groups, paginator
+import engine.main
 from engine.constants import *
-from http_handler.settings import WEBSITE
+from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+from registration.forms import RegistrationForm
 from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
-                           MuteTag, Tag, UserProfile, Post)
+                           MuteTag, Tag, UserProfile, Post, Attachment)
 from smtp_handler.utils import *
 
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-
-from boto.s3.connection import S3Connection
-
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
+
 if WEBSITE == 'murmur':
 	group_or_squad = 'group'
 elif WEBSITE == 'squadbox':
@@ -1293,7 +1274,9 @@ def reject_post(request):
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			group_name = request.POST['group_name']
 			post_id = request.POST['post_id']
-			res = engine.main.update_post_status(user, group_name, post_id, 'R')
+			explanation = request.POST['explanation']
+			tags = request.POST['tags']
+			res = engine.main.update_post_status(user, group_name, post_id, 'R', explanation=explanation, tags=tags)
 			return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

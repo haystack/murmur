@@ -10,7 +10,7 @@ from http_handler.settings import AUTH_USER_MODEL
 
 class Post(models.Model):
 	id = models.AutoField(primary_key=True)
-	author = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
+	author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user_authored_posts', null=True)
 	subject = models.TextField()
 	msg_id = models.CharField(max_length=120, unique=True)
 	post = models.TextField()
@@ -28,8 +28,17 @@ class Post(models.Model):
 	# fwds to this Murmur group
 	poster_email = models.EmailField(max_length=255, null=True)
 
+	# moderation-related data 
+
+	# what state a message is currently in 
 	STATUS_CHOICES = (('R', 'rejected'), ('P', 'pending'), ('A', 'approved'))
 	status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+
+	# optional explanation from mod about decision
+	mod_explanation = models.TextField(null=True)
+
+	# who the moderator that approved or rejected this message was
+	who_moderated = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user_moderated_posts', null=True)
 
 	def __unicode__(self):
 		if self.author:

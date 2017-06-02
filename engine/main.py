@@ -1433,7 +1433,7 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 	logging.debug(res)
 	return res 
 
-def update_post_status(user, group_name, post_id, new_status):
+def update_post_status(user, group_name, post_id, new_status, explanation=None, tags=None):
 	res = {'status' : False}
 
 	try:
@@ -1447,6 +1447,22 @@ def update_post_status(user, group_name, post_id, new_status):
 			res['code'] = msg_code['INVALID_STATUS_ERROR'] % new_status
 		else:
 			p.status = new_status
+			p.who_moderated = user
+
+			if explanation is not None:
+				p.mod_explanation = explanation
+
+			group_tag_names = [t.tag.name for t in TagThread.objects.filter(thread=p.thread)]
+
+			if len(tags) > 0:
+				tag_names = tags.split(',')
+				for t in tag_names:
+					if t not in group_tag_names:
+						_create_tag(g, p.thread, t)
+
+			if new_status == 'R' and 'rejected' not in group_tag_names:
+				_create_tag(g, p.thread, 'rejected')
+
 			p.save()
 			res['status'] = True
 			res['post_id'] = post_id
@@ -1455,15 +1471,26 @@ def update_post_status(user, group_name, post_id, new_status):
 			# now send message on to the intended recipient if it was approved,
 			# or if it was rejected but the recipient wants rejected emails with tag
 			if new_status == 'A' or (new_status == 'R' and g.send_rejected_tagged):
-				mg = MemberGroup.objects.get(group=g, admin=True)
-				admin = mg.member
+
+
+				mgs = MemberGroup.objects.filter(group=g, admin=True)
+				if not mgs.exists():
+					return res
+				else: 
+					admin = mgs[0].member
 
 				if new_status == 'A':
-					new_subj = p.subject
 					reason = 'approved by moderator %s.' % user.email
 				elif new_status == 'R':
-					new_subj = "[Rejected] " + p.subject
 					reason = 'rejected by moderator %s.' % user.email
+
+				tags = [t.tag.name for t in TagThread.objects.filter(thread = p.thread)]
+
+				subject_tags = ''
+				for t in tags:
+					subject_tags += '[%s]' % t
+
+				new_subj = subject_tags + ' ' + p.subject
 
 				mail = MailResponse(From = p.poster_email, To = admin.email, Subject = new_subj)
 				mail['message-id'] = p.msg_id
@@ -1475,8 +1502,12 @@ def update_post_status(user, group_name, post_id, new_status):
 				html_blurb = unicode(html_ps_squadbox(group_name, p.poster_email, reason))
 				plain_blurb = plain_ps_squadbox(group_name, p.poster_email, reason)
 
-				message_text = {'html' : p.post}
-				message_text['plain'] = html2text(p.post)
+				html_prefix = ''
+				if new_status == 'R' and len(p.mod_explanation) > 0:
+					html_prefix = "<p><b>Moderator explanation for rejection</b>: %s </p><b>Message text</b>:<br>" % p.mod_explanation
+
+				message_text = {'html' : html_prefix + p.post}
+				message_text['plain'] = html2text(html_prefix + p.post)
 				mail.Html = get_new_body(message_text, html_blurb, 'html')
 				mail.Body = get_new_body(message_text, plain_blurb, 'plain')
 				relay_mailer.deliver(mail, To = admin.email)

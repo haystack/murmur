@@ -41,12 +41,51 @@
 		<BR>
 	</div>
 	<br>
-	<div class='text-center'>
-	<input type="checkbox" id='whitelist-check'>Add sender {{thread.post.from}} to whitelist</input><br>
-	<input type="checkbox" id='blacklist-check'>Add sender {{thread.post.from}} to blacklist</input><br>
+
+	<div class='text-center' style='text-align:center;'>
+	
+	<label class="radio-inline"><input type="radio" id="approve-radio" name="approve-reject" value="approve">Approve</label>
+	<label class="radio-inline"><input type="radio" id="reject-radio" name="approve-reject" value="reject">Reject</label>
+	<br><br>
+
+
+	<div id="ifApprove" style='display:none'>
+		<input type="checkbox" id='whitelist-check'> Add sender {{thread.post.from}} to whitelist</input> 
+		<span data-toggle="tooltip" title="Emails from {{thread.post.from}} will automatically be approved in the future.">&#9432;</span>
+		<br>
+	</div>
+
+	<div id="ifReject" style='display:none;'>
+		<label for="textarea">Reason for rejection</label><br>
+		<textarea name="" id="explanation" style='width:500px; height: 100px;'></textarea>
+		<br><br>
+
+		<label for="tags">This message contains:</label>
+		<table id="tags" style='margin: 0 auto;'>
+			<tr>
+				<td>Profanity</td>
+				<td><input type="checkbox" class="tag-checks" value='profanity'></input></td>
+			</tr>
+			<tr>
+				<td>Threats</td>
+				<td><input type="checkbox" class="tag-checks" value='threat'></input></td>
+			</tr>
+			<tr>
+				<td>Explicit content</td>
+				<td><input type="checkbox" class="tag-checks" value='explicit'></input></td>
+			</tr>
+			<tr>
+				<td>Insults</td>
+				<td><input type="checkbox" class="tag-checks" value='insult'></input></td>
+			</tr>
+		</table>
+		<br><br>
+		<input type="checkbox" id='blacklist-check'> Add sender {{thread.post.from}} to blacklist</input>
+		<span data-toggle="tooltip" title="Emails from {{thread.post.from}} will automatically be rejected in the future.">&#9432;</span>
+		<br>
+	</div>
 	<br>
-	<button type="button" id="btn-approve" style="margin: 5px; background-color:#28850f; border:none;">Approve</button>
-	<button type="button" id="btn-reject" style="margin: 5px; background-color:#a52312; border:none;">Reject</button>
+	<button type="button" id="btn-submit">Submit</button>
 	</div>
 
 {% endblock %}

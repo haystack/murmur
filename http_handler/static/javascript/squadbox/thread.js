@@ -1,112 +1,68 @@
-$(document).ready(function(){
+$(document).ready(function() {
 
-	var approve_button = $('#btn-approve'),
-		reject_button = $('#btn-reject'),
-		blacklist_box = $('#blacklist-check'),
-		whitelist_check = $('#whitelist-check')[0],
-		blacklist_check = $('#blacklist-check')[0],
-		user_email = $.trim($('#user_email').text()),
-		sender_email = $.trim($('#sender-email').text()),
-		group_name = $.trim($('#group-name').text()),
-		post_id = $.trim($('#post-id').text());
+    var submit_btn = $('#btn-submit'),
+        whitelist_check = $('#whitelist-check')[0],
+        blacklist_check = $('#blacklist-check')[0],
+        user_email = $.trim($('#user_email').text()),
+        sender_email = $.trim($('#sender-email').text()),
+        group_name = $.trim($('#group-name').text()),
+        post_id = $.trim($('#post-id').text()),
+        approve_reject = $('input[type=radio][name=approve-reject]'),
+        approveDiv = $('#ifApprove')[0],
+        rejectDiv = $('#ifReject')[0];
 
-	approve_button.click(function(){
+    $('[data-toggle="tooltip"]').tooltip();
 
-		var params1 = {
-			'group_name' : group_name,
-			'post_id' : post_id, 
-		}
+    approve_reject.change(function() {
+        if (this.value == 'approve') {
+            approveDiv.style.display = 'inline';
+            rejectDiv.style.display = 'none';
+        } else if (this.value == 'reject') {
+            approveDiv.style.display = 'none';
+            rejectDiv.style.display = 'inline';
+        }
+    });
 
-		var params2 = {
-			'group_name' : group_name,
-			'sender' : sender_email,
-		}
+    submit_btn.click(function() {
+        status_params = {
+            'group_name': group_name,
+            'post_id': post_id
+        };
+        var a_r_val = $('input[type=radio][name=approve-reject]:checked').val();
+        var post_to_url = a_r_val == 'approve' ? '/approve_post' : '/reject_post';
+        var list_url = null;
 
-		var add_to_whitelist = (whitelist_check.checked);
-		var add_to_blacklist = (blacklist_check.checked);
+        if (whitelist_check.checked) list_url = '/whitelist';
+        else if (blacklist_check.checked) list_url = '/blacklist';
 
-		if (add_to_blacklist) {
-			alert("Error: you've selected to approve this email, but blacklist the sender.");
-			return;
-		}
+        if (a_r_val == 'reject') {
+            status_params.explanation = $('#explanation').val();
+            var tags = [];
+            var checked = $('.tag-checks:checkbox:checked');
+            checked.each(function() {
+                tags.push(this.value);
+            });
+            if (tags.length > 0) status_params.tags = tags.join(',');
+            else status_params.tags = '';
+        }
 
-		$.post('/approve_post', params1,
-			function(res) { 
-				console.log("add to whitelist: " + add_to_whitelist);
-				if (add_to_whitelist) {
-					notify(res, false);
-					if (res.status) {
-						console.log("post to whitelist");
-						$.post('/whitelist', params2, 
-							function(res){
-								notify(res, true);
-							}
-						);
-					}
-				} else {
-					notify(res, true);
-					console.log(res);
-				}
-				setTimeout(function(){
-					window.location = '/dashboard';
-				},1000);
-			}
-		);
-	});
 
-	reject_button.click(function(){
+        $.post(post_to_url, status_params, function(status_res) {
 
-		var params1 = {
-			'group_name' : group_name,
-			'post_id' : post_id, 
-		}
+            if (status_res.status && list_url != null) {
+                var list_params = {
+                    'group_name': group_name,
+                    'sender': sender_email
+                };
+                $.post(list_url, list_params, function(list_res) {
+                    notify(list_res, true);
+                });
 
-		var params2 = {
-			'group_name' : group_name,
-			'sender' : sender_email,
-		}
+            } else notify(status_res, true);
 
-		var add_to_whitelist = (whitelist_check.checked);
-		var add_to_blacklist = (blacklist_check.checked);
-
-		if (add_to_whitelist) {
-			alert("Error: you've selected to reject this email, but whitelist the sender.");
-			return;
-		}
-
-		$.post('/reject_post', params1,
-			function(res) { 
-				if (add_to_blacklist) {
-					notify(res, false);
-					if (res.status) {
-						$.post('/blacklist', params2, 
-							function(res){
-								notify(res, true);
-							}
-						);
-					}
-				} else {
-					notify(res, true);
-					console.log(res);
-				}
-				setTimeout(function(){
-					window.location = '/dashboard';
-				},1000);
-			}
-		);
-	});
-
-	function deselect_other(which) {
-		if (which == 'white') blacklist_check.checked = false;
-		else if (which == 'black') whitelist_check.checked = false;
-	}
-
-	$('#blacklist-check').click(function(){
-		deselect_other('black');
-	});
-
-	$('#whitelist-check').click(function(){
-		deselect_other('white');
-	});
-
+            if (status_res.status) setTimeout(function() {
+                window.location = '/dashboard';
+            }, 1000);
+        });
+    });
 });
