@@ -1,10 +1,11 @@
-import email, re
+import email, re, time, hashlib, random, dkim, spf
 from lamson.server import Relay
 from config.settings import *
 from lamson_subclass import MurmurMailResponse
-from schema.models import Group, MemberGroup, Thread, Following, Mute
+from schema.models import Group, MemberGroup, Thread, Following, Mute, UserProfile
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE
-
+from email.utils import *
+from email import message_from_string
 
 '''
 Murmur Mail Utils and Constants
@@ -512,3 +513,46 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
 	
 	return body
+
+def isSenderVerified(message):
+	# check 1: DKIM
+	email_message = message.original
+	_, sender_addr = parseaddr(message['From'].lower())
+	_, to_addr = parseaddr(message['To'].lower())
+	verified = dkim.verify(email_message)
+
+	# check 2: SPF - TODO: SPF not implemented - need to find incoming mail server IP address
+	# if not verified:
+	# 	spf_i = ""
+	# 	spf_h = ""
+	# 	spf_s = sender_addr
+	# 	result = spf.check(spf_i, spf_s, spf_h)
+	# 	if result[0] == "pass":
+	# 		verified = True
+
+	if not verified:
+		# check if UserProfile has a hash, if not generate one and send it to them
+		try:
+			user = UserProfile.objects.get(email=sender_addr)
+		except UserProfile.DoesNotExist:
+			user = None
+		if user:
+			# TODO: create new user here if it doesn't exist or otherwise handle posts from non-users
+			# for now just mark as un-verified if DKIM and SPF fail
+			if not user.hash:
+				salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()[:5]
+				new_hash = hashlib.sha1(sender_addr+to_addr+salt).hexdigest()[:20]
+				user.hash = new_hash
+				user.save()
+				mail = MurmurMailResponse(From = NO_REPLY, Subject = "Please use your secret code in future emails")
+				mail.Body = "In future, to ensure your message is delivered, please include the code %s within the address of your emails, before the '@' symbol and after a '+' symbol. E.g. if you are emailing testgroup@%s, you should now email testgroup+%s@%s to ensure your email is verified as coming directly from you, and thus delivered correctly." % (new_hash, HOST, new_hash, HOST)
+				relay.deliver(mail, To = sender_addr)
+			hash_group = re.search(r'\+(.{20,40}?)\@', to_addr)
+			if hash_group:
+				sender_hash = hash_group.group(1)
+				if sender_hash == user.hash:
+					verified = True
+	return verified
+
+def cleanAddress(address):
+	return address.split('+')[0].lower()

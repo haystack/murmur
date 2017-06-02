@@ -274,7 +274,7 @@ def info(message, group_name=None, host=None):
 		mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 		relay.deliver(mail)
 
-def handle_post_murmur(message, group, host):
+def handle_post_murmur(message, group, host, verified):
 
 	_, list_addr = parseaddr(message['List-Id'])
 	msg_id = message['Message-ID']
@@ -361,9 +361,9 @@ def handle_post_murmur(message, group, host):
 			original_list_email = original_list.email
 
 		if message_is_reply:
-			res = insert_reply(group.name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, forwarding_list=original_list)
+			res = insert_reply(group.name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, verified, forwarding_list=original_list)
 		else:
-			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, attachments, forwarding_list=original_list)
+			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, verified, attachments, forwarding_list=original_list)
 			
 		if not res['status']:
 			send_error_email(group.name, res['code'], sender_addr, ADMIN_EMAILS)
@@ -473,7 +473,7 @@ def handle_post_murmur(message, group, host):
 		send_error_email(group.name, e, None, ADMIN_EMAILS)
 		return
 		
-def handle_post_squadbox(message, group, host):
+def handle_post_squadbox(message, group, host, verified):
 
 	msg_id = message['Message-ID']
 	email_message = message_from_string(str(message))
@@ -569,7 +569,7 @@ def handle_post_squadbox(message, group, host):
 	
 	# if pending or rejected, we need to put it in the DB 
 	if status == 'P' or status == 'R':
-		res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, attachments, None, status)
+		res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, verified, attachments, None, status)
 		if not res['status']:
 			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
 			return
@@ -584,13 +584,17 @@ def handle_post(message, address=None, host=None):
 	if '+' in address and '__' in address:
 		return
 
-	address = address.lower()
+	address = cleanAddress(address)
 
 	reserved = filter(lambda x: address.endswith(x), RESERVED)
 	if(reserved):
 		return
 	
 	_, sender_addr = parseaddr(message['From'].lower())
+	_, to_addr = parseaddr(message['To'].lower())
+
+	verified = isSenderVerified(message)
+	
 	group_name = address
 	try:
 		group = Group.objects.get(name=group_name)
@@ -618,10 +622,10 @@ def handle_post(message, address=None, host=None):
 		return
 
 	if WEBSITE == 'squadbox':
-		handle_post_squadbox(message, group, host)
+		handle_post_squadbox(message, group, host, verified)
 
 	elif WEBSITE == 'murmur':
-		handle_post_murmur(message, group, host)
+		handle_post_murmur(message, group, host, verified)
 
 
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)

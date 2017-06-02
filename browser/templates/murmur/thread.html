@@ -28,6 +28,11 @@
 					<h3><span id="post-subject">{{ thread.post.subject }}</span></h3>
 					<span class="strong">From: </span> 
 					<span class="strong-gray" id="post-from">{{ thread.post.from }} </span>
+					{% if thread.post.verified %}
+						<span class="verified" title="The message has been verified as being sent by this email server.">&#10004;</span>
+					{% else %}
+						<span class="not-verified" title="We could not verify the sender\'s identity - be cautious!">&#9888;</span>
+					{% endif %}
 					{% if thread.post.forwarding_list != None %}
 					via {{ thread.post.forwarding_list }}
 					{% endif %}
