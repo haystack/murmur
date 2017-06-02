@@ -669,4 +669,11 @@ table {
 
 td {
   padding: 0px 10px;
+  
+.verified {
+	color: green;
+}
+
+.not-verified {
+	color: red;
 }

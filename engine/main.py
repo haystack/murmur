@@ -684,7 +684,8 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
 						'liked': user_liked,
 						'text': text, 
 						'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp,
-						'attachments': attachments
+						'attachments': attachments,
+						'verified': p.verified_sender
 						}
 			if p.forwarding_list:
 				post_dict['forwarding_list'] = p.forwarding_list.email
@@ -768,7 +769,8 @@ def load_thread(t, user=None, member=None):
 					'subject': escape(p.subject), 
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 					'timestamp': p.timestamp,
-					'attachments': attachments
+					'attachments': attachments,
+					'verified': p.verified_sender
 					}
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
@@ -795,7 +797,7 @@ def load_post(group_name, thread_id, msg_id):
 	res = {'status':False}
 	try:
 		t = Thread.objects.get(id=thread_id)
-		p = Post.objects.get(msg_id=msg_id, thread= t)
+		p = Post.objects.get(msg_id=msg_id, thread=t)
 		tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
 		attachments = []
 		for attachment in Attachment.objects.filter(msg_id=p.msg_id):
@@ -810,6 +812,7 @@ def load_post(group_name, thread_id, msg_id):
 		res['text'] = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
 		res['to'] = p.group.name
 		res['attachments'] = attachments
+		res['verified'] = p.verified_sender
 		if p.forwarding_list:
 			res['forwarding_list'] = p.forwarding_list.email
 	except Thread.DoesNotExist:
@@ -831,7 +834,7 @@ def _create_tag(group, thread, name):
 		t.save()
 	tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
-def _create_post(group, subject, message_text, user, sender_addr, msg_id, attachments=None, forwarding_list=None, post_status=None):
+def _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None):
 
 	try:
 		message_text = message_text.decode("utf-8")
@@ -853,7 +856,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, attach
 	res = upload_attachments(attachments, msg_id)
 
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status)
+			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, verified_sender=verified)
 	p.save()
 	
 	if WEBSITE == 'murmur':
@@ -903,7 +906,7 @@ def insert_post_web(group_name, subject, message_text, user):
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
 			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@' + BASE_URL
-			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id)
+			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id, verified=True)
 			res['status'] = True
 			
 			res['member_group'] = {'no_emails': user_member[0].no_emails,
@@ -951,7 +954,7 @@ def insert_post_web(group_name, subject, message_text, user):
 	return res
 
 
-def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, attachments=None, forwarding_list=None, post_status=None):
+def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None):
 	res = {'status':False}
 	thread = None
 	try:
@@ -973,7 +976,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, at
 		# 4) it's a Squadbox post, so we don't care if the sender has an account / is authorized. 
 		# _create_post will check which of user and forwarding list are None and post appropriately. 
 
-		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, attachments, forwarding_list=forwarding_list, post_status=post_status)
+		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments, forwarding_list=forwarding_list, post_status=post_status)
 		res['status'] = True
 		res['post_id'] = p.id
 		res['msg_id'] = p.msg_id
@@ -981,6 +984,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, at
 		res['tags'] = tags
 		res['tag_objs'] = tag_objs
 		res['recipients'] = recipients
+		res['verified'] = verified
 
 
 	except Group.DoesNotExist:
@@ -996,7 +1000,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, at
 	return res
 
 
-def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, forwarding_list=None, thread_id=None):
+def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, forwarding_list=None, thread_id=None):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
@@ -1038,7 +1042,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, f
 			message_text = message_text.encode("ascii", "ignore")
 			
 			r = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-				subject=subject, post = message_text, reply_to=post, group=group, thread=thread)
+				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified_sender=verified)
 			r.save()
 			
 			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
@@ -1402,8 +1406,11 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 			entry.whitelist = whitelist
 			entry.blacklist = blacklist
 		else:
+			#hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
+			#send_whitelist_hash_email(entry.id)
+			#res['hash'] = hash
 			entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
-		
+			
 		entry.save()
 		res['status'] = True
 		res['group_name'] = group_name
