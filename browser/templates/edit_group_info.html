@@ -1,35 +1,33 @@
 {% extends "group_container_base.html" %}
 {% block container-content %}
 	<p hidden id='group-name'>{{group_info.name}}</p>
-	<h3>Edit {{ group_or_squad | title }} Information</h3>
+	<h3>Edit {{ group_or_squad | title }} Information and Settings</h3>
 	<hr/>
 	<form id="group-info-form">
 		<span class="strong">{{ group_or_squad | title }} Name:</span>
-		<br/>
+		<br>
 		<span class="italic-med">
 			Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed.
 		</span>
-		<br/>
+		<br>
 		<input id="edit-group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;" value="{{group_info.name}}">
 		</input>
-		<br/><br/>
-		<span class="strong">{{ group_or_squad | title }} Description:</span> <br/>
-		<span class="italic-med">Maximum 140 characters</span><br/>
+		<br><br>
+		<span class="strong">{{ group_or_squad | title }} Description:</span> <br>
+		<span class="italic-med">Maximum 140 characters</span><br>
 		<textarea id="edit-group-description" maxlength="140">{{group_info.description.strip }}</textarea>
-		<br/><br/>
+		<br><br>
 		{% if website == "murmur" %}
 			<span class="strong">Privacy Settings:</span>
-			<br/>
+			<br>
 			{% if group_info.public %}
 				<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked>
 			{% else %}
 				<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group">
 			{% endif %}
-
 			Public
-			<br/>
+			<br>
 			<span class="italic-small">All Murmur users will be able to view and search for this group by name and description.</span>
-
 			{% if group_info.public %}
 				<input type="radio" name="pubpriv" value="private" id="rdo-priv-create-group">
 			{% else %}
@@ -37,22 +35,22 @@
 			{% endif %}
 			
 			Private
-			<br/>
+			<br>
 			<span class="italic-small">Only users added to this group by admins will be notified about the group.</span>
-			<br/>
+			<br>
 		{% endif %}
-		<span class="strong">Attachment Policy: </span> <br/>
+		<span class="strong">Attachment Policy: </span> <br>
 		{% if group_info.allow_attachments %}
 			<input type="radio" name="attach" value="yes-attach" id="rdo-attach-create-group" checked>
 		{% else %}
 			<input type="radio" name="attach" value="yes-attach" id="rdo-attach-create-group">
 		{% endif %}
 		Allow Attachments
-		<br/>
+		<br>
 		<span class="italic-small">
 			{% if website == "murmur" %}
 				All members of the group can post attachments. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
-			{% elif website == "squadbox" %}
+				{% elif website == "squadbox" %}
 				Emails with attachments that reach your Squadbox will be moderated as usual. Your squad's moderators will be able to see them when they review messages, and you'll see the attachments on approved messages. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
 			{% endif %}
 		</span>
@@ -62,25 +60,31 @@
 			<input type="radio" name="attach" value="no-attach" id="rdo-attach-create-group" checked>
 		{% endif %}
 		No Attachments Allowed
-		<br/>
+		<br>
 		<span class="italic-small">
 			{% if website == "murmur" %}
 				Users will not be able to post attachments. Messages with attachments will be rejected.
-				{% elif website == "squadbox" %}
-				Emails that reach your Squadbox with attachments will automically be rejected.
+			{% elif website == "squadbox" %}
+				Emails that reach your Squadbox with attachments will automatically be rejected.
 			{% endif %}
 		</span>
-		<br/>
+		
+		{% if website == "squadbox" %}
+			<br>
+			<span class="strong">Rejected Messages: </span> <br>
+			<input type="checkbox" id="send-rejected-check"> Send me rejected messages with a <b>[rejected]</b> tag in the subject line</input><br>
+			<span class="italic-small"><a href="/static/filters/tag_archive_rejected.xml" download>Download a Gmail filter to automatically sort these messages into a separate folder</a> (<a href="">Gmail filters tutorial</a>)</span>
+			<input type="checkbox" id="store-rejected-check"> Store rejected messages on the Squadbox website</input>
+			<span class="italic-small">We will store messages that your moderators reject, and display a link to view them on your homepage.</span>
+			<br>
+		{% endif %}
+		<br>
 		<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Changes</button>
 		<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>
 	</form>
-	<br/>
-
-	{% if website == 'squadbox' %}
-		<h4><a href='/gmail_setup?group={{group_info.name}}'>Setup automatic forwarding and import Gmail contacts to this squad's whitelist &raquo;</a></h4>
-	{% endif %}
-	{% endblock %}
-	{% block customjs %}
-		<script type="text/javascript" src="/static/javascript/notify.js"></script>
-		<script type="text/javascript" src="/static/javascript/edit_group_info.js"></script>
-	{% endblock %}
+	<br>
+{% endblock %}
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/notify.js"></script>
+	<script type="text/javascript" src="/static/javascript/edit_group_info.js"></script>
+{% endblock %}
