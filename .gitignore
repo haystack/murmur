@@ -18,3 +18,12 @@ schema/migrations/*
 
 # Google secrets file
 gmail_setup/client_secrets.json
+http_handler/static/css/fonts/glyphicons-halflings-regular.woff2
+
+http_handler/static/css/fonts/glyphicons-halflings-regular.ttf
+
+http_handler/static/css/fonts/glyphicons-halflings-regular.svg
+
+http_handler/static/css/fonts/glyphicons-halflings-regular.eot
+
+http_handler/static/css/fonts/glyphicons-halflings-regular.woff
