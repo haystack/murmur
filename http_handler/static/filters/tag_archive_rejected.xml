@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom' xmlns:apps='http://schemas.google.com/apps/2006'>
+	<entry>
+		<category term='filter'></category>
+		<title>Label and Archive Rejected</title>
+		<apps:property name='subject' value='[rejected]'/>
+		<apps:property name='label' value='rejected'/>
+		<apps:property name='shouldArchive' value='true'/>
+	</entry>
+</feed>

@@ -229,7 +229,11 @@ def create_group(group_name, group_desc, public, attach, requester):
 		group = Group(name=group_name, active=True, public=public, allow_attachments=attach, description=group_desc)
 		group.save()
 		
-		membergroup = MemberGroup(group=group, member=requester, admin=True, moderator=True)
+		is_mod = True
+		if WEBSITE == 'squadbox':
+			is_mod = False
+
+		membergroup = MemberGroup(group=group, member=requester, admin=True, moderator=is_mod)
 		membergroup.save()
 		
 		res['status'] = True
