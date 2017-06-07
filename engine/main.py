@@ -205,7 +205,7 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
 	logging.debug(res)
 	return res
 
-def create_group(group_name, group_desc, public, attach, requester):
+def create_group(group_name, group_desc, public, attach, send_rejected, store_rejected, requester):
 	res = {'status':False}
 	
 	
@@ -226,7 +226,7 @@ def create_group(group_name, group_desc, public, attach, requester):
 		res['code'] = msg_code['DUPLICATE_ERROR']
 		
 	except Group.DoesNotExist:
-		group = Group(name=group_name, active=True, public=public, allow_attachments=attach, description=group_desc)
+		group = Group(name=group_name, active=True, public=public, allow_attachments=attach, send_rejected_tagged=send_rejected, show_rejected_site=store_rejected, description=group_desc)
 		group.save()
 		
 		is_mod = True
