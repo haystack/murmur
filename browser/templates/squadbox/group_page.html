@@ -34,20 +34,20 @@
 				Attachments <span class="strong">are allowed</span>.
 			{% endif %}
 
-			{% if website == "squadbox" %}
-				<br>
-				{% if not group_info.group.send_rejected_tagged %}
-					Rejected messages <span class="strong">will not</span> be sent to your inbox.
-				{% else %}
-					Rejected messages <span class="strong">will</span> be sent to your inbox with a [rejected] tag.
-				{% endif %}
-				<br>
-				{% if not group_info.group.show_rejected_site %}
-					Rejected messages <span class="strong">will not</span> be stored or displayed on this site.
-				{% else %}
-					Rejected messages <span class="strong">will</span> be stored and displayed to you on this site.
-				{% endif %}
+
+			<br>
+			{% if not group_info.group.send_rejected_tagged %}
+				Rejected messages <span class="strong">will not</span> be sent to your inbox.
+			{% else %}
+				Rejected messages <span class="strong">will</span> be sent to your inbox with a [rejected] tag.
 			{% endif %}
+			<br>
+			{% if not group_info.group.show_rejected_site %}
+				Rejected messages <span class="strong">will not</span> be stored or displayed on this site.
+			{% else %}
+				Rejected messages <span class="strong">will</span> be stored and displayed to you on this site.
+			{% endif %}
+
 			<br><br>
 			
 			<div id="group-options">
