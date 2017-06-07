@@ -840,7 +840,7 @@ def _create_tag(group, thread, name):
 		t.save()
 	tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
-def _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None):
+def _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
 
 	try:
 		message_text = message_text.decode("utf-8")
@@ -862,7 +862,8 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 	res = upload_attachments(attachments, msg_id)
 
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, verified_sender=verified)
+			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, 
+			sender_name=sender_name, verified_sender=verified)
 	p.save()
 	
 	if WEBSITE == 'murmur':
@@ -960,7 +961,7 @@ def insert_post_web(group_name, subject, message_text, user):
 	return res
 
 
-def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None):
+def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
 	res = {'status':False}
 	thread = None
 	try:
@@ -982,7 +983,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, ve
 		# 4) it's a Squadbox post, so we don't care if the sender has an account / is authorized. 
 		# _create_post will check which of user and forwarding list are None and post appropriately. 
 
-		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments, forwarding_list=forwarding_list, post_status=post_status)
+		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments, forwarding_list=forwarding_list, post_status=post_status, sender_name=sender_name)
 		res['status'] = True
 		res['post_id'] = p.id
 		res['msg_id'] = p.msg_id
@@ -1048,7 +1049,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
 			message_text = message_text.encode("ascii", "ignore")
 			
 			r = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified_sender=verified)
+				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified_sender=verified, sender_name=sender_name)
 			r.save()
 			
 			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
@@ -1544,6 +1545,7 @@ def load_pending_posts(user):
 			post_dict = {'id': p.id,
 						'msg_id': p.msg_id, 
 						'from': p.author.email if p.author else p.poster_email,
+						'from_name' : p.poster_name,
 						'to': p.group.name, 
 						'subject': escape(p.subject),
 						'text': p.post,

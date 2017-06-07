@@ -14,6 +14,7 @@
 	
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700,700i|Permanent+Marker" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Quicksand:400|Raleway:300,600" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Hind:400"" rel="stylesheet">
 	
 	<link rel="apple-touch-icon" sizes="57x57" href="/static/images/squadbox/favicon/apple-icon-57x57.png">
 	<link rel="apple-touch-icon" sizes="60x60" href="/static/images/squadbox/favicon/apple-icon-60x60.png">
@@ -58,48 +59,14 @@
         {% if user.is_authenticated %}
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-          	
-          	{% if not group_page %}
+
 	            <li class="dropdown dropdown-left">
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown">My Squads <span class="caret"></span></a>
-	              <ul class="dropdown-menu" role="menu">
-	              	{% for group in groups %}
-	                	<li><a href="/groups/{{ group.name }}">{{ group.name }}</a></li>
-					{% endfor %}
-	                <li class="divider"></li>
-	                <li><a href="/my_group_list">Manage my squads</a></li>
-	                <li><a href="/create_new_group">Create a new squad</a></li>
-	              </ul>
+	              <a href="/dashboard">Moderation Queue</a>
+	            </li>
+	            <li class="dropdown dropdown-left">
+	              <a href="/my_group_list">Manage Squads</a>
 	            </li>
 
-            {% else %}
-<!--             	<li class="dropdown dropdown-left">
-            	{% if groups %}
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>View Posts</span><span class="caret"></span></a>
-	            {% else %}
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>No Squads Yet</span><span class="caret"></span></a>
-	            {% endif %}
-	              	<ul class="dropdown-menu" role="menu" id="list-group-names">
-		              	{% for group in groups %}
-		              		{% if group.name == active_group %}
-		              			<li><a href="/posts?group_name={{ group.name }}"><span id="active_group">{{ group.name }}</span></a></li>
-		              		{% else %}
-		                		<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
-		                	{% endif %}
-						{% endfor %}
-	                <li class="divider"></li>
-	                <li><a href="/my_group_list">Manage my squads</a></li>
-	                <li><a href="/create_new_group">Create a new squad</a></li>
-	              </ul>
-	            </li> -->
-            	{% if my_groups %}
-            		<li class="active"><a href="/my_group_list">My Squads</a></li>
-            		<!-- <li><a href="/group_list">Join Squads</a></li> -->
-            	{% else %}
-            		<li><a href="/my_group_list">My Squads</a></li>
-            		<!-- <li class="active"><a href="/group_list">Explore Squads</a></li> -->
-				{% endif %}
-            {% endif %}
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown dropdown-right">
@@ -110,7 +77,7 @@
               </ul>
             </li>
           </ul>
-        </div><!--/.nav-collapse -->
+        </div>
         
         {% else %}
         <div class="navbar-collapse collapse">

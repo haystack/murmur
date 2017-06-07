@@ -285,7 +285,9 @@ def handle_post_murmur(message, group, host, verified):
 	to_emails = [i[1] for i in getaddresses(to_header)]
 
 	msg_text = get_body(email_message)
-	_, sender_addr = parseaddr(message['From'].lower())
+	sender_name, sender_addr = parseaddr(message['From'].lower())
+	if sender_name == '':
+		sender_name = None
 	attachments = get_attachments(email_message)
 
 	try:
@@ -361,9 +363,9 @@ def handle_post_murmur(message, group, host, verified):
 			original_list_email = original_list.email
 
 		if message_is_reply:
-			res = insert_reply(group.name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, verified, forwarding_list=original_list)
+			res = insert_reply(group.name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, verified, forwarding_list=original_list, sender_name=sender_name)
 		else:
-			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, verified, attachments, forwarding_list=original_list)
+			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, verified, attachments, forwarding_list=original_list, sender_name=sender_name)
 			
 		if not res['status']:
 			send_error_email(group.name, res['code'], sender_addr, ADMIN_EMAILS)

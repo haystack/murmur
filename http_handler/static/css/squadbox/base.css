@@ -3,9 +3,25 @@ body, html {
 	padding-top: 50px;
 }
 
+title {
+	font-family: 'Hind', sans-serif;
+}
+
 #home-body, #home-html {
 	font-family: 'Raleway', sans-serif;
 	padding-top: 0px;
+}
+
+
+.truncate {
+  width: 440px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.faded-message {
+	color: #727F8C;
 }
 
 hr{
@@ -62,8 +78,7 @@ hr{
 }
 
 #site-name, #user_email, #email_dropdown, #groups_dropdown {
-	font-family: 'Quicksand', sans-serif;
-	font-weight: bold;
+	font-family: 'Hind', sans-serif;
 }
 
 #login-form, #reg-form {
@@ -100,7 +115,7 @@ hr{
 	vertical-align:top;
 	background-color: rgba(183, 233, 250, 0.5);
 	max-width:380px;
-	font-family: 'Raleway', sans-serif;
+	font-family: 'Hind', sans-serif;
 }
 
 .group-container {
@@ -111,7 +126,7 @@ hr{
 	padding:30px; 
 	vertical-align:top;
 	background-color: rgba(183, 233, 250, 0.5);
-	font-family: 'Raleway', sans-serif;
+	font-family: 'Hind', sans-serif;
 }
 
 .group-container-posts {
