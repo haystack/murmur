@@ -428,7 +428,9 @@ def edit_group_info(request):
 		group_desc = request.POST['group_desc'] 
 		public = request.POST['public'] == 'public'
 		attach = request.POST['attach'] == 'yes-attach'
-		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, user) 
+		send_rejected = request.POST['send_rejected_tagged'] == 'true'
+		store_rejected = request.POST['store_rejected'] == 'true'
+		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, user) 
 		if res['status']:
 			active_group = request.session.get('active_group')
 			if active_group == old_group_name:

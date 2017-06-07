@@ -243,7 +243,7 @@ def create_group(group_name, group_desc, public, attach, requester):
 	logging.debug(res)
 	return res
 
-def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, user):
+def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, user):
 	res = {'status':False}	
 	try:
 		group = Group.objects.get(name=old_group_name)
@@ -252,6 +252,8 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, 
 		group.description = group_desc
 		group.public = public
 		group.allow_attachments = attach
+		group.send_rejected_tagged = send_rejected
+		group.show_rejected_site = store_rejected
 		group.save()
 		res['status'] = True	
 	except Group.DoesNotExist:

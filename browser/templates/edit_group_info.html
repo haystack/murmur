@@ -50,7 +50,7 @@
 		<span class="italic-small">
 			{% if website == "murmur" %}
 				All members of the group can post attachments. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
-				{% elif website == "squadbox" %}
+			{% elif website == "squadbox" %}
 				Emails with attachments that reach your Squadbox will be moderated as usual. Your squad's moderators will be able to see them when they review messages, and you'll see the attachments on approved messages. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
 			{% endif %}
 		</span>
@@ -72,17 +72,28 @@
 		{% if website == "squadbox" %}
 			<br>
 			<span class="strong">Rejected Messages: </span> <br>
-			<input type="checkbox" id="send-rejected-check"> Send me rejected messages with a <b>[rejected]</b> tag in the subject line</input><br>
+			{% if group_info.send_rejected_tagged %}
+			<input type="checkbox" id="send-rejected" checked> 
+			{% else %}
+			<input type="checkbox" id="send-rejected">
+			{% endif %}
+			 Send me rejected messages with a <b>[rejected]</b> tag in the subject line</input><br>
 			<span class="italic-small"><a href="/static/filters/tag_archive_rejected.xml" download>Download a Gmail filter to automatically sort these messages into a separate folder</a> (<a href="">Gmail filters tutorial</a>)</span>
-			<input type="checkbox" id="store-rejected-check"> Store rejected messages on the Squadbox website</input>
+			{% if group_info.show_rejected_site %}
+			<input type="checkbox" id="store-rejected" checked>
+			{% else %}
+			<input type="checkbox" id="store-rejected">
+			{% endif %}
+			Store rejected messages on the Squadbox website</input>
 			<span class="italic-small">We will store messages that your moderators reject, and display a link to view them on your homepage.</span>
 			<br>
 		{% endif %}
 		<br>
-		<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Changes</button>
-		<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>
+		<button type="button" id="btn-save-settings"">Save Changes</button>
+		<button type="button" id="btn-cancel-settings">Cancel</button>
 	</form>
 	<br>
+	<a href="/groups/{{group_info.name}}">&#171; Go back to squad info page</a>
 {% endblock %}
 {% block customjs %}
 	<script type="text/javascript" src="/static/javascript/notify.js"></script>

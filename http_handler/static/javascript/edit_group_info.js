@@ -22,8 +22,14 @@ $(document).ready(function() {
 
         if (website == "squadbox") { // all squads private 
             params.public = false;
+            params.send_rejected_tagged = $('#send-rejected')[0].checked;
+            params.store_rejected = $('#store-rejected')[0].checked;
         } else if (website == "murmur") {
             params.public = $('input[name=pubpriv]:checked', '#group-info-form').val();
+
+            // just go with the defaults for these for now
+            params.send_rejected_tagged = true;
+            params.store_rejected = true;
         }
 
         $.post('/edit_group_info', params,
