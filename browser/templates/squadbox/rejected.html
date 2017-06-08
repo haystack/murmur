@@ -1,20 +1,14 @@
 {% extends "group_container_base.html" %}
 {% block container-content %}
 	<div id="post-column-area-wrapper">
-		<h3><b>Moderation Queue</b></h3>
+		<h3>Emails rejected from your squad {{ group_name }}</h3>
 		<div id="post-column-area">
 			<div class="post-list-container">
-				{% if groups|length == 0 %}
-					You are not in any squads yet. <a href="/create_new_group">Create a new squad.</a>
-					{% elif mod_group_count == 0 %}
-					You aren't a moderator for any squads yet.
-					{% elif pending_posts|length == 0 %}
-					There are no pending emails in any squads you moderate.
-				{% else %}
-					<i>Click on an email to view its full text, and approve or reject it.</i><br><br>
+				{% if rejected_posts|length == 0 %}
+					No posts have been rejected.
 				{% endif %}
 				<ul id="post-list-table">
-					{% for post in pending_posts %}
+					{% for post in rejected_posts %}
 						<a href="/thread?group_name={{ post.to }}&tid={{ post.thread_id }}&post_id={{post.id}}">
 							<li class="row-item" id="{{ post.thread_id }}">
 								<div class="container">

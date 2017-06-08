@@ -776,7 +776,9 @@ def load_thread(t, user=None, member=None):
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 					'timestamp': p.timestamp,
 					'attachments': attachments,
-					'verified': p.verified_sender
+					'verified': p.verified_sender,
+					'who_moderated' : p.who_moderated,
+					'mod_explanation' : p.mod_explanation,
 					}
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
@@ -1540,21 +1542,8 @@ def load_pending_posts(user):
 	try:
 		groups = Group.objects.filter(membergroup__member=user, membergroup__moderator=True)
 		posts = Post.objects.filter(group__in=groups, status='P')
-		posts_fixed = []
-		for p in posts:
-			post_dict = {'id': p.id,
-						'msg_id': p.msg_id, 
-						'from': p.author.email if p.author else p.poster_email,
-						'from_name' : p.poster_name,
-						'to': p.group.name, 
-						'subject': escape(p.subject),
-						'text': p.post,
-						'thread_id' : p.thread.id, 
-						'timestamp': p.timestamp,
-						}
-			posts_fixed.append(post_dict)
 		res['status'] = True
-		res['posts'] = posts_fixed
+		res['posts'] = fix_posts(posts)
 
 	except Exception, e:
 		logging.debug(e)
@@ -1563,3 +1552,43 @@ def load_pending_posts(user):
 		res['error'] = e
 
 	return res
+
+def load_rejected_posts(user, group_name):
+	res = {'status' : False}
+	try:
+		group = Group.objects.get(name=group_name)
+		mg = MemberGroup.objects.get(member=user, group=group, admin=True)
+		rejected_posts = Post.objects.filter(group=group, status='R')
+		res['posts'] = fix_posts(rejected_posts)
+		res['group'] = group
+		res['status'] = True
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['PRIVILEGE_ERROR']
+	except Exception, e:
+		logging.debug(e)
+		res['code'] = msg_code['UNKNOWN_ERROR']
+		res['error'] = e
+
+	return res
+
+def fix_posts(post_queryset):
+	posts_fixed = []
+	for p in post_queryset:
+		post_dict = {'id': str(p.id),
+					'msg_id': p.msg_id, 
+					'from': p.author.email if p.author else p.poster_email,
+					'from_name' : p.poster_name,
+					'to': p.group.name, 
+					'subject': escape(p.subject),
+					'text': p.post,
+					'thread_id' : p.thread.id, 
+					'timestamp': p.timestamp,
+					'verified': p.verified_sender,
+					'who_moderated' : p.who_moderated,
+					'mod_explanation' : p.mod_explanation,
+					}
+		posts_fixed.append(post_dict)
+
+	return posts_fixed

@@ -178,6 +178,8 @@ elif WEBSITE == 'squadbox':
                     url(r'^whitelist_get', 'browser.views.whitelist_get'),
                     url(r'^whitelist', 'browser.views.whitelist'),
                     url(r'^blacklist', 'browser.views.blacklist'),
+                    url(r'^groups/(?P<group_name>[\w-]+)/rejected', 'browser.views.rejected'),
+                    url(r'^rejected_thread$', 'browser.views.rejected_thread'),
                     ]
 
     urlpatterns.extend(new_patterns)
