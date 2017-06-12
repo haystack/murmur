@@ -44,9 +44,20 @@
 		{% if website == "murmur" %}
 		Users will not be able to post attachments. Messages with attachments will be rejected.
 		{% elif website == "squadbox" %}
-		Emails that reach your Squadbox with attachments will automically be rejected. 
+		Emails that reach your Squadbox with attachments will automatically be rejected. 
 		{% endif %}
 		</span>
+		{% if website == "squadbox" %}
+			<br>
+			<span class="strong">Rejected Messages: </span> <br>
+			<input type="checkbox" id="send-rejected"> Send me rejected messages with a <b>[rejected]</b> tag in the subject line</input><br>
+			<span class="italic-small"><a href="/static/filters/tag_archive_rejected.xml" download>Download a Gmail filter to automatically sort these messages into a separate folder</a> (<a href="">Gmail filters tutorial</a>)</span>
+			<input type="checkbox" id="store-rejected"> Store rejected messages on the Squadbox website</input>
+			<span class="italic-small">We will store messages that your moderators reject, and display a link to view them on your homepage.</span>
+			<br>
+		{% endif %}
+
+
 		<br/>
 		<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>
 	</form>

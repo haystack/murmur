@@ -1,26 +1,17 @@
 {% extends "group_container_base.html" %}
-
 {% block container-content %}
-<h3>Edit My Settings for <span id="group-name">{{ group_info.name }}</span></h3><hr /><br />
-<form id="group-settings-form">
-	<h4>Customizing Emails: </h4> <br/>
+	<h3>Edit My Settings for <span id="group-name">{{ group_info.name }}</span></h3><hr><br>
+	<form id="group-settings-form">
+		<h4>Customizing Emails: </h4><br>
+		<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Settings</button>
+		<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>
+	</form>
 	
-			<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Settings</button>
-			<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>
-		</form>
-		
-		<br/><br/>
-		
-		<a href="/groups/{{group_info.name}}">Squad Info Page</a>
-		
-		{% if settings.receive_attachments %}
-			<input type="checkbox" name="receive-attachments" value="yes" id="ck-receive-attachments" checked>
-		{% else %}
-			<input type="checkbox" name="receive-attachments" value="no" id="ck-receive-attachments">
-		{% endif %}
-		Receive attachments with emails.
-		<br /><br />
-		
+	<br><br>
+	
+	<a href="/groups/{{group_info.name}}">Squad Info Page</a>
+	
+	
 {% endblock %}
 {% block customjs %}
 	<script type="text/javascript" src="/static/javascript/squadbox/my_group_settings.js"></script>
