@@ -9,7 +9,7 @@
 				{% endif %}
 				<ul id="post-list-table">
 					{% for post in rejected_posts %}
-						<a href="/thread?group_name={{ post.to }}&tid={{ post.thread_id }}&post_id={{post.id}}">
+						<a href="/rejected_thread?group_name={{ post.to }}&tid={{ post.thread_id }}&post_id={{post.id}}">
 							<li class="row-item" id="{{ post.thread_id }}">
 								<div class="container">
 									<div class="row">
@@ -22,7 +22,7 @@
 												{% endif %}
 											</span>
 										</div>
-										<div class="col-md-4"><div class="truncate"><span class="strong">{{ post.subject }}</span> - <span class="faded-message">{{ post.text }}</span></div></div>
+										<div class="col-md-4"><div class="truncate"><span class="strong">{{ post.subject }}</span></div></div>
 										<div class="col-md-3"><div class="pull-right" style="padding-right: 20px;">{{ post.timestamp|date:"n/j/Y" }} at {{ post.timestamp|date:"h:i A" }}</div></div>
 									</div>
 								</div>

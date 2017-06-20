@@ -792,7 +792,7 @@ def load_thread(t, user=None, member=None):
 			'thread_id': t.id, 
 		    'post': post, 
 		    'replies': replies, 
-		    'tags': json.dumps(tags),
+		    'tags': tags,
 		    'following': following, 
 		    'muting': muting,
 		    'member': is_member,

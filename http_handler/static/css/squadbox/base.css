@@ -680,11 +680,18 @@ table {
 
 td {
   padding: 0px 10px;
-  
+} 
+
 .verified {
-	color: green;
+	color: #3b8118;
 }
 
 .not-verified {
-	color: red;
+	color: #e05c5c;
+}
+
+.tag-label {
+	position: relative; 
+	top: -3px;
+	font-family: sans-serif;
 }

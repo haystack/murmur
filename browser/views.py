@@ -238,7 +238,14 @@ def thread(request):
 				res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
 			else:
 				res = engine.main.load_thread(thread, user=request.user)
-			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE}
+
+			if WEBSITE == 'murmur':
+				thread_to = '%s@%s' % (group.name, HOST) 
+			elif WEBSITE == 'squadbox':
+				admin = MemberGroup.objects.get(group=group, admin=True)
+				thread_to = admin.member.email
+			return {'user': request.user, 'groups': groups, 'thread': res, 'thread_to' : thread_to, 
+					'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None
@@ -271,7 +278,12 @@ def rejected_thread(request):
 		is_admin = member_group.exists()
 		if is_admin:
 			res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
-			return {'user': request.user, 'thread': res, 'post_id': post_id, 'website' : WEBSITE}
+			groups = Group.objects.filter(membergroup__member=user).values("name")
+			if WEBSITE == 'murmur':
+				thread_to = '%s@%s' % (group.name, HOST) 
+			elif WEBSITE == 'squadbox':
+				thread_to = user.email
+			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id, 'thread_to' : thread_to, 'website' : WEBSITE}
 		else:
 			return redirect('/404?e=perm')
 	else:
@@ -1476,7 +1488,8 @@ def rejected(request, group_name):
 		res = engine.main.load_rejected_posts(user, group_name)
 		if not res['status']:
 			return HttpResponseRedirect('/404')
-		return {'user': request.user, 'rejected_posts' : res['posts'], 'group_name': group_name, 'website' : WEBSITE}
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		return {'user': request.user, 'groups' : groups, 'rejected_posts' : res['posts'], 'group_name': group_name, 'website' : WEBSITE}
 		#return HttpResponse(json.dumps(to_return), content_type="application/json")
 	else:
 		return redirect(global_settings.LOGIN_URL)
