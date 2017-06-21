@@ -365,8 +365,8 @@ def handle_post_murmur(message, group, host, verified):
 		if message_is_reply:
 			res = insert_reply(group.name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, verified, forwarding_list=original_list, sender_name=sender_name)
 		else:
-			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, verified, attachments, forwarding_list=original_list, sender_name=sender_name)
-			
+			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, verified, attachments=attachments, forwarding_list=original_list, sender_name=sender_name)
+
 		if not res['status']:
 			send_error_email(group.name, res['code'], sender_addr, ADMIN_EMAILS)
 			return

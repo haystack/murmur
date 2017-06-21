@@ -889,7 +889,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
 			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, 
-			sender_name=sender_name, verified_sender=verified)
+			poster_name=sender_name, verified_sender=verified)
 	p.save()
 	
 	if WEBSITE == 'murmur':
@@ -1033,7 +1033,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, ve
 	return res
 
 
-def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, forwarding_list=None, thread_id=None):
+def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, forwarding_list=None, thread_id=None, sender_name=None):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
@@ -1066,18 +1066,15 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
 				thread.save()
 			
 			tag_objs = Tag.objects.filter(tagthread__thread=thread)
-			
 			try:
 				message_text = message_text.decode("utf-8")
 			except Exception, e:
 				logging.debug("guessing this is unicode then")
 			
 			message_text = message_text.encode("ascii", "ignore")
-			
 			r = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified_sender=verified, sender_name=sender_name)
+				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified_sender=verified, poster_name=sender_name)
 			r.save()
-			
 			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
 			thread.save()
 			
@@ -1108,15 +1105,15 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
 			
 			#users that always follow threads in this group. minus those that muted
 			recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
-			
 			res['status'] = True
 			res['recipients'] = list(set(recipients))
+			res['tags'] = []
 			res['tags'] = list(tag_objs.values('name'))
 			res['tag_objs'] = tag_objs
 			res['thread_id'] = thread.id
 			res['msg_id'] = msg_id
 			res['post_id'] = r.id
-			
+
 		else:
 			res['code'] = msg_code['NOT_MEMBER']
 		

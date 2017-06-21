@@ -840,10 +840,9 @@ def insert_reply(request):
 			group = Group.objects.get(name=group_name)
 			original_group_object = ForwardingList.objects.get(email=original_group, group=group)
 
-		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, msg_id, forwarding_list=original_group_object, thread_id=thread_id)
-		
+		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, msg_id, True, forwarding_list=original_group_object, thread_id=thread_id)
+
 		if(res['status']):
-			
 			to_send =  res['recipients']
 			post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 			
