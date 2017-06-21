@@ -283,7 +283,7 @@ def rejected_thread(request):
 				thread_to = '%s@%s' % (group.name, HOST) 
 			elif WEBSITE == 'squadbox':
 				thread_to = user.email
-			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id, 'thread_to' : thread_to, 'website' : WEBSITE}
+			return {'user': request.user, 'groups': groups, 'group_name' : group.name, 'thread': res, 'post_id': post_id, 'thread_to' : thread_to, 'website' : WEBSITE}
 		else:
 			return redirect('/404?e=perm')
 	else:
@@ -1323,6 +1323,33 @@ def reject_post(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def delete_post(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.delete_post(user, request.POST['id'], request.POST['thread_id'])
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def delete_posts(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		id_pairs = request.POST['id_pairs'].split(',')
+		for i in id_pairs:
+			tid, pid = i.split('-')
+			res = engine.main.delete_post(user, pid, tid)
+			if not res['status']:
+				break
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def follow_thread(request):
 	try:
 		if request.user.is_authenticated():
@@ -1489,7 +1516,8 @@ def rejected(request, group_name):
 		if not res['status']:
 			return HttpResponseRedirect('/404')
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		return {'user': request.user, 'groups' : groups, 'rejected_posts' : res['posts'], 'group_name': group_name, 'website' : WEBSITE}
+		return {'user': request.user, 'groups' : groups, 
+				'rejected_posts' : res['posts'], 'group_name': group_name, 'website' : WEBSITE}
 		#return HttpResponse(json.dumps(to_return), content_type="application/json")
 	else:
 		return redirect(global_settings.LOGIN_URL)

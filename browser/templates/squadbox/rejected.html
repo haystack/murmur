@@ -1,12 +1,16 @@
 {% extends "group_container_base.html" %}
 {% block container-content %}
 	<div id="post-column-area-wrapper">
+	<div hidden id='group-name'>{{ group_name }}</div>
 		<h3>Emails rejected from your squad {{ group_name }}</h3>
 		<div id="post-column-area">
 			<div class="post-list-container">
 				{% if rejected_posts|length == 0 %}
-					No posts have been rejected.
-				{% endif %}
+					No posts have been rejected yet.
+				{% else %}
+				<div style='margin-bottom: 10px;'>
+				<button type='button' id='delete-btn' class="btn-danger">Delete</button>
+				</div>
 				<ul id="post-list-table">
 					{% for post in rejected_posts %}
 						<a href="/rejected_thread?group_name={{ post.to }}&tid={{ post.thread_id }}&post_id={{post.id}}">
@@ -14,6 +18,7 @@
 								<div class="container">
 									<div class="row">
 										<div class="col-md-2">
+										<input type="checkbox" style='margin-right: 5px;' value='delete-{{post.thread_id}}-{{post.id}}'>
 											<span class="strong">
 												{% if post.from_name %}
 													{{ post.from_name }}
@@ -30,9 +35,12 @@
 						</a>
 					{% endfor %}
 				</ul>
+			{% endif %}
 			</div>
 		</div>
 	</div>
 {% endblock %}
 {% block customjs %}
+<script type="text/javascript" src="/static/javascript/notify.js"></script>
+<script type="text/javascript" src="/static/javascript/squadbox/rejected.js"></script>
 {% endblock %}

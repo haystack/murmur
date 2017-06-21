@@ -174,6 +174,8 @@ elif WEBSITE == 'squadbox':
                     url(r'^reject_get', 'browser.views.reject_get'),
                     url(r'^approve_post', 'browser.views.approve_post'),
                     url(r'^reject_post', 'browser.views.reject_post'),
+                    url(r'^delete_posts', 'browser.views.delete_posts'),
+                    url(r'^delete_post', 'browser.views.delete_post'),
                     url(r'^blacklist_get', 'browser.views.blacklist_get'),
                     url(r'^whitelist_get', 'browser.views.whitelist_get'),
                     url(r'^whitelist', 'browser.views.whitelist'),

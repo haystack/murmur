@@ -832,6 +832,30 @@ def load_post(group_name, thread_id, msg_id):
 	logging.debug(res)
 	return res
 
+def delete_post(user, post_id, thread_id):
+	res = {'status':False}
+	try:
+		group = Post.objects.get(id=post_id).group
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		if membergroup.admin:
+			if thread_id != u'0':
+				thread = Thread.objects.get(id=thread_id)
+				posts = Post.objects.filter(thread=thread)
+				for post in posts:
+					post.delete()
+				thread.delete()
+				res['status'] = True
+			else:
+				post = Post.objects.get(id=post_id)
+				post.delete()
+				res['status'] = True
+		else:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
 
 def _create_tag(group, thread, name):
 	t, created = Tag.objects.get_or_create(group=group, name=name)

@@ -1,9 +1,10 @@
 {% extends "group_container_base.html" %}
 {% block container-content %}
 	<div class="main-area-content">
-		<div hidden id='group-name'>{{ active_group.name }} </div>
+		<div hidden id='group-name'>{{ group_name }}</div>
 		<div hidden id='post-id'>{{ thread.post.id }}</div>
 		<div hidden id='sender-email'>{{ thread.post.from }}</div>
+		<div hidden id='thread-id'>{{ thread.post.thread_id }}</div>
 		<div>
 			<div>
 				<h3>
@@ -63,7 +64,11 @@ This post was rejected by moderator {{ thread.post.who_moderated.email }}.
 	<input type="checkbox">Email me the original message
 	<div style='text-align: center;'><button type="button" id='send-btn'>Send</button> <button type="button" id='cancel-btn'>Cancel</button></div>
 </div>
+<br>
+<br>
+<div style='text-align: center;'><button type="button" class='btn-danger' id='delete-btn' style='display: inline;'>Delete permanently</button></div>
 {% endblock %}
+
 {% block customjs %}
 <script type="text/javascript" src="/static/javascript/notify.js"></script>
 <script type="text/javascript" src="/static/javascript/third-party/jquery-ui.min.js"></script>
