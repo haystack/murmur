@@ -541,17 +541,17 @@ def handle_post_squadbox(message, group, host, verified):
 						disposition=attachment['disposition'],
 						id=attachment['id'])
 
-		if group.active:
+		if not group.active:
 			reason = 'deactivated'
 		elif status == 'A':
 			reason = 'whitelist'
 		elif status == 'R':
 			reason = 'blacklist'
 
-		html_blurb = unicode(html_ps_squadbox(group.name, sender_addr, reason))
+		html_blurb = unicode(ps_squadbox(sender_addr, reason, True))
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
 
-		plain_blurb = plain_ps_squadbox(group.name, sender_addr, reason)
+		plain_blurb = ps_squadbox(sender_addr, reason, False)
 		mail.Body = get_new_body(msg_text, plain_blurb, 'plain')
 
 		relay.deliver(mail, To = admin.email)

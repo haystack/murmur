@@ -1530,8 +1530,8 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				for a in attachments:
 					mail.attach(filename=a['name'], data=a['data'])
 
-				html_blurb = unicode(html_ps_squadbox(group_name, p.poster_email, reason))
-				plain_blurb = plain_ps_squadbox(group_name, p.poster_email, reason)
+				html_blurb = unicode(ps_squadbox(p.poster_email, reason, True))
+				plain_blurb = ps_squadbox(p.poster_email, reason, False)
 
 				html_prefix = ''
 				if new_status == 'R' and len(p.mod_explanation) > 0:
