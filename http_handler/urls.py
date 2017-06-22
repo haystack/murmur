@@ -98,6 +98,9 @@ urlpatterns = patterns('',
     url(r'^accounts/', include('registration.backends.default.urls')),
 
     url(r'^subscribe/confirm/(?P<token>.+)$', 'browser.views.subscribe_confirm'),
+
+    url(r'^activate_group', 'browser.views.activate_group'),
+    url(r'^deactivate_group', 'browser.views.deactivate_group'),
     )
 
 # murmur-only patterns
@@ -111,8 +114,6 @@ if WEBSITE == 'murmur':
                     url(r'^group_list', 'browser.views.group_list'),
                     url(r'^groups/(?P<group_name>[\w-]+)/add_list', 'browser.views.add_list_view'),
                     url(r'^groups/(?P<group_name>[\w-]+)/create_post', 'browser.views.my_group_create_post_view'),
-                    url(r'^activate_group', 'browser.views.activate_group'),
-                    url(r'^deactivate_group', 'browser.views.deactivate_group'),
                     url(r'^my_groups', 'browser.views.my_groups'),
                     url(r'^list_my_groups', 'browser.views.list_my_groups'), 
 

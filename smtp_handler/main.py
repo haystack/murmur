@@ -493,18 +493,23 @@ def handle_post_squadbox(message, group, host, verified):
 	# initially, assume that it's pending and will go through moderation. 
 	status = 'P'
 
-	# if whitelisted, accept; if blacklisted, reject 
-	white_or_blacklist = WhiteOrBlacklist.objects.filter(group=group, email=sender_addr)
-	if white_or_blacklist.exists():
-		w_or_b = white_or_blacklist[0]
-		if w_or_b.blacklist:
-			status = 'R' # if blacklist could means "gets moderated", need to change. 
-		elif w_or_b.whitelist:
-			status = 'A' # sender is whitelisted, so we can accept the mesasge 
+	if not group.active:
+		status = 'A'
+
+	else:
+		# if whitelisted, accept; if blacklisted, reject 
+		white_or_blacklist = WhiteOrBlacklist.objects.filter(group=group, email=sender_addr)
+		if white_or_blacklist.exists():
+			w_or_b = white_or_blacklist[0]
+			if w_or_b.blacklist:
+				status = 'R' # if blacklist could means "gets moderated", need to change. 
+			elif w_or_b.whitelist:
+				status = 'A' # sender is whitelisted, so we can accept the message 
 
 	# either:
 	# 1) sender is whitelisted
 	# 2) sender is blacklisted, but the user still wants rejected messages. 
+	# 3) moderation is turned off for now (inactive group)
 	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
 		# we can just send it on to the intended recipient, i.e. the admin of the group. 
 		mg = MemberGroup.objects.get(group=group, admin=True)
@@ -536,15 +541,17 @@ def handle_post_squadbox(message, group, host, verified):
 						disposition=attachment['disposition'],
 						id=attachment['id'])
 
-		if status == 'A':
+		if not group.active:
+			reason = 'deactivated'
+		elif status == 'A':
 			reason = 'whitelist'
 		elif status == 'R':
 			reason = 'blacklist'
 
-		html_blurb = unicode(html_ps_squadbox(group.name, sender_addr, reason))
+		html_blurb = unicode(ps_squadbox(sender_addr, reason, True))
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
 
-		plain_blurb = plain_ps_squadbox(group.name, sender_addr, reason)
+		plain_blurb = ps_squadbox(sender_addr, reason, False)
 		mail.Body = get_new_body(msg_text, plain_blurb, 'plain')
 
 		relay.deliver(mail, To = admin.email)

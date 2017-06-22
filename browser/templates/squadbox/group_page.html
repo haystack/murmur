@@ -29,6 +29,19 @@
 			<br><br>
 			
 			{% if group_info.admin %}
+				{% if group_info.active %}
+					<button id='activate-btn'>Deactivate</button> <span data-toggle="tooltip" title="When your squad is deactivated, emails will be automatically approved. You can reactivate your squad at any time.">&#9432;</span>
+				{% else %}
+					<button id='activate-btn'>Activate</button> <span data-toggle="tooltip" title="When your squad is active, emails that aren't from a whitelisted or blacklisted sender will go through moderation before they're sent to you.">&#9432;</span>
+				{% endif %}
+				<br><br>
+
+				{% if group_info.active %}
+					Your squad is currently <span class="strong">active</span>.
+				{% else %}
+					Your squad is currently <span class="strong">deactivated</span>.
+				{% endif %}
+				<br>
 				{% if not group_info.group.allow_attachments %}
 					<span class="strong">No Attachments</span> are allowed.
 				{% else %}

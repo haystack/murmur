@@ -60,6 +60,8 @@ $(document).ready(function() {
 
             } else notify(status_res, true);
 
+            console.log(status_res);
+
             if (status_res.status) setTimeout(function() {
                 window.location = '/dashboard';
             }, 1000);

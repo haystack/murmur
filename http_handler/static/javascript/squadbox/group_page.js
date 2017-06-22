@@ -1,5 +1,7 @@
 $(document).ready(function(){
 
+	$('[data-toggle="tooltip"]').tooltip();
+
 	var user_name = $.trim($('#user_email').text()),
 		group_name = $.trim($("#group-name").text()),
 		member = $.trim($(".member").text()) == "Member",
@@ -15,7 +17,9 @@ $(document).ready(function(){
 		btn_set_mod = $("#btn-set-mod"),
 		btn_add_list = $('#btn-add-list'),
 		action_select = $('#actionSelect'),
-		btn_delete_group = $("#btn-delete-group");
+		btn_delete_group = $("#btn-delete-group"),
+		activate_btn = $('#activate-btn');
+
 
 	var admin_buttons = [btn_add_members, btn_edit_group_info, btn_set_admin, btn_set_mod, 
 						btn_delete_members, btn_add_list, action_select, btn_delete_group];
@@ -35,7 +39,7 @@ $(document).ready(function(){
 
 	delete_group =
 	    function(params) {
-	    	warningMessage = "Are you sure? This will delete the squad including all emails ever sent within this squad in the archive."
+	    	warningMessage = "Are you sure? This will delete the squad and all stored emails associated with it."
 	        var confirmation = confirm(warningMessage);
 	        if (confirmation) {
 	        	$.post('/delete_group', params,
@@ -47,37 +51,23 @@ $(document).ready(function(){
 	        		});
 	        }
 	    }
-		
-	// activating and deactivating does nothing
 
-	// activate_group = 
-	// 	function(params){
-	// 		$.post('/activate_group', params, 
-	// 			function(res){
-	// 				if (res.status) {
-	// 					$(".group_active").text('True');
-	// 					group_active = true;
-	// 					fix_visibility();
-	// 				}
-	// 				notify(res, true);
-	// 			}
-	// 		);	
-	// 	};
-		
-	
-	// deactivate_group = 
-	// 	function(params){
-	// 		$.post('/deactivate_group', params, 
-	// 			function(res){
-	// 				if (res.status) {
-	// 					$(".group_active").text('False');
-	// 					group_active = false;
-	// 					fix_visibility();
-	// 				}
-	// 				notify(res, true);
-	// 			}
-	// 		);	
-	// 	};	
+	activate_btn.click(function() {
+
+
+		var params = {'group_name' : group_name},
+			post_to = ($(this)[0].innerHTML == 'Activate') ? '/activate_group' : '/deactivate_group';
+
+		$.post(post_to, params, function(res) {
+			notify(res, true);
+			if (res.status) {
+				setTimeout(function() {
+					window.location.reload();
+				}, 
+				400);
+			}
+		});
+	});
 
 	var post_edit_members = function(params) {
 		$.post('/edit_members', params, function(res){

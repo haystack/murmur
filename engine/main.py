@@ -61,6 +61,7 @@ def group_info_page(user, group_name):
 		res['admin'] = False
 		res['moderator'] = False
 		res['subscribed'] = False
+		res['active'] = group.active
 		
 		for membergroup in members:
 			
@@ -131,7 +132,11 @@ def check_admin(user, groups):
 def list_my_groups(user):
 	res = {'status':False}
 	try:
-		membergroup = MemberGroup.objects.filter(member=user, group__active=True).select_related()
+		if WEBSITE == 'murmur':
+			membergroup = MemberGroup.objects.filter(member=user, group__active=True).select_related()
+		else:
+			# still want to show deactivated squads
+			membergroup = MemberGroup.objects.filter(member=user).select_related()
 		res['status'] = True
 		res['groups'] = []
 		for mg in membergroup:
@@ -1484,7 +1489,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
 			group_tag_names = [t.tag.name for t in TagThread.objects.filter(thread=p.thread)]
 
-			if len(tags) > 0:
+			if tags is not None and len(tags) > 0:
 				tag_names = tags.split(',')
 				for t in tag_names:
 					if t not in group_tag_names:
@@ -1529,8 +1534,8 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				for a in attachments:
 					mail.attach(filename=a['name'], data=a['data'])
 
-				html_blurb = unicode(html_ps_squadbox(group_name, p.poster_email, reason))
-				plain_blurb = plain_ps_squadbox(group_name, p.poster_email, reason)
+				html_blurb = unicode(ps_squadbox(p.poster_email, reason, True))
+				plain_blurb = ps_squadbox(p.poster_email, reason, False)
 
 				html_prefix = ''
 				if new_status == 'R' and len(p.mod_explanation) > 0:
