@@ -28,6 +28,9 @@ class Post(models.Model):
 	# fwds to this Murmur group
 	poster_email = models.EmailField(max_length=255, null=True)
 
+	# often "from" header is Firstname LastName <person@website.com>. if so, save that name.
+	poster_name = models.CharField(max_length=50, null=True)
+
 	# moderation-related data 
 
 	# what state a message is currently in 

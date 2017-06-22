@@ -238,7 +238,14 @@ def thread(request):
 				res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
 			else:
 				res = engine.main.load_thread(thread, user=request.user)
-			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE}
+
+			if WEBSITE == 'murmur':
+				thread_to = '%s@%s' % (group.name, HOST) 
+			elif WEBSITE == 'squadbox':
+				admin = MemberGroup.objects.get(group=group, admin=True)
+				thread_to = admin.member.email
+			return {'user': request.user, 'groups': groups, 'thread': res, 'thread_to' : thread_to, 
+					'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None
@@ -252,7 +259,35 @@ def thread(request):
 		else:
 			res = engine.main.load_thread(thread)
 			return {'user': request.user, 'groups': groups, 'thread': res, 'post_id': post_id,'active_group': active_group, 'website' : WEBSITE}
-			
+
+@render_to(WEBSITE+"/rejected_thread.html")
+def rejected_thread(request):
+	
+	post_id = request.GET.get('post_id')
+	thread_id = request.GET.get('tid')
+	try:
+		thread = Thread.objects.get(id=int(thread_id))
+	except Thread.DoesNotExist:
+		return redirect('/404?e=thread')
+	
+	group = thread.group
+	
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		member_group = MemberGroup.objects.filter(member=user, group=group, admin=True)
+		is_admin = member_group.exists()
+		if is_admin:
+			res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
+			groups = Group.objects.filter(membergroup__member=user).values("name")
+			if WEBSITE == 'murmur':
+				thread_to = '%s@%s' % (group.name, HOST) 
+			elif WEBSITE == 'squadbox':
+				thread_to = user.email
+			return {'user': request.user, 'groups': groups, 'group_name' : group.name, 'thread': res, 'post_id': post_id, 'thread_to' : thread_to, 'website' : WEBSITE}
+		else:
+			return redirect('/404?e=perm')
+	else:
+		return HttpResponseRedirect(global_settings.LOGIN_URL)
 			
 @render_to("settings.html")
 @login_required
@@ -805,10 +840,9 @@ def insert_reply(request):
 			group = Group.objects.get(name=group_name)
 			original_group_object = ForwardingList.objects.get(email=original_group, group=group)
 
-		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, msg_id, forwarding_list=original_group_object, thread_id=thread_id)
-		
+		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, msg_id, True, forwarding_list=original_group_object, thread_id=thread_id)
+
 		if(res['status']):
-			
 			to_send =  res['recipients']
 			post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 			
@@ -1288,6 +1322,33 @@ def reject_post(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def delete_post(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.delete_post(user, request.POST['id'], request.POST['thread_id'])
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def delete_posts(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		id_pairs = request.POST['id_pairs'].split(',')
+		for i in id_pairs:
+			tid, pid = i.split('-')
+			res = engine.main.delete_post(user, pid, tid)
+			if not res['status']:
+				break
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def follow_thread(request):
 	try:
 		if request.user.is_authenticated():
@@ -1445,3 +1506,17 @@ def subscribe_confirm(request, token):
 		return HttpResponseRedirect('/')
 	else:
 		return HttpResponseRedirect('/404')
+
+@render_to('squadbox/rejected.html')
+def rejected(request, group_name):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.load_rejected_posts(user, group_name)
+		if not res['status']:
+			return HttpResponseRedirect('/404')
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		return {'user': request.user, 'groups' : groups, 
+				'rejected_posts' : res['posts'], 'group_name': group_name, 'website' : WEBSITE}
+		#return HttpResponse(json.dumps(to_return), content_type="application/json")
+	else:
+		return redirect(global_settings.LOGIN_URL)

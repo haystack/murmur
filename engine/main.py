@@ -776,7 +776,9 @@ def load_thread(t, user=None, member=None):
 					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 					'timestamp': p.timestamp,
 					'attachments': attachments,
-					'verified': p.verified_sender
+					'verified': p.verified_sender,
+					'who_moderated' : p.who_moderated,
+					'mod_explanation' : p.mod_explanation,
 					}
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
@@ -790,7 +792,7 @@ def load_thread(t, user=None, member=None):
 			'thread_id': t.id, 
 		    'post': post, 
 		    'replies': replies, 
-		    'tags': json.dumps(tags),
+		    'tags': tags,
 		    'following': following, 
 		    'muting': muting,
 		    'member': is_member,
@@ -830,6 +832,30 @@ def load_post(group_name, thread_id, msg_id):
 	logging.debug(res)
 	return res
 
+def delete_post(user, post_id, thread_id):
+	res = {'status':False}
+	try:
+		group = Post.objects.get(id=post_id).group
+		membergroup = MemberGroup.objects.get(group=group, member=user)
+		if membergroup.admin:
+			if thread_id != u'0':
+				thread = Thread.objects.get(id=thread_id)
+				posts = Post.objects.filter(thread=thread)
+				for post in posts:
+					post.delete()
+				thread.delete()
+				res['status'] = True
+			else:
+				post = Post.objects.get(id=post_id)
+				post.delete()
+				res['status'] = True
+		else:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+	except:
+		res['code'] = msg_code['UNKNOWN_ERROR']
+	logging.debug(res)
+	return res
+
 
 def _create_tag(group, thread, name):
 	t, created = Tag.objects.get_or_create(group=group, name=name)
@@ -840,7 +866,7 @@ def _create_tag(group, thread, name):
 		t.save()
 	tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
-def _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None):
+def _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
 
 	try:
 		message_text = message_text.decode("utf-8")
@@ -862,7 +888,8 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 	res = upload_attachments(attachments, msg_id)
 
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, verified_sender=verified)
+			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, 
+			poster_name=sender_name, verified_sender=verified)
 	p.save()
 	
 	if WEBSITE == 'murmur':
@@ -960,7 +987,7 @@ def insert_post_web(group_name, subject, message_text, user):
 	return res
 
 
-def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None):
+def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
 	res = {'status':False}
 	thread = None
 	try:
@@ -982,7 +1009,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, ve
 		# 4) it's a Squadbox post, so we don't care if the sender has an account / is authorized. 
 		# _create_post will check which of user and forwarding list are None and post appropriately. 
 
-		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments, forwarding_list=forwarding_list, post_status=post_status)
+		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments, forwarding_list=forwarding_list, post_status=post_status, sender_name=sender_name)
 		res['status'] = True
 		res['post_id'] = p.id
 		res['msg_id'] = p.msg_id
@@ -1006,7 +1033,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, ve
 	return res
 
 
-def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, forwarding_list=None, thread_id=None):
+def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, forwarding_list=None, thread_id=None, sender_name=None):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)
@@ -1039,18 +1066,15 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
 				thread.save()
 			
 			tag_objs = Tag.objects.filter(tagthread__thread=thread)
-			
 			try:
 				message_text = message_text.decode("utf-8")
 			except Exception, e:
 				logging.debug("guessing this is unicode then")
 			
 			message_text = message_text.encode("ascii", "ignore")
-			
 			r = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
-				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified_sender=verified)
+				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified_sender=verified, poster_name=sender_name)
 			r.save()
-			
 			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
 			thread.save()
 			
@@ -1081,15 +1105,15 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
 			
 			#users that always follow threads in this group. minus those that muted
 			recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
-			
 			res['status'] = True
 			res['recipients'] = list(set(recipients))
+			res['tags'] = []
 			res['tags'] = list(tag_objs.values('name'))
 			res['tag_objs'] = tag_objs
 			res['thread_id'] = thread.id
 			res['msg_id'] = msg_id
 			res['post_id'] = r.id
-			
+
 		else:
 			res['code'] = msg_code['NOT_MEMBER']
 		
@@ -1539,20 +1563,8 @@ def load_pending_posts(user):
 	try:
 		groups = Group.objects.filter(membergroup__member=user, membergroup__moderator=True)
 		posts = Post.objects.filter(group__in=groups, status='P')
-		posts_fixed = []
-		for p in posts:
-			post_dict = {'id': p.id,
-						'msg_id': p.msg_id, 
-						'from': p.author.email if p.author else p.poster_email,
-						'to': p.group.name, 
-						'subject': escape(p.subject),
-						'text': p.post,
-						'thread_id' : p.thread.id, 
-						'timestamp': p.timestamp,
-						}
-			posts_fixed.append(post_dict)
 		res['status'] = True
-		res['posts'] = posts_fixed
+		res['posts'] = fix_posts(posts)
 
 	except Exception, e:
 		logging.debug(e)
@@ -1561,3 +1573,43 @@ def load_pending_posts(user):
 		res['error'] = e
 
 	return res
+
+def load_rejected_posts(user, group_name):
+	res = {'status' : False}
+	try:
+		group = Group.objects.get(name=group_name)
+		mg = MemberGroup.objects.get(member=user, group=group, admin=True)
+		rejected_posts = Post.objects.filter(group=group, status='R')
+		res['posts'] = fix_posts(rejected_posts)
+		res['group'] = group
+		res['status'] = True
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['PRIVILEGE_ERROR']
+	except Exception, e:
+		logging.debug(e)
+		res['code'] = msg_code['UNKNOWN_ERROR']
+		res['error'] = e
+
+	return res
+
+def fix_posts(post_queryset):
+	posts_fixed = []
+	for p in post_queryset:
+		post_dict = {'id': str(p.id),
+					'msg_id': p.msg_id, 
+					'from': p.author.email if p.author else p.poster_email,
+					'from_name' : p.poster_name,
+					'to': p.group.name, 
+					'subject': escape(p.subject),
+					'text': p.post,
+					'thread_id' : p.thread.id, 
+					'timestamp': p.timestamp,
+					'verified': p.verified_sender,
+					'who_moderated' : p.who_moderated,
+					'mod_explanation' : p.mod_explanation,
+					}
+		posts_fixed.append(post_dict)
+
+	return posts_fixed
