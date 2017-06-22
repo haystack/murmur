@@ -61,6 +61,7 @@ def group_info_page(user, group_name):
 		res['admin'] = False
 		res['moderator'] = False
 		res['subscribed'] = False
+		res['active'] = group.active
 		
 		for membergroup in members:
 			

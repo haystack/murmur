@@ -365,11 +365,13 @@ def plain_forwarded_blurb(group_name, to_list, original_list_email=None):
 def html_ps_squadbox(squad_name, sender, reason):
 	content = ''
 	if reason == 'whitelist':
-		content = 'This message was automatically approved by Squadbox because the sender %s is on your whitelist.' % sender
+		content = 'This message was automatically approved because the sender %s is on your whitelist.' % sender
 	elif reason == 'blacklist':
-		content = 'This message was automatically rejected by Squadbox because the sender %s is on your blacklist.' % sender
+		content = 'This message was automatically rejected because the sender %s is on your blacklist.' % sender
 	elif reason.startswith('approved') or reason.startswith('rejected'):
 		content = 'This message was ' + reason 
+	elif reason == 'deactivated':
+		content = 'This message was automatically approved because your squad is disabled.'
 
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
@@ -377,11 +379,13 @@ def html_ps_squadbox(squad_name, sender, reason):
 def plain_ps_squadbox(squadbox, sender, reason):
 	content = ''
 	if reason == 'whitelist':
-		content = 'This message was automatically approved by Squadbox because the sender %s is on your whitelist.' % sender
+		content = 'This message was automatically approved because the sender %s is on your whitelist.' % sender
 	elif reason == 'blacklist':
-		content = 'This message was automatically rejected by Squadbox because the sender %s is on your blacklist.' % sender
+		content = 'This message was automatically rejected because the sender %s is on your blacklist.' % sender
 	elif reason.startswith('approved') or reason.startswith('rejected'):
 		content = 'This message was ' + reason 
+	elif reason == 'deactivated':
+		content = 'This message was automatically approved because your squad is disabled.'
 
 	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
 	return body
