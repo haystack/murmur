@@ -1485,7 +1485,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
 			group_tag_names = [t.tag.name for t in TagThread.objects.filter(thread=p.thread)]
 
-			if len(tags) > 0:
+			if tags is not None and len(tags) > 0:
 				tag_names = tags.split(',')
 				for t in tag_names:
 					if t not in group_tag_names:
