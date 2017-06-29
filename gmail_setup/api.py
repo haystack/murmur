@@ -6,13 +6,14 @@ def parse_contacts(service_people):
     page_token = ""
     while page_token != None:
         response = service_people.people().connections().list(resourceName='people/me', pageSize=500, requestMask_includeField="person.email_addresses,person.names", pageToken=page_token).execute()
-        for person in response["connections"]:
-            the_name = ""
-            if "names" in person:
-                the_name = person["names"][0]["displayName"]
-            if "emailAddresses" in person:
-                for email in person["emailAddresses"]:
-                    res_tuple.append((the_name, email["value"]))
+        if "connections" in response:
+            for person in response["connections"]:
+                the_name = ""
+                if "names" in person:
+                    the_name = person["names"][0]["displayName"]
+                if "emailAddresses" in person:
+                    for email in person["emailAddresses"]:
+                        res_tuple.append((the_name, email["value"]))
         if "nextPageToken" in response:
             page_token = response["nextPageToken"]
         else:

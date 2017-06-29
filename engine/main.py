@@ -132,7 +132,11 @@ def check_admin(user, groups):
 def list_my_groups(user):
 	res = {'status':False}
 	try:
-		membergroup = MemberGroup.objects.filter(member=user, group__active=True).select_related()
+		if WEBSITE == 'murmur':
+			membergroup = MemberGroup.objects.filter(member=user, group__active=True).select_related()
+		else:
+			# still want to show deactivated squads
+			membergroup = MemberGroup.objects.filter(member=user).select_related()
 		res['status'] = True
 		res['groups'] = []
 		for mg in membergroup:
