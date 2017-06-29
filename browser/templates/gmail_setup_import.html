@@ -15,13 +15,17 @@
             <form action="import" method="post">
                 {% csrf_token %}
 
-                <p>Below are your contacts and email addresses you've messaged frequency in the last year. Deselect any you don't want whitelisted, then click "Add to whitelist" below.</p>
-
-                <p>The list of email addresses from your contacts is:</p>
-                <span class="toggle-all"><label><input type="checkbox" id="toggle-all-contacts" checked> TOGGLE ALL</label></span><br />
-                {% for name, email in contacts_names_emails %}
-                    <span class="item-contacts"><label><input type="checkbox" class="contacts-checkbox" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span></span><br />
-                {% endfor %}
+                <p>Below are your contacts, and email addresses you've messaged frequently in the last year. Deselect any you don't want whitelisted, then click "Add to whitelist" below.</p>
+                {{ contacts_names_emails }}
+                {% if contacts_names_emails|length > 0 %}
+                    <p>The list of email addresses from your contacts is:</p>
+                    <span class="toggle-all"><label><input type="checkbox" id="toggle-all-contacts" checked> TOGGLE ALL</label></span><br />
+                    {% for name, email in contacts_names_emails %}
+                        <span class="item-contacts"><label><input type="checkbox" class="contacts-checkbox" name="{{email}}" checked> {{name}}</label> <span id="email">{{email}}</span></span><br />
+                    {% endfor %}
+                {% else %}
+                <i>No contacts available.</i>
+                {% endif %}
                 <br />
 
                 <p>The list of people you've received messages from in the past year, sorted by frequency, is:</p>
