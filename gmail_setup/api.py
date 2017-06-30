@@ -136,10 +136,13 @@ def create_gmail_filter(service_mail, whitelist_emails, forward_address):
             if 'forward' in filter['action']:
                 if filter['action']['forward'] == forward_address:
                     service_mail.users().settings().filters().delete(userId='me', id=filter['id']).execute()
-    email_list_piped = "|".join(whitelist_emails)
+    #email_list_piped = "|".join(whitelist_emails)
+    emails = 'from:' + ' | from:'.join(whitelist_emails)
     filter = {
         'criteria': {
-            'from': email_list_piped
+            #'from': email_list_piped,
+            'negatedQuery' : emails,
+            'excludeChats' : True,
         },
         'action': {
             'removeLabelIds': ['INBOX'],

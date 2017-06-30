@@ -1,12 +1,17 @@
 import os
 import httplib2
 import json
+
+import api
+from engine.main import update_blacklist_whitelist
+from schema.models import CredentialsModel, FlowModel
+from http_handler.settings import BASE_URL, WEBSITE
+
 from oauth2client import xsrfutil
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.django_orm import Storage
 
 from apiclient.discovery import build
-
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
@@ -17,13 +22,6 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import get_current_site
 from annoying.decorators import render_to
-
-from engine.main import update_blacklist_whitelist
-
-from schema.models import CredentialsModel, FlowModel
-import api
-
-from http_handler.settings import BASE_URL, WEBSITE
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 
@@ -166,10 +164,10 @@ def import_start(request):
         for email in emails_to_add:
             # add these to whitelist / create form here!
             res = update_blacklist_whitelist(user=user, group_name=group_name, email=email, whitelist=True, blacklist=False)
-            print(res)
-        
-        #forward_address = group_name + '@' + BASE_URL
-        forward_address = group_name + '@' + 'murmur-dev@csail.mit.edu'
+
+        forward_address = group_name + '@' + BASE_URL
+        print "FORWARDING ADDRESS1: ", forward_address
+
         if WEBSITE == "squadbox":
             res = api.create_gmail_filter(service_mail, emails_to_add, forward_address)
         return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)
