@@ -104,7 +104,7 @@ $(document).ready( function() {
 
 
     $(":checkbox").change(function() {
-        name = $(this).attr('name')
+        name = $(this).attr('name');
         if(this.checked) {
             $(this).parent().parent().css('opacity', '1.0');
             $("input[name='"+name+"']").prop('checked', true);

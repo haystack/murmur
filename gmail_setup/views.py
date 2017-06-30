@@ -129,15 +129,21 @@ def import_start(request):
 
     max_frequency = 0
     min_frequency = 0
-    frequency_list = []
+    frequencies = set()
+
     sorted_gmail_list = api.parse_gmail(service_mail)
+    freq_contacted = {'personal' : [], 'social' : [], 'forums' : [], 'updates' : [], 'promotions' : []}
     if sorted_gmail_list:
         max_frequency = sorted_gmail_list[0][1]
         min_frequency = sorted_gmail_list[-1][1]-1
-        for i in range(len(sorted_gmail_list)):
-            if sorted_gmail_list[i][1] not in frequency_list:
-                frequency_list.append(sorted_gmail_list[i][1])
-        frequency_list.reverse()
+        for el in sorted_gmail_list:
+            freq_contacted[el[3]].append(el)
+            frequencies.add(el[1])
+
+    frequency_list = sorted(list(frequencies))
+
+    for cat in freq_contacted:
+        freq_contacted[cat].sort(key=lambda c: c[1], reverse=True)
     
     if request.method == 'POST':
         # process submitted form here
@@ -162,7 +168,8 @@ def import_start(request):
             res = update_blacklist_whitelist(user=user, group_name=group_name, email=email, whitelist=True, blacklist=False)
             print(res)
         
-        forward_address = group_name + '@' + BASE_URL
+        #forward_address = group_name + '@' + BASE_URL
+        forward_address = group_name + '@' + 'murmur-dev@csail.mit.edu'
         if WEBSITE == "squadbox":
             res = api.create_gmail_filter(service_mail, emails_to_add, forward_address)
         return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)
@@ -172,4 +179,4 @@ def import_start(request):
         if 'group' in request.GET:
             group_name = request.GET['group']
         # TODO: combine multiple email addresses for same contact in contacts view
-        return render(request, 'gmail_setup_import.html', {'website': WEBSITE, 'user': user, 'contacts_names_emails': contacts_names_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list})
+        return render(request, 'gmail_setup_import.html', {'website': WEBSITE, 'user': user, 'contacts_names_emails': contacts_names_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list, 'freq_contacted' : freq_contacted})
