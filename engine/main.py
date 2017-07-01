@@ -1440,8 +1440,9 @@ def unmute_tag(tag_name, group_name, user=None, email=None):
 # add a new entry to whitelist/blacklist table, or update existing one
 # user is the user who is adding them(we need to make sure they are authorized,
 # email is the address to be blacklisted/whitelsited)
-def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
+def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 	res = {'status' : False}
+
 
 	# illegal to have both set to true
 	if whitelist and blacklist:
@@ -1453,21 +1454,27 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 	try:
 		g = Group.objects.get(name=group_name)
 		mg = MemberGroup.objects.get(Q(member=user, group=g), Q(admin=True) | Q(moderator=True))
-		current = WhiteOrBlacklist.objects.filter(group=g, email=email)
-		if current.exists():
-			entry = current[0]
-			entry.whitelist = whitelist
-			entry.blacklist = blacklist
-		else:
-			#hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
-			#send_whitelist_hash_email(entry.id)
-			#res['hash'] = hash
-			entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
-			
-		entry.save()
+		
+		for email in emails.split(','):
+			email = email.strip()
+			current = WhiteOrBlacklist.objects.filter(group=g, email=email)
+			if current.exists():
+				entry = current[0]
+				print "entry: ", entry.whitelist, entry.blacklist
+				entry.whitelist = whitelist
+				entry.blacklist = blacklist
+			else:
+				print "doesnt exist"
+				#hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
+				#send_whitelist_hash_email(entry.id)
+				#res['hash'] = hash
+				entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
+				
+			entry.save()
+
 		res['status'] = True
 		res['group_name'] = group_name
-		res['email'] = email
+		res['emails'] = emails
 		res['email_whitelisted'] = whitelist
 		res['email_blacklisted'] = blacklist
 
