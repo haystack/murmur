@@ -159,13 +159,12 @@
 						{% endfor %}
 					</tbody>
 				</table>
-
 				<br>
 				<hr>
 				<h3>Whitelist</h3>
 				<p>Add senders you can trust to your whitelist. Emails from them will be automatically approved.</p>
 				<button type="button" id="btn-add-whitelist">Add more addresses</button>
-				<button type="button" id="btn-del-blacklist">Remove selected</button>
+				<button type="button" id="btn-del-whitelist">Remove selected</button>
 				<table id="whitelist-table" class="display" cellspacing="0" width="100%">
 					<thead>
 						<tr>
@@ -189,7 +188,6 @@
 						{% endfor %}
 					</tbody>
 				</table>
-
 				<br><br>
 				<a href='/gmail_setup?group={{group_info.group.name}}'>Setup automatic forwarding and import Gmail contacts to this squad's whitelist &raquo;</a>
 				<hr>
@@ -228,8 +226,8 @@
 			{% endif %}
 		</div>
 	</div>
-
 {% endblock %}
 {% block customjs %}
-<script type="text/javascript" src="/static/javascript/squadbox/group_page.js"></script>
+	<script type="text/javascript" src="/static/javascript/notify.js"></script>
+	<script type="text/javascript" src="/static/javascript/squadbox/group_page.js"></script>
 {% endblock %}
