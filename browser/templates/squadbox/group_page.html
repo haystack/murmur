@@ -179,7 +179,7 @@
 					<tbody>
 						{% for w in group_info.whitelist %}
 							<tr>
-								<td><input class="checkbox checkbox-user" type="checkbox" id ={{ w.id }}></td>
+								<td><input class="checkbox checkbox-whitelist" type="checkbox" id ={{ w.email }}></td>
 								<td>{{ w.email }}</td>
 								{% if flavour != "mobile" %}
 									<td>{{ w.timestamp }}</td>
@@ -210,7 +210,7 @@
 					<tbody>
 						{% for b in group_info.blacklist %}
 							<tr>
-								<td><input class="checkbox checkbox-user" type="checkbox" id ={{ b.id }}></td>
+								<td><input class="checkbox checkbox-blacklist" type="checkbox" id ={{ b.email }}></td>
 								<td>{{ b.email }}</td>
 								{% if flavour != "mobile" %}
 									<td>{{ b.timestamp }}</td>

@@ -52,7 +52,7 @@ $(document).ready(function() {
             if (status_res.status && list_url != null) {
                 var list_params = {
                     'group_name': group_name,
-                    'sender': sender_email
+                    'senders': sender_email
                 };
                 $.post(list_url, list_params, function(list_res) {
                     notify(list_res, true);
