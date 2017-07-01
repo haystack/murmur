@@ -7,15 +7,9 @@
 		<div class="group-container">
 			
 			{% if group_info.admin %}
-				<span class="admin label">Admin</span>
-			{% else %}
-				<span class="admin label" style="display: none;"></span>
-			{% endif %}
-			
-			{% if group_info.moderator %}
+				<span class="admin label">Owner</span>
+				{% elif group_info.moderator %}
 				<span class="mod label">Mod</span>
-			{% else %}
-				<span class="mod label" style="display: none;"></span>
 			{% endif %}
 			
 			<h3><span id="group-name">{{ group_info.group.name }}</span></h3>
@@ -35,7 +29,6 @@
 					<button id='activate-btn'>Activate</button> <span data-toggle="tooltip" title="When your squad is active, emails that aren't from a whitelisted or blacklisted sender will go through moderation before they're sent to you.">&#9432;</span>
 				{% endif %}
 				<br><br>
-
 				{% if group_info.active %}
 					Your squad is currently <span class="strong">active</span>.
 				{% else %}
@@ -47,7 +40,6 @@
 				{% else %}
 					Attachments <span class="strong">are allowed</span>.
 				{% endif %}
-
 				<br>
 				{% if not group_info.group.send_rejected_tagged %}
 					Rejected messages <span class="strong">will not</span> be sent to your inbox.
@@ -65,11 +57,10 @@
 			
 			<div id="group-options">
 				{% if group_info.subscribed %}
-					<!-- 						<button type="button" id="btn-edit-settings">Edit My Settings</button> -->
 					{% if group_info.admin %}
 						<button type="button" id="btn-edit-group-info">Edit settings</button>
 					{% endif %}
-					<br /><br />
+					<br><br>
 				{% else %}
 					<button type="button" id="btn-edit-settings" style="display: none;">Edit My Settings</button>
 				{% endif %}
@@ -79,7 +70,7 @@
 				{% endif %}
 			</div>
 			
-			<hr />
+			<hr>
 			{% if group_info.admin %}
 				<h3>Squad Members</h3>
 				<button type="button" id="btn-add-members">Invite new moderators</button>
@@ -87,6 +78,7 @@
 			{% else %}
 				<button type="button" id="btn-add-members" style="display: none;">Add Members</button>
 			{% endif %}
+			
 			{% if group_info.admin %}
 				<table id="members-table" class="display" cellspacing="0" width="100%">
 					<thead>
@@ -95,23 +87,12 @@
 							<th>Email</th>
 							{% if flavour != "mobile" %}
 								<th>Joined</th>
-								<th>Admin</th>
+								<th>Owner</th>
 								<th>Moderator</th>
 							{% endif %}
 						</tr>
 					</thead>
 					
-					<tfoot>
-					<tr>
-						<th>Select</th>
-						<th>Email</th>
-						{% if flavour != "mobile" %}
-							<th>Joined</th>
-							<th>Admin</th>
-							<th>Moderator</th>
-						{% endif %}
-					</tr>
-					</tfoot>
 					
 					<tbody>
 						{% for member in group_info.members %}
@@ -178,20 +159,77 @@
 						{% endfor %}
 					</tbody>
 				</table>
-				<br />
+
+				<br>
 				<hr>
-				<h3>Whitelist/Blacklist</h3>
+				<h3>Whitelist</h3>
+				<p>Add senders you can trust to your whitelist. Emails from them will be automatically approved.</p>
+				<button type="button" id="btn-add-whitelist">Add more addresses</button>
+				<button type="button" id="btn-del-blacklist">Remove selected</button>
+				<table id="whitelist-table" class="display" cellspacing="0" width="100%">
+					<thead>
+						<tr>
+							<th>Select</th>
+							<th>Email</th>
+							{% if flavour != "mobile" %}
+								<th>Added</th>
+							{% endif %}
+						</tr>
+					</thead>
+					
+					<tbody>
+						{% for w in group_info.whitelist %}
+							<tr>
+								<td><input class="checkbox checkbox-user" type="checkbox" id ={{ w.id }}></td>
+								<td>{{ w.email }}</td>
+								{% if flavour != "mobile" %}
+									<td>{{ w.timestamp }}</td>
+								{% endif %}
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+
+				<br><br>
 				<a href='/gmail_setup?group={{group_info.group.name}}'>Setup automatic forwarding and import Gmail contacts to this squad's whitelist &raquo;</a>
 				<hr>
-				{% if group_info.admin %}
-					<div style="text-align:center">
-						<button type="button" class="btn btn-danger" id="btn-delete-group">Delete squad</button>
-					</div>
-				{% endif %}
-			</div>
+				<h3>Blacklist</h3>
+				<p>Add senders you want to block to your blacklist. Emails from them will be automatically rejected.</p>
+				<button type="button" id="btn-add-blacklist">Add more addresses</button>
+				<button type="button" id="btn-del-blacklist">Remove selected</button>
+				<table id="blacklist-table" class="display" cellspacing="0" width="100%">
+					<thead>
+						<tr>
+							<th>Select</th>
+							<th>Email</th>
+							{% if flavour != "mobile" %}
+								<th>Added</th>
+							{% endif %}
+						</tr>
+					</thead>
+					
+					
+					<tbody>
+						{% for b in group_info.blacklist %}
+							<tr>
+								<td><input class="checkbox checkbox-user" type="checkbox" id ={{ b.id }}></td>
+								<td>{{ b.email }}</td>
+								{% if flavour != "mobile" %}
+									<td>{{ b.timestamp }}</td>
+								{% endif %}
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<hr>
+				<div style="text-align:center">
+					<button type="button" class="btn btn-danger" id="btn-delete-group">Delete squad</button>
+				</div>
+			{% endif %}
 		</div>
-	{% endif %}
+	</div>
+
 {% endblock %}
 {% block customjs %}
-	<script type="text/javascript" src="/static/javascript/squadbox/group_page.js"></script>
+<script type="text/javascript" src="/static/javascript/squadbox/group_page.js"></script>
 {% endblock %}

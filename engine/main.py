@@ -52,11 +52,15 @@ def group_info_page(user, group_name):
 		group = Group.objects.get(name=group_name)
 		members = MemberGroup.objects.filter(group=group)
 		members_pending = MemberGroupPending.objects.filter(group=group)
+		whitelist = WhiteOrBlacklist.objects.filter(group=group, whitelist=True)
+		blacklist = WhiteOrBlacklist.objects.filter(group=group, blacklist=True)
 
 		res['group'] = group
 		res['members'] = []
 		res['members_pending'] = []
 		res['lists'] = []
+		res['whitelist'] = []
+		res['blacklist'] = []
 		
 		res['admin'] = False
 		res['moderator'] = False
@@ -98,6 +102,20 @@ def group_info_page(user, group_name):
 						'url' : l.url
 						}
 			res['lists'].append(list_obj)
+
+		for w in whitelist:
+			wl_obj = {	'id' : w.id, 
+						'email' : w.email,
+						'timestamp' : w.timestamp
+					}
+			res['whitelist'].append(wl_obj)
+
+		for b in blacklist:
+			bl_obj = {	'id' : b.id, 
+						'email' : b.email,
+						'timestamp' : b.timestamp
+					}
+			res['blacklist'].append(bl_obj)
 
 
 	except Group.DoesNotExist:

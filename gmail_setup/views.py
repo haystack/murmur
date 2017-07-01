@@ -166,7 +166,6 @@ def import_start(request):
             res = update_blacklist_whitelist(user=user, group_name=group_name, email=email, whitelist=True, blacklist=False)
 
         forward_address = group_name + '@' + BASE_URL
-        print "FORWARDING ADDRESS1: ", forward_address
 
         if WEBSITE == "squadbox":
             res = api.create_gmail_filter(service_mail, emails_to_add, forward_address)

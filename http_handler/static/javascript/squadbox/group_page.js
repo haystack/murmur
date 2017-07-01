@@ -28,13 +28,18 @@ $(document).ready(function(){
 		var members_table = $('#members-table').dataTable({
 			"aoColumns": [ { 'bSortable': false}, null, null, null, null]
 		}),
-			lists_table = $('#lists-table').dataTable({
+			whitelist_table = $('#whitelist-table').dataTable({
+			"aoColumns": [ { 'bSortable': false}, null, null, null, null, null]
+		}),
+
+			blacklist_table = $('#blacklist-table').dataTable({
 			"aoColumns": [ { 'bSortable': false}, null, null, null, null, null]
 		});
 
 	} else {
 		var members_table = $('#members-table').dataTable({}),
-			lists_table = $('#lists-table').dataTable({});
+			whitelist_table = $('#whitelist-table').dataTable({}),
+			blacklist_table = $('#blacklist-table').dataTable({});
 	}
 
 	delete_group =
