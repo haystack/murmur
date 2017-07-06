@@ -5,8 +5,9 @@ $(document).ready(function() {
     var user_name = $.trim($('#user_email').text()),
         group_name = $.trim($("#group-name").text()),
         member = $.trim($(".member").text()) == "Member",
-        admin = $.trim($(".admin").text()) == "Admin",
+        admin = $.trim($(".admin").text()) == "Owner",
         mod = $.trim($(".mod").text()) == "Mod",
+        mod_can_edit = $.trim($('#mod-can-edit').text()) == 'True';
         btn_edit_group_info = $("#btn-edit-group-info"),
         btn_edit_settings = $("#btn-edit-settings"),
         btn_add_members = $("#btn-add-members"),
@@ -34,22 +35,26 @@ $(document).ready(function() {
                 "aoColumns": [{
                     'bSortable': false
                 }, null, null, null, null]
-            }),
-            whitelist_table = $('#whitelist-table').dataTable({
-                "aoColumns": [{
-                    'bSortable': false
-                }, null, null, null, null, null]
-            }),
-
-            blacklist_table = $('#blacklist-table').dataTable({
-                "aoColumns": [{
-                    'bSortable': false
-                }, null, null, null, null, null]
             });
 
     } else {
-        var members_table = $('#members-table').dataTable({}),
-            whitelist_table = $('#whitelist-table').dataTable({}),
+        var members_table = $('#members-table').dataTable({});
+    }
+
+    if (admin || mod && mod_can_edit) {
+        var whitelist_table = $('#whitelist-table').dataTable({
+            "aoColumns": [{
+                'bSortable': false
+            }, null, null]
+        }),
+
+        blacklist_table = $('#blacklist-table').dataTable({
+            "aoColumns": [{
+                'bSortable': false
+            }, null, null]
+        });
+    } else {
+        var whitelist_table = $('#whitelist-table').dataTable({}),
             blacklist_table = $('#blacklist-table').dataTable({});
     }
 

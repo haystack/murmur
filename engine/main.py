@@ -266,7 +266,7 @@ def create_group(group_name, group_desc, public, attach, send_rejected, store_re
 	logging.debug(res)
 	return res
 
-def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, user):
+def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, user):
 	res = {'status':False}	
 	try:
 		group = Group.objects.get(name=old_group_name)
@@ -277,6 +277,7 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, 
 		group.allow_attachments = attach
 		group.send_rejected_tagged = send_rejected
 		group.show_rejected_site = store_rejected
+		group.mod_edit_wl_bl = mod_edit
 		group.save()
 		res['status'] = True	
 	except Group.DoesNotExist:
@@ -1453,8 +1454,12 @@ def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 
 	try:
 		g = Group.objects.get(name=group_name)
-		mg = MemberGroup.objects.get(Q(member=user, group=g), Q(admin=True) | Q(moderator=True))
-		
+		# if mods can edit wl/bl, check for admin OR mod. if not, just admin. 
+		if g.mod_edit_wl_bl:
+			mg = MemberGroup.objects.get(Q(member=user, group=g), Q(admin=True) | Q(moderator=True))
+		else:
+			mg = MemberGroup.objects.get(member=user, group=g, admin=True)
+
 		for email in emails.split(','):
 			email = email.strip()
 			current = WhiteOrBlacklist.objects.filter(group=g, email=email)
@@ -1481,8 +1486,6 @@ def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 
-	# they are not in the group or are not an admin of the group
-	# later on should give people the option to also have mods add to list. 
 	except MemberGroup.DoesNotExist:
 		res['code'] = msg_code['PRIVILEGE_ERROR']
 

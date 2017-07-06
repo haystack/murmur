@@ -393,13 +393,15 @@ def add_whitelist_view(request, group_name):
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	try:
 		group = Group.objects.get(name=group_name)
-		membergroup = MemberGroup.objects.filter(member=user, group=group)
-		if membergroup.count() == 1 and membergroup[0].admin:
+		membergroup = MemberGroup.objects.get(member=user, group=group)
+		if membergroup.admin or group.mod_edit_wl_bl and membergroup.moderator:
 			return {'user': request.user, 'groups': groups, 'group_info': group, 'website' : WEBSITE}
 		else:
-			return redirect('/404?e=admin')
+			return redirect('/404?e=perm')
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
+	except MemberGroup.DoesNotExist:
+		return redirect('/404?e=member')
 
 @render_to(WEBSITE+"/add_blacklist.html")
 @login_required
@@ -408,13 +410,15 @@ def add_blacklist_view(request, group_name):
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	try:
 		group = Group.objects.get(name=group_name)
-		membergroup = MemberGroup.objects.filter(member=user, group=group)
-		if membergroup.count() == 1 and membergroup[0].admin:
+		membergroup = MemberGroup.objects.get(member=user, group=group)
+		if membergroup.admin or group.mod_edit_wl_bl and membergroup.moderator:
 			return {'user': request.user, 'groups': groups, 'group_info': group, 'website' : WEBSITE}
 		else:
-			return redirect('/404?e=admin')
+			return redirect('/404?e=perm')
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
+	except MemberGroup.DoesNotExist:
+		return redirect('/404?e=member')
 
 @render_to(WEBSITE+"/edit_my_settings.html")
 @login_required
@@ -495,7 +499,8 @@ def edit_group_info(request):
 		attach = request.POST['attach'] == 'yes-attach'
 		send_rejected = request.POST['send_rejected_tagged'] == 'true'
 		store_rejected = request.POST['store_rejected'] == 'true'
-		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, user) 
+		mod_edit = request.POST['mod_edit'] == 'true'
+		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, user) 
 		if res['status']:
 			active_group = request.session.get('active_group')
 			if active_group == old_group_name:
