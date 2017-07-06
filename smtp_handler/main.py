@@ -852,7 +852,7 @@ def help(message, address=None, host=None):
 @stateless
 def send_account_info(message, address=None, host=None):
 
-	subj_string = str(message['Subject']).lower()
+	subj_string = message['Subject'].encode('utf-8').lower()
 	activation_str = ("account activation on %s" % WEBSITE).lower()
 	reset_str = ("password reset on %s" % WEBSITE).lower()
 
