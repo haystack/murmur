@@ -87,8 +87,15 @@
 			Store rejected messages on the Squadbox website</input>
 			<span class="italic-small">We will store messages that your moderators reject, and display a link to view them on your homepage.</span>
 			<br>
+			<span class="strong">Moderation:</span> <br>
+			{% if group_info.mod_edit_wl_bl %}
+			<input type="checkbox" id="mod-edit-wl-bl" checked>
+			{% else %}
+			<input type="checkbox" id="mod-edit-wl-bl">
+			{% endif %}
+			Allow squad moderators to add and remove senders from your whitelist and blacklist
 		{% endif %}
-		<br>
+		<br><br>
 		<button type="button" id="btn-save-settings"">Save Changes</button>
 		<button type="button" id="btn-cancel-settings">Cancel</button>
 	</form>

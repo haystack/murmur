@@ -181,6 +181,8 @@ class Group(models.Model):
 	timestamp = models.DateTimeField(auto_now=True)
 	show_rejected_site = models.BooleanField(default=True)
 	send_rejected_tagged = models.BooleanField(default=True)
+	# whether moderators can edit whitelist and blacklist 
+	mod_edit_wl_bl = models.BooleanField(default=True) 
 	
 	def __unicode__(self):
 		return self.name

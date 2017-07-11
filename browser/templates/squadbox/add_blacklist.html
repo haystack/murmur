@@ -1,0 +1,22 @@
+{% extends "group_container_base.html" %}
+
+{% block container-content %}
+	
+	<h3>Add email addresses to blacklist for <span id="group-name">{{ group_info.name }}</span></h3>
+	<hr>
+	
+	<form id="new-members-form">
+		Emails from blacklisted addresses will be automatically rejected when they reach Squadbox.<br><br>Enter email addresses, separated by commas: <br>
+		<input id="new-blacklist-emails" type="text" style="width: 100%; box-sizing: border-box;"></input>
+		<br><br>
+		<button type="button" id="btn-add-blacklist" style="margin-top:10px;">Add</button>
+	</form>
+	<br>
+	
+	<a href="/groups/{{group_info.name}}">Back to squad info page</a>
+{% endblock %}
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/notify.js"></script>
+	<script type="text/javascript" src="/static/javascript/add_blacklist.js"></script>
+{% endblock %}

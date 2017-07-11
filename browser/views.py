@@ -386,6 +386,40 @@ def add_list_view(request, group_name):
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 
+@render_to(WEBSITE+"/add_whitelist.html")
+@login_required
+def add_whitelist_view(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.get(member=user, group=group)
+		if membergroup.admin or group.mod_edit_wl_bl and membergroup.moderator:
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'website' : WEBSITE}
+		else:
+			return redirect('/404?e=perm')
+	except Group.DoesNotExist:
+		return redirect('/404?e=gname&name=%s' % group_name)
+	except MemberGroup.DoesNotExist:
+		return redirect('/404?e=member')
+
+@render_to(WEBSITE+"/add_blacklist.html")
+@login_required
+def add_blacklist_view(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.get(member=user, group=group)
+		if membergroup.admin or group.mod_edit_wl_bl and membergroup.moderator:
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'website' : WEBSITE}
+		else:
+			return redirect('/404?e=perm')
+	except Group.DoesNotExist:
+		return redirect('/404?e=gname&name=%s' % group_name)
+	except MemberGroup.DoesNotExist:
+		return redirect('/404?e=member')
+
 @render_to(WEBSITE+"/edit_my_settings.html")
 @login_required
 def my_group_settings_view(request, group_name):
@@ -465,7 +499,8 @@ def edit_group_info(request):
 		attach = request.POST['attach'] == 'yes-attach'
 		send_rejected = request.POST['send_rejected_tagged'] == 'true'
 		store_rejected = request.POST['store_rejected'] == 'true'
-		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, user) 
+		mod_edit = request.POST['mod_edit'] == 'true'
+		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, user) 
 		if res['status']:
 			active_group = request.session.get('active_group')
 			if active_group == old_group_name:
@@ -1239,8 +1274,8 @@ def whitelist(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.POST['group_name']
-		sender_email = request.POST['sender']
-		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, True, False)
+		sender_emails = request.POST['senders']
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_emails, True, False)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
@@ -1253,8 +1288,24 @@ def blacklist(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.POST['group_name']
-		sender_email = request.POST['sender']
-		res = engine.main.update_blacklist_whitelist(user, group_name, sender_email, False, True)
+		sender_emails = request.POST['senders']
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_emails, False, True)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def unblacklist_unwhitelist(request):
+	try:
+		print "hi"
+		print "senders: ", request.POST['senders']
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.POST['group_name']
+		sender_emails = request.POST['senders']
+		res = engine.main.update_blacklist_whitelist(user, group_name, sender_emails, False, False)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
