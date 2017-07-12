@@ -77,14 +77,15 @@
 						{% endfor %}
 					</ul>
 				</li>
+
 				
-			{% if active_group.role %}
+			{% if active_group_role %}
 				<li style='margin-top:18px;'>
-					{% if active_group.role == 'admin' %}
+					{% if active_group_role == 'admin' %}
 						<span class="admin label">owner</span>
-						{% elif active_group.role == 'moderator' %}
+						{% elif active_group_role == 'mod' %}
 						<span class="mod label">mod</span>
-						{% elif active_group.role == 'member' %}
+						{% elif active_group_role == 'member' %}
 						<span class="member label">member</span>
 					{% endif %}
 				</li>

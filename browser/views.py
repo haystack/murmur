@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template.context import RequestContext
 from django.utils.encoding import *
 
-from browser.util import load_groups, paginator, get_groups_links_from_roles
+from browser.util import load_groups, paginator, get_groups_links_from_roles, get_role_from_group_name
 import engine.main
 from engine.constants import *
 from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
@@ -55,11 +55,14 @@ def error(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
+		groups_links = get_groups_links_from_roles(user, groups)
 	else:
 		user = None
 		groups = []
+		groups_links = []
 
-	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'website': WEBSITE}
+	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 
+			'groups_links' : groups_links, 'website': WEBSITE}
 	
 	error = request.GET.get('e')
 	if error == 'gname':
@@ -228,6 +231,7 @@ def thread(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
+		groups_links = get_groups_links_from_roles(user, groups)
 		
 		member_group = MemberGroup.objects.filter(member=user, group=group)
 		is_member = member_group.exists()
@@ -236,8 +240,10 @@ def thread(request):
 		if group.public or is_member:
 			if is_member:
 				res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
+				role = get_role_from_group_name(user, group.name)
 			else:
 				res = engine.main.load_thread(thread, user=request.user)
+				role = None
 
 			if WEBSITE == 'murmur':
 				thread_to = '%s@%s' % (group.name, HOST) 
@@ -245,7 +251,8 @@ def thread(request):
 				admin = MemberGroup.objects.get(group=group, admin=True)
 				thread_to = admin.member.email
 			return {'user': request.user, 'groups': groups, 'thread': res, 'thread_to' : thread_to, 
-					'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE}
+					'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE, 
+					'active_group_role' : role, 'groups_links' : groups_links}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None
@@ -336,10 +343,12 @@ def group_page(request, group_name):
 	group_info = engine.main.group_info_page(user, group_name)
 	groups_links = get_groups_links_from_roles(user, groups)
 	active_group = Group.objects.get(name=group_name)
+	active_group_role = get_role_from_group_name(user, group_name)
 
 	if group_info['group']:
 		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True, 
-		'admin_address' : group_name + '+admins@' + HOST, 'groups_links' : groups_links, 'active_group' : active_group}
+		'admin_address' : group_name + '+admins@' + HOST, 'groups_links' : groups_links, 
+		'active_group' : active_group, 'active_group_role' : active_group_role}
 	else:
 		return redirect('/404?e=gname&name=%s' % group_name)
 	
@@ -367,7 +376,8 @@ def add_members_view(request, group_name):
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
 		if membergroup.count() == 1 and membergroup[0].admin:
-			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 'website': WEBSITE}
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 'website': WEBSITE,
+			'active_group' : group, 'active_group_role' : 'admin'}
 		else:
 			return redirect('/404?e=admin')
 	except Group.DoesNotExist:
@@ -396,8 +406,10 @@ def add_whitelist_view(request, group_name):
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(member=user, group=group)
+		role = get_role_from_group_name(user, group_name)
 		if membergroup.admin or group.mod_edit_wl_bl and membergroup.moderator:
-			return {'user': request.user, 'groups': groups, 'group_info': group, 'website' : WEBSITE}
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'website' : WEBSITE,
+			'active_group' : group, 'active_group_role' : role}
 		else:
 			return redirect('/404?e=perm')
 	except Group.DoesNotExist:
@@ -413,8 +425,10 @@ def add_blacklist_view(request, group_name):
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(member=user, group=group)
+		role = get_role_from_group_name(user, group_name)
 		if membergroup.admin or group.mod_edit_wl_bl and membergroup.moderator:
-			return {'user': request.user, 'groups': groups, 'group_info': group, 'website' : WEBSITE}
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'website' : WEBSITE,
+			'active_group' : group, 'active_group_role' : role}
 		else:
 			return redirect('/404?e=perm')
 	except Group.DoesNotExist:
@@ -483,7 +497,8 @@ def edit_group_info_view(request, group_name):
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
 		if membergroup[0].admin:
 			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 
-					'website' : WEBSITE, 'group_or_squad' : group_or_squad}
+					'website' : WEBSITE, 'group_or_squad' : group_or_squad, 'active_group' : group, 
+					'active_group_role' : 'admin'}
 		else:
 			return redirect('/404?e=admin')
 	except Group.DoesNotExist:
@@ -1537,21 +1552,33 @@ def serve_attachment(request, hash_filename):
 def mod_queue(request, group_name):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = Group.objects.filter(membergroup__member=user).values("name")
-		groups_links = get_groups_links_from_roles(user, groups)
-		
-		curr_group = Group.objects.get(name=group_name)
+
+		mgs = MemberGroup.objects.filter(member=user, group__name=group_name)
+		if not mgs.exists():
+			return redirect('404/e=member')
+
+		mg = mgs[0]
+		if not (mg.moderator or mg.admin):
+			return redirect('404/e=perm')
+
 		res = engine.main.load_pending_posts(user, group_name)
 
 		pending_posts = []
 		if not res['status']:
-			logging.debug('Error loading pending posts: ' + str(res['error']))
+			redirect('/404')
 		else:
 			for p in res['posts']:
 				p['text'] = html2text(p['text'])
 				pending_posts.append(p)
 
-		return {'user' : request.user, 'groups' : groups, 'active_group' : curr_group,
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		groups_links = get_groups_links_from_roles(user, groups)
+		curr_group = mg.group
+		role = get_role_from_group_name(user, group_name)
+
+		print "role:", role
+
+		return {'user' : request.user, 'groups' : groups, 'active_group' : curr_group, 'active_group_role' : role,
 				'groups_links' : groups_links, 'pending_posts' : pending_posts, 'website' : WEBSITE}
 	else:
 		return redirect(global_settings.LOGIN_URL)

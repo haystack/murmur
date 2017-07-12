@@ -32,12 +32,16 @@
 								{% if website == 'murmur' %}
 								Admin
 								{% elif website == 'squadbox' %}
-								Owner
+								owner
 								{% endif %}
 								</span>
 							{% endif %}
 							{% if group.mod %}
-								<span class="mod label">Mod</span>
+								{% if website == 'murmur' %}
+								Mod
+								{% elif website == 'squadbox' %}
+								mod
+								{% endif %}
 							{% endif %}
 							<br>
 							<span class="italic-med">{{ group.desc }}</span></li>
