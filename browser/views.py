@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404, redirect, render_to_response
 from django.template.context import RequestContext
 from django.utils.encoding import *
 
-from browser.util import load_groups, paginator
+from browser.util import load_groups, paginator, get_groups_links_from_roles
 import engine.main
 from engine.constants import *
 from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
@@ -88,7 +88,7 @@ def index(request):
 		if WEBSITE == 'murmur':
 			return HttpResponseRedirect('/posts')
 		elif WEBSITE == 'squadbox':
-			return HttpResponseRedirect('/dashboard')
+			return HttpResponseRedirect('/my_group_list')
 	
 	
 @render_to(WEBSITE+'/posts.html')
@@ -294,8 +294,9 @@ def rejected_thread(request):
 def settings(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
-	active_group = load_groups(request, groups, user)
-	return {'user': request.user, "active_group": active_group, "groups": groups, 'website' : WEBSITE}
+	groups_links = get_groups_links_from_roles(user, groups)
+	#active_group = load_groups(request, groups, user)
+	return {'user': request.user, "groups": groups, 'groups_links': groups_links, 'website' : WEBSITE, 'group_page' : True}
 	
 @render_to(WEBSITE+"/groups.html")
 @login_required
@@ -309,14 +310,16 @@ def my_groups(request):
 		return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info':info}
 
 
-
 @render_to("mobile_list_groups.html")
 @login_required
 def my_group_list(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = engine.main.list_my_groups(user)
-	return {'user': request.user, 'groups': groups['groups'], 'group_page': True, 
-			'my_groups': True, 'website' : WEBSITE, 'group_or_squad' : group_or_squad}
+	res = engine.main.list_my_groups(user)
+	groups_links = get_groups_links_from_roles(user, res['groups'])
+	pairs = zip(res['groups'], [e[1] for e in groups_links])
+
+	return {'user': request.user, 'groups': res['groups'], 'group_page': True, 'groups_links' : groups_links,
+			'my_groups': True, 'website' : WEBSITE, 'group_or_squad' : group_or_squad, 'pairs' : pairs}
 
 
 @render_to(WEBSITE+"/mobile_pub_list_groups.html")
@@ -327,17 +330,16 @@ def pub_group_list(request):
 	
 @render_to(WEBSITE+"/group_page.html")
 def group_page(request, group_name):
-	try:
-		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = Group.objects.filter(membergroup__member=user).values("name")
-	except Exception, e:
-		logging.debug(e)
-		user = None
-		groups = []
-		
+	# try:
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
 	group_info = engine.main.group_info_page(user, group_name)
+	groups_links = get_groups_links_from_roles(user, groups)
+	active_group = Group.objects.get(name=group_name)
+
 	if group_info['group']:
-		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True, 'admin_address' : group_name + '+admins@' + HOST}
+		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True, 
+		'admin_address' : group_name + '+admins@' + HOST, 'groups_links' : groups_links, 'active_group' : active_group}
 	else:
 		return redirect('/404?e=gname&name=%s' % group_name)
 	
@@ -1506,8 +1508,10 @@ def unmute_thread(request):
 def murmur_acct(request, acct_func=None, template_name=None):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
-	active_group = load_groups(request, groups, user)
-	return acct_func(request, template_name=template_name, extra_context={'active_group': active_group, 'groups': groups, 'user': request.user, 'website' : WEBSITE})
+	groups_links = get_groups_links_from_roles(user, groups)
+
+	context = {'groups': groups, 'groups_links' : groups_links, 'user': request.user, 'website' : WEBSITE, 'group_page' : True} 
+	return acct_func(request, template_name=template_name, extra_context=context)
 
 @login_required
 def serve_attachment(request, hash_filename):
@@ -1529,13 +1533,16 @@ def serve_attachment(request, hash_filename):
 	else:
 		return HttpResponseRedirect('/404')
 
-@render_to('squadbox/dashboard.html')
-def dashboard(request):
+@render_to('squadbox/mod_queue.html')
+def mod_queue(request, group_name):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		mod_group_count = len(Group.objects.filter(membergroup__member=user, membergroup__moderator=True))
-		res = engine.main.load_pending_posts(user)
+		groups_links = get_groups_links_from_roles(user, groups)
+		
+		curr_group = Group.objects.get(name=group_name)
+		res = engine.main.load_pending_posts(user, group_name)
+
 		pending_posts = []
 		if not res['status']:
 			logging.debug('Error loading pending posts: ' + str(res['error']))
@@ -1544,8 +1551,8 @@ def dashboard(request):
 				p['text'] = html2text(p['text'])
 				pending_posts.append(p)
 
-		return {'user' : request.user, 'groups' : groups, 'mod_group_count' : mod_group_count,
-				'pending_posts' : pending_posts, 'website' : WEBSITE}
+		return {'user' : request.user, 'groups' : groups, 'active_group' : curr_group,
+				'groups_links' : groups_links, 'pending_posts' : pending_posts, 'website' : WEBSITE}
 	else:
 		return redirect(global_settings.LOGIN_URL)
 

@@ -58,8 +58,41 @@
         </div>
         {% if user.is_authenticated %}
         <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-	        <li>
+
+			<ul class="nav navbar-nav">
+				<li class="dropdown" id='groups_dropdown'>
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+						<span class="caret"></span>
+						<span id="active_group">
+						{% if active_group %}
+						{{ active_group.name }}
+						{% else %}
+						Select a squad
+						{% endif %}
+						</span>
+					</a>
+					<ul class="dropdown-menu" role="menu">
+						{% for group, link in groups_links %}
+							<li><a href={{link}}>{{ group }}</a></li>
+						{% endfor %}
+					</ul>
+				</li>
+				
+			{% if active_group.role %}
+				<li style='margin-top:18px;'>
+					{% if active_group.role == 'admin' %}
+						<span class="admin label">owner</span>
+						{% elif active_group.role == 'moderator' %}
+						<span class="mod label">mod</span>
+						{% elif active_group.role == 'member' %}
+						<span class="member label">member</span>
+					{% endif %}
+				</li>
+			{% endif %}
+			</ul>
+		
+
+<!-- 	        <li>
 	          <a href="/dashboard">Moderation Queue</a>
 	        </li>
 
@@ -76,7 +109,7 @@
 	          <a href="/my_group_list">Manage Squads</a>
 	        </li>
           </ul>
-
+ -->
           <ul class="nav navbar-nav navbar-right">
             <li class="dropdown dropdown-right">
             	<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="user_email">{{ user.email|truncatechars:20 }}</span><span class="caret"></span></a>

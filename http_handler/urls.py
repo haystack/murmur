@@ -170,7 +170,7 @@ if WEBSITE == 'murmur':
 elif WEBSITE == 'squadbox': 
 
     new_patterns = [
-                    url(r'^dashboard', 'browser.views.dashboard'),
+                    url(r'^mod_queue/(?P<group_name>[\w-]+)', 'browser.views.mod_queue'),
 
                     url(r'^approve_get', 'browser.views.approve_get'),
                     url(r'^reject_get', 'browser.views.reject_get'),

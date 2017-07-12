@@ -3,6 +3,8 @@ import random
 
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 
+from schema.models import MemberGroup
+
 ALLOWED_TAGS = [
     'a',
     'abbr',
@@ -99,3 +101,20 @@ def paginator(page, object_list, per_page=10):
         # If page is out of range (e.g. 9999), deliver last page of results.
         objects = []
     return objects
+
+def get_groups_links_from_roles(user, groups):
+
+    group_names = [g['name'] for g in groups]
+    
+    links = []
+    for g in group_names:
+        mg = MemberGroup.objects.get(member=user, group__name=g)
+        if mg.admin:
+            links.append('/groups/%s' % g)
+        elif mg.moderator:
+            links.append('/mod_queue/%s' % g)
+        else:
+            links.append(None) # no default link right for just a member
+
+
+    return zip(group_names, links)
