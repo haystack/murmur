@@ -37,11 +37,13 @@
 								</span>
 							{% endif %}
 							{% if group.mod %}
+								<span class="mod label">
 								{% if website == 'murmur' %}
 								Mod
 								{% elif website == 'squadbox' %}
 								mod
 								{% endif %}
+								</span>
 							{% endif %}
 							<br>
 							<span class="italic-med">{{ group.desc }}</span></li>
