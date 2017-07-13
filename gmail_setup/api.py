@@ -6,13 +6,14 @@ def parse_contacts(service_people):
     page_token = ""
     while page_token != None:
         response = service_people.people().connections().list(resourceName='people/me', pageSize=500, requestMask_includeField="person.email_addresses,person.names", pageToken=page_token).execute()
-        for person in response["connections"]:
-            the_name = ""
-            if "names" in person:
-                the_name = person["names"][0]["displayName"]
-            if "emailAddresses" in person:
-                for email in person["emailAddresses"]:
-                    res_tuple.append((the_name, email["value"]))
+        if "connections" in response:
+            for person in response["connections"]:
+                the_name = ""
+                if "names" in person:
+                    the_name = person["names"][0]["displayName"]
+                if "emailAddresses" in person:
+                    for email in person["emailAddresses"]:
+                        res_tuple.append((the_name, email["value"]))
         if "nextPageToken" in response:
             page_token = response["nextPageToken"]
         else:
@@ -135,10 +136,13 @@ def create_gmail_filter(service_mail, whitelist_emails, forward_address):
             if 'forward' in filter['action']:
                 if filter['action']['forward'] == forward_address:
                     service_mail.users().settings().filters().delete(userId='me', id=filter['id']).execute()
-    email_list_piped = "|".join(whitelist_emails)
+    #email_list_piped = "|".join(whitelist_emails)
+    emails = 'from:' + ' | from:'.join(whitelist_emails)
     filter = {
         'criteria': {
-            'from': email_list_piped
+            #'from': email_list_piped,
+            'negatedQuery' : emails,
+            'excludeChats' : True,
         },
         'action': {
             'removeLabelIds': ['INBOX'],

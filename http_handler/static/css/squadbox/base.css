@@ -461,15 +461,15 @@ textarea {
 }
 
 .admin {
-	background-color: pink;
+	background-color: #f05537;
 }
 
 .mod {
-	background-color: green;
+	background-color: rgb(78, 202, 244);
 }
 
 .member {
-	background-color: blue;
+	background-color: grey;
 }
 
 .blurb {

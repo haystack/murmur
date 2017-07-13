@@ -1,7 +1,8 @@
 {% extends "group_container_base.html" %}
 {% block container-content %}
 	<div id="post-column-area-wrapper">
-		<h3><b>Moderation Queue</b></h3>
+		<h3><b>Moderation Queue for <a href="/groups/{{active_group}}">{{ active_group }}</a></b>
+		</h3>
 		<div id="post-column-area">
 			<div class="post-list-container">
 				{% if groups|length == 0 %}
@@ -9,7 +10,7 @@
 					{% elif mod_group_count == 0 %}
 					You aren't a moderator for any squads yet.
 					{% elif pending_posts|length == 0 %}
-					There are no pending emails in any squads you moderate.
+					There are no pending emails for this squad.
 				{% else %}
 					<i>Click on an email to view its full text, and approve or reject it.</i><br><br>
 				{% endif %}
@@ -17,9 +18,8 @@
 					{% for post in pending_posts %}
 						<a href="/thread?group_name={{ post.to }}&tid={{ post.thread_id }}&post_id={{post.id}}">
 							<li class="row-item" id="{{ post.thread_id }}">
-								<div class="container">
 									<div class="row">
-										<div class="col-md-2">
+										<div class="col-md-3">
 											<span class="strong">
 												{% if post.from_name %}
 													{{ post.from_name }}
@@ -28,10 +28,9 @@
 												{% endif %}
 											</span>
 										</div>
-										<div class="col-md-4"><div class="truncate"><span class="strong">{{ post.subject }}</span> - <span class="faded-message">{{ post.text }}</span></div></div>
-										<div class="col-md-3"><div class="pull-right" style="padding-right: 20px;">{{ post.timestamp|date:"n/j/Y" }} at {{ post.timestamp|date:"h:i A" }}</div></div>
+										<div class="col-md-5"><div class="truncate"><span class="strong">{{ post.subject }}</span> - <span class="faded-message">{{ post.text }}</span></div></div>
+										<div class="col-md-4"><div class="pull-right" style="padding-right: 20px;">{{ post.timestamp|date:"n/j/y" }} at {{ post.timestamp|date:"h:i A" }}</div></div>
 									</div>
-								</div>
 							</li>
 						</a>
 					{% endfor %}

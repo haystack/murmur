@@ -193,6 +193,7 @@ class Group(models.Model):
 	send_rejected_tagged = models.BooleanField(default=True)
 	# whether moderators can edit whitelist and blacklist 
  	mod_edit_wl_bl = models.BooleanField(default=True) 
+
 	
 	def __unicode__(self):
 		return self.name

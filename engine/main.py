@@ -52,11 +52,15 @@ def group_info_page(user, group_name):
 		group = Group.objects.get(name=group_name)
 		members = MemberGroup.objects.filter(group=group)
 		members_pending = MemberGroupPending.objects.filter(group=group)
+		whitelist = WhiteOrBlacklist.objects.filter(group=group, whitelist=True)
+		blacklist = WhiteOrBlacklist.objects.filter(group=group, blacklist=True)
 
 		res['group'] = group
 		res['members'] = []
 		res['members_pending'] = []
 		res['lists'] = []
+		res['whitelist'] = []
+		res['blacklist'] = []
 		
 		res['admin'] = False
 		res['moderator'] = False
@@ -98,6 +102,20 @@ def group_info_page(user, group_name):
 						'url' : l.url
 						}
 			res['lists'].append(list_obj)
+
+		for w in whitelist:
+			wl_obj = {	'id' : w.id, 
+						'email' : w.email,
+						'timestamp' : w.timestamp
+					}
+			res['whitelist'].append(wl_obj)
+
+		for b in blacklist:
+			bl_obj = {	'id' : b.id, 
+						'email' : b.email,
+						'timestamp' : b.timestamp
+					}
+			res['blacklist'].append(bl_obj)
 
 
 	except Group.DoesNotExist:
@@ -248,7 +266,7 @@ def create_group(group_name, group_desc, public, attach, send_rejected, store_re
 	logging.debug(res)
 	return res
 
-def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, user):
+def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, user):
 	res = {'status':False}	
 	try:
 		group = Group.objects.get(name=old_group_name)
@@ -259,6 +277,7 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, 
 		group.allow_attachments = attach
 		group.send_rejected_tagged = send_rejected
 		group.show_rejected_site = store_rejected
+		group.mod_edit_wl_bl = mod_edit
 		group.save()
 		res['status'] = True	
 	except Group.DoesNotExist:
@@ -1422,8 +1441,9 @@ def unmute_tag(tag_name, group_name, user=None, email=None):
 # add a new entry to whitelist/blacklist table, or update existing one
 # user is the user who is adding them(we need to make sure they are authorized,
 # email is the address to be blacklisted/whitelsited)
-def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
+def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 	res = {'status' : False}
+
 
 	# illegal to have both set to true
 	if whitelist and blacklist:
@@ -1434,30 +1454,38 @@ def update_blacklist_whitelist(user, group_name, email, whitelist, blacklist):
 
 	try:
 		g = Group.objects.get(name=group_name)
-		mg = MemberGroup.objects.get(Q(member=user, group=g), Q(admin=True) | Q(moderator=True))
-		current = WhiteOrBlacklist.objects.filter(group=g, email=email)
-		if current.exists():
-			entry = current[0]
-			entry.whitelist = whitelist
-			entry.blacklist = blacklist
+		# if mods can edit wl/bl, check for admin OR mod. if not, just admin. 
+		if g.mod_edit_wl_bl:
+			mg = MemberGroup.objects.get(Q(member=user, group=g), Q(admin=True) | Q(moderator=True))
 		else:
-			#hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
-			#send_whitelist_hash_email(entry.id)
-			#res['hash'] = hash
-			entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
-			
-		entry.save()
+			mg = MemberGroup.objects.get(member=user, group=g, admin=True)
+
+		for email in emails.split(','):
+			email = email.strip()
+			current = WhiteOrBlacklist.objects.filter(group=g, email=email)
+			if current.exists():
+				entry = current[0]
+				print "entry: ", entry.whitelist, entry.blacklist
+				entry.whitelist = whitelist
+				entry.blacklist = blacklist
+			else:
+				print "doesnt exist"
+				#hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
+				#send_whitelist_hash_email(entry.id)
+				#res['hash'] = hash
+				entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
+				
+			entry.save()
+
 		res['status'] = True
 		res['group_name'] = group_name
-		res['email'] = email
+		res['emails'] = emails
 		res['email_whitelisted'] = whitelist
 		res['email_blacklisted'] = blacklist
 
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 
-	# they are not in the group or are not an admin of the group
-	# later on should give people the option to also have mods add to list. 
 	except MemberGroup.DoesNotExist:
 		res['code'] = msg_code['PRIVILEGE_ERROR']
 
@@ -1563,13 +1591,19 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 	logging.debug(res)
 	return res 
 
-def load_pending_posts(user):
+def load_pending_posts(user, group_name):
 	res = {'status' : False}
 	try:
-		groups = Group.objects.filter(membergroup__member=user, membergroup__moderator=True)
-		posts = Post.objects.filter(group__in=groups, status='P')
-		res['status'] = True
+		mg = MemberGroup.objects.get(member=user, group__name=group_name)
+		posts = Post.objects.filter(group__name=group_name, status='P')
 		res['posts'] = fix_posts(posts)
+		res['status'] = True
+
+	except MemberGroup.DoesNotExist:
+		logging.debug(e)
+		res['status'] = False
+		res['code'] = msg_code['NOT_MEMBER']
+		res['error'] = e
 
 	except Exception, e:
 		logging.debug(e)
