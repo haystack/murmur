@@ -1038,7 +1038,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, ve
 	return res
 
 
-def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, forwarding_list=None, thread_id=None, sender_name=None):
+def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, thread_id=None, post_status=None, sender_name=None):
 	res = {'status':False}
 	try:
 		group = Group.objects.get(name=group_name)

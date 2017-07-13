@@ -480,15 +480,18 @@ def handle_post_squadbox(message, group, host, verified):
 	msg_id = message['Message-ID']
 	email_message = message_from_string(str(message))
 	msg_text = get_body(email_message)
-	_, sender_addr = parseaddr(message['From'].lower())
+	sender_name, sender_addr = parseaddr(message['From'].lower())
+	if sender_name == '':
+		sender_name = None
+	
 	subj = message['Subject'].strip()
+	message_is_reply = (subj[0:4].lower() == "re: ")
+	attachments = get_attachments(email_message)
 
 	if 'html' not in msg_text or msg_text['html'] == '':
 		msg_text['html'] = markdown(msg_text['plain'])
 	if 'plain' not in msg_text or msg_text['plain'] == '':
 		msg_text['plain'] = html2text(msg_text['html'])
-
-	attachments = get_attachments(email_message)
 
 	# initially, assume that it's pending and will go through moderation. 
 	status = 'P'
@@ -505,6 +508,22 @@ def handle_post_squadbox(message, group, host, verified):
 				status = 'R' # if blacklist could means "gets moderated", need to change. 
 			elif w_or_b.whitelist:
 				status = 'A' # sender is whitelisted, so we can accept the message 
+
+
+	# if pending or rejected, we need to put it in the DB 
+	if status == 'P' or status == 'R':
+
+		if message_is_reply:
+			original_subject = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
+			res = insert_reply(group.name, "Re: " + original_subject, msg_text['html'], None, sender_addr, msg_id, verified, attachments, None, post_status=reply_status, sender_name=sender_name)
+
+		else: 
+			res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, verified, attachments, None, status, sender_name)
+		
+		if not res['status']:
+			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
+			return
+
 
 	# either:
 	# 1) sender is whitelisted
@@ -576,12 +595,6 @@ def handle_post_squadbox(message, group, host, verified):
 			relay.deliver(outgoing_msg, To=member.email)
 			logging.debug("sending msg to moderator %s" % member.email)
 	
-	# if pending or rejected, we need to put it in the DB 
-	if status == 'P' or status == 'R':
-		res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, verified, attachments, None, status)
-		if not res['status']:
-			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
-			return
 
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
