@@ -2,8 +2,10 @@ import string
 import random
 
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
+from bleach import clean
+from bs4 import BeautifulSoup
 
-from schema.models import MemberGroup
+from schema.models import MemberGroup, Attachment
 
 ALLOWED_TAGS = [
     'a',
@@ -52,7 +54,7 @@ ALLOWED_ATTRIBUTES = {
     'div': ['class']
 }
 
-ALLOWED_STYLES = ['border-style', 'border-width', 'float', 'height', 'margin', 'width']
+ALLOWED_STYLES = ['border-style', 'border-width', 'float', 'height', 'margin', 'width', 'max-width']
 
 
 def load_groups(request, groups, user, group_name=None):
@@ -103,7 +105,10 @@ def paginator(page, object_list, per_page=10):
     return objects
 
 def get_role_from_group_name(user, group_name):
-    mg = MemberGroup.objects.get(member=user, group__name=group_name)
+    mg_res = MemberGroup.objects.filter(member=user, group__name=group_name)
+    if not mg_res.exists():
+        return None
+    mg = mg_res[0]
     if mg.admin:
         return 'admin'
     if mg.moderator:
@@ -125,3 +130,39 @@ def get_groups_links_from_roles(user, groups):
             links.append(None) # no default link right now for just a member
 
     return zip(group_names, links)
+
+'''
+so inline attachments weren't displaying if the post was made via SMTP, because they would 
+show up in the post body as something like <img src="cid:xxxx" alt="filename_here"> where 
+the cid is the content-id of the attachment in the original post. but it's not a real link,
+so the browser had no way to render the image.
+
+this function cleans the HTML up and then goes through and finds all the inline images, and 
+if their "alt" tag (the filename) matches a stored attachment, replaces the src with a link 
+to the image on S3.
+'''
+def fix_html_and_img_srcs(msg_id, post_text):
+
+    post_soup = BeautifulSoup(post_text, 'html5lib')
+    imgs = post_soup.find_all('img')
+    attachments = Attachment.objects.filter(msg_id=msg_id)
+    for i in imgs:
+        filename = i.get('alt')
+        cid = i.get('src')
+        match = None
+
+        if filename:
+            match_by_filename = attachments.filter(true_filename=filename)
+            if match_by_filename.exists():
+                match = match_by_filename[0]
+
+        if cid and not match:
+            id_no = '<%s>' % cid.split(':')[1]
+            match_by_cid = attachments.filter(content_id=id_no)
+            if match_by_cid.exists():
+                match = match_by_cid[0]
+
+        if match:
+            i['src'] = "attachment/" + match.hash_filename
+
+    return clean(str(post_soup), tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)

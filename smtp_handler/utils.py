@@ -1,11 +1,14 @@
-import email, re, time, hashlib, random, dkim, spf
+import email, re, time, hashlib, random, dkim, spf, pytz
 from lamson.server import Relay
 from config.settings import *
 from lamson_subclass import MurmurMailResponse
-from schema.models import Group, MemberGroup, Thread, Following, Mute, UserProfile
+from schema.models import *
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE
+from datetime import datetime, timedelta
 from email.utils import *
 from email import message_from_string
+from html2text import html2text
+from markdown2 import markdown
 
 '''
 Murmur Mail Utils and Constants
@@ -70,7 +73,12 @@ ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "appli
 					"application/msword", "text/plain", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 					"application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
 					"application/vnd.openxmlformats-officedocument.presentationml.presentation"]
+
+ALLOWED_MIMETYPES_STR = 'images (JPEG, BMP, GIF, PNG), PDFs, and Microsoft Office (Word, Excel, Powerpoint) files'
+
 MAX_ATTACHMENT_SIZE = 3000000
+
+
 
 def setup_post(From, Subject, group_name):
 	
@@ -127,8 +135,10 @@ def send_error_email(group_name, error, user_addr, admin_emails):
 	mail = MurmurMailResponse(From = NO_REPLY, Subject = "Error")
 	mail.Body = "You tried to post to: %s. Error Message: %s" % (group_name, error)
 	if user_addr:
+		mail.Body = "You tried to post to: %s. Error Message: %s" % (group_name, error)
 		relay.deliver(mail, To = user_addr)
 	if admin_emails:
+		mail.Body = "User %s tried to post to: %s. Error Message: %s" % (user_addr, group_name, error)
 		relay.deliver(mail, To = ADMIN_EMAILS)
 
 def check_attachments(attachments, attachments_allowed):
@@ -162,19 +172,17 @@ def get_subject(message, msg_res, group_name):
 	return subject
 
 def get_new_body(message_text, ps_blurb, plain_or_html):
-	try:
-		# assume email is in utf-8
-		new_body = unicode(message_text[plain_or_html], "utf-8", "ignore")
-		new_body = new_body + ps_blurb
-	except UnicodeDecodeError:
-		#then try default (ascii)
-		logging.debug('unicode decode error')
-		new_body = unicode(message_text[plain_or_html], errors="ignore")
-		new_body = new_body + ps_blurb
-	except TypeError:
-		logging.debug('decoding Unicode is not supported')
-		new_body = message_text[plain_or_html]
-		new_body = new_body + ps_blurb
+
+	text = message_text[plain_or_html]
+
+	if isinstance(text, unicode):
+		logging.debug("it's unicode, no need to change")
+		new_body = text + ps_blurb
+
+	else:
+		logging.debug("not unicode, convert using utf-8")
+		converted_text = unicode(text, "utf-8", "ignore")
+		new_body = converted_text + ps_blurb
 
 	return new_body
 
@@ -190,88 +198,56 @@ def get_direct_recips(email_message):
 	emails = [recip[1] for recip in all_recipients]
 	return emails
 
+
 def get_attachments(email_message):
 	res = {'attachments': [],
 		   'error': ''}
 	
-	for i in range(1, len(email_message.get_payload())):
-		try:
-			attachment = email_message.get_payload()[i]
-			attachment_type = attachment.get_content_type()
-			content_id = attachment.get('content-id')
-			disposition = attachment.get('content-disposition')
-			if disposition:
-				disposition = disposition.split(';')[0]
-				if disposition not in ['inline', 'attachment']:
-					continue
-			else:
-				continue
-			
-			attachment_data = attachment.get_payload(decode=True)
-			if attachment_type in ALLOWED_MIMETYPES:
-				if len(attachment_data) < MAX_ATTACHMENT_SIZE:
-					res['attachments'].append({'content': attachment_data,
-											   'mime': attachment_type,
-											   'filename': attachment.get_filename(),
-											   'disposition': disposition,
-											   'id': content_id})
-				else:
-					res['error'] = 'One or more attachments exceed size limit of 1MB. Please use a separate service and send a link to the list instead.'
-					break
-			else:
-				# just send the email without the attachment
-				#res['error'] = 'One or more attachments violate allowed mimetypes: jpg, img, png, pdf, and bmp.'
-				#break
-				continue
-		except Exception, e:
-			logging.debug(e)
+	for part in email_message.walk():
+
+		disposition = part.get('content-disposition')
+
+		if not disposition or not disposition.split(';')[0] in ['inline', 'attachment']:
+			logging.debug("no disposition or not attachment; skip")
 			continue
+
+		content_type = part.get_content_type()
+		part_data = part.get_payload(decode=True)
+
+		if content_type in ALLOWED_MIMETYPES:
+			if len(part_data) < MAX_ATTACHMENT_SIZE:
+
+				content_id = part.get('content-id')
+
+				res['attachments'].append({'content': part_data,
+										   'mime': content_type,
+										   'filename': part.get_filename(),
+										   'disposition': disposition,
+										   'id': content_id})
+			else:
+				res['error'] = 'One or more attachments exceed size limit of 3MB. Please use a separate service and send a link instead.'
+
+		else:
+			res['error'] = 'One or more attachments was an unsupported filetype. We support %s.' % ALLOWED_MIMETYPES_STR
+
 	return res
 	
 
 def get_body(email_message):
-	res = {}
 
-	maintype = email_message.get_content_maintype()
-	subtype = email_message.get_content_subtype()
+	res = {'html' : '', 'plain' : ''}
 
-	if maintype == 'multipart':
-		res['html'] = ''
-		res['plain'] = ''
+	for part in email_message.walk():
+		if part.get_content_maintype() == 'text':
 
-		for part in email_message.get_payload():
-			d1 = (part['Content-Transfer-Encoding'] == 'base64')
-			if part.get_content_maintype() == 'text':
-				if part.get_content_subtype() == 'html':
-					body = part.get_payload(decode=d1)
-					body = remove_html_ps(body)
-					res['html'] += body
-				else:
-					body = part.get_payload(decode=d1)
-					body = remove_plain_ps(body)
-					res['plain'] += body
-			elif part.get_content_maintype() == 'multipart':
-				for part2 in part.get_payload():
-					d2 = (part2['Content-Transfer-Encoding'] == 'base64')
-					if part2.get_content_subtype() == 'html':
-						body = part2.get_payload(decode=d2)
-						body = remove_html_ps(body)
-						res['html'] += body
-					elif part2.get_content_subtype() == 'plain':
-						body = part2.get_payload(decode=d2)
-						body = remove_plain_ps(body)
-						res['plain'] += body
-	elif maintype == 'text':
-		d = (email_message['Content-Transfer-Encoding'] == 'base64')
-		if subtype == 'html':
-			body = email_message.get_payload(decode=d)
-			body = remove_html_ps(body)
-			res['html'] = body
-			
-		elif subtype == 'plain':
-			body = email_message.get_payload(decode=d)
-			body = remove_plain_ps(body)
-			res['plain'] = body
+			body = part.get_payload(decode=True)
+
+			subtype = part.get_content_subtype()
+			if subtype == 'plain':
+				res['plain'] += remove_plain_ps(body)
+			elif subtype == 'html':
+				res['html'] += remove_html_ps(body)
+
 	return res
 
 
@@ -381,7 +357,7 @@ def ps_squadbox(sender, reason, HTML):
 	else:
 		return '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
 
-def html_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, original_list_email=None):
+def html_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, had_attachments, original_list_email=None):
 	#follow_addr = 'mailto:%s' %(group_name + '+' + FOLLOW_SUFFIX + '@' + HOST)
 	#unfollow_addr = 'mailto:%s' %(group_name + '+'  + UNFOLLOW_SUFFIX + '@' + HOST)
 	content = ""
@@ -389,7 +365,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	if original_list_email:
 		content += "This post was sent to this group via the mailing list %s. <BR><BR>" % (original_list_email)
 
-	if not membergroup.receive_attachments:
+	if had_attachments and not membergroup.receive_attachments:
 		content += "This message came with attachments, which you have turned off. To see the attachments, view the original post:<br />"
 	tid = thread.id
 	permalink = PERMALINK_POST % (HOST, tid, post_id)
@@ -443,13 +419,16 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	content += ' | ''<a href=\"%s\">Unsubscribe</a>' % unsubscribe_addr
 
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
-	return body
+	return unicode(body)
 
-def plain_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, original_list_email=None):
+def plain_ps(group, thread, post_id, membergroup, following, muting, tag_following, tag_muting, tags, had_attachments, original_list_email=None):
 
 	content = ""
 	if original_list_email:
 		content += "This post was sent to this group via the mailing list %s. \n\n" % (original_list_email)
+
+	if had_attachments and not membergroup.receive_attachments:
+		content += "This message came with attachments, which you have turned off. To see the attachments, view the original post:\n"
 
 	tid = thread.id
 	group_name = group.name
@@ -551,3 +530,93 @@ def isSenderVerified(message):
 
 def cleanAddress(address):
 	return address.split('+')[0].lower()
+
+
+def check_whitelist_blacklist(group, sender_addr):
+	white_or_blacklist = WhiteOrBlacklist.objects.filter(group=group, email=sender_addr)
+
+	if white_or_blacklist.exists():
+		w_or_b = white_or_blacklist[0]
+		if w_or_b.blacklist:
+			return ('R', 'blacklist')
+		elif w_or_b.whitelist:
+			return ('A', 'whitelist')
+
+	return ('P', None)
+
+def check_html_and_plain(msg_text, message_is_reply):
+
+	if message_is_reply:
+		if 'html' in msg_text:
+			msg_text['html'] = remove_html_ps(msg_text['html'])
+		if 'plain' in msg_text:
+			msg_text['plain'] = remove_plain_ps(msg_text['plain'])
+
+	if 'html' not in msg_text or msg_text['html'] == '':
+		msg_text['html'] = markdown(msg_text['plain'])
+	if 'plain' not in msg_text or msg_text['plain'] == '':
+		msg_text['plain'] = html2text(msg_text['html'])
+
+	return msg_text
+
+def check_duplicate(message, group, sender_addr):
+
+	# check if we already got a post to this group with the same message_id
+	existing_post_matching_id = Post.objects.filter(msg_id=message['Message-ID'], group=group)
+	if existing_post_matching_id.exists():
+		logging.debug("Already received post with same msg-id to this group")
+		return True
+
+	# or di we get one with same sender and subject in the last ten minutes? 
+	# (this might happen if we get a post via multiple mailing lists, for example, 
+	# and the mailing list changes the ID.)
+	ten_minutes_ago = datetime.now(pytz.utc) + timedelta(minutes=-10)
+	existing_post_recent = Post.objects.filter(poster_email=sender_addr, group=group, 
+									subject=message['Subject'], timestamp__gte = ten_minutes_ago)
+	if existing_post_recent.exists():
+		logging.debug("Post with same sender and subject sent to this group < 10 min ago")
+		return True
+
+	# this is the case where we forward a message to a google group, and it forwards back to us
+	if 'X-Original-Sender' in message and message['X-Original-Sender'].split('@')[0] == group.name:
+		logging.debug('This message originally came from this list; not reposting')
+		return True
+
+	return False
+
+def check_if_can_post_murmur(group, sender_addr, possible_list_addresses):
+
+	forwarding_list = None
+
+	logging.debug("pssible list addresses: " + str(possible_list_addresses))
+
+	# if you're a member of this group, you can post
+	membergroup = MemberGroup.objects.filter(group=group, member__email=sender_addr)
+	if membergroup.exists():
+		return {'can_post' : True, 'reason' : 'is_member', 'which_user' : membergroup[0].member}
+
+	# otherwise, you can only post if you're posting via a forwarding list
+	forwarding_list = ForwardingList.objects.filter(email__in=possible_list_addresses, group=group, can_post=True)
+
+	if forwarding_list.exists():
+		return {'can_post' : True, 'reason' : 'via_list', 'which_list' : forwarding_list[0]}
+
+	return {'can_post' : False, 'reason' : 'not_member'}
+
+def fix_headers(message, mail):
+	if 'references' in message:
+			mail['References'] = message['references']
+	elif 'message-id' in message:
+		mail['References'] = message['message-id']	
+
+	if 'in-reply-to' not in message:
+		mail["In-Reply-To"] = message['message-id']
+
+def add_attachments(mail, attachments):
+	for attachment in attachments:
+		mail.attach(filename= attachment['filename'],
+					content_type=attachment['mime'],
+					data=attachment['content'],
+					disposition=attachment['disposition'],
+					id=attachment['id'])
+

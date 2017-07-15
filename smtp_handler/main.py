@@ -8,10 +8,8 @@ from email.utils import *
 from email import message_from_string
 from engine.main import *
 from utils import *
-from html2text import html2text
-from markdown2 import markdown
 from django.db.utils import OperationalError
-from datetime import datetime, timedelta
+from datetime import datetime
 import pytz
 import django.db
 
@@ -21,6 +19,8 @@ Murmur Mail Interface Handler
 @author: Anant Bhardwaj
 @date: Oct 20, 2012
 '''
+
+GROUP_OR_SQUAD = {'murmur' : 'group', 'squadbox' : 'squad'}
 
 @route("(address)@(host)", address="all", host=HOST)
 @stateless
@@ -128,10 +128,7 @@ def admins(message, group_name=None, host=None):
 			email_message = message_from_string(str(message))
 			msg_text = get_body(email_message)
 
-			if 'html' not in msg_text or msg_text['html'] == '':
-				msg_text['html'] = markdown(msg_text['plain'])
-			if 'plain' not in msg_text or msg_text['plain'] == '':
-				msg_text['plain'] = html2text(msg_text['html'])
+			msg_text = check_html_and_plain(msg_text)
 
 			mail = MurmurMailResponse(From = sender_addr, 
 					To = group_name+"+admins@" + HOST, 
@@ -203,8 +200,6 @@ def subscribe(message, group_name=None, host=None):
 		relay.deliver(mail)
 
 
-
-
 @route("(group_name)\\+unsubscribe@(host)", group_name=".+", host=HOST)
 @stateless
 def unsubscribe(message, group_name=None, host=None):
@@ -238,8 +233,6 @@ def unsubscribe(message, group_name=None, host=None):
 		mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
 		mail['Reply-To'] = '%s+subscribe@%s' %(group_name, host)
 		relay.deliver(mail)
-
-
 
 
 @route("(group_name)\\+info@(host)", group_name=".+", host=HOST)
@@ -276,124 +269,106 @@ def info(message, group_name=None, host=None):
 
 def handle_post_murmur(message, group, host, verified):
 
-	_, list_addr = parseaddr(message['List-Id'])
-	msg_id = message['Message-ID']
+	# just setting up a bunch of variables with values we'll use
 	email_message = message_from_string(str(message))
+
 	to_header = email_message.get_all('to', [])
-
-	# returns tuples of form (realname, address); only need second 
 	to_emails = [i[1] for i in getaddresses(to_header)]
-
-	msg_text = get_body(email_message)
 	sender_name, sender_addr = parseaddr(message['From'].lower())
-	if sender_name == '':
+	if not sender_name:
 		sender_name = None
-	attachments = get_attachments(email_message)
 
-	try:
-		
-		# try to detect and prevent duplicate posts 
+	# any of the lists in the "to" field might be what forwarded this to us
+	possible_list_addresses = to_emails
+	# if List-Id set that might also be it 
+	_, list_addr = parseaddr(message['List-Id'])
+	if list_addr:
+		possible_list_addresses.append(list_addr)
 
-		# check if we already got a post to this group with the same message_id
-		existing_post_matching_id = Post.objects.filter(msg_id=msg_id, group=group)
-		if existing_post_matching_id.exists():
-			logging.debug("Already received post with same msg-id to this group")
-			return
+	# according to rules and group membership, can this post go through?
+	can_post = check_if_can_post_murmur(group, sender_addr, possible_list_addresses)
+	if not can_post['can_post']:
+		error_msg = 'You are not authorized to post to the Murmur group %s@%s. This is either ' % (group.name, host) + \
+		'because you are posting directly to the group, but you are not a member, or because you are posting to ' + \
+		'a mailing list that forwards to the Murmur group, but does not have permission to do so.'
 
-		ten_minutes_ago = datetime.now(pytz.utc) + timedelta(minutes=-10)
-		existing_post_recent = Post.objects.filter(poster_email=sender_addr, group=group, 
-										subject=message['Subject'], timestamp__gte = ten_minutes_ago)
-		if existing_post_recent.exists():
-			logging.debug("Post with same sender and subject sent to this group < 10 min ago")
-			return
+		send_error_email(group.name, error_msg, sender_addr, ADMIN_EMAILS)
+		return
 
-		# this is the case where we forward a message to a google group, and it forwards back to us
-		if 'X-Original-Sender' in message and message['X-Original-Sender'].split('@')[0] == group.name:
-			logging.debug('This message originally came from this list; not reposting')
-			return
+	# if this looks like a double-post, ignore it
+	if check_duplicate(message, group, sender_addr):
+		logging.debug("ignoring duplicate")
+		return
 
-		message_is_reply = (message['Subject'][0:4].lower() == "re: ")
-		
-		if not message_is_reply:
-			orig_message = message['Subject'].strip()
-		else:
-			orig_message = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
-			if 'html' in msg_text:
-				msg_text['html'] = remove_html_ps(msg_text['html'])
-			if 'plain' in msg_text:
-				msg_text['plain'] = remove_plain_ps(msg_text['plain'])
-				
-		if 'html' not in msg_text or msg_text['html'] == '':
-			msg_text['html'] = markdown(msg_text['plain'])
-		if 'plain' not in msg_text or msg_text['plain'] == '':
-			msg_text['plain'] = html2text(msg_text['html'])
+	msg_id = message['Message-ID']
+	msg_text = get_body(email_message)
+	message_is_reply = (message['Subject'][0:4].lower() == "re: ")
+	msg_text = check_html_and_plain(msg_text, message_is_reply)
 
-		if msg_text['plain'].startswith('unsubscribe\n') or msg_text['plain'] == 'unsubscribe':
-			unsubscribe(message, group_name = group.name, host = HOST)
-			return
-		elif msg_text['plain'].startswith('subscribe\n') or msg_text['plain'] == 'subscribe':
-			subscribe(message, group_name = group.name, host = HOST)
-			return
-		
-		# try looking up sender in Murmur users
-		user_lookup = UserProfile.objects.filter(email=sender_addr)
+	if msg_text['plain'].startswith('unsubscribe\n') or msg_text['plain'] == 'unsubscribe':
+		unsubscribe(message, group_name = group.name, host = HOST)
+		return
+	elif msg_text['plain'].startswith('subscribe\n') or msg_text['plain'] == 'subscribe':
+		subscribe(message, group_name = group.name, host = HOST)
+		return
 
-		# try using List-Id field from email
-		original_list_lookup = ForwardingList.objects.filter(email=list_addr, group=group, can_post=True)
-
-		# if no valid List-Id, try email's To field
-		if not original_list_lookup.exists():
-			original_list_lookup = ForwardingList.objects.filter(email__in=to_emails, group=group, can_post=True)
-
-		# neither user nor fwding list exist so post is invalid - reject email
-		if not user_lookup.exists() and not original_list_lookup.exists():
-			error_msg = 'Your email is not in the Murmur system. Ask the admin of the group to add you.'
-			send_error_email(group.name, error_msg, sender_addr, ADMIN_EMAILS)
-			return
-
-		# get user and/or forwarding list objects to pass to insert_reply or insert_post 
-		user = None
-		if user_lookup.exists():
-			user = user_lookup[0]
-
+	# get user and/or forwarding list objects (however we are receiving this message) 
+	if can_post['reason'] == 'is_member':
+		user = can_post['which_user']
 		original_list = None
 		original_list_email = None
-		if original_list_lookup.exists():
-			original_list = original_list_lookup[0]
-			original_list_email = original_list.email
+	elif can_post['reason'] == 'via_list':
+		user = None
+		original_list = can_post['which_list']
+		original_list_email = original_list.email
+
+	# if we make it to here, then post is valid under one of following conditions:
+	# 1) it's a normal post by a group member to the group.
+	# 2) it's a post via a list that is allowed to fwd to this group, by someone who may
+	# or may not be a Murmur user, but is not a group member. 
+
+	# _create_post (called by both insert_reply and insert_post) will check which of user 
+	# and forwarding list are None and post appropriately. 
+	try:
+		res = get_attachments(email_message)
+		check = check_attachments(res, group.allow_attachments)
+
+		if not check['status']:
+			send_error_email(group.name, check['error'], sender_addr, ADMIN_EMAILS)
+			return
+
+		attachments = res['attachments']
 
 		if message_is_reply:
-			res = insert_reply(group.name, "Re: " + orig_message, msg_text['html'], user, sender_addr, msg_id, verified, forwarding_list=original_list, sender_name=sender_name)
+			post_subject = "Re: " + re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
+			insert_func = insert_reply
 		else:
-			res = insert_post(group.name, orig_message, msg_text['html'], user, sender_addr, msg_id, verified, attachments=attachments, forwarding_list=original_list, sender_name=sender_name)
+			post_subject = message['Subject'].strip()
+			insert_func = insert_post
+			
+		args = [group.name, post_subject, msg_text['html'], user, sender_addr, msg_id, verified]
+		keyword_args = {'attachments' : attachments, 'forwarding_list' : original_list, 'sender_name' : sender_name}
+
+		res = insert_func(*args, **keyword_args)
 
 		if not res['status']:
 			send_error_email(group.name, res['code'], sender_addr, ADMIN_EMAILS)
 			return
 
 		subject = get_subject(message, res, group.name)
-			
-		mail = setup_post(message['From'],
-							subject,	
-							group.name)
-			
-		if 'references' in message:
-			mail['References'] = message['references']
-		elif 'message-id' in message:
-			mail['References'] = message['message-id']	
-	
-		if 'in-reply-to' not in message:
-			mail["In-Reply-To"] = message['message-id']
+		mail = setup_post(message['From'], subject,	group.name)
+
+		fix_headers(message, mail)
 	
 		msg_id = res['msg_id']
 		mail['message-id'] = msg_id
+
 		to_send =  res['recipients']
+		logging.debug('TO LIST: ' + str(to_send))
 		
 		ccs = email_message.get_all('cc', None)
 		if ccs:
 			mail['Cc'] = ','.join(ccs)
-
-		logging.debug('TO LIST: ' + str(to_send))
 		
 		g = group
 		t = Thread.objects.get(id=res['thread_id'])
@@ -418,32 +393,34 @@ def handle_post_murmur(message, group, host, verified):
 					if recip.email == sender_addr or recip.email in direct_recips:
 						continue
 
+					# clear out message other than the headers
+					mail.clear()
+
 					membergroup = membergroups.filter(member=recip)[0]
 					following = followings.filter(user=recip).exists()
 					muting = mutings.filter(user=recip).exists()
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
-
-					if membergroup.receive_attachments:
-						for attachment in attachments.get("attachments"):
-							mail.attach(filename=attachment['filename'],
-										content_type=attachment['mime'],
-										data=attachment['content'],
-										disposition=attachment['disposition'],
-										id=attachment['id'])
 				
-					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_list_email)
-					html_ps_blurb = unicode(html_ps_blurb)
+					has_attachments = len(attachments) > 0
+
+					html_ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], has_attachments, original_list_email=original_list_email)
 					mail.Html = get_new_body(msg_text, html_ps_blurb, 'html')
 					
-					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_list_email)
+					plain_ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], has_attachments, original_list_email=original_list_email)
 					mail.Body = get_new_body(msg_text, plain_ps_blurb, 'plain')
-		
+
+					if membergroup.receive_attachments:
+						add_attachments(mail, attachments)
+
 					relay.deliver(mail, To = recip.email)
 
 			fwd_to_lists = ForwardingList.objects.filter(group=g, can_receive=True)
 
 			for l in fwd_to_lists:
+
+				mail.clear()
+
 				# non murmur list, send as usual 
 				if HOST not in l.email:
 
@@ -452,6 +429,7 @@ def handle_post_murmur(message, group, host, verified):
 
 					mail.Html = get_new_body(msg_text, footer_html, 'html')
 					mail.Body = get_new_body(msg_text, footer_plain, 'plain')
+					add_attachments(mail, attachments)
 
 					relay.deliver(mail, To = l.email)
 				# it's another murmur list. can't send mail to ourself ("loops back to 
@@ -477,9 +455,8 @@ def handle_post_murmur(message, group, host, verified):
 		
 def handle_post_squadbox(message, group, host, verified):
 
-	msg_id = message['Message-ID']
 	email_message = message_from_string(str(message))
-	msg_text = get_body(email_message)
+
 	sender_name, sender_addr = parseaddr(message['From'].lower())
 	if sender_name == '':
 		sender_name = None
@@ -487,52 +464,54 @@ def handle_post_squadbox(message, group, host, verified):
 	subj = message['Subject'].strip()
 	message_is_reply = (subj[0:4].lower() == "re: ")
 	attachments = get_attachments(email_message)
+	msg_id = message['Message-ID']
 
-	if 'html' not in msg_text or msg_text['html'] == '':
-		msg_text['html'] = markdown(msg_text['plain'])
-	if 'plain' not in msg_text or msg_text['plain'] == '':
-		msg_text['plain'] = html2text(msg_text['html'])
+	msg_text = get_body(email_message)
+	msg_text = check_html_and_plain(msg_text, message_is_reply)
 
 	# initially, assume that it's pending and will go through moderation. 
 	status = 'P'
+	reason = None
 
+	# deactivated squad - message is auto-approved. 
 	if not group.active:
 		status = 'A'
+		reason = 'deactivated'
 
 	else:
 		# if whitelisted, accept; if blacklisted, reject 
-		white_or_blacklist = WhiteOrBlacklist.objects.filter(group=group, email=sender_addr)
-		if white_or_blacklist.exists():
-			w_or_b = white_or_blacklist[0]
-			if w_or_b.blacklist:
-				status = 'R' # if blacklist could means "gets moderated", need to change. 
-			elif w_or_b.whitelist:
-				status = 'A' # sender is whitelisted, so we can accept the message 
-
+		status, reason = check_whitelist_blacklist(group, sender_addr)
+		if not reason:
+			# TODO: hash sender + subject, check if already approved from them
+			pass
 
 	# if pending or rejected, we need to put it in the DB 
-	if status == 'P' or status == 'R':
+	if status in ['P', 'R']:
 
 		if message_is_reply:
-			original_subject = re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
-			res = insert_reply(group.name, "Re: " + original_subject, msg_text['html'], None, sender_addr, msg_id, verified, attachments, None, post_status=reply_status, sender_name=sender_name)
+			post_subject = "Re: " + re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
+			insert_func = insert_squadbox_reply
+		else:
+			post_subject = message['Subject'].strip()
+			insert_func = insert_post
+			
+		args = [group.name, post_subject, msg_text['html'], None, sender_addr, msg_id, verified]
+		keyword_args = {'attachments' : attachments, 'sender_name' : sender_name, 'status' : status}
 
-		else: 
-			res = insert_post(group.name, subj, msg_text['html'], None, sender_addr, msg_id, verified, attachments, None, status, sender_name)
-		
+		res = insert_func(*args, **keyword_args)
+
 		if not res['status']:
 			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
 			return
-
 
 	# either:
 	# 1) sender is whitelisted
 	# 2) sender is blacklisted, but the user still wants rejected messages. 
 	# 3) moderation is turned off for now (inactive group)
 	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
+
 		# we can just send it on to the intended recipient, i.e. the admin of the group. 
-		mg = MemberGroup.objects.get(group=group, admin=True)
-		admin = mg.member
+		admin = MemberGroup.objects.get(group=group, admin=True).member
 
 		new_subj = subj
 		if status == 'R':
@@ -540,32 +519,14 @@ def handle_post_squadbox(message, group, host, verified):
 
 		mail = MurmurMailResponse(From = message['From'], To = admin.email, Subject = new_subj)
 
-		if 'references' in message:
-			mail['References'] = message['references']
-		elif 'message-id' in message:
-			mail['References'] = message['message-id']	
-	
-		if 'in-reply-to' not in message:
-			mail["In-Reply-To"] = message['message-id']
+		fix_headers(message, mail)
 
 		mail['message-id'] = msg_id
 		ccs = email_message.get_all('cc', None)
 		if ccs:
 			mail['Cc'] = ','.join(ccs)
 
-		for attachment in attachments.get("attachments"):
-			mail.attach(filename=attachment['filename'],
-						content_type=attachment['mime'],
-						data=attachment['content'],
-						disposition=attachment['disposition'],
-						id=attachment['id'])
-
-		if not group.active:
-			reason = 'deactivated'
-		elif status == 'A':
-			reason = 'whitelist'
-		elif status == 'R':
-			reason = 'blacklist'
+		add_attachments(mail, attachments)
 
 		html_blurb = unicode(ps_squadbox(sender_addr, reason, True))
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
@@ -595,6 +556,10 @@ def handle_post_squadbox(message, group, host, verified):
 			relay.deliver(outgoing_msg, To=member.email)
 			logging.debug("sending msg to moderator %s" % member.email)
 	
+handler_funcs = {
+	'murmur' : handle_post_murmur,
+	'squadbox' : handle_post_squadbox,
+}
 
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
@@ -620,17 +585,9 @@ def handle_post(message, address=None, host=None):
 	group_name = address
 	try:
 		group = Group.objects.get(name=group_name)
-	except Exception, e:
-		logging.debug(e)
-		send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)	
-		return
-
-	email_message = message_from_string(str(message))
-
-	attachments = get_attachments(email_message)
-	res = check_attachments(attachments, group.allow_attachments)
-	if not res['status']:
-		send_error_email(group_name, res['error'], sender_addr, ADMIN_EMAILS)
+	except Group.DoesNotExist:
+		msg = '%s with name %s does not exist.' % (GROUP_OR_SQUAD[WEBSITE], group_name)
+		send_error_email(group_name, msg, sender_addr, ADMIN_EMAILS)	
 		return
 	
 	# deal with Gmail forwarding verification emails:
@@ -643,11 +600,7 @@ def handle_post(message, address=None, host=None):
 		relay.deliver(mail)
 		return
 
-	if WEBSITE == 'squadbox':
-		handle_post_squadbox(message, group, host, verified)
-
-	elif WEBSITE == 'murmur':
-		handle_post_murmur(message, group, host, verified)
+	handler_funcs[WEBSITE](message, group, host, verified)
 
 
 @route("(group_name)\\+(thread_id)(suffix)@(host)", group_name=".+", thread_id=".+", suffix=FOLLOW_SUFFIX+"|"+FOLLOW_SUFFIX.upper(), host=HOST)
@@ -791,6 +744,7 @@ def handle_mute_tag(message, group_name=None, tag_name=None, suffix=None, host=N
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = body)
 		relay.deliver(mail)
 
+
 @route("(group_name)\\+(tag_name)(suffix)@(host)", group_name=".+", tag_name=".+", suffix=UNMUTE_TAG_SUFFIX+"|"+UNMUTE_TAG_SUFFIX.upper(), host=HOST)
 @stateless
 def handle_unmute_tag(message, group_name=None, tag_name=None, suffix=None, host=None):
@@ -809,6 +763,7 @@ def handle_unmute_tag(message, group_name=None, tag_name=None, suffix=None, host
 		
 		mail = MailResponse(From = NO_REPLY, To = addr, Subject = res['tag_name'], Body = body)
 		relay.deliver(mail)
+
 
 @route("(group_name)\\+(post_id)(suffix)@(host)", group_name=".+", post_id=".+", suffix=UPVOTE_SUFFIX+"|"+UPVOTE_SUFFIX.upper(), host=HOST)
 @stateless
