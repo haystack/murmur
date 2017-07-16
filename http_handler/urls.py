@@ -171,16 +171,25 @@ elif WEBSITE == 'squadbox':
 
     new_patterns = [
                     url(r'^dashboard', 'browser.views.dashboard'),
+
                     url(r'^approve_get', 'browser.views.approve_get'),
                     url(r'^reject_get', 'browser.views.reject_get'),
                     url(r'^approve_post', 'browser.views.approve_post'),
                     url(r'^reject_post', 'browser.views.reject_post'),
+
                     url(r'^delete_posts', 'browser.views.delete_posts'),
                     url(r'^delete_post', 'browser.views.delete_post'),
-                    url(r'^blacklist_get', 'browser.views.blacklist_get'),
+
                     url(r'^whitelist_get', 'browser.views.whitelist_get'),
                     url(r'^whitelist', 'browser.views.whitelist'),
+                    url(r'^groups/(?P<group_name>[\w-]+)/add_whitelist', 'browser.views.add_whitelist_view'),
+
+                    url(r'^unblacklist_unwhitelist', 'browser.views.unblacklist_unwhitelist'),
+
+                    url(r'^blacklist_get', 'browser.views.blacklist_get'),
                     url(r'^blacklist', 'browser.views.blacklist'),
+                    url(r'^groups/(?P<group_name>[\w-]+)/add_blacklist', 'browser.views.add_blacklist_view'),
+
                     url(r'^groups/(?P<group_name>[\w-]+)/rejected', 'browser.views.rejected'),
                     url(r'^rejected_thread$', 'browser.views.rejected_thread'),
                     ]
