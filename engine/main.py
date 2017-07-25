@@ -956,11 +956,8 @@ def insert_post_web(group_name, subject, message_text, user):
 		group = Group.objects.get(name=group_name)
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
-			print "hello"
 			msg_id = base64.b64encode(user.email + str(datetime.now())).lower() + '@' + BASE_URL
-			print "hello again"
 			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id, verified=True)
-			print "boop"
 			res['status'] = True
 			
 			res['member_group'] = {'no_emails': user_member[0].no_emails,
@@ -1450,7 +1447,6 @@ def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 			current = WhiteOrBlacklist.objects.filter(group=g, email=email)
 			if current.exists():
 				entry = current[0]
-				print "entry: ", entry.whitelist, entry.blacklist
 				entry.whitelist = whitelist
 				entry.blacklist = blacklist
 			else:

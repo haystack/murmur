@@ -776,7 +776,6 @@ def insert_post(request):
 		msg_text = request.POST['msg_text']
 		
 		res = engine.main.insert_post_web(group_name, request.POST['subject'], msg_text, user)
-		print res
 		
 		subj_tag = ''
 		for tag in res['tags']:
@@ -1319,8 +1318,6 @@ def blacklist(request):
 @login_required
 def unblacklist_unwhitelist(request):
 	try:
-		print "hi"
-		print "senders: ", request.POST['senders']
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.POST['group_name']
