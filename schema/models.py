@@ -156,6 +156,7 @@ class MemberGroup(models.Model):
 	always_follow_thread = models.BooleanField(default=True)
 	upvote_emails = models.BooleanField(default=True)
 	receive_attachments = models.BooleanField(default=True)
+	last_emailed = models.DateTimeField(null=True)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)

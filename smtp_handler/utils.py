@@ -106,7 +106,7 @@ def setup_post(From, Subject, group_name):
 
 def setup_moderation_post(group_name):
 
-	subject = 'New post to Squadbox squad %s requires approval' % group_name 
+	subject = 'New posts to Squadbox squad %s require approval' % group_name 
 	to = '%s Moderators <%s+mods@%s>' % (group_name, group_name, HOST)
 	from_addr = 'Squadbox Notifications <%s+notifications@%s>' % (group_name, HOST)
 
@@ -119,8 +119,11 @@ def setup_moderation_post(group_name):
 		"Precedence": 'list'
 		})
 
-	plain_body = "To view all pending posts to the squad, visit your dashboard: %s/dashboard" % BASE_URL
-	html_body = "To view all pending posts to the squad, visit your <a href='%s/dashboard'>dashboard</a>." % BASE_URL 
+	pending_count = Post.objects.filter(group__name=group_name, status='P').count()
+
+	body_base = 'As of now, there are %s pending posts. To view all of them, visit the ' %  pending_count
+	plain_body = body_base + "moderation queue: %s/mod_queue/%s" % (BASE_URL, group_name)
+	html_body = body_base + "<a href='%s/mod_queue/%s'>moderation queue</a>." % (BASE_URL, group_name)
 
 	blurb = "You're receiving this message because you're a moderator of the squad %s." % group_name
 	html_ps_blurb = '%s%s%s' % (HTML_SUBHEAD, blurb, HTML_SUBTAIL)
@@ -342,21 +345,21 @@ def plain_forwarded_blurb(group_name, to_list, original_list_email=None):
 
 def ps_squadbox(sender, reason, HTML):
 
-	content = 'This message was automatically '
+	content = 'This message was '
 
 	if reason == 'whitelist':
-		content += 'rejected because the sender %s is on your whitelist.' % sender
+		content += 'automatically rejected because the sender %s is on your whitelist.' % sender
 	elif reason == 'blacklist':
-		content += 'rejected because the sender %s is on your blacklist.' % sender
+		content += 'automatically rejected because the sender %s is on your blacklist.' % sender
 	elif reason.startswith('approved') or reason.startswith('rejected'):
 		content += reason
 	elif reason == 'deactivated':
-		content += 'approved because your squad is disabled.'
+		content += 'automatically approved because your squad is disabled.'
 	elif reason == 'already approved':
-		content += 'approved because a previous post from %s to this thread was approved.' % sender 
+		content += 'automatically approved because a previous post from %s to this thread was approved.' % sender 
 		#+ ' If you want to turn moderation back on for posts from %s, '
 	elif reason == 'no mods':
-		content += 'approved because your squad has no moderators.'
+		content += 'automatically approved because your squad has no moderators.'
 	else:
 		content = ''
 
