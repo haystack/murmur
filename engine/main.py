@@ -1426,7 +1426,6 @@ def unmute_tag(tag_name, group_name, user=None, email=None):
 def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 	res = {'status' : False}
 
-
 	# illegal to have both set to true
 	if whitelist and blacklist:
 		res['code'] = msg_code['REQUEST_ERROR']
@@ -1498,7 +1497,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
 			group_tag_names = [t.tag.name for t in TagThread.objects.filter(thread=p.thread)]
 
-			if tags is not None and len(tags) > 0:
+			if tags and len(tags) > 0:
 				tag_names = tags.split(',')
 				for t in tag_names:
 					if t not in group_tag_names:
@@ -1516,7 +1515,6 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 			# or if it was rejected but the recipient wants rejected emails with tag
 			if new_status == 'A' or (new_status == 'R' and g.send_rejected_tagged):
 
-
 				mgs = MemberGroup.objects.filter(group=g, admin=True)
 				if not mgs.exists():
 					return res
@@ -1525,6 +1523,10 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
 				if new_status == 'A':
 					reason = 'approved by moderator %s.' % user.email
+					if not check_if_sender_moderated_for_thread(g, p.poster_email, p.subject):
+						hashed = get_sender_subject_hash(sender_addr, subject)
+						ThreadHash.objects.get_or_create(sender_subject_hash=hashed, group=g, moderate=False)
+
 				elif new_status == 'R':
 					reason = 'rejected by moderator %s.' % user.email
 

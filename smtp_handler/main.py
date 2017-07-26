@@ -463,6 +463,12 @@ def handle_post_squadbox(message, group, host, verified):
 	
 	subj = message['Subject'].strip()
 	message_is_reply = (subj[0:4].lower() == "re: ")
+
+	if message_is_reply:
+		post_subject = "Re: " + re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
+	else:
+		post_subject = message['Subject'].strip()
+
 	attachments = get_attachments(email_message)
 	msg_id = message['Message-ID']
 
@@ -477,22 +483,24 @@ def handle_post_squadbox(message, group, host, verified):
 	if not group.active:
 		status = 'A'
 		reason = 'deactivated'
-
+		logging.debug("Squad deactivated; automatically approving message")
 	else:
 		# if whitelisted, accept; if blacklisted, reject 
 		status, reason = check_whitelist_blacklist(group, sender_addr)
 		if not reason:
-			# TODO: hash sender + subject, check if already approved from them
-			pass
+			if check_if_sender_approved_for_thread(group, sender_addr, post_subject):
+				status = 'A'
+				reason = 'already approved'
+				logging.debug('Sender approved for this thread previously; automatically approving post')
+			else:
+				logging.debug('Post needs to be moderated; either sender has not been approved before, or admin has opted to have this sender continue being moderated')
 
 	# if pending or rejected, we need to put it in the DB 
 	if status in ['P', 'R']:
 
 		if message_is_reply:
-			post_subject = "Re: " + re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
 			insert_func = insert_squadbox_reply
 		else:
-			post_subject = message['Subject'].strip()
 			insert_func = insert_post
 			
 		args = [group.name, post_subject, msg_text['html'], None, sender_addr, msg_id, verified]
@@ -504,10 +512,17 @@ def handle_post_squadbox(message, group, host, verified):
 			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
 			return
 
+	moderators = MemberGroup.objects.filter(group=group, moderator=True)
+	if not moderators.exist():
+		status = 'A'
+		reason = 'no mods'
+		logging.debug("Squad has no moderators")
+
 	# either:
 	# 1) sender is whitelisted
 	# 2) sender is blacklisted, but the user still wants rejected messages. 
 	# 3) moderation is turned off for now (inactive group)
+	# 4) sender already posted to this thread and got approved, and admin didn't opt back in to moderation for that sender
 	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
 
 		# we can just send it on to the intended recipient, i.e. the admin of the group. 
@@ -515,7 +530,7 @@ def handle_post_squadbox(message, group, host, verified):
 
 		new_subj = subj
 		if status == 'R':
-			new_subj = '[Rejected] ' + new_subj 
+			new_subj = '[Rejected] ' + new_subj
 
 		mail = MurmurMailResponse(From = message['From'], To = admin.email, Subject = new_subj)
 
@@ -538,15 +553,6 @@ def handle_post_squadbox(message, group, host, verified):
 
 	# send notification to mods (probably should change to not do this every time)
 	elif status == 'P':
-
-		moderators = MemberGroup.objects.filter(group=group, moderator=True)
-
-		if len(moderators) == 0:
-			error_msg = 'Error: the group %s has no moderators' % group.name
-			logging.debug(error_msg)
-			send_error_email(group.name, error_msg, None, ADMIN_EMAILS)
-			# maybe here we should just send the original email on to the admin here then? 
-			return
 
 		outgoing_msg = setup_moderation_post(group.name)
 		outgoing_msg['message-id'] = base64.b64encode(group.name + str(datetime.now())).lower() + '@' + BASE_URL

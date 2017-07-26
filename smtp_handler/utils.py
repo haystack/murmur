@@ -7,6 +7,7 @@ from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE
 from datetime import datetime, timedelta
 from email.utils import *
 from email import message_from_string
+from hashlib import sha1
 from html2text import html2text
 from markdown2 import markdown
 
@@ -341,14 +342,21 @@ def plain_forwarded_blurb(group_name, to_list, original_list_email=None):
 
 def ps_squadbox(sender, reason, HTML):
 
+	content = 'This message was automatically '
+
 	if reason == 'whitelist':
-		content = 'This message was automatically approved because the sender %s is on your whitelist.' % sender
+		content += 'rejected because the sender %s is on your whitelist.' % sender
 	elif reason == 'blacklist':
-		content = 'This message was automatically rejected because the sender %s is on your blacklist.' % sender
+		content += 'rejected because the sender %s is on your blacklist.' % sender
 	elif reason.startswith('approved') or reason.startswith('rejected'):
-		content = 'This message was ' + reason 
+		content += reason
 	elif reason == 'deactivated':
-		content = 'This message was automatically approved because your squad is disabled.'
+		content += 'approved because your squad is disabled.'
+	elif reason == 'already approved':
+		content += 'approved because a previous post from %s to this thread was approved.' % sender 
+		#+ ' If you want to turn moderation back on for posts from %s, '
+	elif reason == 'no mods':
+		content += 'approved because your squad has no moderators.'
 	else:
 		content = ''
 
@@ -620,3 +628,14 @@ def add_attachments(mail, attachments):
 					disposition=attachment['disposition'],
 					id=attachment['id'])
 
+def get_sender_subject_hash(sender_addr, subject):
+	data = '%s|%s' % (sender_addr, subject)
+	return sha1(data.encode()).hexdigest()
+
+def check_if_sender_approved_for_thread(group, sender_addr, subject):
+	hashed = get_sender_subject_hash(sender_addr, subject)
+	return ThreadHash.objects.filter(sender_subject_hash=hashed, group=group, moderate=False).exists()
+
+def check_if_sender_moderated_for_thread(group, sender_addr, subject):
+	hashed = get_sender_subject_hash(sender_addr, subject)
+	return ThreadHash.objects.filter(sender_subject_hash=hashed, group=group, moderate=True).exists()
