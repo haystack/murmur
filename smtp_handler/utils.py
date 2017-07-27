@@ -343,25 +343,64 @@ def plain_forwarded_blurb(group_name, to_list, original_list_email=None):
 	return body
 
 
-def ps_squadbox(sender, reason, HTML):
+def ps_squadbox(sender, reason, squad_name, subject, HTML):
+
+	moderate_on_link = '%s/moderate_user_for_thread_get?group_name=%s&sender=%s&subject=%s&moderate=on' % (BASE_URL, squad_name, sender, subject)
+	moderate_off_link = moderate_on_link[:-2] + 'off'
 
 	content = 'This message was '
 
 	if reason == 'whitelist':
-		content += 'automatically rejected because the sender %s is on your whitelist.' % sender
+		content += 'automatically approved because the sender %s is on your whitelist.' % sender
+
 	elif reason == 'blacklist':
 		content += 'automatically rejected because the sender %s is on your blacklist.' % sender
+
 	elif reason.startswith('approved') or reason.startswith('rejected'):
 		content += reason
+
+		if reason.startswith('approved':)
+
+			if check_if_sender_moderated_for_thread(squad_name, sender, subject):
+				start = "You've opted to keep moderation on for posts from %s to this thread. To turn it off, follow " % sender
+
+				if HTML:
+					content += '<br><br>' + start + "<a href='%s'>this link</a>." % moderate_off_link
+				else:
+					content += '\n\n' + start + "this link: <%s>" % moderate_off_link
+				
+			elif check_if_sender_approved_for_thread(squad_name, sender, subject):
+				start = "Since this post was approved, future posts from %s to this thread will be automatically approved. To turn moderation back on for this sender, follow " % sender
+
+				if HTML:
+					content += '<br><br>' + start + "<a href='%s'>this link</a>." % moderate_on_link
+				else:
+					content += '\n\n' + start + "this link: <%s>" % moderate_on_link
+
+
 	elif reason == 'deactivated':
 		content += 'automatically approved because your squad is disabled.'
 	elif reason == 'already approved':
 		content += 'automatically approved because a previous post from %s to this thread was approved.' % sender 
-		#+ ' If you want to turn moderation back on for posts from %s, '
+
+		start = "To turn moderation back on for posts from %s to this thread, follow " % sender
+		if HTML:
+			content += '<br><br>' + start + '<a href="%s">this link</a>.' % moderate_on_link
+		else:
+			content += '\n\n' + start + 'this link: <%s>' % moderate_on_link
+
 	elif reason == 'no mods':
 		content += 'automatically approved because your squad has no moderators.'
 	else:
 		content = ''
+
+	if reason in ['whitelist', 'blacklist', 'no mods']:
+		page_link = '%s/groups/%s' % (BASE_URL, squad_name)
+		start = "To edit your whitelist, blacklist, or moderators, visit the "
+		if HTML:
+			content += '<br><br>' + start + '<a href="%s">squad page</a>.' % page_link
+		else:
+			content += '\n\n' + start + 'squad page <%s>.' % page_link
 
 	if HTML:
 		return '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
@@ -635,10 +674,10 @@ def get_sender_subject_hash(sender_addr, subject):
 	data = '%s|%s' % (sender_addr, subject)
 	return sha1(data.encode()).hexdigest()
 
-def check_if_sender_approved_for_thread(group, sender_addr, subject):
+def check_if_sender_approved_for_thread(group_name, sender_addr, subject):
 	hashed = get_sender_subject_hash(sender_addr, subject)
-	return ThreadHash.objects.filter(sender_subject_hash=hashed, group=group, moderate=False).exists()
+	return ThreadHash.objects.filter(sender_subject_hash=hashed, group__name=group_name, moderate=False).exists()
 
-def check_if_sender_moderated_for_thread(group, sender_addr, subject):
+def check_if_sender_moderated_for_thread(group_name, sender_addr, subject):
 	hashed = get_sender_subject_hash(sender_addr, subject)
-	return ThreadHash.objects.filter(sender_subject_hash=hashed, group=group, moderate=True).exists()
+	return ThreadHash.objects.filter(sender_subject_hash=hashed, group__name=group_name, moderate=True).exists()

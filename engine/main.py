@@ -1530,7 +1530,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
 				if new_status == 'A':
 					reason = 'approved by moderator %s.' % user.email
-					if not check_if_sender_moderated_for_thread(g, p.poster_email, p.subject):
+					if not check_if_sender_moderated_for_thread(g.name, p.poster_email, p.subject):
 						hashed = get_sender_subject_hash(p.poster_email, p.subject)
 						ThreadHash.objects.get_or_create(sender_subject_hash=hashed, group=g, moderate=False)
 
@@ -1642,3 +1642,27 @@ def fix_posts(post_queryset):
 		posts_fixed.append(post_dict)
 
 	return posts_fixed
+
+def adjust_moderate_user_for_thread(user, group_name, sender_addr, subject, moderate):
+
+	res = {'status' : False}
+	try:
+		g = Group.objects.get(name=group_name)
+		mg = MemberGroup.objects.get(member=user, group=g)
+		if not mg.admin:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+		else:
+			hashed = get_sender_subject_hash(sender_addr, subject)
+			th, _ = ThreadHash.objects.get_or_create(group=g, sender_subject_hash=hashed)
+			th.moderate = moderate
+			th.save()
+			res['status'] = True
+
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
+
+	return res
+

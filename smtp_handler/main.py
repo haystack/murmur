@@ -497,7 +497,7 @@ def handle_post_squadbox(message, group, host, verified):
 		# if whitelisted, accept; if blacklisted, reject 
 		status, reason = check_whitelist_blacklist(group, sender_addr)
 		if not reason:
-			if check_if_sender_approved_for_thread(group, sender_addr, original_subj):
+			if check_if_sender_approved_for_thread(group.name, sender_addr, original_subj):
 				status = 'A'
 				reason = 'already approved'
 				logging.debug('Sender approved for this thread previously; automatically approving post')
@@ -550,11 +550,10 @@ def handle_post_squadbox(message, group, host, verified):
 			mail['Cc'] = ','.join(ccs)
 
 		add_attachments(mail, attachments)
-
-		html_blurb = unicode(ps_squadbox(sender_addr, reason, True))
+		html_blurb = unicode(ps_squadbox(sender_addr, reason, group.name, subj, True))
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
 
-		plain_blurb = ps_squadbox(sender_addr, reason, False)
+		plain_blurb = ps_squadbox(sender_addr, reason, group.name, subj, False)
 		mail.Body = get_new_body(msg_text, plain_blurb, 'plain')
 
 		relay.deliver(mail, To = admin.email)

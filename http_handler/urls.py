@@ -193,6 +193,8 @@ elif WEBSITE == 'squadbox':
 
                     url(r'^groups/(?P<group_name>[\w-]+)/rejected', 'browser.views.rejected'),
                     url(r'^rejected_thread$', 'browser.views.rejected_thread'),
+
+                    url(r'^moderate_user_for_thread_get', 'browser.views.moderate_user_for_thread_get'),
                     ]
 
     urlpatterns.extend(new_patterns)
