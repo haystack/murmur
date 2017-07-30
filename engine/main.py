@@ -1591,13 +1591,19 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 	logging.debug(res)
 	return res 
 
-def load_pending_posts(user):
+def load_pending_posts(user, group_name):
 	res = {'status' : False}
 	try:
-		groups = Group.objects.filter(membergroup__member=user, membergroup__moderator=True)
-		posts = Post.objects.filter(group__in=groups, status='P')
-		res['status'] = True
+		mg = MemberGroup.objects.get(member=user, group__name=group_name)
+		posts = Post.objects.filter(group__name=group_name, status='P')
 		res['posts'] = fix_posts(posts)
+		res['status'] = True
+
+	except MemberGroup.DoesNotExist:
+		logging.debug(e)
+		res['status'] = False
+		res['code'] = msg_code['NOT_MEMBER']
+		res['error'] = e
 
 	except Exception, e:
 		logging.debug(e)

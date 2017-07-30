@@ -34,8 +34,6 @@ urlpatterns = patterns('',
     url(r'^add_members', 'browser.views.add_members'),
     url(r'^edit_members', 'browser.views.edit_members'),
 
-    url(r'^unsubscribe_get', 'browser.views.unsubscribe_get'),
-    url(r'^subscribe_get', 'browser.views.subscribe_get'),
     url(r'^unsubscribe_group', 'browser.views.unsubscribe_group'),
     url(r'^subscribe_group', 'browser.views.subscribe_group'),
 
@@ -108,6 +106,9 @@ if WEBSITE == 'murmur':
     new_patterns = [
                     url(r'^about', 'browser.views.about'),
                     url(r'^posts$', 'browser.views.posts'),
+   
+                    url(r'^unsubscribe_get', 'browser.views.unsubscribe_get'),
+                    url(r'^subscribe_get', 'browser.views.subscribe_get'),
 
                     url(r'^post_list', 'browser.views.post_list'),
                     url(r'^pub_group_list', 'browser.views.pub_group_list'),
@@ -170,10 +171,11 @@ if WEBSITE == 'murmur':
 elif WEBSITE == 'squadbox': 
 
     new_patterns = [
-                    url(r'^dashboard', 'browser.views.dashboard'),
+                    url(r'^mod_queue/(?P<group_name>[\w-]+)', 'browser.views.mod_queue'),
 
-                    url(r'^approve_get', 'browser.views.approve_get'),
-                    url(r'^reject_get', 'browser.views.reject_get'),
+                    # url(r'^approve_get', 'browser.views.approve_get'),
+                    # url(r'^reject_get', 'browser.views.reject_get'),
+
                     url(r'^approve_post', 'browser.views.approve_post'),
                     url(r'^reject_post', 'browser.views.reject_post'),
 
