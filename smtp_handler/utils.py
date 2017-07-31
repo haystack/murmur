@@ -518,9 +518,9 @@ def isSenderVerified(message):
 				new_hash = hashlib.sha1(sender_addr+to_addr+salt).hexdigest()[:20]
 				user.hash = new_hash
 				user.save()
-				mail = MurmurMailResponse(From = NO_REPLY, Subject = "Please use your secret code in future emails")
-				mail.Body = "In future, to ensure your message is delivered, please include the code %s within the address of your emails, before the '@' symbol and after a '+' symbol. E.g. if you are emailing testgroup@%s, you should now email testgroup+%s@%s to ensure your email is verified as coming directly from you, and thus delivered correctly." % (new_hash, HOST, new_hash, HOST)
-				relay.deliver(mail, To = sender_addr)
+				#mail = MurmurMailResponse(From = NO_REPLY, Subject = "Please use your secret code in future emails")
+				#mail.Body = "In future, to ensure your message is delivered, please include the code %s within the address of your emails, before the '@' symbol and after a '+' symbol. E.g. if you are emailing testgroup@%s, you should now email testgroup+%s@%s to ensure your email is verified as coming directly from you, and thus delivered correctly." % (new_hash, HOST, new_hash, HOST)
+				#relay.deliver(mail, To = sender_addr)
 			hash_group = re.search(r'\+(.{20,40}?)\@', to_addr)
 			if hash_group:
 				sender_hash = hash_group.group(1)
