@@ -1009,13 +1009,9 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, ve
 	res = {'status' : False}
 	thread = None
 
-	logging.debug("ATTACHMENTS:")
-	logging.debug(attachments)
 	try:
 		group = Group.objects.get(name=group_name)
-		logging.debug("here1")
 		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments=attachments, forwarding_list=forwarding_list, post_status=post_status, sender_name=sender_name)
-		logging.debug("here2")
 		res['status'] = True
 		res['post_id'] = p.id
 		res['msg_id'] = p.msg_id
@@ -1028,14 +1024,12 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, ve
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 
-	# except Exception, e:
-	# 	logging.debug("here10")
-	# 	logging.debug(e)
-	# 	if(thread and thread.id):
-	# 		thread.delete()
-	# 	res['code'] = msg_code['UNKNOWN_ERROR']
+	except Exception, e:
+		logging.debug(e)
+		if(thread and thread.id):
+			thread.delete()
+		res['code'] = msg_code['UNKNOWN_ERROR']
 
-	logging.debug("here3")
 	logging.debug(res)
 	return res
 
