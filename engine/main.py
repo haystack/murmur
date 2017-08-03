@@ -1525,8 +1525,9 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				if new_status == 'A':
 					reason = 'approved by moderator %s.' % user.email
 					if not check_if_sender_moderated_for_thread(g.name, p.poster_email, p.subject):
-						hashed = get_sender_subject_hash(p.poster_email, p.subject)
-						ThreadHash.objects.get_or_create(sender_subject_hash=hashed, group=g, moderate=False)
+						if g.auto_approve_after_first:
+							hashed = get_sender_subject_hash(p.poster_email, p.subject)
+							ThreadHash.objects.get_or_create(sender_subject_hash=hashed, group=g, moderate=False)
 
 				elif new_status == 'R':
 					reason = 'rejected by moderator %s.' % user.email

@@ -494,15 +494,37 @@ def handle_post_squadbox(message, group, host, verified):
 		reason = 'deactivated'
 		logging.debug("Squad deactivated; automatically approving message")
 	else:
-		# if whitelisted, accept; if blacklisted, reject 
+
+		# first try whitelist/blacklist
 		status, reason = check_whitelist_blacklist(group, sender_addr)
+
+		# if that didn't give us an answer
 		if not reason:
+
+			# see if moderation has been shut off for this user/thread combo. that happens if either:
+			# 1) group has setting on to auto-approve posts from a user to thread after their 1st post to thread is approved
+			# 2) that setting isn't on, but recipient manually shut off moderation for this user to this thread
 			if check_if_sender_approved_for_thread(group.name, sender_addr, original_subj):
 				status = 'A'
-				reason = 'already approved'
-				logging.debug('Sender approved for this thread previously; automatically approving post')
+
+				# case 1 
+				if group.auto_approve_after_first:
+					reason = 'already approved'
+					logging.debug('Sender approved for this thread previously; automatically approving post')
+				# case 2
+				else:
+					reason = 'moderation turned off for sender'
+					
 			else:
-				logging.debug('Post needs to be moderated; either sender has not been approved before, or admin has opted to have this sender continue being moderated')
+				logging.debug('Post needs to be moderated')
+
+
+
+	moderators = MemberGroup.objects.filter(group=group, moderator=True)
+	if not moderators.exists():
+		status = 'A'
+		reason = 'no mods'
+		logging.debug("Squad has no moderators")
 
 	# if pending or rejected, we need to put it in the DB 
 	if status in ['P', 'R']:
@@ -520,17 +542,14 @@ def handle_post_squadbox(message, group, host, verified):
 			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
 			return
 
-	moderators = MemberGroup.objects.filter(group=group, moderator=True)
-	if not moderators.exists():
-		status = 'A'
-		reason = 'no mods'
-		logging.debug("Squad has no moderators")
-
-	# either:
+	# one of following is true: 
 	# 1) sender is whitelisted
 	# 2) sender is blacklisted, but the user still wants rejected messages. 
 	# 3) moderation is turned off for now (inactive group)
-	# 4) sender already posted to this thread and got approved, and admin didn't opt back in to moderation for that sender
+	# 4) this group doesn't have any moderators yet
+	# 4) group has "auto approve after first post" on, and this sender posted before and got approved 
+	# (and the recipient did not subsequently opt back in to moderation for that user)
+	# 5) group has "auto approve after first post" off, but sender manually shut off moderation for this sender
 	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
 
 		# we can just send it on to the intended recipient, i.e. the admin of the group. 
