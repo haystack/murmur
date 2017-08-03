@@ -1523,14 +1523,14 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 					admin = mgs[0].member
 
 				if new_status == 'A':
-					reason = 'approved by moderator %s.' % user.email
+					reason = 'moderator approved'
 					if not check_if_sender_moderated_for_thread(g.name, p.poster_email, p.subject):
 						if g.auto_approve_after_first:
 							hashed = get_sender_subject_hash(p.poster_email, p.subject)
 							ThreadHash.objects.get_or_create(sender_subject_hash=hashed, group=g, moderate=False)
 
 				elif new_status == 'R':
-					reason = 'rejected by moderator %s.' % user.email
+					reason = 'moderator rejected'
 
 				tags = [t.tag.name for t in TagThread.objects.filter(thread = p.thread)]
 
@@ -1547,8 +1547,12 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				for a in attachments:
 					mail.attach(filename=a['name'], data=a['data'])
 
-				html_blurb = unicode(ps_squadbox(p.poster_email, reason, True))
-				plain_blurb = ps_squadbox(p.poster_email, reason, False)
+				orig_subj = p.subject
+				if orig_subj.startswith('Re: '):
+					orig_subj = orig_subj[4:]		
+
+				html_blurb = unicode(ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, True))
+				plain_blurb = ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, False)
 
 				html_prefix = ''
 				if new_status == 'R' and len(p.mod_explanation) > 0:

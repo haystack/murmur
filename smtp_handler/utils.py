@@ -79,7 +79,62 @@ ALLOWED_MIMETYPES_STR = 'images (JPEG, BMP, GIF, PNG), PDFs, and Microsoft Offic
 
 MAX_ATTACHMENT_SIZE = 3000000
 
+# for creating squadbox ps 
+SQUADBOX_REASONS = {
+	'whitelist' : "This message was auto-approved because the sender %s is on your whitelist.",
+	'blacklist' : "This message was auto-rejected because the sender %s is on your blacklist.",
+	'no mods' : "This message was auto-approved because your squad currently has no moderators.",
+	'deactivated' : "This message was auto-approved because your squad is currently deactivated.",
+	'moderator approved' : "This message was approved by your moderator %s.",
+	'moderator rejected' : "This message was rejected by your moderator %s.",
+	'auto approve on' : "This message was auto-approved because a previous post from %s \
+						to this thread was approved.", 
+	'mod off for sender-thread' : "This message was auto-approved because you've turned moderation off \
+							for posts by %s to this thread.", 
 
+}
+
+FUTURE_AUTO_APPROVE = {
+	True: "<br><br>Future posts from %s to this thread will be auto-approved.",
+	False: "\n\nFuture posts from %s will be auto-approved."
+}
+
+MODERATE_ON_LINK = '%s/moderate_user_for_thread_get?group_name=%s&sender=%s&subject=%s&moderate=on'
+MODERATE_OFF_LINK = MODERATE_ON_LINK[:-2] + 'off'
+
+MOD_ON = {
+	True: " If you would like moderators to continue reviewing this sender's posts to the thread, follow <a href='%s'>this link</a>.",
+	False: " If you would like moderators to continue reviewing this sender's posts to the thread, follow this link: <%s>."
+}
+
+MOD_BACK_ON = {
+	True: "<br><br>To turn it back on, follow <a href='%s'>this link</a>.",
+	False: "\n\nTo turn it back on, follow this link: <%s>."
+}
+
+
+MOD_OFF = {
+	True: " To turn moderation off for future posts from %s to this thread, follow <a href='%s'>this link</a>.",
+	False: " To turn moderation off for future posts from %s to this thread, follow this link: <%s>."
+}
+
+EDIT_WL_BL_MODS = {
+	True: "<br><br>To edit your whitelist, blacklist, or moderators, visit the <a href='%s'>squad page</a>.",
+	False: "\n\nTo edit your whitelist, blacklist, or moderators, visit the squad page: <%s>."
+}
+
+REACTIVATE = {
+	True: "<br><br>To reactivate your squad, visit the <a href='%s'>squad page</a>.",
+	False: "\n\nTo reactivate your squad, visit the squad page: <%s>."
+}
+
+EDIT_AUTO_APPROVE = {
+	True: "<br>To edit your thread auto-approval settings, visit the <a href='%s'>squad settings page</a>.",
+	False: "\nTo edit your thread auto-approval settings, visit the squad settings page <%s>."
+}
+
+SQUAD_PAGE_LINK = '%s/groups/%s'
+SQUAD_SETTINGS_LINK = SQUAD_PAGE_LINK + '/edit_group_info'
 
 def setup_post(From, Subject, group_name):
 	
@@ -342,65 +397,42 @@ def plain_forwarded_blurb(group_name, to_list, original_list_email=None):
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
+def ps_squadbox(sender, reason, squad_name, squad_auto_approve, subject, mod_email, HTML):
 
-def ps_squadbox(sender, reason, squad_name, subject, HTML):
+	mod_on = MODERATE_ON_LINK % (BASE_URL, squad_name, sender, subject)
+	mod_off = MODERATE_OFF_LINK % (BASE_URL, squad_name, sender, subject)
+	squad_link = SQUAD_PAGE_LINK % (BASE_URL, squad_name)
+	settings_link = SQUAD_SETTINGS_LINK % (BASE_URL, squad_name)
 
-	moderate_on_link = '%s/moderate_user_for_thread_get?group_name=%s&sender=%s&subject=%s&moderate=on' % (BASE_URL, squad_name, sender, subject)
-	moderate_off_link = moderate_on_link[:-2] + 'off'
+	content = SQUADBOX_REASONS[reason]
 
-	content = 'This message was '
+	if reason in ['whitelist', 'blacklist']:
+		content %= sender
+		content += EDIT_WL_BL_MODS[HTML] % squad_link
 
-	if reason == 'whitelist':
-		content += 'automatically approved because the sender %s is on your whitelist.' % sender
+	elif reason == 'auto approve on':
+		content %= sender
+		content += MOD_ON[HTML] % mod_on + EDIT_AUTO_APPROVE[HTML] % settings_link
 
-	elif reason == 'blacklist':
-		content += 'automatically rejected because the sender %s is on your blacklist.' % sender
-
-	elif reason.startswith('approved') or reason.startswith('rejected'):
-		content += reason
-
-		if reason.startswith('approved':)
-
-			if check_if_sender_moderated_for_thread(squad_name, sender, subject):
-				start = "You've opted to keep moderation on for posts from %s to this thread. To turn it off, follow " % sender
-
-				if HTML:
-					content += '<br><br>' + start + "<a href='%s'>this link</a>." % moderate_off_link
-				else:
-					content += '\n\n' + start + "this link: <%s>" % moderate_off_link
-				
-			elif check_if_sender_approved_for_thread(squad_name, sender, subject):
-				start = "Since this post was approved, future posts from %s to this thread will be automatically approved. To turn moderation back on for this sender, follow " % sender
-
-				if HTML:
-					content += '<br><br>' + start + "<a href='%s'>this link</a>." % moderate_on_link
-				else:
-					content += '\n\n' + start + "this link: <%s>" % moderate_on_link
-
-
-	elif reason == 'deactivated':
-		content += 'automatically approved because your squad is disabled.'
-	elif reason == 'already approved':
-		content += 'automatically approved because a previous post from %s to this thread was approved.' % sender 
-
-		start = "To turn moderation back on for posts from %s to this thread, follow " % sender
-		if HTML:
-			content += '<br><br>' + start + '<a href="%s">this link</a>.' % moderate_on_link
+	elif reason == 'moderator approved':
+		content %= mod_email
+		if squad_auto_approve:
+			content += FUTURE_AUTO_APPROVE[HTML] % sender + MOD_ON[HTML] % mod_on + EDIT_AUTO_APPROVE[HTML] % settings_link
 		else:
-			content += '\n\n' + start + 'this link: <%s>' % moderate_on_link
+			content += MOD_OFF[HTML] % (sender, mod_off)
+
+	elif reason == 'moderator rejected':
+		content %= mod_email 
 
 	elif reason == 'no mods':
-		content += 'automatically approved because your squad has no moderators.'
-	else:
-		content = ''
+		content += EDIT_WL_BL_MODS[HTML] % squad_link
 
-	if reason in ['whitelist', 'blacklist', 'no mods']:
-		page_link = '%s/groups/%s' % (BASE_URL, squad_name)
-		start = "To edit your whitelist, blacklist, or moderators, visit the "
-		if HTML:
-			content += '<br><br>' + start + '<a href="%s">squad page</a>.' % page_link
-		else:
-			content += '\n\n' + start + 'squad page <%s>.' % page_link
+	elif reason == 'mod off for sender-thread':
+		content %= sender
+		content += MOD_BACK_ON[HTML] % mod_on
+
+	elif reason == 'deactivated':
+		content += REACTIVATE[HTML] % squad_link
 
 	if HTML:
 		return '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)

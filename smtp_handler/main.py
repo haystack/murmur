@@ -509,11 +509,11 @@ def handle_post_squadbox(message, group, host, verified):
 
 				# case 1 
 				if group.auto_approve_after_first:
-					reason = 'already approved'
+					reason = 'auto approve on'
 					logging.debug('Sender approved for this thread previously; automatically approving post')
 				# case 2
 				else:
-					reason = 'moderation turned off for sender'
+					reason = "mod off for sender-thread"
 					
 			else:
 				logging.debug('Post needs to be moderated')
@@ -569,10 +569,11 @@ def handle_post_squadbox(message, group, host, verified):
 			mail['Cc'] = ','.join(ccs)
 
 		add_attachments(mail, attachments)
-		html_blurb = unicode(ps_squadbox(sender_addr, reason, group.name, subj, True))
+
+		html_blurb = unicode(ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, True))
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
 
-		plain_blurb = ps_squadbox(sender_addr, reason, group.name, subj, False)
+		plain_blurb = ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, False)
 		mail.Body = get_new_body(msg_text, plain_blurb, 'plain')
 
 		relay.deliver(mail, To = admin.email)
