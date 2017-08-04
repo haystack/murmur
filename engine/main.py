@@ -265,7 +265,7 @@ def create_group(group_name, group_desc, public, attach, send_rejected, store_re
 	logging.debug(res)
 	return res
 
-def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, user):
+def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, auto_approve, user):
 	res = {'status':False}	
 	try:
 		group = Group.objects.get(name=old_group_name)
@@ -277,6 +277,7 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, 
 		group.send_rejected_tagged = send_rejected
 		group.show_rejected_site = store_rejected
 		group.mod_edit_wl_bl = mod_edit
+		group.auto_approve_after_first = auto_approve
 		group.save()
 		res['status'] = True	
 	except Group.DoesNotExist:

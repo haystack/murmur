@@ -14,7 +14,7 @@
 		</input>
 		<br><br>
 		<span class="strong">{{ group_or_squad | title }} Description:</span> <br>
-		<span class="italic-med">Maximum 140 characters</span><br>
+		<span class="italic-med">(optional) Maximum 140 characters</span><br>
 		<textarea id="edit-group-description" maxlength="140">{{group_info.description.strip }}</textarea>
 		<br><br>
 		{% if website == "murmur" %}
@@ -94,6 +94,13 @@
 			<input type="checkbox" id="mod-edit-wl-bl">
 			{% endif %}
 			Allow squad moderators to add and remove senders from your whitelist and blacklist
+			<br>
+			{% if group_info.auto_approve_after_first %}
+			<input type="checkbox" id="auto-approve" checked>
+			{% else %}
+			<input type="checkbox" id="auto-approve">
+			{% endif %}
+			After a sender's first post to a thread is approved, auto-approve their future posts to the thread
 		{% endif %}
 		<br><br>
 		<button type="button" id="btn-save-settings"">Save Changes</button>

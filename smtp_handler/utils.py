@@ -108,8 +108,8 @@ MOD_ON = {
 }
 
 MOD_BACK_ON = {
-	True: "<br><br>To turn it back on, follow <a href='%s'>this link</a>.",
-	False: "\n\nTo turn it back on, follow this link: <%s>."
+	True: " To turn it back on, follow <a href='%s'>this link</a>.",
+	False: " To turn it back on, follow this link: <%s>."
 }
 
 
