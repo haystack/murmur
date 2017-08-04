@@ -25,6 +25,7 @@ $(document).ready(function() {
             params.send_rejected_tagged = $('#send-rejected')[0].checked;
             params.store_rejected = $('#store-rejected')[0].checked;
             params.mod_edit = $('#mod-edit-wl-bl')[0].checked;
+            params.mod_rules = $("#edit-mod-rules").val();
         } else if (website == "murmur") {
             params.public = $('input[name=pubpriv]:checked', '#group-info-form').val();
 
@@ -32,6 +33,7 @@ $(document).ready(function() {
             params.send_rejected_tagged = true;
             params.store_rejected = true;
             params.mod_edit = true;
+            params.mod_rules = '';
         }
 
         $.post('/edit_group_info', params,

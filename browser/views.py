@@ -517,7 +517,8 @@ def edit_group_info(request):
 		send_rejected = request.POST['send_rejected_tagged'] == 'true'
 		store_rejected = request.POST['store_rejected'] == 'true'
 		mod_edit = request.POST['mod_edit'] == 'true'
-		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, user) 
+		mod_rules = request.POST['mod_rules']
+		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, user) 
 		if res['status']:
 			active_group = request.session.get('active_group')
 			if active_group == old_group_name:
