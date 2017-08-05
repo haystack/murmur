@@ -255,6 +255,13 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+
+        # comment this out if you want to see DB queries in logs
+        'django.db.backends': {
+            'handlers': None, 
+            'propagate': False,
+            'level':'DEBUG',
+        },
     }
 }
 

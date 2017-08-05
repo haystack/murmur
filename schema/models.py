@@ -57,6 +57,7 @@ class Attachment(models.Model):
 	msg_id = models.CharField(max_length=120)
 	hash_filename = models.TextField(max_length=40)
 	true_filename = models.TextField()
+	content_id = models.CharField(max_length=40, null=True)
 	timestamp = models.DateTimeField(auto_now=True)
 
 	class Meta:
@@ -86,6 +87,16 @@ class TagThread(models.Model):
 	
 	class Meta:
 		unique_together = ("thread", "tag")
+
+'''
+this is for deciding whether a non-first post in a thread, from 
+someone who already posted in the thread, should go through 
+moderation. 
+'''
+class ThreadHash(models.Model):
+	group = models.ForeignKey('Group')
+	sender_subject_hash = models.CharField(max_length=40)
+	moderate = models.BooleanField(default=False)
 		
 class Tag(models.Model):
 	id = models.AutoField(primary_key=True)
@@ -182,7 +193,8 @@ class Group(models.Model):
 	show_rejected_site = models.BooleanField(default=True)
 	send_rejected_tagged = models.BooleanField(default=True)
 	# whether moderators can edit whitelist and blacklist 
-	mod_edit_wl_bl = models.BooleanField(default=True) 
+ 	mod_edit_wl_bl = models.BooleanField(default=True) 
+
 	
 	def __unicode__(self):
 		return self.name

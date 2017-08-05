@@ -973,7 +973,8 @@ $(document).ready(function(){
 		content += '<br />';
 		content += '<span class="strong">Date: </span><span class="strong-gray">' + new Date(res.post.timestamp + ' UTC') + '</span>';
 		content += '<br />';
-		if (res.post.attachments.length > 0) {
+
+		if (res.post.attachments && res.post.attachments.length > 0) {
 			content += "<span class=\"strong\">Attachments: </span><span class=\"strong-gray\">"
 			for (var j = 0; j < res.post.attachments.length; j++) {
 				content += "<a href=\""+ res.post.attachments[j][1] + "\">" + res.post.attachments[j][0] + "</a> ";
