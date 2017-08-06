@@ -535,7 +535,7 @@ def handle_post_squadbox(message, group, host, verified):
 			
 		args = [group.name, post_subject, msg_text['html'], None, sender_addr, msg_id, verified]
 		keyword_args = {'attachments' : attachments, 'sender_name' : sender_name, 'post_status' : status}
-
+    
 		res = insert_func(*args, **keyword_args)
 
 		if not res['status']:
@@ -571,6 +571,7 @@ def handle_post_squadbox(message, group, host, verified):
 		add_attachments(mail, attachments)
 
 		html_blurb = unicode(ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, True))
+
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
 
 		plain_blurb = ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, False)
