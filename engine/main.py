@@ -1,4 +1,4 @@
-import sys, logging, base64, email, datetime
+import sys, logging, base64, email#, datetime
 from schema.models import *
 from constants import *
 from django.utils.timezone import utc
@@ -44,7 +44,6 @@ def list_groups(user=None):
 					   'count': g.membergroup_set.count()
 					   })
 	return groups
-
 
 def group_info_page(user, group_name):
 	res = {}
@@ -287,7 +286,6 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, 
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res
-
 
 def get_group_settings(group_name, user):
 	res = {'status':False}
@@ -574,9 +572,6 @@ def add_members(group_name, emails, add_as_mods, user):
 	logging.debug(res)
 	return res
 
-
-
-
 def subscribe_group(group_name, user):
 	res = {'status':False}
 
@@ -596,9 +591,6 @@ def subscribe_group(group_name, user):
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res
-
-
-
 
 def unsubscribe_group(group_name, user):
 	res = {'status':False}
@@ -667,8 +659,7 @@ def group_info(group_name, user):
 	return res
 
 def format_date_time(d):
-	return datetime.datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
-
+	return datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
 def list_posts_page(threads, group, res, user=None, format_datetime=True, return_replies=True, text_limit=None):
 	res['threads'] = []
@@ -701,7 +692,8 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
 				url = "attachment/" + attachment.hash_filename
 				attachments.append((attachment.true_filename, url))
 			
-			text = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
+			#text = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
+			text = fix_html_and_img_srcs(p.msg_id, p.post)
 			if text_limit:
 				text = text[:text_limit]
 			
@@ -741,9 +733,9 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
 def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=True, format_datetime=True):
 	res = {'status':False}
 	try:
-		t = datetime.datetime.min
+		t = datetime.min
 		if(timestamp_str):
-			t = datetime.datetime.strptime(timestamp_str, '%Y/%m/%d %H:%M:%S')
+			t = datetime.strptime(timestamp_str, '%Y/%m/%d %H:%M:%S')
 		t = t.replace(tzinfo=utc, second = t.second + 1)
 		
 		if (group_name != None):
@@ -789,6 +781,8 @@ def load_thread(t, user=None, member=None):
 		for attachment in Attachment.objects.filter(msg_id=p.msg_id):
 			url = "attachment/" + attachment.hash_filename
 			attachments.append((attachment.true_filename, url))
+
+
 		post_dict = {
 					'id': str(p.id),
 					'msg_id': p.msg_id, 
@@ -798,7 +792,7 @@ def load_thread(t, user=None, member=None):
 					'to': p.group.name,
 					'liked': user_liked,
 					'subject': escape(p.subject), 
-					'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
+					'text' : fix_html_and_img_srcs(p.msg_id, p.post),
 					'timestamp': p.timestamp,
 					'attachments': attachments,
 					'verified': p.verified_sender,
@@ -842,7 +836,7 @@ def load_post(group_name, thread_id, msg_id):
 		res['from'] = p.email
 		res['tags'] = json.dumps(tags)
 		res['subject'] = escape(p.subject)
-		res['text'] = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
+		res['text'] = fix_html_and_img_srcs(p.msg_id, p.post)
 		res['to'] = p.group.name
 		res['attachments'] = attachments
 		res['verified'] = p.verified_sender
@@ -881,7 +875,6 @@ def delete_post(user, post_id, thread_id):
 	logging.debug(res)
 	return res
 
-
 def _create_tag(group, thread, name):
 	t, created = Tag.objects.get_or_create(group=group, name=name)
 	if created:
@@ -897,7 +890,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 		message_text = message_text.decode("utf-8")
 	except Exception, _:
 		logging.debug("guessing this is unicode then")
-	
+
 	message_text = message_text.encode("ascii", "ignore")
 	
 	stripped_subj = re.sub("\[.*?\]", "", subject).strip()
@@ -909,8 +902,9 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 
 	if post_status == None:
 		post_status = 'A'
-	
-	res = upload_attachments(attachments, msg_id)
+
+	if attachments:
+		upload_attachments(attachments, msg_id)
 
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
 			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, 
@@ -921,15 +915,15 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 		for match in re.findall(r"[^[]*\[([^]]*)\]", subject):
 			if match.lower() != group.name:
 				_create_tag(group, thread, match)
-		
+
 		tags = list(extract_hash_tags(message_text))
 		for tag in tags:
 			if tag.lower() != group.name:
 				_create_tag(group, thread, tag)
-		
+
 		tag_objs = Tag.objects.filter(tagthread__thread=thread)
 		tags = list(tag_objs.values('name', 'color'))
-		
+
 		group_members = MemberGroup.objects.filter(group=group)
 		
 		recipients = []
@@ -951,19 +945,19 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 	elif WEBSITE == 'squadbox':
 		recipients = []
 		tags = None
-		tag_objs = None 
+		tag_objs = None
 	
 	return p, thread, recipients, tags, tag_objs
 
 def insert_post_web(group_name, subject, message_text, user):
 	res = {'status':False}
 	thread = None
-	
+
 	try:
 		group = Group.objects.get(name=group_name)
 		user_member = MemberGroup.objects.filter(group=group, member=user)
 		if user_member.exists():
-			msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@' + BASE_URL
+			msg_id = base64.b64encode(user.email + str(datetime.now())).lower() + '@' + BASE_URL
 			p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id, verified=True)
 			res['status'] = True
 			
@@ -980,7 +974,7 @@ def insert_post_web(group_name, subject, message_text, user):
 						 'text': clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES), 
 						 'timestamp': format_date_time(p.timestamp),
 						}
-			
+
 			res['threads'] = []
 			res['threads'].append({'thread_id': thread.id,
 								   'post': post_info,
@@ -1013,27 +1007,10 @@ def insert_post_web(group_name, subject, message_text, user):
 
 
 def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
-	res = {'status':False}
+	res = {'status' : False}
 	thread = None
 	try:
 		group = Group.objects.get(name=group_name)
-
-		if WEBSITE == 'murmur':
-			# this post did not come from a forwarding list. thus we should only
-			# post it if the user is a member of the group. 
-			if user and not forwarding_list:
-				user_member = MemberGroup.objects.filter(group=group, member=user)
-				if not user_member.exists():
-					res['code'] = msg_code['NOT_MEMBER']
-					return res
-
-		# if we make it to here, then post is valid under one of following conditions:
-		# 1) it's a normal post by a group member to the group.
-		# 2) it's a post by a Murmur user, but it's being posted to this group via a list that fwds to this group. 
-		# 3) it's a post by someone who doesn't use Murmur, via a list that fwds to this group. 
-		# 4) it's a Squadbox post, so we don't care if the sender has an account / is authorized. 
-		# _create_post will check which of user and forwarding list are None and post appropriately. 
-
 		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments, forwarding_list=forwarding_list, post_status=post_status, sender_name=sender_name)
 		res['status'] = True
 		res['post_id'] = p.id
@@ -1043,7 +1020,6 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, ve
 		res['tag_objs'] = tag_objs
 		res['recipients'] = recipients
 		res['verified'] = verified
-
 
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -1057,15 +1033,33 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, ve
 	logging.debug(res)
 	return res
 
+def insert_squadbox_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, post_status=None, sender_name=None):
+	res = { 'status' : False }
+	try:
+		group = Group.objects.get(name=group_name)
+		original_subject = subject[4:].strip()
+		thread, created = Thread.objects.get_or_create(subject=original_subject, group=group)
+		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status)
+		post.save()
+		upload_attachments(attachments, msg_id)
+		res['status'] = True
+		res['post'] = post
 
-def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, forwarding_list=None, thread_id=None, sender_name=None):
-	res = {'status':False}
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+
+	return res
+
+
+def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, thread_id=None, post_status=None, sender_name=None):
+	res = {'status' : False}
+
 	try:
 		group = Group.objects.get(name=group_name)
 		group_members = UserProfile.objects.filter(membergroup__group=group)
-		
+
 		if user in group_members or forwarding_list:
-			
+
 			orig_post_subj = subject[4:].strip()
 			
 			post = Post.objects.filter((Q(subject=orig_post_subj) | Q(subject=subject)) & Q(group=group)).order_by('-timestamp')
@@ -1073,7 +1067,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
 				post = post[0]
 			else:
 				post = None
-				
+			
 			if not thread_id:
 				thread = Thread.objects.filter(subject=orig_post_subj, group=group).order_by('-timestamp')
 			else:
@@ -1083,13 +1077,17 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
 				thread = thread[0]
 			else:
 				thread = None
-		
+
 			if not thread:
 				thread = Thread()
 				thread.subject = orig_post_subj
 				thread.group = group
 				thread.save()
-			
+
+			if attachments:
+				upload_attachments(attachments, msg_id)
+
+
 			tag_objs = Tag.objects.filter(tagthread__thread=thread)
 			try:
 				message_text = message_text.decode("utf-8")
@@ -1100,7 +1098,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
 			r = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
 				subject=subject, post = message_text, reply_to=post, group=group, thread=thread, verified_sender=verified, poster_name=sender_name)
 			r.save()
-			thread.timestamp = datetime.datetime.now().replace(tzinfo=utc)
+			thread.timestamp = datetime.now().replace(tzinfo=utc)
 			thread.save()
 			
 			if not Following.objects.filter(user=user, thread=thread).exists(): 
@@ -1249,10 +1247,6 @@ def follow_thread(thread_id, email=None, user=None):
 	logging.debug(res)
 	return res
 
-
-
-
-
 def unfollow_thread(thread_id, email=None, user=None):
 	res = {'status':False}
 	try:
@@ -1279,8 +1273,6 @@ def unfollow_thread(thread_id, email=None, user=None):
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res
-
-
 
 def mute_thread(thread_id, email=None, user=None):
 	res = {'status':False}
@@ -1310,10 +1302,6 @@ def mute_thread(thread_id, email=None, user=None):
 	logging.debug(res)
 	return res
 
-
-
-
-
 def unmute_thread(thread_id, email=None, user=None):
 	res = {'status':False}
 	try:
@@ -1341,7 +1329,6 @@ def unmute_thread(thread_id, email=None, user=None):
 	logging.debug(res)
 	return res
 
-
 def follow_tag(tag_name, group_name, user=None, email=None):
 	res = {'status':False}
 	g = Group.objects.get(name=group_name)
@@ -1364,8 +1351,6 @@ def follow_tag(tag_name, group_name, user=None, email=None):
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res
-
-
 
 def unfollow_tag(tag_name, group_name, user=None, email=None):
 	res = {'status':False}
@@ -1390,7 +1375,6 @@ def unfollow_tag(tag_name, group_name, user=None, email=None):
 	logging.debug(res)
 	return res
 
-
 def mute_tag(tag_name, group_name, user=None, email=None):
 	res = {'status':False}
 	g = Group.objects.get(name=group_name)
@@ -1413,8 +1397,6 @@ def mute_tag(tag_name, group_name, user=None, email=None):
 		res['code'] = msg_code['UNKNOWN_ERROR']
 	logging.debug(res)
 	return res
-
-
 
 def unmute_tag(tag_name, group_name, user=None, email=None):
 	res = {'status':False}
@@ -1466,7 +1448,6 @@ def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 			current = WhiteOrBlacklist.objects.filter(group=g, email=email)
 			if current.exists():
 				entry = current[0]
-				print "entry: ", entry.whitelist, entry.blacklist
 				entry.whitelist = whitelist
 				entry.blacklist = blacklist
 			else:

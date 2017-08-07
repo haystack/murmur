@@ -821,10 +821,10 @@ def insert_post(request):
 				if request.POST.__contains__('original_group'):
 					original_group = request.POST['original_group'] + '@' + HOST
 
-				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_group)
+				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], False, original_group)
 				mail.Html = msg_text + ps_blurb	
 				
-				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_group)
+				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], False, original_group)
 				mail.Body = html2text(msg_text) + ps_blurb	
 			
 				relay_mailer.deliver(mail, To = recip.email)
@@ -884,7 +884,7 @@ def insert_reply(request):
 		msg_text = request.POST['msg_text']
 		
 		#msg_id = request.POST['msg_id'].encode('ascii', 'ignore')
-		msg_id = base64.b64encode(user.email + str(datetime.datetime.now())).lower() + '@' + BASE_URL
+		msg_id = base64.b64encode(user.email + str(datetime.now())).lower() + '@' + BASE_URL
 		
 		original_group = None
 		original_group_object = None
@@ -938,10 +938,10 @@ def insert_reply(request):
 					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 
-					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_group)
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], False, original_list_email=original_group)
 					mail.Html = msg_text + ps_blurb	
 					
-					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], original_list_email=original_group)
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], False, original_list_email=original_group)
 					mail.Body = html2text(msg_text) + ps_blurb
 				
 					relay_mailer.deliver(mail, To = recip.email)
@@ -1317,8 +1317,6 @@ def blacklist(request):
 @login_required
 def unblacklist_unwhitelist(request):
 	try:
-		print "hi"
-		print "senders: ", request.POST['senders']
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.POST['group_name']

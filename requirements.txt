@@ -35,3 +35,4 @@ dnspython==1.15.0
 pyspf==2.0.11
 ipaddr==2.1.11
 pydns==2.3.6
+bs4==4.6.0
