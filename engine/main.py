@@ -265,7 +265,8 @@ def create_group(group_name, group_desc, public, attach, send_rejected, store_re
 	logging.debug(res)
 	return res
 
-def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, user):
+
+def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, auto_approve, user):
 	res = {'status':False}	
 	try:
 		group = Group.objects.get(name=old_group_name)
@@ -278,6 +279,7 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, 
 		group.show_rejected_site = store_rejected
 		group.mod_edit_wl_bl = mod_edit
 		group.mod_rules = mod_rules
+		group.auto_approve_after_first = auto_approve
 		group.save()
 		res['status'] = True	
 	except Group.DoesNotExist:
@@ -1009,9 +1011,10 @@ def insert_post_web(group_name, subject, message_text, user):
 def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
 	res = {'status' : False}
 	thread = None
+
 	try:
 		group = Group.objects.get(name=group_name)
-		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments, forwarding_list=forwarding_list, post_status=post_status, sender_name=sender_name)
+		p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments=attachments, forwarding_list=forwarding_list, post_status=post_status, sender_name=sender_name)
 		res['status'] = True
 		res['post_id'] = p.id
 		res['msg_id'] = p.msg_id
@@ -1427,7 +1430,6 @@ def unmute_tag(tag_name, group_name, user=None, email=None):
 def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 	res = {'status' : False}
 
-
 	# illegal to have both set to true
 	if whitelist and blacklist:
 		res['code'] = msg_code['REQUEST_ERROR']
@@ -1499,7 +1501,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
 			group_tag_names = [t.tag.name for t in TagThread.objects.filter(thread=p.thread)]
 
-			if tags is not None and len(tags) > 0:
+			if tags and len(tags) > 0:
 				tag_names = tags.split(',')
 				for t in tag_names:
 					if t not in group_tag_names:
@@ -1517,7 +1519,6 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 			# or if it was rejected but the recipient wants rejected emails with tag
 			if new_status == 'A' or (new_status == 'R' and g.send_rejected_tagged):
 
-
 				mgs = MemberGroup.objects.filter(group=g, admin=True)
 				if not mgs.exists():
 					return res
@@ -1525,9 +1526,14 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 					admin = mgs[0].member
 
 				if new_status == 'A':
-					reason = 'approved by moderator %s.' % user.email
+					reason = 'moderator approved'
+					if not check_if_sender_moderated_for_thread(g.name, p.poster_email, p.subject):
+						if g.auto_approve_after_first:
+							hashed = get_sender_subject_hash(p.poster_email, p.subject)
+							ThreadHash.objects.get_or_create(sender_subject_hash=hashed, group=g, moderate=False)
+
 				elif new_status == 'R':
-					reason = 'rejected by moderator %s.' % user.email
+					reason = 'moderator rejected'
 
 				tags = [t.tag.name for t in TagThread.objects.filter(thread = p.thread)]
 
@@ -1544,8 +1550,12 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				for a in attachments:
 					mail.attach(filename=a['name'], data=a['data'])
 
-				html_blurb = unicode(ps_squadbox(p.poster_email, reason, True))
-				plain_blurb = ps_squadbox(p.poster_email, reason, False)
+				orig_subj = p.subject
+				if orig_subj.startswith('Re: '):
+					orig_subj = orig_subj[4:]		
+
+				html_blurb = unicode(ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, True))
+				plain_blurb = ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, False)
 
 				html_prefix = ''
 				if new_status == 'R' and len(p.mod_explanation) > 0:
@@ -1634,3 +1644,27 @@ def fix_posts(post_queryset):
 		posts_fixed.append(post_dict)
 
 	return posts_fixed
+
+def adjust_moderate_user_for_thread(user, group_name, sender_addr, subject, moderate):
+
+	res = {'status' : False}
+	try:
+		g = Group.objects.get(name=group_name)
+		mg = MemberGroup.objects.get(member=user, group=g)
+		if not mg.admin:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
+		else:
+			hashed = get_sender_subject_hash(sender_addr, subject)
+			th, _ = ThreadHash.objects.get_or_create(group=g, sender_subject_hash=hashed)
+			th.moderate = moderate
+			th.save()
+			res['status'] = True
+
+	except Group.DoesNotExist:
+		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+
+	except MemberGroup.DoesNotExist:
+		res['code'] = msg_code['NOT_MEMBER']
+
+	return res
+

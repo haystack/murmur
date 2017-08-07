@@ -63,7 +63,7 @@ $(document).ready(function() {
             console.log(status_res);
 
             if (status_res.status) setTimeout(function() {
-                window.location = '/dashboard';
+                window.location = '/mod_queue/' + group_name;
             }, 1000);
         });
     });

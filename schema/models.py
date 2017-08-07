@@ -95,7 +95,15 @@ moderation.
 '''
 class ThreadHash(models.Model):
 	group = models.ForeignKey('Group')
+
+	# we store a hash so that we don't keep information about
+	# this thread once all its posts are approved.
 	sender_subject_hash = models.CharField(max_length=40)
+
+	# if this is True, the group's admin has opted in to keep
+	# moderation on for the user's posts to this thread. if it's 
+	# False (but this object exists), this user previously posted 
+	# and the post was approved. 
 	moderate = models.BooleanField(default=False)
 		
 class Tag(models.Model):
@@ -148,6 +156,7 @@ class MemberGroup(models.Model):
 	always_follow_thread = models.BooleanField(default=True)
 	upvote_emails = models.BooleanField(default=True)
 	receive_attachments = models.BooleanField(default=True)
+	last_emailed = models.DateTimeField(null=True)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)
@@ -196,6 +205,10 @@ class Group(models.Model):
 	mod_edit_wl_bl = models.BooleanField(default=True) 
 	# description of policy/rules for moderation
 	mod_rules = models.TextField(null=True)
+
+ 	# whether to automatically approve emails from a sender to a thread 
+ 	# in this group after their first post to the thread is approved
+ 	auto_approve_after_first = models.BooleanField(default=False)
 
 	
 	def __unicode__(self):

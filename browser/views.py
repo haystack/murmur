@@ -518,7 +518,8 @@ def edit_group_info(request):
 		store_rejected = request.POST['store_rejected'] == 'true'
 		mod_edit = request.POST['mod_edit'] == 'true'
 		mod_rules = request.POST['mod_rules']
-		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, user) 
+		auto_approve = request.POST['auto_approve'] == 'true'
+		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, auto_approve, user) 
 		if res['status']:
 			active_group = request.session.get('active_group')
 			if active_group == old_group_name:
@@ -1604,3 +1605,25 @@ def rejected(request, group_name):
 		#return HttpResponse(json.dumps(to_return), content_type="application/json")
 	else:
 		return redirect(global_settings.LOGIN_URL)
+
+
+@render_to("squadbox/moderate_user_thread.html")
+@login_required
+def moderate_user_for_thread_get(request):
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		group_name = request.GET.get('group_name')
+		subject = request.GET.get('subject')
+		sender = request.GET.get('sender')
+		on_off = (request.GET.get('moderate') == 'on')
+		res = engine.main.adjust_moderate_user_for_thread(user, group_name, sender, subject, on_off)
+
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		active_group = Group.objects.get(name=group_name)
+		role = get_role_from_group_name(user, group_name)
+		
+		return {'res' : res, 'website' : WEBSITE, 'group_name' : group_name, 'user' : user,
+				'type' : request.GET.get('moderate'), 'sender' : sender, 'subject' : subject,
+				'active_group' : active_group, 'active_group_role' : role}
+	else:
+		return redirect(global_settings.LOGIN_URL + '?next=/approve_get?group_name=%s&post_id=%s' % (group_name, post_id))
