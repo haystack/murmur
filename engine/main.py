@@ -49,10 +49,6 @@ def group_info_page(user, group_name):
 	res = {}
 	try:
 		group = Group.objects.get(name=group_name)
-		members = MemberGroup.objects.filter(group=group)
-		members_pending = MemberGroupPending.objects.filter(group=group)
-		whitelist = WhiteOrBlacklist.objects.filter(group=group, whitelist=True)
-		blacklist = WhiteOrBlacklist.objects.filter(group=group, blacklist=True)
 
 		res['group'] = group
 		res['members'] = []
@@ -60,66 +56,65 @@ def group_info_page(user, group_name):
 		res['lists'] = []
 		res['whitelist'] = []
 		res['blacklist'] = []
-		
 		res['admin'] = False
 		res['moderator'] = False
 		res['subscribed'] = False
 		res['active'] = group.active
-		
-		for membergroup in members:
-			
-			if user != None:
-				if user.email == membergroup.member.email:
-					res['admin'] = membergroup.admin
-					res['moderator'] = membergroup.moderator
-					res['subscribed'] = True
-			
 
-			member_info = {'id':membergroup.id,
-							'email': membergroup.member.email,
-						   'joined': membergroup.timestamp,
-						   'admin': membergroup.admin, 
-						   'mod': membergroup.moderator}
-			
-			res['members'].append(member_info)
+		mg = MemberGroup.objects.get(group=group, member=user)
 
-		for membergroup in members_pending:
-			member_info = {'id':membergroup.id,
-							'email': membergroup.member.email,
-						   'admin': False,
-						   'mod': False}
-			res['members_pending'].append(member_info)
+		res['admin'] = mg.admin
+		res['moderator'] = mg.moderator
+		res['subscribed'] = True
 
-		lists = ForwardingList.objects.filter(group=group)
+		if mg.admin:
+	
+			for m in MemberGroup.objects.filter(group=group):
+				res['members'].append({	'id':m.id,
+										'email': m.member.email,
+									   	'joined': m.timestamp,
+									   	'admin': m.admin, 
+									   	'mod': m.moderator,
+							   		})
 
-		for l in lists:
-			list_obj = {'id' : l.id,
-						'email' : l.email,
-						'can_post' : l.can_post,
-						'can_receive' : l.can_receive,
-						'added': l.timestamp,
-						'url' : l.url
-						}
-			res['lists'].append(list_obj)
+			for mp in MemberGroupPending.objects.filter(group=group):
+				res['members_pending'].append({	'id':mp.id,
+												'email': mp.member.email,
+									   			'admin': False,
+									   			'mod': False, 
+							   				})
 
-		for w in whitelist:
-			wl_obj = {	'id' : w.id, 
-						'email' : w.email,
-						'timestamp' : w.timestamp
-					}
-			res['whitelist'].append(wl_obj)
+			for l in ForwardingList.objects.filter(group=group):
+				res['lists'].append({	'id' : l.id,
+										'email' : l.email,
+										'can_post' : l.can_post,
+										'can_receive' : l.can_receive,
+										'added': l.timestamp,
+										'url' : l.url,
+									})
 
-		for b in blacklist:
-			bl_obj = {	'id' : b.id, 
-						'email' : b.email,
-						'timestamp' : b.timestamp
-					}
-			res['blacklist'].append(bl_obj)
+			for w in WhiteOrBlacklist.objects.filter(group=group, whitelist=True):
+				res['whitelist'].append({	'id' : w.id, 
+											'email' : w.email,
+											'timestamp' : w.timestamp,
+										})
+
+
+			for b in WhiteOrBlacklist.objects.filter(group=group, blacklist=True):
+				res['blacklist'].append({	'id' : b.id, 
+											'email' : b.email,
+											'timestamp' : b.timestamp
+										})
 
 
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 		res['group'] = None
+
+	except MemberGroup.DoesNotExist:
+		if not group.public:
+			res['code'] = msg_code['NOT_MEMBER']
+			res['group'] = None
 
 	except Exception, e:
 		res['code'] = msg_code['UNKNOWN_ERROR']

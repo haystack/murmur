@@ -235,6 +235,12 @@ def thread(request):
 		
 		member_group = MemberGroup.objects.filter(member=user, group=group)
 		is_member = member_group.exists()
+
+
+		if is_member and (member_group[0].moderator or membergroup_[0].admin):
+			modal_data = group.mod_rules
+		else:
+			modal_data = None
 		
 		active_group = load_groups(request, groups, user, group_name=group.name)
 		if group.public or is_member:
@@ -252,7 +258,7 @@ def thread(request):
 				thread_to = admin.member.email
 			return {'user': request.user, 'groups': groups, 'thread': res, 'thread_to' : thread_to, 
 					'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE, 
-					'active_group_role' : role, 'groups_links' : groups_links}
+					'active_group_role' : role, 'groups_links' : groups_links, 'modal_data' : modal_data}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None
