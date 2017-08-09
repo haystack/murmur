@@ -559,7 +559,7 @@ def handle_post_squadbox(message, group, host, verified):
 	# 4) this group doesn't have any moderators yet
 	# 4) group has "auto approve after first post" on, and this sender posted before and got approved 
 	# (and the recipient did not subsequently opt back in to moderation for that user)
-	# 5) group has "auto approve after first post" off, but sender manually shut off moderation for this sender
+	# 5) group has "auto approve after first post" off, but owner manually shut off moderation for this sender
 	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
 
 		# we can just send it on to the intended recipient, i.e. the admin of the group. 
@@ -572,8 +572,6 @@ def handle_post_squadbox(message, group, host, verified):
 		mail = MurmurMailResponse(From = message['From'], To = admin.email, Subject = new_subj)
 
 		fix_headers(message, mail)
-
-		mail['Sender'] = '%s@%s' % (group.name, HOST)
 
 		ccs = email_message.get_all('cc', None)
 		if ccs:

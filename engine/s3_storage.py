@@ -2,6 +2,7 @@ import hashlib, logging, random, time
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
+from http_handler.settings import WEBSITE
 from schema.models import Attachment
 
 def upload_attachments(attachments, msg_id):
@@ -19,7 +20,7 @@ def upload_attachments(attachments, msg_id):
             hash_filename = hashlib.sha1(filename + salt + thetime).hexdigest()
             hash_collision = Attachment.objects.filter(hash_filename=hash_filename).exists()
 
-        path = 'attachments/%s/%s' % (hash_filename, filename)
+        path = '%s/attachments/%s/%s' % (WEBSITE, hash_filename, filename)
         with default_storage.open(path, 'wb+') as destination:
             destination.write(attachment_file)
 
@@ -33,7 +34,7 @@ def download_attachments(msg_id):
     files = []
     attachments = Attachment.objects.filter(msg_id=msg_id)
     for a in attachments:
-        path = 'attachments/%s/%s' % (a.hash_filename, a.true_filename)
+        path = '%s/attachments/%s/%s' % (WEBSITE, a.hash_filename, a.true_filename)
         with default_storage.open(path, 'r') as f:
             file = {
                 'name' : a.true_filename,
@@ -45,7 +46,7 @@ def download_attachments(msg_id):
 def upload_message(message, post_id, post_timestamp):
 
     res = {'status' : False}
-    path = 'original_messages/%s_%s' % (post_id, post_timestamp.strftime('%s'))
+    path = '%s/original_messages/%s_%s' % (WEBSITE, post_id, post_timestamp.strftime('%s'))
 
     try: 
         message_string = str(message)
@@ -61,7 +62,7 @@ def upload_message(message, post_id, post_timestamp):
 def download_message(post_id, post_timestamp):
 
     res = {'status' : False}
-    path = 'original_messages/%s_%s' % (post_id, post_timestamp.strftime('%s'))
+    path = '%s/original_messages/%s_%s' % (WEBSITE, post_id, post_timestamp.strftime('%s'))
 
     # try:
     with default_storage.open(path, 'r') as f:

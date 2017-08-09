@@ -1540,7 +1540,7 @@ def serve_attachment(request, hash_filename):
 
 			if MemberGroup.objects.filter(member=user, group=group).exists():
 				s3 = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, is_secure=True)
-				filepath = 'attachments/%s/%s' % (hash_filename, attachment.true_filename)
+				filepath = '%s/attachments/%s/%s' % (WEBSITE, hash_filename, attachment.true_filename)
 				temporary_auth_url = s3.generate_url(60, 'GET', bucket=AWS_STORAGE_BUCKET_NAME, key=filepath)
 				return HttpResponseRedirect(temporary_auth_url)
 			else:
