@@ -1021,6 +1021,7 @@ def insert_post(group_name, subject, message_text, user, sender_addr, msg_id, ve
 		res['tag_objs'] = tag_objs
 		res['recipients'] = recipients
 		res['verified'] = verified
+		res['timestamp'] = p.timestamp
 
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -1137,6 +1138,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
 			res['thread_id'] = thread.id
 			res['msg_id'] = msg_id
 			res['post_id'] = r.id
+			res['timestamp'] = r.timestamp
 
 		else:
 			res['code'] = msg_code['NOT_MEMBER']

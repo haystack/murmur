@@ -7,6 +7,7 @@ from lamson.mail import MailResponse
 from email.utils import *
 from email import message_from_string
 from engine.main import *
+from engine.s3_storage import upload_message
 from utils import *
 from django.db.utils import OperationalError
 from datetime import datetime
@@ -456,6 +457,8 @@ def handle_post_murmur(message, group, host, verified):
 def handle_post_squadbox(message, group, host, verified):
 
 	email_message = message_from_string(str(message))
+	logging.debug("MESSAGE STRING:")
+	logging.debug(str(message))
 	msg_id = message['Message-ID']
 
 	sender_name, sender_addr = parseaddr(message['From'].lower())
@@ -542,6 +545,13 @@ def handle_post_squadbox(message, group, host, verified):
 			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
 			return
 
+		post_id = res['post_id']
+		post_time = res['timestamp']
+
+		res = upload_message(message, post_id, post_time)
+		if not res['status']:
+			logging.debug("Error uploading original post to s3; continuing anyway")
+
 	# one of following is true: 
 	# 1) sender is whitelisted
 	# 2) sender is blacklisted, but the user still wants rejected messages. 
@@ -563,7 +573,8 @@ def handle_post_squadbox(message, group, host, verified):
 
 		fix_headers(message, mail)
 
-		mail['message-id'] = msg_id
+		mail['Sender'] = '%s@%s' % (group.name, HOST)
+
 		ccs = email_message.get_all('cc', None)
 		if ccs:
 			mail['Cc'] = ','.join(ccs)

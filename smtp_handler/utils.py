@@ -686,13 +686,24 @@ def check_if_can_post_murmur(group, sender_addr, possible_list_addresses):
 	return {'can_post' : False, 'reason' : 'not_member'}
 
 def fix_headers(message, mail):
-	if 'references' in message:
-			mail['References'] = message['references']
-	elif 'message-id' in message:
-		mail['References'] = message['message-id']	
+	if 'References' in message:
+			mail['References'] = message['References']
 
-	if 'in-reply-to' not in message:
-		mail["In-Reply-To"] = message['message-id']
+	# a message's own ID shouldn't show up in its references. commenting out for now.
+	# elif 'message-id' in message:
+	# 	mail['References'] = message['message-id']	
+
+	# a message can't be in reply to itself. if it's a reply to a previous message and needs 
+	# this header, then that value is contained in the received message's in-reply-to. so
+	# we should just copy it over if it exists, and that's it. commenting out for now. 
+
+	# if 'in-reply-to' not in message:
+	# 	mail["In-Reply-To"] = message['message-id']
+
+	if 'in-reply-to' in message:
+		mail['In-Reply-To'] = message['In-Reply-To']
+
+	mail['Message-ID'] = message['Message-ID']
 
 def add_attachments(mail, attachments):
 	for attachment in attachments:

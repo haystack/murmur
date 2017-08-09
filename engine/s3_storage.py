@@ -42,10 +42,10 @@ def download_attachments(msg_id):
             files.append(file)
     return files
 
-def upload_message(message, post_id):
+def upload_message(message, post_id, post_timestamp):
 
     res = {'status' : False}
-    path = 'original_messages/%s' % post_id
+    path = 'original_messages/%s_%s' % (post_id, post_timestamp.strftime('%s'))
 
     try: 
         message_string = str(message)
@@ -58,19 +58,19 @@ def upload_message(message, post_id):
 
     return res
 
-def download_message(post_id):
+def download_message(post_id, post_timestamp):
 
     res = {'status' : False}
-    path = 'original_messages/%s' % post_id
+    path = 'original_messages/%s_%s' % (post_id, post_timestamp.strftime('%s'))
 
-    try:
-        with default_storage.open(path, 'r') as f:
-            message = f.read()
+    # try:
+    with default_storage.open(path, 'r') as f:
+        message = f.read()
 
-        res['message'] = message
-        res['status'] = True
+    res['message'] = message
+    res['status'] = True
 
-    except Exception, e:
-        logging.debug("Error downloading original message: %s" % e)
+    # except Exception, e:
+    #     logging.debug("Error downloading original message: %s" % e)
 
     return res
