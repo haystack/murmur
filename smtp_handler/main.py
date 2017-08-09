@@ -457,8 +457,6 @@ def handle_post_murmur(message, group, host, verified):
 def handle_post_squadbox(message, group, host, verified):
 
 	email_message = message_from_string(str(message))
-	logging.debug("MESSAGE STRING:")
-	logging.debug(str(message))
 	msg_id = message['Message-ID']
 
 	sender_name, sender_addr = parseaddr(message['From'].lower())
@@ -528,6 +526,10 @@ def handle_post_squadbox(message, group, host, verified):
 		status = 'A'
 		reason = 'no mods'
 		logging.debug("Squad has no moderators")
+	elif moderators.filter(member__email=sender_addr).exists():
+		status = 'A'
+		reason = 'is mod'
+		logging.debug('Message is from a moderator')
 
 	# if pending or rejected, we need to put it in the DB 
 	if status in ['P', 'R']:
@@ -546,9 +548,8 @@ def handle_post_squadbox(message, group, host, verified):
 			return
 
 		post_id = res['post_id']
-		post_time = res['timestamp']
 
-		res = upload_message(message, post_id, post_time)
+		res = upload_message(message, post_id, msg_id)
 		if not res['status']:
 			logging.debug("Error uploading original post to s3; continuing anyway")
 

@@ -43,10 +43,10 @@ def download_attachments(msg_id):
             files.append(file)
     return files
 
-def upload_message(message, post_id, post_timestamp):
+def upload_message(message, post_id, msg_id):
 
     res = {'status' : False}
-    path = '%s/original_messages/%s_%s' % (WEBSITE, post_id, post_timestamp.strftime('%s'))
+    path = '%s/original_messages/%s_%s' % (WEBSITE, post_id, msg_id)
 
     try: 
         message_string = str(message)
@@ -59,10 +59,10 @@ def upload_message(message, post_id, post_timestamp):
 
     return res
 
-def download_message(post_id, post_timestamp):
+def download_message(post_id, msg_id):
 
     res = {'status' : False}
-    path = '%s/original_messages/%s_%s' % (WEBSITE, post_id, post_timestamp.strftime('%s'))
+    path = '%s/original_messages/%s_%s' % (WEBSITE, post_id, msg_id)
 
     # try:
     with default_storage.open(path, 'r') as f:

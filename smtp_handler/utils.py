@@ -91,6 +91,7 @@ SQUADBOX_REASONS = {
 						to this thread was approved.", 
 	'mod off for sender-thread' : "This message was auto-approved because you've turned moderation off \
 							for posts by %s to this thread.", 
+	'is mod' : "This message was auto-approved because it's from one of your moderators.",
 
 }
 
@@ -424,7 +425,7 @@ def ps_squadbox(sender, reason, squad_name, squad_auto_approve, subject, mod_ema
 	elif reason == 'moderator rejected':
 		content %= mod_email 
 
-	elif reason == 'no mods':
+	elif reason in ['no mods', 'is mod']:
 		content += EDIT_WL_BL_MODS[HTML] % squad_link
 
 	elif reason == 'mod off for sender-thread':
