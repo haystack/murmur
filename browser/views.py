@@ -1531,23 +1531,35 @@ def murmur_acct(request, acct_func=None, template_name=None):
 
 @login_required
 def serve_attachment(request, hash_filename):
-	if Attachment.objects.filter(hash_filename=hash_filename):
-		if request.user.is_authenticated():
+
+	if request.user.is_authenticated():
+		try:
 			user = get_object_or_404(UserProfile, email=request.user.email)
-			user_groups = Group.objects.filter(membergroup__member=user)
-			user_groups_names = [group.name for group in user_groups]
-			msg_id = Attachment.objects.filter(hash_filename=hash_filename)[0].msg_id
-			authorized_group = Post.objects.filter(msg_id=msg_id)[0].group.name
-			if authorized_group in user_groups_names:
+			attachment = Attachment.objects.get(hash_filename=hash_filename)
+			group = Post.objects.get(msg_id=attachment.msg_id).group
+
+			if MemberGroup.objects.filter(member=user, group=group).exists():
 				s3 = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, is_secure=True)
-				filename = Attachment.objects.filter(hash_filename=hash_filename)[0].true_filename
-				filepath = hash_filename + "/" + filename
+				filepath = 'attachments/%s/%s' % (hash_filename, attachment.true_filename)
 				temporary_auth_url = s3.generate_url(60, 'GET', bucket=AWS_STORAGE_BUCKET_NAME, key=filepath)
 				return HttpResponseRedirect(temporary_auth_url)
 			else:
-				return HttpResponseRedirect('/404')
+				return HttpResponse('/404?e=member')
+
+		except Attachment.DoesNotExist:
+			logging.debug("No attachment with hash filename %s" % hash_filename)
+			return HttpResponseRedirect('/404')
+
+		except Post.DoesNotExist:
+			logging.debug("No post with msg id %s" % attachment.msg_id)
+			return HttpResponseRedirect('/404')
+
+		except Exception, e:
+			logging.debug("Error serving attachment: %s" % e)
+			return HttpResponseRedirect('/404')
 	else:
-		return HttpResponseRedirect('/404')
+		return redirect(global_settings.LOGIN_URL)
+
 
 @render_to('squadbox/mod_queue.html')
 def mod_queue(request, group_name):

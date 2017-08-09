@@ -8,7 +8,7 @@ from lamson.mail import MailResponse
 from smtp_handler.utils import *
 from bleach import clean
 from cgi import escape
-from attachments import upload_attachments, download_attachments
+from s3_storage import upload_attachments, download_attachments
 import re
 import hashlib
 import random

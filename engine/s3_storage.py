@@ -1,11 +1,8 @@
-import hashlib
-import time
-import random
-
-from schema.models import Attachment
-
+import hashlib, logging, random, time
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+
+from schema.models import Attachment
 
 def upload_attachments(attachments, msg_id):
     res = ""
@@ -22,7 +19,8 @@ def upload_attachments(attachments, msg_id):
             hash_filename = hashlib.sha1(filename + salt + thetime).hexdigest()
             hash_collision = Attachment.objects.filter(hash_filename=hash_filename).exists()
 
-        with default_storage.open(hash_filename+'/'+filename, 'wb+') as destination:
+        path = 'attachments/%s/%s' % (hash_filename, filename)
+        with default_storage.open(path, 'wb+') as destination:
             destination.write(attachment_file)
 
         a = Attachment(msg_id=msg_id, hash_filename=hash_filename, true_filename=filename, content_id=content_id)
@@ -35,7 +33,7 @@ def download_attachments(msg_id):
     files = []
     attachments = Attachment.objects.filter(msg_id=msg_id)
     for a in attachments:
-        path = a.hash_filename + '/' + a.true_filename 
+        path = 'attachments/%s/%s' % (a.hash_filename, a.true_filename)
         with default_storage.open(path, 'r') as f:
             file = {
                 'name' : a.true_filename,
@@ -43,3 +41,36 @@ def download_attachments(msg_id):
             }
             files.append(file)
     return files
+
+def upload_message(message, post_id):
+
+    res = {'status' : False}
+    path = 'original_messages/%s' % post_id
+
+    try: 
+        message_string = str(message)
+        with default_storage.open(path, 'wb+') as destination:
+            destination.write(message_string)
+        res['status'] = True
+
+    except Exception, e:
+        logging.debug("Error uploading original message: %s" % e)
+
+    return res
+
+def download_message(post_id):
+
+    res = {'status' : False}
+    path = 'original_messages/%s' % post_id
+
+    try:
+        with default_storage.open(path, 'r') as f:
+            message = f.read()
+
+        res['message'] = message
+        res['status'] = True
+
+    except Exception, e:
+        logging.debug("Error downloading original message: %s" % e)
+
+    return res
