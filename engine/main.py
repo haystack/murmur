@@ -746,6 +746,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 	return res
 	
 def load_thread(t, user=None, member=None):
+
 	following = False
 	muting = False
 	no_emails = False
@@ -764,8 +765,10 @@ def load_thread(t, user=None, member=None):
 		posts = Post.objects.filter(thread = t)	
 	elif WEBSITE == 'squadbox':
 		posts = Post.objects.filter(thread = t, status='P')
+
 	replies = []
 	post = None
+	
 	for p in posts:
 		post_likes = p.upvote_set.count()
 		total_likes += post_likes
@@ -796,10 +799,21 @@ def load_thread(t, user=None, member=None):
 					}
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
-		if not p.reply_to_id:
-			post = post_dict
-		else:
-			replies.append(post_dict)
+
+		if WEBSITE == 'murmur':
+			if not p.reply_to_id:
+				post = post_dict
+			else:
+				replies.append(post_dict)
+
+		elif WEBSITE == 'squadbox':
+			if post is None:
+				post = post_dict
+			elif post['timestamp'] > post_dict['timestamp']:
+				post = post_dict
+			else:
+				replies.append(post_dict)
+
 	tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
 	
 	return {'status': True,
