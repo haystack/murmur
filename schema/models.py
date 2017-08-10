@@ -209,7 +209,6 @@ class Group(models.Model):
  	# whether to automatically approve emails from a sender to a thread 
  	# in this group after their first post to the thread is approved
  	auto_approve_after_first = models.BooleanField(default=False)
-
 	
 	def __unicode__(self):
 		return self.name

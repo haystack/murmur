@@ -251,6 +251,8 @@ def thread(request):
 				res = engine.main.load_thread(thread, user=request.user)
 				role = None
 
+			print res
+
 			if WEBSITE == 'murmur':
 				thread_to = '%s@%s' % (group.name, HOST) 
 			elif WEBSITE == 'squadbox':
