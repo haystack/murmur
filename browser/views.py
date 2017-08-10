@@ -1591,8 +1591,6 @@ def mod_queue(request, group_name):
 		curr_group = mg.group
 		role = get_role_from_group_name(user, group_name)
 
-		print "role:", role
-
 		return {'user' : request.user, 'groups' : groups, 'active_group' : curr_group, 'active_group_role' : role,
 				'groups_links' : groups_links, 'pending_threads' : res['threads'], 'website' : WEBSITE}
 	else:

@@ -9,27 +9,26 @@
 					You are not in any squads yet. <a href="/create_new_group">Create a new squad.</a>
 					{% elif mod_group_count == 0 %}
 					You aren't a moderator for any squads yet.
-					{% elif pending_posts|length == 0 %}
+					{% elif pending_threads|length == 0 %}
 					There are no pending emails for this squad.
 				{% else %}
 					<i>Click on an email to view its full text, and approve or reject it.</i><br><br>
 				{% endif %}
 				<ul id="post-list-table">
-					{% for post in pending_posts %}
-						<a href="/thread?group_name={{ post.to }}&tid={{ post.thread_id }}&post_id={{post.id}}">
-							<li class="row-item" id="{{ post.thread_id }}">
+					{% for thread in pending_threads %}
+						<a href="/thread?group_name={{ active_group }}&tid={{ thread.id }}">
+							<li class="row-item" id="{{ thread.id }}">
 									<div class="row">
-										<div class="col-md-3">
-											<span class="strong">
-												{% if post.from_name %}
-													{{ post.from_name }}
-												{% else %}
-													{{ post.from }}
-												{% endif %}
-											</span>
+										<div class="col-md-3 truncated-senders">
+											{% if thread.num_posts > 1 %}
+												<span class='unread'>
+												{{thread.num_posts }}
+												</span>
+											{% endif %}
+											{{ thread.senders }}
 										</div>
-										<div class="col-md-5"><div class="truncate"><span class="strong">{{ post.subject }}</span> - <span class="faded-message">{{ post.text }}</span></div></div>
-										<div class="col-md-4"><div class="pull-right" style="padding-right: 20px;">{{ post.timestamp|date:"n/j/y" }} at {{ post.timestamp|date:"h:i A" }}</div></div>
+										<div class="col-md-6"><div class="truncated-post"><span class="strong">{{ thread.subject }}</span> - <span class="faded-message">{{ thread.first_text }}</span></div></div>
+										<div class="col-md-3"><div class="pull-right" style="padding-right: 20px;">{{ thread.first_timestamp|date:"n/j/y" }} at {{ thread.first_timestamp|date:"h:i A" }}</div></div>
 									</div>
 							</li>
 						</a>

@@ -760,8 +760,10 @@ def load_thread(t, user=None, member=None):
 			no_emails = member.no_emails
 			always_follow = member.always_follow_thread
 	
-	
-	posts = Post.objects.filter(thread = t)		
+	if WEBSITE == 'murmur':
+		posts = Post.objects.filter(thread = t)	
+	elif WEBSITE == 'squadbox':
+		posts = Post.objects.filter(thread = t, status='P')
 	replies = []
 	post = None
 	for p in posts:
@@ -1033,7 +1035,12 @@ def insert_squadbox_reply(group_name, subject, message_text, user, sender_addr, 
 		group = Group.objects.get(name=group_name)
 		original_subject = subject[4:].strip()
 		thread, created = Thread.objects.get_or_create(subject=original_subject, group=group)
-		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status)
+		thread_posts = Post.objects.filter(thread=thread).order_by('-timestamp')
+		if thread_posts.exists():
+			replying_to = thread_posts[0]
+		else:
+			replying_to = None
+		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, reply_to=replying_to, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status)
 		post.save()
 		upload_attachments(attachments, msg_id)
 		res['post_id'] = post.id
@@ -1654,7 +1661,29 @@ def group_by_thread(posts_list):
 		tid = p['thread_id']
 		threads[tid] = threads.get(tid, []) + [p]
 
-	return [threads[i] for i in threads]
+	thread_data = []
+	for t in threads:
+		posts = threads[t]
+
+		senders = set()
+		for p in posts:
+			if p['from_name']:
+				senders.add(p['from_name'])
+			else:
+				senders.add(p['from'])
+
+		thread = {
+			'id' : t,
+			'num_posts' : len(posts),
+			'first_timestamp' : posts[0]['timestamp'],
+			'first_text' : posts[0]['text'],
+			'subject' : posts[0]['subject'],
+			'senders' : ', '.join(list(senders)),
+		}
+
+		thread_data.append(thread)
+
+	return thread_data
 
 def adjust_moderate_user_for_thread(user, group_name, sender_addr, subject, moderate):
 
