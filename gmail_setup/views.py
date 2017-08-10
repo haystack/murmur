@@ -163,7 +163,7 @@ def import_start(request):
 
         for email in emails_to_add:
             # add these to whitelist / create form here!
-            res = update_blacklist_whitelist(user=user, group_name=group_name, email=email, whitelist=True, blacklist=False)
+            res = update_blacklist_whitelist(user, group_name, email, True, False)
 
         forward_address = group_name + '@' + BASE_URL
 
