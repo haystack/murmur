@@ -1,24 +1,20 @@
-import sys, logging, base64, email#, datetime
-from schema.models import *
-from constants import *
-from django.utils.timezone import utc
-from django.db.models import Q
-from browser.util import *
-from lamson.mail import MailResponse
-from smtp_handler.utils import *
+import base64, email, hashlib, json, logging, random, re, sys
+
 from bleach import clean
 from cgi import escape
-from attachments import upload_attachments, download_attachments
-import re
-import hashlib
-import random
+from django.utils.timezone import utc
+from django.db.models import Q
 from email.utils import parseaddr
 from html2text import html2text
+from lamson.mail import MailResponse
 
-from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME
-import json
+from browser.util import *
+from constants import *
 from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
-
+from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME
+from s3_storage import upload_attachments, download_attachments, download_message
+from schema.models import *
+from smtp_handler.utils import *
 
 def list_groups(user=None):
 	groups = []
@@ -1040,8 +1036,8 @@ def insert_squadbox_reply(group_name, subject, message_text, user, sender_addr, 
 		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status)
 		post.save()
 		upload_attachments(attachments, msg_id)
+		res['post_id'] = post.id
 		res['status'] = True
-		res['post'] = post
 
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -1506,6 +1502,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				_create_tag(g, p.thread, 'rejected')
 
 			p.save()
+
 			res['status'] = True
 			res['post_id'] = post_id
 			res['new_status'] = new_status
@@ -1540,6 +1537,15 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
 				mail = MailResponse(From = p.poster_email, To = admin.email, Subject = new_subj)
 				mail['message-id'] = p.msg_id
+
+				res = download_message(p.id, p.msg_id)
+				if not res['status']:
+					logging.debug("Error downloading original message")
+				else:
+					original_msg = email.message_from_string(res['message'])
+					mail['In-Reply-To'] = original_msg['In-Reply-To']
+					mail['References'] = original_msg['References']
+					mail['Cc'] = original_msg['Cc']
 
 				attachments = download_attachments(p.msg_id)
 				for a in attachments:

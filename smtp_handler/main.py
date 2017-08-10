@@ -7,6 +7,7 @@ from lamson.mail import MailResponse
 from email.utils import *
 from email import message_from_string
 from engine.main import *
+from engine.s3_storage import upload_message
 from utils import *
 from django.db.utils import OperationalError
 from datetime import datetime
@@ -355,6 +356,12 @@ def handle_post_murmur(message, group, host, verified):
 			send_error_email(group.name, res['code'], sender_addr, ADMIN_EMAILS)
 			return
 
+		post_id = res['post_id']
+
+		res = upload_message(message, post_id, msg_id)
+		if not res['status']:
+			logging.debug("Error uploading original post to s3; continuing anyway")
+
 		subject = get_subject(message, res, group.name)
 		mail = setup_post(message['From'], subject,	group.name)
 
@@ -525,6 +532,10 @@ def handle_post_squadbox(message, group, host, verified):
 		status = 'A'
 		reason = 'no mods'
 		logging.debug("Squad has no moderators")
+	elif moderators.filter(member__email=sender_addr).exists():
+		status = 'A'
+		reason = 'is mod'
+		logging.debug('Message is from a moderator')
 
 	# if pending or rejected, we need to put it in the DB 
 	if status in ['P', 'R']:
@@ -542,6 +553,12 @@ def handle_post_squadbox(message, group, host, verified):
 			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
 			return
 
+		post_id = res['post_id']
+
+		res = upload_message(message, post_id, msg_id)
+		if not res['status']:
+			logging.debug("Error uploading original post to s3; continuing anyway")
+
 	# one of following is true: 
 	# 1) sender is whitelisted
 	# 2) sender is blacklisted, but the user still wants rejected messages. 
@@ -549,7 +566,7 @@ def handle_post_squadbox(message, group, host, verified):
 	# 4) this group doesn't have any moderators yet
 	# 4) group has "auto approve after first post" on, and this sender posted before and got approved 
 	# (and the recipient did not subsequently opt back in to moderation for that user)
-	# 5) group has "auto approve after first post" off, but sender manually shut off moderation for this sender
+	# 5) group has "auto approve after first post" off, but owner manually shut off moderation for this sender
 	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
 
 		# we can just send it on to the intended recipient, i.e. the admin of the group. 
@@ -563,7 +580,6 @@ def handle_post_squadbox(message, group, host, verified):
 
 		fix_headers(message, mail)
 
-		mail['message-id'] = msg_id
 		ccs = email_message.get_all('cc', None)
 		if ccs:
 			mail['Cc'] = ','.join(ccs)
