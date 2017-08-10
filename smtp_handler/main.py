@@ -356,6 +356,12 @@ def handle_post_murmur(message, group, host, verified):
 			send_error_email(group.name, res['code'], sender_addr, ADMIN_EMAILS)
 			return
 
+		post_id = res['post_id']
+
+		res = upload_message(message, post_id, msg_id)
+		if not res['status']:
+			logging.debug("Error uploading original post to s3; continuing anyway")
+
 		subject = get_subject(message, res, group.name)
 		mail = setup_post(message['From'], subject,	group.name)
 

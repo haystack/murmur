@@ -1039,6 +1039,7 @@ def insert_squadbox_reply(group_name, subject, message_text, user, sender_addr, 
 		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status)
 		post.save()
 		upload_attachments(attachments, msg_id)
+		res['post_id'] = post.id
 		res['status'] = True
 
 	except Group.DoesNotExist:
