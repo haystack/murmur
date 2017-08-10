@@ -237,7 +237,7 @@ def thread(request):
 		is_member = member_group.exists()
 
 
-		if is_member and (member_group[0].moderator or membergroup_[0].admin):
+		if is_member and (member_group[0].moderator or member_group[0].admin):
 			modal_data = group.mod_rules
 		else:
 			modal_data = None
@@ -1583,13 +1583,8 @@ def mod_queue(request, group_name):
 
 		res = engine.main.load_pending_posts(user, group_name)
 
-		pending_posts = []
 		if not res['status']:
 			redirect('/404')
-		else:
-			for p in res['posts']:
-				p['text'] = html2text(p['text'])
-				pending_posts.append(p)
 
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		groups_links = get_groups_links_from_roles(user, groups)
@@ -1599,7 +1594,7 @@ def mod_queue(request, group_name):
 		print "role:", role
 
 		return {'user' : request.user, 'groups' : groups, 'active_group' : curr_group, 'active_group_role' : role,
-				'groups_links' : groups_links, 'pending_posts' : pending_posts, 'website' : WEBSITE}
+				'groups_links' : groups_links, 'pending_threads' : res['threads'], 'website' : WEBSITE}
 	else:
 		return redirect(global_settings.LOGIN_URL)
 

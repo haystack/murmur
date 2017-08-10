@@ -1589,7 +1589,9 @@ def load_pending_posts(user, group_name):
 	try:
 		mg = MemberGroup.objects.get(member=user, group__name=group_name)
 		posts = Post.objects.filter(group__name=group_name, status='P')
-		res['posts'] = fix_posts(posts)
+		posts_cleaned = fix_posts(posts)
+		grouped = group_by_thread(posts_cleaned)
+		res['threads'] = grouped
 		res['status'] = True
 
 	except MemberGroup.DoesNotExist:
@@ -1635,7 +1637,7 @@ def fix_posts(post_queryset):
 					'from_name' : p.poster_name,
 					'to': p.group.name, 
 					'subject': escape(p.subject),
-					'text': p.post,
+					'text': html2text(p.post),
 					'thread_id' : p.thread.id, 
 					'timestamp': p.timestamp,
 					'verified': p.verified_sender,
@@ -1645,6 +1647,14 @@ def fix_posts(post_queryset):
 		posts_fixed.append(post_dict)
 
 	return posts_fixed
+
+def group_by_thread(posts_list):
+	threads = {}
+	for p in posts_list:
+		tid = p['thread_id']
+		threads[tid] = threads.get(tid, []) + [p]
+
+	return [threads[i] for i in threads]
 
 def adjust_moderate_user_for_thread(user, group_name, sender_addr, subject, moderate):
 
