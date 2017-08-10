@@ -63,7 +63,11 @@ $(document).ready(function() {
             console.log(status_res);
 
             if (status_res.status) setTimeout(function() {
-                window.location = '/mod_queue/' + group_name;
+                if ($('.reply').length > 0) {
+                    location.reload(true);
+                } else {
+                    window.location = '/mod_queue/' + group_name;
+                }
             }, 1000);
         });
     });
