@@ -7,8 +7,6 @@ from bs4 import BeautifulSoup
 
 from schema.models import MemberGroup, Attachment
 
-from schema.models import MemberGroup
-
 ALLOWED_TAGS = [
     'a',
     'abbr',
