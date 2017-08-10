@@ -36,27 +36,28 @@ def parse_gmail(service_mail):
         message = response
         list_message_object = {}
         batch_cb.stop = False
-        if int(message["internalDate"]) < int(current_time - time_back):
-            batch_cb.stop = True
-            return
-        for pair in message['payload']['headers']:
-            if pair["name"] == "From":
-                emailstring = pair["value"].encode('UTF-8')
-                list_message_object['email'] = re.findall(r'[\w\.-]+@[\w\.-]+', emailstring)[0]
-                name = emailstring.split('<')[0].strip()
-                if name.startswith('"') and name.endswith('"'):
-                    name = name[1:-1]
-                list_message_object['name'] = name
-        list_message_object['label'] = None
-        for label in message['labelIds']:
-            if label == "CATEGORY_PERSONAL": list_message_object['label'] = 'personal'
-            if label == "CATEGORY_SOCIAL": list_message_object['label'] = 'social'
-            if label == "CATEGORY_PROMOTIONS": list_message_object['label'] = 'promotions'
-            if label == "CATEGORY_UPDATES": list_message_object['label'] = 'updates'
-            if label == "CATEGORY_FORUMS": list_message_object['label'] = 'forums'
-        # TODO: labels at the moment are only decided based on most recent email; change to be mode
-        if list_message_object['label'] != None:
-            received_list.append(list_message_object)
+        if message is not None:
+            if int(message["internalDate"]) < int(current_time - time_back):
+                batch_cb.stop = True
+                return
+            for pair in message['payload']['headers']:
+                if pair["name"] == "From":
+                    emailstring = pair["value"].encode('UTF-8')
+                    list_message_object['email'] = re.findall(r'[\w\.-]+@[\w\.-]+', emailstring)[0]
+                    name = emailstring.split('<')[0].strip()
+                    if name.startswith('"') and name.endswith('"'):
+                        name = name[1:-1]
+                    list_message_object['name'] = name
+            list_message_object['label'] = None
+            for label in message['labelIds']:
+                if label == "CATEGORY_PERSONAL": list_message_object['label'] = 'personal'
+                if label == "CATEGORY_SOCIAL": list_message_object['label'] = 'social'
+                if label == "CATEGORY_PROMOTIONS": list_message_object['label'] = 'promotions'
+                if label == "CATEGORY_UPDATES": list_message_object['label'] = 'updates'
+                if label == "CATEGORY_FORUMS": list_message_object['label'] = 'forums'
+            # TODO: labels at the moment are only decided based on most recent email; change to be mode
+            if list_message_object['label'] != None:
+                received_list.append(list_message_object)
 
     # receieved:
     while (page_token != None) and time_not_over:
