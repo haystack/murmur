@@ -456,6 +456,7 @@ def handle_post_murmur(message, group, host, verified):
 def handle_post_squadbox(message, group, host, verified):
 
 	email_message = message_from_string(str(message))
+	msg_id = message['Message-ID']
 
 	sender_name, sender_addr = parseaddr(message['From'].lower())
 	if sender_name == '':
@@ -463,8 +464,22 @@ def handle_post_squadbox(message, group, host, verified):
 	
 	subj = message['Subject'].strip()
 	message_is_reply = (subj[0:4].lower() == "re: ")
-	attachments = get_attachments(email_message)
-	msg_id = message['Message-ID']
+
+	if message_is_reply:
+		original_subj = subj[4:]
+		post_subject = "Re: " + re.sub("\[.*?\]", "", subj[4:])
+	else:
+		original_subj = subj
+		post_subject = subj
+
+	res = get_attachments(email_message)
+	check = check_attachments(res, group.allow_attachments)
+
+	if not check['status']:
+		send_error_email(group.name, check['error'], sender_addr, ADMIN_EMAILS)
+		return
+
+	attachments = res['attachments']
 
 	msg_text = get_body(email_message)
 	msg_text = check_html_and_plain(msg_text, message_is_reply)
@@ -477,37 +492,64 @@ def handle_post_squadbox(message, group, host, verified):
 	if not group.active:
 		status = 'A'
 		reason = 'deactivated'
-
+		logging.debug("Squad deactivated; automatically approving message")
 	else:
-		# if whitelisted, accept; if blacklisted, reject 
+
+		# first try whitelist/blacklist
 		status, reason = check_whitelist_blacklist(group, sender_addr)
+
+		# if that didn't give us an answer
 		if not reason:
-			# TODO: hash sender + subject, check if already approved from them
-			pass
+
+			# see if moderation has been shut off for this user/thread combo. that happens if either:
+			# 1) group has setting on to auto-approve posts from a user to thread after their 1st post to thread is approved
+			# 2) that setting isn't on, but recipient manually shut off moderation for this user to this thread
+			if check_if_sender_approved_for_thread(group.name, sender_addr, original_subj):
+				status = 'A'
+
+				# case 1 
+				if group.auto_approve_after_first:
+					reason = 'auto approve on'
+					logging.debug('Sender approved for this thread previously; automatically approving post')
+				# case 2
+				else:
+					reason = "mod off for sender-thread"
+					
+			else:
+				logging.debug('Post needs to be moderated')
+
+
+
+	moderators = MemberGroup.objects.filter(group=group, moderator=True)
+	if not moderators.exists():
+		status = 'A'
+		reason = 'no mods'
+		logging.debug("Squad has no moderators")
 
 	# if pending or rejected, we need to put it in the DB 
 	if status in ['P', 'R']:
-
 		if message_is_reply:
-			post_subject = "Re: " + re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
 			insert_func = insert_squadbox_reply
 		else:
-			post_subject = message['Subject'].strip()
 			insert_func = insert_post
 			
 		args = [group.name, post_subject, msg_text['html'], None, sender_addr, msg_id, verified]
-		keyword_args = {'attachments' : attachments, 'sender_name' : sender_name, 'status' : status}
-
+		keyword_args = {'attachments' : attachments, 'sender_name' : sender_name, 'post_status' : status}
+    
 		res = insert_func(*args, **keyword_args)
 
 		if not res['status']:
 			send_error_email(group.name, res['code'], None, ADMIN_EMAILS)
 			return
 
-	# either:
+	# one of following is true: 
 	# 1) sender is whitelisted
 	# 2) sender is blacklisted, but the user still wants rejected messages. 
 	# 3) moderation is turned off for now (inactive group)
+	# 4) this group doesn't have any moderators yet
+	# 4) group has "auto approve after first post" on, and this sender posted before and got approved 
+	# (and the recipient did not subsequently opt back in to moderation for that user)
+	# 5) group has "auto approve after first post" off, but sender manually shut off moderation for this sender
 	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
 
 		# we can just send it on to the intended recipient, i.e. the admin of the group. 
@@ -515,7 +557,7 @@ def handle_post_squadbox(message, group, host, verified):
 
 		new_subj = subj
 		if status == 'R':
-			new_subj = '[Rejected] ' + new_subj 
+			new_subj = '[Rejected] ' + new_subj
 
 		mail = MurmurMailResponse(From = message['From'], To = admin.email, Subject = new_subj)
 
@@ -528,34 +570,32 @@ def handle_post_squadbox(message, group, host, verified):
 
 		add_attachments(mail, attachments)
 
-		html_blurb = unicode(ps_squadbox(sender_addr, reason, True))
+		html_blurb = unicode(ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, True))
+
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
 
-		plain_blurb = ps_squadbox(sender_addr, reason, False)
+		plain_blurb = ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, False)
 		mail.Body = get_new_body(msg_text, plain_blurb, 'plain')
 
 		relay.deliver(mail, To = admin.email)
 
-	# send notification to mods (probably should change to not do this every time)
+	# send notification to least recently emailed mod if we haven't emailed them in 24 hrs 
 	elif status == 'P':
+		twenty_four_hours_ago = datetime.now(pytz.utc) + timedelta(days=-1)
+		unnotified_mods = moderators.filter(Q(last_emailed__lte=twenty_four_hours_ago) | Q(last_emailed=None))
 
-		moderators = MemberGroup.objects.filter(group=group, moderator=True)
+		if unnotified_mods.exists():
+			least_recent = unnotified_mods.order_by('last_emailed')[0]
 
-		if len(moderators) == 0:
-			error_msg = 'Error: the group %s has no moderators' % group.name
-			logging.debug(error_msg)
-			send_error_email(group.name, error_msg, None, ADMIN_EMAILS)
-			# maybe here we should just send the original email on to the admin here then? 
-			return
+			outgoing_msg = setup_moderation_post(group.name)
+			outgoing_msg['message-id'] = base64.b64encode(group.name + str(datetime.now())).lower() + '@' + BASE_URL
 
-		outgoing_msg = setup_moderation_post(group.name)
-		outgoing_msg['message-id'] = base64.b64encode(group.name + str(datetime.now())).lower() + '@' + BASE_URL
+			relay.deliver(outgoing_msg, To=least_recent.member.email)
+			logging.debug("sending msg to moderator %s" % least_recent.member.email)
 
-		for m in moderators:
-			member = m.member
-			relay.deliver(outgoing_msg, To=member.email)
-			logging.debug("sending msg to moderator %s" % member.email)
-	
+			least_recent.last_emailed = datetime.now(pytz.utc)
+			least_recent.save()
+		
 handler_funcs = {
 	'murmur' : handle_post_murmur,
 	'squadbox' : handle_post_squadbox,

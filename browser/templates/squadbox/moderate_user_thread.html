@@ -1,0 +1,24 @@
+{% extends "group_container_base.html" %}
+
+{% block container-content %}
+	
+	{% if res.status %}
+	You've turned moderation <span class="strong">{{ type }}</span> for the sender {{ sender }} in thread "{{ subject }}".
+
+	{% if type == 'on' %}
+		All future emails from this sender to this thread will undergo moderation. 
+		<br><br>
+		To turn moderation off for {{ sender }}'s future emails to "{{ subject }}",  
+		<a href="/moderate_user_for_thread_get?group_name={{group_name}}&sender={{sender}}&subject={{subject}}&moderate=off">click here</a>.
+	{% else %}
+		All future emails from this sender to this thread will be automatically approved. 
+		<br><br>
+		To turn moderation back on for {{ sender }}'s future emails to "{{ subject }}", 
+		<a href="/moderate_user_for_thread_get?group_name={{group_name}}&sender={{sender}}&subject={{subject}}&moderate=on">click here</a>.
+	{% endif %}
+
+	{% else %}
+		Sorry, there was an error: {{ res.code | lower }}.
+	{% endif %}
+
+{% endblock %}

@@ -4,10 +4,7 @@ import random
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from bleach import clean
 from bs4 import BeautifulSoup
-
 from schema.models import MemberGroup, Attachment
-
-from schema.models import MemberGroup
 
 ALLOWED_TAGS = [
     'a',

@@ -7,6 +7,7 @@ from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE
 from datetime import datetime, timedelta
 from email.utils import *
 from email import message_from_string
+from hashlib import sha1
 from html2text import html2text
 from markdown2 import markdown
 
@@ -78,7 +79,62 @@ ALLOWED_MIMETYPES_STR = 'images (JPEG, BMP, GIF, PNG), PDFs, and Microsoft Offic
 
 MAX_ATTACHMENT_SIZE = 3000000
 
+# for creating squadbox ps 
+SQUADBOX_REASONS = {
+	'whitelist' : "This message was auto-approved because the sender %s is on your whitelist.",
+	'blacklist' : "This message was auto-rejected because the sender %s is on your blacklist.",
+	'no mods' : "This message was auto-approved because your squad currently has no moderators.",
+	'deactivated' : "This message was auto-approved because your squad is currently deactivated.",
+	'moderator approved' : "This message was approved by your moderator %s.",
+	'moderator rejected' : "This message was rejected by your moderator %s.",
+	'auto approve on' : "This message was auto-approved because a previous post from %s \
+						to this thread was approved.", 
+	'mod off for sender-thread' : "This message was auto-approved because you've turned moderation off \
+							for posts by %s to this thread.", 
 
+}
+
+FUTURE_AUTO_APPROVE = {
+	True: "<br><br>Future posts from %s to this thread will be auto-approved.",
+	False: "\n\nFuture posts from %s will be auto-approved."
+}
+
+MODERATE_ON_LINK = '%s/moderate_user_for_thread_get?group_name=%s&sender=%s&subject=%s&moderate=on'
+MODERATE_OFF_LINK = MODERATE_ON_LINK[:-2] + 'off'
+
+MOD_ON = {
+	True: " If you would like moderators to continue reviewing this sender's posts to the thread, follow <a href='%s'>this link</a>.",
+	False: " If you would like moderators to continue reviewing this sender's posts to the thread, follow this link: <%s>."
+}
+
+MOD_BACK_ON = {
+	True: " To turn it back on, follow <a href='%s'>this link</a>.",
+	False: " To turn it back on, follow this link: <%s>."
+}
+
+
+MOD_OFF = {
+	True: " To turn moderation off for future posts from %s to this thread, follow <a href='%s'>this link</a>.",
+	False: " To turn moderation off for future posts from %s to this thread, follow this link: <%s>."
+}
+
+EDIT_WL_BL_MODS = {
+	True: "<br><br>To edit your whitelist, blacklist, or moderators, visit the <a href='%s'>squad page</a>.",
+	False: "\n\nTo edit your whitelist, blacklist, or moderators, visit the squad page: <%s>."
+}
+
+REACTIVATE = {
+	True: "<br><br>To reactivate your squad, visit the <a href='%s'>squad page</a>.",
+	False: "\n\nTo reactivate your squad, visit the squad page: <%s>."
+}
+
+EDIT_AUTO_APPROVE = {
+	True: "<br>To edit your thread auto-approval settings, visit the <a href='%s'>squad settings page</a>.",
+	False: "\nTo edit your thread auto-approval settings, visit the squad settings page <%s>."
+}
+
+SQUAD_PAGE_LINK = '%s/groups/%s'
+SQUAD_SETTINGS_LINK = SQUAD_PAGE_LINK + '/edit_group_info'
 
 def setup_post(From, Subject, group_name):
 	
@@ -105,7 +161,7 @@ def setup_post(From, Subject, group_name):
 
 def setup_moderation_post(group_name):
 
-	subject = 'New post to Squadbox squad %s requires approval' % group_name 
+	subject = 'New posts to Squadbox squad %s require approval' % group_name 
 	to = '%s Moderators <%s+mods@%s>' % (group_name, group_name, HOST)
 	from_addr = 'Squadbox Notifications <%s+notifications@%s>' % (group_name, HOST)
 
@@ -118,8 +174,11 @@ def setup_moderation_post(group_name):
 		"Precedence": 'list'
 		})
 
-	plain_body = "To view all pending posts to the squad, visit your dashboard: %s/dashboard" % BASE_URL
-	html_body = "To view all pending posts to the squad, visit your <a href='%s/dashboard'>dashboard</a>." % BASE_URL 
+	pending_count = Post.objects.filter(group__name=group_name, status='P').count()
+
+	body_base = 'As of now, there are %s pending posts. To view all of them, visit the ' %  pending_count
+	plain_body = body_base + "moderation queue: %s/mod_queue/%s" % (BASE_URL, group_name)
+	html_body = body_base + "<a href='%s/mod_queue/%s'>moderation queue</a>." % (BASE_URL, group_name)
 
 	blurb = "You're receiving this message because you're a moderator of the squad %s." % group_name
 	html_ps_blurb = '%s%s%s' % (HTML_SUBHEAD, blurb, HTML_SUBTAIL)
@@ -338,19 +397,42 @@ def plain_forwarded_blurb(group_name, to_list, original_list_email=None):
 	body = '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
 	return body
 
+def ps_squadbox(sender, reason, squad_name, squad_auto_approve, subject, mod_email, HTML):
 
-def ps_squadbox(sender, reason, HTML):
+	mod_on = MODERATE_ON_LINK % (BASE_URL, squad_name, sender, subject)
+	mod_off = MODERATE_OFF_LINK % (BASE_URL, squad_name, sender, subject)
+	squad_link = SQUAD_PAGE_LINK % (BASE_URL, squad_name)
+	settings_link = SQUAD_SETTINGS_LINK % (BASE_URL, squad_name)
 
-	if reason == 'whitelist':
-		content = 'This message was automatically approved because the sender %s is on your whitelist.' % sender
-	elif reason == 'blacklist':
-		content = 'This message was automatically rejected because the sender %s is on your blacklist.' % sender
-	elif reason.startswith('approved') or reason.startswith('rejected'):
-		content = 'This message was ' + reason 
+	content = SQUADBOX_REASONS[reason]
+
+	if reason in ['whitelist', 'blacklist']:
+		content %= sender
+		content += EDIT_WL_BL_MODS[HTML] % squad_link
+
+	elif reason == 'auto approve on':
+		content %= sender
+		content += MOD_ON[HTML] % mod_on + EDIT_AUTO_APPROVE[HTML] % settings_link
+
+	elif reason == 'moderator approved':
+		content %= mod_email
+		if squad_auto_approve:
+			content += FUTURE_AUTO_APPROVE[HTML] % sender + MOD_ON[HTML] % mod_on + EDIT_AUTO_APPROVE[HTML] % settings_link
+		else:
+			content += MOD_OFF[HTML] % (sender, mod_off)
+
+	elif reason == 'moderator rejected':
+		content %= mod_email 
+
+	elif reason == 'no mods':
+		content += EDIT_WL_BL_MODS[HTML] % squad_link
+
+	elif reason == 'mod off for sender-thread':
+		content %= sender
+		content += MOD_BACK_ON[HTML] % mod_on
+
 	elif reason == 'deactivated':
-		content = 'This message was automatically approved because your squad is disabled.'
-	else:
-		content = ''
+		content += REACTIVATE[HTML] % squad_link
 
 	if HTML:
 		return '%s%s%s' % (HTML_SUBHEAD, content, HTML_SUBTAIL)
@@ -620,3 +702,14 @@ def add_attachments(mail, attachments):
 					disposition=attachment['disposition'],
 					id=attachment['id'])
 
+def get_sender_subject_hash(sender_addr, subject):
+	data = '%s|%s' % (sender_addr, subject)
+	return sha1(data.encode()).hexdigest()
+
+def check_if_sender_approved_for_thread(group_name, sender_addr, subject):
+	hashed = get_sender_subject_hash(sender_addr, subject)
+	return ThreadHash.objects.filter(sender_subject_hash=hashed, group__name=group_name, moderate=False).exists()
+
+def check_if_sender_moderated_for_thread(group_name, sender_addr, subject):
+	hashed = get_sender_subject_hash(sender_addr, subject)
+	return ThreadHash.objects.filter(sender_subject_hash=hashed, group__name=group_name, moderate=True).exists()
