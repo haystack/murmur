@@ -251,6 +251,8 @@ def thread(request):
 				res = engine.main.load_thread(thread, user=request.user)
 				role = None
 
+			print res
+
 			if WEBSITE == 'murmur':
 				thread_to = '%s@%s' % (group.name, HOST) 
 			elif WEBSITE == 'squadbox':
@@ -526,6 +528,7 @@ def edit_group_info(request):
 		mod_rules = request.POST['mod_rules']
 		auto_approve = request.POST['auto_approve'] == 'true'
 		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, auto_approve, user) 
+
 		if res['status']:
 			active_group = request.session.get('active_group')
 			if active_group == old_group_name:

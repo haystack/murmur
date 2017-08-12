@@ -260,7 +260,6 @@ def create_group(group_name, group_desc, public, attach, send_rejected, store_re
 	logging.debug(res)
 	return res
 
-
 def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, auto_approve, user):
 	res = {'status':False}	
 	try:
@@ -274,6 +273,7 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, 
 		group.show_rejected_site = store_rejected
 		group.mod_edit_wl_bl = mod_edit
 		group.mod_rules = mod_rules
+
 		group.auto_approve_after_first = auto_approve
 		group.save()
 		res['status'] = True	
