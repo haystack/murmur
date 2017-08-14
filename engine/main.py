@@ -1,4 +1,4 @@
-import base64, email, hashlib, json, logging, random, re, sys
+import base64, email, hashlib, json, logging, random, re, sys, time
 
 from bleach import clean
 from cgi import escape
@@ -1721,4 +1721,22 @@ def adjust_moderate_user_for_thread(user, group_name, sender_addr, subject, mode
 		res['code'] = msg_code['NOT_MEMBER']
 
 	return res
+
+def generate_filter_hash(user, group_name):
+	res = {'status' : False }
+	try:
+		mg = MemberGroup.objects.get(member=user, group__name=group_name)
+		salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()
+		new_hash = hashlib.sha1(user.email + group_name + salt).hexdigest()[:20]
+		mg.gmail_filter_hash = new_hash
+		mg.save()
+
+		res['status'] = True
+		res['hash'] = new_hash
+
+	except MemberGroup.DoesNotExist:
+		res['error'] = 'Member group does not exist'
+
+	return res
+
 

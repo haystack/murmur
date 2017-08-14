@@ -4,24 +4,21 @@ import json
 
 import api
 from engine.main import update_blacklist_whitelist
-from schema.models import CredentialsModel, FlowModel
 from http_handler.settings import BASE_URL, WEBSITE
+from schema.models import CredentialsModel, FlowModel
 
+from annoying.decorators import render_to
+from apiclient.discovery import build
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.sites.models import get_current_site
+from django.core.urlresolvers import reverse
+from django.shortcuts import render, render_to_response
 from oauth2client import xsrfutil
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.django_orm import Storage
-
-from apiclient.discovery import build
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from django.http import HttpResponseBadRequest
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, render_to_response
-from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
-from django.contrib.sites.models import get_current_site
-from annoying.decorators import render_to
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 
@@ -29,12 +26,13 @@ CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 @render_to("gmail_setup_start.html")
 def index(request):
     is_done = False
-    if request.path_info == '/gmail_setup/done':
-        is_done = True
+
+    is_done = (request.path_info == '/gmail_setup/done')
+
     if 'group' not in request.GET:
         return {'group_name': None}
-    group_name = request.GET['group']
 
+    group_name = request.GET['group']
     forward_address = group_name + '@' + BASE_URL
 
     user = request.user
@@ -44,9 +42,7 @@ def index(request):
     is_authorized = False
     # Used for Squadbox only:
     gmail_forwarding_verified = False
-    if credential is None or credential.invalid is True:
-        pass
-    else:
+    if credential and not credential.invalid:
         is_authorized = True
         http = httplib2.Http()
         http = credential.authorize(http)
@@ -75,7 +71,7 @@ def auth(request):
     user = request.user
     storage = Storage(CredentialsModel, 'id', user, 'credential')
     credential = storage.get()
-    if credential is None or credential.invalid is True:
+    if not credential or credential.invalid:
         if 'group' in request.GET:
             group_name = request.GET['group']
             FLOW.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY, user) + '___' + group_name
@@ -146,7 +142,7 @@ def import_start(request):
     if request.method == 'POST':
         # process submitted form here
         raw_response = request.POST.items()
-        emails_to_add = []
+        emails_to_add = [] 
         group_name = None
         for item in raw_response:
             if item[0] == 'csrfmiddlewaretoken':
@@ -168,12 +164,10 @@ def import_start(request):
         forward_address = group_name + '@' + BASE_URL
 
         if WEBSITE == "squadbox":
-            res = api.create_gmail_filter(service_mail, emails_to_add, forward_address)
+            res = api.create_gmail_filter(service_mail, emails_to_add, forward_address, user, group_name)
         return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)
     else:
         # generate form objects for first load here
-        group_name = None
-        if 'group' in request.GET:
-            group_name = request.GET['group']
+        group_name = request.GET.get('group', None)
         # TODO: combine multiple email addresses for same contact in contacts view
         return render(request, 'gmail_setup_import.html', {'website': WEBSITE, 'user': user, 'contacts_names_emails': contacts_names_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list, 'freq_contacted' : freq_contacted})

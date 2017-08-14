@@ -1,5 +1,5 @@
-import re
-import time
+import logging, re, time
+from engine.main import generate_filter_hash
 
 def parse_contacts(service_people):
     res_tuple = []
@@ -129,7 +129,7 @@ def get_google_emails(service_people, service_mail):
     emails = parse_gmail(service_mail)
     return list(set(contacts).union(set(emails)))
 
-def create_gmail_filter(service_mail, whitelist_emails, forward_address):
+def create_gmail_filter(service_mail, whitelist_emails, forward_address, user, group_name):
     response = service_mail.users().settings().filters().list(userId='me').execute()
     if 'filter' in response:
         existing_filters = response['filter']
@@ -138,11 +138,24 @@ def create_gmail_filter(service_mail, whitelist_emails, forward_address):
                 if filter['action']['forward'] == forward_address:
                     service_mail.users().settings().filters().delete(userId='me', id=filter['id']).execute()
     #email_list_piped = "|".join(whitelist_emails)
-    emails = 'from:' + ' | from:'.join(whitelist_emails)
+    emails = '{from:' + ' from:'.join(whitelist_emails) + '}' 
+
+    user_gmail = service_mail.users().getProfile(userId='me').execute()['emailAddress']
+    logging.debug("USER GMAIL: %s" % user_gmail)
+
+    user_gmail_id = user_gmail.split('@')[0]
+      
+    res = generate_filter_hash(user, group_name)
+    if not res['status']:
+        logging.error("Error generating gmail filter")
+        gmail_secret = ''
+    else:
+        gmail_secret = 'to:%s+%s@gmail.com' % (user_gmail_id, res['hash'])
+
     filter = {
         'criteria': {
             #'from': email_list_piped,
-            'negatedQuery' : emails,
+            'negatedQuery' : '%s %s' % (emails, gmail_secret),
             'excludeChats' : True,
         },
         'action': {
