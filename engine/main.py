@@ -1587,7 +1587,14 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				message_text['plain'] = html2text(html_prefix + p.post)
 				mail.Html = get_new_body(message_text, html_blurb, 'html')
 				mail.Body = get_new_body(message_text, plain_blurb, 'plain')
-				relay_mailer.deliver(mail, To = admin.email)
+
+				to_email = admin.email
+				if to_email.endswith('@gmail.com'):
+					filter_hash = mgs[0].gmail_filter_hash
+					gmail_id = to_email.split('@')[0] 
+					to_email = '%s+%s@gmail.com' % (gmail_id, filter_hash)
+
+				relay_mailer.deliver(mail, To = to_email)
 
 	except Post.DoesNotExist:
 		res['code'] = msg_code['POST_NOT_FOUND_ERROR']

@@ -572,7 +572,8 @@ def handle_post_squadbox(message, group, host, verified):
 	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
 
 		# we can just send it on to the intended recipient, i.e. the admin of the group. 
-		admin = MemberGroup.objects.get(group=group, admin=True).member
+		admin_mg = MemberGroup.objects.get(group=group, admin=True)
+		admin = admin_mg.member
 
 		new_subj = subj
 		if status == 'R':
@@ -589,13 +590,18 @@ def handle_post_squadbox(message, group, host, verified):
 		add_attachments(mail, attachments)
 
 		html_blurb = unicode(ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, True))
-
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
 
 		plain_blurb = ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, False)
 		mail.Body = get_new_body(msg_text, plain_blurb, 'plain')
 
-		relay.deliver(mail, To = admin.email)
+		to_email = admin.email
+		if to_email.endswith('@gmail.com'):
+			filter_hash = admin_mg.gmail_filter_hash
+			gmail_id = to_email.split('@')[0] 
+			to_email = '%s+%s@gmail.com' % (gmail_id, filter_hash)
+
+		relay.deliver(mail, To = to_email)
 
 	# send notification to least recently emailed mod if we haven't emailed them in 24 hrs 
 	elif status == 'P':
