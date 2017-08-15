@@ -599,7 +599,7 @@ def handle_post_squadbox(message, group, host, verified):
 		if to_email.endswith('@gmail.com'):
 			filter_hash = admin_mg.gmail_filter_hash
 			gmail_id = to_email.split('@')[0] 
-			to_email = '%s+%s@gmail.com' % (gmail_id, filter_hash)
+			to_email = '%s+__%s__@gmail.com' % (gmail_id, filter_hash)
 
 		relay.deliver(mail, To = to_email)
 

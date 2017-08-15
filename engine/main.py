@@ -1495,9 +1495,13 @@ def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 def update_post_status(user, group_name, post_id, new_status, explanation=None, tags=None):
 	res = {'status' : False}
 
+	logging.error("here, updating post status")
+
 	try:
 		p = Post.objects.get(id=post_id)
 		g = Group.objects.get(name=group_name)
+
+		logging.error("here2")
 		
 		# only admins or moderators of a group can change post statuses
 		mg = MemberGroup.objects.get(Q(admin=True) | Q(moderator=True), member=user, group=g)
@@ -1505,6 +1509,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 		if new_status not in ALLOWED_MESSAGE_STATUSES:
 			res['code'] = msg_code['INVALID_STATUS_ERROR'] % new_status
 		else:
+			logging.error("here3")
 			p.status = new_status
 			p.who_moderated = user
 
@@ -1528,9 +1533,13 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 			res['post_id'] = post_id
 			res['new_status'] = new_status
 
+			logging.error("here4")
+
 			# now send message on to the intended recipient if it was approved,
 			# or if it was rejected but the recipient wants rejected emails with tag
 			if new_status == 'A' or (new_status == 'R' and g.send_rejected_tagged):
+
+				logging.error("here5")
 
 				mgs = MemberGroup.objects.filter(group=g, admin=True)
 				if not mgs.exists():
@@ -1561,7 +1570,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
 				res = download_message(p.id, p.msg_id)
 				if not res['status']:
-					logging.debug("Error downloading original message")
+					logging.error("Error downloading original message")
 				else:
 					original_msg = email.message_from_string(res['message'])
 					mail['In-Reply-To'] = original_msg['In-Reply-To']
@@ -1583,16 +1592,21 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				if new_status == 'R' and len(p.mod_explanation) > 0:
 					html_prefix = "<p><b>Moderator explanation for rejection</b>: %s </p><b>Message text</b>:<br>" % p.mod_explanation
 
+				logging.error("here6")
+
 				message_text = {'html' : html_prefix + p.post}
 				message_text['plain'] = html2text(html_prefix + p.post)
 				mail.Html = get_new_body(message_text, html_blurb, 'html')
 				mail.Body = get_new_body(message_text, plain_blurb, 'plain')
 
 				to_email = admin.email
+				logging.error("to email: %s" % to_email)
 				if to_email.endswith('@gmail.com'):
+					logging.error("here!")
 					filter_hash = mgs[0].gmail_filter_hash
 					gmail_id = to_email.split('@')[0] 
 					to_email = '%s+%s@gmail.com' % (gmail_id, filter_hash)
+					logging.error("updated to email: %s" % to_email)
 
 				relay_mailer.deliver(mail, To = to_email)
 
