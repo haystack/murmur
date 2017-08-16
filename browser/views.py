@@ -1598,7 +1598,6 @@ def subscribe_confirm(request, token):
 	mgp = MemberGroupPending.objects.get(hash=token)
 	if mgp:
 		mod = WEBSITE == 'squadbox'
-		logging.debug("confirming; mod=%s" % mod)
 		mg,_ = MemberGroup.objects.get_or_create(member=mgp.member, group=mgp.group, moderator=mod)
 		MemberGroupPending.objects.get(hash=token).delete()
 		return HttpResponseRedirect('/')
