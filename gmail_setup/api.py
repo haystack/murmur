@@ -1,5 +1,8 @@
+from apiclient.discovery import build
 import logging, re, time
-from engine.main import generate_filter_hash
+
+from http_handler.settings import BASE_URL
+from views import build_services
 
 def parse_contacts(service_people):
     res_tuple = []
@@ -129,32 +132,20 @@ def get_google_emails(service_people, service_mail):
     emails = parse_gmail(service_mail)
     return list(set(contacts).union(set(emails)))
 
-def create_gmail_filter(service_mail, whitelist_emails, forward_address, user, group_name):
-    response = service_mail.users().settings().filters().list(userId='me').execute()
-    if 'filter' in response:
-        existing_filters = response['filter']
-        for filter in existing_filters:
-            if 'forward' in filter['action']:
-                if filter['action']['forward'] == forward_address:
-                    service_mail.users().settings().filters().delete(userId='me', id=filter['id']).execute()
-    #email_list_piped = "|".join(whitelist_emails)
+def create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_hash):
+
+    filters = service_mail.users().settings().filters()
+
+    response = filters.list(userId='me').execute()
+    for f in response.get('filter', []):
+        if 'forward' in f['action'] and f['action']['forward'] == forward_address:
+            filters.delete(userId='me', id=f['id']).execute()
+
     emails = '{from:' + ' from:'.join(whitelist_emails) + '}' 
+    gmail_secret = 'list:%s@%s' % (filter_hash, BASE_URL)
 
-    user_gmail = service_mail.users().getProfile(userId='me').execute()['emailAddress']
-    logging.debug("USER GMAIL: %s" % user_gmail)
-
-    user_gmail_id = user_gmail.split('@')[0]
-      
-    res = generate_filter_hash(user, group_name)
-    if not res['status']:
-        logging.error("Error generating gmail filter")
-        gmail_secret = ''
-    else:
-        gmail_secret = 'to:%s+%s@gmail.com' % (user_gmail_id, res['hash'])
-
-    filter = {
+    new_filter = {
         'criteria': {
-            #'from': email_list_piped,
             'negatedQuery' : '%s %s' % (emails, gmail_secret),
             'excludeChats' : True,
         },
@@ -163,11 +154,13 @@ def create_gmail_filter(service_mail, whitelist_emails, forward_address, user, g
             'forward': forward_address
         }
     }
-    result = service_mail.users().settings().filters().create(userId='me', body=filter).execute()
-    return result
 
-def add_to_whitelist(emails):
-    return
+    return filters.create(userId='me', body=new_filter).execute()
+
+def update_gmail_filter(user, group_name, whitelist_emails, filter_hash):
+    service_mail = build_services(user)['mail']
+    forward_address = '%s@%s' % (group_name, BASE_URL)
+    return create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_hash)
 
 def check_forwarding_address(service_mail, forward_address):
     result = service_mail.users().settings().forwardingAddresses().list(userId='me').execute()

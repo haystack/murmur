@@ -3,7 +3,8 @@ import httplib2
 import json
 
 import api
-from engine.main import update_blacklist_whitelist
+from engine.main import update_blacklist_whitelist, get_or_generate_filter_hash
+from gmail_setup.api import create_gmail_filter
 from http_handler.settings import BASE_URL, WEBSITE
 from schema.models import CredentialsModel, FlowModel
 
@@ -22,10 +23,19 @@ from oauth2client.django_orm import Storage
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 
+def build_services(user):
+    storage = Storage(CredentialsModel, 'id', user, 'credential')
+    credential = storage.get()
+    if credential and not credential.invalid
+        http = httplib2.Http()
+        http = credential.authorize(http)
+        service_people = build('people', 'v1', http=http)
+        service_mail = build('gmail', 'v1', http=http)
+        return {'mail' : service_mail, 'people' : service_people}
+
 @login_required
 @render_to("gmail_setup_start.html")
 def index(request):
-    is_done = False
 
     is_done = (request.path_info == '/gmail_setup/done')
 
@@ -35,18 +45,15 @@ def index(request):
     group_name = request.GET['group']
     forward_address = group_name + '@' + BASE_URL
 
-    user = request.user
-    storage = Storage(CredentialsModel, 'id', user, 'credential')
-    credential = storage.get()
+    services = build_services(user)
 
-    is_authorized = False
+    is_authorized = False 
     # Used for Squadbox only:
     gmail_forwarding_verified = False
-    if credential and not credential.invalid:
+
+    if services is not None:
         is_authorized = True
-        http = httplib2.Http()
-        http = credential.authorize(http)
-        service_mail = build('gmail', 'v1', http=http)
+        service_mail = services['mail']
         gmail_forwarding_verified = api.check_forwarding_address(service_mail, forward_address)
 
     return {'website': WEBSITE, 'user': user, 'is_authorized': is_authorized, 'gmail_forwarding_verified': gmail_forwarding_verified, 'is_done': is_done, 'group_name': group_name, 'forward_address': forward_address}
@@ -111,13 +118,10 @@ def deauth(request):
 
 @login_required
 def import_start(request):
-    user = request.user
-    storage = Storage(CredentialsModel, 'id', user, 'credential')
-    credential = storage.get()
-    http = httplib2.Http()
-    http = credential.authorize(http)
-    service_people = build('people', 'v1', http=http)
-    service_mail = build('gmail', 'v1', http=http)
+
+    services = build_services(request.user)
+    service_people = services['people']
+    service_mail = services['mail']
 
     contacts_names_emails = api.parse_contacts(service_people)
 
@@ -164,7 +168,9 @@ def import_start(request):
         forward_address = group_name + '@' + BASE_URL
 
         if WEBSITE == "squadbox":
-            res = api.create_gmail_filter(service_mail, emails_to_add, forward_address, user, group_name)
+            filter_hash = get_or_generate_filter_hash(user, group_name, push=False)['hash']
+            api.create_gmail_filter(service_mail, emails_to_add, forward_address, filter_hash)
+
         return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)
     else:
         # generate form objects for first load here

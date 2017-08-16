@@ -159,6 +159,7 @@ class MemberGroup(models.Model):
 	receive_attachments = models.BooleanField(default=True)
 	last_emailed = models.DateTimeField(null=True)
 	gmail_filter_hash = models.CharField(max_length=40, null=True)
+	last_updated_hash = models.DateTimeField(auto_now_add=True)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)

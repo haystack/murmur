@@ -600,13 +600,11 @@ def handle_post_squadbox(message, group, host, verified):
 		plain_blurb = ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, False)
 		mail.Body = get_new_body(msg_text, plain_blurb, 'plain')
 
-		to_email = admin.email
-		if to_email.endswith('@gmail.com'):
-			filter_hash = admin_mg.gmail_filter_hash
-			gmail_id = to_email.split('@')[0] 
-			to_email = '%s+__%s__@gmail.com' % (gmail_id, filter_hash)
+		res = get_or_generate_filter_hash(admin, group.name)
+		if res['status']:
+			mail['List-Id'] = '%s@%s' % (res['hash'], BASE_URL)
+			logging.error("updated list id to %s" % mail['List-Id'])
 
-		mail['To'] = to_email
 		relay.deliver(mail)
 
 	# send notification to least recently emailed mod if we haven't emailed them in 24 hrs 
