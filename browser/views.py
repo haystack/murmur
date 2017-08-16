@@ -1597,7 +1597,8 @@ def mod_queue(request, group_name):
 def subscribe_confirm(request, token):
 	mgp = MemberGroupPending.objects.get(hash=token)
 	if mgp:
-		mg,_ = MemberGroup.objects.get_or_create(member=mgp.member, group=mgp.group)
+		mod = WEBSITE == 'squadbox'
+		mg,_ = MemberGroup.objects.get_or_create(member=mgp.member, group=mgp.group, moderator=mod)
 		MemberGroupPending.objects.get(hash=token).delete()
 		return HttpResponseRedirect('/')
 	else:
