@@ -1577,8 +1577,10 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				if orig_subj.startswith('Re: '):
 					orig_subj = orig_subj[4:]		
 
-				html_blurb = unicode(ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, True))
-				plain_blurb = ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, False)
+				# html_blurb = unicode(ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, True))
+				# plain_blurb = ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, False)
+				html_blurb = ''
+				plain_blurb = ''
 
 				html_prefix = ''
 				if new_status == 'R' and len(p.mod_explanation) > 0:

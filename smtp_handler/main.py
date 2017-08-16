@@ -595,9 +595,11 @@ def handle_post_squadbox(message, group, host, verified):
 		add_attachments(mail, attachments)
 
 		html_blurb = unicode(ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, True))
+		html_blurb = ''
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
 
-		plain_blurb = ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, False)
+		#plain_blurb = ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, False)
+		plain_blurb = ''
 		mail.Body = get_new_body(msg_text, plain_blurb, 'plain')
 
 		res = get_or_generate_filter_hash(admin, group.name)
