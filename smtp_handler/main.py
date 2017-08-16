@@ -470,6 +470,11 @@ def handle_post_squadbox(message, group, host, verified):
 	sender_addr = sender_addr.lower()
 	if sender_name == '':
 		sender_name = None
+
+	# if this looks like a double-post, ignore it
+	if check_duplicate(message, group, sender_addr):
+		logging.debug("ignoring duplicate")
+		return
 	
 	subj = message['Subject'].strip()
 	message_is_reply = (subj[0:4].lower() == "re: ")
@@ -601,7 +606,8 @@ def handle_post_squadbox(message, group, host, verified):
 			gmail_id = to_email.split('@')[0] 
 			to_email = '%s+__%s__@gmail.com' % (gmail_id, filter_hash)
 
-		relay.deliver(mail, To = to_email)
+		mail['To'] = to_email
+		relay.deliver(mail)
 
 	# send notification to least recently emailed mod if we haven't emailed them in 24 hrs 
 	elif status == 'P':
