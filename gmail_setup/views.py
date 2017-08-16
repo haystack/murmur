@@ -26,7 +26,7 @@ CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 def build_services(user):
     storage = Storage(CredentialsModel, 'id', user, 'credential')
     credential = storage.get()
-    if credential and not credential.invalid
+    if credential and not credential.invalid:
         http = httplib2.Http()
         http = credential.authorize(http)
         service_people = build('people', 'v1', http=http)
@@ -45,7 +45,7 @@ def index(request):
     group_name = request.GET['group']
     forward_address = group_name + '@' + BASE_URL
 
-    services = build_services(user)
+    services = build_services(request.user)
 
     is_authorized = False 
     # Used for Squadbox only:
@@ -56,7 +56,7 @@ def index(request):
         service_mail = services['mail']
         gmail_forwarding_verified = api.check_forwarding_address(service_mail, forward_address)
 
-    return {'website': WEBSITE, 'user': user, 'is_authorized': is_authorized, 'gmail_forwarding_verified': gmail_forwarding_verified, 'is_done': is_done, 'group_name': group_name, 'forward_address': forward_address}
+    return {'website': WEBSITE, 'user': request.user, 'is_authorized': is_authorized, 'gmail_forwarding_verified': gmail_forwarding_verified, 'is_done': is_done, 'group_name': group_name, 'forward_address': forward_address}
 
 @login_required
 def auth(request):
@@ -118,8 +118,8 @@ def deauth(request):
 
 @login_required
 def import_start(request):
-
-    services = build_services(request.user)
+    user = request.user
+    services = build_services(user)
     service_people = services['people']
     service_mail = services['mail']
 

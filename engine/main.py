@@ -1468,13 +1468,11 @@ def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 				entry.whitelist = whitelist
 				entry.blacklist = blacklist
 			else:
-				print "doesnt exist"
-				#hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
-				#send_whitelist_hash_email(entry.id)
-				#res['hash'] = hash
 				entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
 				
 			entry.save()
+
+		get_or_generate_filter_hash(user, group_name)
 
 		res['status'] = True
 		res['group_name'] = group_name
@@ -1733,6 +1731,7 @@ def adjust_moderate_user_for_thread(user, group_name, sender_addr, subject, mode
 
 # push - whether to call gmail api and update filter there
 # we want to do that every time *except* when we call this during setup. 
+# call this function whenever whitelist is changed
 def get_or_generate_filter_hash(user, group_name, push=True):
 	res = {'status' : False }
 	try:
@@ -1745,10 +1744,6 @@ def get_or_generate_filter_hash(user, group_name, push=True):
 			salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()
 			new_hash = hashlib.sha1(user.email + group_name + salt).hexdigest()[:20]	
 			
-			if push:
-				whitelist_emails = [w.email for w in WhiteOrBlacklist.objects.filter(group__name=group_name, whitelist=True)]
-				update_gmail_filter(user, group_name, whitelist_emails, new_hash)
-
 			mg.gmail_filter_hash = new_hash
 			mg.last_updated_hash = now 
 			mg.save()
@@ -1756,6 +1751,10 @@ def get_or_generate_filter_hash(user, group_name, push=True):
  
  		else:
  			res['hash'] = mg.gmail_filter_hash
+
+		if push:
+			whitelist_emails = [w.email for w in WhiteOrBlacklist.objects.filter(group__name=group_name, whitelist=True)]
+			update_gmail_filter(user, group_name, whitelist_emails, res['hash'])
 
 		res['status'] = True
 

@@ -1,8 +1,9 @@
 from apiclient.discovery import build
-import logging, re, time
+import httplib2, logging, re, time
+from oauth2client.django_orm import Storage
 
 from http_handler.settings import BASE_URL
-from views import build_services
+from schema.models import CredentialsModel
 
 def parse_contacts(service_people):
     res_tuple = []
@@ -150,7 +151,7 @@ def create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_
             'excludeChats' : True,
         },
         'action': {
-            'removeLabelIds': ['INBOX'],
+            'addLabelIds': ['TRASH'],
             'forward': forward_address
         }
     }
@@ -158,7 +159,12 @@ def create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_
     return filters.create(userId='me', body=new_filter).execute()
 
 def update_gmail_filter(user, group_name, whitelist_emails, filter_hash):
-    service_mail = build_services(user)['mail']
+
+    storage = Storage(CredentialsModel, 'id', user, 'credential')
+    credential = storage.get()
+    http = httplib2.Http()
+    http = credential.authorize(http)
+    service_mail = build('gmail', 'v1', http=http)
     forward_address = '%s@%s' % (group_name, BASE_URL)
     return create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_hash)
 
