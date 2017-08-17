@@ -799,6 +799,7 @@ def load_thread(t, user=None, member=None):
 					'verified': p.verified_sender,
 					'who_moderated' : p.who_moderated,
 					'mod_explanation' : p.mod_explanation,
+					'perspective_data' : p.perspective_data,
 					}
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
@@ -1610,7 +1611,8 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				res = get_or_generate_filter_hash(admin, group.name)
 				if res['status']:
 					mail['List-Id'] = '%s@%s' % (res['hash'], BASE_URL)
-					logging.error("updated list id to %s" % mail['List-Id'])
+				else:
+					logging.error("Error getting/generating filter hash")
 
 				relay_mailer.deliver(mail, To = admin.email)
 
@@ -1689,6 +1691,7 @@ def fix_posts(post_queryset):
 					'verified': p.verified_sender,
 					'who_moderated' : p.who_moderated,
 					'mod_explanation' : p.mod_explanation,
+					'perspective_data' : p.perspective_data,
 					}
 		posts_fixed.append(post_dict)
 
@@ -1799,14 +1802,11 @@ def call_perspective_api(text):
 								'SPAM' : {},
 								'ATTACK_ON_COMMENTER' : {},
 								'INFLAMMATORY' : {},
-								'INCOHERENT' : {}, 
 								},
 		'doNotStore' : True, # don't store text of msg
 	}
 
 	response = requests.post(path, json=request)
-	logging.error("PERPSECTIVE RESPONSE:")
-	logging.error(response.text)
 
 	if response.status_code == 200:
 
@@ -1816,6 +1816,8 @@ def call_perspective_api(text):
 		attribute_scores = data['attributeScores']
 
 		for attr, data in attribute_scores.iteritems():
+			if attr = 'ATTACK_ON_COMMENTER':
+				attr = 'ATTACK'
 			summary = data['summaryScore']
 			prob = summary['value']
 			scores_simplified[attr] = prob
