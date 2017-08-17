@@ -1,12 +1,11 @@
-
-from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, User
-
-from django.utils.http import urlquote
 from django.core.mail import send_mail
-from http_handler import settings
-
+from django.db import models
+from django.utils.http import urlquote
+from jsonfield import JSONField
 from oauth2client.django_orm import FlowField, CredentialsField
+
+from http_handler import settings
 from http_handler.settings import AUTH_USER_MODEL
 
 class Post(models.Model):
@@ -43,6 +42,8 @@ class Post(models.Model):
 
 	# who the moderator that approved or rejected this message was
 	who_moderated = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user_moderated_posts', null=True)
+
+	perspective_data = JSONField(null=True)
 
 	def __unicode__(self):
 		if self.author:

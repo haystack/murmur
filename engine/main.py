@@ -1,4 +1,4 @@
-import base64, email, hashlib, json, logging, random, re, sys, time
+import base64, email, hashlib, json, logging, random, re, requests, sys, time
 
 from bleach import clean
 from cgi import escape
@@ -7,7 +7,6 @@ from django.utils.timezone import utc
 from django.db.models import Q
 from email.utils import parseaddr
 from html2text import html2text
-from googleapiclient import discovery
 from lamson.mail import MailResponse
 from pytz import utc
 
@@ -919,9 +918,17 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 	if attachments:
 		upload_attachments(attachments, msg_id)
 
+	if WEBSITE == 'squadbox':
+		res = call_perspective_api(message_text)
+		if res['status']:
+			del res['status']
+			perspective_data = res
+		else:
+			perspective_data = None
+
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
 			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, 
-			poster_name=sender_name, verified_sender=verified)
+			poster_name=sender_name, verified_sender=verified, perspective_data=perspective_data)
 	p.save()
 	
 	if WEBSITE == 'murmur':
@@ -1058,7 +1065,15 @@ def insert_squadbox_reply(group_name, subject, message_text, user, sender_addr, 
 			replying_to = thread_posts[0]
 		else:
 			replying_to = None
-		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, reply_to=replying_to, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status)
+
+		res = call_perspective_api(message_text)
+		if res['status']:
+			del res['status']
+			perspective_data = res
+		else:
+			perspective_data = None
+
+		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, reply_to=replying_to, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status, perspective_data=perspective_data)
 		post.save()
 		upload_attachments(attachments, msg_id)
 		res['post_id'] = post.id
@@ -1767,10 +1782,13 @@ def get_or_generate_filter_hash(user, group_name, push=True):
 	return res
 
 def call_perspective_api(text):
-	# API currently only accepts plaintext
+	res = { 'status' : False }
+
+	# API currently only accepts plaintext	
 	text = html2text(text)
 
-	service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=PERSPECTIVE_KEY)
+	path = ' https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=%s' % PERSPECTIVE_KEY
+
 	request = {
 		'comment' : {'text' : text },
 		'requestedAttributes' : {
@@ -1779,7 +1797,6 @@ def call_perspective_api(text):
 								# might not be that useful yet 
 								'OBSCENE' : {},
 								'SPAM' : {},
-								'ATTACK_ON_AUTHOR' : {},
 								'ATTACK_ON_COMMENTER' : {},
 								'INFLAMMATORY' : {},
 								'INCOHERENT' : {}, 
@@ -1787,13 +1804,39 @@ def call_perspective_api(text):
 		'doNotStore' : True, # don't store text of msg
 	}
 
-	response = service.comments().analyze(body=request).execute()
+	response = requests.post(path, json=request)
 
-	return json.dumps(response, indent=2)
+	if response.status_code == 200:
 
+		data = json.loads(response.text)
+		scores_simplified = {}
+		spans_simplified = {}
+		attribute_scores = data['attributeScores']
 
+		for attr, data in attribute_scores.iteritems():
+			summary = data['summaryScore']
+			prob = summary['value']
+			scores_simplified[attr] = prob
 
+			spans = data.get('spanScores')
+			if spans:
+				span_list = []
+				for s in spans:
+					span_data = {
+						'start' : s['begin'],
+						'end' : s['end'],
+						'score' : s['score']['value'],
+					}
 
+					span_list.append(span_data)
+
+				spans_simplified[attr] = span_list
+
+		res['scores'] = scores_simplified
+		res['spans'] = spans_simplified
+		res['status'] = True
+
+	return res
 
 
 
