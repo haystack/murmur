@@ -7,6 +7,7 @@ from django.utils.timezone import utc
 from django.db.models import Q
 from email.utils import parseaddr
 from html2text import html2text
+from googleapiclient import discovery
 from lamson.mail import MailResponse
 from pytz import utc
 
@@ -14,7 +15,7 @@ from browser.util import *
 from constants import *
 from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
 from gmail_setup.api import update_gmail_filter
-from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME
+from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME, PERSPECTIVE_KEY
 from s3_storage import upload_attachments, download_attachments, download_message
 from schema.models import *
 from smtp_handler.utils import *
@@ -1764,5 +1765,36 @@ def get_or_generate_filter_hash(user, group_name, push=True):
 		res['error'] = 'Member group does not exist'
 
 	return res
+
+def call_perspective_api(text):
+	# API currently only accepts plaintext
+	text = html2text(text)
+
+	service = discovery.build('commentanalyzer', 'v1alpha1', developerKey=PERSPECTIVE_KEY)
+	request = {
+		'comment' : {'text' : text },
+		'requestedAttributes' : {
+								'TOXICITY' : {},
+								# all of these are experimental and
+								# might not be that useful yet 
+								'OBSCENE' : {},
+								'SPAM' : {},
+								'ATTACK_ON_AUTHOR' : {},
+								'ATTACK_ON_COMMENTER' : {},
+								'INFLAMMATORY' : {},
+								'INCOHERENT' : {}, 
+								},
+		'doNotStore' : True, # don't store text of msg
+	}
+
+	response = service.comments().analyze(body=request).execute()
+
+	return json.dumps(response, indent=2)
+
+
+
+
+
+
 
 
