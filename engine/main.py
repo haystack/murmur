@@ -1816,7 +1816,7 @@ def call_perspective_api(text):
 		attribute_scores = data['attributeScores']
 
 		for attr, data in attribute_scores.iteritems():
-			if attr = 'ATTACK_ON_COMMENTER':
+			if attr == 'ATTACK_ON_COMMENTER':
 				attr = 'ATTACK'
 			summary = data['summaryScore']
 			prob = summary['value']
