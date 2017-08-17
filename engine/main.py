@@ -1805,8 +1805,8 @@ def call_perspective_api(text):
 	}
 
 	response = requests.post(path, json=request)
-	logging.debug("PERPSECTIVE RESPONSE:")
-	logging.debug(response.text)
+	logging.error("PERPSECTIVE RESPONSE:")
+	logging.error(response.text)
 
 	if response.status_code == 200:
 
