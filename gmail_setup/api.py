@@ -142,7 +142,7 @@ def create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_
         if 'forward' in f['action'] and f['action']['forward'] == forward_address:
             filters.delete(userId='me', id=f['id']).execute()
 
-    emails = '{from:' + ' from:'.join(whitelist_emails) + '}' 
+    emails = '{from:' + ' from:'.join(whitelist_emails) + ' from:me }' 
     gmail_secret = 'list:%s@%s' % (filter_hash, BASE_URL)
 
     new_filter = {
