@@ -202,12 +202,13 @@ class Group(models.Model):
 	show_rejected_site = models.BooleanField(default=True)
 	send_rejected_tagged = models.BooleanField(default=True)
 	# whether moderators can edit whitelist and blacklist 
- 	mod_edit_wl_bl = models.BooleanField(default=True) 
+	mod_edit_wl_bl = models.BooleanField(default=True) 
+	# description of policy/rules for moderation
+	mod_rules = models.TextField(null=True)
 
  	# whether to automatically approve emails from a sender to a thread 
  	# in this group after their first post to the thread is approved
  	auto_approve_after_first = models.BooleanField(default=False)
-
 	
 	def __unicode__(self):
 		return self.name

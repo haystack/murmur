@@ -235,6 +235,12 @@ def thread(request):
 		
 		member_group = MemberGroup.objects.filter(member=user, group=group)
 		is_member = member_group.exists()
+
+
+		if is_member and (member_group[0].moderator or membergroup_[0].admin):
+			modal_data = group.mod_rules
+		else:
+			modal_data = None
 		
 		active_group = load_groups(request, groups, user, group_name=group.name)
 		if group.public or is_member:
@@ -245,6 +251,8 @@ def thread(request):
 				res = engine.main.load_thread(thread, user=request.user)
 				role = None
 
+			print res
+
 			if WEBSITE == 'murmur':
 				thread_to = '%s@%s' % (group.name, HOST) 
 			elif WEBSITE == 'squadbox':
@@ -252,7 +260,7 @@ def thread(request):
 				thread_to = admin.member.email
 			return {'user': request.user, 'groups': groups, 'thread': res, 'thread_to' : thread_to, 
 					'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE, 
-					'active_group_role' : role, 'groups_links' : groups_links}
+					'active_group_role' : role, 'groups_links' : groups_links, 'modal_data' : modal_data}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None
@@ -517,8 +525,10 @@ def edit_group_info(request):
 		send_rejected = request.POST['send_rejected_tagged'] == 'true'
 		store_rejected = request.POST['store_rejected'] == 'true'
 		mod_edit = request.POST['mod_edit'] == 'true'
+		mod_rules = request.POST['mod_rules']
 		auto_approve = request.POST['auto_approve'] == 'true'
-		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, auto_approve, user) 
+		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, auto_approve, user) 
+
 		if res['status']:
 			active_group = request.session.get('active_group')
 			if active_group == old_group_name:
