@@ -4,8 +4,7 @@
 	<h3>Edit {{ group_or_squad | title }} Information and Settings</h3>
 	<hr/>
 	<form id="group-info-form">
-		<span class="strong">{{ group_or_squad | title }} Name:</span>
-		<br>
+		<h4 class="strong">{{ group_or_squad | title }} Name:</h4>
 		<span class="italic-med">
 			Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed.
 		</span>
@@ -13,13 +12,12 @@
 		<input id="edit-group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;" value="{{group_info.name}}">
 		</input>
 		<br><br>
-		<span class="strong">{{ group_or_squad | title }} Description:</span> <br>
+		<h4 class="strong">{{ group_or_squad | title }} Description:</h4>
 		<span class="italic-med">(optional) Maximum 140 characters</span><br>
 		<textarea id="edit-group-description" maxlength="140">{{group_info.description.strip }}</textarea>
 		<br><br>
 		{% if website == "murmur" %}
-			<span class="strong">Privacy Settings:</span>
-			<br>
+			<h4 class="strong">Privacy Settings:</h4>
 			{% if group_info.public %}
 				<input type="radio" name="pubpriv" value="public" id="rdo-pub-create-group" checked>
 			{% else %}
@@ -39,7 +37,7 @@
 			<span class="italic-small">Only users added to this group by admins will be notified about the group.</span>
 			<br>
 		{% endif %}
-		<span class="strong">Attachment Policy: </span> <br>
+		<h4 class="strong">Attachment Policy: </h4>
 		{% if group_info.allow_attachments %}
 			<input type="radio" name="attach" value="yes-attach" id="rdo-attach-create-group" checked>
 		{% else %}
@@ -71,7 +69,7 @@
 		
 		{% if website == "squadbox" %}
 			<br>
-			<span class="strong">Rejected Messages: </span> <br>
+			<h4 class="strong">Rejected Messages: </h4>
 			{% if group_info.send_rejected_tagged %}
 			<input type="checkbox" id="send-rejected" checked> 
 			{% else %}
@@ -87,7 +85,12 @@
 			Store rejected messages on the Squadbox website</input>
 			<span class="italic-small">We will store messages that your moderators reject, and display a link to view them on your homepage.</span>
 			<br>
-			<span class="strong">Moderation:</span> <br>
+			<h4 class="strong">Moderation:</h4>
+			<span class="italic-medium">Please enter any information you want moderators to know regarding your preferences. For example, "please reject messages with profanity."
+			</span><br>
+			<textarea id="edit-mod-rules">{{group_info.mod_rules.strip }}</textarea>
+			<br>
+			<span class="strong">Options:</span> <br>
 			{% if group_info.mod_edit_wl_bl %}
 			<input type="checkbox" id="mod-edit-wl-bl" checked>
 			{% else %}

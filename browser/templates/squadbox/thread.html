@@ -1,6 +1,7 @@
 {% extends "group_container_base.html" %}
 
 {% block container-content %}
+{% include "squadbox/moderation_modal.html" %}
 	<div class="main-area-content">
 	<div hidden id='group-name'>{{ active_group.name }} </div>
 	<div hidden id='post-id'>{{ thread.post.id }}</div>
@@ -40,10 +41,11 @@
 		{% endif %}
 		<BR>
 	</div>
-	<br>
 
 	<div class='text-center' style='text-align:center;'>
-	
+	<br>
+	<a href="" data-toggle="modal" data-target="#mod-rules-modal"><i>review squad owner's preferences</i></a><br><br>
+
 	<label class="radio-inline"><input type="radio" id="approve-radio" name="approve-reject" value="approve">Approve</label>
 	<label class="radio-inline"><input type="radio" id="reject-radio" name="approve-reject" value="reject">Reject</label>
 	<br><br>
