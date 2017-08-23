@@ -19,9 +19,15 @@
 <!-- 				<br><span class="strong">To: </span>
 				<span class="strong-gray">{{ active_group.name }}</span>  -->
 				<br>
+
 				<span class="strong">Date: </span>
 				<span class="strong-gray">{{ thread.post.timestamp }}</span>
 				<input type="hidden" id="post_info" name="post_info" value="{{ thread.post.msg_id }}" readonly>
+				<br><br>
+				<span class="strong">Categorization probabilities:</span><br>
+				{% for k,v in thread.post.perspective_data.scores.items %}
+					<span class="strong-gray">{{k|lower}}</span>: {{v|floatformat:2}} <br>
+				{% endfor %}
 			</div>
 		</div>
 		<hr>

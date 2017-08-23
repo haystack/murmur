@@ -1,4 +1,4 @@
-import base64, email, hashlib, json, logging, random, re, sys, time
+import base64, email, hashlib, json, logging, random, re, requests, sys, time
 
 from bleach import clean
 from cgi import escape
@@ -14,7 +14,7 @@ from browser.util import *
 from constants import *
 from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
 from gmail_setup.api import update_gmail_filter
-from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME
+from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME, PERSPECTIVE_KEY
 from s3_storage import upload_attachments, download_attachments, download_message
 from schema.models import *
 from smtp_handler.utils import *
@@ -798,6 +798,7 @@ def load_thread(t, user=None, member=None):
 					'verified': p.verified_sender,
 					'who_moderated' : p.who_moderated,
 					'mod_explanation' : p.mod_explanation,
+					'perspective_data' : p.perspective_data,
 					}
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
@@ -917,9 +918,17 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 	if attachments:
 		upload_attachments(attachments, msg_id)
 
+	if WEBSITE == 'squadbox':
+		res = call_perspective_api(message_text)
+		if res['status']:
+			del res['status']
+			perspective_data = res
+		else:
+			perspective_data = None
+
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
 			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, 
-			poster_name=sender_name, verified_sender=verified)
+			poster_name=sender_name, verified_sender=verified, perspective_data=perspective_data)
 	p.save()
 	
 	if WEBSITE == 'murmur':
@@ -1056,7 +1065,15 @@ def insert_squadbox_reply(group_name, subject, message_text, user, sender_addr, 
 			replying_to = thread_posts[0]
 		else:
 			replying_to = None
-		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, reply_to=replying_to, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status)
+
+		res = call_perspective_api(message_text)
+		if res['status']:
+			del res['status']
+			perspective_data = res
+		else:
+			perspective_data = None
+
+		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, reply_to=replying_to, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status, perspective_data=perspective_data)
 		post.save()
 		upload_attachments(attachments, msg_id)
 		res['post_id'] = post.id
@@ -1593,7 +1610,8 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				res = get_or_generate_filter_hash(admin, group.name)
 				if res['status']:
 					mail['List-Id'] = '%s@%s' % (res['hash'], BASE_URL)
-					logging.error("updated list id to %s" % mail['List-Id'])
+				else:
+					logging.error("Error getting/generating filter hash")
 
 				relay_mailer.deliver(mail, To = admin.email)
 
@@ -1672,6 +1690,7 @@ def fix_posts(post_queryset):
 					'verified': p.verified_sender,
 					'who_moderated' : p.who_moderated,
 					'mod_explanation' : p.mod_explanation,
+					'perspective_data' : p.perspective_data,
 					}
 		posts_fixed.append(post_dict)
 
@@ -1763,5 +1782,65 @@ def get_or_generate_filter_hash(user, group_name, push=True):
 		res['error'] = 'Member group does not exist'
 
 	return res
+
+def call_perspective_api(text):
+	res = { 'status' : False }
+
+	# API currently only accepts plaintext	
+	text = html2text(text)
+
+	path = ' https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=%s' % PERSPECTIVE_KEY
+
+	request = {
+		'comment' : {'text' : text },
+		'requestedAttributes' : {
+								'TOXICITY' : {},
+								# all of these are experimental and
+								# might not be that useful yet 
+								'OBSCENE' : {},
+								'SPAM' : {},
+								'ATTACK_ON_COMMENTER' : {},
+								'INFLAMMATORY' : {},
+								},
+		'doNotStore' : True, # don't store text of msg
+	}
+
+	response = requests.post(path, json=request)
+
+	if response.status_code == 200:
+
+		data = json.loads(response.text)
+		scores_simplified = {}
+		spans_simplified = {}
+		attribute_scores = data['attributeScores']
+
+		for attr, data in attribute_scores.iteritems():
+			if attr == 'ATTACK_ON_COMMENTER':
+				attr = 'ATTACK'
+			summary = data['summaryScore']
+			prob = summary['value']
+			scores_simplified[attr] = prob
+
+			spans = data.get('spanScores')
+			if spans:
+				span_list = []
+				for s in spans:
+					span_data = {
+						'start' : s['begin'],
+						'end' : s['end'],
+						'score' : s['score']['value'],
+					}
+
+					span_list.append(span_data)
+
+				spans_simplified[attr] = span_list
+
+		res['scores'] = scores_simplified
+		res['spans'] = spans_simplified
+		res['status'] = True
+
+	return res
+
+
 
 
