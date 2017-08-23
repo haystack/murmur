@@ -1,3 +1,4 @@
+
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, User
 
@@ -157,6 +158,8 @@ class MemberGroup(models.Model):
 	upvote_emails = models.BooleanField(default=True)
 	receive_attachments = models.BooleanField(default=True)
 	last_emailed = models.DateTimeField(null=True)
+	gmail_filter_hash = models.CharField(max_length=40, null=True)
+	last_updated_hash = models.DateTimeField(auto_now_add=True)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)
@@ -227,6 +230,7 @@ class WhiteOrBlacklist(models.Model):
 
 	# timestamp (for temporary bans)
 	timestamp = models.DateTimeField(auto_now=True)
+
 
 class MyUserManager(BaseUserManager):
 	def create_user(self, email, password=None):

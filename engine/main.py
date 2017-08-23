@@ -1,16 +1,19 @@
-import base64, email, hashlib, json, logging, random, re, sys
+import base64, email, hashlib, json, logging, random, re, sys, time
 
 from bleach import clean
 from cgi import escape
+from datetime import timedelta
 from django.utils.timezone import utc
 from django.db.models import Q
 from email.utils import parseaddr
 from html2text import html2text
 from lamson.mail import MailResponse
+from pytz import utc
 
 from browser.util import *
 from constants import *
 from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
+from gmail_setup.api import update_gmail_filter
 from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME
 from s3_storage import upload_attachments, download_attachments, download_message
 from schema.models import *
@@ -1464,13 +1467,11 @@ def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 				entry.whitelist = whitelist
 				entry.blacklist = blacklist
 			else:
-				print "doesnt exist"
-				#hash = hashlib.sha1(email + str(random.rand()) + group_name + str(random.rand()))
-				#send_whitelist_hash_email(entry.id)
-				#res['hash'] = hash
 				entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
 				
 			entry.save()
+
+		get_or_generate_filter_hash(user, group_name)
 
 		res['status'] = True
 		res['group_name'] = group_name
@@ -1560,7 +1561,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
 				res = download_message(p.id, p.msg_id)
 				if not res['status']:
-					logging.debug("Error downloading original message")
+					logging.error("Error downloading original message")
 				else:
 					original_msg = email.message_from_string(res['message'])
 					mail['In-Reply-To'] = original_msg['In-Reply-To']
@@ -1575,8 +1576,10 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				if orig_subj.startswith('Re: '):
 					orig_subj = orig_subj[4:]		
 
-				html_blurb = unicode(ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, True))
-				plain_blurb = ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, False)
+				# html_blurb = unicode(ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, True))
+				# plain_blurb = ps_squadbox(p.poster_email, reason, group_name, g.auto_approve_after_first, orig_subj, p.who_moderated.email, False)
+				html_blurb = ''
+				plain_blurb = ''
 
 				html_prefix = ''
 				if new_status == 'R' and len(p.mod_explanation) > 0:
@@ -1586,6 +1589,12 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				message_text['plain'] = html2text(html_prefix + p.post)
 				mail.Html = get_new_body(message_text, html_blurb, 'html')
 				mail.Body = get_new_body(message_text, plain_blurb, 'plain')
+
+				res = get_or_generate_filter_hash(admin, group.name)
+				if res['status']:
+					mail['List-Id'] = '%s@%s' % (res['hash'], BASE_URL)
+					logging.error("updated list id to %s" % mail['List-Id'])
+
 				relay_mailer.deliver(mail, To = admin.email)
 
 	except Post.DoesNotExist:
@@ -1720,4 +1729,39 @@ def adjust_moderate_user_for_thread(user, group_name, sender_addr, subject, mode
 		res['code'] = msg_code['NOT_MEMBER']
 
 	return res
+
+# push - whether to call gmail api and update filter there
+# we want to do that every time *except* when we call this during setup. 
+# call this function whenever whitelist is changed
+def get_or_generate_filter_hash(user, group_name, push=True):
+	res = {'status' : False }
+	try:
+		mg = MemberGroup.objects.get(member=user, group__name=group_name)
+		now = datetime.now(utc)
+		last_update = mg.last_updated_hash
+
+		if mg.gmail_filter_hash is None or now - last_update >  timedelta(hours=24):
+
+			salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()
+			new_hash = hashlib.sha1(user.email + group_name + salt).hexdigest()[:20]	
+			
+			mg.gmail_filter_hash = new_hash
+			mg.last_updated_hash = now 
+			mg.save()
+			res['hash'] = new_hash
+ 
+ 		else:
+ 			res['hash'] = mg.gmail_filter_hash
+
+		if push:
+			whitelist_emails = [w.email for w in WhiteOrBlacklist.objects.filter(group__name=group_name, whitelist=True)]
+			update_gmail_filter(user, group_name, whitelist_emails, res['hash'])
+
+		res['status'] = True
+
+	except MemberGroup.DoesNotExist:
+		res['error'] = 'Member group does not exist'
+
+	return res
+
 

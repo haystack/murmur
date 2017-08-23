@@ -1,5 +1,9 @@
-import re
-import time
+from apiclient.discovery import build
+import httplib2, logging, re, time
+from oauth2client.django_orm import Storage
+
+from http_handler.settings import BASE_URL
+from schema.models import CredentialsModel
 
 def parse_contacts(service_people):
     res_tuple = []
@@ -36,27 +40,28 @@ def parse_gmail(service_mail):
         message = response
         list_message_object = {}
         batch_cb.stop = False
-        if int(message["internalDate"]) < int(current_time - time_back):
-            batch_cb.stop = True
-            return
-        for pair in message['payload']['headers']:
-            if pair["name"] == "From":
-                emailstring = pair["value"].encode('UTF-8')
-                list_message_object['email'] = re.findall(r'[\w\.-]+@[\w\.-]+', emailstring)[0]
-                name = emailstring.split('<')[0].strip()
-                if name.startswith('"') and name.endswith('"'):
-                    name = name[1:-1]
-                list_message_object['name'] = name
-        list_message_object['label'] = None
-        for label in message['labelIds']:
-            if label == "CATEGORY_PERSONAL": list_message_object['label'] = 'personal'
-            if label == "CATEGORY_SOCIAL": list_message_object['label'] = 'social'
-            if label == "CATEGORY_PROMOTIONS": list_message_object['label'] = 'promotions'
-            if label == "CATEGORY_UPDATES": list_message_object['label'] = 'updates'
-            if label == "CATEGORY_FORUMS": list_message_object['label'] = 'forums'
-        # TODO: labels at the moment are only decided based on most recent email; change to be mode
-        if list_message_object['label'] != None:
-            received_list.append(list_message_object)
+        if message is not None:
+            if int(message["internalDate"]) < int(current_time - time_back):
+                batch_cb.stop = True
+                return
+            for pair in message['payload']['headers']:
+                if pair["name"] == "From":
+                    emailstring = pair["value"].encode('UTF-8')
+                    list_message_object['email'] = re.findall(r'[\w\.-]+@[\w\.-]+', emailstring)[0]
+                    name = emailstring.split('<')[0].strip()
+                    if name.startswith('"') and name.endswith('"'):
+                        name = name[1:-1]
+                    list_message_object['name'] = name
+            list_message_object['label'] = None
+            for label in message['labelIds']:
+                if label == "CATEGORY_PERSONAL": list_message_object['label'] = 'personal'
+                if label == "CATEGORY_SOCIAL": list_message_object['label'] = 'social'
+                if label == "CATEGORY_PROMOTIONS": list_message_object['label'] = 'promotions'
+                if label == "CATEGORY_UPDATES": list_message_object['label'] = 'updates'
+                if label == "CATEGORY_FORUMS": list_message_object['label'] = 'forums'
+            # TODO: labels at the moment are only decided based on most recent email; change to be mode
+            if list_message_object['label'] != None:
+                received_list.append(list_message_object)
 
     # receieved:
     while (page_token != None) and time_not_over:
@@ -128,32 +133,40 @@ def get_google_emails(service_people, service_mail):
     emails = parse_gmail(service_mail)
     return list(set(contacts).union(set(emails)))
 
-def create_gmail_filter(service_mail, whitelist_emails, forward_address):
-    response = service_mail.users().settings().filters().list(userId='me').execute()
-    if 'filter' in response:
-        existing_filters = response['filter']
-        for filter in existing_filters:
-            if 'forward' in filter['action']:
-                if filter['action']['forward'] == forward_address:
-                    service_mail.users().settings().filters().delete(userId='me', id=filter['id']).execute()
-    #email_list_piped = "|".join(whitelist_emails)
-    emails = 'from:' + ' | from:'.join(whitelist_emails)
-    filter = {
+def create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_hash):
+
+    filters = service_mail.users().settings().filters()
+
+    response = filters.list(userId='me').execute()
+    for f in response.get('filter', []):
+        if 'forward' in f['action'] and f['action']['forward'] == forward_address:
+            filters.delete(userId='me', id=f['id']).execute()
+
+    emails = '{from:' + ' from:'.join(whitelist_emails) + ' from:me }' 
+    gmail_secret = 'list:%s@%s' % (filter_hash, BASE_URL)
+
+    new_filter = {
         'criteria': {
-            #'from': email_list_piped,
-            'negatedQuery' : emails,
+            'negatedQuery' : '%s %s' % (emails, gmail_secret),
             'excludeChats' : True,
         },
         'action': {
-            'removeLabelIds': ['INBOX'],
+            'addLabelIds': ['TRASH'],
             'forward': forward_address
         }
     }
-    result = service_mail.users().settings().filters().create(userId='me', body=filter).execute()
-    return result
 
-def add_to_whitelist(emails):
-    return
+    return filters.create(userId='me', body=new_filter).execute()
+
+def update_gmail_filter(user, group_name, whitelist_emails, filter_hash):
+
+    storage = Storage(CredentialsModel, 'id', user, 'credential')
+    credential = storage.get()
+    http = httplib2.Http()
+    http = credential.authorize(http)
+    service_mail = build('gmail', 'v1', http=http)
+    forward_address = '%s@%s' % (group_name, BASE_URL)
+    return create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_hash)
 
 def check_forwarding_address(service_mail, forward_address):
     result = service_mail.users().settings().forwardingAddresses().list(userId='me').execute()

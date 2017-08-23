@@ -470,6 +470,11 @@ def handle_post_squadbox(message, group, host, verified):
 	sender_addr = sender_addr.lower()
 	if sender_name == '':
 		sender_name = None
+
+	# if this looks like a double-post, ignore it
+	if check_duplicate(message, group, sender_addr):
+		logging.debug("ignoring duplicate")
+		return
 	
 	subj = message['Subject'].strip()
 	message_is_reply = (subj[0:4].lower() == "re: ")
@@ -574,7 +579,8 @@ def handle_post_squadbox(message, group, host, verified):
 	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
 
 		# we can just send it on to the intended recipient, i.e. the admin of the group. 
-		admin = MemberGroup.objects.get(group=group, admin=True).member
+		admin_mg = MemberGroup.objects.get(group=group, admin=True)
+		admin = admin_mg.member
 
 		new_subj = subj
 		if status == 'R':
@@ -591,13 +597,19 @@ def handle_post_squadbox(message, group, host, verified):
 		add_attachments(mail, attachments)
 
 		html_blurb = unicode(ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, True))
-
+		html_blurb = ''
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
 
-		plain_blurb = ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, False)
+		#plain_blurb = ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, False)
+		plain_blurb = ''
 		mail.Body = get_new_body(msg_text, plain_blurb, 'plain')
 
-		relay.deliver(mail, To = admin.email)
+		res = get_or_generate_filter_hash(admin, group.name)
+		if res['status']:
+			mail['List-Id'] = '%s@%s' % (res['hash'], BASE_URL)
+			logging.error("updated list id to %s" % mail['List-Id'])
+
+		relay.deliver(mail)
 
 	# send notification to least recently emailed mod if we haven't emailed them in 24 hrs 
 	elif status == 'P':

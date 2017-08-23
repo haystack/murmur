@@ -73,7 +73,7 @@ ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "appli
 					"application/x-mspowerpoint", "application/powerpoint", "application/vnd.ms-powerpoint",
 					"application/msword", "text/plain", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 					"application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
-					"application/vnd.openxmlformats-officedocument.presentationml.presentation"]
+					"application/vnd.openxmlformats-officedocument.presentationml.presentation", "application/pkcs7-signature"]
 
 ALLOWED_MIMETYPES_STR = 'images (JPEG, BMP, GIF, PNG), PDFs, and Microsoft Office (Word, Excel, Powerpoint) files'
 

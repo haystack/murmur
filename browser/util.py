@@ -164,4 +164,8 @@ def fix_html_and_img_srcs(msg_id, post_text):
         if match:
             i['src'] = "attachment/" + match.hash_filename
 
+    style = post_soup.find_all('style')
+    for s in style:
+        s.replace_with('')
+
     return clean(str(post_soup), tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
