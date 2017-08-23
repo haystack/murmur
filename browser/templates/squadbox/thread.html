@@ -40,6 +40,7 @@
 			</span>
 		{% endif %}
 		<BR>
+
 	</div>
 
 	<div class='text-center' style='text-align:center;'>
@@ -89,6 +90,28 @@
 	<br>
 	<button type="button" id="btn-submit">Submit</button>
 	</div>
+	<br>
+
+	{% if thread.replies %}
+		<h4><span class='strong'>Other pending posts in this thread</span></h4>
+		<span class='italic-med'>(we'll have you moderate them next)</span>
+		<br><br>
+		{% for reply in thread.replies %}
+			<div class="reply">
+				<div class="main-area-content">
+					<span class="strong">{{ reply.from }}</span> on {{ reply.timestamp }}
+					{% if reply.attachments %}
+						| Attachments:
+						{% for name, url in reply.attachments %}
+							<a href="{{url}}">{{name}}</a>
+						{% endfor %}
+					{% endif %}
+					<br>
+					{% autoescape off %}{{ reply.text }}{% endautoescape %}				
+				</div>
+			</div>
+		{% endfor %}
+	{% endif %}
 
 {% endblock %}
 

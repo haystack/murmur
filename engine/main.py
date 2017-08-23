@@ -745,6 +745,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
 	return res
 	
 def load_thread(t, user=None, member=None):
+
 	following = False
 	muting = False
 	no_emails = False
@@ -759,10 +760,14 @@ def load_thread(t, user=None, member=None):
 			no_emails = member.no_emails
 			always_follow = member.always_follow_thread
 	
-	
-	posts = Post.objects.filter(thread = t)		
+	if WEBSITE == 'murmur':
+		posts = Post.objects.filter(thread = t)	
+	elif WEBSITE == 'squadbox':
+		posts = Post.objects.filter(thread = t, status='P')
+
 	replies = []
 	post = None
+	
 	for p in posts:
 		post_likes = p.upvote_set.count()
 		total_likes += post_likes
@@ -793,10 +798,21 @@ def load_thread(t, user=None, member=None):
 					}
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
-		if not p.reply_to_id:
-			post = post_dict
-		else:
-			replies.append(post_dict)
+
+		if WEBSITE == 'murmur':
+			if not p.reply_to_id:
+				post = post_dict
+			else:
+				replies.append(post_dict)
+
+		elif WEBSITE == 'squadbox':
+			if post is None:
+				post = post_dict
+			elif post['timestamp'] > post_dict['timestamp']:
+				post = post_dict
+			else:
+				replies.append(post_dict)
+
 	tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
 	
 	return {'status': True,
@@ -1032,7 +1048,12 @@ def insert_squadbox_reply(group_name, subject, message_text, user, sender_addr, 
 		group = Group.objects.get(name=group_name)
 		original_subject = subject[4:].strip()
 		thread, created = Thread.objects.get_or_create(subject=original_subject, group=group)
-		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status)
+		thread_posts = Post.objects.filter(thread=thread).order_by('-timestamp')
+		if thread_posts.exists():
+			replying_to = thread_posts[0]
+		else:
+			replying_to = None
+		post = Post(author=user, subject=subject, msg_id=msg_id, post=message_text, group=group, thread=thread, reply_to=replying_to, verified_sender=verified, poster_email=sender_addr, poster_name=sender_name, status=post_status)
 		post.save()
 		upload_attachments(attachments, msg_id)
 		res['post_id'] = post.id
@@ -1588,7 +1609,9 @@ def load_pending_posts(user, group_name):
 	try:
 		mg = MemberGroup.objects.get(member=user, group__name=group_name)
 		posts = Post.objects.filter(group__name=group_name, status='P')
-		res['posts'] = fix_posts(posts)
+		posts_cleaned = fix_posts(posts)
+		grouped = group_by_thread(posts_cleaned)
+		res['threads'] = grouped
 		res['status'] = True
 
 	except MemberGroup.DoesNotExist:
@@ -1634,7 +1657,7 @@ def fix_posts(post_queryset):
 					'from_name' : p.poster_name,
 					'to': p.group.name, 
 					'subject': escape(p.subject),
-					'text': p.post,
+					'text': html2text(p.post),
 					'thread_id' : p.thread.id, 
 					'timestamp': p.timestamp,
 					'verified': p.verified_sender,
@@ -1644,6 +1667,36 @@ def fix_posts(post_queryset):
 		posts_fixed.append(post_dict)
 
 	return posts_fixed
+
+def group_by_thread(posts_list):
+	threads = {}
+	for p in posts_list:
+		tid = p['thread_id']
+		threads[tid] = threads.get(tid, []) + [p]
+
+	thread_data = []
+	for t in threads:
+		posts = threads[t]
+
+		senders = set()
+		for p in posts:
+			if p['from_name']:
+				senders.add(p['from_name'])
+			else:
+				senders.add(p['from'])
+
+		thread = {
+			'id' : t,
+			'num_posts' : len(posts),
+			'first_timestamp' : posts[0]['timestamp'],
+			'first_text' : posts[0]['text'],
+			'subject' : posts[0]['subject'],
+			'senders' : ', '.join(list(senders)),
+		}
+
+		thread_data.append(thread)
+
+	return thread_data
 
 def adjust_moderate_user_for_thread(user, group_name, sender_addr, subject, moderate):
 

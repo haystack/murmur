@@ -275,7 +275,8 @@ def handle_post_murmur(message, group, host, verified):
 
 	to_header = email_message.get_all('to', [])
 	to_emails = [i[1] for i in getaddresses(to_header)]
-	sender_name, sender_addr = parseaddr(message['From'].lower())
+	sender_name, sender_addr = parseaddr(message['From'])
+	sender_addr = sender_addr.lower()
 	if not sender_name:
 		sender_name = None
 
@@ -465,7 +466,8 @@ def handle_post_squadbox(message, group, host, verified):
 	email_message = message_from_string(str(message))
 	msg_id = message['Message-ID']
 
-	sender_name, sender_addr = parseaddr(message['From'].lower())
+	sender_name, sender_addr = parseaddr(message['From'])
+	sender_addr = sender_addr.lower()
 	if sender_name == '':
 		sender_name = None
 	
@@ -547,7 +549,7 @@ def handle_post_squadbox(message, group, host, verified):
 			
 		args = [group.name, post_subject, msg_text['html'], None, sender_addr, msg_id, verified]
 		keyword_args = {'attachments' : attachments, 'sender_name' : sender_name, 'post_status' : status}
-
+    
 		res = insert_func(*args, **keyword_args)
 
 		if not res['status']:
@@ -589,6 +591,7 @@ def handle_post_squadbox(message, group, host, verified):
 		add_attachments(mail, attachments)
 
 		html_blurb = unicode(ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, True))
+
 		mail.Html = get_new_body(msg_text, html_blurb, 'html')
 
 		plain_blurb = ps_squadbox(sender_addr, reason, group.name, group.auto_approve_after_first, original_subj, None, False)
