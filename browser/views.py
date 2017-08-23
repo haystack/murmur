@@ -236,7 +236,6 @@ def thread(request):
 		member_group = MemberGroup.objects.filter(member=user, group=group)
 		is_member = member_group.exists()
 
-
 		if is_member and (member_group[0].moderator or member_group[0].admin):
 			modal_data = group.mod_rules
 		else:
@@ -528,6 +527,7 @@ def edit_group_info(request):
 		mod_rules = request.POST['mod_rules']
 		auto_approve = request.POST['auto_approve'] == 'true'
 		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, auto_approve, user) 
+
 		if res['status']:
 			active_group = request.session.get('active_group')
 			if active_group == old_group_name:

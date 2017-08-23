@@ -92,7 +92,6 @@ SQUADBOX_REASONS = {
 	'mod off for sender-thread' : "This message was auto-approved because you've turned moderation off \
 							for posts by %s to this thread.", 
 	'is mod' : "This message was auto-approved because it's from one of your moderators.",
-
 }
 
 FUTURE_AUTO_APPROVE = {
