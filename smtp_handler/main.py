@@ -539,6 +539,7 @@ def handle_post_squadbox(message, group, host, verified):
 		status = 'A'
 		reason = 'no mods'
 		logging.debug("Squad has no moderators")
+
 	elif moderators.filter(member__email=sender_addr).exists():
 		status = 'A'
 		reason = 'is mod'
@@ -574,6 +575,7 @@ def handle_post_squadbox(message, group, host, verified):
 	# 4) group has "auto approve after first post" on, and this sender posted before and got approved 
 	# (and the recipient did not subsequently opt back in to moderation for that user)
 	# 5) group has "auto approve after first post" off, but owner manually shut off moderation for this sender
+
 	if status == 'A' or (status == 'R' and group.send_rejected_tagged):
 
 		# we can just send it on to the intended recipient, i.e. the admin of the group. 
