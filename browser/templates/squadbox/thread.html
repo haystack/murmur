@@ -59,9 +59,11 @@
 
 
 	<div id="ifApprove" style='display:none'>
+	{% if mod_edit_wl_bl %}
 		<input type="checkbox" id='whitelist-check'> Add sender {{thread.post.from}} to whitelist</input> 
 		<span data-toggle="tooltip" title="Emails from {{thread.post.from}} will automatically be approved in the future.">&#9432;</span>
 		<br>
+	{% endif %}
 	</div>
 
 	<div id="ifReject" style='display:none;'>
@@ -87,11 +89,21 @@
 				<td>Insults</td>
 				<td><input type="checkbox" class="tag-checks" value='insult'></input></td>
 			</tr>
+			<tr>
+				<td>Spam</td>
+				<td><input type="checkbox" class="tag-checks" value='spam'></input></td>
+			</tr>
+			<tr>
+				<td>Advertisement</td>
+				<td><input type="checkbox" class="tag-checks" value='advertisement'></input></td>
+			</tr>
 		</table>
 		<br><br>
+		{% if mod_edit_wl_bl %}
 		<input type="checkbox" id='blacklist-check'> Add sender {{thread.post.from}} to blacklist</input>
 		<span data-toggle="tooltip" title="Emails from {{thread.post.from}} will automatically be rejected in the future.">&#9432;</span>
 		<br>
+		{% endif %}
 	</div>
 	<br>
 	<button type="button" id="btn-submit">Submit</button>

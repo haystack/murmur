@@ -204,11 +204,12 @@ def check_attachments(attachments, attachments_allowed):
 
 	res = {'status' : True, 'error' : None}
 
-	if len(attachments['attachments']) > 0 and not attachments_allowed:
-		logging.debug("No attachments allowed for this group")
-		res['error'] = "No attachments allowed for this group."
-		res['status'] = False
-		return res
+	if WEBSITE == 'murmur':
+		if len(attachments['attachments']) > 0 and not attachments_allowed:
+			logging.debug("No attachments allowed for this group")
+			res['error'] = "No attachments allowed for this group."
+			res['status'] = False
+			return res
 
 	if attachments['error'] != '':
 		logging.debug(attachments['error'])
@@ -273,8 +274,8 @@ def get_attachments(email_message):
 		content_type = part.get_content_type()
 		part_data = part.get_payload(decode=True)
 
-		if content_type in ALLOWED_MIMETYPES:
-			if len(part_data) < MAX_ATTACHMENT_SIZE:
+		if content_type in ALLOWED_MIMETYPES or WEBSITE == 'squadbox':
+			if len(part_data) < MAX_ATTACHMENT_SIZE or WEBSITE == 'squadbox':
 
 				content_id = part.get('content-id')
 

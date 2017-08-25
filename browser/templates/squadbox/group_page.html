@@ -14,7 +14,11 @@
 		{% endif %}
 		
 		<h3><span id="group-name">{{ group_info.group.name }}</span></h3>
-
+		<a href="/mod_queue/{{group_info.group.name}}">view mod queue</a>
+		{% if group_info.group.show_rejected_site %}
+		<br>
+		<a href="{{group_info.group.name}}/rejected">view rejected messages</a>
+		{% endif %}
 		<hr>
 
 		{% if group_info.group.description == "" %}
@@ -79,11 +83,13 @@
 		
 		<hr>
 		<h3>Moderation Rules</h3>
+		<a href="/groups/{{group_info.group.name}}/edit_group_info#mod-header">edit &raquo;</a><br><br>
 		<p>{{ group_info.group.mod_rules }}</p>
+
 
 		{% if group_info.admin %}
 			<hr>
-			<h3>Squad Members</h3>
+			<h3>Squad Moderators</h3>
 			<button type="button" id="btn-add-members">Invite new moderators</button>
 			<button type="button" id="btn-del-members">Remove selected</button>
 			
@@ -91,43 +97,23 @@
 			<table id="members-table" class="display" cellspacing="0" width="100%">
 				<thead>
 					<tr>
-						{% if group_info.admin %}
-							<th>Select</th>
-						{% endif %}
+						<th>Select</th>
 						<th>Email</th>
 						{% if flavour != "mobile" %}
 							<th>Joined</th>
-							<th>Owner</th>
-							<th>Moderator</th>
 						{% endif %}
 					</tr>
 				</thead>
 				
 				<tbody>
 					{% for member in group_info.members %}
-						{% if member.email == user.email %}
-							<tr class="my_row">
-						{% else %}
+						{% if member.email != user.email %}
 							<tr>
-						{% endif %}
-								
-						{% if group_info.admin %}
 							<td><input class="checkbox checkbox-user" type="checkbox" id ={{ member.id }}></td>
-						{% endif %}
-
-						<td>{{ member.email }}</td>
-						{% if flavour != "mobile" %}
+							<td>{{ member.email }}</td>
+							{% if flavour != "mobile" %}
 							<td>{{ member.joined }}</td>
-							<th>
-								{% if member.admin %}
-									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-								{% endif %}
-							</th>
-							<th>
-								{% if member.mod %}
-									<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-								{% endif %}
-							</th>
+							{% endif %}
 						{% endif %}
 					{% endfor %}
 
@@ -137,16 +123,6 @@
 							<td><i>{{ member.email }} (pending)</i></td>
 							{% if flavour != "mobile" %}
 								<td>{{ member.joined }}</td>
-								<th>
-									{% if member.admin %}
-										<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-									{% endif %}
-								</th>
-								<th>
-									{% if member.mod %}
-										<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-									{% endif %}
-								</th>
 							{% endif %}
 						</tr>
 					{% endfor %}

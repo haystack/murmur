@@ -49,15 +49,17 @@
 	{% endif %}
 	<br>
 </div>
+{% if thread.post.who_moderated %}
 <br>
 This post was rejected by moderator {{ thread.post.who_moderated.email }}.
+{% endif %}
 {% if thread.post.mod_explanation %}
 	<br><br>
 	<b>Explanation</b>: {{ thread.post.mod_explanation }}
 	<br><br>
 {% endif %}
 
-<div id='notify-link'>Should this message have been approved? <a id="message-link">Click here to fix it, and notify the moderator</a>.</div>
+<!-- <div id='notify-link'>Should this message have been approved? <a id="message-link">Click here to fix it, and notify the moderator</a>.</div>
 <div id='message-form' style='display: none;'>
 	<textarea id="admin-message" style='width:500px; height: 100px;' placeholder="Message to the mod..."></textarea><br>
 	<input type="checkbox" id="change-to-approve" checked> Change post status to "approved" <br>
@@ -66,7 +68,7 @@ This post was rejected by moderator {{ thread.post.who_moderated.email }}.
 </div>
 <br>
 <br>
-<div style='text-align: center;'><button type="button" class='btn-danger' id='delete-btn' style='display: inline;'>Delete permanently</button></div>
+<div style='text-align: center;'><button type="button" class='btn-danger' id='delete-btn' style='display: inline;'>Delete permanently</button></div> -->
 {% endblock %}
 
 {% block customjs %}

@@ -1,12 +1,14 @@
 import os
 import httplib2
 import json
+import logging
 
 import api
+from browser.util import get_groups_links_from_roles
 from engine.main import update_blacklist_whitelist, get_or_generate_filter_hash
 from gmail_setup.api import create_gmail_filter
 from http_handler.settings import BASE_URL, WEBSITE
-from schema.models import CredentialsModel, FlowModel
+from schema.models import CredentialsModel, FlowModel, Group
 
 from annoying.decorators import render_to
 from apiclient.discovery import build
@@ -37,6 +39,8 @@ def build_services(user):
 @render_to("gmail_setup_start.html")
 def index(request):
 
+    user = request.user
+
     is_done = (request.path_info == '/gmail_setup/done')
 
     if 'group' not in request.GET:
@@ -45,7 +49,7 @@ def index(request):
     group_name = request.GET['group']
     forward_address = group_name + '@' + BASE_URL
 
-    services = build_services(request.user)
+    services = build_services(user)
 
     is_authorized = False 
     # Used for Squadbox only:
@@ -56,7 +60,13 @@ def index(request):
         service_mail = services['mail']
         gmail_forwarding_verified = api.check_forwarding_address(service_mail, forward_address)
 
-    return {'website': WEBSITE, 'user': request.user, 'is_authorized': is_authorized, 'gmail_forwarding_verified': gmail_forwarding_verified, 'is_done': is_done, 'group_name': group_name, 'forward_address': forward_address}
+    groups = Group.objects.filter(membergroup__member=user).values("name")
+    groups_links = get_groups_links_from_roles(user, groups)
+    active_group = Group.objects.get(name=group_name)
+
+    return {'website': WEBSITE, 'user': user, 'is_authorized': is_authorized, 'gmail_forwarding_verified': gmail_forwarding_verified, 
+        'is_done': is_done, 'group_name': group_name, 'forward_address': forward_address, 'groups' : groups, 'active_group' : active_group,
+        'groups_links' : groups_links, 'active_group_role' : 'admin'}
 
 @login_required
 def auth(request):
@@ -74,6 +84,8 @@ def auth(request):
         scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic',
         redirect_uri=REDIRECT_URI
     )
+
+    FLOW.params['access_type'] = 'offline'
 
     user = request.user
     storage = Storage(CredentialsModel, 'id', user, 'credential')
@@ -161,19 +173,30 @@ def import_start(request):
             else:
                 emails_to_add.append(item[0])
 
-        for email in emails_to_add:
-            # add these to whitelist / create form here!
-            res = update_blacklist_whitelist(user, group_name, email, True, False)
+        emails_str = ','.join(emails_to_add)
+        res = update_blacklist_whitelist(user, group_name, emails_str, True, False, push=False)
 
         forward_address = group_name + '@' + BASE_URL
 
         if WEBSITE == "squadbox":
             filter_hash = get_or_generate_filter_hash(user, group_name, push=False)['hash']
+            # try:
             api.create_gmail_filter(service_mail, emails_to_add, forward_address, filter_hash)
+            # except Exception, e:
+            #     logging.error("Exception creating gmail filter - probably hit request limit")
+            #     logging.debug(e)
 
         return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)
     else:
         # generate form objects for first load here
-        group_name = request.GET.get('group', None)
+        group_name = request.GET.get('group')
+
+        groups = Group.objects.filter(membergroup__member=user).values("name")
+        groups_links = get_groups_links_from_roles(user, groups)
+        active_group = Group.objects.get(name=group_name)
         # TODO: combine multiple email addresses for same contact in contacts view
-        return render(request, 'gmail_setup_import.html', {'website': WEBSITE, 'user': user, 'contacts_names_emails': contacts_names_emails, 'sorted_gmail_list': sorted_gmail_list, 'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 'frequency_list': frequency_list, 'freq_contacted' : freq_contacted})
+        return render(request, 'gmail_setup_import.html', {'website': WEBSITE, 'user': user, 
+            'contacts_names_emails': contacts_names_emails, 'sorted_gmail_list': sorted_gmail_list, 
+            'group_name': group_name, 'max_frequency': max_frequency, 'min_frequency': min_frequency, 
+            'frequency_list': frequency_list, 'freq_contacted' : freq_contacted, 'groups': groups, 
+            'active_group' : active_group, 'active_group_role' : 'admin', 'groups_links' : groups_links})

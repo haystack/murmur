@@ -1,0 +1,109 @@
+
+{% extends "group_container_base.html" %}
+{% block container-content %}
+{% if edit_page %}
+	<p hidden id='orig-group-name'>{{group_info.name}}</p>
+	<h3>Edit Squad Information and Settings</h3>
+{% else %}
+	<h3>Create New Squad</h3>
+{% endif %}
+<hr>
+<form id="group-form">
+	<h4 class="strong">Squad Name:</h4>
+	<span class="italic-med">
+		Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed.
+	</span>
+	<br>
+	{% if edit_page %}
+		<input id="group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;" value="{{group_info.name}}">
+		</input>
+	{% else %}
+		<input id="group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;">
+		</input>
+	{% endif %}
+	<br><br>
+	<h4 class="strong">Squad Description:</h4>
+	<span class="italic-med">(optional) Maximum 140 characters</span><br>
+	
+	<textarea id="group-description" maxlength="140">{% if edit_page %}{{ group_info.description.strip }}{% endif %}</textarea>
+	<br><br>
+	<h4 class="strong">Attachment Policy: </h4>
+	{% if group_info.allow_attachments or not edit_page %}
+		<input type="radio" name="attach" value="yes-attach" id="rdo-attach" checked>
+	{% else %}
+		<input type="radio" name="attach" value="yes-attach" id="rdo-attach">
+	{% endif %}
+	Allow Attachments
+	<br>
+	<span class="italic-small">
+		Emails with attachments that reach your Squadbox will be moderated as usual. Your squad's moderators will be able to see them when they review messages, and you'll see the attachments on approved messages.
+	</span>
+	{% if group_info.allow_attachments or not edit_page %}
+		<input type="radio" name="attach" value="attach" id="rdo-attach">
+	{% else %}
+		<input type="radio" name="attach" value="no-attach" id="rdo-attach" checked>
+	{% endif %}
+	No Attachments Allowed
+	<br>
+	<span class="italic-small">
+		Emails that reach your Squadbox with attachments will automatically be rejected.
+	</span>
+	
+	<br>
+	<h4 class="strong">Rejected Messages: </h4>
+	{% if group_info.send_rejected_tagged or not edit_page %}
+		<input type="checkbox" id="send-rejected" checked>
+	{% else %}
+		<input type="checkbox" id="send-rejected">
+	{% endif %}
+	Send me rejected messages with a <b>[rejected]</b> tag in the subject line</input><br>
+	<span class="italic-small"><a href="/static/filters/tag_archive_rejected.xml" download>(Optional) Download a Gmail filter to automatically sort these messages into a separate folder (<a href="https://support.google.com/mail/answer/6579?hl=en">Instructions to import this file to your Gmail account</a>)</a></span>
+	{% if edit_page and group_info.show_rejected_site or not edit_page %}
+		<input type="checkbox" id="store-rejected" checked>
+	{% else %}
+		<input type="checkbox" id="store-rejected">
+	{% endif %}
+	Store rejected messages on the Squadbox website</input>
+	<span class="italic-small">We will store messages that your moderators reject, and display a link to view them on your homepage.</span>
+	<br>
+	<h4 class="strong" id='mod-header'>Moderation:</h4>
+	<span class="italic-medium">Please enter any information you want moderators to know regarding your preferences. For example, "please reject messages with profanity."
+	</span><br>
+	<textarea id="edit-mod-rules">{{group_info.mod_rules.strip }}</textarea>
+	<br>
+	<span class="strong">Options:</span> <br>
+	{% if group_info.mod_edit_wl_bl or not edit_page %}
+		<input type="checkbox" id="mod-edit-wl-bl" checked>
+	{% else %}
+		<input type="checkbox" id="mod-edit-wl-bl">
+	{% endif %}
+	Allow squad moderators to add and remove senders from your whitelist and blacklist
+	<br>
+	{% if group_info.auto_approve_after_first %}
+		<input type="checkbox" id="auto-approve" checked>
+	{% else %}
+		<input type="checkbox" id="auto-approve">
+	{% endif %}
+	After a sender's first post to a thread is approved, auto-approve their future posts to the thread
+	<br><br>
+	{% if edit_page %}
+		<button type="button" id="btn-save-settings"">Save Changes</button>
+		<button type="button" id="btn-cancel-settings">Cancel</button>
+	{% else %}
+		<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>
+	{% endif %}
+	
+</form>
+<br>
+{% if edit_page %}
+	<a href="/groups/{{group_info.name}}">&#171; Go back to squad info page</a>
+{% endif %}
+{% endblock %}
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/notify.js"></script>
+	{% if edit_page %}
+		<script type="text/javascript" src="/static/javascript/edit_group_info.js"></script>
+	{% else %}
+		<script type="text/javascript" src="/static/javascript/create_group.js"></script>
+	{% endif %}
+{% endblock %}
