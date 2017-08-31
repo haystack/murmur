@@ -359,8 +359,8 @@ def handle_post_murmur(message, group, host, verified):
 
 		post_id = res['post_id']
 
-		res = upload_message(message, post_id, msg_id)
-		if not res['status']:
+		s3_res = upload_message(message, post_id, msg_id)
+		if not s3_res['status']:
 			logging.debug("Error uploading original post to s3; continuing anyway")
 
 		subject = get_subject(message, res, group.name)
