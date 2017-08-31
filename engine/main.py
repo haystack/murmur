@@ -918,13 +918,12 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 	if attachments:
 		upload_attachments(attachments, msg_id)
 
+	perspective_data = None
 	if WEBSITE == 'squadbox':
 		res = call_perspective_api(message_text)
 		if res['status']:
 			del res['status']
 			perspective_data = res
-		else:
-			perspective_data = None
 
 	p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
 			subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, 
