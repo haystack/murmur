@@ -3,7 +3,7 @@ import httplib2
 import json
 import logging
 
-import random, time, hashlib
+import random, time, hashlib, datetime
 
 import api
 from browser.util import get_groups_links_from_roles
@@ -170,6 +170,7 @@ def initial_filters(request):
     mg = MemberGroup.objects.get(member=u, group__name=group_name)
     hash = mg.gmail_filter_hash 
     if not hash:
+        now = datetime.now(utc)
         salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()
         new_hash = hashlib.sha1(user_email + group_name + salt).hexdigest()[:20]    
         mg.gmail_filter_hash = new_hash
