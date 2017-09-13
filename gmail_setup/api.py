@@ -53,12 +53,15 @@ def parse_gmail(service_mail):
                         name = name[1:-1]
                     list_message_object['name'] = name
             list_message_object['label'] = None
-            for label in message['labelIds']:
-                if label == "CATEGORY_PERSONAL": list_message_object['label'] = 'personal'
-                if label == "CATEGORY_SOCIAL": list_message_object['label'] = 'social'
-                if label == "CATEGORY_PROMOTIONS": list_message_object['label'] = 'promotions'
-                if label == "CATEGORY_UPDATES": list_message_object['label'] = 'updates'
-                if label == "CATEGORY_FORUMS": list_message_object['label'] = 'forums'
+            if 'labelIds' in message:
+                for label in message['labelIds']:
+                    if label == "CATEGORY_PERSONAL": list_message_object['label'] = 'personal'
+                    if label == "CATEGORY_SOCIAL": list_message_object['label'] = 'social'
+                    if label == "CATEGORY_PROMOTIONS": list_message_object['label'] = 'promotions'
+                    if label == "CATEGORY_UPDATES": list_message_object['label'] = 'updates'
+                    if label == "CATEGORY_FORUMS": list_message_object['label'] = 'forums'
+            else:
+                list_message_object['label'] = 'personal'  
             # TODO: labels at the moment are only decided based on most recent email; change to be mode
             if list_message_object['label'] != None:
                 received_list.append(list_message_object)
