@@ -3,7 +3,8 @@ import httplib2
 import json
 import logging
 
-import random, time, hashlib, datetime
+import random, time, hashlib
+from datetime import datetime
 
 import api
 from browser.util import get_groups_links_from_roles
