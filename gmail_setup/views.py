@@ -128,6 +128,52 @@ def deauth(request):
     else:
         return HttpResponseRedirect("authorize")
 
+
+XML_FILE = """<?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.org/2005/Atom' xmlns:apps='http://schemas.google.com/apps/2006'>
+    <title>Mail Filters</title>
+    <id>tag:mail.google.com,2008:filters:1505317265328,1505323987561</id>
+    <updated>2017-09-13T17:44:58Z</updated>
+    <entry>
+        <category term='filter'></category>
+        <title>Mail Filter</title>
+        <id>tag:mail.google.com,2008:filter:1505317265328</id>
+        <updated>2017-09-13T17:44:58Z</updated>
+        <content></content>
+        <apps:property name='hasTheWord' value='list:%s@squadbox.csail.mit.edu'/>
+        <apps:property name='excludeChats' value='true'/>
+        <apps:property name='smartLabelToApply' value='^smartlabel_personal'/>
+    </entry>
+    <entry>
+        <category term='filter'></category>
+        <title>Mail Filter</title>
+        <id>tag:mail.google.com,2008:filter:1505323987561</id>
+        <updated>2017-09-13T17:44:58Z</updated>
+        <content></content>
+        <apps:property name='doesNotHaveTheWord' value='list:%s@squadbox.csail.mit.edu'/>
+        <apps:property name='forwardTo' value='%s@squadbox.csail.mit.edu'/>
+        <apps:property name='sizeOperator' value='s_sl'/>
+        <apps:property name='sizeUnit' value='s_smb'/>
+    </entry>
+</feed>"""
+
+
+@login_required
+def initial_filters(request):
+    user = request.user
+    group_name = request.GET.get('group')
+    from schema.models import UserProfile, MemberGroup
+    user_email = user.email
+    
+    u = UserProfile.objects.get(email=user_email)
+    mg = MemberGroup.objects.get(member=u, group__name=group_name)
+    hash = mg.gmail_filter_hash 
+    xml_string = XML_FILE % (hash, hash, group_name)
+    
+    response = HttpResponse(xml_string, content_type='application/xml')
+    response['Content-Disposition'] = 'attachment; filename=gmailfilter.xml'
+    return response
+    
+
 @login_required
 def import_start(request):
     user = request.user
