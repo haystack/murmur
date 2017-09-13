@@ -156,12 +156,12 @@ XML_FILE = """<?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.o
         <updated>2017-09-13T17:44:58Z</updated>
         <content></content>
         <apps:property name='doesNotHaveTheWord' value='list:%s@squadbox.csail.mit.edu'/>
+        <apps:property name='shouldArchive' value='true'/>
         <apps:property name='forwardTo' value='%s@squadbox.csail.mit.edu'/>
         <apps:property name='sizeOperator' value='s_sl'/>
         <apps:property name='sizeUnit' value='s_smb'/>
     </entry>
 </feed>"""
-
 
 @login_required
 def initial_filters(request):
