@@ -221,7 +221,7 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
 	logging.debug(res)
 	return res
 
-def create_group(group_name, group_desc, public, attach, send_rejected, store_rejected, requester):
+def create_group(group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit_wl_bl, mod_rules, auto_approve, requester):
 	res = {'status':False}
 	
 	
@@ -242,7 +242,9 @@ def create_group(group_name, group_desc, public, attach, send_rejected, store_re
 		res['code'] = msg_code['DUPLICATE_ERROR']
 		
 	except Group.DoesNotExist:
-		group = Group(name=group_name, active=True, public=public, allow_attachments=attach, send_rejected_tagged=send_rejected, show_rejected_site=store_rejected, description=group_desc)
+		group = Group(name=group_name, active=True, public=public, allow_attachments=attach, send_rejected_tagged=send_rejected, 
+			show_rejected_site=store_rejected, description=group_desc, mod_rules=mod_rules, mod_edit_wl_bl=mod_edit_wl_bl,
+			auto_approve_after_first=auto_approve)
 		group.save()
 		
 		is_mod = True
@@ -763,13 +765,15 @@ def load_thread(t, user=None, member=None):
 			no_emails = member.no_emails
 			always_follow = member.always_follow_thread
 	
-	if WEBSITE == 'murmur':
-		posts = Post.objects.filter(thread = t)	
-	elif WEBSITE == 'squadbox':
-		posts = Post.objects.filter(thread = t, status='P')
+	#if WEBSITE == 'murmur':
+	posts = Post.objects.filter(thread = t)	
+	# elif WEBSITE == 'squadbox':
+	# 	posts = Post.objects.filter(thread = t, status='P')
 
 	replies = []
 	post = None
+
+	print "postS: ", posts
 	
 	for p in posts:
 		post_likes = p.upvote_set.count()
@@ -800,6 +804,7 @@ def load_thread(t, user=None, member=None):
 					'mod_explanation' : p.mod_explanation,
 					'perspective_data' : p.perspective_data,
 					}
+
 		if p.forwarding_list:
 			post_dict['forwarding_list'] = p.forwarding_list.email
 
@@ -1456,8 +1461,8 @@ def unmute_tag(tag_name, group_name, user=None, email=None):
 
 # add a new entry to whitelist/blacklist table, or update existing one
 # user is the user who is adding them(we need to make sure they are authorized,
-# email is the address to be blacklisted/whitelsited)
-def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
+# emaild is a string of comma separated addresses to be blacklisted/whitelisted)
+def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist, push=True):
 	res = {'status' : False}
 
 	# illegal to have both set to true
@@ -1475,6 +1480,8 @@ def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 		else:
 			mg = MemberGroup.objects.get(member=user, group=g, admin=True)
 
+		to_insert = []
+
 		for email in emails.split(','):
 			email = email.strip()
 			current = WhiteOrBlacklist.objects.filter(group=g, email=email)
@@ -1482,12 +1489,15 @@ def update_blacklist_whitelist(user, group_name, emails, whitelist, blacklist):
 				entry = current[0]
 				entry.whitelist = whitelist
 				entry.blacklist = blacklist
+				entry.save()
 			else:
 				entry = WhiteOrBlacklist(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
-				
-			entry.save()
+				to_insert.append(entry)
 
-		get_or_generate_filter_hash(user, group_name)
+		WhiteOrBlacklist.objects.bulk_create(to_insert)
+
+		# if push:
+		# 	get_or_generate_filter_hash(user, group_name)
 
 		res['status'] = True
 		res['group_name'] = group_name
@@ -1606,7 +1616,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 				mail.Html = get_new_body(message_text, html_blurb, 'html')
 				mail.Body = get_new_body(message_text, plain_blurb, 'plain')
 
-				res = get_or_generate_filter_hash(admin, group.name)
+				res = get_or_generate_filter_hash(admin, group_name)
 				if res['status']:
 					mail['List-Id'] = '%s@%s' % (res['hash'], BASE_URL)
 				else:
@@ -1636,6 +1646,7 @@ def load_pending_posts(user, group_name):
 		mg = MemberGroup.objects.get(member=user, group__name=group_name)
 		posts = Post.objects.filter(group__name=group_name, status='P')
 		posts_cleaned = fix_posts(posts)
+		print "here"
 		grouped = group_by_thread(posts_cleaned)
 		res['threads'] = grouped
 		res['status'] = True
@@ -1652,17 +1663,21 @@ def load_pending_posts(user, group_name):
 		res['code'] = msg_code['UNKNOWN_ERROR']
 		res['error'] = e
 
+	print "res:!!!!", res
 	return res
 
 def load_rejected_posts(user, group_name):
 	res = {'status' : False}
 	try:
 		group = Group.objects.get(name=group_name)
-		mg = MemberGroup.objects.get(member=user, group=group, admin=True)
-		rejected_posts = Post.objects.filter(group=group, status='R')
-		res['posts'] = fix_posts(rejected_posts)
-		res['group'] = group
-		res['status'] = True
+		mg = MemberGroup.objects.get(member=user, group=group)
+		if mg.admin or mg.moderator:
+			rejected_posts = Post.objects.filter(group=group, status='R')
+			res['posts'] = fix_posts(rejected_posts)
+			res['group'] = group
+			res['status'] = True
+		else:
+			res['code'] = msg_code['PRIVILEGE_ERROR']
 	except Group.DoesNotExist:
 		res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 	except MemberGroup.DoesNotExist:
@@ -1708,9 +1723,9 @@ def group_by_thread(posts_list):
 		senders = set()
 		for p in posts:
 			if p['from_name']:
-				senders.add(p['from_name'])
+				senders.add(str(p['from_name']))
 			else:
-				senders.add(p['from'])
+				senders.add(str(p['from']))
 
 		thread = {
 			'id' : t,
@@ -1758,7 +1773,7 @@ def get_or_generate_filter_hash(user, group_name, push=True):
 		now = datetime.now(utc)
 		last_update = mg.last_updated_hash
 
-		if mg.gmail_filter_hash is None or now - last_update >  timedelta(hours=24):
+		if mg.gmail_filter_hash is None: #or now - last_update >  timedelta(hours=24):
 
 			salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()
 			new_hash = hashlib.sha1(user.email + group_name + salt).hexdigest()[:20]	
@@ -1771,9 +1786,9 @@ def get_or_generate_filter_hash(user, group_name, push=True):
  		else:
  			res['hash'] = mg.gmail_filter_hash
 
-		if push:
-			whitelist_emails = [w.email for w in WhiteOrBlacklist.objects.filter(group__name=group_name, whitelist=True)]
-			update_gmail_filter(user, group_name, whitelist_emails, res['hash'])
+		# if push:
+		# 	whitelist_emails = [w.email for w in WhiteOrBlacklist.objects.filter(group__name=group_name, whitelist=True)]
+		# 	update_gmail_filter(user, group_name, whitelist_emails, res['hash'])
 
 		res['status'] = True
 
@@ -1797,7 +1812,6 @@ def call_perspective_api(text):
 								# all of these are experimental and
 								# might not be that useful yet 
 								'OBSCENE' : {},
-								'SPAM' : {},
 								'ATTACK_ON_COMMENTER' : {},
 								'INFLAMMATORY' : {},
 								},

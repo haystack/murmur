@@ -31,7 +31,7 @@ def parse_gmail(service_mail):
     frequency_dict = dict()
     page_token = ""
     current_time = time.time()*1000
-    time_back = 1.577e+10 # get messages from the last 6 months
+    time_back = 7.855e+9 # get messages from the last 3 months
     # time_back = 2e+8 # shorter time for testing
     time_not_over = True
     ans = None
@@ -133,6 +133,9 @@ def get_google_emails(service_people, service_mail):
     emails = parse_gmail(service_mail)
     return list(set(contacts).union(set(emails)))
 
+def total_length(l):
+    return len(' -'.join(l))
+
 def create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_hash):
 
     filters = service_mail.users().settings().filters()
@@ -142,21 +145,56 @@ def create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_
         if 'forward' in f['action'] and f['action']['forward'] == forward_address:
             filters.delete(userId='me', id=f['id']).execute()
 
-    emails = '{from:' + ' from:'.join(whitelist_emails) + ' from:me }' 
+
+
     gmail_secret = 'list:%s@%s' % (filter_hash, BASE_URL)
 
+    # remove from forums (list id does this)
     new_filter = {
         'criteria': {
-            'negatedQuery' : '%s %s' % (emails, gmail_secret),
+            'query' : gmail_secret,
             'excludeChats' : True,
         },
         'action': {
-            'addLabelIds': ['TRASH'],
-            'forward': forward_address
+            'addLabelIds': ['CATEGORY_PERSONAL'],
         }
     }
 
-    return filters.create(userId='me', body=new_filter).execute()
+    filters.create(userId='me', body=new_filter).execute()
+
+    # whitelist emails
+    email_chunks = []
+    whitelist_copy = whitelist_emails[:]
+    current_chunk = []
+
+    while len(whitelist_copy) > 0:
+        if total_length(current_chunk) >= 1300:
+            email_chunks.append(current_chunk)
+            current_chunk = []
+        else:
+            current_chunk.append(whitelist_copy.pop())
+
+    email_chunks.append(current_chunk)
+
+    for chunk in email_chunks:
+
+        not_emails = '-me -' + ' -'.join(chunk) 
+        
+        new_filter = {
+            'criteria': {
+                'from' : not_emails,
+                'negatedQuery' : gmail_secret,
+                'excludeChats' : True,
+            },
+            'action': {
+                'addLabelIds': ['TRASH'],
+                'forward': forward_address
+            }
+        }
+
+        filters.create(userId='me', body=new_filter).execute()
+
+    return True
 
 def update_gmail_filter(user, group_name, whitelist_emails, filter_hash):
 
@@ -166,7 +204,8 @@ def update_gmail_filter(user, group_name, whitelist_emails, filter_hash):
     http = credential.authorize(http)
     service_mail = build('gmail', 'v1', http=http)
     forward_address = '%s@%s' % (group_name, BASE_URL)
-    return create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_hash)
+    return True
+    #return create_gmail_filter(service_mail, whitelist_emails, forward_address, filter_hash)
 
 def check_forwarding_address(service_mail, forward_address):
     result = service_mail.users().settings().forwardingAddresses().list(userId='me').execute()

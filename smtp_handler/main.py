@@ -533,6 +533,14 @@ def handle_post_squadbox(message, group, host, verified):
 				logging.debug('Post needs to be moderated')
 
 
+	# should refactor logic to check for this first, but for now
+	# doing it here will be ok. (should it supercede all
+	# of the other rules?)
+	if len(attachments) > 0 and not group.allow_attachments:
+		status = 'R'
+		reason = 'no attachments'
+		logging.debug("squad does not allow attachments")
+
 
 	moderators = MemberGroup.objects.filter(group=group, moderator=True)
 	if not moderators.exists():
@@ -544,6 +552,8 @@ def handle_post_squadbox(message, group, host, verified):
 		status = 'A'
 		reason = 'is mod'
 		logging.debug('Message is from a moderator')
+
+
 
 	# if pending or rejected, we need to put it in the DB 
 	if status in ['P', 'R']:
@@ -611,10 +621,10 @@ def handle_post_squadbox(message, group, host, verified):
 
 		relay.deliver(mail)
 
-	# send notification to least recently emailed mod if we haven't emailed them in 24 hrs 
-	elif status == 'P':
-		twenty_four_hours_ago = datetime.now(pytz.utc) + timedelta(days=-1)
-		unnotified_mods = moderators.filter(Q(last_emailed__lte=twenty_four_hours_ago) | Q(last_emailed=None))
+	# send notification to least recently emailed mod if we have pending posts 
+	if Post.objects.filter(group__name=group.name, status='P').exists():
+		four_hours_ago = datetime.now(pytz.utc) + timedelta(hours=-4)
+		unnotified_mods = moderators.filter(Q(last_emailed__lte=four_hours_ago) | Q(last_emailed=None))
 
 		if unnotified_mods.exists():
 			least_recent = unnotified_mods.order_by('last_emailed')[0]
@@ -649,8 +659,10 @@ def handle_post(message, address=None, host=None):
 	if(reserved):
 		return
 	
-	_, sender_addr = parseaddr(message['From'].lower())
-	_, to_addr = parseaddr(message['To'].lower())
+	_, sender_addr = parseaddr(message['From'])
+	sender_addr = sender_addr.lower()
+	_, to_addr = parseaddr(message['To'])
+	to_addr = to_addr.lower()
 
 	verified = isSenderVerified(message)
 	

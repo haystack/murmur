@@ -13,7 +13,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db.models.aggregates import Count
 from django.http import *
-from django.shortcuts import get_object_or_404, redirect, render_to_response
+from django.shortcuts import get_object_or_404, redirect, render_to_response, render
 from django.template.context import RequestContext
 from django.utils.encoding import *
 
@@ -257,10 +257,10 @@ def thread(request):
 				admin = MemberGroup.objects.get(group=group, admin=True)
 				thread_to = admin.member.email
 
-
 			return {'user': request.user, 'groups': groups, 'thread': res, 'thread_to' : thread_to, 
 					'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE, 
-					'active_group_role' : role, 'groups_links' : groups_links, 'modal_data' : modal_data}
+					'active_group_role' : role, 'groups_links' : groups_links, 'modal_data' : modal_data,
+					'mod_edit_wl_bl' : group.mod_edit_wl_bl}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None
@@ -289,16 +289,23 @@ def rejected_thread(request):
 	
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		member_group = MemberGroup.objects.filter(member=user, group=group, admin=True)
-		is_admin = member_group.exists()
-		if is_admin:
-			res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
+		mg = MemberGroup.objects.filter(member=user, group=group)
+		if mg.exists() and (mg[0].admin or mg[0].moderator):
+			res = engine.main.load_thread(thread, user=request.user, member=mg[0])
 			groups = Group.objects.filter(membergroup__member=user).values("name")
 			if WEBSITE == 'murmur':
 				thread_to = '%s@%s' % (group.name, HOST) 
 			elif WEBSITE == 'squadbox':
 				thread_to = user.email
-			return {'user': request.user, 'groups': groups, 'group_name' : group.name, 'thread': res, 'post_id': post_id, 'thread_to' : thread_to, 'website' : WEBSITE}
+
+			groups = Group.objects.filter(membergroup__member=user).values("name")
+			groups_links = get_groups_links_from_roles(user, groups)
+			active_group = group
+			active_group_role = get_role_from_group_name(user, group.name)
+
+			return {'user': request.user, 'groups': groups, 'group_name' : group.name, 'thread': res, 'post_id': post_id, 
+			'thread_to' : thread_to, 'website' : WEBSITE, 'groups_links' : groups_links, group_page: True,
+			'active_group' : active_group, 'active_group_role' : active_group_role}
 		else:
 			return redirect('/404?e=perm')
 	else:
@@ -316,14 +323,16 @@ def settings(request):
 @render_to(WEBSITE+"/groups.html")
 @login_required
 def my_groups(request):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	if request.flavour == "mobile":
-		return HttpResponseRedirect('/my_group_list')
+	if request.user.is_authenticated():
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		if request.flavour == "mobile":
+			return HttpResponseRedirect('/my_group_list')
+		else:
+			groups = Group.objects.filter(membergroup__member=user).values("name")
+			info = engine.main.check_admin(user,groups)
+			return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info':info}	
 	else:
-		groups = Group.objects.filter(membergroup__member=user).values("name")
-		info = engine.main.check_admin(user,groups)
-		return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info':info}
-
+		return HttpResponseRedirect(global_settings.LOGIN_URL)
 
 @render_to("mobile_list_groups.html")
 @login_required
@@ -486,16 +495,17 @@ def list_my_groups(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
-@render_to("create_group.html")
+@render_to(WEBSITE+"/edit_create_group.html")
 @login_required
 def create_group_view(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
+	groups_links = get_groups_links_from_roles(user, groups)
 	return {'user': request.user, 'groups': groups, 'group_page': True, 
-			'website' : WEBSITE, 'group_or_squad' : group_or_squad}
+			'website' : WEBSITE, 'group_or_squad' : group_or_squad, 
+			'groups_links' : groups_links, 'edit_page' : False}
 
-
-@render_to("edit_group_info.html")
+@render_to(WEBSITE+"/edit_create_group.html")
 @login_required
 def edit_group_info_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)  
@@ -503,10 +513,11 @@ def edit_group_info_view(request, group_name):
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
+		groups_links = get_groups_links_from_roles(user, groups)
 		if membergroup[0].admin:
 			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 
 					'website' : WEBSITE, 'group_or_squad' : group_or_squad, 'active_group' : group, 
-					'active_group_role' : 'admin'}
+					'active_group_role' : 'admin', 'groups_links' : groups_links, 'edit_page' : True}
 		else:
 			return redirect('/404?e=admin')
 	except Group.DoesNotExist:
@@ -569,7 +580,10 @@ def create_group(request):
 		attach = request.POST['attach'] == 'yes-attach'
 		send_rejected = request.POST['send_rejected_tagged'] == 'true'
 		store_rejected = request.POST['store_rejected'] == 'true'
-		res = engine.main.create_group(request.POST['group_name'], request.POST['group_desc'], public, attach, send_rejected, store_rejected, user)
+		mod_edit_wl_bl = request.POST['mod_edit_wl_bl'] == 'true'
+		mod_rules = request.POST['mod_rules']
+		auto_approve = request.POST['auto_approve'] =='true'
+		res = engine.main.create_group(request.POST['group_name'], request.POST['group_desc'], public, attach, send_rejected, store_rejected, mod_edit_wl_bl, mod_rules, auto_approve, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
@@ -1584,6 +1598,9 @@ def mod_queue(request, group_name):
 
 		res = engine.main.load_pending_posts(user, group_name)
 
+		logging.debug("RES:")
+		logging.debug(res)
+
 		if not res['status']:
 			redirect('/404')
 
@@ -1639,6 +1656,6 @@ def moderate_user_for_thread_get(request):
 		
 		return {'res' : res, 'website' : WEBSITE, 'group_name' : group_name, 'user' : user,
 				'type' : request.GET.get('moderate'), 'sender' : sender, 'subject' : subject,
-				'active_group' : active_group, 'active_group_role' : role}
+				'active_group' : active_group, 'active_group_role' : role, 'groups' : groups}
 	else:
 		return redirect(global_settings.LOGIN_URL + '?next=/approve_get?group_name=%s&post_id=%s' % (group_name, post_id))

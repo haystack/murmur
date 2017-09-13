@@ -1,0 +1,97 @@
+{% extends "group_container_base.html" %}
+{% block container-content %}
+
+{% if edit_page %}
+	<p hidden id='orig-group-name'>{{group_info.name}}</p>
+	<h3>Edit Group Information and Settings</h3>
+{% else %}
+	<h3>Create New Group</h3>
+{% endif %}
+
+<hr>
+<form id="group-form">
+	<h4 class="strong">Group Name:</h4>
+	<span class="italic-med">
+		Maximum 20 characters. Only alphanumeric characters, underscores, and dashes allowed.
+	</span>
+	<br>
+	{% if edit_page %}
+		<input id="group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;" value="{{group_info.name}}">
+		</input>
+	{% else %}
+		<input id="group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;">
+		</input>
+	{% endif %}
+
+	<br><br>
+	<h4 class="strong">Group Description:</h4>
+	<span class="italic-med">(optional) Maximum 140 characters</span><br>
+
+	<textarea id="group-description" maxlength="140">{% if edit_page %}{{ group_info.description.strip }}{% endif %}</textarea>
+	<br><br>
+
+	<h4 class="strong">Privacy Settings:</h4>
+	{% if group_info.public %}
+		<input type="radio" name="pubpriv" value="public" id="rdo-pub" checked>
+	{% else %}
+		<input type="radio" name="pubpriv" value="public" id="rdo-pub">
+	{% endif %}
+	Public
+	<br>
+	<span class="italic-small">All Murmur users will be able to view and search for this group by name and description.</span>
+	{% if group_info.public %}
+		<input type="radio" name="pubpriv" value="private" id="rdo-priv">
+	{% else %}
+		<input type="radio" name="pubpriv" value="private" id="rdo-priv" checked>
+	{% endif %}
+	
+	Private
+	<br>
+	<span class="italic-small">Only users added to this group by admins will be notified about the group and be able to see its posts.</span>
+	<br>
+
+	<h4 class="strong">Attachment Policy: </h4>
+	{% if group_info.allow_attachments or not edit_page %}
+		<input type="radio" name="attach" value="yes-attach" id="rdo-attach" checked>
+	{% else %}
+		<input type="radio" name="attach" value="yes-attach" id="rdo-attach">
+	{% endif %}
+	Allow Attachments
+	<br>
+	<span class="italic-small">
+	All members of the group can post attachments. Size of attachments cannot exceed 3MB. We currently support images, PDFs, and MS Office files.
+	</span>
+	{% if group_info.allow_attachments or not edit_page %}
+		<input type="radio" name="attach" value="no-attach" id="rdo-attach">
+	{% else %}
+		<input type="radio" name="attach" value="no-attach" id="rdo-attach" checked>
+	{% endif %}
+	No Attachments Allowed
+	<br>
+	<span class="italic-small">
+		Users will not be able to post attachments. Messages with attachments will be rejected.
+	</span>
+	
+	<br><br>
+	{% if edit_page %}
+		<button type="button" id="btn-save-settings"">Save Changes</button>
+		<button type="button" id="btn-cancel-settings">Cancel</button>
+	{% else %}
+		<button type="button" id="btn-new-create-group" style="margin-top:10px;">Create</button>
+	{% endif %}
+</form>
+<br>
+
+{% if edit_page %}
+<a href="/groups/{{group_info.name}}">&#171; Go back to group info page</a>
+{% endif %}
+
+{% endblock %}
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/notify.js"></script>
+	{% if edit_page %}
+		<script type="text/javascript" src="/static/javascript/edit_group_info.js"></script>
+	{% else %}
+		<script type="text/javascript" src="/static/javascript/create_group.js"></script>
+	{% endif %}
+{% endblock %}
