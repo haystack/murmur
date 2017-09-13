@@ -5,6 +5,9 @@ import logging
 
 import random, time, hashlib
 from datetime import datetime
+from django.utils.timezone import utc
+from pytz import utc
+
 
 import api
 from browser.util import get_groups_links_from_roles
