@@ -180,11 +180,11 @@ def import_start(request):
 
         if WEBSITE == "squadbox":
             filter_hash = get_or_generate_filter_hash(user, group_name, push=False)['hash']
-            # try:
-            api.create_gmail_filter(service_mail, emails_to_add, forward_address, filter_hash)
-            # except Exception, e:
-            #     logging.error("Exception creating gmail filter - probably hit request limit")
-            #     logging.debug(e)
+            try:
+                api.create_gmail_filter(service_mail, emails_to_add, forward_address, filter_hash)
+            except Exception, e:
+                logging.error("Exception creating gmail filter - probably hit request limit")
+                logging.debug(e)
 
         return HttpResponseRedirect('/gmail_setup/done?group=' + group_name)
     else:
