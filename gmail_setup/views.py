@@ -3,6 +3,8 @@ import httplib2
 import json
 import logging
 
+import random, time, hashlib
+
 import api
 from browser.util import get_groups_links_from_roles
 from engine.main import update_blacklist_whitelist, get_or_generate_filter_hash
@@ -167,6 +169,13 @@ def initial_filters(request):
     u = UserProfile.objects.get(email=user_email)
     mg = MemberGroup.objects.get(member=u, group__name=group_name)
     hash = mg.gmail_filter_hash 
+    if not hash:
+        salt = hashlib.sha1(str(random.random())+str(time.time())).hexdigest()
+        new_hash = hashlib.sha1(user_email + group_name + salt).hexdigest()[:20]    
+        mg.gmail_filter_hash = new_hash
+        mg.last_updated_hash = now 
+        mg.save()
+        hash = new_hash
     xml_string = XML_FILE % (hash, hash, group_name)
     
     response = HttpResponse(xml_string, content_type='application/xml')
