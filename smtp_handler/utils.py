@@ -641,7 +641,7 @@ def check_html_and_plain(msg_text, message_is_reply):
 		try:
 			msg_text['plain'] = html2text(msg_text['html'])
 		except UnicodeDecodeError:
-			continue
+			pass
 
 	return msg_text
 
