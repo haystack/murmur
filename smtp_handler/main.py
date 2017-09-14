@@ -553,7 +553,10 @@ def handle_post_squadbox(message, group, host, verified):
 		reason = 'is mod'
 		logging.debug('Message is from a moderator')
 
-
+	elif MemberGroup.objects.filter(group=group, member__email=sender_addr, admin=True).exists():
+		status = 'A'
+		reason = 'is owner'
+		logging.debug('Message is from owner')
 
 	# if pending or rejected, we need to put it in the DB 
 	if status in ['P', 'R']:
