@@ -32,8 +32,8 @@ $(document).ready(function() {
         var post_to_url = a_r_val == 'approve' ? '/approve_post' : '/reject_post';
         var list_url = null;
 
-        if (whitelist_check.checked) list_url = '/whitelist';
-        else if (blacklist_check.checked) list_url = '/blacklist';
+        if (whitelist_check && whitelist_check.checked) list_url = '/whitelist';
+        else if (blacklist_check && blacklist_check.checked) list_url = '/blacklist';
 
         if (a_r_val == 'reject') {
             status_params.explanation = $('#explanation').val();
