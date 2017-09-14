@@ -79,7 +79,7 @@
 	{% endif %}
 	Allow squad moderators to add and remove senders from your whitelist and blacklist
 	<br>
-	{% if group_info.auto_approve_after_first %}
+	{% if group_info.auto_approve_after_first or not edit_page %}
 		<input type="checkbox" id="auto-approve" checked>
 	{% else %}
 		<input type="checkbox" id="auto-approve">
