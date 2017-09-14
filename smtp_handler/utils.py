@@ -638,7 +638,10 @@ def check_html_and_plain(msg_text, message_is_reply):
 	if 'html' not in msg_text or msg_text['html'] == '':
 		msg_text['html'] = markdown(msg_text['plain'])
 	if 'plain' not in msg_text or msg_text['plain'] == '':
-		msg_text['plain'] = html2text(msg_text['html'])
+		try:
+			msg_text['plain'] = html2text(msg_text['html'])
+		except UnicodeDecodeError:
+			continue
 
 	return msg_text
 
