@@ -9,16 +9,21 @@ def untrash_message(service_mail, subject, sender_addr):
 
     messages = service_mail.users().messages()
 
-    query = 'subject:%s from:%s' % (subject.split(' ')[0], sender_addr)
+    query = 'subject:%s from:%s in:trash' % (subject.split(' ')[0], sender_addr)
     res1 = messages.list(userId='me', q=query).execute()
     logging.debug("res1:", res1)
     if res1['resultSizeEstimate'] == 0:
         logging.debug("no results")
-        return
+        return 0
 
-    gmail_msg_id = res1['messages'][0]['id']
-    res2 = messages.untrash(userId='me', id=gmail_msg_id).execute()
-    return
+    updated_count = 0
+    for m in res1['messages']:
+        gmail_msg_id = m['id']
+        res2 = messages.untrash(userId='me', id=gmail_msg_id).execute()
+        updated_count += 1
+        logging.debug("res2:", res2)
+    
+    return updated_count
 
 def parse_contacts(service_people):
     res_tuple = []
