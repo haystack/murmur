@@ -5,11 +5,11 @@ from oauth2client.django_orm import Storage
 from http_handler.settings import BASE_URL
 from schema.models import CredentialsModel
 
-def untrash_message(service_mail, subject, sender_addr):
+def untrash_message(service_mail, sender_addr, subject):
 
     messages = service_mail.users().messages()
 
-    query = 'subject:%s from:%s in:trash' % (subject.split(' ')[0], sender_addr)
+    query = 'subject:%s from:%s in:trash' % (sender_addr, subject.split(' ')[0])
     res1 = messages.list(userId='me', q=query).execute()
     logging.debug("res1:", res1)
     if res1['resultSizeEstimate'] == 0:
