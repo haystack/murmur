@@ -1577,9 +1577,10 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
                         mail_service = build_services(admin)['mail']
                         updated_count = untrash_message(mail_service, p.poster_email, p.subject)
                         if updated_count > 0:
-                            logging.debug("untrashed count: %s" % updated_count)
+                            logging.error("untrashed count: %s" % updated_count)
                             return 
                     except Exception, e:
+                        logging.error(e)
                         pass
 
                 elif new_status == 'R':
