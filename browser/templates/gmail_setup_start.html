@@ -29,10 +29,11 @@
                         <p><b>Step {% if website == "squadbox" %}3{% else %}2{% endif %}:</b> <span style="color:#0DA10D">&#x2714; done</span> - your contacts have been imported to the whitelist and Gmail redirect filter has been set up. <a href="import?group={{group_name}}">Click here</a> or come back here any time to update your whitelist emails.</p>
                     {% else %}
                         <p><b>Step {% if website == "squadbox" %}3{% else %}2{% endif %}:</b> ready - 
-                        	First, <a href="initial_filters?group={{group_name}}">download this xml file</a> containing a Gmail filter. Then go to <a href="https://mail.google.com/mail/u/0/#settings/filters" target="_blank">your Gmail filters page</a> and click "Import filters" to upload the XML file.
+                      <!--  	First, <a href="initial_filters?group={{group_name}}">download this xml file</a> containing a Gmail filter. Then go to <a href="https://mail.google.com/mail/u/0/#settings/filters" target="_blank">your Gmail filters page</a> and click "Import filters" to upload the XML file.
                         </p>
+                        -->                      
                         <P>
-                        	Next, <a href="import?group={{group_name}}" data-toggle="modal">click here</a> to begin importing your contacts and other people you've recently emailed. This will allow you to add them to your whitelist. (This might take a couple of minutes.)</p>
+                        	Now, <a href="import?group={{group_name}}" data-toggle="modal">click here</a> to begin importing your contacts and other people you've recently emailed. This will allow you to add them to your whitelist. (This might take a couple of minutes.)</p>
                     {% endif %}
                 {% endif %}
             {% else %}
