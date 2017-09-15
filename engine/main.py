@@ -1735,9 +1735,17 @@ def group_by_thread(posts_list):
         senders = set()
         for p in posts:
             if p['from_name']:
-                senders.add(str(p['from_name']))
+                name = p['from_name']
+                if not isinstance(name, unicode):
+                    name = unicode(name, 'utf-8', 'ignore')
+
+                senders.add(name)
             else:
-                senders.add(str(p['from']))
+                sender = p['from']
+                if not isinstance(sender, unicode):
+                    sender = unicode(name, 'utf-8', 'ignore')
+
+                senders.add(sender)
 
         thread = {
             'id' : t,
