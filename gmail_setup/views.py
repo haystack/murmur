@@ -37,6 +37,7 @@ def build_services(user):
     if credential and not credential.invalid:
         http = httplib2.Http()
         http = credential.authorize(http)
+        credential.refresh(http)
         service_people = build('people', 'v1', http=http)
         service_mail = build('gmail', 'v1', http=http)
         return {'mail' : service_mail, 'people' : service_people}
