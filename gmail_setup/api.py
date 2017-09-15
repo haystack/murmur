@@ -9,7 +9,8 @@ def untrash_message(service_mail, sender_addr, subject):
 
     messages = service_mail.users().messages()
 
-    query = 'subject:%s from:%s in:trash' % (sender_addr, subject.split(' ')[0])
+    query = 'subject:%s from:%s in:trash' % (subject.split(' ')[0], sender_addr)
+    logging.debug("QUERY:", query)
     res1 = messages.list(userId='me', q=query).execute()
     logging.debug("res1:", res1)
     if res1['resultSizeEstimate'] == 0:
