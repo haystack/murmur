@@ -5,14 +5,16 @@ from oauth2client.django_orm import Storage
 from http_handler.settings import BASE_URL
 from schema.models import CredentialsModel
 
-def untrash_message(service_mail, msg_id):
-    query = 'rfc822msgid:%s' % msg_id
-    messages = service_mail.users().messages()
-    res1 = messages.list(userId='me', q=query).execute()
+def untrash_message(service_mail, subject, sender_addr):
+    query = 'subject:%s from:%s' % (subject, sender_addr)
+    res1 = service_mail.users().messages().list(userId='me', q=query).execute()
     logging.debug("res1:", res1)
+    if res1['resultSizeEstimate'] == 0:
+        logging.debug("no results")
+        return
+
     gmail_msg_id = res1['messages'][0]['id']
-    res2 = messages.untrash(userId='me', id=gmail_msg_id).execute()
-    logging.debug("res2:", res2)
+    res2 = service_mail.users().messages().untrash(userId='me', id=gmail_msg_id).execute()
     return
 
 def parse_contacts(service_people):
