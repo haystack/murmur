@@ -1594,7 +1594,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
                 new_subj = subject_tags + ' ' + p.subject
 
-                mail = MailResponse(From = p.poster_email, To = admin.email, Subject = new_subj)
+                mail = MailResponse(From = 'no_reply@%s' % HOST, To = admin.email, Subject = '%s: %s' % (p.poster_email, new_subj))
                 mail['message-id'] = p.msg_id
 
                 res = download_message(p.id, p.msg_id)
