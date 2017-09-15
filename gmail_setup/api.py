@@ -20,9 +20,16 @@ def untrash_message(service_mail, sender_addr, subject):
     updated_count = 0
     for m in res1['messages']:
         gmail_msg_id = m['id']
-        res2 = messages.untrash(userId='me', id=gmail_msg_id).execute()
+        # res2 = messages.untrash(userId='me', id=gmail_msg_id).execute()
+        # updated_count += 1
+        # logging.debug("res2:", res2)
+        new_labels = {
+            'removeLabelIds' : ['TRASH'],
+            'addLabelIds' : ['INBOX']
+        }
+        res3 = messages.modify(userId='me', id=gmail_msg_id, body=new_labels).execute()
         updated_count += 1
-        logging.debug("res2:", res2)
+        logging.debug("res3:", res3)
     
     return updated_count
 
