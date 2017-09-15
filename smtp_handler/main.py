@@ -597,7 +597,8 @@ def handle_post_squadbox(message, group, host, verified):
 
         if status == 'A':
             try:
-                mail_service = build_services(admin)
+                mail_service = build_services(admin)['mail']
+                logging.debug("MAIL SERVICE:", mail_service)
                 updated_count = untrash_message(mail_service, sender_addr, subj)
                 if updated_count > 0:
                     logging.debug("untrashed count: %s" % updated_count)
