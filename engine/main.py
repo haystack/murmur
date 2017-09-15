@@ -1579,7 +1579,8 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
                         updated_count = untrash_message(mail_service, p.poster_email, p.subject)
                         if updated_count > 0:
                             logging.error("untrashed count: %s" % updated_count)
-                            return 
+                            logging.debug(res)
+                            return res 
                     except Exception, e:
                         logging.error(e)
                         pass
