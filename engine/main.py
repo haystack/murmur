@@ -1596,6 +1596,7 @@ def update_post_status(user, group_name, post_id, new_status, explanation=None, 
 
                 mail = MailResponse(From = 'no_reply@%s' % HOST, To = admin.email, Subject = '%s: %s' % (p.poster_email, new_subj))
                 mail['message-id'] = p.msg_id
+                mail['reply-to'] = p.poster_email
 
                 res = download_message(p.id, p.msg_id)
                 if not res['status']:
