@@ -88,7 +88,7 @@ def auth(request):
 
     FLOW = flow_from_clientsecrets(
         CLIENT_SECRETS,
-        scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic',
+        scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic https://www.googleapis.com/auth/gmail.modify',
         redirect_uri=REDIRECT_URI
     )
 
