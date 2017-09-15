@@ -160,6 +160,7 @@ XML_FILE = """<?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.o
         <apps:property name='shouldTrash' value='true'/>
         <apps:property name='forwardTo' value='%s@squadbox.csail.mit.edu'/>
         <apps:property name='sizeOperator' value='s_sl'/>
+        <apps:property name='excludeChats' value='true'/>
         <apps:property name='sizeUnit' value='s_smb'/>
     </entry>
 </feed>"""
