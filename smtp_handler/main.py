@@ -622,15 +622,15 @@ def handle_post_squadbox(message, group, host, verified):
             mail['List-Id'] = '%s@%s' % (res['hash'], BASE_URL)
             logging.error("updated list id to %s" % mail['List-Id'])
 
-              try:
-                    mail_service = build_services(user)
-                    updated_count = untrash_message(mail_service, p.poster_email, p.subject)
-                    if updated_count > 0:
-                        logging.debug("untrashed count: %s" % updated_count)
-                        return 
-                except Exception, e:
-                    logging.error("error untrashing msg: %s" % e)
-                    pass
+            try:
+                mail_service = build_services(user)
+                updated_count = untrash_message(mail_service, p.poster_email, p.subject)
+                if updated_count > 0:
+                    logging.debug("untrashed count: %s" % updated_count)
+                    return 
+            except Exception, e:
+                logging.error("error untrashing msg: %s" % e)
+                pass
 
         relay.deliver(mail)
 
