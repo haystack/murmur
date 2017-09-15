@@ -5,6 +5,34 @@ from oauth2client.django_orm import Storage
 from http_handler.settings import BASE_URL
 from schema.models import CredentialsModel
 
+def untrash_message(service_mail, sender_addr, subject):
+
+    messages = service_mail.users().messages()
+
+    query = 'subject:%s from:%s in:trash' % (subject.split(' ')[0], sender_addr)
+    logging.debug("QUERY:", query)
+    res1 = messages.list(userId='me', q=query).execute()
+    logging.debug("res1:", res1)
+    if res1['resultSizeEstimate'] == 0:
+        logging.debug("no results")
+        return 0
+
+    updated_count = 0
+    for m in res1['messages']:
+        gmail_msg_id = m['id']
+        # res2 = messages.untrash(userId='me', id=gmail_msg_id).execute()
+        # updated_count += 1
+        # logging.debug("res2:", res2)
+        new_labels = {
+            'removeLabelIds' : ['TRASH'],
+            'addLabelIds' : ['INBOX']
+        }
+        res3 = messages.modify(userId='me', id=gmail_msg_id, body=new_labels).execute()
+        updated_count += 1
+        logging.debug("res3:", res3)
+    
+    return updated_count
+
 def parse_contacts(service_people):
     res_tuple = []
     page_token = ""

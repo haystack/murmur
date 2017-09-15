@@ -11,7 +11,7 @@ from pytz import utc
 
 import api
 from browser.util import get_groups_links_from_roles
-from engine.main import update_blacklist_whitelist, get_or_generate_filter_hash
+#from engine.main import update_blacklist_whitelist, get_or_generate_filter_hash
 from gmail_setup.api import create_gmail_filter
 from http_handler.settings import BASE_URL, WEBSITE
 from schema.models import CredentialsModel, FlowModel, Group
@@ -37,6 +37,7 @@ def build_services(user):
     if credential and not credential.invalid:
         http = httplib2.Http()
         http = credential.authorize(http)
+        credential.refresh(http)
         service_people = build('people', 'v1', http=http)
         service_mail = build('gmail', 'v1', http=http)
         return {'mail' : service_mail, 'people' : service_people}
@@ -87,7 +88,7 @@ def auth(request):
 
     FLOW = flow_from_clientsecrets(
         CLIENT_SECRETS,
-        scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic',
+        scope='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic https://www.googleapis.com/auth/gmail.modify',
         redirect_uri=REDIRECT_URI
     )
 
@@ -159,6 +160,7 @@ XML_FILE = """<?xml version='1.0' encoding='UTF-8'?><feed xmlns='http://www.w3.o
         <apps:property name='shouldTrash' value='true'/>
         <apps:property name='forwardTo' value='%s@squadbox.csail.mit.edu'/>
         <apps:property name='sizeOperator' value='s_sl'/>
+        <apps:property name='excludeChats' value='true'/>
         <apps:property name='sizeUnit' value='s_smb'/>
     </entry>
 </feed>"""
@@ -234,12 +236,12 @@ def import_start(request):
                 emails_to_add.append(item[0])
 
         emails_str = ','.join(emails_to_add)
-        res = update_blacklist_whitelist(user, group_name, emails_str, True, False, push=False)
+        res = engine.main.update_blacklist_whitelist(user, group_name, emails_str, True, False, push=False)
 
         forward_address = group_name + '@' + BASE_URL
 
         if WEBSITE == "squadbox":
-            filter_hash = get_or_generate_filter_hash(user, group_name, push=False)['hash']
+            filter_hash = engine.main.get_or_generate_filter_hash(user, group_name, push=False)['hash']
             try:
                 api.create_gmail_filter(service_mail, emails_to_add, forward_address, filter_hash)
             except Exception, e:
