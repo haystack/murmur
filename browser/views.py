@@ -354,13 +354,16 @@ def pub_group_list(request):
 	
 @render_to(WEBSITE+"/group_page.html")
 def group_page(request, group_name):
-	# try:
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
-	group_info = engine.main.group_info_page(user, group_name)
-	groups_links = get_groups_links_from_roles(user, groups)
-	active_group = Group.objects.get(name=group_name)
-	active_group_role = get_role_from_group_name(user, group_name)
+    try:
+        user = get_object_or_404(UserProfile, email=request.user.email)
+        groups = Group.objects.filter(membergroup__member=user).values("name")
+    except Exception:
+        user = None
+        groups = []
+    group_info = engine.main.group_info_page(user, group_name)
+    groups_links = get_groups_links_from_roles(user, groups)
+    active_group = Group.objects.get(name=group_name)
+    active_group_role = get_role_from_group_name(user, group_name)
 
 	if group_info['group']:
 		return {'user': request.user, 'groups': groups, 'group_info': group_info, 'group_page': True, 
