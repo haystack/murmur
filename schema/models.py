@@ -59,7 +59,7 @@ class Attachment(models.Model):
 	msg_id = models.CharField(max_length=120)
 	hash_filename = models.TextField(max_length=40)
 	true_filename = models.TextField()
-	content_id = models.CharField(max_length=40, null=True)
+	content_id = models.CharField(max_length=120, null=True)
 	timestamp = models.DateTimeField(auto_now=True)
 
 	class Meta:
