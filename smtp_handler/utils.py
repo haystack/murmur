@@ -1,4 +1,4 @@
-import email, re, time, hashlib, random, dkim, spf, pytz
+import email, re, time, hashlib, random, dkim, pytz
 from lamson.server import Relay
 from config.settings import *
 from lamson_subclass import MurmurMailResponse
@@ -578,6 +578,7 @@ def isSenderVerified(message):
 	_, to_addr = parseaddr(message['To'].lower())
 	verified = dkim.verify(email_message)
 
+	# import spf
 	# check 2: SPF - TODO: SPF not implemented - need to find incoming mail server IP address
 	# if not verified:
 	# 	spf_i = ""
