@@ -5,6 +5,10 @@
 	<div class="accounts">
 		<h3>Register Account</h3>
 		<hr />
+		{% if website == 'squadbox' %}
+		<i>Note: Squadbox is still in the development and testing phase.</i>
+		<br><br>
+		{% endif %}
 		<form method='post' id='reg-form'>
 			{% csrf_token %}		
 			{{ form.as_p }}
