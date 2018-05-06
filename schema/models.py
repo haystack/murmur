@@ -81,7 +81,7 @@ class Thread(models.Model):
 
 class ThreadExcludedUser(models.Model):
 	thread = models.ForeignKey('Thread')
-	excluded_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user_authored_posts', blank=True)
+	excluded_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user_excluded_thread', blank=True)
 		
 	def __unicode__(self):
 		return '%s excluded user for Thread %s' % (self.excluded_user.name, self.thread.id)
