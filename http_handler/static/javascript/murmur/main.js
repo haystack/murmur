@@ -758,6 +758,7 @@ $(document).ready(function(){
 		$("#btn-subscribe-group").click(sub_group);
 		$("#btn-unsubscribe-group").click(unsub_group);
 		$("#btn-add-members").click(function() {
+			console.log("add member click");
 			window.location.href = "/groups/" + res.group_name + "/add_members";
 		});
 		

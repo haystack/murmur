@@ -826,7 +826,7 @@ def insert_post(request):
 		t = Thread.objects.get(id=res['thread_id'])
 		
 		if len(to_send) > 0:
-			
+			logging.debug('Insert post to : ' + str(to_send))
 			recips = UserProfile.objects.filter(email__in=to_send)
 			membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
 			

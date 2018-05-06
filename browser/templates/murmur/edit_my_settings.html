@@ -61,6 +61,23 @@
 		<div id="edit-emails">
 	{% endif %}
 
+	<div id='blacklist-list-area' style='display:none;'>
+		<h3>My Blacklist of this group</h3> 
+		<hr />
+		<button type="button" id="btn-add-members">Add Members</button>
+		<button type="button" id="btn-delete-members">Delete Members</button>
+		<table id="members-table" class="display" cellspacing="0" width="100%">
+			<thead>
+				<tr>
+					<th>Select</th>
+					<th>Email</th>
+					<th>Admin</th>
+					<th>Moderator</th>
+				</tr>
+			</thead>
+		</table>	
+	</div>
+
 	<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Settings</button>
 	<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>
 
