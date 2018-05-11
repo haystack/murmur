@@ -403,6 +403,25 @@ def add_members_view(request, group_name):
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 
+
+@render_to(WEBSITE+"/add_members.html")
+@login_required
+def add_dissimulate_view(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+	print "add_dissimulate_view" + groups
+	# try:
+	# 	group = Group.objects.get(name=group_name)
+	# 	membergroup = MemberGroup.objects.filter(member=user, group=group)
+	# 	if membergroup.count() == 1 and membergroup[0].admin:
+	# 		return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 'website': WEBSITE,
+	# 		'active_group' : group, 'active_group_role' : 'admin'}
+	# 	else:
+	# 		return redirect('/404?e=admin')
+	# except Group.DoesNotExist:
+	# 	return redirect('/404?e=gname&name=%s' % group_name)
+
+
 @render_to(WEBSITE+"/add_list.html")
 @login_required
 def add_list_view(request, group_name):

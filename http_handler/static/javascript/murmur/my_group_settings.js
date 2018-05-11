@@ -97,6 +97,10 @@ $(document).ready(function(){
 			// post_edit_members(params);
 		}
 	});
+
+	function go_to(page) {
+		window.location ='/groups/' + group_name + '/' + page;
+	}
 });
 
 
