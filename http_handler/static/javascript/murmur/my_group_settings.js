@@ -3,6 +3,8 @@ $(document).ready(function(){
 	var user_name = $.trim($('#user_email').text());
 	var group_name = $.trim($("#group-name").text());
 	
+	var btn_add_members = $("#btn-add-dissimulate");
+
 	var btn_save_settings = $("#btn-save-settings");
 	var btn_cancel_settings = $("#btn-cancel-settings");
 	
@@ -78,7 +80,10 @@ $(document).ready(function(){
 	});
 
 
-
+	// attach handlers to buttons 
+	btn_add_members.click(function() {
+		go_to('add_dissimulate');
+	});
 });
 
 
