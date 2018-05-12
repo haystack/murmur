@@ -410,16 +410,14 @@ def add_dissimulate_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 
-	# try:
-	# 	group = Group.objects.get(name=group_name)
-	# 	membergroup = MemberGroup.objects.filter(member=user, group=group)
-	# 	if membergroup.count() == 1 and membergroup[0].admin:
-	# 		return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 'website': WEBSITE,
-	# 		'active_group' : group, 'active_group_role' : 'admin'}
-	# 	else:
-	# 		return redirect('/404?e=admin')
-	# except Group.DoesNotExist:
-	# 	return redirect('/404?e=gname&name=%s' % group_name)
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.filter(member=user, group=group)
+		return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 'website': WEBSITE,
+			'active_group' : group, 'active_group_role' : 'admin'}
+
+	except Group.DoesNotExist:
+		return redirect('/404?e=gname&name=%s' % group_name)
 
 
 @render_to(WEBSITE+"/add_list.html")
