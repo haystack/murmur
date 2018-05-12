@@ -404,12 +404,12 @@ def add_members_view(request, group_name):
 		return redirect('/404?e=gname&name=%s' % group_name)
 
 
-@render_to(WEBSITE+"/add_members.html")
+@render_to(WEBSITE+"/add_dissimulate.html")
 @login_required
 def add_dissimulate_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
-	print "add_dissimulate_view" + groups
+
 	# try:
 	# 	group = Group.objects.get(name=group_name)
 	# 	membergroup = MemberGroup.objects.filter(member=user, group=group)
@@ -1355,6 +1355,22 @@ def blacklist(request):
 		sender_emails = request.POST['senders']
 		res = engine.main.update_blacklist_whitelist(user, group_name, sender_emails, False, True)
 		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def dissimulate_list(request):
+	try:
+		print "dissimulate_list"
+		print request.user.email
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.POST['group_name']
+		sender_emails = request.POST['senders']
+		# res = engine.main.update_blacklist_whitelist(user, group_name, sender_emails, False, True)
+		# return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
 		logging.debug(e)

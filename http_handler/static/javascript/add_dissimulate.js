@@ -1,18 +1,18 @@
 $(document).ready(function() {
 
     var group_name = $.trim($("#group-name").text()),
-        btn_add_blacklist = $("#btn-add-blacklist");
+        btn_add_dissimulate = $("#btn-add-dissimulate");
 
 
-    btn_add_blacklist.click(function() {
+        btn_add_dissimulate.click(function() {
         var params = {
             'group_name': group_name,
-            'senders': $('#new-blacklist-emails').val(),
+            'senders': $('#new-dissimulate-emails').val(),
         };
 
-        $.post('/blacklist', params,
+        $.post('/dissimulate_list', params,
             function(res) {
-                if (res.status) $('#new-blacklist-emails').val("");
+                if (res.status) $('#new-dissimulate-emails').val("");
                 notify(res, true);
             }
         );
