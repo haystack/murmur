@@ -1460,6 +1460,55 @@ def unmute_tag(tag_name, group_name, user=None, email=None):
     logging.debug(res)
     return res
 
+# add a new entry to dissimulate table, or update existing one
+# user is the user who is adding them(we need to make sure they are authorized,
+# emaild is a string of comma separated addresses to be dissimulated)
+# create a Mute instance for dissimulated person 
+def update_dissimulate_list(user, group_name, emails, push=True):
+    res = {'status' : False}
+
+    try:
+        g = Group.objects.get(name=group_name)
+        mg = MemberGroup.objects.get(member=user, group=g, admin=True)
+
+        to_insert = []
+
+        for email in emails.split(','):
+            email = email.strip()
+            email_user = UserProfile.objects.filter(email=email)
+            current = DissimulateList.objects.filter(group=g, email=email)
+            if not current.exists():
+                entry = DissimulateList(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
+                to_insert.append(entry)
+
+        WhiteOrBlacklist.objects.bulk_create(to_insert)
+
+        # if push:
+        #   get_or_generate_filter_hash(user, group_name)
+
+        res['status'] = True
+        res['group_name'] = group_name
+        res['emails'] = emails
+        res['email_whitelisted'] = whitelist
+        res['email_blacklisted'] = blacklist
+
+    except UserProfile.DoesNotExist:
+        # given email is not a member of current group
+        # let the user know the email couldn't be added to the list
+        res['code'] = msg_code['USER_DOES_NOT_EXIST']
+    except Group.DoesNotExist:
+        res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+
+    except MemberGroup.DoesNotExist:
+        res['code'] = msg_code['PRIVILEGE_ERROR']
+
+    except Exception, e:
+        print e
+        res['code'] = msg_code['UNKNOWN_ERROR']
+
+    logging.debug(res)
+    return res 
+
 # add a new entry to whitelist/blacklist table, or update existing one
 # user is the user who is adding them(we need to make sure they are authorized,
 # emaild is a string of comma separated addresses to be blacklisted/whitelisted)

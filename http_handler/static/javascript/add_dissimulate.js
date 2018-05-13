@@ -12,8 +12,13 @@ $(document).ready(function() {
 
         $.post('/dissimulate_list', params,
             function(res) {
-                if (res.status) $('#new-dissimulate-emails').val("");
-                notify(res, true);
+                if (res.status) {
+                    $('#new-dissimulate-emails').val("");
+                    notify(res, true);
+                }
+                else {
+                    notify(res, false);
+                }
             }
         );
     });

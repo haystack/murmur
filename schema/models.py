@@ -79,12 +79,13 @@ class Thread(models.Model):
 		db_table = "murmur_threads"
 		ordering = ["-timestamp"]
 
-class ThreadExcludedUser(models.Model):
-	thread = models.ForeignKey('Thread')
-	excluded_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user_excluded_thread', blank=True)
+class DissimulateList(models.Model):
+	group = models.ForeignKey('Group')
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='dissimulate_user')
+	dissimulated_email = models.EmailField(max_length=255)
 		
 	def __unicode__(self):
-		return '%s excluded user for Thread %s' % (self.excluded_user.name, self.thread.id)
+		return '%s dissimulate user for user %s at group %s' % (self.user.name, self.dissimulated_user, self.group)
 
 class TagThread(models.Model):
 	thread = models.ForeignKey('Thread')
@@ -331,6 +332,7 @@ class Mute(models.Model):
 	thread = models.ForeignKey('Thread')
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	timestamp = models.DateTimeField(auto_now=True)
+	dissimulated = models.BooleanField(default=False)
 	
 	def __unicode__(self):
 		return '%s mutes Thread: %s' % (self.user.email, self.thread.id)

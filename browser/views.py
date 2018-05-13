@@ -802,7 +802,7 @@ def refresh_posts(request):
 
 @login_required
 def load_post(request):
-	try:
+	try:#request.user
 		res = engine.main.load_post(group_name=None, thread_id = request.POST['thread_id'], msg_id=request.POST['msg_id'])
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
@@ -1367,8 +1367,8 @@ def dissimulate_list(request):
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.POST['group_name']
 		sender_emails = request.POST['senders']
-		# res = engine.main.update_blacklist_whitelist(user, group_name, sender_emails, False, True)
-		# return HttpResponse(json.dumps(res), content_type="application/json")
+		res = engine.main.update_dissimulate_list(user, group_name, sender_emails)
+		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
 		logging.debug(e)
