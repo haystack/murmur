@@ -9,6 +9,10 @@ $(document).ready(function(){
 	var btn_save_settings = $("#btn-save-settings");
 	var btn_cancel_settings = $("#btn-cancel-settings");
 	
+	var donotsend_members_table = $('#donotsend-members-table').dataTable({
+		"aoColumns": [ { 'bSortable': false}, null, null]
+	});
+
 	toggle_edit_emails();
 	
 	$('#ck-no-email').change(function() {

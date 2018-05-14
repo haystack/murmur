@@ -774,6 +774,17 @@ def group_info(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def donotsend_info(request):
+	try:
+		print "view group_info requested"
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.donotsend_info(request.POST['group_name'], user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def list_posts(request):
 	try:
 		group_name = request.POST.get('active_group')

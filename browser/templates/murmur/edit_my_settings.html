@@ -61,18 +61,30 @@
 		<div id="edit-emails">
 	{% endif %}
 
-	<div id='dissimulate-list-area'>
+	<div id='donotsent-list-area'>
 		<h3>My dissimulated members of this group</h3> 
 		<hr />
 		<button type="button" id="btn-add-dissimulate">Add dissimulated</button>
 		<button type="button" id="btn-delete-dissimulate">Delete dissimulated</button>
-		<table id="members-table" class="display" cellspacing="0" width="100%">
+		<table id="donotsend-members-table" class="display" cellspacing="0" width="100%">
 			<thead>
 				<tr>
 					<th>Select</th>
 					<th>Email</th>
 				</tr>
 			</thead>
+			<tbody>
+				{% for member in donotsend_info.members %}
+					{% if member.email == user.email %}
+						<tr class="my_row">
+					{% else %}
+						<tr>
+					{% endif %}							
+						<td><input class="checkbox checkbox-user" type="checkbox" id ={{ member.id }}></td>
+						<td>{{ member.email }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
 		</table>	
 	</div>
 

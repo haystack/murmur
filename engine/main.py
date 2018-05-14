@@ -656,6 +656,33 @@ def group_info(group_name, user):
     logging.debug(res)
     return res
 
+def donotsend_info(group_name, user):
+    res = {'status':False}
+    try:
+        group = Group.objects.get(name=group_name)
+        membergroups = MemberGroup.objects.filter(group=group).select_related()
+        donotsends = DoNotSendList.objects.filter(group=group, user=user)
+
+        res['status'] = True
+        res['group_name'] = group_name
+        res['members'] = []
+        for donotsend in donotsends:
+            member_info = {'id': donotsend.id,
+                           'email': donotsend.donotsend_user.email,
+                           'group_name': group_name, 
+                           'member': True}
+            
+            res['members'].append(member_info)
+
+            print "fetch donotsend list", donotsend.donotsend_user.email
+
+    except Group.DoesNotExist:
+        res['code'] = msg_code['GROUP_NOT_FOUND_ERROR'] 
+    except:
+        res['code'] = msg_code['UNKNOWN_ERROR']
+    logging.debug(res)
+    return res
+
 def format_date_time(d):
     return datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
@@ -681,7 +708,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         thread_likes = 0
         for p in posts:
             # if the user is dissimulated by the author of the post, stop appending replies
-            dm = DoNotSendList.objects.filter(group=group, user=p.author, dissimulated_user=user)
+            dm = DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=user)
             if dm.count() > 0:
                break 
 
@@ -958,7 +985,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
         
         recipients = []
         for m in group_members:
-            dm = DoNotSendList.objects.filter(group=group, user=user, dissimulated_user=m.member)
+            dm = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=m.member)
             if dm.count() > 0:
                continue 
             elif not m.no_emails and m.member.email != sender_addr:
@@ -1180,7 +1207,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
             # remove dissimulated user from the recipient list
             if dissimulate.count() > 0:
                 for d in dissimulate:
-                    recipients = [r for r in recipients if r != d.dissimulated_user.email]
+                    recipients = [r for r in recipients if r != d.donotsend_user.email]
                     
 
             res['status'] = True
@@ -1501,9 +1528,9 @@ def update_dissimulate_list(user, group_name, emails, push=True):
                 continue
 
             email_user = email_user[0]
-            current = DoNotSendList.objects.filter(group=g, user=user, dissimulated_user=email_user)
+            current = DoNotSendList.objects.filter(group=g, user=user, donotsend_user=email_user)
             if not current.exists():
-                entry = DoNotSendList(group=g, user=user, dissimulated_user=email_user)
+                entry = DoNotSendList(group=g, user=user, donotsend_user=email_user)
                 to_insert.append(entry)
 
         DoNotSendList.objects.bulk_create(to_insert)

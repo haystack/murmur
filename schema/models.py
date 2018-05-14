@@ -83,10 +83,10 @@ class DoNotSendList(models.Model):
 	id = models.AutoField(primary_key=True)
 	group = models.ForeignKey('Group')
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='dissimulate_user')
-	dissimulated_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='dissimulated_user')
+	donotsend_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='donotsend_user')
 		
 	def __unicode__(self):
-		return '%s dissimulate user for user %s at group %s' % (self.user.name, self.dissimulated_user.name, self.group)
+		return '%s dissimulate user for user %s at group %s' % (self.user.name, self.donotsend_user.name, self.group)
 
 	class Meta:
 		unique_together = ("user", "group")
