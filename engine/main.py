@@ -690,7 +690,8 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
     for t in threads:
         following = False
         muting = False
-        
+        u = None 
+
         if user:
             u = UserProfile.objects.get(email=user)
             following = Following.objects.filter(thread=t, user=u).exists()
@@ -707,9 +708,11 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         thread_likes = 0
         for p in posts:
             # if the user is dissimulated by the author of the post, stop appending replies
-            dm = DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=user)
-            if dm.count() > 0:
-               break 
+            if user:
+                print "post author", p.author.email
+                dm = DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u)
+                if dm.count() > 0:
+                    break 
 
             post_likes = p.upvote_set.count()
             user_liked = False
