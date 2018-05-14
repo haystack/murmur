@@ -1205,10 +1205,11 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
             #users that always follow threads in this group. minus those that muted
             recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
 
-            dissimulate = DoNotSendList.objects.filter(group=group, user=user)
+            dissimulate = DoNotSendList.objects.filter(group=group, user=group_members)
             # remove dissimulated user from the recipient list
             if dissimulate.count() > 0:
                 for d in dissimulate:
+                    print "at reply remove recip", d.donotsend_user.email
                     recipients = [r for r in recipients if r != d.donotsend_user.email]
                     
 
