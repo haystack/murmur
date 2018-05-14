@@ -483,7 +483,11 @@ def my_group_settings_view(request, group_name):
 
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(member=user, group=group)
-		donotsends = DoNotSendList.objects.get(group=group, user=user)       
+		donotsends = DoNotSendList.objects.filter(group=group, user=user)   
+		if donotsends.count() > 0:
+			donotsends = donotsends[0]
+		else:
+			donotsends = []
 
 		return {'user': request.user, 'groups': groups, 'group_info': group, 'settings': membergroup, 
 			'group_page': True, 'website' : WEBSITE, 'donotsend_info': donotsends}
