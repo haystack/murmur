@@ -82,10 +82,10 @@ class Thread(models.Model):
 class DissimulateList(models.Model):
 	group = models.ForeignKey('Group')
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='dissimulate_user')
-	dissimulated_email = models.EmailField(max_length=255)
+	dissimulated_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='dissimulated_user')
 		
 	def __unicode__(self):
-		return '%s dissimulate user for user %s at group %s' % (self.user.name, self.dissimulated_user, self.group)
+		return '%s dissimulate user for user %s at group %s' % (self.user.name, self.dissimulated_user.name, self.group)
 
 class TagThread(models.Model):
 	thread = models.ForeignKey('Thread')

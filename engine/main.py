@@ -680,6 +680,11 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         post = None
         thread_likes = 0
         for p in posts:
+            # if the user is dissimulated by the author of the post, stop appending replies
+            dm = DissimulateList.objects.filter(group=group, user=p.author, dissimulated_user=user)
+            if dm.count() > 0:
+               break 
+
             post_likes = p.upvote_set.count()
             user_liked = False
             if user:
@@ -953,7 +958,10 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
         
         recipients = []
         for m in group_members:
-            if not m.no_emails and m.member.email != sender_addr:
+            dm = DissimulateList.objects.filter(group=group, user=user, dissimulated_user=m.member)
+            if dm.count() > 0:
+               continue 
+            elif not m.no_emails and m.member.email != sender_addr:
                 mute_tag = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
                 if not mute_tag:
                     recipients.append(m.member.email)
@@ -1164,9 +1172,17 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
                 #users following the tag
                 follow_tag = FollowTag.objects.filter(group=group, tag__in=tag_objs).select_related()
                 recipients.extend([f.user.email for f in follow_tag if f.user.email not in always_follow_members])
-            
+
             #users that always follow threads in this group. minus those that muted
             recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
+
+            dissimulate = DissimulateList.objects.filter(group=group, user=user)
+            # remove dissimulated user from the recipient list
+            if dissimulate.count() > 0:
+                for d in dissimulate:
+                    recipients = [r for r in recipients if r != d.dissimulated_user.email]
+                    
+
             res['status'] = True
             res['recipients'] = list(set(recipients))
             res['tags'] = []
@@ -1476,12 +1492,18 @@ def update_dissimulate_list(user, group_name, emails, push=True):
         for email in emails.split(','):
             email = email.strip()
             email_user = UserProfile.objects.filter(email=email)
-            current = DissimulateList.objects.filter(group=g, email=email)
+            if email_user.count() == 0:
+                # given email is not a member of current group
+                # don't add to the dissimulateListand skip 
+                print "not a member of the group"
+                continue
+            email_user = email_user[0]
+            current = DissimulateList.objects.filter(group=g, user=user, dissimulated_user=email_user)
             if not current.exists():
-                entry = DissimulateList(group=g, email=email, whitelist=whitelist, blacklist=blacklist)
+                entry = DissimulateList(group=g, user=user, dissimulated_user=email_user)
                 to_insert.append(entry)
 
-        WhiteOrBlacklist.objects.bulk_create(to_insert)
+        DissimulateList.objects.bulk_create(to_insert)
 
         # if push:
         #   get_or_generate_filter_hash(user, group_name)
@@ -1489,13 +1511,7 @@ def update_dissimulate_list(user, group_name, emails, push=True):
         res['status'] = True
         res['group_name'] = group_name
         res['emails'] = emails
-        res['email_whitelisted'] = whitelist
-        res['email_blacklisted'] = blacklist
 
-    except UserProfile.DoesNotExist:
-        # given email is not a member of current group
-        # let the user know the email couldn't be added to the list
-        res['code'] = msg_code['USER_DOES_NOT_EXIST']
     except Group.DoesNotExist:
         res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
 
