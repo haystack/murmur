@@ -660,7 +660,6 @@ def donotsend_info(group_name, user):
     res = {'status':False}
     try:
         group = Group.objects.get(name=group_name)
-        membergroups = MemberGroup.objects.filter(group=group).select_related()
         donotsends = DoNotSendList.objects.filter(group=group, user=user)
 
         res['status'] = True

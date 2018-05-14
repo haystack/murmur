@@ -479,10 +479,14 @@ def my_group_settings_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	try:
+		print "fetch donotsend list"
+
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(member=user, group=group)
+        donotsends = DoNotSendList.objects.get(group=group, user=user)       
+
 		return {'user': request.user, 'groups': groups, 'group_info': group, 'settings': membergroup, 
-			'group_page': True, 'website' : WEBSITE}
+			'group_page': True, 'website' : WEBSITE, 'donotsend_info': donotsends}
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 	except MemberGroup.DoesNotExist:

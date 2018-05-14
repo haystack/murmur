@@ -74,14 +74,14 @@
 				</tr>
 			</thead>
 			<tbody>
-				{% for member in donotsend_info.members %}
-					{% if member.email == user.email %}
+				{% for d in donotsend_info %}
+					{% if d.donotsend_user.email == user.email %}
 						<tr class="my_row">
 					{% else %}
 						<tr>
 					{% endif %}							
-						<td><input class="checkbox checkbox-user" type="checkbox" id ={{ member.id }}></td>
-						<td>{{ member.email }}</td>
+						<td><input class="checkbox checkbox-user" type="checkbox" id ={{ d.donotsend_user.id }}></td>
+						<td>{{ d.donotsend_user.email }}</td>
 					</tr>
 				{% endfor %}
 			</tbody>
