@@ -88,6 +88,9 @@ class DissimulateList(models.Model):
 	def __unicode__(self):
 		return '%s dissimulate user for user %s at group %s' % (self.user.name, self.dissimulated_user.name, self.group)
 
+	class Meta:
+		unique_together = ("user", "group")
+
 class TagThread(models.Model):
 	thread = models.ForeignKey('Thread')
 	tag = models.ForeignKey('Tag')
