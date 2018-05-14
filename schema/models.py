@@ -79,7 +79,7 @@ class Thread(models.Model):
 		db_table = "murmur_threads"
 		ordering = ["-timestamp"]
 
-class DissimulateList(models.Model):
+class DoNotSendList(models.Model):
 	id = models.AutoField(primary_key=True)
 	group = models.ForeignKey('Group')
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='dissimulate_user')

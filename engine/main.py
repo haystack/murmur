@@ -681,7 +681,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         thread_likes = 0
         for p in posts:
             # if the user is dissimulated by the author of the post, stop appending replies
-            dm = DissimulateList.objects.filter(group=group, user=p.author, dissimulated_user=user)
+            dm = DoNotSendList.objects.filter(group=group, user=p.author, dissimulated_user=user)
             if dm.count() > 0:
                break 
 
@@ -958,7 +958,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
         
         recipients = []
         for m in group_members:
-            dm = DissimulateList.objects.filter(group=group, user=user, dissimulated_user=m.member)
+            dm = DoNotSendList.objects.filter(group=group, user=user, dissimulated_user=m.member)
             if dm.count() > 0:
                continue 
             elif not m.no_emails and m.member.email != sender_addr:
@@ -1176,7 +1176,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
             #users that always follow threads in this group. minus those that muted
             recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
 
-            dissimulate = DissimulateList.objects.filter(group=group, user=user)
+            dissimulate = DoNotSendList.objects.filter(group=group, user=user)
             # remove dissimulated user from the recipient list
             if dissimulate.count() > 0:
                 for d in dissimulate:
@@ -1495,18 +1495,18 @@ def update_dissimulate_list(user, group_name, emails, push=True):
             email_user = UserProfile.objects.filter(email=email)
             if email_user.count() == 0:
                 # given email is not a member of current group
-                # don't add to the dissimulateListand skip 
+                # don't add to the DoNotSendList then skip 
                 print "not a member of the group"
                 not_added_members.append(email)
                 continue
 
             email_user = email_user[0]
-            current = DissimulateList.objects.filter(group=g, user=user, dissimulated_user=email_user)
+            current = DoNotSendList.objects.filter(group=g, user=user, dissimulated_user=email_user)
             if not current.exists():
-                entry = DissimulateList(group=g, user=user, dissimulated_user=email_user)
+                entry = DoNotSendList(group=g, user=user, dissimulated_user=email_user)
                 to_insert.append(entry)
 
-        DissimulateList.objects.bulk_create(to_insert)
+        DoNotSendList.objects.bulk_create(to_insert)
 
         # if push:
         #   get_or_generate_filter_hash(user, group_name)
