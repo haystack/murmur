@@ -89,6 +89,7 @@ class DoNotSendList(models.Model):
 		return '%s dissimulate user for user %s at group %s' % (self.user.name, self.donotsend_user.name, self.group)
 
 	class Meta:
+		db_table = "murmur_donotsend"
 		unique_together = ("user", "group")
 
 class TagThread(models.Model):
