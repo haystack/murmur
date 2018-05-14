@@ -1210,8 +1210,9 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
             if dissimulate.count() > 0:
                 for d in dissimulate:
                     print "at reply remove recip", d.donotsend_user.email
-                    recipients = [r for r in recipients if r != d.donotsend_user.email]
-                    
+                    recipients = [recip for recip in recipients if recip != d.donotsend_user.email]
+            
+            print "recipients tidy done", str(recipients)
 
             res['status'] = True
             res['recipients'] = list(set(recipients))
