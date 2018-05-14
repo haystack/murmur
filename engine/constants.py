@@ -6,6 +6,7 @@ msg_code={
 	'USER_DOES_NOT_EXIST': 'User %s does not exist in Murmur system.',
 	'PRIVILEGE_ERROR': 'Do not have the required privileges',
 	'NOT_MEMBER': 'Not a member of this Group',
+	'NOT_MEMBERS': '%s cannot be added sicne they are not a member of this Group',
 	'DUPLICATE_ERROR': 'Name already exists',
 	'GROUP_NOT_FOUND_ERROR': 'Group not found',
 	'POST_NOT_FOUND_ERROR': 'Post not found',

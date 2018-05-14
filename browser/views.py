@@ -613,6 +613,7 @@ def create_group(request):
 @login_required
 def get_group_settings(request):
 	try:
+		print "view get group settings"
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.get_group_settings(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")

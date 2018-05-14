@@ -1488,6 +1488,7 @@ def update_dissimulate_list(user, group_name, emails, push=True):
         mg = MemberGroup.objects.get(member=user, group=g, admin=True)
 
         to_insert = []
+        not_added_members = []
 
         for email in emails.split(','):
             email = email.strip()
@@ -1496,7 +1497,9 @@ def update_dissimulate_list(user, group_name, emails, push=True):
                 # given email is not a member of current group
                 # don't add to the dissimulateListand skip 
                 print "not a member of the group"
+                not_added_members.append(email)
                 continue
+
             email_user = email_user[0]
             current = DissimulateList.objects.filter(group=g, user=user, dissimulated_user=email_user)
             if not current.exists():
@@ -1511,6 +1514,8 @@ def update_dissimulate_list(user, group_name, emails, push=True):
         res['status'] = True
         res['group_name'] = group_name
         res['emails'] = emails
+        if len(not_added_members) > 0:
+            res['code'] = msg_code['NOT_MEMBERS'] % str(not_added_members)
 
     except Group.DoesNotExist:
         res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
