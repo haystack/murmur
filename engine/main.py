@@ -709,7 +709,6 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         for p in posts:
             # if the user is dissimulated by the author of the post, stop appending replies
             if user:
-                print "post author", p.author.email
                 dm = DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u)
                 if dm.count() > 0:
                     break 
@@ -1209,10 +1208,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
             # remove dissimulated user from the recipient list
             if dissimulate.count() > 0:
                 for d in dissimulate:
-                    print "at reply remove recip", d.donotsend_user.email
                     recipients = [recip for recip in recipients if recip != d.donotsend_user.email]
-            
-            print "recipients tidy done", str(recipients)
 
             res['status'] = True
             res['recipients'] = list(set(recipients))

@@ -401,6 +401,12 @@ def handle_post_murmur(message, group, host, verified):
                     if recip.email == sender_addr or recip.email in direct_recips:
                         continue
 
+                    print "email to", recip.email
+                    # Don't send email to the sender if she is at the sender's do-not-send list
+                    # up = UserProfile.objects.filter(email=user.member.email)
+                    # if DoNotSendList.objects.filter(group=g, user=up[0], donotsend_user=recip).exists():
+                    #     continue
+                    
                     # clear out message other than the headers
                     mail.clear()
 

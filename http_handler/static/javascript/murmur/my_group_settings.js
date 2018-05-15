@@ -87,7 +87,7 @@ $(document).ready(function(){
 
 	// attach handlers to buttons 
 	btn_add_dissimulate.click(function() {
-		go_to('add_dissimulate');
+		go_to('add_donotsend');
 	});
 
 	btn_delete_dissimulate.click(function() {

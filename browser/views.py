@@ -404,7 +404,7 @@ def add_members_view(request, group_name):
 		return redirect('/404?e=gname&name=%s' % group_name)
 
 
-@render_to(WEBSITE+"/add_dissimulate.html")
+@render_to(WEBSITE+"/add_donotsend.html")
 @login_required
 def add_dissimulate_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
