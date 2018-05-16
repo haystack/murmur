@@ -983,10 +983,10 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
         tags = list(tag_objs.values('name', 'color'))
 
         group_members = MemberGroup.objects.filter(group=group)
-        
+        print "AT _create_post"
         recipients = []
         for m in group_members:
-            print "create post", user.email
+            # print "create post", user.email
             print "donotsend", m.member.email
             dm = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=m.member)
             if dm.exists():
