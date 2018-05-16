@@ -10,7 +10,7 @@ $(document).ready(function(){
 	var btn_cancel_settings = $("#btn-cancel-settings");
 	
 	var donotsend_members_table = $('#donotsend-members-table').dataTable({
-		"aoColumns": [ { 'bSortable': false}, null, null]
+		"aoColumns": [ { 'bSortable': false}, null]
 	});
 
 	toggle_edit_emails();
