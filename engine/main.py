@@ -984,11 +984,12 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
 
         group_members = MemberGroup.objects.filter(group=group)
         
-        user_profile = UserProfile.objects.filter(email=user.member.email)
         recipients = []
         for m in group_members:
-            dm = DoNotSendList.objects.filter(group=group, user=user_profile[0], donotsend_user=m.member)
-            if dm.count() > 0:
+            print "create post", user.email
+            print "donotsend", m.member.email
+            dm = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=m.member)
+            if dm.exists():
                continue 
             elif not m.no_emails and m.member.email != sender_addr:
                 mute_tag = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
