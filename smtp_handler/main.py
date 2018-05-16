@@ -372,7 +372,7 @@ def handle_post_murmur(message, group, host, verified):
         mail['message-id'] = msg_id
 
         to_send =  res['recipients']
-        logging.debug('TO LIST: ' + str(to_send))
+        print ('TO LIST: ' + str(to_send))
         
         ccs = email_message.get_all('cc', None)
         if ccs:
@@ -429,10 +429,10 @@ def handle_post_murmur(message, group, host, verified):
 
                     relay.deliver(mail, To = recip.email)
 
-            fwd_to_lists = ForwardingList.objects.filter(group=g, can_receive=True)
+            fwd_to_lists = ForwardingList.objects.filter(group=g, can_receive=True) 
 
             for l in fwd_to_lists:
-
+                print "forwarding emails", l.email 
                 mail.clear()
 
                 # non murmur list, send as usual 
