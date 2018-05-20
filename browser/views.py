@@ -1375,9 +1375,9 @@ def blacklist(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
-def dissimulate_list(request):
+def donotsend_list(request):
 	try:
-		print "dissimulate_list"
+		print "add donotsend list"
 		print request.user.email
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")

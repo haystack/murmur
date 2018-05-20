@@ -10,7 +10,7 @@ $(document).ready(function() {
             'senders': $('#new-dissimulate-emails').val(),
         };
 
-        $.post('/dissimulate_list', params,
+        $.post('/donotsend_list', params,
             function(res) {
                 if (res.status) {
                     $('#new-dissimulate-emails').val("");
