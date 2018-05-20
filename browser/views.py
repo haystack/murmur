@@ -1383,7 +1383,7 @@ def donotsend_list(request):
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.POST['group_name']
 		sender_emails = request.POST['senders']
-		res = engine.main.update_dissimulate_list(user, group_name, sender_emails)
+		res = engine.main.update_donotsend_list(user, group_name, sender_emails)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
