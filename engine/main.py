@@ -742,7 +742,6 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
             # if the user is at do-not-send list of the author of the post, stop appending replies
             if user:
                 if DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u).exists():
-                    print DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u).values()
                     # if none of post is added yet
                     if len(replies) == 0:
                         not_include_thread = True
@@ -1556,6 +1555,7 @@ def update_donotsend_list(user, group_name, emails, push=True):
 
         to_insert = []
         not_added_members = []
+        u = UserProfile.objects.filter(email=user)
 
         for email in emails.split(','):
             email = email.strip()
@@ -1570,9 +1570,10 @@ def update_donotsend_list(user, group_name, emails, push=True):
                 continue
 
             email_user = email_user[0]
-            current = DoNotSendList.objects.filter(group=g, user=user, donotsend_user=email_user)
+            current = DoNotSendList.objects.filter(group=g, user=u, donotsend_user=email_user)
             if not current.exists():
-                entry = DoNotSendList(group=g, user=user, donotsend_user=email_user)
+                print "current length", current.count()
+                entry = DoNotSendList(group=g, user=u, donotsend_user=email_user)
                 to_insert.append(entry)
 
         DoNotSendList.objects.bulk_create(to_insert)
