@@ -738,10 +738,12 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         post = None
         thread_likes = 0
         for p in posts:
-            # if the user is dissimulated by the author of the post, stop appending replies
+            # if the user is at do-not-send list of the author of the post, stop appending replies
             if user:
-                dm = DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u)
-                if dm.count() > 0:
+                print "list post pages"
+                print "author", p.author.email, p.author
+                print "requesting user", u.email, u
+                if DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u).exists():
                     break 
 
             post_likes = p.upvote_set.count()
