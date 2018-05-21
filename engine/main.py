@@ -236,12 +236,8 @@ def edit_donotsend_table(group_name, toDelete, user):
                 toDelete_realList.append(int(item))
         for toDelete in toDelete_realList:
             u = UserProfile.objects.filter(id=toDelete)
-            print "mgssss"
-            for m in u:
-                print "MG", m.email
             donotsend = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=u[0])
             if donotsend.exists():
-                print "Find donotsend obj to delete"
                 donotsend[0].delete()
                 break
 
