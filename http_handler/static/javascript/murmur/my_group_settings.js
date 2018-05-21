@@ -91,7 +91,7 @@ $(document).ready(function(){
 	});
 
 	btn_delete_dissimulate.click(function() {
-		if (confirm("Are you sure you want to delete the selected users?")) {
+		if (confirm("Are you sure you want to delete the selected users from your do-not-send list?")) {
 			console.log("deleted")
 			var params = {'group_name' : group_name, 
 							'toAdmin' : '',
@@ -116,7 +116,7 @@ $(document).ready(function(){
 	}
 
 	var post_edit_members = function(params) {
-		$.post('/edit_members', params, function(res){
+		$.post('/edit_donotsend', params, function(res){
 			notify(res,true);
 			setTimeout(function(){
 				window.location.reload();
