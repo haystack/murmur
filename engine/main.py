@@ -236,6 +236,7 @@ def edit_donotsend_table(group_name, toDelete, user):
                 toDelete_realList.append(int(item))
         for toDelete in toDelete_realList:
             mg = MemberGroup.objects.filter(id=toDelete)
+            print "MG", mg.member.email
             donotsend = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=mg[0].member)
             if donotsend.exists():
                 print "Find donotsend obj to delete"
