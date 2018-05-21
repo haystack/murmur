@@ -1388,8 +1388,6 @@ def blacklist(request):
 @login_required
 def donotsend_list(request):
 	try:
-		print "add donotsend list"
-		print request.user.email
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.POST['group_name']

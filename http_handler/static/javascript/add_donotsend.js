@@ -12,9 +12,17 @@ $(document).ready(function() {
 
         $.post('/donotsend_list', params,
             function(res) {
+                $('#donotsend-msg').hide();
                 if (res.status) {
                     $('#new-dissimulate-emails').val("");
-                    notify(res, true);
+                    if (res.code) { 
+                        // some emails are not added since they are not members of the group
+                        $('#donotsend-msg').show();
+                        $('#donotsend-msg').text(res['code']);
+                    }
+                    else {                        
+                        notify(res, true);
+                    }
                 }
                 else {
                     notify(res, false);

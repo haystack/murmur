@@ -1543,10 +1543,10 @@ def unmute_tag(tag_name, group_name, user=None, email=None):
     logging.debug(res)
     return res
 
-# add a new entry to dissimulate table, or update existing one
+# add a new entry to do-not-send table, or update existing one
 # user is the user who is adding them(we need to make sure they are authorized,
-# emaild is a string of comma separated addresses to be dissimulated)
-# create a Mute instance for dissimulated person 
+# emaild is a string of comma separated addresses to be do-not-send)
+# create a Mute instance for do-not-send person 
 def update_donotsend_list(user, group_name, emails, push=True):
     res = {'status' : False}
 
