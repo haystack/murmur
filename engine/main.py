@@ -1573,12 +1573,11 @@ def update_donotsend_list(user, group_name, emails, push=True):
             email_user = email_user[0]
             current = DoNotSendList.objects.filter(group=g, user=u, donotsend_user=email_user)
             if not current.exists():
-                # print "current length", current.count()
+                print "current length", current.count()
                 entry = DoNotSendList.objects.create(group=g, user=u, donotsend_user=email_user)
-                # to_insert.append(entry)
-                # entry.save()
+                to_insert.append(entry)
 
-        # DoNotSendList.objects.bulk_create(to_insert)
+        DoNotSendList.objects.bulk_create(to_insert)
 
         # if push:
         #   get_or_generate_filter_hash(user, group_name)

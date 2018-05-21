@@ -90,7 +90,7 @@ class DoNotSendList(models.Model):
 
 	class Meta:
 		db_table = "murmur_donotsend"
-		unique_together = ("user", "group")
+		unique_together = ("user", "group", "donotsend_user")
 
 class TagThread(models.Model):
 	thread = models.ForeignKey('Thread')
