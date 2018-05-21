@@ -741,9 +741,6 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         for p in posts:
             # if the user is at do-not-send list of the author of the post, stop appending replies
             if user:
-                print "list post pages"
-                print "author", p.author.email, p.author
-                print "requesting user", u.email, u 
                 if DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u).exists():
                     print DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u).values()
                     # if none of post is added yet
