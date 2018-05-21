@@ -84,7 +84,7 @@ class DoNotSendList(models.Model):
 	group = models.ForeignKey('Group')
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='donotsend_author')
 	donotsend_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='donotsend_user')
-		member = models.ForeignKey(settings.AUTH_USER_MODEL)
+		
 	def __unicode__(self):
 		return '%s dissimulate user for user %s at group %s' % (self.user.name, self.donotsend_user.name, self.group)
 
