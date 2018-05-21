@@ -722,6 +722,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         following = False
         muting = False
         u = None 
+        not_include_thread = False
 
         if user:
             u = UserProfile.objects.get(email=user)
@@ -745,6 +746,9 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                 print "requesting user", u.email, u 
                 if DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u).exists():
                     print DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u).values()
+                    # if none of post is added yet
+                    if len(replies) == 0:
+                        not_include_thread = True
                     break 
 
             post_likes = p.upvote_set.count()
@@ -783,6 +787,9 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                     break
             else:
                 replies.append(post_dict)
+        
+        if not_include_thread:
+            continue
         tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
         res['threads'].append({'thread_id': t.id, 
                                'post': post, 
