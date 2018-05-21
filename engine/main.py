@@ -1584,7 +1584,7 @@ def update_donotsend_list(user, group_name, emails, push=True):
         res['group_name'] = group_name
         res['emails'] = emails
         if len(not_added_members) > 0:
-            res['code'] = msg_code['NOT_MEMBERS'] % not_added_members.join(", ")
+            res['code'] = msg_code['NOT_MEMBERS'] % ", ".join(not_added_members)
 
     except Group.DoesNotExist:
         res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
