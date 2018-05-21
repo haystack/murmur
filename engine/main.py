@@ -1556,7 +1556,8 @@ def update_donotsend_list(user, group_name, emails, push=True):
         to_insert = []
         not_added_members = []
         u = UserProfile.objects.filter(email=user)
-
+        u = u[0]
+        
         for email in emails.split(','):
             email = email.strip()
             if len(email) == 0:
