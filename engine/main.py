@@ -222,6 +222,37 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
     logging.debug(res)
     return res
 
+def edit_donotsend_table(group_name, toDelete, user):
+    res = {'status':False}
+    try:
+        group = Group.objects.get(name=group_name)
+        
+        toDelete_list = toDelete.split(',')
+        toDelete_realList = []
+        for item in toDelete_list:
+            if item == '':
+                continue
+            else:
+                toDelete_realList.append(int(item))
+        for toDelete in toDelete_realList:
+            mg = MemberGroup.objects.filter(group=group, id=toDelete)
+            donotsend = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=mg.member)
+            if donotsend.exists():
+                donotsend.delete()
+                break
+
+        res['status'] = True
+    except Exception, e:
+        print e
+        logging.debug(e)
+    except Group.DoesNotExist:
+        res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+    except:
+        res['code'] = msg_code['UNKNOWN_ERROR']
+    logging.debug(res)
+    return res
+
+
 def create_group(group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit_wl_bl, mod_rules, auto_approve, requester):
     res = {'status':False}
     

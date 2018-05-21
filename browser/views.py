@@ -587,6 +587,17 @@ def edit_members(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def edit_donotsend(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.edit_donotsend_table(request.POST['group_name'], request.POST['toDelete'], user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def delete_group(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)

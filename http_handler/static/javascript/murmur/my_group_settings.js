@@ -93,18 +93,36 @@ $(document).ready(function(){
 	btn_delete_dissimulate.click(function() {
 		if (confirm("Are you sure you want to delete the selected users?")) {
 			console.log("deleted")
-			// var params = {'group_name' : group_name, 
-			// 				'toAdmin' : '',
-			// 				'toMod' : '',
-			// 				'toDelete' : get_selected('user').join(',')
-			// 			};
-			// post_edit_members(params);
+			var params = {'group_name' : group_name, 
+							'toAdmin' : '',
+							'toMod' : '',
+							'toDelete' : get_selected('user').join(',')
+						};
+			post_edit_members(params);
 		}
 	});
+
+	function get_selected(typeString) {
+		var className = '.checkbox-' + typeString;
+		var lists = [];
+		$(className).each(function() {
+			if (this.checked) lists.push(this.id);	
+		});
+		return lists;
+	}
 
 	function go_to(page) {
 		window.location ='/groups/' + group_name + '/' + page;
 	}
+
+	var post_edit_members = function(params) {
+		$.post('/edit_members', params, function(res){
+			notify(res,true);
+			setTimeout(function(){
+				window.location.reload();
+			}, 400);
+		});
+	};
 });
 
 

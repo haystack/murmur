@@ -163,6 +163,7 @@ if WEBSITE == 'murmur':
                     url(r'^adjust_list_can_receive', 'browser.views.adjust_list_can_receive'),
 
                     url(r'^groups/(?P<group_name>[\w-]+)/add_donotsend', 'browser.views.add_dissimulate_view'),
+                    url(r'^edit_donotsend', 'browser.views.edit_donotsend'),
                     url(r'^donotsend_list', 'browser.views.donotsend_list'),
                     ]
 
