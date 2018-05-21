@@ -742,8 +742,9 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
             if user:
                 print "list post pages"
                 print "author", p.author.email, p.author
-                print "requesting user", u.email, u
+                print "requesting user", u.email, u 
                 if DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u).exists():
+                    print DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u).values()
                     break 
 
             post_likes = p.upvote_set.count()
