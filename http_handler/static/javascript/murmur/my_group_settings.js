@@ -26,6 +26,7 @@ $(document).ready(function(){
 			params.receive_attachments = $('#ck-receive-attachments').is(":checked");
 			params.no_emails = $('#ck-no-email').is(":checked");
 			params.following = $('input[name=following]:checked', '#group-settings-form').val();
+			params.digest = $('#ck-digest').is(":checked");
 			$.post('/edit_group_settings', params, 
 				function(res){
 					notify(res, true);

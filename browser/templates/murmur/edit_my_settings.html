@@ -46,6 +46,14 @@
 		Receive attachments with emails.
 		<br /><br />
 
+		{% if settings.digest %}
+			<input type="checkbox" name="digest" value="yes" id="ck-digest" checked>
+		{% else %}
+			<input type="checkbox" name="digest" value="no" id="ck-digest">
+		{% endif %}
+		Receive daily digests emails.
+		<br /><br />
+
 	{% if settings.no_emails %}
 		<input type="checkbox" name="no-emails" value="yes" id="ck-no-email" checked>
 	{% else %}

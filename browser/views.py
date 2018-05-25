@@ -646,7 +646,8 @@ def edit_group_settings(request):
 		upvote_emails = request.POST['upvote_emails'] == 'true'
 		receive_attachments = request.POST['receive_attachments'] == 'true'
 		no_emails = request.POST['no_emails'] == 'true'
-		res = engine.main.edit_group_settings(request.POST['group_name'], following, upvote_emails, receive_attachments, no_emails, user)
+		digest = request.POST['digest'] == 'true'
+		res = engine.main.edit_group_settings(request.POST['group_name'], following, upvote_emails, receive_attachments, no_emails, digest, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
