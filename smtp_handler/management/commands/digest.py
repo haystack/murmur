@@ -12,7 +12,7 @@ class Command(BaseCommand):
         groups = Group.objects.filter()
         for group in groups:
             # Get lists of subjects of posts for given time span
-            now = datetime.datetime.now()
+            now = datetime.now()
             lastday_time = now - timedelta(hours = 24)
             posts = Post.objects.filter(timestamp__range=(lastday_time,now))
 
