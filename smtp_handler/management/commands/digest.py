@@ -18,8 +18,8 @@ class Command(BaseCommand):
 
             if not posts.exists():
                 continue
-                
-            digest_subject = "[" + group.name + "]Digest " + lastday_time.strftime('%Y-%m-%d %H:%M') " ~ " + now.strftime('%Y-%m-%d %H:%M') 
+
+            digest_subject = "[" + group.name + "]Digest " + lastday_time.strftime('%Y-%m-%d %H:%M') + " ~ " + now.strftime('%Y-%m-%d %H:%M') 
             digest_body = "Today's topics: <br/>"
             for p in posts:
                 digest_body = p.subject + "<br/>"
