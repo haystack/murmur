@@ -193,7 +193,7 @@ def send_email(subject, from_addr, to_addr, body):
 	mail = MurmurMailResponse(From = from_addr, Subject = subject)
 	mail.Body = body
 	
-	relay.deliver(mail, To = to_addr)
+	relay_mailer.deliver(mail, To = to_addr)
 
 def send_error_email(group_name, error, user_addr, admin_emails):
 	if user_addr:
