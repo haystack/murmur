@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from utils import *
+from smtp_handler.utils import *
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE
 
 class Command(BaseCommand):
