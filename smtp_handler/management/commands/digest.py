@@ -15,14 +15,14 @@ class Command(BaseCommand):
             now = datetime.now()
             lastday_time = now - timedelta(hours = 24)
             posts = Post.objects.filter(timestamp__range=(lastday_time,now))
-
+            # TODO do-not-send list
             if not posts.exists():
                 continue
 
             digest_subject = "[" + group.name + "]Digest " + lastday_time.strftime('%Y-%m-%d %H:%M') + " ~ " + now.strftime('%Y-%m-%d %H:%M') 
-            digest_body = "Today's topics: <br/>"
+            digest_body = "Today's topics: \n"
             for p in posts:
-                digest_body = p.subject + "<br/>"
+                digest_body += p.subject + "\n"
 
             # Iterate through members who turn on the digest feature
             memberGroups = MemberGroup.objects.filter(group=group, digest=True)
