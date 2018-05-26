@@ -38,8 +38,10 @@ class Command(BaseCommand):
                             break
 
                     if post_include:
-                        digest_body += p.subject + " (" + p.author.get_full_name() + ")\n"
+                        permalink = PERMALINK_POST % (HOST, p.thread.id, p.id)
+	                    subject_link += '* <a href="%s">' + p.subject + '</a> | ' % (permalink)
+                        digest_body += subject_link + " (" + p.author.get_full_name() + ")<br/>"
                 
                 if digest_body != "":
-                    digest_body = "Today's topics: \n" + digest_body
-                send_email(digest_subject, DEFAULT_FROM_EMAIL, mg.member.email, digest_body)
+                    digest_body = "Today's topics: <br/>" + digest_body
+                send_email(digest_subject, DEFAULT_FROM_EMAIL, mg.member.email, body_html=digest_body)

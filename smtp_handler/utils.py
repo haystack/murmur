@@ -189,19 +189,22 @@ def setup_moderation_post(group_name):
 	
 	return mail
 
-def send_email(subject, from_addr, to_addr, body):
+def send_email(subject, from_addr, to_addr, body_plain=None, body_html=None):
 	mail = MurmurMailResponse(From = from_addr, Subject = subject)
-	mail.Body = body
-	
+	if body_plain:
+		mail.Body = body
+	if body_html:
+		mail.Html = body_html
+
 	relay_mailer.deliver(mail, To = to_addr)
 
 def send_error_email(group_name, error, user_addr, admin_emails):
 	if user_addr:
 		body = "You tried to post to: %s. Error Message: %s" % (group_name, error)
-		send_email(subject = "Error", from_addr = NO_REPLY, to_addr = user_addr, body = body)
+		send_email(subject = "Error", from_addr = NO_REPLY, to_addr = user_addr, body_plain = body)
 	if admin_emails:
 		body = "User %s tried to post to: %s. Error Message: %s" % (user_addr, group_name, error)
-		send_email(subject = "Error", from_addr = NO_REPLY, to_addr = ADMIN_EMAILS, body = body)
+		send_email(subject = "Error", from_addr = NO_REPLY, to_addr = ADMIN_EMAILS, body_plain = body)
 
 def check_attachments(attachments, attachments_allowed):
 
