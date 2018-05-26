@@ -18,7 +18,7 @@ class Command(BaseCommand):
             if not posts.exists():
                 continue
 
-            digest_subject = "[" + group.name + "] Digest " + lastday_time.strftime('%m-%d %H:%M') + " ~ " + now.strftime('%Y-%m-%d %H:%M') 
+            digest_subject = "[" + group.name + "] Digest " + lastday_time.strftime('%m-%d %H:%M') + " ~ " + now.strftime('%m-%d') 
             
             # Iterate through members who turn on the digest feature
             memberGroups = MemberGroup.objects.filter(group=group, digest=True)
@@ -38,7 +38,7 @@ class Command(BaseCommand):
                             break
 
                     if post_include:
-                        digest_body += p.subject + "\n"
+                        digest_body += p.subject + " (" + p.author.get_full_name() + ")\n"
                 
                 if digest_body != "":
                     digest_body = "Today's topics: \n" + digest_body
