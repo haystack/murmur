@@ -39,7 +39,8 @@ class Command(BaseCommand):
 
                     if post_include:
                         permalink = PERMALINK_POST % (HOST, p.thread.id, p.id)
-	                    subject_link += '* <a href="%s">' + p.subject + '</a> | ' % (permalink)
+                        subject_link = '* <a href="%s">' % (permalink)
+	                    subject_link += p.subject + '</a>'
                         digest_body += subject_link + " (" + p.author.get_full_name() + ")<br/>"
                 
                 if digest_body != "":
