@@ -23,6 +23,7 @@ class Command(BaseCommand):
             # Iterate through members who turn on the digest feature
             memberGroups = MemberGroup.objects.filter(group=group, digest=True)
             for mg in memberGroups:
+                post_cnt = 0
                 digest_body = ""
                 for p in posts:
                     # TODO do-not-send list
@@ -38,8 +39,9 @@ class Command(BaseCommand):
                             break
 
                     if post_include:
+                        post_cnt = post_cnt + 1
                         permalink = PERMALINK_POST % (HOST, p.thread.id, p.id)
-                        subject_link = '* <a href="%s">' % (permalink)
+                        subject_link = str(post_cnt) + '. <a href="%s">' % (permalink)
                         subject_link += p.subject + '</a>'
                         sender_name = p.author.get_full_name() if p.author.get_full_name() != "" else p.author.email
                         digest_body += subject_link + " (" + sender_name  + ")<br/>"
