@@ -62,3 +62,6 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 #### run murmur server
 * If running email server: `lamson start`
 * Webserver: `python manage.py runserver`
+
+#### enable daily digest feature
+* `crontab -e` and add a line `0 */24 * * * python ABSOLUTE_DIRECTORY/manage.py digest`
