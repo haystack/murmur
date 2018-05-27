@@ -18,7 +18,7 @@ $(document).ready(function() {
                     if (res.code) { 
                         // some emails are not added since they are not members of the group
                         $('#donotsend-msg').show();
-                        $('#donotsend-msg').text(res['code']);
+                        $('#donotsend-msg').html(res['code']);
                     }
                     else {                        
                         notify(res, true);

@@ -1565,6 +1565,10 @@ def update_donotsend_list(user, group_name, emails, push=True):
                 continue
 
             email_user = UserProfile.objects.filter(email=email)
+            if user == email_user:
+                res['code'] = "You can't add yourself to your do-not-send list <br/>"
+                continue
+
             if email_user.count() == 0:
                 # given email is not a member of current group
                 # don't add to the DoNotSendList then skip 
@@ -1586,7 +1590,9 @@ def update_donotsend_list(user, group_name, emails, push=True):
         res['group_name'] = group_name
         res['emails'] = emails
         if len(not_added_members) > 0:
-            res['code'] = msg_code['NOT_MEMBERS'] % ", ".join(not_added_members)
+            if not 'code' in res:
+                res['code'] = ''
+            res['code'] += msg_code['NOT_MEMBERS'] % ", ".join(not_added_members)
 
     except Group.DoesNotExist:
         res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
