@@ -1565,7 +1565,7 @@ def update_donotsend_list(user, group_name, emails, push=True):
                 continue
 
             email_user = UserProfile.objects.filter(email=email)
-            if user == email_user:
+            if user.email == email:
                 res['code'] = "You can't add yourself to your do-not-send list <br/>"
                 continue
 
