@@ -281,6 +281,7 @@ def handle_post_murmur(message, group, host, verified):
         sender_name = None
     else:
         sn = sender_name.split(" ")
+        print "sender name", sender_name
         if len(sn) > 0:
             u = UserProfile.objects.filter(email__in=sender_addr)
 
