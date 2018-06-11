@@ -279,7 +279,27 @@ def handle_post_murmur(message, group, host, verified):
     sender_addr = sender_addr.lower()
     if not sender_name:
         sender_name = None
+    else:
+        sn = sender_name.split(" ")
+        if len(sn) > 0:
+            u = UserProfile.objects.filter(email__in=sender_addr)
 
+            # update first/last name 
+            if u.exists():
+                first_name = ''
+                last_name = ''
+
+                first_name = sn[0]
+                entry = u[0]
+                entry.first_name = first_name
+                
+                
+                if len(sn) > 1:
+                    last_name = sn[1]
+                    entry.last_name = last_name
+
+                entry.save()
+            
     # any of the lists in the "to" field might be what forwarded this to us
     possible_list_addresses = to_emails
     # if List-Id set that might also be it 
