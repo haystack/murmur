@@ -283,20 +283,21 @@ def handle_post_murmur(message, group, host, verified):
         sn = sender_name.split(" ")
         print "sender name", sender_name
         if len(sn) > 0:
-            u = UserProfile.objects.filter(email__in=sender_addr)
-
+            u = UserProfile.objects.filter(email=sender_addr)
+            print "sender name", sender_addr
             # update first/last name 
             if u.exists():
                 first_name = ''
                 last_name = ''
 
                 first_name = sn[0]
+                print "first name", first_name
                 entry = u[0]
                 entry.first_name = first_name
                 
                 
                 if len(sn) > 1:
-                    last_name = sn[1]
+                    last_name = " ".join(sn[1:])
                     entry.last_name = last_name
 
                 entry.save()
