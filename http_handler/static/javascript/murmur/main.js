@@ -93,6 +93,16 @@ $(document).ready(function(){
 			);
 		};
 
+	donotsend_info = 
+		function(params){
+			$.post('donotsend_info', params, 
+				function(res){
+					populate_donotsend_members_table(res);
+					notify(res, false);
+				}
+			);
+		};
+
 	var btn_delete_members = $("#btn-delete-members");
 	var btn_set_admin = $("#btn-set-admin");
 	var btn_set_mod = $("#btn-set-mod");
@@ -758,6 +768,7 @@ $(document).ready(function(){
 		$("#btn-subscribe-group").click(sub_group);
 		$("#btn-unsubscribe-group").click(unsub_group);
 		$("#btn-add-members").click(function() {
+			console.log("add member click");
 			window.location.href = "/groups/" + res.group_name + "/add_members";
 		});
 		

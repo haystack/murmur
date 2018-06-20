@@ -23,7 +23,7 @@ from engine.constants import *
 from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 from registration.forms import RegistrationForm
 from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
-                           MuteTag, Tag, UserProfile, Post, Attachment)
+                           MuteTag, Tag, UserProfile, Post, Attachment, DoNotSendList)
 from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
@@ -403,6 +403,23 @@ def add_members_view(request, group_name):
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 
+
+@render_to(WEBSITE+"/add_donotsend.html")
+@login_required
+def add_dissimulate_view(request, group_name):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	groups = Group.objects.filter(membergroup__member=user).values("name")
+
+	try:
+		group = Group.objects.get(name=group_name)
+		membergroup = MemberGroup.objects.filter(member=user, group=group)
+		return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 'website': WEBSITE,
+			'active_group' : group, 'active_group_role' : 'admin'}
+
+	except Group.DoesNotExist:
+		return redirect('/404?e=gname&name=%s' % group_name)
+
+
 @render_to(WEBSITE+"/add_list.html")
 @login_required
 def add_list_view(request, group_name):
@@ -462,10 +479,14 @@ def my_group_settings_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	groups = Group.objects.filter(membergroup__member=user).values("name")
 	try:
+		print "fetch donotsend list"
+
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(member=user, group=group)
+		donotsends = DoNotSendList.objects.filter(group=group, user=user)   
+
 		return {'user': request.user, 'groups': groups, 'group_info': group, 'settings': membergroup, 
-			'group_page': True, 'website' : WEBSITE}
+			'group_page': True, 'website' : WEBSITE, 'donotsend_info': donotsends}
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 	except MemberGroup.DoesNotExist:
@@ -566,6 +587,17 @@ def edit_members(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def edit_donotsend(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.edit_donotsend_table(request.POST['group_name'], request.POST['toDelete'], user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def delete_group(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -596,6 +628,7 @@ def create_group(request):
 @login_required
 def get_group_settings(request):
 	try:
+		print "view get group settings"
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.get_group_settings(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
@@ -613,7 +646,8 @@ def edit_group_settings(request):
 		upvote_emails = request.POST['upvote_emails'] == 'true'
 		receive_attachments = request.POST['receive_attachments'] == 'true'
 		no_emails = request.POST['no_emails'] == 'true'
-		res = engine.main.edit_group_settings(request.POST['group_name'], following, upvote_emails, receive_attachments, no_emails, user)
+		digest = request.POST['digest'] == 'true'
+		res = engine.main.edit_group_settings(request.POST['group_name'], following, upvote_emails, receive_attachments, no_emails, digest, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
@@ -756,6 +790,17 @@ def group_info(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def donotsend_info(request):
+	try:
+		print "view group_info requested"
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		res = engine.main.donotsend_info(request.POST['group_name'], user)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def list_posts(request):
 	try:
 		group_name = request.POST.get('active_group')
@@ -785,7 +830,7 @@ def refresh_posts(request):
 
 @login_required
 def load_post(request):
-	try:
+	try:#request.user
 		res = engine.main.load_post(group_name=None, thread_id = request.POST['thread_id'], msg_id=request.POST['msg_id'])
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
@@ -826,7 +871,7 @@ def insert_post(request):
 		t = Thread.objects.get(id=res['thread_id'])
 		
 		if len(to_send) > 0:
-			
+			logging.debug('Insert post to : ' + str(to_send))
 			recips = UserProfile.objects.filter(email__in=to_send)
 			membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
 			
@@ -1335,6 +1380,20 @@ def blacklist(request):
 		group_name = request.POST['group_name']
 		sender_emails = request.POST['senders']
 		res = engine.main.update_blacklist_whitelist(user, group_name, sender_emails, False, True)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def donotsend_list(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		groups = Group.objects.filter(membergroup__member=user).values("name")
+		group_name = request.POST['group_name']
+		sender_emails = request.POST['senders']
+		res = engine.main.update_donotsend_list(user, group_name, sender_emails)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

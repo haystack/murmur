@@ -3,9 +3,16 @@ $(document).ready(function(){
 	var user_name = $.trim($('#user_email').text());
 	var group_name = $.trim($("#group-name").text());
 	
+	var btn_add_dissimulate = $("#btn-add-dissimulate"),
+		btn_delete_dissimulate = $("#btn-delete-dissimulate");
+
 	var btn_save_settings = $("#btn-save-settings");
 	var btn_cancel_settings = $("#btn-cancel-settings");
 	
+	var donotsend_members_table = $('#donotsend-members-table').dataTable({
+		"aoColumns": [ { 'bSortable': false}, null]
+	});
+
 	toggle_edit_emails();
 	
 	$('#ck-no-email').change(function() {
@@ -19,6 +26,7 @@ $(document).ready(function(){
 			params.receive_attachments = $('#ck-receive-attachments').is(":checked");
 			params.no_emails = $('#ck-no-email').is(":checked");
 			params.following = $('input[name=following]:checked', '#group-settings-form').val();
+			params.digest = $('#ck-digest').is(":checked");
 			$.post('/edit_group_settings', params, 
 				function(res){
 					notify(res, true);
@@ -78,7 +86,44 @@ $(document).ready(function(){
 	});
 
 
+	// attach handlers to buttons 
+	btn_add_dissimulate.click(function() {
+		go_to('add_donotsend');
+	});
 
+	btn_delete_dissimulate.click(function() {
+		if (confirm("Are you sure you want to delete the selected users from your do-not-send list?")) {
+			console.log("deleted")
+			var params = {'group_name' : group_name, 
+							'toAdmin' : '',
+							'toMod' : '',
+							'toDelete' : get_selected('user').join(',')
+						};
+			post_edit_members(params);
+		}
+	});
+
+	function get_selected(typeString) {
+		var className = '.checkbox-' + typeString;
+		var lists = [];
+		$(className).each(function() {
+			if (this.checked) lists.push(this.id);	
+		});
+		return lists;
+	}
+
+	function go_to(page) {
+		window.location ='/groups/' + group_name + '/' + page;
+	}
+
+	var post_edit_members = function(params) {
+		$.post('/edit_donotsend', params, function(res){
+			notify(res,true);
+			setTimeout(function(){
+				window.location.reload();
+			}, 400);
+		});
+	};
 });
 
 

@@ -222,6 +222,37 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
     logging.debug(res)
     return res
 
+def edit_donotsend_table(group_name, toDelete, user):
+    res = {'status':False}
+    try:
+        group = Group.objects.get(name=group_name)
+        
+        toDelete_list = toDelete.split(',')
+        toDelete_realList = []
+        for item in toDelete_list:
+            if item == '':
+                continue
+            else:
+                toDelete_realList.append(int(item))
+        for toDelete in toDelete_realList:
+            u = UserProfile.objects.filter(id=toDelete)
+            donotsend = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=u[0])
+            if donotsend.exists():
+                donotsend[0].delete()
+                break
+
+        res['status'] = True
+    except Exception, e:
+        print e
+        logging.debug(e)
+    except Group.DoesNotExist:
+        res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+    except:
+        res['code'] = msg_code['UNKNOWN_ERROR']
+    logging.debug(res)
+    return res
+
+
 def create_group(group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit_wl_bl, mod_rules, auto_approve, requester):
     res = {'status':False}
     
@@ -295,6 +326,7 @@ def get_group_settings(group_name, user):
         res['no_emails'] = membergroup.no_emails
         res['upvote_emails'] = membergroup.upvote_emails
         res['receive_attachments'] = membergroup.receive_attachments
+        res['digest'] = membergroup.digest
         res['status'] = True
     except Group.DoesNotExist:
         res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
@@ -306,7 +338,7 @@ def get_group_settings(group_name, user):
     logging.debug(res)
     return res
 
-def edit_group_settings(group_name, following, upvote_emails, receive_attachments, no_emails, user):
+def edit_group_settings(group_name, following, upvote_emails, receive_attachments, no_emails, digest, user):
     res = {'status':False}
     
     try:
@@ -316,6 +348,7 @@ def edit_group_settings(group_name, following, upvote_emails, receive_attachment
         membergroup.upvote_emails = upvote_emails
         membergroup.receive_attachments = receive_attachments
         membergroup.no_emails = no_emails
+        membergroup.digest = digest
         membergroup.save()
         
         res['status'] = True
@@ -656,6 +689,32 @@ def group_info(group_name, user):
     logging.debug(res)
     return res
 
+def donotsend_info(group_name, user):
+    res = {'status':False}
+    try:
+        group = Group.objects.get(name=group_name)
+        donotsends = DoNotSendList.objects.filter(group=group, user=user)
+
+        res['status'] = True
+        res['group_name'] = group_name
+        res['members'] = []
+        for donotsend in donotsends:
+            member_info = {'id': donotsend.id,
+                           'email': donotsend.donotsend_user.email,
+                           'group_name': group_name, 
+                           'member': True}
+            
+            res['members'].append(member_info)
+
+            print "fetch donotsend list", donotsend.donotsend_user.email
+
+    except Group.DoesNotExist:
+        res['code'] = msg_code['GROUP_NOT_FOUND_ERROR'] 
+    except:
+        res['code'] = msg_code['UNKNOWN_ERROR']
+    logging.debug(res)
+    return res
+
 def format_date_time(d):
     return datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
@@ -664,7 +723,9 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
     for t in threads:
         following = False
         muting = False
-        
+        u = None 
+        not_include_thread = False
+
         if user:
             u = UserProfile.objects.get(email=user)
             following = Following.objects.filter(thread=t, user=u).exists()
@@ -680,6 +741,14 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         post = None
         thread_likes = 0
         for p in posts:
+            # if the user is at do-not-send list of the author of the post, stop appending replies
+            if user:
+                if DoNotSendList.objects.filter(group=group, user=p.author, donotsend_user=u).exists():
+                    # if none of post is added yet
+                    if len(replies) == 0:
+                        not_include_thread = True
+                    break 
+
             post_likes = p.upvote_set.count()
             user_liked = False
             if user:
@@ -716,6 +785,9 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                     break
             else:
                 replies.append(post_dict)
+        
+        if not_include_thread:
+            continue
         tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
         res['threads'].append({'thread_id': t.id, 
                                'post': post, 
@@ -950,10 +1022,14 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
         tags = list(tag_objs.values('name', 'color'))
 
         group_members = MemberGroup.objects.filter(group=group)
-        
         recipients = []
         for m in group_members:
-            if not m.no_emails and m.member.email != sender_addr:
+            # print "create post", user.email
+            print "donotsend", m.member.email
+            dm = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=m.member)
+            if dm.exists():
+               continue 
+            elif not m.no_emails and m.member.email != sender_addr:
                 mute_tag = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
                 if not mute_tag:
                     recipients.append(m.member.email)
@@ -1164,9 +1240,16 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
                 #users following the tag
                 follow_tag = FollowTag.objects.filter(group=group, tag__in=tag_objs).select_related()
                 recipients.extend([f.user.email for f in follow_tag if f.user.email not in always_follow_members])
-            
+
             #users that always follow threads in this group. minus those that muted
             recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
+
+            dissimulate = DoNotSendList.objects.filter(group=group, user=group_members)
+            # remove dissimulated user from the recipient list
+            if dissimulate.count() > 0:
+                for d in dissimulate:
+                    recipients = [recip for recip in recipients if recip != d.donotsend_user.email]
+
             res['status'] = True
             res['recipients'] = list(set(recipients))
             res['tags'] = []
@@ -1459,6 +1542,70 @@ def unmute_tag(tag_name, group_name, user=None, email=None):
         res['code'] = msg_code['UNKNOWN_ERROR']
     logging.debug(res)
     return res
+
+# add a new entry to do-not-send table, or update existing one
+# user is the user who is adding them(we need to make sure they are authorized,
+# emaild is a string of comma separated addresses to be do-not-send)
+# create a Mute instance for do-not-send person 
+def update_donotsend_list(user, group_name, emails, push=True):
+    res = {'status' : False}
+
+    try:
+        g = Group.objects.get(name=group_name)
+        mg = MemberGroup.objects.get(member=user, group=g)
+
+        to_insert = []
+        not_added_members = []
+        u = UserProfile.objects.filter(email=user)
+        u = u[0]
+        
+        for email in emails.split(','):
+            email = email.strip()
+            if len(email) == 0:
+                continue
+
+            email_user = UserProfile.objects.filter(email=email)
+            if user.email == email:
+                res['code'] = "You can't add yourself to your do-not-send list <br/>"
+                continue
+
+            if email_user.count() == 0:
+                # given email is not a member of current group
+                # don't add to the DoNotSendList then skip 
+                not_added_members.append(email)
+                continue
+
+            email_user = email_user[0]
+            current = DoNotSendList.objects.filter(group=g, user=u, donotsend_user=email_user)
+            if not current.exists():
+                entry = DoNotSendList(group=g, user=u, donotsend_user=email_user)
+                to_insert.append(entry)
+
+        DoNotSendList.objects.bulk_create(to_insert)
+
+        # if push:
+        #   get_or_generate_filter_hash(user, group_name)
+
+        res['status'] = True
+        res['group_name'] = group_name
+        res['emails'] = emails
+        if len(not_added_members) > 0:
+            if not 'code' in res:
+                res['code'] = ''
+            res['code'] += msg_code['NOT_MEMBERS'] % ", ".join(not_added_members)
+
+    except Group.DoesNotExist:
+        res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
+
+    except MemberGroup.DoesNotExist:
+        res['code'] = msg_code['PRIVILEGE_ERROR']
+
+    except Exception, e:
+        print e
+        res['code'] = msg_code['UNKNOWN_ERROR']
+
+    logging.debug(res)
+    return res 
 
 # add a new entry to whitelist/blacklist table, or update existing one
 # user is the user who is adding them(we need to make sure they are authorized,

@@ -1,6 +1,7 @@
 {% extends "murmur/base.html" %}
 
 {% block customcss %}
+<link href="/static/css/third-party/datatable.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -45,6 +46,14 @@
 		Receive attachments with emails.
 		<br /><br />
 
+		{% if settings.digest %}
+			<input type="checkbox" name="digest" value="yes" id="ck-digest" checked>
+		{% else %}
+			<input type="checkbox" name="digest" value="no" id="ck-digest">
+		{% endif %}
+		Receive daily digests emails.
+		<br /><br />
+
 	{% if settings.no_emails %}
 		<input type="checkbox" name="no-emails" value="yes" id="ck-no-email" checked>
 	{% else %}
@@ -60,6 +69,35 @@
 	{% else %}
 		<div id="edit-emails">
 	{% endif %}
+
+	<div id='donotsent-list-area'>
+		<h3>My do-not-send list of this group</h3> 
+		<hr />
+		<span>When you post at this group, your post won't be sent to this list</span>
+		<br/>
+		<button type="button" id="btn-add-dissimulate">Add Members</button>
+		<button type="button" id="btn-delete-dissimulate">Delete Members</button>
+		<table id="donotsend-members-table" class="display" cellspacing="0" width="100%">
+			<thead>
+				<tr>
+					<th>Select</th>
+					<th>Email</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for d in donotsend_info %}
+					{% if d.donotsend_user.email == user.email %}
+						<tr class="my_row">
+					{% else %}
+						<tr>
+					{% endif %}							
+						<td><input class="checkbox checkbox-user" type="checkbox" id ={{ d.donotsend_user.id }}></td>
+						<td>{{ d.donotsend_user.email }}</td>
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>	
+	</div>
 
 	<button type="button" id="btn-save-settings" style="margin-top:10px;">Save Settings</button>
 	<button type="button" id="btn-cancel-settings" style="margin-top:10px;">Cancel</button>

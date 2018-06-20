@@ -79,6 +79,18 @@ class Thread(models.Model):
 		db_table = "murmur_threads"
 		ordering = ["-timestamp"]
 
+class DoNotSendList(models.Model):
+	id = models.AutoField(primary_key=True)
+	group = models.ForeignKey('Group')
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, unique=False, related_name='donotsend_author')
+	donotsend_user = models.ForeignKey(settings.AUTH_USER_MODEL, unique=False, related_name='donotsend_user')
+		
+	def __unicode__(self):
+		return '%s dissimulate user for user %s at group %s' % (self.user.name, self.donotsend_user.name, self.group)
+
+	class Meta:
+		db_table = "murmur_donotsend"
+		# unique_together = ("user", "group", "donotsend_user")
 
 class TagThread(models.Model):
 	thread = models.ForeignKey('Thread')
@@ -161,6 +173,7 @@ class MemberGroup(models.Model):
 	last_emailed = models.DateTimeField(null=True)
 	gmail_filter_hash = models.CharField(max_length=40, null=True)
 	last_updated_hash = models.DateTimeField(auto_now_add=True)
+	digest = models.BooleanField(default=False)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)
@@ -325,6 +338,7 @@ class Mute(models.Model):
 	thread = models.ForeignKey('Thread')
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	timestamp = models.DateTimeField(auto_now=True)
+	dissimulated = models.BooleanField(default=False)
 	
 	def __unicode__(self):
 		return '%s mutes Thread: %s' % (self.user.email, self.thread.id)
