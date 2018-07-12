@@ -18,3 +18,5 @@ schema/migrations/*
 
 # Google secrets file
 gmail_setup/client_secrets.json
+
+sandbox/
