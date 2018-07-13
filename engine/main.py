@@ -779,7 +779,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                         }
             if p.forwarding_list:
                 post_dict['forwarding_list'] = p.forwarding_list.email
-            if not p.reply_to_id:
+            if not p.reply_to:
                 post = post_dict
                 if not return_replies:
                     break
@@ -791,7 +791,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
         res['threads'].append({'thread_id': t.id, 
                                'post': post, 
-                               'num_replies': posts.count() - 1,
+                               'num_replies': len(replies) - 1,
                                'replies': replies, 
                                'following': following, 
                                'muting': muting,
