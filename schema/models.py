@@ -13,7 +13,7 @@ class Post(models.Model):
 	author = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user_authored_posts', null=True)
 	subject = models.TextField()
 	msg_id = models.CharField(max_length=120, unique=True)
-	post = models.TextField(max_length=1255)
+	post = models.TextField()
 	group = models.ForeignKey('Group')
 	thread = models.ForeignKey('Thread')
 	reply_to = models.ForeignKey('self', blank=False, null=True, related_name="replies")
