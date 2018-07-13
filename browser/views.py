@@ -387,6 +387,17 @@ def group_list(request):
 	else:
 		return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
 
+@render_to("login_imap.html")
+@login_required
+def login_imap_view(request):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	
+	try:
+		return {'user': request.user, 'website': WEBSITE, 'active_group_role' : 'admin'}
+
+	except Group.DoesNotExist:
+		return redirect('/404?e=admin')
+
 @render_to(WEBSITE+"/add_members.html")
 @login_required
 def add_members_view(request, group_name):
@@ -804,7 +815,8 @@ def donotsend_info(request):
 def list_posts(request):
 	try:
 		group_name = request.POST.get('active_group')
-		res = engine.main.list_posts(group_name=group_name, user=request.user.email)
+		load_replies = request.POST.get('load')
+		res = engine.main.list_posts(group_name=group_name, user=request.user.email, return_replies=load_replies)
 		res['user'] = request.user.email
 		res['group_name'] = group_name
 		return HttpResponse(json.dumps(res), content_type="application/json")

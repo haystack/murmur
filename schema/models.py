@@ -284,7 +284,7 @@ class UserProfile(AbstractBaseUser):
 	is_admin = models.BooleanField(default=False)
 	date_joined = models.DateTimeField(auto_now=True)
 	hash = models.CharField(max_length=40, default="")
-	imapAccount = models.ForeignKey('ImapAccount', blank=True)
+	imapAccount = models.ForeignKey('ImapAccount', blank=True, null=True)
 
 	objects = MyUserManager()
 
