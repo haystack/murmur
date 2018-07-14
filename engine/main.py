@@ -718,7 +718,7 @@ def donotsend_info(group_name, user):
 def format_date_time(d):
     return datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
-def list_posts_page(threads, group, res, user=None, format_datetime=True, return_replies=True, text_limit=None):
+def list_posts_page(threads, group, res, user=None, format_datetime=True, return_replies=True, text_limit=None, return_full_content=True):
     res['threads'] = []
     for t in threads:
         following = False
@@ -755,9 +755,11 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                 user_liked = p.upvote_set.filter(user=u).exists()
             thread_likes += post_likes
             attachments = []
-            for attachment in Attachment.objects.filter(msg_id=p.msg_id):
-                url = "attachment/" + attachment.hash_filename
-                attachments.append((attachment.true_filename, url))
+
+            if return_full_content:
+                for attachment in Attachment.objects.filter(msg_id=p.msg_id):
+                    url = "attachment/" + attachment.hash_filename
+                    attachments.append((attachment.true_filename, url))
             
             #text = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
             text = fix_html_and_img_srcs(p.msg_id, p.post)
@@ -772,7 +774,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                         'subject': escape(p.subject),
                         'likes': post_likes, 
                         'liked': user_liked,
-                        'text': text, 
+                        'text': text if return_full_content else text[:40], 
                         'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp,
                         'attachments': attachments,
                         'verified': p.verified_sender
@@ -800,7 +802,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                                'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
         res['status'] = True
 
-def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=True, format_datetime=True):
+def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=True, format_datetime=True, return_full_content=True):
     res = {'status':False}
     try:
         t = datetime.min
@@ -814,7 +816,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
         else:
             threads = Thread.objects.filter(timestamp__gt = t)
         
-        list_posts_page(threads, g, res, user=user, format_datetime=format_datetime, return_replies=return_replies)
+        list_posts_page(threads, g, res, user=user, format_datetime=format_datetime, return_replies=return_replies, return_full_content=return_full_content)
             
     except Exception, e:
         print e
@@ -822,7 +824,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
     logging.debug(res)
     return res
     
-def load_thread(t, user=None, member=None, return_full_contents=True):
+def load_thread(t, user=None, member=None):
 
     following = False
     muting = False
@@ -854,15 +856,13 @@ def load_thread(t, user=None, member=None, return_full_contents=True):
         user_liked = False
         if user:
             user_liked = p.upvote_set.filter(user=user).exists()
+
+        print "attachment at load_thread?"
         attachments = []
+        for attachment in Attachment.objects.filter(msg_id=p.msg_id):
+            url = "attachment/" + attachment.hash_filename
+            attachments.append((attachment.true_filename, url))
 
-        # Get attachments only when asked to return full contents
-        if return_full_contents:
-            for attachment in Attachment.objects.filter(msg_id=p.msg_id):
-                url = "attachment/" + attachment.hash_filename
-                attachments.append((attachment.true_filename, url))
-
-        post_full_text = fix_html_and_img_srcs(p.msg_id, p.post)
         post_dict = {
                     'id': str(p.id),
                     'msg_id': p.msg_id, 
@@ -872,7 +872,7 @@ def load_thread(t, user=None, member=None, return_full_contents=True):
                     'to': p.group.name,
                     'liked': user_liked,
                     'subject': escape(p.subject), 
-                    'text' : post_full_text if return_full_contents else post_full_text[:40],
+                    'text' : fix_html_and_img_srcs(p.msg_id, p.post),
                     'timestamp': p.timestamp,
                     'attachments': attachments,
                     'verified': p.verified_sender,

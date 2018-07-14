@@ -816,7 +816,8 @@ def list_posts(request):
 	try:
 		group_name = request.POST.get('active_group')
 		load_replies = request.POST.get('load')
-		res = engine.main.list_posts(group_name=group_name, user=request.user.email, return_replies=load_replies)
+		return_full_content = request.POST.get('return_full_content')
+		res = engine.main.list_posts(group_name=group_name, user=request.user.email, return_replies=load_replies, return_full_content=return_full_content)
 		res['user'] = request.user.email
 		res['group_name'] = group_name
 		return HttpResponse(json.dumps(res), content_type="application/json")
@@ -853,7 +854,7 @@ def load_post(request):
 def load_thread(request):
 	try:#request.user
 		t = Thread.objects.get(id=request.POST['thread_id'])
-		res = engine.main.load_thread(t, return_full_contents=False)
+		res = engine.main.load_thread(t)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

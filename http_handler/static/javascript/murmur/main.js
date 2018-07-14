@@ -524,7 +524,8 @@ $(document).ready(function(){
 					if(res.status){
 						list_posts({'load':true, 
 									'active_group': params.group_name,
-									'thread_id':res.thread_id});
+									'thread_id':res.thread_id,
+									'return_full_content': false});
 					}
 					notify(res, true);
 				}
@@ -1263,7 +1264,7 @@ $(document).ready(function(){
                         }
                 );
         var active_group = $("#active_group").text();
-		list_posts({'load':false, 'active_group': active_group});
+		list_posts({'load':false, 'active_group': active_group, return_full_content=false});
 		activate_tag_buttons(active_group);
 	}
 	
