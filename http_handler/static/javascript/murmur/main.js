@@ -285,8 +285,21 @@ $(document).ready(function(){
 
 
 
-	load_post = 
+	load_thread = 
 		function(params){
+			// TODO load posts at a thread; need to include msg_id, group_name
+			$.post('load_thread', params, 
+				function(res){
+					params.thread_id = parseInt(getUrlParameter('tid'));
+					if (params.thread_id > -1) {
+						params.load = true;
+					}
+					if (res.status) {
+						populate_posts_table(res, params, true);
+					}
+				}
+			);
+			
 			render_post(params);
 			posts_local_data.selected_thread = params.thread_id;
 			$('.row-item').css("background-color","white");
@@ -869,7 +882,7 @@ $(document).ready(function(){
 				 'member_group': member_group,
 			};
 				
-			var f = bind(load_post, params);
+			var f = bind(load_thread, params);
 			if(thread_list[i].thread_id == load_params.thread_id){
 				selected_thread = thread_list[i].thread_id;
 			}

@@ -822,7 +822,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
     logging.debug(res)
     return res
     
-def load_thread(t, user=None, member=None):
+def load_thread(t, user=None, member=None, return_full_contents=True):
 
     following = False
     muting = False
@@ -855,11 +855,14 @@ def load_thread(t, user=None, member=None):
         if user:
             user_liked = p.upvote_set.filter(user=user).exists()
         attachments = []
-        for attachment in Attachment.objects.filter(msg_id=p.msg_id):
-            url = "attachment/" + attachment.hash_filename
-            attachments.append((attachment.true_filename, url))
 
+        # Get attachments only when asked to return full contents
+        if return_full_contents:
+            for attachment in Attachment.objects.filter(msg_id=p.msg_id):
+                url = "attachment/" + attachment.hash_filename
+                attachments.append((attachment.true_filename, url))
 
+        post_full_text = fix_html_and_img_srcs(p.msg_id, p.post)
         post_dict = {
                     'id': str(p.id),
                     'msg_id': p.msg_id, 
@@ -869,7 +872,7 @@ def load_thread(t, user=None, member=None):
                     'to': p.group.name,
                     'liked': user_liked,
                     'subject': escape(p.subject), 
-                    'text' : fix_html_and_img_srcs(p.msg_id, p.post),
+                    'text' : post_full_text if return_full_contents else post_full_text[:40],
                     'timestamp': p.timestamp,
                     'attachments': attachments,
                     'verified': p.verified_sender,

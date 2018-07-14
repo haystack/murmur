@@ -850,6 +850,16 @@ def load_post(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def load_thread(request):
+	try:#request.user
+		t = Thread.objects.get(id=request.POST['thread_id'])
+		res = engine.main.load_thread(t, return_full_contents=False)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def insert_post(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
