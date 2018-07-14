@@ -1264,7 +1264,7 @@ $(document).ready(function(){
                         }
                 );
         var active_group = $("#active_group").text();
-		list_posts({'load':false, 'active_group': active_group, return_full_content=false});
+		list_posts({'load':false, 'active_group': active_group, 'return_full_content':false});
 		activate_tag_buttons(active_group);
 	}
 	
