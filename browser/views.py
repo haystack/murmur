@@ -815,8 +815,8 @@ def donotsend_info(request):
 def list_posts(request):
 	try:
 		group_name = request.POST.get('active_group')
-		load_replies = request.POST.get('load')
-		return_full_content = request.POST.get('return_full_content')
+		load_replies = True if request.POST.get('load') == "true" else False
+		return_full_content = True if request.POST.get('return_full_content') == "true" else False
 		res = engine.main.list_posts(group_name=group_name, user=request.user.email, return_replies=load_replies, return_full_content=return_full_content)
 		res['user'] = request.user.email
 		res['group_name'] = group_name
