@@ -284,10 +284,9 @@ $(document).ready(function(){
     };
 
 
-
+	// Load posts at a thread
 	load_thread = 
 		function(params){
-			// TODO load posts at a thread; need to include msg_id, group_name
 			$.post('load_thread', params, 
 				function(res){
 					params.thread_id = parseInt(getUrlParameter('tid'));
@@ -295,12 +294,12 @@ $(document).ready(function(){
 						params.load = true;
 					}
 					if (res.status) {
-						populate_posts_table(res, params, true);
+						render_post(params);
 					}
 				}
 			);
 			
-			render_post(params);
+			
 			posts_local_data.selected_thread = params.thread_id;
 			$('.row-item').css("background-color","white");
 			$('#' + params.thread_id).css("background-color","lightyellow");
