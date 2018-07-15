@@ -873,7 +873,7 @@ def load_thread(t, user=None, member=None):
                     'liked': user_liked,
                     'subject': escape(p.subject), 
                     'text' : fix_html_and_img_srcs(p.msg_id, p.post),
-                    'timestamp': p.timestamp,
+                    'timestamp': format_date_time(p.timestamp),
                     'attachments': attachments,
                     'verified': p.verified_sender,
                     'who_moderated' : p.who_moderated,
@@ -911,7 +911,7 @@ def load_thread(t, user=None, member=None):
             'no_emails': no_emails,
             'always_follow': always_follow,
             'likes': total_likes,
-            'timestamp': t.timestamp}
+            'timestamp': format_date_time(t.timestamp)}
 
 def load_post(group_name, thread_id, msg_id):
     res = {'status':False}
