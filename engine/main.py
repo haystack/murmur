@@ -790,6 +790,8 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         
         if not_include_thread:
             continue
+        if not post: # assert the post exists 
+            continue
         tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
         res['threads'].append({'thread_id': t.id, 
                                'post': post, 
