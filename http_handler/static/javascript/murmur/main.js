@@ -827,7 +827,7 @@ $(document).ready(function(){
 			var content = '<div class="left-column-area-metadata">';
 			content += '<span class="gray">' + d.date + '</span><BR>';
 			content += '<span class="gray">' + d.time + '</span><BR>';
-			content += '<span class="unread">' + thread_list[i].replies.length + '</span> <br />';
+			content += '<span class="unread">' + thread_list[i].num_replies + '</span> <br />';
 			content += '</div>';
 			content += '<div class= "left-column-area-content">';
 			

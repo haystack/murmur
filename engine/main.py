@@ -793,7 +793,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
         tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
         res['threads'].append({'thread_id': t.id, 
                                'post': post, 
-                               'num_replies': len(replies) - 1,
+                               'num_replies': len(replies),
                                'replies': replies if return_replies else [], 
                                'following': following, 
                                'muting': muting,
