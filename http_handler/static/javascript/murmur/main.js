@@ -294,7 +294,7 @@ $(document).ready(function(){
 						params.load = true;
 					}
 					if (res.status) {
-						render_post(params);
+						render_post(res);
 					}
 				}
 			);
