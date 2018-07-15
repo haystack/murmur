@@ -295,14 +295,13 @@ $(document).ready(function(){
 					}
 					if (res.status) {
 						render_post(res);
+
+						posts_local_data.selected_thread = params.thread_id;
+						$('.row-item').css("background-color","white");
+						$('#' + params.thread_id).css("background-color","lightyellow");
 					}
 				}
 			);
-			
-			
-			posts_local_data.selected_thread = params.thread_id;
-			$('.row-item').css("background-color","white");
-			$('#' + params.thread_id).css("background-color","lightyellow");
 		};
 
 	
