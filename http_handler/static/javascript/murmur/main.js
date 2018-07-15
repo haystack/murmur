@@ -289,10 +289,6 @@ $(document).ready(function(){
 		function(params){
 			$.post('load_thread', params, 
 				function(res){
-					params.thread_id = parseInt(getUrlParameter('tid'));
-					if (params.thread_id > -1) {
-						params.load = true;
-					}
 					if (res.status) {
 						render_post(res);
 
