@@ -52,7 +52,7 @@ class Command(BaseCommand):
                 addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
                 footer = "You are set to receive daily digests from this group. <BR><a href=\"%s\">Change your settings</a>" % (addr)
 
-                footer = '%s%s%s' % (HTML_SUBHEAD, footer, HTML_SUBTAIL)
+                footer = '<br/>%s%s%s' % (HTML_SUBHEAD, footer, HTML_SUBTAIL)
                 digest_body = digest_body + footer
 
                 send_email(digest_subject, DEFAULT_FROM_EMAIL, mg.member.email, body_html=digest_body)
