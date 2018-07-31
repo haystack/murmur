@@ -284,6 +284,7 @@ class UserProfile(AbstractBaseUser):
 	is_admin = models.BooleanField(default=False)
 	date_joined = models.DateTimeField(auto_now=True)
 	hash = models.CharField(max_length=40, default="")
+	imapAccount = models.ForeignKey('ImapAccount', blank=True, null=True)
 
 	objects = MyUserManager()
 
@@ -319,6 +320,25 @@ class UserProfile(AbstractBaseUser):
 		"Is the user a member of staff?"
 		return self.is_admin
 
+class ImapAccount(models.Model):
+	newest_msg_id = models.IntegerField(default=-1)
+
+	email = models.EmailField(
+        verbose_name='email address',
+        max_length=255,
+        unique=True,
+    )
+	password = models.CharField('password', max_length=100, blank=True)
+	host = models.CharField('host', max_length=100)
+
+	is_oauth = models.BooleanField(default=False)
+	access_token = models.CharField('access_token', max_length=100, blank=True)
+	refresh_token = models.CharField('refresh_token', max_length=100, blank=True)
+	
+	arrive_action = models.CharField('access_token', max_length=1000, blank=True)
+	custom_action = models.CharField('custom_action', max_length=1000, blank=True)
+	timer_action = models.CharField('timer_action', max_length=1000, blank=True)
+	repeat_action = models.CharField('repeat_action', max_length=1000, blank=True)
 
 class Following(models.Model):
 	id = models.AutoField(primary_key=True)

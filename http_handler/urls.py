@@ -119,6 +119,7 @@ if WEBSITE == 'murmur':
                     url(r'^list_my_groups', 'browser.views.list_my_groups'), 
 
                     url(r'^load_post', 'browser.views.load_post'),
+                    url(r'^load_thread', 'browser.views.load_thread'),
 
                     url(r'^list_posts', 'browser.views.list_posts'),
                     url(r'^refresh_posts', 'browser.views.refresh_posts'),

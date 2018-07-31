@@ -387,6 +387,17 @@ def group_list(request):
 	else:
 		return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
 
+@render_to("login_imap.html")
+@login_required
+def login_imap_view(request):
+	user = get_object_or_404(UserProfile, email=request.user.email)
+	
+	try:
+		return {'user': request.user, 'website': WEBSITE, 'active_group_role' : 'admin'}
+
+	except Group.DoesNotExist:
+		return redirect('/404?e=admin')
+
 @render_to(WEBSITE+"/add_members.html")
 @login_required
 def add_members_view(request, group_name):
@@ -804,7 +815,9 @@ def donotsend_info(request):
 def list_posts(request):
 	try:
 		group_name = request.POST.get('active_group')
-		res = engine.main.list_posts(group_name=group_name, user=request.user.email)
+		load_replies = True if request.POST.get('load') == "true" else False
+		return_full_content = True if request.POST.get('return_full_content') == "true" else False
+		res = engine.main.list_posts(group_name=group_name, user=request.user.email, return_replies=load_replies, return_full_content=return_full_content)
 		res['user'] = request.user.email
 		res['group_name'] = group_name
 		return HttpResponse(json.dumps(res), content_type="application/json")
@@ -832,6 +845,16 @@ def refresh_posts(request):
 def load_post(request):
 	try:#request.user
 		res = engine.main.load_post(group_name=None, thread_id = request.POST['thread_id'], msg_id=request.POST['msg_id'])
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def load_thread(request):
+	try:#request.user
+		t = Thread.objects.get(id=request.POST['thread_id'])
+		res = engine.main.load_thread(t)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		logging.debug(e)

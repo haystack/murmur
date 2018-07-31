@@ -718,7 +718,7 @@ def donotsend_info(group_name, user):
 def format_date_time(d):
     return datetime.strftime(d, '%Y/%m/%d %H:%M:%S')
 
-def list_posts_page(threads, group, res, user=None, format_datetime=True, return_replies=True, text_limit=None):
+def list_posts_page(threads, group, res, user=None, format_datetime=True, return_replies=True, text_limit=None, return_full_content=True):
     res['threads'] = []
     for t in threads:
         following = False
@@ -755,9 +755,11 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                 user_liked = p.upvote_set.filter(user=u).exists()
             thread_likes += post_likes
             attachments = []
-            for attachment in Attachment.objects.filter(msg_id=p.msg_id):
-                url = "attachment/" + attachment.hash_filename
-                attachments.append((attachment.true_filename, url))
+
+            if return_full_content:
+                for attachment in Attachment.objects.filter(msg_id=p.msg_id):
+                    url = "attachment/" + attachment.hash_filename
+                    attachments.append((attachment.true_filename, url))
             
             #text = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
             text = fix_html_and_img_srcs(p.msg_id, p.post)
@@ -772,27 +774,29 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                         'subject': escape(p.subject),
                         'likes': post_likes, 
                         'liked': user_liked,
-                        'text': text, 
+                        'text': text if return_full_content else text[:40], 
                         'timestamp': format_date_time(p.timestamp) if format_datetime else p.timestamp,
                         'attachments': attachments,
                         'verified': p.verified_sender
                         }
             if p.forwarding_list:
                 post_dict['forwarding_list'] = p.forwarding_list.email
-            if not p.reply_to_id:
+            if not p.reply_to:
                 post = post_dict
-                if not return_replies:
-                    break
+                # if not return_replies:
+                #     break
             else:
                 replies.append(post_dict)
         
         if not_include_thread:
             continue
+        if not post: # assert the post exists 
+            continue
         tags = list(Tag.objects.filter(tagthread__thread=t).values('name', 'color'))
         res['threads'].append({'thread_id': t.id, 
                                'post': post, 
-                               'num_replies': posts.count() - 1,
-                               'replies': replies, 
+                               'num_replies': len(replies),
+                               'replies': replies if return_replies else [], 
                                'following': following, 
                                'muting': muting,
                                'tags': tags,
@@ -800,7 +804,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                                'timestamp': format_date_time(t.timestamp) if format_datetime else t.timestamp})
         res['status'] = True
 
-def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=True, format_datetime=True):
+def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=True, format_datetime=True, return_full_content=True):
     res = {'status':False}
     try:
         t = datetime.min
@@ -814,7 +818,7 @@ def list_posts(group_name=None, user=None, timestamp_str=None, return_replies=Tr
         else:
             threads = Thread.objects.filter(timestamp__gt = t)
         
-        list_posts_page(threads, g, res, user=user, format_datetime=format_datetime, return_replies=return_replies)
+        list_posts_page(threads, g, res, user=user, format_datetime=format_datetime, return_replies=return_replies, return_full_content=return_full_content)
             
     except Exception, e:
         print e
@@ -854,11 +858,12 @@ def load_thread(t, user=None, member=None):
         user_liked = False
         if user:
             user_liked = p.upvote_set.filter(user=user).exists()
+
+        print "attachment at load_thread?"
         attachments = []
         for attachment in Attachment.objects.filter(msg_id=p.msg_id):
             url = "attachment/" + attachment.hash_filename
             attachments.append((attachment.true_filename, url))
-
 
         post_dict = {
                     'id': str(p.id),
@@ -870,7 +875,7 @@ def load_thread(t, user=None, member=None):
                     'liked': user_liked,
                     'subject': escape(p.subject), 
                     'text' : fix_html_and_img_srcs(p.msg_id, p.post),
-                    'timestamp': p.timestamp,
+                    'timestamp': format_date_time(p.timestamp),
                     'attachments': attachments,
                     'verified': p.verified_sender,
                     'who_moderated' : p.who_moderated,
@@ -908,7 +913,7 @@ def load_thread(t, user=None, member=None):
             'no_emails': no_emails,
             'always_follow': always_follow,
             'likes': total_likes,
-            'timestamp': t.timestamp}
+            'timestamp': format_date_time(t.timestamp)}
 
 def load_post(group_name, thread_id, msg_id):
     res = {'status':False}

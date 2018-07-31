@@ -284,13 +284,20 @@ $(document).ready(function(){
     };
 
 
-
-	load_post = 
+	// Load posts at a thread
+	load_thread = 
 		function(params){
-			render_post(params);
-			posts_local_data.selected_thread = params.thread_id;
-			$('.row-item').css("background-color","white");
-			$('#' + params.thread_id).css("background-color","lightyellow");
+			$.post('load_thread', params, 
+				function(res){
+					if (res.status) {
+						render_post(res);
+
+						posts_local_data.selected_thread = params.thread_id;
+						$('.row-item').css("background-color","white");
+						$('#' + params.thread_id).css("background-color","lightyellow");
+					}
+				}
+			);
 		};
 
 	
@@ -511,7 +518,8 @@ $(document).ready(function(){
 					if(res.status){
 						list_posts({'load':true, 
 									'active_group': params.group_name,
-									'thread_id':res.thread_id});
+									'thread_id':res.thread_id,
+									'return_full_content': false});
 					}
 					notify(res, true);
 				}
@@ -814,7 +822,7 @@ $(document).ready(function(){
 			var content = '<div class="left-column-area-metadata">';
 			content += '<span class="gray">' + d.date + '</span><BR>';
 			content += '<span class="gray">' + d.time + '</span><BR>';
-			content += '<span class="unread">' + thread_list[i].replies.length + '</span> <br />';
+			content += '<span class="unread">' + thread_list[i].num_replies + '</span> <br />';
 			content += '</div>';
 			content += '<div class= "left-column-area-content">';
 			
@@ -869,7 +877,7 @@ $(document).ready(function(){
 				 'member_group': member_group,
 			};
 				
-			var f = bind(load_post, params);
+			var f = bind(load_thread, params);
 			if(thread_list[i].thread_id == load_params.thread_id){
 				selected_thread = thread_list[i].thread_id;
 			}
@@ -1250,7 +1258,7 @@ $(document).ready(function(){
                         }
                 );
         var active_group = $("#active_group").text();
-		list_posts({'load':false, 'active_group': active_group});
+		list_posts({'load':false, 'active_group': active_group, 'return_full_content':false});
 		activate_tag_buttons(active_group);
 	}
 	
