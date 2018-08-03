@@ -138,14 +138,15 @@ def posts(request):
 		if not active_group['active']:
 			return HttpResponseRedirect('/group_list')
 		elif group.public or is_member:
-			if request.flavour == "mobile":
-				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
-			else:
-				if is_member:
-					request.session['active_group'] = active_group['name']
-					return page_info
-				else:
-					return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+			return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+			# if request.flavour == "mobile":
+			# 	return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+			# else:
+			# 	if is_member:
+			# 		request.session['active_group'] = active_group['name']
+			# 		return page_info
+			# 	else:
+			# 		return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 		else:
 			if len(groups) == 0:
 				return HttpResponseRedirect('/group_list')
