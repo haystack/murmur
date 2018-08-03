@@ -326,12 +326,13 @@ def settings(request):
 def my_groups(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		if request.flavour == "mobile":
-			return HttpResponseRedirect('/my_group_list')
-		else:
-			groups = Group.objects.filter(membergroup__member=user).values("name")
-			info = engine.main.check_admin(user,groups)
-			return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info':info}	
+		return HttpResponseRedirect('/my_group_list')
+		# if request.flavour == "mobile":
+		# 	return HttpResponseRedirect('/my_group_list')
+		# else:
+		# 	groups = Group.objects.filter(membergroup__member=user).values("name")
+		# 	info = engine.main.check_admin(user,groups)
+		# 	return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info':info}	
 	else:
 		return HttpResponseRedirect(global_settings.LOGIN_URL)
 
