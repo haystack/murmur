@@ -1431,7 +1431,8 @@ def login_imap(request):
 		
 		email = request.POST['email']
 		password = request.POST['password']
-		res = engine.main.login_imap(user, group_name, sender_emails)
+		host = request.POST['host']
+		res = engine.main.login_imap(user, email, password, host)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

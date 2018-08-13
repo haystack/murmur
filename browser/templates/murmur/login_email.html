@@ -9,16 +9,18 @@
 		Your post won't be sent to members of this list.<br><br>Enter email addresses, separated by commas: <br>
         <input id="input-email" type="text" style="width: 100%; box-sizing: border-box;"></input>
         <input id="input-password" type="password" style="width: 100%; box-sizing: border-box;"></input>
+		<br>
+		<input id="input-host" type="text" style="width: 100%; box-sizing: border-box;"></input>
 		<br><br>
 		<div style="diplay:none;color:red;" id="donotsend-msg"></div>
 		<button type="button" id="btn-login" style="margin-top:10px;">Log in</button>
 	</form>
 	<br>
 	
-	<a href="/groups/{{group_info.name}}">Back to group info page</a>
+	<!-- <a href="/groups/{{group_info.name}}">Back to group info page</a> -->
 {% endblock %}
 
 {% block customjs %}
 	<script type="text/javascript" src="/static/javascript/notify.js"></script>
-	<script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>
+	<script type="text/javascript" src="/static/javascript/murmur/login_imap.js"></script>
 {% endblock %}

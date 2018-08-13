@@ -1612,12 +1612,12 @@ def update_donotsend_list(user, group_name, emails, push=True):
     logging.debug(res)
     return res 
 
-def login_imap(user, email, password, push=True):
+def login_imap(user, email, password, host, push=True):
     res = {'status' : False}
 
     try:
         if not ImapAccount.objects.filter(email=email).exists():
-            imapAccount = ImapAccount(email=email, password=password)
+            imapAccount = ImapAccount(email=email, password=password, host=host)
             imapAccount.save()
 
             res['code'] = "New user"

@@ -7,6 +7,7 @@ $(document).ready(function() {
         btn_login.click(function() {
                 var params = {
                     'email': $("#input-email").val(),
+                    'host': $("#input-host").val(),
                     'password': $("#input-password").val()
                 };
         
