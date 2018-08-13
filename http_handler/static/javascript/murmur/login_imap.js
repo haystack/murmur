@@ -32,6 +32,10 @@ $(document).ready(function() {
                     }
                 );
         });
+
+        $("#input-email").keyup(function( event ) {
+            guess_host( $(this).val() );
+        });
     
         $(".default-text").blur();
         tinyMCE.init({
@@ -46,4 +50,11 @@ $(document).ready(function() {
 
     // TODO auto-complete host input when user typed email. 
     // init also in case email input is already auto-completed
+
+    function guess_host( email_addr ) {
+        if( email_addr.includes("gmail")) $("#input-host").val("imap.gmail.com");
+        else if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");
+        else if ( email_addr.includes("csail")) $("#input-host").val("imap.csail.mit.edu");
+        else if ( email_addr.includes("mit")) $("#input-host").val("imap.exchange.mit.edu");
+    }
 });
