@@ -1612,6 +1612,28 @@ def update_donotsend_list(user, group_name, emails, push=True):
     logging.debug(res)
     return res 
 
+def login_imap(user, email, password, push=True):
+    res = {'status' : False}
+
+    try:
+        if not ImapAccount.objects.filter(email=email).exists():
+            imapAccount = ImapAccount(email=email, password=password)
+            imapAccount.save()
+
+            res['code'] = "New user"
+
+        else:
+            res['code'] = "This account is already logged in!"
+        
+        res['status'] = True
+
+    except Exception, e:
+        print e
+        res['code'] = msg_code['UNKNOWN_ERROR']
+
+    logging.debug(res)
+    return res 
+
 # add a new entry to whitelist/blacklist table, or update existing one
 # user is the user who is adding them(we need to make sure they are authorized,
 # emaild is a string of comma separated addresses to be blacklisted/whitelisted)
