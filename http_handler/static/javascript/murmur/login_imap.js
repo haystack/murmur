@@ -48,9 +48,6 @@ $(document).ready(function() {
             theme_advanced_resizing: true
         });
 
-    // TODO auto-complete host input when user typed email. 
-    // init also in case email input is already auto-completed
-
     function guess_host( email_addr ) {
         if( email_addr.includes("gmail")) $("#input-host").val("imap.gmail.com");
         else if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");
