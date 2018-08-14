@@ -3,6 +3,23 @@ $(document).ready(function() {
     var user_name = $.trim($('#user_email').text()),
         btn_login = $("#btn-login");
     
+
+    // Create the sandbox:
+    window.sandbox = new Sandbox.View({
+        el : $('#sandbox'),
+        model : new Sandbox.Model()
+      });
+
+    var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+        mode: {name: "python",
+               version: 3,
+               singleLineStringErrors: false},
+        lineNumbers: true,
+        indentUnit: 4,
+        matchBrackets: true
+      });
+
+    $("#editor-container").hide();
     
         btn_login.click(function() {
                 var params = {
@@ -15,8 +32,12 @@ $(document).ready(function() {
                     function(res) {
                         // $('#donotsend-msg').hide();
                         console.log(res);
+                        
+                        // Auth success
                         if (res.status) {
-                            // $('#new-dissimulate-emails').val("");
+                            // Show coding interfaces 
+                            $("#editor-container").show();
+
                             if (res.code) { 
                                 // some emails are not added since they are not members of the group
                                 // $('#donotsend-msg').show();
