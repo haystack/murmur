@@ -20,6 +20,8 @@ from s3_storage import upload_attachments, download_attachments, download_messag
 from schema.models import *
 from smtp_handler.utils import *
 
+from imapclient import IMAPClient
+
 def list_groups(user=None):
     groups = []
     pub_groups = Group.objects.filter(Q(public=True, active=True)).order_by('name')
@@ -1617,6 +1619,13 @@ def login_imap(user, email, password, host, push=True):
 
     try:
         if not ImapAccount.objects.filter(email=email).exists():
+            imap = IMAPClient(host, use_uid=True)
+            imap.login(email, password)
+
+            # folder = "INBOX"
+
+            # imap.select_folder(folder)
+
             imapAccount = ImapAccount(email=email, password=password, host=host)
             imapAccount.save()
 
@@ -1628,6 +1637,7 @@ def login_imap(user, email, password, host, push=True):
         res['status'] = True
 
     except Exception, e:
+        # TODO add exception
         print e
         res['code'] = msg_code['UNKNOWN_ERROR']
 

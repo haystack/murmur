@@ -37,6 +37,7 @@ $(document).ready(function() {
                         // Auth success
                         if (res.status) {
                             // Show coding interfaces 
+                            $("#login-email-form").hide();
                             $("#editor-container").show();
 
                             if (res.code) { 
