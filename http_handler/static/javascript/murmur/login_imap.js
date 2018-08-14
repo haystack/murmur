@@ -5,11 +5,12 @@ $(document).ready(function() {
     
 
     // Create the sandbox:
-    window.sandbox = new Sandbox.View({
-        el : $('#sandbox'),
-        model : new Sandbox.Model()
-      });
+    // window.sandbox = new Sandbox.View({
+    //     el : $('#sandbox'),
+    //     model : new Sandbox.Model()
+    //   });
 
+    // init editor 
     var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
         mode: {name: "python",
                version: 3,
