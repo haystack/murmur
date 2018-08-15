@@ -48,11 +48,11 @@
 						</div>
 						<div class="card-block">
 						  <textarea id="code" name="code">
-		def doAction(newEmail):
-			if "free food" in newEmail.get_subjects()[0]:
-				send("my_colleague@mit.edu", "Free food is here!", "\n".join(newEmail.get_subjects()))
+def doAction(newEmail):
+	if "free food" in newEmail.get_subjects()[0]:
+		send("my_colleague@mit.edu", "Free food is here!", "\n".join(newEmail.get_subjects()))
 		
-		onArrive(doAction)
+onArrive(doAction)
 						  </textarea>
 						</div>
 					  </div>
