@@ -1654,7 +1654,7 @@ def run_mailbot(user, email, code, push=True):
         imap.login(email, imapAccount.password)
 
         # TODO execute the code
-        interpret(imap, code)
+        res = interpret(imap, code)
 
         res['status'] = True
 
