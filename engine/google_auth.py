@@ -24,6 +24,7 @@ from urllib.request import urlopen
 import urllib.parse
 import webbrowser
 from datetime import datetime, timedelta
+from http_handler.settings import WEBSITE, CLIENT_ID, CLIENT_SECRET
 
 class GoogleOauth2():
   # The URL root for accessing Google Accounts.
@@ -36,7 +37,8 @@ class GoogleOauth2():
   TOKEN_EXPIRED_TIME = None
 
   def __init__(self):
-    pass
+    print "OAUTH", CLIENT_ID, CLIENT_SECRET
+    #pass
 
   def isExpired(self): 
     if not self.TOKEN_EXPIRED_TIME:
