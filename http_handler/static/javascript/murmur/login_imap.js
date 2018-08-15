@@ -1,3 +1,13 @@
+// init editor 
+var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+    mode: {name: "python",
+           version: 3,
+           singleLineStringErrors: false},
+    lineNumbers: true,
+    indentUnit: 4,
+    matchBrackets: true
+  });
+
 $(document).ready(function() {
     
     var user_name = $.trim($('#user_email').text()),
@@ -10,16 +20,6 @@ $(document).ready(function() {
     //     el : $('#sandbox'),
     //     model : new Sandbox.Model()
     //   });
-
-    // init editor 
-    var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-        mode: {name: "python",
-               version: 3,
-               singleLineStringErrors: false},
-        lineNumbers: true,
-        indentUnit: 4,
-        matchBrackets: true
-      });
 
     $("#editor-container").hide();
     
