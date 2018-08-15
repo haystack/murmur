@@ -1,12 +1,4 @@
-// init editor 
-var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-    mode: {name: "python",
-           version: 3,
-           singleLineStringErrors: false},
-    lineNumbers: true,
-    indentUnit: 4,
-    matchBrackets: true
-  });
+
 
 $(document).ready(function() {
     
@@ -20,6 +12,9 @@ $(document).ready(function() {
     //     el : $('#sandbox'),
     //     model : new Sandbox.Model()
     //   });
+
+    // init editor 
+    var editor;
 
     $("#editor-container").hide();
     
@@ -40,6 +35,15 @@ $(document).ready(function() {
                             // Show coding interfaces 
                             $("#login-email-form").hide();
                             $("#editor-container").show();
+
+                            editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+                                mode: {name: "python",
+                                    version: 3,
+                                    singleLineStringErrors: false},
+                                lineNumbers: true,
+                                indentUnit: 4,
+                                matchBrackets: true
+                            });
 
                             if (res.code) { 
                                 // some emails are not added since they are not members of the group
