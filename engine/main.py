@@ -1658,9 +1658,8 @@ def run_mailbot(user, email, code, push=True):
 
         # if the code execute well without any bug, then save the code to DB
         if not res['imap_error']:
-            entry = imapAccount[0]
-            entry.code = code 
-            entry.save()
+            imapAccount.code = code 
+            imapAccount.save()
 
         res['status'] = True
 
