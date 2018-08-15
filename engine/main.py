@@ -1645,7 +1645,7 @@ def login_imap(user, email, password, host, push=True):
     return res 
 
 def run_mailbot(user, email, code, push=True):
-    res = {'status' : False}
+    res = {'status' : False, 'imap_error': False}
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
