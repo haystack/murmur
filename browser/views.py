@@ -1440,6 +1440,21 @@ def login_imap(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def run_mailbot(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		
+		email = request.POST['email']
+		code = request.POST['code']
+
+		res = engine.main.run_mailbot(user, email, code)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def unblacklist_unwhitelist(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)

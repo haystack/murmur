@@ -1,7 +1,8 @@
 $(document).ready(function() {
     
     var user_name = $.trim($('#user_email').text()),
-        btn_login = $("#btn-login");
+        btn_login = $("#btn-login"),
+        btn_code_sumbit = $("#btn-code-submit");
     
 
     // Create the sandbox:
@@ -56,6 +57,37 @@ $(document).ready(function() {
                 );
         });
 
+        btn_code_sumbit.click(function() {
+            var params = {
+                'email': $("#input-email").val(),
+                'code': editor.getValue()
+            };
+    
+            $.post('/run_mailbot', params,
+                function(res) {
+                    // $('#donotsend-msg').hide();
+                    console.log(res);
+                    
+                    // Auth success
+                    if (res.status) {
+                        // TODO spin cogs, give feedback it's running
+
+                        if (res.code) { 
+                            // some emails are not added since they are not members of the group
+                            // $('#donotsend-msg').show();
+                            // $('#donotsend-msg').html(res['code']);
+                        }
+                        else {                        
+                            notify(res, true);
+                        }
+                    }
+                    else {
+                        notify(res, false);
+                    }
+                }
+            );
+        });
+
         $("#input-email").keyup(function( event ) {
             guess_host( $(this).val() );
         });
@@ -76,5 +108,6 @@ $(document).ready(function() {
         else if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");
         else if ( email_addr.includes("csail")) $("#input-host").val("imap.csail.mit.edu");
         else if ( email_addr.includes("mit")) $("#input-host").val("imap.exchange.mit.edu");
+        else $("#input-host").val("");
     }
 });

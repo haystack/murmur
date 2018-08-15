@@ -11,6 +11,7 @@ from lamson.mail import MailResponse
 from pytz import utc
 
 from browser.util import *
+from browser.imap import *
 from constants import *
 from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
 from gmail_setup.api import update_gmail_filter, untrash_message
@@ -1618,14 +1619,10 @@ def login_imap(user, email, password, host, push=True):
     res = {'status' : False}
 
     try:
+        imap = IMAPClient(host, use_uid=True)
+        imap.login(email, password)
+
         if not ImapAccount.objects.filter(email=email).exists():
-            imap = IMAPClient(host, use_uid=True)
-            imap.login(email, password)
-
-            # folder = "INBOX"
-
-            # imap.select_folder(folder)
-
             imapAccount = ImapAccount(email=email, password=password, host=host)
             imapAccount.save()
 
@@ -1636,6 +1633,35 @@ def login_imap(user, email, password, host, push=True):
         
         res['status'] = True
 
+    except IMAPClient.Error, e:
+        res['code'] = e
+
+    except Exception, e:
+        # TODO add exception
+        print e
+        res['code'] = msg_code['UNKNOWN_ERROR']
+
+    logging.debug(res)
+    return res 
+
+def run_mailbot(user, email, code, push=True):
+    res = {'status' : False}
+
+    try:
+        imapAccount = ImapAccount.objects.get(email=email)
+
+        imap = IMAPClient(imapAccount.host, use_uid=True)
+        imap.login(email, imapAccount.password)
+
+        # TODO execute the code
+        interpret(code)
+
+        res['status'] = True
+
+    except IMAPClient.Error, e:
+        res['code'] = e
+    except ImapAccount.DoesNotExist:
+        res['code'] = "Not logged into IMAP"
     except Exception, e:
         # TODO add exception
         print e
