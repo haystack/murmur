@@ -1656,6 +1656,12 @@ def run_mailbot(user, email, code, push=True):
         # TODO execute the code
         res = interpret(imap, code)
 
+        # if the code execute well without any bug, then save the code to DB
+        if not res['imap_error']:
+            entry = imapAccount[0]
+            entry.code = code 
+            entry.save()
+
         res['status'] = True
 
     except IMAPClient.Error, e:

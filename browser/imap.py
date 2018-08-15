@@ -6,17 +6,17 @@ except ImportError:
     import io
 import contextlib
 
-@contextlib.contextmanager
-def stdoutIO(stdout=None):
-    old = sys.stdout
-    if stdout is None:
-        stdout = io.StringIO()
-    sys.stdout = stdout
-    yield stdout
-    sys.stdout = old
-
 def interpret(imap, code):
     res = {'status' : False}
+
+    @contextlib.contextmanager
+    def stdoutIO(stdout=None):
+        old = sys.stdout
+        if stdout is None:
+            stdout = StringIO()
+        sys.stdout = stdout
+        yield stdout
+        sys.stdout = old
 
     with stdoutIO() as s:
         def catch_exception(e):   
