@@ -1430,9 +1430,11 @@ def login_imap(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		
 		email = request.POST['email']
-		password = request.POST['password']
 		host = request.POST['host']
-		res = engine.main.login_imap(user, email, password, host)
+		is_oauth = request.POST['is_oauth']
+		password = request.POST['password']
+
+		res = engine.main.login_imap(user, email, password, host, is_oauth)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

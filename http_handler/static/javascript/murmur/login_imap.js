@@ -21,12 +21,30 @@ $(document).ready(function() {
         matchBrackets: true
     });
 
+    toggle_login_mode();
+	
+	$('#rdo-oauth').change(function() {
+        toggle_login_mode();      
+    });
+	
+	function toggle_login_mode() {
+		oauth = $('#rdo-oauth').is(":checked");
+		if (oauth) {
+            $(".oauth").show();
+            $(".plain").hide();
+		} else {
+			$(".oauth").show();
+            $(".plain").hide();
+		}
+	}
+
     
         btn_login.click(function() {
                 var params = {
                     'email': $("#input-email").val(),
                     'host': $("#input-host").val(),
-                    'password': $("#input-password").val()
+                    'password': $('#rdo-oauth').is(":checked") ? $("#input-access-code").val() : $("#input-password").val(),
+                    'is_oauth': $('#rdo-oauth').is(":checked")
                 };
         
                 $.post('/login_imap', params,
@@ -113,7 +131,14 @@ $(document).ready(function() {
         $(".default-text").blur();
 
     function guess_host( email_addr ) {
-        if( email_addr.includes("gmail")) $("#input-host").val("imap.gmail.com");
+        $("#link-less-secure").attr('href', "");
+        $("#rdo-oauth").attr('disabled', "");
+        
+        if( email_addr.includes("gmail")) {
+            $("#input-host").val("imap.gmail.com");
+            $("#link-less-secure").attr('href', "https://myaccount.google.com/lesssecureapps");
+            $("#rdo-oauth").removeAttr('disabled');
+        }
         else if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");
         else if ( email_addr.includes("csail")) $("#input-host").val("imap.csail.mit.edu");
         else if ( email_addr.includes("mit")) $("#input-host").val("imap.exchange.mit.edu");

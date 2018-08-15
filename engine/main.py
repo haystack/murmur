@@ -1615,12 +1615,16 @@ def update_donotsend_list(user, group_name, emails, push=True):
     logging.debug(res)
     return res 
 
-def login_imap(user, email, password, host, push=True):
+def login_imap(user, email, password, host, is_oauth, push=True):
     res = {'status' : False}
 
     try:
         imap = IMAPClient(host, use_uid=True)
-        imap.login(email, password)
+        if is_oauth:
+            imap.oauth2_login(email, password)
+
+        else:   
+            imap.login(email, password)
 
         if not ImapAccount.objects.filter(email=email).exists():
             imapAccount = ImapAccount(email=email, password=password, host=host)

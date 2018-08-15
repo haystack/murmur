@@ -35,11 +35,20 @@ def interpret(imap, code):
         def print_test():   
             print "print test"
 
-        def create_folder(inFolderName):
-            imap.create_folder(inFolderName)
+        def create_folder(folder):
+            imap.create_folder(folder)
+            print "Create folder name " + folder 
 
-        def select_folder(inFolderName):
-            imap.select_folder(inFolderName)
+        def list_folders(directory=u'', pattern=u'*'):
+            return imap.list_folders(directory, pattern)
+
+        def select_folder(folder):
+            imap.select_folder(folder)
+            print "Select a folder " + folder 
+
+        def rename_folder(old_name, new_name):
+            imap.rename_folder(old_name, new_name)
+            print "Rename " + old_name + " to " + new_name
 
         # print "code"
         # print code
