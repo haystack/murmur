@@ -22,14 +22,14 @@ def interpret(imap, code):
         def catch_exception(e):   
             etype, evalue = sys.exc_info()[:2]
             estr = traceback.format_exception_only(etype, evalue)
-            logstr = 'Error during executing your code'
+            logstr = 'Error during executing your code \n'
             for each in estr:
                 logstr += '{0}; '.format(each.strip('\n'))
 
             logstr = "%s \n %s" % (logstr, str(e))
 
             # Send this error msg to the user
-            res['code'] = logstr
+            res['imap_log'] = logstr
             res['imap_error'] = True
 
         def print_test():   
@@ -43,15 +43,13 @@ def interpret(imap, code):
 
         # print "code"
         # print code
-        d = dict(locals(), **globals())
-        # exec( code, d, d )
         try:
             exec code in globals(), locals()
         except Exception as e:
             catch_exception(e)
 
         if not res['imap_error']:
-            res['code'] = s.getvalue()
+            res['imap_log'] = s.getvalue()
 
         return res
 

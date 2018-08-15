@@ -72,6 +72,24 @@ $(document).ready(function() {
                     if (res.status) {
                         // TODO spin cogs, give feedback it's running
 
+                        var currentdate = new Date();
+                        var datetime = (currentdate.getMonth()+1) + "/"
+                        + currentdate.getDate() + "/" 
+                        + currentdate.getFullYear() + " @ "  
+                        + currentdate.getHours() + ":"  
+                        + currentdate.getMinutes() + ":" 
+                        + currentdate.getSeconds()
+                        + " | ";
+
+                        if(res['imap_error'])  {
+                            $( "<p>" + datetime + res['imap_log'] + "</p>" ).appendTo( "#console" )
+                              .addClass("error");
+                        }
+                        else {
+                            $( "<p>" + datetime + res['imap_log'] + "</p>" ).appendTo( "#console" )
+                              .addClass("info");
+                        }
+
                         if (res.code) { 
                             // some emails are not added since they are not members of the group
                             // $('#donotsend-msg').show();
