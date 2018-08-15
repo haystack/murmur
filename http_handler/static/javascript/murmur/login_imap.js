@@ -38,6 +38,8 @@ $(document).ready(function() {
                         if (res.status) {
                             // Show coding interfaces 
                             $("#login-email-form").hide();
+                            if ('imap_code' in res) 
+                                editor.setValue( res['imap_code'] );
                             
                             if (res.code) { 
                                 // some emails are not added since they are not members of the group

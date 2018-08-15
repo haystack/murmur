@@ -41,8 +41,8 @@ def interpret(imap, code):
         def select_folder(inFolderName):
             imap.select_folder(inFolderName)
 
-        print "code"
-        print code
+        # print "code"
+        # print code
         d = dict(locals(), **globals())
         # exec( code, d, d )
         try:
