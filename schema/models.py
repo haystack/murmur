@@ -335,7 +335,7 @@ class ImapAccount(models.Model):
 	access_token = models.CharField('access_token', max_length=100, blank=True)
 	refresh_token = models.CharField('refresh_token', max_length=100, blank=True)
 
-	code = models.TextField()
+	code = models.TextField(null=True, blank=True)
 	
 	arrive_action = models.CharField('access_token', max_length=1000, blank=True)
 	custom_action = models.CharField('custom_action', max_length=1000, blank=True)

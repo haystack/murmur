@@ -91,15 +91,6 @@ $(document).ready(function() {
         });
     
         $(".default-text").blur();
-        tinyMCE.init({
-            mode: "textareas",
-            theme: "advanced",
-            theme_advanced_buttons1: "bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,blockquote",
-            theme_advanced_toolbar_location: "top",
-            theme_advanced_toolbar_align: "left",
-            theme_advanced_statusbar_location: "bottom",
-            theme_advanced_resizing: true
-        });
 
     function guess_host( email_addr ) {
         if( email_addr.includes("gmail")) $("#input-host").val("imap.gmail.com");
