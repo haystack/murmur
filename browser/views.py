@@ -1431,7 +1431,7 @@ def login_imap(request):
 		
 		email = request.POST['email']
 		host = request.POST['host']
-		is_oauth = request.POST['is_oauth']
+		is_oauth = True if request.POST['is_oauth'] == "true" else False
 		password = request.POST['password']
 
 		res = engine.main.login_imap(user, email, password, host, is_oauth)

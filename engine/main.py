@@ -13,6 +13,7 @@ from pytz import utc
 from browser.util import *
 from browser.imap import *
 from constants import *
+from engine.google_auth import *
 from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
 from gmail_setup.api import update_gmail_filter, untrash_message
 from gmail_setup.views import build_services
@@ -1621,7 +1622,14 @@ def login_imap(user, email, password, host, is_oauth, push=True):
     try:
         imap = IMAPClient(host, use_uid=True)
         if is_oauth:
-            imap.oauth2_login(email, password)
+            # TODO If this imap account is already mapped with this account, by pass the login. 
+            oauth = GoogleOauth2()
+            print oauth.GeneratePermissionUrl()
+            response = oauth.generate_oauth2_token(password)
+            #refresh_token = response['refresh_token']
+            access_token = response['access_token']
+
+            imap.oauth2_login(email, access_token)
 
         else:   
             imap.login(email, password)

@@ -23,7 +23,7 @@ $(document).ready(function() {
 
     toggle_login_mode();
 	
-	$('#rdo-oauth').change(function() {
+	$('input[type=radio][name=auth-mode]').change(function() {
         toggle_login_mode();      
     });
 	
