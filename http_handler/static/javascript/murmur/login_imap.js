@@ -33,8 +33,8 @@ $(document).ready(function() {
             $(".oauth").show();
             $(".plain").hide();
 		} else {
-			$(".oauth").show();
-            $(".plain").hide();
+			$(".oauth").hide();
+            $(".plain").show();
 		}
 	}
 

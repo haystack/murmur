@@ -20,8 +20,11 @@ import json
 from optparse import OptionParser
 import smtplib
 import sys
-from urllib.request import urlopen
-import urllib.parse
+from urllib2 import urlopen
+try:
+    from urllib.parse import urlparse
+except ImportError:
+     from urlparse import urlparse
 import webbrowser
 from datetime import datetime, timedelta
 from http_handler.settings import WEBSITE, CLIENT_ID, CLIENT_SECRET
@@ -87,7 +90,7 @@ class GoogleOauth2():
 
   def UrlEscape(self, text):
     # See OAUTH 5.1 for a definition of which characters need to be escaped.
-    return urllib.parse.quote(text, safe='~-._')
+    return urllib.quote(text, safe='~-._')
 
 
   def UrlUnescape(self, text):
@@ -172,8 +175,11 @@ class GoogleOauth2():
     params['grant_type'] = 'authorization_code'
     request_url = self.AccountsUrl('o/oauth2/token')
 
-    response = urlopen(request_url, urllib.parse.urlencode(params).encode("utf-8")).read()
-    return json.loads(response.decode('utf-8'))
+    #response = urlopen(request_url, urllib.parse.urlencode(params).encode("utf-8")).read()
+    #return json.loads(response.decode('utf-8'))
+
+    response = urllib.urlopen(request_url, urllib.urlencode(params)).read()
+    return json.loads(response)
 
   def GenerateOAuth2String(self, username, access_token, base64_encode=True):
     """Generates an IMAP OAuth2 authentication string.
