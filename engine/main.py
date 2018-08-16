@@ -1679,7 +1679,11 @@ def run_mailbot(user, email, code, push=True):
         imapAccount = ImapAccount.objects.get(email=email)
 
         imap = IMAPClient(imapAccount.host, use_uid=True)
-        imap.login(email, imapAccount.password)
+        if imapAccount.is_oauth:
+            imap.oauth2_login(email, imapAccount.access_token)
+
+        else:
+            imap.login(email, imapAccount.password)
 
         # TODO execute the code
         res = interpret(imap, code)
