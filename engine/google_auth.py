@@ -34,8 +34,8 @@ class GoogleOauth2():
   GOOGLE_ACCOUNTS_BASE_URL = 'https://accounts.google.com'
 
   # Hardcoded dummy redirect URI for non-web apps.
-  REDIRECT_URI = 'http://murmur-dev.csail.mit.edu/login_email'
-  #REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
+  # REDIRECT_URI = 'http://murmur-dev.csail.mit.edu/login_email'
+  REDIRECT_URI = 'urn:ietf:wg:oauth:2.0:oob'
   # Record when access token is created to check whether it is expired 
   TOKEN_EXPIRED_TIME = None
 

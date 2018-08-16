@@ -48,6 +48,8 @@ def _get_website():
     return website
     
 WEBSITE = _get_website()
+CLIENT_ID = ''
+CLIENT_SECRET = ''
 
 try:
     execfile(SITE_ROOT + '/../private.py')
@@ -79,8 +81,6 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
 DEFAULT_EMAIL = 'no-reply@' + BASE_URL
 DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
-CLIENT_ID = ''
-CLIENT_SECRET = ''
 
 
 DATABASES = {
