@@ -5,6 +5,8 @@ try:
 except ImportError:
     import io
 import contextlib
+from smtp_handler.utils import *
+from email import message_from_string
 
 def interpret(imap, code):
     res = {'status' : False, 'imap_error': False}
@@ -34,6 +36,26 @@ def interpret(imap, code):
 
         def print_test():   
             print "print test"
+
+        # return a list of email UIDs
+        def search(criteria=u'ALL', charset=None):
+            return self.imap.search(criteria, charset)
+
+        def get_body_test(messages):
+            # raw=email.message_from_bytes(data[0][1])
+            response = self.imap.fetch(messages, ['BODY[TEXT]'])
+            bodys = []
+            for msgid, data in response.items():
+                body = email.message_from_string(data[b'BODY[TEXT]'].decode('utf-8'))
+                bodys.append( get_body(body) )
+                # print (body)
+
+            # self.mark_read(False, unreads)
+            
+            # email_message = email.message_from_string(str(message))
+            # msg_text = get_body(email_message)
+
+            return bodys
 
         def create_folder(folder):
             imap.create_folder(folder)
