@@ -284,7 +284,6 @@ class UserProfile(AbstractBaseUser):
 	is_admin = models.BooleanField(default=False)
 	date_joined = models.DateTimeField(auto_now=True)
 	hash = models.CharField(max_length=40, default="")
-	imapAccount = models.ForeignKey('ImapAccount', blank=True, null=True)
 
 	objects = MyUserManager()
 
@@ -341,6 +340,8 @@ class ImapAccount(models.Model):
 	custom_action = models.CharField('custom_action', max_length=1000, blank=True)
 	timer_action = models.CharField('timer_action', max_length=1000, blank=True)
 	repeat_action = models.CharField('repeat_action', max_length=1000, blank=True)
+
+	user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True)
 
 class Following(models.Model):
 	id = models.AutoField(primary_key=True)

@@ -20,11 +20,7 @@ import json
 from optparse import OptionParser
 import smtplib
 import sys
-from urllib2 import urlopen
-try:
-    from urllib.parse import urlparse
-except ImportError:
-     from urlparse import urlparse
+import urllib
 import webbrowser
 from datetime import datetime, timedelta
 from http_handler.settings import WEBSITE, CLIENT_ID, CLIENT_SECRET

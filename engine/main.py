@@ -1621,12 +1621,15 @@ def login_imap(user, email, password, host, is_oauth, push=True):
 
     try:
         imap = IMAPClient(host, use_uid=True)
+
+        refresh_token = ''
+        access_token = ''
+
         if is_oauth:
             # TODO If this imap account is already mapped with this account, by pass the login. 
             oauth = GoogleOauth2()
-            print oauth.GeneratePermissionUrl()
             response = oauth.generate_oauth2_token(password)
-            #refresh_token = response['refresh_token']
+            refresh_token = response['refresh_token']
             access_token = response['access_token']
 
             imap.oauth2_login(email, access_token)
@@ -1634,8 +1637,17 @@ def login_imap(user, email, password, host, is_oauth, push=True):
         else:   
             imap.login(email, password)
 
+        # Log out after auth verification
+        imap.logout()
+
         if not ImapAccount.objects.filter(email=email).exists():
             imapAccount = ImapAccount(email=email, password=password, host=host)
+
+            if is_oauth:
+                imapAccount.is_oauth = is_oauth
+                imapAccount.access_token = access_token
+                imapAccount.refresh_token = refresh_token
+
             imapAccount.save()
 
             res['code'] = "New user"
