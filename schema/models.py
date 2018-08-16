@@ -331,8 +331,8 @@ class ImapAccount(models.Model):
 	host = models.CharField('host', max_length=100)
 
 	is_oauth = models.BooleanField(default=False)
-	access_token = models.CharField('access_token', max_length=100, blank=True)
-	refresh_token = models.CharField('refresh_token', max_length=100, blank=True)
+	access_token = models.CharField('access_token', max_length=200, blank=True)
+	refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
 
 	code = models.TextField(null=True, blank=True)
 	
