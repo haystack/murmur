@@ -4,6 +4,7 @@ from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE
 from schema.models import *
 from datetime import datetime, timedelta
 from browser.imap import *
+from imapclient import IMAPClient
 
 class Command(BaseCommand):
     args = ''
@@ -11,7 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         imapAccounts = ImapAccount.objects.filter().exclude(code="")
-        for imapAccount in ImapAccounts:
+        for imapAccount in imapAccounts:
             res = {'status' : False, 'imap_error': False}
             print "RUN MAILbot of ", imapAccount.email
 
@@ -42,7 +43,7 @@ class Command(BaseCommand):
                     imapAccount.save()
 
                     # TODO save log 
-
+                    print res['imap_log']
 
                 # TODO send the error msg via email to the user
                 #if res['imap_error']:

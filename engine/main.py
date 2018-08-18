@@ -1650,6 +1650,7 @@ def login_imap(user, email, password, host, is_oauth, push=True):
 
             imapAccount.save()
 
+
             res['code'] = "New user"
 
         else:
@@ -1681,17 +1682,17 @@ def run_mailbot(user, email, code, push=True):
         imapAccount.code = code 
         imapAccount.save()
 
-        # imap = IMAPClient(imapAccount.host, use_uid=True)
-        # if imapAccount.is_oauth:
-        #     # TODO if access_token is expired, then get a new token 
-        #     imap.oauth2_login(email, imapAccount.access_token)
+        imap = IMAPClient(imapAccount.host, use_uid=True)
+        if imapAccount.is_oauth:
+            # TODO if access_token is expired, then get a new token 
+            imap.oauth2_login(email, imapAccount.access_token)
 
-        # else:
-        #     imap.login(email, imapAccount.password)
+        else:
+            imap.login(email, imapAccount.password)
 
-        # uid = fetch_latest_email(imapAccount, imap)
-        # imapAccount.newest_msg_id = uid
-        # imapAccount.save()
+        uid = fetch_latest_email(imapAccount, imap)
+        imapAccount.newest_msg_id = uid
+        imapAccount.save()
 
         # res = interpret(imap, code)
 
