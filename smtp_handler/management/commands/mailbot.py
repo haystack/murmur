@@ -5,6 +5,7 @@ from schema.models import *
 from datetime import datetime, timedelta
 from browser.imap import *
 from imapclient import IMAPClient
+from engine.constants import *
 
 class Command(BaseCommand):
     args = ''
@@ -37,7 +38,7 @@ class Command(BaseCommand):
                 if new_uid > imapAccount.newest_msg_id:
                     imap.select_folder("INBOX")
 
-                    res = interpret(imap, imapAccount.code, imap.search("UID %d:%d") % (imapAccount.newest_msg_id +1, new_uid))
+                    res = interpret(imap, imapAccount.code, "UID %d:%d" % (imapAccount.newest_msg_id +1, new_uid))
                 
                     imapAccount.newest_msg_id = new_uid
                     imapAccount.save()

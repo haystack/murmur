@@ -1690,7 +1690,7 @@ def run_mailbot(user, email, code, push=True):
         else:
             imap.login(email, imapAccount.password)
 
-        uid = fetch_latest_email(imapAccount, imap)
+        uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
         imapAccount.save()
 

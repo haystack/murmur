@@ -21,9 +21,10 @@ def fetch_latest_email_id(imap_account, imap_client):
 
     return max(uid_list)
 
-def interpret(imap, code, messages):
+def interpret(imap, code, search_creteria):
     res = {'status' : False, 'imap_error': False}
-    pile = Pile(messages)
+    pile = Pile(imap, search_creteria)
+    messages = imap.search( search_creteria )
 
     @contextlib.contextmanager
     def stdoutIO(stdout=None):
