@@ -1,5 +1,4 @@
 from email.parser import HeaderParser
-from Log import *
 import heapq
 import email
 from smtp_handler.utils import *
@@ -14,7 +13,7 @@ class Pile():
     def __init__(self, imap, search_criteria):
         self.imap = imap
         self.search_criteria = search_criteria
-        writeLog ("info", self.search_criteria)
+        print ("info", self.search_criteria)
 
     def add_flags(self, flags):
         if type(flags) is not list:
@@ -35,7 +34,7 @@ class Pile():
 
     def get_count(self):
         messages = self.imap.search( self.search_criteria )
-        writeLog ("info", "Mmail getCount(): " + self.search_criteria + str(len(messages)))
+        print ("info", "Mmail getCount(): " + self.search_criteria + str(len(messages)))
         # print (messages)
         return len(messages)
 
