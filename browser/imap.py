@@ -6,10 +6,24 @@ except ImportError:
     import io
 import contextlib
 from smtp_handler.utils import *
+from smtp_handler.Pile import *
 from email import message_from_string
 
-def interpret(imap, code):
+def fetch_latest_email_id(imap_account, imap_client):
+    imap_client.select_folder("INBOX")
+    uid_list = []
+
+    if imap_account.newest_msg_id == -1:
+        uid_list = imap_client.search("UID 99999:*")
+
+    else:
+        uid_list = imap_client.search("UID %d:*" % imap_account.newest_msg_id)
+
+    return max(uid_list)
+
+def interpret(imap, code, messages):
     res = {'status' : False, 'imap_error': False}
+    pile = Pile(messages)
 
     @contextlib.contextmanager
     def stdoutIO(stdout=None):
@@ -37,13 +51,59 @@ def interpret(imap, code):
         def print_test():   
             print "print test"
 
+        def copy(src_folder, dst_folder):
+            select_folder(src_folder)
+            return imap.copy(messages, dst_folder)
+
+        def move(src_folder, dst_folder):
+            select_folder(src_folder)
+
+            copy(src_folder, dst_folder)
+            delete()
+
+        def delete():
+            imap.delete_messages(messages)
+
+        def get_senders():
+            return pile.get_senders()
+
+        def get_receipients():
+            return pile.get_receipients()
+
+        def get_contents():
+            return pile.get_contents()
+
+        def get_dates():
+            return pile.get_dates()
+
+        def get_attachments():    
+            pass
+
+        def get_subjects():
+            return pile.get_subjects()
+
+        def get_flags():        
+            return pile.get_flags()
+
         # return a list of email UIDs
-        def search(criteria=u'ALL', charset=None):
-            return self.imap.search(criteria, charset)
+        def search(criteria=u'ALL', charset=None, folder=None):
+            # TODO how to deal with folders
+            # iterate through all the functions
+            if folder is None:
+                pass
+            
+            # iterate through a folder of list of folder
+            else:
+                # if it's a list iterate
+                pass
+                # else it's a string search a folder
+
+            select_folder('INBOX')
+            return imap.search(criteria, charset)
 
         def get_body_test(messages):
             # raw=email.message_from_bytes(data[0][1])
-            response = self.imap.fetch(messages, ['BODY[TEXT]'])
+            response = imap.fetch(messages, ['BODY[TEXT]'])
             bodys = []
             for msgid, data in response.items():
                 body = email.message_from_string(data[b'BODY[TEXT]'].decode('utf-8'))

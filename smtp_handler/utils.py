@@ -314,6 +314,8 @@ def get_body(email_message):
 			elif subtype == 'html':
 				res['html'] += remove_html_ps(body)
 
+	print res
+
 	return res
 
 

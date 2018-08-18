@@ -1678,20 +1678,27 @@ def run_mailbot(user, email, code, push=True):
     try:
         imapAccount = ImapAccount.objects.get(email=email)
 
-        imap = IMAPClient(imapAccount.host, use_uid=True)
-        if imapAccount.is_oauth:
-            imap.oauth2_login(email, imapAccount.access_token)
+        imapAccount.code = code 
+        imapAccount.save()
 
-        else:
-            imap.login(email, imapAccount.password)
+        # imap = IMAPClient(imapAccount.host, use_uid=True)
+        # if imapAccount.is_oauth:
+        #     # TODO if access_token is expired, then get a new token 
+        #     imap.oauth2_login(email, imapAccount.access_token)
 
-        # TODO execute the code
-        res = interpret(imap, code)
+        # else:
+        #     imap.login(email, imapAccount.password)
+
+        # uid = fetch_latest_email(imapAccount, imap)
+        # imapAccount.newest_msg_id = uid
+        # imapAccount.save()
+
+        # res = interpret(imap, code)
 
         # if the code execute well without any bug, then save the code to DB
-        if not res['imap_error']:
-            imapAccount.code = code 
-            imapAccount.save()
+        # if not res['imap_error']:
+        #     imapAccount.code = code 
+        #     imapAccount.save()
 
         res['status'] = True
 
