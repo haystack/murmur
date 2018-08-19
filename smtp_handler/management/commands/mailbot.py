@@ -50,7 +50,11 @@ class Command(BaseCommand):
                 if new_uid > imapAccount.newest_msg_id:
                     imap.select_folder("INBOX")
 
-                    for i in range(imapAccount.newest_msg_id +1, new_uid+1):
+                    for i in range(imapAccount.newest_msg_id +1, new_uid+1): 
+                        print "Sender of new email is", Pile(imap, "UID %d" % (i)).get_sender()
+                        if Pile(imap, "UID %d" % (i)).get_sender() == "mailbot-log@murmur.csail.mit.edu":
+                            continue
+                            
                         print "Processing email UID", i
                         res = interpret(imap, imapAccount.code, "UID %d" % (i))
                 

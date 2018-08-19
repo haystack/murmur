@@ -12,7 +12,7 @@ from email import message_from_string,message
 
 def append(imap, subject, content):
     new_message = message.Message()
-    new_message["From"] = "no-reply@murmur.csail.mit.edu"
+    new_message["From"] = "mailbot-log@murmur.csail.mit.edu"
     new_message["Subject"] = subject
     new_message.set_payload(content)
     
