@@ -38,7 +38,8 @@ class Command(BaseCommand):
                 if new_uid > imapAccount.newest_msg_id:
                     imap.select_folder("INBOX")
 
-                    res = interpret(imap, imapAccount.code, "UID %d:%d" % (imapAccount.newest_msg_id +1, new_uid))
+                    for i in range(imapAccount.newest_msg_id +1, new_uid+1):
+                        res = interpret(imap, imapAccount.code, "UID %d" % (i))
                 
                     imapAccount.newest_msg_id = new_uid
                     imapAccount.save()

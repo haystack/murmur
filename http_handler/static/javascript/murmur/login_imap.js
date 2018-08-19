@@ -36,7 +36,14 @@ $(document).ready(function() {
 			$(".oauth").hide();
             $(".plain").show();
 		}
-	}
+    }
+    
+    function spinStatusCog(spin) {
+        if(spin)
+          $("svg.fa-cog").addClass("fa-spin");
+        else 
+          $("svg.fa-cog").removeClass("fa-spin");
+    }
 
     
         btn_login.click(function() {
@@ -56,8 +63,10 @@ $(document).ready(function() {
                         if (res.status) {
                             // Show coding interfaces 
                             $("#login-email-form").hide();
-                            if ('imap_code' in res) 
+                            if ('imap_code' in res) {
                                 editor.setValue( res['imap_code'] );
+                                spinStatusCog(true);
+                            }
                             
                             if (res.code) { 
                                 // some emails are not added since they are not members of the group
@@ -80,6 +89,10 @@ $(document).ready(function() {
                 'email': $("#input-email").val(),
                 'code': editor.getValue()
             };
+
+            // TODO
+            if (editor.getValue() == "") spinStatusCog(false);
+            else spinStatusCog(true);
     
             $.post('/run_mailbot', params,
                 function(res) {

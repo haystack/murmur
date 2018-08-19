@@ -65,6 +65,31 @@ def interpret(imap, code, search_creteria):
         def delete():
             imap.delete_messages(messages)
 
+        def mark_read(is_seen);
+            pile.mark_read(is_seen, messages)
+
+        def get_sender():
+            return pile.get_senders()[0]
+
+        def get_receipient():
+            return pile.get_receipients()[0]
+
+        def get_content():
+            return pile.get_contents()[0]
+
+        def get_date():
+            return pile.get_dates()[0]
+
+        def get_attachment():    
+            pass
+
+        def get_subject():
+            return pile.get_subjects()[0]
+
+        def get_flag():        
+            return pile.get_flags()[0]
+
+
         def get_senders():
             return pile.get_senders()
 
