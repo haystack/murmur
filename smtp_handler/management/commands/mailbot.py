@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from browser.imap import *
 from imapclient import IMAPClient
 from engine.constants import *
+from smtp_handler.Pile import *
 
 class Command(BaseCommand):
     args = ''
@@ -51,8 +52,8 @@ class Command(BaseCommand):
                     imap.select_folder("INBOX")
 
                     for i in range(imapAccount.newest_msg_id +1, new_uid+1): 
-                        print "Sender of new email is", Pile(imap, "UID %d" % (i)).get_sender()
-                        if Pile(imap, "UID %d" % (i)).get_sender() == "mailbot-log@murmur.csail.mit.edu":
+                        print "Sender of new email is", Pile(imap, "UID %d" % (i)).get_senders()
+                        if Pile(imap, "UID %d" % (i)).get_senders() == "mailbot-log@murmur.csail.mit.edu":
                             continue
                             
                         print "Processing email UID", i
