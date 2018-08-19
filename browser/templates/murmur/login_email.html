@@ -58,6 +58,7 @@
 						<div class="card-block">
 						  <textarea id="code" name="code">
 if "newsletter" in get_subject():
+    print "Delete the email from %s at %s" % (get_sender(), get_date())
     delete()
     
 elif "csail-related" in get_subject():
@@ -67,7 +68,7 @@ elif "csail-related" in get_subject():
 					  </div>
 		
 					  <div id="console" class="info">
-						<!-- <p class="info">Output from the engine will be displayed here. Press a button "RUN" to start your engine.</p> -->
+						<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
 					  </div>
 					</div>
 			  </div>
