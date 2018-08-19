@@ -71,14 +71,11 @@ def interpret(imap, code, search_creteria):
         def get_sender():
             return pile.get_senders()[0]
 
-        def get_recipient():
-            return pile.get_recipients()[0]
-
         def get_content():
             return pile.get_contents()[0]
 
         def get_date():
-            return pile.get_dates()[0]
+            return pile.get_dates()[0][1]
 
         def get_attachment():    
             pass

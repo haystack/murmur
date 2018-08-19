@@ -39,6 +39,7 @@ class Command(BaseCommand):
                     imap.select_folder("INBOX")
 
                     for i in range(imapAccount.newest_msg_id +1, new_uid+1):
+                        print "Processing email UID", i
                         res = interpret(imap, imapAccount.code, "UID %d" % (i))
                 
                     imapAccount.newest_msg_id = new_uid
@@ -47,7 +48,11 @@ class Command(BaseCommand):
                     # TODO save log 
                     print res['imap_log']
 
-                # TODO send the error msg via email to the user
+                    # TODO send the error msg via email to the user
+                    if res['imap_error']:
+                        pass
+
+                
                 #if res['imap_error']:
                 #    imapAccount.save()
             except IMAPClient.Error, e:
