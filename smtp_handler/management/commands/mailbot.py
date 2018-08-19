@@ -52,8 +52,10 @@ class Command(BaseCommand):
                     imap.select_folder("INBOX")
 
                     for i in range(imapAccount.newest_msg_id +1, new_uid+1): 
-                        print "Sender of new email is", Pile(imap, "UID %d" % (i)).get_senders()
-                        if Pile(imap, "UID %d" % (i)).get_senders() == "mailbot-log@murmur.csail.mit.edu":
+                        p = Pile(imap, "UID %d" % (i))
+                        print "Sender of new email is", p.get_senders()
+
+                        if p.get_senders()[0] == "mailbot-log@murmur.csail.mit.edu":
                             continue
                             
                         print "Processing email UID", i
@@ -64,7 +66,8 @@ class Command(BaseCommand):
 
                     # TODO save log 
                     print res['imap_log']
-                    append(imap, "Murmur mailbot log", res['imap_log'])
+                    if res['imap_log'] != "":
+                        append(imap, "Murmur mailbot log", res['imap_log'])
 
                     # TODO send the error msg via email to the user
                     if res['imap_error']:

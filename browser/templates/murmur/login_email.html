@@ -57,11 +57,11 @@
 						</div>
 						<div class="card-block">
 						  <textarea id="code" name="code">
-def doAction(newEmail):
-	if "free food" in newEmail.get_subjects()[0]:
-		send("my_colleague@mit.edu", "Free food is here!", "\n".join(newEmail.get_subjects()))
-		
-onArrive(doAction)
+if "newsletter" in get_subject():
+    delete()
+    
+elif "csail-related" in get_subject():
+    mark_read(True)
 						  </textarea>
 						</div>
 					  </div>
