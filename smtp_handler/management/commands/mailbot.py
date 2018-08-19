@@ -59,6 +59,7 @@ class Command(BaseCommand):
 
                     # TODO save log 
                     print res['imap_log']
+                    append(imap, "Murmur mailbot log", res['imap_log'])
 
                     # TODO send the error msg via email to the user
                     if res['imap_error']:

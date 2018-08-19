@@ -7,7 +7,16 @@ except ImportError:
 import contextlib
 from smtp_handler.utils import *
 from smtp_handler.Pile import *
-from email import message_from_string
+from email import message_from_string,message
+
+
+def append(imap, subject, content):
+    new_message = message.Message()
+    new_message["From"] = "no-reply@murmur.csail.mit.edu"
+    new_message["Subject"] = subject
+    new_message.set_payload(content)
+    
+    imap.append('INBOX', str(new_message), ('murmur-log'))
 
 def fetch_latest_email_id(imap_account, imap_client):
     imap_client.select_folder("INBOX")
@@ -49,8 +58,6 @@ def interpret(imap, code, search_creteria):
             res['imap_log'] = logstr
             res['imap_error'] = True
 
-        def print_test():   
-            print "print test"
 
         def copy(src_folder, dst_folder):
             select_folder(src_folder)
