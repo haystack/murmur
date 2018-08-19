@@ -27,7 +27,19 @@ class Command(BaseCommand):
 
                 new_uid = fetch_latest_email_id(imapAccount, imap)
             except IMAPClient.Error, e:
-                res['code'] = "Can't authenticate your email"
+                # TODO try to renew the access token
+                try: 
+                    if imapAccount.is_oauth:
+                        oauth = GoogleOauth2()
+                        response = oauth.RefreshToken(imapAccount.refresh_token)
+                        imap.oauth2_login(imapAccount.email, response['access_token'])
+
+                        imapAccount.access_token = response['access_token']
+                        imapAccount.save()
+                    else:
+                        res['code'] = "Can't authenticate your email"
+                except IMAPClient.Error, e:  
+                    res['code'] = "Can't authenticate your email"
             except Exception, e:
                 # TODO add exception
                 print e
