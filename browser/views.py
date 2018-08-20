@@ -390,15 +390,8 @@ def group_list(request):
 		return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
 
 @render_to(WEBSITE+"/login_email.html")
-@login_required
 def login_imap_view(request):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	
-	try:
-		return {'user': request.user, 'website': WEBSITE}
-
-	except Group.DoesNotExist:
-		return redirect('/404?e=admin')
+	return {'website': WEBSITE}
 
 @render_to(WEBSITE+"/add_members.html")
 @login_required
