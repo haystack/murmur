@@ -108,16 +108,17 @@ $(document).ready(function() {
                         + " | ";
 
                         if(res['imap_error'])  {
+                            $( "<p>" + datetime + res['imap_log'] + "</p>" ).appendTo( "#console" )
+                            .addClass("error");
+
+                            spinStatusCog(false);   
+                        }
+                        else {
                             $( "<p>" + datetime + "Your rule is successfully installed" + "</p>" ).appendTo( "#console" )
-                              .addClass("error");
+                            .addClass("info");
 
                             if (editor.getValue() == "") spinStatusCog(false);
                             else spinStatusCog(true);
-                        }
-                        else {
-                            $( "<p>" + datetime + res['imap_log'] + "</p>" ).appendTo( "#console" )
-                              .addClass("info");
-                            spinStatusCog(false);
                         }
 
                         if (res.code) { 
