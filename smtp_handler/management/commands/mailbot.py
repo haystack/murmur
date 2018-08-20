@@ -50,7 +50,7 @@ class Command(BaseCommand):
                 # execute user's rule only when there is a new email arrive
                 if new_uid > imapAccount.newest_msg_id:
                     imap.select_folder("INBOX")
-
+                    execution_logs = ""
                     for i in range(imapAccount.newest_msg_id +1, new_uid+1): 
                         p = Pile(imap, "UID %d" % (i))
                         print "Sender of new email is", p.get_senders()
@@ -60,13 +60,16 @@ class Command(BaseCommand):
                             
                         print "Processing email UID", i
                         res = interpret(imap, imapAccount.code, "UID %d" % (i))
+
+                        if res['imap_log'] != "":
+                            execution_logs += (res['imap_log'] + "\n")
                 
                     imapAccount.newest_msg_id = new_uid
                     imapAccount.save()
 
                     # TODO save log 
-                    print res['imap_log']
-                    if res['imap_log'] != "":
+                    print execution_logs
+                    if execution_logs != "":
                         append(imap, "Murmur mailbot log", res['imap_log'])
 
                     # TODO send the error msg via email to the user

@@ -62,7 +62,11 @@ if "newsletter" in get_subject():
     delete()
     
 elif "csail-related" in get_subject():
-    mark_read(True)
+		mark_read(True)
+		
+elif "action required" in get_subject():
+    add_flags(["TODO"])
+    print "Flags are ", get_flags()
 						  </textarea>
 						</div>
 					  </div>

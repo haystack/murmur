@@ -40,12 +40,11 @@ $(document).ready(function() {
     
     function spinStatusCog(spin) {
         if(spin)
-          $("svg.fa-cog").addClass("fa-spin");
+            document.querySelector("svg.fa-cog").classList.add("fa-spin");
         else 
-          $("svg.fa-cog").removeClass("fa-spin");
+            document.querySelector("svg.fa-cog").classList.remove("fa-spin");
     }
 
-    
         btn_login.click(function() {
                 var params = {
                     'email': $("#input-email").val(),
@@ -90,10 +89,6 @@ $(document).ready(function() {
                 'code': editor.getValue()
             };
 
-            // TODO
-            if (editor.getValue() == "") spinStatusCog(false);
-            else spinStatusCog(true);
-    
             $.post('/run_mailbot', params,
                 function(res) {
                     // $('#donotsend-msg').hide();
@@ -113,12 +108,16 @@ $(document).ready(function() {
                         + " | ";
 
                         if(res['imap_error'])  {
-                            $( "<p>" + datetime + res['imap_log'] + "</p>" ).appendTo( "#console" )
+                            $( "<p>" + datetime + "Your rule is successfully installed" + "</p>" ).appendTo( "#console" )
                               .addClass("error");
+
+                            if (editor.getValue() == "") spinStatusCog(false);
+                            else spinStatusCog(true);
                         }
                         else {
                             $( "<p>" + datetime + res['imap_log'] + "</p>" ).appendTo( "#console" )
                               .addClass("info");
+                            spinStatusCog(false);
                         }
 
                         if (res.code) { 

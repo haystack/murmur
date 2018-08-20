@@ -1694,6 +1694,8 @@ def run_mailbot(user, email, code, push=True):
         imapAccount.newest_msg_id = uid
         imapAccount.save()
 
+        res['imap_log'] = "Your rule is successfully installed"
+
         # res = interpret(imap, code)
 
         # if the code execute well without any bug, then save the code to DB
