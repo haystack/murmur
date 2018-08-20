@@ -51,75 +51,14 @@
             <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand" id="logo" href="/"><img class="icon" src="/static/images/favicon/favicon-194x194.png">Murmur</a>
-        </div>
+				</div>
+				
+				<div class="navbar-collapse collapse"></div>
         {% if user.is_authenticated %}
         <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-          	
-          	{% if not group_page %}
-	            <li class="dropdown dropdown-left">
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="active_group">{{ active_group.name }}</span><span class="caret"></span></a>
-	              <ul class="dropdown-menu" role="menu">
-	              	{% for group in groups %}
-	                	<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
-					{% endfor %}
-	                <li class="divider"></li>
-	                <li><a href="/my_groups">Manage my groups</a></li>
-	                <li><a href="/group_list">Join/create new groups</a></li>
-	              </ul>
-	            </li>
-	            
-	            <li><a href="/my_groups">My Groups</a></li>
-	            <li><a href="/group_list">Explore Groups</a></li>
-	        
-            {% else %}
-            	<li class="dropdown dropdown-left">
-            	{% if groups %}
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>View Posts</span><span class="caret"></span></a>
-	            {% else %}
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>No Groups Yet</span><span class="caret"></span></a>
-	            {% endif %}
-	              	<ul class="dropdown-menu" role="menu" id="list-group-names">
-		              	{% for group in groups %}
-		              		{% if group.name == active_group %}
-		              			<li><a href="/posts?group_name={{ group.name }}"><span id="active_group">{{ group.name }}</span></a></li>
-		              		{% else %}
-		                		<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
-		                	{% endif %}
-						{% endfor %}
-	                <li class="divider"></li>
-	                <li><a href="/my_groups">Manage my groups</a></li>
-	                <li><a href="/group_list">Join/create new groups</a></li>
-	              </ul>
-	            </li>
-            	{% if my_groups %}
-            		<li class="active"><a href="/my_groups">My Groups</a></li>
-            		<li><a href="/group_list">Explore Groups</a></li>
-            	{% else %}
-            		<li><a href="/my_groups">My Groups</a></li>
-            		<li class="active"><a href="/group_list">Explore Groups</a></li>
-				{% endif %}
-            {% endif %}
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown dropdown-right">
-            	<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="user_email">{{ user.email|truncatechars:24 }}</span><span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a href="/settings">Settings</a></li>
-                <li><a href="/accounts/logout">Logout</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div><!--/.nav-collapse -->
-        
-        {% else %}
-        <div class="navbar-collapse collapse">
-        	<ul class="nav navbar-nav navbar-right">
-        		<li><a href="/accounts/login/">Login</a></li>
-        		<li><a href="/accounts/register/">Register</a></li>
-        	</ul>
-        </div>
-        {% endif %}
+					<ul class="nav navbar-nav"></ul>
+				</div>
+
       </div>
     </div>
 	
