@@ -152,9 +152,14 @@ $(document).ready(function() {
             $("#link-less-secure").attr('href', "https://myaccount.google.com/lesssecureapps");
             $("#rdo-oauth").removeAttr('disabled');
         }
-        else if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");
-        else if ( email_addr.includes("csail")) $("#input-host").val("imap.csail.mit.edu");
-        else if ( email_addr.includes("mit")) $("#input-host").val("imap.exchange.mit.edu");
-        else $("#input-host").val("");
+        else {
+            $("#rdo-plain").not(':checked').prop("checked", true);
+            
+            if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");
+            else if ( email_addr.includes("csail")) $("#input-host").val("imap.csail.mit.edu");
+            else if ( email_addr.includes("mit")) $("#input-host").val("imap.exchange.mit.edu");
+            else $("#input-host").val("");
+        }
+        
     }
 });
