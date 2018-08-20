@@ -141,4 +141,5 @@ class Pile():
             self.imap.remove_flags(inMsgs, '\\Seen')     
     
 
-    
+    def remove_flags(self, flags):
+        self.imap.remove_flags(self.get_IDs(), flags)

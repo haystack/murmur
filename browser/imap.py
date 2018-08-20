@@ -58,22 +58,15 @@ def interpret(imap, code, search_creteria):
             res['imap_log'] = logstr
             res['imap_error'] = True
 
+        def add_flags(flags): 
+            pile.add_flags(flags)
 
         def copy(src_folder, dst_folder):
             select_folder(src_folder)
             return imap.copy(messages, dst_folder)
 
-        def move(src_folder, dst_folder):
-            select_folder(src_folder)
-
-            copy(src_folder, dst_folder)
-            delete()
-
         def delete():
             imap.delete_messages(messages)
-
-        def mark_read(is_seen):
-            pile.mark_read(is_seen, messages)
 
         def get_sender():
             return pile.get_senders()[0]
@@ -114,6 +107,18 @@ def interpret(imap, code, search_creteria):
 
         def get_flags():        
             return pile.get_flags()
+
+        def mark_read(is_seen):
+            pile.mark_read(is_seen, messages)
+
+        def move(src_folder, dst_folder):
+            select_folder(src_folder)
+
+            copy(src_folder, dst_folder)
+            delete()
+
+        def remove_flags(flags): 
+            pile.remove_flags(flags)
 
         # return a list of email UIDs
         def search(criteria=u'ALL', charset=None, folder=None):
