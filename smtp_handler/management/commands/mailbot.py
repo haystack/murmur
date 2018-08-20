@@ -7,6 +7,7 @@ from browser.imap import *
 from imapclient import IMAPClient
 from engine.constants import *
 from smtp_handler.Pile import *
+from engine.google_auth import *
 
 class Command(BaseCommand):
     args = ''

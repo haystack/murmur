@@ -147,8 +147,8 @@ class GoogleOauth2():
     params['grant_type'] = 'refresh_token'
     request_url = self.AccountsUrl('o/oauth2/token')
 
-    response = urlopen(request_url, urllib.parse.urlencode(params).encode("utf-8")).read()
-    return json.loads(response.decode('utf-8'))
+    response = urllib.urlopen(request_url, urllib.urlencode(params)).read()
+    return json.loads(response)
 
   def AuthorizeTokens(self, client_id, client_secret, authorization_code):
     """Obtains OAuth access token and refresh token.
