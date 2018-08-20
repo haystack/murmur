@@ -1424,17 +1424,14 @@ def donotsend_list(request):
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
-@login_required
 def login_imap(request):
 	try:
-		user = get_object_or_404(UserProfile, email=request.user.email)
-		
 		email = request.POST['email']
 		host = request.POST['host']
 		is_oauth = True if request.POST['is_oauth'] == "true" else False
 		password = request.POST['password']
 
-		res = engine.main.login_imap(user, email, password, host, is_oauth)
+		res = engine.main.login_imap(email, password, host, is_oauth)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

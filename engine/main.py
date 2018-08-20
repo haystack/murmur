@@ -1616,7 +1616,7 @@ def update_donotsend_list(user, group_name, emails, push=True):
     logging.debug(res)
     return res 
 
-def login_imap(user, email, password, host, is_oauth, push=True):
+def login_imap(email, password, host, is_oauth, push=True):
     res = {'status' : False}
 
     try:
@@ -1641,7 +1641,7 @@ def login_imap(user, email, password, host, is_oauth, push=True):
         imap.logout()
 
         if not ImapAccount.objects.filter(email=email).exists():
-            imapAccount = ImapAccount(user=user, email=email, password=password, host=host)
+            imapAccount = ImapAccount(email=email, password=password, host=host)
 
             if is_oauth:
                 imapAccount.is_oauth = is_oauth
