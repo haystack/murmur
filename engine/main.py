@@ -1627,7 +1627,7 @@ def login_imap(email, password, host, is_oauth, push=True):
 
         refresh_token = ''
         access_token = ''
-
+        password_original = password
         if is_oauth:
             # TODO If this imap account is already mapped with this account, by pass the login. 
             oauth = GoogleOauth2()
@@ -1639,13 +1639,13 @@ def login_imap(email, password, host, is_oauth, push=True):
 
         else:   
             imap.login(email, password)
-
+             
             #encrypt password then save
             aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
 
             # padding password
             padding = random.choice(string.letters)
-            extra = len(s) % 16
+            extra = len(password) % 16
             if extra > 0:
                 password = password + (padding * (16 - extra))
             password = aes.encrypt(password)
@@ -1653,17 +1653,25 @@ def login_imap(email, password, host, is_oauth, push=True):
         # Log out after auth verification
         imap.logout()
 
-        if not ImapAccount.objects.filter(email=email).exists():
-            imapAccount = ImapAccount(email=email, password=password, host=host)
+        if not UserProfile.objects.filter(email=email).exists():
+            u = UserProfile.objects.create_user(email, password_original)
 
-            imapAccount.host = host
+            u.host = host
+            u.imap_password = password
+
+            # imapAccount = ImapAccount(email=email, password=password, host=host)
+
+            # imapAccount.host = host
             if is_oauth:
-                imapAccount.is_oauth = is_oauth
-                imapAccount.access_token = access_token
-                imapAccount.refresh_token = refresh_token
+                u.is_oauth = is_oauth
+                u.access_token = access_token
+                u.refresh_token = refresh_token
+                # imapAccount.is_oauth = is_oauth
+                # imapAccount.access_token = access_token
+                # imapAccount.refresh_token = refresh_token
 
-            imapAccount.save()
-
+            # imapAccount.save()
+            u.save()
 
             res['code'] = "New user"
 
@@ -1671,7 +1679,7 @@ def login_imap(email, password, host, is_oauth, push=True):
             res['code'] = "This account is already logged in!"
 
             # if user has source code running, send it
-            imapAccount = ImapAccount.objects.get(email=email)
+            imapAccount = u.objects.get(email=email)
             res['imap_code'] = imapAccount.code
         
         res['status'] = True

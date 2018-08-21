@@ -285,6 +285,22 @@ class UserProfile(AbstractBaseUser):
 	date_joined = models.DateTimeField(auto_now=True)
 	hash = models.CharField(max_length=40, default="")
 
+	newest_msg_id = models.IntegerField(default=-1)
+
+	imap_password = models.CharField('password', max_length=100, blank=True, null=True)
+	host = models.CharField('host', max_length=100, null=True,)
+
+	is_oauth = models.BooleanField(default=False)
+	access_token = models.CharField('access_token', max_length=200, blank=True, null=True)
+	refresh_token = models.CharField('refresh_token', max_length=200, blank=True, null=True)
+
+	code = models.TextField(null=True, blank=True)
+	
+	arrive_action = models.CharField('access_token', max_length=1000, blank=True, null=True)
+	custom_action = models.CharField('custom_action', max_length=1000, blank=True, null=True)
+	timer_action = models.CharField('timer_action', max_length=1000, blank=True, null=True)
+	repeat_action = models.CharField('repeat_action', max_length=1000, blank=True, null=True)
+
 	objects = MyUserManager()
 
 	USERNAME_FIELD = 'email'

@@ -8,6 +8,7 @@ from imapclient import IMAPClient
 from engine.constants import *
 from smtp_handler.Pile import *
 from engine.google_auth import *
+from Crypto.Cipher import AES
 
 class Command(BaseCommand):
     args = ''
@@ -25,6 +26,7 @@ class Command(BaseCommand):
                     # TODO if access_token is expired, then get a new token
                     imap.oauth2_login(imapAccount.email, imapAccount.access_token)
                 else:
+                    
                     imap.login(imapAccount.email, imapAccount.password)
 
                 new_uid = fetch_latest_email_id(imapAccount, imap)
