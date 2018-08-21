@@ -1653,34 +1653,41 @@ def login_imap(email, password, host, is_oauth, push=True):
         # Log out after auth verification
         imap.logout()
 
-        u = UserProfile.objects.filter(email=email)
-        if not u.exists():
-            u = UserProfile.objects.create_user(email, password_original)
+        imapAccount = ImapAccount.objects.filter(email=email).exists()
+        if not imapAccount.exists():
+            imapAccount = ImapAccount(email=email, password=password, host=host)
+            imapAccount.host = host
+            if is_oauth:
+                imapAccount.is_oauth = is_oauth
+                imapAccount.access_token = access_token
+                imapAccount.refresh_token = refresh_token
 
-            res['code'] = "New user"
+            imapAccount.save()
+
+            # = imapAccount
         else:
-            res['code'] = "This account is already logged in!"
-
-            # if user has source code running, send it
-            u = u[0]
-            imapAccount = u
+            imapAccount = imapAccount[0]
             res['imap_code'] = imapAccount.code
+
         
-        u.host = host
-        u.imap_password = password
 
-        # imapAccount = ImapAccount(email=email, password=password, host=host)
-        # imapAccount.host = host
-        if is_oauth:
-            u.is_oauth = is_oauth
-            u.access_token = access_token
-            u.refresh_token = refresh_token
-            # imapAccount.is_oauth = is_oauth
-            # imapAccount.access_token = access_token
-            # imapAccount.refresh_token = refresh_token
+        # u = UserProfile.objects.filter(email=email)
+        # if not u.exists():
+        #     u = UserProfile.objects.create_user(email, password_original)
 
-        # imapAccount.save()
-        u.save()
+        #     res['code'] = "New user"
+        # else:
+        #     res['code'] = "This account is already logged in!"
+
+        #     # if user has source code running, send it
+        #     u = u[0]
+        #     imapAccount = u
+        #     res['imap_code'] = imapAccount.code
+        
+        # u.host = host
+        # u.imap_password = password
+
+        # u.save()
 
         res['status'] = True
 
