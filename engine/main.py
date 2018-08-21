@@ -24,6 +24,8 @@ from smtp_handler.utils import *
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
+import string
+import random
 
 def list_groups(user=None):
     groups = []
@@ -1640,6 +1642,12 @@ def login_imap(email, password, host, is_oauth, push=True):
 
             #encrypt password then save
             aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
+
+            # padding password
+            padding = random.choice(string.letters)
+            extra = len(s) % 16
+            if extra > 0:
+                password = password + (padding * (16 - extra))
             password = aes.encrypt(password)
 
         # Log out after auth verification
@@ -1695,7 +1703,13 @@ def run_mailbot(user, email, code, push=True):
 
         else:
             aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
-            imap.login(email, aes.decrypt(imapAccount.password) )
+            password = aes.decrypt(imapAccount.password)
+
+            if len(password) % 16 != 0:
+                padding_len = len(password) - len(password) / 16 * 16
+                password = password[:(-1)* padding_len]
+
+            imap.login(email, password)
 
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
