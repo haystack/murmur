@@ -1619,7 +1619,7 @@ def update_donotsend_list(user, group_name, emails, push=True):
     logging.debug(res)
     return res 
 
-def login_imap(email, password, host, is_oauth, push=True):
+def login_imap(user, password, host, is_oauth, push=True):
     res = {'status' : False}
 
     try:

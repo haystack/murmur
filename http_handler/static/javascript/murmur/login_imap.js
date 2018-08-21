@@ -21,8 +21,8 @@ $(document).ready(function() {
         matchBrackets: true
     });
 
-    $("#password-container").hide();
-
+    // $("#password-container").hide();
+    guess_host($("#user-full-email").text());
     toggle_login_mode();
 	
 	$('input[type=radio][name=auth-mode]').change(function() {
@@ -146,9 +146,9 @@ $(document).ready(function() {
             );
         });
         // TODO change with change
-        $("#input-email").keyup(function( event ) {
-            guess_host( $(this).val() );
-        });
+        // $("#input-email").keyup(function( event ) {
+        //     guess_host( $(this).val() );
+        // });
     
         $(".default-text").blur();
 
