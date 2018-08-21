@@ -327,6 +327,7 @@ class ImapProfile(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
+	hash = models.CharField(max_length=40, default="")
 	# password = models.CharField('password', max_length=100, blank=True)
 	host = models.CharField('host', max_length=100)
 
