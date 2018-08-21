@@ -1653,28 +1653,11 @@ def login_imap(email, password, host, is_oauth, push=True):
         # Log out after auth verification
         imap.logout()
 
-        if not UserProfile.objects.filter(email=email).exists():
+        u = UserProfile.objects.filter(email=email)
+        if not u.exists():
             u = UserProfile.objects.create_user(email, password_original)
 
-            u.host = host
-            u.imap_password = password
-
-            # imapAccount = ImapAccount(email=email, password=password, host=host)
-
-            # imapAccount.host = host
-            if is_oauth:
-                u.is_oauth = is_oauth
-                u.access_token = access_token
-                u.refresh_token = refresh_token
-                # imapAccount.is_oauth = is_oauth
-                # imapAccount.access_token = access_token
-                # imapAccount.refresh_token = refresh_token
-
-            # imapAccount.save()
-            u.save()
-
             res['code'] = "New user"
-
         else:
             res['code'] = "This account is already logged in!"
 
@@ -1682,6 +1665,22 @@ def login_imap(email, password, host, is_oauth, push=True):
             imapAccount = u.objects.get(email=email)
             res['imap_code'] = imapAccount.code
         
+        u.host = host
+        u.imap_password = password
+
+        # imapAccount = ImapAccount(email=email, password=password, host=host)
+        # imapAccount.host = host
+        if is_oauth:
+            u.is_oauth = is_oauth
+            u.access_token = access_token
+            u.refresh_token = refresh_token
+            # imapAccount.is_oauth = is_oauth
+            # imapAccount.access_token = access_token
+            # imapAccount.refresh_token = refresh_token
+
+        # imapAccount.save()
+        u.save()
+
         res['status'] = True
 
     except IMAPClient.Error, e:
