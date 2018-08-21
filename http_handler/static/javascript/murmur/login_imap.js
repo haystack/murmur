@@ -69,6 +69,8 @@ $(document).ready(function() {
                         if (res.status) {
                             // Show coding interfaces 
                             $("#login-email-form").hide();
+                            $("#btn-code-submit").removeAttr('disabled');
+                            
                             if ('imap_code' in res) {
                                 editor.setValue( res['imap_code'] );
                                 spinStatusCog(true);
@@ -156,6 +158,7 @@ $(document).ready(function() {
         
         if( validateEmail(email_addr) ) {
             $("#password-container").show();
+            toggle_login_mode();
 
             if( email_addr.includes("gmail")) {
                 $("#input-host").val("imap.gmail.com");

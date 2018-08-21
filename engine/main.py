@@ -1635,14 +1635,19 @@ def login_imap(email, password, host, is_oauth, push=True):
             imap.oauth2_login(email, access_token)
 
         else:   
-            imap.login(email, password)
+            new_user = User.objects.get(email=email)
+            new_user.check_password(password)
+
+            # imap.login(email, password)
 
         # Log out after auth verification
         imap.logout()
 
         if not ImapAccount.objects.filter(email=email).exists():
-            imapAccount = ImapAccount(email=email, password=password, host=host)
+            imapAccount = ImapAccount.objects.create_user(email, password)
+            # imapAccount = ImapAccount(email=email, password=password, host=host)
 
+            imapAccount.host = host
             if is_oauth:
                 imapAccount.is_oauth = is_oauth
                 imapAccount.access_token = access_token
