@@ -1624,6 +1624,7 @@ def login_imap(user, password, host, is_oauth, push=True):
 
     try:
         imap = IMAPClient(host, use_uid=True)
+        email = user.email
 
         refresh_token = ''
         access_token = ''
@@ -1653,7 +1654,7 @@ def login_imap(user, password, host, is_oauth, push=True):
         # Log out after auth verification
         imap.logout()
 
-        imapAccount = ImapAccount.objects.filter(email=email).exists()
+        imapAccount = ImapAccount.objects.filter(email=email)
         if not imapAccount.exists():
             imapAccount = ImapAccount(email=email, password=password, host=host)
             imapAccount.host = host
