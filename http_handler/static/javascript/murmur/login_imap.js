@@ -54,7 +54,6 @@ $(document).ready(function() {
 
         btn_login.click(function() {
                 var params = {
-                    'email': $("#input-email").val(),
                     'host': $("#input-host").val(),
                     'password': $('#rdo-oauth').is(":checked") ? $("#input-access-code").val() : $("#input-password").val(),
                     'is_oauth': $('#rdo-oauth').is(":checked")
@@ -168,6 +167,8 @@ $(document).ready(function() {
                 $(".oauth").show();
             }
             else {
+                $(".oauth").remove();
+
                 $("#rdo-plain").not(':checked').prop("checked", true);
                 
                 if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");

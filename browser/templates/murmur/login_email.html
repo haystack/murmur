@@ -23,7 +23,7 @@
 				<br> -->
 				{% if user.is_authenticated %}
 					<div id="password-container">
-							<input type="radio" name="auth-mode" value="oauth" id="rdo-oauth" class="oauth"><label for="rdo-oauth" class="oauth">Oauth </label>
+							<input type="radio" name="auth-mode" value="oauth" id="rdo-oauth"><label for="rdo-oauth">Oauth </label>
 							<input type="radio" name="auth-mode" value="plain" id="rdo-plain" checked><label for="rdo-plain">Plain password </label>
 							<br>
 							<a class="btn btn-info oauth" style="color:white;" target="_blank" href="https://accounts.google.com/o/oauth2/auth?client_id=1035128514395-ljeutpptbag8unpv2lgo1k93eiq006f6.apps.googleusercontent.com&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob&response_type=code&scope=https%3A%2F%2Fmail.google.com%2F">Get access code</a>
@@ -37,8 +37,9 @@
 							<div style="diplay:none;color:red;" id="donotsend-msg"></div>
 							<p class="plain">Before you log in, go to <a id="link-less-secure">"Less secure apps" section of my Account.</a> And Enable less secure log in.</p>
 					</div>
+					<button type="button" id="btn-login" style="margin-top:10px;">Link your email</button>
 				{% else %}
-					<button type="button" id="btn-login" style="margin-top:10px;">Log in</button>
+					<a type="button" href="/accounts/login/" style="margin-top:10px;">Log in</a>
 				{% endif %}
 			</form>
 			<br>
