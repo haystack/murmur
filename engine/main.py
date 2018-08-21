@@ -17,11 +17,12 @@ from engine.google_auth import *
 from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
 from gmail_setup.api import update_gmail_filter, untrash_message
 from gmail_setup.views import build_services
-from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME, PERSPECTIVE_KEY
+from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME, PERSPECTIVE_KEY, IMAP_SECRET
 from s3_storage import upload_attachments, download_attachments, download_message
 from schema.models import *
 from smtp_handler.utils import *
 
+from Crypto.Cipher import AES
 from imapclient import IMAPClient
 
 def list_groups(user=None):
@@ -1635,17 +1636,17 @@ def login_imap(email, password, host, is_oauth, push=True):
             imap.oauth2_login(email, access_token)
 
         else:   
-            new_user = User.objects.get(email=email)
-            new_user.check_password(password)
+            imap.login(email, password)
 
-            # imap.login(email, password)
+            #encrypt password then save
+            aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
+            password = aes.encrypt(password)
 
         # Log out after auth verification
         imap.logout()
 
         if not ImapAccount.objects.filter(email=email).exists():
-            imapAccount = ImapAccount.objects.create_user(email, password)
-            # imapAccount = ImapAccount(email=email, password=password, host=host)
+            imapAccount = ImapAccount(email=email, password=password, host=host)
 
             imapAccount.host = host
             if is_oauth:
@@ -1693,7 +1694,8 @@ def run_mailbot(user, email, code, push=True):
             imap.oauth2_login(email, imapAccount.access_token)
 
         else:
-            imap.login(email, imapAccount.password)
+            aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
+            imap.login(email, aes.decrypt(imapAccount.password) )
 
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid

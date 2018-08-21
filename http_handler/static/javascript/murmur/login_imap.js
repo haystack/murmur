@@ -70,7 +70,7 @@ $(document).ready(function() {
                             // Show coding interfaces 
                             $("#login-email-form").hide();
                             $("#btn-code-submit").removeAttr('disabled');
-                            
+
                             if ('imap_code' in res) {
                                 editor.setValue( res['imap_code'] );
                                 spinStatusCog(true);
@@ -145,7 +145,7 @@ $(document).ready(function() {
                 }
             );
         });
-
+        // TODO change with change
         $("#input-email").keyup(function( event ) {
             guess_host( $(this).val() );
         });

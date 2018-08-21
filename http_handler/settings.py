@@ -50,6 +50,7 @@ def _get_website():
 WEBSITE = _get_website()
 CLIENT_ID = ''
 CLIENT_SECRET = ''
+IMAP_SECRET = ''
 
 try:
     execfile(SITE_ROOT + '/../private.py')
