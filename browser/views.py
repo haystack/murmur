@@ -391,7 +391,9 @@ def group_list(request):
 
 @render_to(WEBSITE+"/login_email.html")
 def login_imap_view(request):
-	return {'website': WEBSITE}
+	return {'website': WEBSITE,
+			'form': AuthenticationForm(),
+			'reg_form': RegistrationForm()}
 
 @render_to(WEBSITE+"/add_members.html")
 @login_required

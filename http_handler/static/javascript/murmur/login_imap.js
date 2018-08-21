@@ -21,6 +21,8 @@ $(document).ready(function() {
         matchBrackets: true
     });
 
+    $("#password-container").hide();
+
     toggle_login_mode();
 	
 	$('input[type=radio][name=auth-mode]').change(function() {
@@ -44,6 +46,11 @@ $(document).ready(function() {
         else 
             document.querySelector("svg.fa-cog").classList.remove("fa-spin");
     }
+
+    function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }    
 
         btn_login.click(function() {
                 var params = {
@@ -147,19 +154,28 @@ $(document).ready(function() {
         $("#link-less-secure").attr('href', "");
         $("#rdo-oauth").attr('disabled', "");
         
-        if( email_addr.includes("gmail")) {
-            $("#input-host").val("imap.gmail.com");
-            $("#link-less-secure").attr('href', "https://myaccount.google.com/lesssecureapps");
-            $("#rdo-oauth").removeAttr('disabled');
+        if( validateEmail(email_addr) ) {
+            $("#password-container").show();
+
+            if( email_addr.includes("gmail")) {
+                $("#input-host").val("imap.gmail.com");
+                $("#link-less-secure").attr('href', "https://myaccount.google.com/lesssecureapps");
+                $("#rdo-oauth").removeAttr('disabled');
+
+                $(".oauth").show();
+            }
+            else {
+                $("#rdo-plain").not(':checked').prop("checked", true);
+                
+                if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");
+                else if ( email_addr.includes("csail")) $("#input-host").val("imap.csail.mit.edu");
+                else if ( email_addr.includes("mit")) $("#input-host").val("imap.exchange.mit.edu");
+                else $("#input-host").val("");
+
+                $(".oauth").hide();
+            }
         }
-        else {
-            $("#rdo-plain").not(':checked').prop("checked", true);
-            
-            if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");
-            else if ( email_addr.includes("csail")) $("#input-host").val("imap.csail.mit.edu");
-            else if ( email_addr.includes("mit")) $("#input-host").val("imap.exchange.mit.edu");
-            else $("#input-host").val("");
-        }
-        
+        else $("#password-container").hide();
     }
+
 });
