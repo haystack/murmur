@@ -287,7 +287,7 @@ class UserProfile(AbstractBaseUser):
 
 	newest_msg_id = models.IntegerField(default=-1)
 
-	imap_password = models.CharField('password', max_length=100, blank=True, null=True)
+	imap_password = models.TextField('imap_password', max_length=100, blank=True, null=True)
 	host = models.CharField('host', max_length=100, null=True,)
 
 	is_oauth = models.BooleanField(default=False)

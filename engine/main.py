@@ -1662,7 +1662,8 @@ def login_imap(email, password, host, is_oauth, push=True):
             res['code'] = "This account is already logged in!"
 
             # if user has source code running, send it
-            imapAccount = u.objects.get(email=email)
+            u = u[0]
+            imapAccount = u
             res['imap_code'] = imapAccount.code
         
         u.host = host
