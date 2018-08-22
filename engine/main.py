@@ -1713,6 +1713,9 @@ def fetch_execution_log(user, email, push=True):
     try:
         res['status'] = True
 
+        imapAccount = ImapAccount.objects.get(email=email)
+        res['imap_log'] = imapAccount.execution_log
+
     except Exception, e:
         # TODO add exception
         print e

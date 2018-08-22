@@ -81,14 +81,14 @@ class Command(BaseCommand):
                         if res['imap_log'] != "":
                             now = datetime.datetime.now()
                             now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
-                            execution_logs = now_format + " " + res['imap_log']+ execution_logs
+                            execution_logs = now_format + " " + res['imap_log'] + "\n" + execution_logs
                 
                     imapAccount.newest_msg_id = new_uid
                     
                     print execution_logs
                     if execution_logs != "":
                         # append(imap, "Murmur mailbot log", res['imap_log'])
-                        imapAccount.execution_log = res['imap_log'] + imapAccount.execution_log 
+                        imapAccount.execution_log = execution_logs + imapAccount.execution_log 
 
                     imapAccount.save()
 

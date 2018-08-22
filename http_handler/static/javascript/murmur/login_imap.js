@@ -54,6 +54,8 @@ $(document).ready(function() {
 
     function fetch_log()
     {
+        var params = {};
+        
         $.post('/fetch_execution_log', params,
             function(res) {
                 // $('#donotsend-msg').hide();
@@ -63,14 +65,7 @@ $(document).ready(function() {
                 if (res.status) {
                     append_log(res['imap_log'], false);
                     
-                    if (res.code) { 
-                        // some emails are not added since they are not members of the group
-                        // $('#donotsend-msg').show();
-                        // $('#donotsend-msg').html(res['code']);
-                    }
-                    else {                        
-                        notify(res, true);
-                    }
+                    
                 }
                 else {
                     notify(res, false);
