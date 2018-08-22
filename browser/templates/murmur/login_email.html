@@ -22,6 +22,8 @@
 				<input id="input-email" type="email" style="box-sizing: border-box;"></input>
 				<br> -->
 				{% if user.is_authenticated %}
+					{% if imap_authenticated %}
+					{% else %}
 					<div id="password-container">
 							<input type="radio" name="auth-mode" value="oauth" id="rdo-oauth"><label for="rdo-oauth">Oauth </label>
 							<input type="radio" name="auth-mode" value="plain" id="rdo-plain" checked><label for="rdo-plain">Plain password </label>
@@ -38,6 +40,7 @@
 							<p class="plain">Before you log in, go to <a id="link-less-secure">"Less secure apps" section of my Account.</a> And Enable less secure log in.</p>
 					</div>
 					<button type="button" id="btn-login" style="margin-top:10px;">Link your email</button>
+					{% endif %}
 				{% else %}
 					<a type="button" href="/accounts/login/" style="margin-top:10px;">Log in</a>
 				{% endif %}
@@ -47,18 +50,21 @@
 				<div id="status">
 				  This rule will be applied to your incoming emails.  
 				  <div class="fa-3x">
-					<span class="fa-layers fa-fw">
-					  <i class="fas fa-cog"></i>
-					  <span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
-					</span>
+						<span class="fa-layers fa-fw">
+							<i class="fas fa-cog"></i>
+							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
+						</span>
 				  </div>
-				  <!-- <span id="auth-msg"></span> -->
 				</div>
 		
 					<div style="padding-top:  50px;">
 					  <div class="card">
 						<div class="card-header">
-						  <span>Email engine editor</span> <button class="btn btn-primary" style="float:right" id="btn-code-submit" disabled>Save & Run</button>
+							{% if imap_authenticated %}
+								<span>Email engine editor</span> <button class="btn btn-primary" style="float:right" id="btn-code-submit">Save & Run</button>
+							{% else %}
+							<span>Email engine editor</span> <button class="btn btn-primary" style="float:right" id="btn-code-submit" disabled>Save & Run</button>
+							{% endif %}
 						</div>
 						<div class="card-block">
 						  <textarea id="code" name="code">

@@ -68,7 +68,7 @@ $(document).ready(function() {
                         if (res.status) {
                             // Show coding interfaces 
                             $("#login-email-form").hide();
-                            $("#btn-code-submit").removeAttr('disabled');
+                            // $("#btn-code-submit").removeAttr('disabled');
 
                             if ('imap_code' in res) {
                                 editor.setValue( res['imap_code'] );

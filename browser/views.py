@@ -391,7 +391,7 @@ def group_list(request):
 
 @render_to(WEBSITE+"/login_email.html")
 def login_imap_view(request):
-	return {'user': request.user, 'website': WEBSITE}
+	return {'user': request.user, 'imap_authenticated': ImapAccount.objects.filter(email=request.user.email).exists(), 'website': WEBSITE}
 
 @render_to(WEBSITE+"/add_members.html")
 @login_required
