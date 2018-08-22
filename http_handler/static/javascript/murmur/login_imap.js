@@ -21,6 +21,8 @@ $(document).ready(function() {
         matchBrackets: true
     });
 
+    var log_backup = "";
+
     // $("#password-container").hide();
     guess_host($("#user-full-email").text());
     toggle_login_mode();
@@ -63,8 +65,10 @@ $(document).ready(function() {
                 
                 // Auth success
                 if (res.status) {
-                    append_log(res['imap_log'], false);
-                    
+                    if( log_backup != res['imap_log']){
+                        $("#console").html("");
+                        append_log(res['imap_log'], false);
+                    }
                     
                 }
                 else {
@@ -97,7 +101,7 @@ $(document).ready(function() {
                         if (res.status) {
                             // Show coding interfaces 
                             $("#login-email-form").hide();
-                            // $("#btn-code-submit").removeAttr('disabled');
+                            $("#btn-code-submit").removeAttr('disabled');
 
                             if ('imap_code' in res) {
                                 editor.setValue( res['imap_code'] );
@@ -179,6 +183,8 @@ $(document).ready(function() {
             + currentdate.getMinutes() + ":" 
             + currentdate.getSeconds()
             + " | ";
+
+        datetime = '';
 
         if(is_error) 
             $( "<p>" + datetime + log + "</p>" ).appendTo( "#console" ).addClass("error");
