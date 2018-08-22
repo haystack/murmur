@@ -2,7 +2,7 @@ import base64
 
 from django.core.management.base import BaseCommand, CommandError
 from smtp_handler.utils import *
-from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE
+from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE, IMAP_SECRET
 from schema.models import *
 from datetime import datetime, timedelta
 from browser.imap import *
