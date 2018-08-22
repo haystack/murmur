@@ -1707,6 +1707,20 @@ def login_imap(user, password, host, is_oauth, push=True):
     logging.debug(res)
     return res 
 
+def fetch_execution_log(user, email, push=True):
+    res = {'status' : False}
+
+    try:
+        res['status'] = True
+
+    except Exception, e:
+        # TODO add exception
+        print e
+        res['code'] = msg_code['UNKNOWN_ERROR']
+
+    logging.debug(res)
+    return res 
+
 def run_mailbot(user, email, code, push=True):
     res = {'status' : False, 'imap_error': False}
 

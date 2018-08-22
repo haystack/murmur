@@ -90,7 +90,10 @@ elif "action required" in get_subject():
 			  <!-- END editor col -->	
 		</div>
 	</div>
-
+	<script type="text/javascript">
+		var is_authenticated = {{ user.is_authenticated|yesno:"true,false" }},
+			is_imap_authenticated = {{ imap_authenticated|yesno:"true,false" }};
+	</script>
 	
 	  
 	<!-- <a href="/groups/{{group_info.name}}">Back to group info page</a> -->

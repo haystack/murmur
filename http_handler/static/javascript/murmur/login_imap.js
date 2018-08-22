@@ -11,7 +11,7 @@ $(document).ready(function() {
     //     model : new Sandbox.Model()
     //   });
 
-    // init editor 
+    // init editor  
     var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
         mode: {name: "python",
             version: 3,
@@ -24,7 +24,12 @@ $(document).ready(function() {
     // $("#password-container").hide();
     guess_host($("#user-full-email").text());
     toggle_login_mode();
-	
+
+    // TODO check if imap is logged in
+    if(is_imap_authenticated) {
+        fetch_log(); 
+    }
+    
 	$('input[type=radio][name=auth-mode]').change(function() {
         toggle_login_mode();      
     });
@@ -45,6 +50,35 @@ $(document).ready(function() {
             document.querySelector("svg.fa-cog").classList.add("fa-spin");
         else 
             document.querySelector("svg.fa-cog").classList.remove("fa-spin");
+    }
+
+    function fetch_log()
+    {
+        $.post('/fetch_execution_log', params,
+            function(res) {
+                // $('#donotsend-msg').hide();
+                console.log(res);
+                
+                // Auth success
+                if (res.status) {
+                    append_log(res['imap_log'], false);
+                    
+                    if (res.code) { 
+                        // some emails are not added since they are not members of the group
+                        // $('#donotsend-msg').show();
+                        // $('#donotsend-msg').html(res['code']);
+                    }
+                    else {                        
+                        notify(res, true);
+                    }
+                }
+                else {
+                    notify(res, false);
+                }
+            }
+        );
+        
+        setTimeout(fetch_log, 30 * 1000); // 30 second
     }
 
     function validateEmail(email) {
@@ -74,7 +108,7 @@ $(document).ready(function() {
                                 editor.setValue( res['imap_code'] );
                                 spinStatusCog(true);
                             }
-
+                            
                             append_log(res['imap_log'], false)
                             
                             if (res.code) { 
@@ -135,7 +169,7 @@ $(document).ready(function() {
             );
         });
         // TODO change with change
-        // $("#input-email").keyup(function( event ) {
+        // $("#input-email").change(function( event ) {
         //     guess_host( $(this).val() );
         // });
     

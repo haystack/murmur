@@ -30,7 +30,13 @@ def fetch_latest_email_id(imap_account, imap_client):
 
     return max(uid_list)
 
-def interpret(imap, code, search_creteria):
+def format_log(msg, is_error=False):
+    if is_error:
+        return "[Error] " + msg
+    else:
+        return "[Info] " + msg
+
+def interpret(imap, code, search_creteria, is_test=False):
     res = {'status' : False, 'imap_error': False}
     pile = Pile(imap, search_creteria)
     messages = imap.search( search_creteria )
@@ -59,14 +65,27 @@ def interpret(imap, code, search_creteria):
             res['imap_error'] = True
 
         def add_flags(flags): 
-            pile.add_flags(flags)
+            if not is_test: 
+                pile.add_flags(flags)
 
+            print format_log("Add %s to Message %s" % (flags, search_creteria), False) 
+            
         def copy(src_folder, dst_folder):
-            select_folder(src_folder)
-            return imap.copy(messages, dst_folder)
+            if not imap.folder_exists(src_folder):
+                format_log("Copy Message; source folder %s not exist" % src_folder, True)  
+                return
+
+            if not is_test: 
+                select_folder(src_folder)
+                imap.copy(messages, dst_folder)
+
+            print format_log("Copy Message %s from folder %s to %s" % (search_creteria, src_folder, dst_folder), False)  
 
         def delete():
-            imap.delete_messages(messages)
+            if not is_test: 
+                imap.delete_messages(messages)
+
+            print format_log("Delete Message %s" % (search_creteria), False)  
 
         def get_sender():
             return pile.get_senders()[0]
@@ -109,16 +128,28 @@ def interpret(imap, code, search_creteria):
             return pile.get_flags()
 
         def mark_read(is_seen):
-            pile.mark_read(is_seen, messages)
+            if not is_test: 
+                pile.mark_read(is_seen, messages)
+                
+            print format_log("Mark Message %s %s" % (search_creteria, "read" if is_error else "unread"), False)  
 
         def move(src_folder, dst_folder):
-            select_folder(src_folder)
+            if not imap.folder_exists(src_folder):
+                format_log("Move Message; source folder %s not exist" % src_folder, True)  
+                return
 
-            copy(src_folder, dst_folder)
-            delete()
+            if not is_test: 
+                select_folder(src_folder)
+                copy(src_folder, dst_folder)
+                delete()
+            
+            print format_log("Move Message from %s to %s" % (search_creteria, src_folder, dst_folder), False)  
 
         def remove_flags(flags): 
-            pile.remove_flags(flags)
+            if not is_test: 
+                pile.remove_flags(flags)
+
+            print format_log("Remove flags %s of Message %s" % (flags, search_creteria), False)  
 
         # return a list of email UIDs
         def search(criteria=u'ALL', charset=None, folder=None):
@@ -153,19 +184,35 @@ def interpret(imap, code, search_creteria):
             return bodys
 
         def create_folder(folder):
-            imap.create_folder(folder)
-            print "Create folder name " + folder 
+            if imap.folder_exists(folder):
+                format_log("Create folder; folder %s already exist" % folder, True)  
+                return
+            
+            if not is_test: 
+                imap.create_folder(folder)
+
+            print format_log("Create a folder %s" % folder, False)  
 
         def list_folders(directory=u'', pattern=u'*'):
             return imap.list_folders(directory, pattern)
 
         def select_folder(folder):
+            if not imap.folder_exists(folder):
+                format_log("Select folder; folder %s not exist" % folder, True)  
+                return
+
             imap.select_folder(folder)
             print "Select a folder " + folder 
 
         def rename_folder(old_name, new_name):
-            imap.rename_folder(old_name, new_name)
-            print "Rename " + old_name + " to " + new_name
+            if imap.folder_exists(new_name):
+                format_log("Rename folder; folder %s already exist. Try other name" % new_name, True)  
+                return
+
+            if not is_test: 
+                imap.rename_folder(old_name, new_name)
+        
+            print format_log("Rename a folder %s to %s" % (old_name, new_name), False)
 
         # print "code"
         # print code

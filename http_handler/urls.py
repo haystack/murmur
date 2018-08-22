@@ -166,6 +166,7 @@ if WEBSITE == 'murmur':
                     url(r'^login_email', 'browser.views.login_imap_view'),
                     url(r'^login_imap', 'browser.views.login_imap'),
                     url(r'^run_mailbot', 'browser.views.run_mailbot'),
+                    url(r'^fetch_execution_log', 'browser.views.fetch_execution_log'),
 
                     url(r'^groups/(?P<group_name>[\w-]+)/add_donotsend', 'browser.views.add_dissimulate_view'),
                     url(r'^edit_donotsend', 'browser.views.edit_donotsend'),

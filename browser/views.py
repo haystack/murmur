@@ -1435,6 +1435,18 @@ def login_imap(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def fetch_execution_log(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		
+		res = engine.main.fetch_execution_log(user, request.user.email)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def run_mailbot(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
