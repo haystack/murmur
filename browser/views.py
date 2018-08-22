@@ -394,9 +394,9 @@ def login_imap_view(request):
 	imap_code = ""
 	imap = ImapAccount.objects.filter(email=request.user.email)
 	if imap.exists():
-		imap_code = imap.code
+		imap_code = imap[0].code
 
-	return {'user': request.user, 'imap_authenticated': imap.exists(), 'imap': , 'imap_code': imap_code,'website': WEBSITE}
+	return {'user': request.user, 'imap_authenticated': imap.exists(), 'imap_code': imap_code,'website': WEBSITE}
 
 @render_to(WEBSITE+"/add_members.html")
 @login_required

@@ -51,11 +51,11 @@ $(document).ready(function() {
     
     function spinStatusCog(spin) {
         if(spin) {
-            document.querySelector("svg.fa-cog").classList.add("fa-spin");
+            document.querySelector(".fa-cog").classList.add("fa-spin");
             document.querySelector(".idle-mark").style.display = "none";
         }
         else {
-            document.querySelector("svg.fa-cog").classList.remove("fa-spin");
+            document.querySelector(".fa-cog").classList.remove("fa-spin");
             document.querySelector(".idle-mark").style.display = "inline-block";
         }
     }
