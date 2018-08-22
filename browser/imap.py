@@ -131,7 +131,7 @@ def interpret(imap, code, search_creteria, is_test=False):
             if not is_test: 
                 pile.mark_read(is_seen, messages)
                 
-            print format_log("Mark Message %s %s" % (search_creteria, "read" if is_error else "unread"), False)  
+            print format_log("Mark Message %s %s" % (search_creteria, "read" if is_seen else "unread"), False)  
 
         def move(src_folder, dst_folder):
             if not imap.folder_exists(src_folder):
