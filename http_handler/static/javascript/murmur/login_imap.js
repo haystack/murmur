@@ -27,10 +27,12 @@ $(document).ready(function() {
     guess_host($("#user-full-email").text());
     toggle_login_mode();
 
-    // TODO check if imap is logged in
     if(is_imap_authenticated) {
         fetch_log(); 
     }
+
+    if(is_running) 
+        spinStatusCog(true)
     
 	$('input[type=radio][name=auth-mode]').change(function() {
         toggle_login_mode();      
@@ -48,14 +50,17 @@ $(document).ready(function() {
     }
     
     function spinStatusCog(spin) {
-        if(spin)
+        if(spin) {
             document.querySelector("svg.fa-cog").classList.add("fa-spin");
-        else 
+            document.querySelector(".idle-mark").style.display = "none";
+        }
+        else {
             document.querySelector("svg.fa-cog").classList.remove("fa-spin");
+            document.querySelector(".idle-mark").style.display = "inline-block";
+        }
     }
 
-    function fetch_log()
-    {
+    function fetch_log() {
         var params = {};
         
         $.post('/fetch_execution_log', params,
