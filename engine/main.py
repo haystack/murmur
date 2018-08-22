@@ -1646,6 +1646,9 @@ def login_imap(user, password, host, is_oauth, push=True):
 
             # padding password
             padding = random.choice(string.letters)
+            while padding == password[-1]:
+                padding = random.choice(string.letters)
+                continue
             extra = len(password) % 16
             if extra > 0:
                 password = password + (padding * (16 - extra))
@@ -1656,7 +1659,7 @@ def login_imap(user, password, host, is_oauth, push=True):
 
         imapAccount = ImapAccount.objects.filter(email=email)
         if not imapAccount.exists():
-            imapAccount = ImapAccount(email=email, password=password, host=host)
+            imapAccount = ImapAccount(email=email, password=base64.b64encode(password), host=host)
             imapAccount.host = host
             if is_oauth:
                 imapAccount.is_oauth = is_oauth
@@ -1719,11 +1722,15 @@ def run_mailbot(user, email, code, push=True):
 
         else:
             aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
-            password = aes.decrypt(imapAccount.password)
+            password = aes.decrypt( base64.b64decode(imapAccount.password) )
 
-            if len(password) % 16 != 0:
-                padding_len = len(password) - len(password) / 16 * 16
-                password = password[:(-1)* padding_len]
+            index = 0
+            last_string = password[-1]
+            for c in reversed(password):
+                if last_string != c:
+                    password = password[:(-1)*index]
+                    break
+                index = index + 1
 
             imap.login(email, password)
 

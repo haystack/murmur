@@ -9,6 +9,7 @@ from engine.constants import *
 from smtp_handler.Pile import *
 from engine.google_auth import *
 from Crypto.Cipher import AES
+import datetime
 
 class Command(BaseCommand):
     args = ''
@@ -65,15 +66,18 @@ class Command(BaseCommand):
                         res = interpret(imap, imapAccount.code, "UID %d" % (i))
 
                         if res['imap_log'] != "":
-                            execution_logs += (res['imap_log'] + "\n")
+                            now = datetime.datetime.now()
+                            now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
+                            execution_logs = now_format+ " " + (res['imap_log'] + "\n") + execution_logs
                 
                     imapAccount.newest_msg_id = new_uid
-                    imapAccount.save()
-
-                    # TODO save log 
+                    
                     print execution_logs
                     if execution_logs != "":
                         append(imap, "Murmur mailbot log", res['imap_log'])
+                        imapAccount.execution_log = res['imap_log'] + imapAccount.execution_log 
+
+                    imapAccount.save()
 
                     # TODO send the error msg via email to the user
                     if res['imap_error']:
