@@ -67,9 +67,10 @@ $(document).ready(function() {
                 if (res.status) {
                     if( log_backup != res['imap_log']){
                         $("#console").html("");
-                        append_log(res['imap_log'], false);
+                        append_log(res['imap_log'].replace(/\n/g , "<br>"), false);
                     }
                     
+                    log_backup = res['imap_log'];
                 }
                 else {
                     notify(res, false);
