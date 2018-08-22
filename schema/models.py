@@ -353,8 +353,8 @@ class ImapAccount(models.Model):
 	refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
 
 	code = models.TextField(null=True, blank=True)
-	execution_log = models.TextField(null=True, blank=True)
-	
+	execution_log = models.TextField(default="")
+
 	arrive_action = models.CharField('access_token', max_length=1000, blank=True)
 	custom_action = models.CharField('custom_action', max_length=1000, blank=True)
 	timer_action = models.CharField('timer_action', max_length=1000, blank=True)

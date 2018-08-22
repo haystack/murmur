@@ -30,7 +30,6 @@ class Command(BaseCommand):
                     
                     imap.login(imapAccount.email, imapAccount.password)
 
-                new_uid = fetch_latest_email_id(imapAccount, imap)
             except IMAPClient.Error, e:
                 # TODO try to renew the access token
                 try: 
@@ -50,7 +49,10 @@ class Command(BaseCommand):
                 print e
                 res['code'] = msg_code['UNKNOWN_ERROR']
             
+
             try:
+                new_uid = fetch_latest_email_id(imapAccount, imap)
+
                 # execute user's rule only when there is a new email arrive
                 if new_uid > imapAccount.newest_msg_id:
                     imap.select_folder("INBOX")
@@ -68,7 +70,7 @@ class Command(BaseCommand):
                         if res['imap_log'] != "":
                             now = datetime.datetime.now()
                             now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
-                            execution_logs = now_format+ " " + (res['imap_log'] + "\n") + execution_logs
+                            execution_logs = now_format + " " + res['imap_log']+ execution_logs
                 
                     imapAccount.newest_msg_id = new_uid
                     

@@ -74,6 +74,8 @@ $(document).ready(function() {
                                 editor.setValue( res['imap_code'] );
                                 spinStatusCog(true);
                             }
+
+                            append_log(res['imap_log'], false)
                             
                             if (res.code) { 
                                 // some emails are not added since they are not members of the group
@@ -105,25 +107,13 @@ $(document).ready(function() {
                     // Auth success
                     if (res.status) {
                         // TODO spin cogs, give feedback it's running
-
-                        var currentdate = new Date();
-                        var datetime = (currentdate.getMonth()+1) + "/"
-                        + currentdate.getDate() + "/" 
-                        + currentdate.getFullYear() + " @ "  
-                        + currentdate.getHours() + ":"  
-                        + currentdate.getMinutes() + ":" 
-                        + currentdate.getSeconds()
-                        + " | ";
-
                         if(res['imap_error'])  {
-                            $( "<p>" + datetime + res['imap_log'] + "</p>" ).appendTo( "#console" )
-                            .addClass("error");
+                            // append_log(res['imap_log'], true);
 
                             spinStatusCog(false);   
                         }
                         else {
-                            $( "<p>" + datetime + "Your rule is successfully installed" + "</p>" ).appendTo( "#console" )
-                            .addClass("info");
+                            // append_log(res['imap_log'], false)
 
                             if (editor.getValue() == "") spinStatusCog(false);
                             else spinStatusCog(true);
@@ -150,6 +140,23 @@ $(document).ready(function() {
         // });
     
         $(".default-text").blur();
+
+    function append_log( log, is_error ) {
+        var currentdate = new Date();
+        var datetime = (currentdate.getMonth()+1) + "/"
+            + currentdate.getDate() + "/" 
+            + currentdate.getFullYear() + " @ "  
+            + currentdate.getHours() + ":"  
+            + currentdate.getMinutes() + ":" 
+            + currentdate.getSeconds()
+            + " | ";
+
+        if(is_error) 
+            $( "<p>" + datetime + log + "</p>" ).appendTo( "#console" ).addClass("error");
+
+        else $( "<p>" + datetime + log + "</p>" ).appendTo( "#console" )
+            .addClass("info");
+    }   
 
     function guess_host( email_addr ) {
         $("#link-less-secure").attr('href', "");
