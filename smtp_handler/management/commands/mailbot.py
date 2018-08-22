@@ -27,8 +27,17 @@ class Command(BaseCommand):
                     # TODO if access_token is expired, then get a new token
                     imap.oauth2_login(imapAccount.email, imapAccount.access_token)
                 else:
-                    
-                    imap.login(imapAccount.email, imapAccount.password)
+                    aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
+                    password = aes.decrypt( base64.b64decode(imapAccount.password) )
+
+                    index = 0
+                    last_string = password[-1]
+                    for c in reversed(password):
+                        if last_string != c:
+                            password = password[:(-1)*index]
+                            break
+                        index = index + 1
+                    imap.login(imapAccount.email, password)
 
             except IMAPClient.Error, e:
                 # TODO try to renew the access token
@@ -76,7 +85,7 @@ class Command(BaseCommand):
                     
                     print execution_logs
                     if execution_logs != "":
-                        append(imap, "Murmur mailbot log", res['imap_log'])
+                        # append(imap, "Murmur mailbot log", res['imap_log'])
                         imapAccount.execution_log = res['imap_log'] + imapAccount.execution_log 
 
                     imapAccount.save()
