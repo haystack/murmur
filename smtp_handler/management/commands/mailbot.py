@@ -1,3 +1,5 @@
+import base64
+
 from django.core.management.base import BaseCommand, CommandError
 from smtp_handler.utils import *
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE
