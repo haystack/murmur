@@ -28,6 +28,8 @@ $(document).ready(function() {
     guess_host($("#user-full-email").text());
     toggle_login_mode();
 
+    editor.setValue(imap_code);
+
     if(is_imap_authenticated) {
         fetch_log(); 
     }

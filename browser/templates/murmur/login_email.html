@@ -68,11 +68,6 @@
 							{% endif %}
 						</div>
 						<div class="card-block">
-							{% if imap_code %}
-						  	<textarea id="code" name="code">
-{{ imap_code }}
-								</textarea>
-							{% else %}
 								<textarea id="code" name="code">
 if "newsletter" in get_subject():
     print "Delete the email from %s at %s" % (get_sender(), get_date())
@@ -85,7 +80,6 @@ elif "action required" in get_subject():
     add_flags(["TODO"])
     print "Flags are ", get_flags()
 								</textarea>
-							{% endif %}
 						</div>
 					  </div>
 		
@@ -100,7 +94,8 @@ elif "action required" in get_subject():
 	<script type="text/javascript">
 		var is_authenticated = {{ user.is_authenticated|yesno:"true,false" }},
 			is_imap_authenticated = {{ imap_authenticated|yesno:"true,false" }},
-			is_running = {{ imap_code }} ? true: false;
+			is_running = {{ imap_code }} ? true: false,
+			imap_code = {{ imap_code }};
 	</script>
 	
 	  
