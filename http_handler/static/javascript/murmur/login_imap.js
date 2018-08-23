@@ -73,7 +73,7 @@ $(document).ready(function() {
                 if (res.status) {
                     if( log_backup != res['imap_log']){
                         $("#console").html("");
-                        append_log(res['imap_log'].replace(/\n/g , "<br>"), false);
+                        append_log(res['imap_log'], false);
                     }
                     
                     log_backup = res['imap_log'];
@@ -204,9 +204,9 @@ $(document).ready(function() {
         datetime = '';
 
         if(is_error) 
-            $( "<p>" + datetime + log + "</p>" ).appendTo( "#console" ).addClass("error");
+            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).appendTo( "#console" ).addClass("error");
 
-        else $( "<p>" + datetime + log + "</p>" ).appendTo( "#console" )
+        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).appendTo( "#console" )
             .addClass("info");
     }   
 
