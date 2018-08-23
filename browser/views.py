@@ -1457,8 +1457,9 @@ def run_mailbot(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		
 		code = request.POST['code']
+		is_test = True if request.POST['test_run'] == "true" else False
 
-		res = engine.main.run_mailbot(user, request.user.email, code)
+		res = engine.main.run_mailbot(user, request.user.email, code, is_test)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

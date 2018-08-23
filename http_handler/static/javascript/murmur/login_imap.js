@@ -2,6 +2,7 @@ $(document).ready(function() {
     
     var user_name = $.trim($('#user_email').text()),
         btn_login = $("#btn-login"),
+        btn_test_run = $("#btn-test-run"),
         btn_code_sumbit = $("#btn-code-submit");
     
 
@@ -132,10 +133,11 @@ $(document).ready(function() {
                 );
         });
 
-        btn_code_sumbit.click(function() {
+        function run_code(is_dry_run) {
             var params = {
                 'email': $("#input-email").val(),
-                'code': editor.getValue()
+                'code': editor.getValue(),
+                'test_run': is_dry_run
             };
 
             $.post('/run_mailbot', params,
@@ -172,6 +174,14 @@ $(document).ready(function() {
                     }
                 }
             );
+        }
+
+        btn_test_run.click(function() {
+            run_code(true);
+        });
+
+        btn_code_sumbit.click(function() {
+            run_code(false);
         });
         // TODO change with change
         // $("#input-email").change(function( event ) {

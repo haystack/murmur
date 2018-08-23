@@ -1724,14 +1724,12 @@ def fetch_execution_log(user, email, push=True):
     logging.debug(res)
     return res 
 
-def run_mailbot(user, email, code, push=True):
+def run_mailbot(user, email, code, is_test, push=True):
     res = {'status' : False, 'imap_error': False}
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
-
-        imapAccount.code = code 
-        imapAccount.save()
+        imapAccount = is_test
 
         imap = IMAPClient(imapAccount.host, use_uid=True)
         if imapAccount.is_oauth:
@@ -1756,14 +1754,14 @@ def run_mailbot(user, email, code, push=True):
         imapAccount.newest_msg_id = uid
         imapAccount.save()
 
-        res['imap_log'] = "Your rule is successfully installed"
-
-        # res = interpret(imap, code)
+        res = interpret(imap, code, is_test)
 
         # if the code execute well without any bug, then save the code to DB
-        # if not res['imap_error']:
-        #     imapAccount.code = code 
-        #     imapAccount.save()
+        if not res['imap_error']:
+            imapAccount.code = code 
+            imapAccount.save()
+
+            res['imap_log'] = "Your rule is successfully installed"
 
         res['status'] = True
 
