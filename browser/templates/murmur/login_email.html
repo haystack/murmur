@@ -100,8 +100,12 @@ elif "action required" in get_subject():
 	<script type="text/javascript">
 		var is_authenticated = {{ user.is_authenticated|yesno:"true,false" }},
 			is_imap_authenticated = {{ imap_authenticated|yesno:"true,false" }},
-			imap_code = {{ imap_code }},
-			is_running = imap_code ? true: false;
+			imap_code = "{{ imap_code }}";
+			{% if imap_code %}
+				var is_running = true; 
+			{% else %} 
+				var is_running = false;
+			{% endif %} 
 	</script>
 	
 	  
