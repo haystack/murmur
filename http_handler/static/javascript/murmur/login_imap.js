@@ -109,7 +109,8 @@ $(document).ready(function() {
                             // Show coding interfaces 
                             $("#login-email-form").hide();
                             $("#btn-code-submit").removeAttr('disabled');
-
+                            $("#btn-test-run").removeAttr('disabled');
+                            
                             if ('imap_code' in res) {
                                 editor.setValue( res['imap_code'] );
                                 spinStatusCog(true);

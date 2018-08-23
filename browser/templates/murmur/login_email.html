@@ -68,7 +68,7 @@
 							{% endif %}
 						</div>
 						<div class="card-block">
-							{% if imap_authenticated %}
+							{% if imap_code|length|get_digit:"-1" > 0 %}
 						  	<textarea id="code" name="code">
 {{ imap_code }}
 								</textarea>

@@ -1729,7 +1729,7 @@ def run_mailbot(user, email, code, is_test, push=True):
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
-        imapAccount = is_test
+        imapAccount.is_test = is_test
 
         imap = IMAPClient(imapAccount.host, use_uid=True)
         if imapAccount.is_oauth:
