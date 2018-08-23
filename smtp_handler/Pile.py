@@ -13,7 +13,7 @@ class Pile():
     def __init__(self, imap, search_criteria):
         self.imap = imap
         self.search_criteria = search_criteria
-        print ("info", self.search_criteria)
+        # print ("info", self.search_criteria)
 
     def add_flags(self, flags):
         if type(flags) is not list:

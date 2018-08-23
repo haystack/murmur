@@ -68,7 +68,7 @@
 							{% endif %}
 						</div>
 						<div class="card-block">
-							{% if imap_code|length|get_digit:"-1" > 0 %}
+							{% if imap_code %}
 						  	<textarea id="code" name="code">
 {{ imap_code }}
 								</textarea>
@@ -100,7 +100,7 @@ elif "action required" in get_subject():
 	<script type="text/javascript">
 		var is_authenticated = {{ user.is_authenticated|yesno:"true,false" }},
 			is_imap_authenticated = {{ imap_authenticated|yesno:"true,false" }},
-			is_running = {{ imap_code|length }} > 0 ? true: false;
+			is_running = {{ imap_code }} ? true: false;
 	</script>
 	
 	  

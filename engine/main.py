@@ -1754,7 +1754,7 @@ def run_mailbot(user, email, code, is_test, push=True):
         imapAccount.newest_msg_id = uid
         imapAccount.save()
 
-        res = interpret(imap, code, is_test)
+        res = interpret(imap, code, "UID %d" % uid, is_test)
 
         # if the code execute well without any bug, then save the code to DB
         if not res['imap_error']:
