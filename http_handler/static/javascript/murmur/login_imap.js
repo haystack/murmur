@@ -110,7 +110,7 @@ $(document).ready(function() {
                             $("#login-email-form").hide();
                             $("#btn-code-submit").removeAttr('disabled');
                             $("#btn-test-run").removeAttr('disabled');
-                            
+
                             if ('imap_code' in res) {
                                 editor.setValue( res['imap_code'] );
                                 spinStatusCog(true);
@@ -155,7 +155,7 @@ $(document).ready(function() {
                             spinStatusCog(false);   
                         }
                         else {
-                            // append_log(res['imap_log'], false)
+                            append_log(res['imap_log'], false)
 
                             if (editor.getValue() == "") spinStatusCog(false);
                             else spinStatusCog(true);

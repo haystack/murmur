@@ -1761,7 +1761,7 @@ def run_mailbot(user, email, code, is_test, push=True):
             imapAccount.code = code 
             imapAccount.save()
 
-            res['imap_log'] = "Your rule is successfully installed"
+            res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log']) 
 
         res['status'] = True
 
