@@ -42,7 +42,6 @@ class Command(BaseCommand):
                     imap.login(imapAccount.email, password)
 
             except IMAPClient.Error, e:
-                # TODO try to renew the access token
                 try: 
                     if imapAccount.is_oauth:
                         oauth = GoogleOauth2()
@@ -55,6 +54,13 @@ class Command(BaseCommand):
                         res['code'] = "Can't authenticate your email"
                 except IMAPClient.Error, e:  
                     res['code'] = "Can't authenticate your email"
+
+                    # Delete this ImapAccount information so that it requires user to reauthenticate
+                    imapAccount.delete()
+
+                    # TODO email to the user that there is error at authenticating email
+                    continue
+
             except Exception, e:
                 # TODO add exception
                 print e

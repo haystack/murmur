@@ -392,11 +392,15 @@ def group_list(request):
 @render_to(WEBSITE+"/login_email.html")
 def login_imap_view(request):
 	imap_code = ""
-	imap = ImapAccount.objects.filter(email=request.user.email)
-	if imap.exists():
-		imap_code = imap[0].code
+	imap_authenticated = False
 
-	return {'user': request.user, 'imap_authenticated': imap.exists(), 'imap_code': imap_code,'website': WEBSITE}
+	if request.user.is_authenticated:
+		imap = ImapAccount.objects.filter(email=request.user.email)
+		if imap.exists():
+			imap_code = imap[0].code
+			imap_authenticated = imap.exists()
+
+	return {'user': request.user, 'imap_authenticated': imap_authenticated, 'imap_code': imap_code,'website': WEBSITE}
 
 @render_to(WEBSITE+"/add_members.html")
 @login_required
