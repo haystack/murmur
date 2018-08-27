@@ -394,7 +394,7 @@ def login_imap_view(request):
 	imap_code = ""
 	imap_authenticated = False
 
-	if request.user.is_authenticated:
+	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
 		if imap.exists():
 			imap_code = imap[0].code
@@ -1673,6 +1673,16 @@ def unmute_thread(request):
 		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
+
+
+def murmur_login_request(request, acct_func=None, template_name=None):
+	print "murmur_login_request", request.GET['next']
+	# user = get_object_or_404(UserProfile, email=request.user.email)
+	# groups = Group.objects.filter(membergroup__member=user).values("name")
+	# groups_links = get_groups_links_from_roles(user, groups)
+
+	context = {'next': request.GET['next'], 'website' : WEBSITE} 
+	return acct_func(request, template_name=template_name, extra_context=context)
 
 @login_required
 def murmur_acct(request, acct_func=None, template_name=None):
