@@ -46,11 +46,6 @@ urlpatterns = patterns('',
     url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2")),
      
     #override the registration default urls - bug with django 1.6
-    url(r'^accounts/login/$',
-                    murmur_login_request,
-                    {'acct_func': auth_views.login, 'template_name': 'registration/login.html'},
-                    name='login',
-                    ),
     url(r'^accounts/password/change/$',
                     murmur_acct,
                     {'acct_func': auth_views.password_change, 'template_name': 'registration/password_change_form.html'},
