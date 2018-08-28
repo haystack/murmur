@@ -84,11 +84,11 @@ $(document).ready(function() {
     
     function spinStatusCog(spin) {
         if(spin) {
-            document.querySelector(".fa-cog").classList.add("fa-spin");
+            document.querySelector(".fa-sync").classList.add("fa-spin");
             document.querySelector(".idle-mark").style.display = "none";
         }
         else {
-            document.querySelector(".fa-cog").classList.remove("fa-spin");
+            document.querySelector(".fa-sync").classList.remove("fa-spin");
             document.querySelector(".idle-mark").style.display = "inline-block";
         }
     }
