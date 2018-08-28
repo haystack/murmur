@@ -45,7 +45,7 @@ $(document).ready(function() {
         labels_placement: "right",
         on_label: 'Test mode',
         off_label: '',
-        checked: false
+        checked: is_test
     });
 
     btn_code_sumbit.click(function() {
