@@ -51,21 +51,22 @@
 				<div id="status">
 				  This rule will be applied to your incoming emails.  
 				  <div class="fa-3x">
-						<span class="fa-layers fa-fw">
+						Status: <span class="fa-layers fa-fw">
 							<i class="fas fa-cog"></i>
 							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
 						</span>
+						{% if imap_authenticated %}
+							<button class="btn btn-primary" id="btn-code-submit">Save & Run</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg"></div></div>
+						{% else %}
+							<button class="btn btn-primary" id="btn-code-submit" disabled>Save & Run</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg"></div></div>
+						{% endif %}
 				  </div>
 				</div>
 		
 					<div style="padding-top:  50px;">
 					  <div class="card">
 						<div class="card-header">
-							{% if imap_authenticated %}
-								<span>Email engine editor</span> <button class="btn btn-default" style="float:right" id="btn-test-run">Test run</button> <button class="btn btn-primary" style="float:right" id="btn-code-submit">Save & Run</button>
-							{% else %}
-								<span>Email engine editor</span> <button class="btn btn-default" style="float:right" id="btn-test-run" disabled>Test run</button> <button class="btn btn-primary" style="float:right" id="btn-code-submit" disabled>Save & Run</button>
-							{% endif %}
+							<h4>Email engine editor</h4> 
 						</div>
 						<div class="card-block">
 							{% if imap_code %}

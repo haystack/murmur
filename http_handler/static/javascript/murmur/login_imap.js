@@ -38,6 +38,23 @@ $(document).ready(function() {
 	$('input[type=radio][name=auth-mode]').change(function() {
         toggle_login_mode();      
     });
+
+    $("#test-mode[type=checkbox]").switchButton({
+        labels_placement: "right",
+        on_label: 'Test mode',
+        checked: false
+    });
+
+    $('#test-mode[type=checkbox]').change(function() {
+        if( $(this).is(":checked") ) {
+            $("#mode-msg").text("You are currently at test mode. Mailbot will simulate your rule but not actually run the rule.");
+            run_code(true);
+        } 
+        else  {
+            $("#mode-msg").text("Mailbot is running!");
+            run_code(false);
+        }   
+    });
 	
 	function toggle_login_mode() {
 		oauth = $('#rdo-oauth').is(":checked");
@@ -177,13 +194,13 @@ $(document).ready(function() {
             );
         }
 
-        btn_test_run.click(function() {
-            run_code(true);
-        });
+        // btn_test_run.click(function() {
+        //     run_code(true);
+        // });
 
-        btn_code_sumbit.click(function() {
-            run_code(false);
-        });
+        // btn_code_sumbit.click(function() {
+        //     run_code(false);
+        // });
         // TODO change with change
         // $("#input-email").change(function( event ) {
         //     guess_host( $(this).val() );
