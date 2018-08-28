@@ -52,9 +52,9 @@ $(document).ready(function() {
     });
 
     btn_code_sumbit.click(function() {
-        if($(this).text() == "Save & Run") {
-            set_running(true);
-        } else set_running(false);
+        if( get_running() ) { // if currently running, then stop 
+            run_code( $('#test-mode[type=checkbox]').is(":checked"), false );
+        } else run_code( $('#test-mode[type=checkbox]').is(":checked"), true );
         
     });
 
@@ -86,15 +86,11 @@ $(document).ready(function() {
         if(start_running) {
             spinStatusCog(true);
             btn_code_sumbit.text("Stop");
-
-            if(!IS_RUNNING) // if it is already running, prevent running twice  
-                run_code( $('#test-mode[type=checkbox]').is(":checked"), true );
         }
         
         // Stop running
         else {
             spinStatusCog(false);
-            run_code( $('#test-mode[type=checkbox]').is(":checked"), false );
             $(this).text("Save & Run");
         }
     }
@@ -202,13 +198,13 @@ $(document).ready(function() {
                         if(res['imap_error'])  {
                             // append_log(res['imap_log'], true);
 
-                            spinStatusCog(false);   
+                            set_running(false);   
                         }
                         else {
                             append_log(res['imap_log'], false)
 
-                            if (editor.getValue() == "") spinStatusCog(false);
-                            else spinStatusCog(true);
+                            if (editor.getValue() == "") set_running(false);   
+                            else set_running(true);   
                         }
 
                         if (res.code) { 
