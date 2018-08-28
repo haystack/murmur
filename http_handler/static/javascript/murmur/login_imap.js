@@ -45,13 +45,20 @@ $(document).ready(function() {
         checked: false
     });
 
+    btn_code_sumbit.click(function() {
+        run_code( $('#test-mode[type=checkbox]').is(":checked") );
+
+        if($(this).text() == "Save & Run") $(this).text("Stop")
+        else $(this).text("Save & Run")
+    });
+
     $('#test-mode[type=checkbox]').change(function() {
         if( $(this).is(":checked") ) {
             $("#mode-msg").text("You are currently at test mode. Mailbot will simulate your rule but not actually run the rule.");
             run_code(true);
         } 
         else  {
-            $("#mode-msg").text("Mailbot is running!");
+            $("#mode-msg").text("Mailbot will apply your rules to your incoming emails. ");
             run_code(false);
         }   
     });

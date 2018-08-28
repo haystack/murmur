@@ -6,6 +6,7 @@
 <!-- Interactive console styles -->
 <!-- <link rel="stylesheet" href="/static/css/mailbot/libs/sandbox.css" /> -->
 <link rel="stylesheet" href="/static/css/mailbot/style.css">
+<link rel="stylesheet" href="/static/css/mailbot/libs/jquery.switchButton.css" />
 {% endblock %}
 
 {% block content %}
@@ -49,7 +50,7 @@
 			<br>
 			<div id="editor-container">
 				<div id="status">
-				  This rule will be applied to your incoming emails.  
+				  <!-- This rule will be applied to your incoming emails.   -->
 				  <div class="fa-3x">
 						Status: <span class="fa-layers fa-fw">
 							<i class="fas fa-cog"></i>
@@ -132,6 +133,8 @@ elif "action required" in get_subject():
 	<script type="text/javascript" src="/static/javascript/mailbot/console/lettering.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/console/prettify.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/console/DAT.GUI.min.js"></script>
+
+	<script type="text/javascript" src="/static/javascript/mailbot/jquery.switchButton.js"></script>
 	
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
 	<!-- <script type="text/javascript" src="/static/javascript/mailbot/console/sandbox-console.js"></script> -->
