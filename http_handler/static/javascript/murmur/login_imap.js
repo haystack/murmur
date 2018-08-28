@@ -36,9 +36,8 @@ $(document).ready(function() {
         fetch_log(); 
     }
 
-    if(is_running) {
-        spinStatusCog(true);
-        btn_code_sumbit.text("Stop");
+    if(IS_RUNNING) {
+        set_running(true);
     }
     
 	$('input[type=radio][name=auth-mode]').change(function() {
@@ -53,21 +52,16 @@ $(document).ready(function() {
     });
 
     btn_code_sumbit.click(function() {
-        // Stop running
         if($(this).text() == "Save & Run") {
-            run_code( $('#test-mode[type=checkbox]').is(":checked"), false );
-            $(this).text("Stop")
-        }
-        else {  // Start running
-            run_code( $('#test-mode[type=checkbox]').is(":checked"), true );
-            $(this).text("Save & Run")
-        }
+            set_running(true);
+        } else set_running(false);
+        
     });
 
     $('#test-mode[type=checkbox]').change(function() {
         var want_test = $(this).is(":checked");
         $("#mode-msg").text( test_mode_msg[ want_test ] );
-        if(is_running)
+        if(get_running())
             run_code( want_test, true ); 
     });
 	
@@ -80,6 +74,29 @@ $(document).ready(function() {
 			$(".oauth").hide();
             $(".plain").show();
 		}
+    }
+
+    function get_running() {
+        if( btn_code_sumbit.text() == "Stop") return true;
+        else return false;
+    }
+
+    function set_running(start_running) {
+        // Start running
+        if(start_running) {
+            spinStatusCog(true);
+            btn_code_sumbit.text("Stop");
+
+            if(!IS_RUNNING) // if it is already running, prevent running twice  
+                run_code( $('#test-mode[type=checkbox]').is(":checked"), true );
+        }
+        
+        // Stop running
+        else {
+            spinStatusCog(false);
+            run_code( $('#test-mode[type=checkbox]').is(":checked"), false );
+            $(this).text("Save & Run");
+        }
     }
     
     function spinStatusCog(spin) {
