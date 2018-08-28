@@ -53,7 +53,7 @@
 				  <!-- This rule will be applied to your incoming emails.   -->
 				  <div class="fa-3x">
 						Status: <span class="fa-layers fa-fw">
-							<i class="fas fa-cog"></i>
+							<i class="fas fa-sync"></i>
 							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
 						</span>
 						{% if imap_authenticated %}
@@ -102,12 +102,8 @@ elif "action required" in get_subject():
 	<script type="text/javascript">
 		var is_authenticated = {{ user.is_authenticated|yesno:"true,false" }},
 			is_imap_authenticated = {{ imap_authenticated|yesno:"true,false" }},
-			is_test = {{ is_test|yesno:"true,false" }};  
-			{% if imap_code %}
-				var is_running = true; 
-			{% else %} 
-				var is_running = false;
-			{% endif %} 
+			is_test = {{ is_test|yesno:"true,false" }},
+			is_running = {{ is_running|yesno:"true,false" }};
 	</script>
 	
 	  

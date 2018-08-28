@@ -5,6 +5,10 @@ $(document).ready(function() {
         btn_test_run = $("#btn-test-run"),
         btn_code_sumbit = $("#btn-code-submit");
     
+    var test_mode_msg = {true: "You are currently at test mode. Mailbot will simulate your rule but not actually run the rule.", 
+        false: "Mailbot will apply your rules to your incoming emails. "};
+
+    $("#mode-msg").text( test_mode_msg[is_test] );
 
     // Create the sandbox:
     // window.sandbox = new Sandbox.View({
@@ -49,21 +53,22 @@ $(document).ready(function() {
     });
 
     btn_code_sumbit.click(function() {
-        run_code( $('#test-mode[type=checkbox]').is(":checked") );
-
-        if($(this).text() == "Save & Run") $(this).text("Stop")
-        else $(this).text("Save & Run")
+        // Stop running
+        if($(this).text() == "Save & Run") {
+            run_code( $('#test-mode[type=checkbox]').is(":checked"), false );
+            $(this).text("Stop")
+        }
+        else {  // Start running
+            run_code( $('#test-mode[type=checkbox]').is(":checked"), true );
+            $(this).text("Save & Run")
+        }
     });
 
     $('#test-mode[type=checkbox]').change(function() {
-        if( $(this).is(":checked") ) {
-            $("#mode-msg").text("You are currently at test mode. Mailbot will simulate your rule but not actually run the rule.");
-            run_code(true);
-        } 
-        else  {
-            $("#mode-msg").text("Mailbot will apply your rules to your incoming emails. ");
-            run_code(false);
-        }   
+        var want_test = $(this).is(":checked");
+        $("#mode-msg").text( test_mode_msg[ want_test ] );
+        if(is_running)
+            run_code( want_test, true ); 
     });
 	
 	function toggle_login_mode() {
@@ -161,11 +166,12 @@ $(document).ready(function() {
                 );
         });
 
-        function run_code(is_dry_run) {
+        function run_code(is_dry_run, is_running) {
             var params = {
                 'email': $("#input-email").val(),
                 'code': editor.getValue(),
-                'test_run': is_dry_run
+                'test_run': is_dry_run,
+                'is_running': is_running
             };
 
             $.post('/run_mailbot', params,
@@ -203,18 +209,6 @@ $(document).ready(function() {
                 }
             );
         }
-
-        // btn_test_run.click(function() {
-        //     run_code(true);
-        // });
-
-        // btn_code_sumbit.click(function() {
-        //     run_code(false);
-        // });
-        // TODO change with change
-        // $("#input-email").change(function( event ) {
-        //     guess_host( $(this).val() );
-        // });
     
         $(".default-text").blur();
 

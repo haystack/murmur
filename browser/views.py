@@ -401,8 +401,9 @@ def login_imap_view(request):
 			imap_code = imap[0].code
 			imap_authenticated = True
 			is_test = imap[0].is_test
+			is_running = imap[0].is_running
 
-	return {'user': request.user, 'is_test': is_test, 'imap_authenticated': imap_authenticated, 'imap_code': imap_code,'website': WEBSITE}
+	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 'imap_authenticated': imap_authenticated, 'imap_code': imap_code,'website': WEBSITE}
 
 @render_to(WEBSITE+"/add_members.html")
 @login_required
@@ -1464,8 +1465,9 @@ def run_mailbot(request):
 		
 		code = request.POST['code']
 		is_test = True if request.POST['test_run'] == "true" else False
+		is_running = True if request.POST['is_running'] == "true" else False
 
-		res = engine.main.run_mailbot(user, request.user.email, code, is_test)
+		res = engine.main.run_mailbot(user, request.user.email, code, is_test, is_running)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

@@ -20,6 +20,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         imapAccounts = ImapAccount.objects.filter().exclude(code="")
         for imapAccount in imapAccounts:
+            if not imapAccount.is_running:
+                continue
+
             res = {'status' : False, 'imap_error': False}
             print "RUN MAILbot of ", imapAccount.email
 

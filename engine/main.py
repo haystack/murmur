@@ -1724,12 +1724,13 @@ def fetch_execution_log(user, email, push=True):
     logging.debug(res)
     return res 
 
-def run_mailbot(user, email, code, is_test, push=True):
+def run_mailbot(user, email, code, is_test, is_running, push=True):
     res = {'status' : False, 'imap_error': False}
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
         imapAccount.is_test = is_test
+        imapAccount.is_running = is_running
 
         imap = IMAPClient(imapAccount.host, use_uid=True)
         if imapAccount.is_oauth:
@@ -1754,16 +1755,20 @@ def run_mailbot(user, email, code, is_test, push=True):
         imapAccount.newest_msg_id = uid
         imapAccount.save()
 
-        res = interpret(imap, code, "UID %d" % uid, is_test)
+        if imapAccount.is_running:
+            res = interpret(imap, code, "UID %d" % uid, is_test)
 
-        # if the code execute well without any bug, then save the code to DB
-        if not res['imap_error']:
-            imapAccount.code = code 
-            imapAccount.save()
+            # if the code execute well without any bug, then save the code to DB
+            if not res['imap_error']:
+                imapAccount.code = code 
+                imapAccount.save()
 
-            res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log']) 
+                res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log']) 
+        else:
+            res['imap_log'] = "Your mailbot stops running"
 
         res['status'] = True
+            
 
     except IMAPClient.Error, e:
         res['code'] = e
