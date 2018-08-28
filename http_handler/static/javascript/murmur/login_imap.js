@@ -203,8 +203,7 @@ $(document).ready(function() {
                         else {
                             append_log(res['imap_log'], false)
 
-                            if (editor.getValue() == "") set_running(false);   
-                            else set_running(true);   
+                            set_running(is_running);   
                         }
 
                         if (res.code) { 
