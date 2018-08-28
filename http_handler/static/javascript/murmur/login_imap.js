@@ -91,7 +91,7 @@ $(document).ready(function() {
         // Stop running
         else {
             spinStatusCog(false);
-            $(this).text("Save & Run");
+            btn_code_sumbit.text("Save & Run");
         }
     }
     
