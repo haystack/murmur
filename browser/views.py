@@ -394,7 +394,8 @@ def login_imap_view(request):
 	imap_code = ""
 	imap_authenticated = False
 	is_test = False
-
+	is_running = False
+	
 	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
 		if imap.exists():
