@@ -5,3 +5,9 @@
 .info {
     color: darkblue;
 }
+
+.switch-wrapper {
+    display: inline-block;
+    position: relative;
+    top: 3px;
+  }

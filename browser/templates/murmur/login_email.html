@@ -57,9 +57,9 @@
 							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
 						</span>
 						{% if imap_authenticated %}
-							<button class="btn btn-primary" id="btn-code-submit">Save & Run</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg"></div></div>
+							<button class="btn btn-primary" id="btn-code-submit">Save & Run</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% else %}
-							<button class="btn btn-primary" id="btn-code-submit" disabled>Save & Run</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg"></div></div>
+							<button class="btn btn-primary" id="btn-code-submit" disabled>Save & Run</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1" disabled><div id="mode-msg" style="font-size: small;"></div></div>
 						{% endif %}
 				  </div>
 				</div>

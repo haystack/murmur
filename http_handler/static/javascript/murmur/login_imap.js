@@ -32,8 +32,10 @@ $(document).ready(function() {
         fetch_log(); 
     }
 
-    if(is_running) 
-        spinStatusCog(true)
+    if(is_running) {
+        spinStatusCog(true);
+        btn_code_sumbit.text("Stop");
+    }
     
 	$('input[type=radio][name=auth-mode]').change(function() {
         toggle_login_mode();      
@@ -42,6 +44,7 @@ $(document).ready(function() {
     $("#test-mode[type=checkbox]").switchButton({
         labels_placement: "right",
         on_label: 'Test mode',
+        off_label: '',
         checked: false
     });
 
