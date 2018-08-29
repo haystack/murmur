@@ -6,6 +6,7 @@
 <!-- Interactive console styles -->
 <!-- <link rel="stylesheet" href="/static/css/mailbot/libs/sandbox.css" /> -->
 <link rel="stylesheet" href="/static/css/mailbot/style.css">
+<link rel="stylesheet" href="/static/css/mailbot/libs/prism.css">
 <link rel="stylesheet" href="/static/css/mailbot/libs/jquery.switchButton.css" />
 <link rel="stylesheet" href="https://get.mavo.io/mavo.css"/>
 {% endblock %}
@@ -23,13 +24,46 @@
             mv-unauthenticated-permissions="read"
             mv-autosave="0"
             mv-server-push="true">
-                <div property="methods" mv-multiple>
+                <h3>Retreive metadata of an email</h3>
+                <div property="getter" mv-multiple>
                     <h4>[name] ([params])</h4>
                     <p>[description]</p>
+                    <pre class="language-python">
+                        <code class="language-python" property="example" mv-multiple>
+                            <!-- <h6 property="line"></g6> -->
+                        </code>
+                    </pre>
                 </div>
+                <br>
+                <h3>Action on an email</h3>
+                <div property="methods"  mv-multiple>
+                    <h4>[name] ([params])</h4>
+                    <p>[description]</p>
+                    <pre class="language-python">
+                        <code class="language-python" property="example" mv-multiple>
+                            <!-- <h6 property="line"></g6> -->
+                          </code>
+                    </pre>
+                  </div>
+                  <br>
+                <h3>Action on a folder</h3>
+                <div property="folder"  mv-multiple>
+                        <h4>[name] ([params])</h4>
+                        <p>[description]</p>
+                        <pre class="language-python">
+                            <code class="language-python" property="example" mv-multiple>
+                                <!-- <h6 property="line"></g6> -->
+                              </code>
+                        </pre>
+                      </div>
             </main>
 		</div>
-	</div>
+    </div>
+    <script>
+            $.events(document, "DOMContentLoaded mv-load", function(evt) {
+              init_syntax();
+            });
+          </script>
 	  
 	<!-- <a href="/groups/{{group_info.name}}">Back to group info page</a> -->
 {% endblock %}
@@ -55,7 +89,8 @@
 	<script type="text/javascript" src="/static/javascript/mailbot/console/prettify.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/console/DAT.GUI.min.js"></script>
 
-	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/static/javascript/mailbot/prism.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/jquery.switchButton.js"></script>
 	
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->

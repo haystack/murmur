@@ -11,3 +11,7 @@
     position: relative;
     top: 3px;
   }
+
+.mv-bar.mv-ui {
+    display: none;
+}
