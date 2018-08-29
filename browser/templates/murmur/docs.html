@@ -5,10 +5,12 @@
 <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
 <!-- Interactive console styles -->
 <!-- <link rel="stylesheet" href="/static/css/mailbot/libs/sandbox.css" /> -->
-<link rel="stylesheet" href="/static/css/mailbot/style.css">
-<link rel="stylesheet" href="/static/css/mailbot/libs/prism.css">
+
 <link rel="stylesheet" href="/static/css/mailbot/libs/jquery.switchButton.css" />
 <link rel="stylesheet" href="https://get.mavo.io/mavo.css"/>
+<link rel="stylesheet" href="/static/css/mailbot/libs/prism.css">
+<link rel="stylesheet" href="/static/css/mailbot/style.css">
+
 {% endblock %}
 
 {% block content %}
@@ -29,7 +31,7 @@
                 <div property="getter" mv-multiple>
                     <h4>[name] ([params])</h4>
                     <p>[description]</p>
-                    <pre class="language-python">
+                    <pre class="language-python" style="background-color: transparent;">
                         <code class="language-python" property="example" mv-multiple>
                             <!-- <h6 property="line"></g6> -->
                         </code>
@@ -40,7 +42,7 @@
                 <div property="methods"  mv-multiple>
                     <h4>[name] ([params])</h4>
                     <p>[description]</p>
-                    <pre class="language-python">
+                    <pre class="language-python" style="background-color: transparent;">
                         <code class="language-python" property="example" mv-multiple>
                             <!-- <h6 property="line"></g6> -->
                           </code>
@@ -48,10 +50,10 @@
                   </div>
                   <br>
                 <h3>Action on a folder</h3>
-                <div property="folder"  mv-multiple>
+                <div property="methods"  mv-multiple>
                         <h4>[name] ([params])</h4>
                         <p>[description]</p>
-                        <pre class="language-python">
+                        <pre class="language-python" style="background-color: transparent;">
                             <code class="language-python" property="example" mv-multiple>
                                 <!-- <h6 property="line"></g6> -->
                               </code>
@@ -60,11 +62,6 @@
             </main>
 		</div>
     </div>
-    <script>
-            $.events(document, "DOMContentLoaded mv-load", function(evt) {
-              init_syntax();
-            });
-          </script>
 	  
 	<!-- <a href="/groups/{{group_info.name}}">Back to group info page</a> -->
 {% endblock %}
@@ -91,11 +88,18 @@
 	<script type="text/javascript" src="/static/javascript/mailbot/console/DAT.GUI.min.js"></script>
 
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
+    
     <script type="text/javascript" src="/static/javascript/mailbot/prism.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/jquery.switchButton.js"></script>
 	
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
 	<!-- <script type="text/javascript" src="/static/javascript/mailbot/console/sandbox-console.js"></script> -->
 
-	<script src="https://get.mavo.io/mavo.js"></script>
+    <script src="https://get.mavo.io/mavo.js"></script>
+    
+    <script>
+            document.addEventListener("mv-load", function(){
+                init_syntax();
+              });
+          </script>
 {% endblock %}
