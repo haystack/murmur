@@ -26,6 +26,39 @@ $(document).ready(function() {
         matchBrackets: true
     });
 
+    document.addEventListener("mv-load", function(){
+        
+
+        var arrows = [13, 37, 38, 39, 40];
+        editor.on("keyup", function(cm, e) {
+            if (arrows.indexOf(e.keyCode) < 0) {
+            editor.execCommand("autocomplete")
+            }
+        });
+
+        CodeMirror.registerHelper('hint', 'dictionaryHint', function(editor) {
+            var cur = editor.getCursor();
+            var curLine = editor.getLine(cur.line);
+            var start = cur.ch;
+            var end = start;
+
+            var method_names = [];
+            document.querySelectorAll('#apis-container h4').forEach(function(element) {
+                method_names.push( element.innerHTML.split("(")[0] );
+            });
+
+            return {
+                list: method_names,
+                from: CodeMirror.Pos(cur.line, start),
+                to: CodeMirror.Pos(cur.line, end)
+            }
+        });
+
+        CodeMirror.commands.autocomplete = function(cm) {
+            CodeMirror.showHint(cm, CodeMirror.hint.dictionaryHint);
+        };
+    });
+
     var log_backup = "";
 
     // $("#password-container").hide();

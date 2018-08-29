@@ -7,6 +7,7 @@
 <!-- <link rel="stylesheet" href="/static/css/mailbot/libs/sandbox.css" /> -->
 <link rel="stylesheet" href="/static/css/mailbot/style.css">
 <link rel="stylesheet" href="/static/css/mailbot/libs/jquery.switchButton.css" />
+<link rel="stylesheet" href="/static/css/mailbot/libs/show-hint.css" />
 {% endblock %}
 
 {% block content %}
@@ -97,6 +98,23 @@ elif "action required" in get_subject():
 					  </div>
 					</div>
 			  </div>
+
+			  <div id="apis-container" style="display:none;" mv-app="api" mv-storage="https://github.com/soyapark/mailbot">
+				<h3>Retreive metadata of an email</h3>
+                <div property="getter" mv-multiple>
+                    <h4>[name] ([params])</h4>
+                </div>
+                <br>
+                <h3>Action on an email</h3>
+                <div property="methods"  mv-multiple>
+                    <h4>[name] ([params])</h4>
+                  </div>
+                  <br>
+                <h3>Action on a folder</h3>
+                <div property="folder"  mv-multiple>
+                    <h4>[name] ([params])</h4>
+                </div>
+			  </div>
 			  <!-- END editor col -->	
 		</div>
 	</div>
@@ -119,7 +137,8 @@ elif "action required" in get_subject():
 	<script type="text/javascript" src="/static/javascript/mailbot/codemirror.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/addon/edit/matchbrackets.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/python.js"></script>
-
+	<script type="text/javascript" src="/static/javascript/mailbot/addon/hint/show-hint.js"></script>
+	
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"></script>
 	
 	<!-- Underscore, Backbone, backbone-localStorage, jQuery -->
@@ -135,6 +154,7 @@ elif "action required" in get_subject():
 	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/jquery.switchButton.js"></script>
 	
+	<script src="https://get.mavo.io/mavo.js"></script>
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
 	<!-- <script type="text/javascript" src="/static/javascript/mailbot/console/sandbox-console.js"></script> -->
 
