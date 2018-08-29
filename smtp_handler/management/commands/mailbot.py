@@ -2,15 +2,12 @@ import base64
 
 from django.core.management.base import BaseCommand, CommandError
 from smtp_handler.utils import *
-from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE, IMAP_SECRET
 from schema.models import *
 from datetime import datetime, timedelta
 from browser.imap import *
 from imapclient import IMAPClient
 from engine.constants import *
 from smtp_handler.Pile import *
-from engine.google_auth import *
-from Crypto.Cipher import AES
 import datetime
 
 class Command(BaseCommand):
@@ -26,50 +23,12 @@ class Command(BaseCommand):
             res = {'status' : False, 'imap_error': False}
             print "RUN MAILbot of ", imapAccount.email
 
-            try:    
-                imap = IMAPClient(imapAccount.host, use_uid=True)
-                if imapAccount.is_oauth:
-                    # TODO if access_token is expired, then get a new token
-                    imap.oauth2_login(imapAccount.email, imapAccount.access_token)
-                else:
-                    aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
-                    password = aes.decrypt( base64.b64decode(imapAccount.password) )
+            auth_res = authenticate( imapAccount )
+            if not auth_res['status']:
+                continue
 
-                    index = 0
-                    last_string = password[-1]
-                    for c in reversed(password):
-                        if last_string != c:
-                            password = password[:(-1)*index]
-                            break
-                        index = index + 1
-                    imap.login(imapAccount.email, password)
-
-            except IMAPClient.Error, e:
-                try: 
-                    if imapAccount.is_oauth:
-                        oauth = GoogleOauth2()
-                        response = oauth.RefreshToken(imapAccount.refresh_token)
-                        imap.oauth2_login(imapAccount.email, response['access_token'])
-
-                        imapAccount.access_token = response['access_token']
-                        imapAccount.save()
-                    else:
-                        res['code'] = "Can't authenticate your email"
-                except IMAPClient.Error, e:  
-                    res['code'] = "Can't authenticate your email"
-
-                    # Delete this ImapAccount information so that it requires user to reauthenticate
-                    imapAccount.delete()
-
-                    # TODO email to the user that there is error at authenticating email
-                    continue
-
-            except Exception, e:
-                # TODO add exception
-                print e
-                res['code'] = msg_code['UNKNOWN_ERROR']
+            imap = auth_res['imap']
             
-
             try:
                 new_uid = fetch_latest_email_id(imapAccount, imap)
 

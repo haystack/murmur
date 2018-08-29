@@ -1733,23 +1733,7 @@ def run_mailbot(user, email, code, is_test, is_running, push=True):
         imapAccount.is_running = is_running
 
         imap = IMAPClient(imapAccount.host, use_uid=True)
-        if imapAccount.is_oauth:
-            # TODO if access_token is expired, then get a new token 
-            imap.oauth2_login(email, imapAccount.access_token)
-
-        else:
-            aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
-            password = aes.decrypt( base64.b64decode(imapAccount.password) )
-
-            index = 0
-            last_string = password[-1]
-            for c in reversed(password):
-                if last_string != c:
-                    password = password[:(-1)*index]
-                    break
-                index = index + 1
-
-            imap.login(email, password)
+        authenticate( imap )
 
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid

@@ -8,7 +8,60 @@ import contextlib
 from smtp_handler.utils import *
 from smtp_handler.Pile import *
 from email import message_from_string,message
+from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE, IMAP_SECRET
+from engine.google_auth import *
+from Crypto.Cipher import AES
 
+def authenticate(imap_account):
+    res = {'status' : False, 'imap_error': False}
+
+    try:  
+        imap = IMAPClient(imap_account.host, use_uid=True)
+        if imap_account.is_oauth:
+            # TODO if access_token is expired, then get a new token 
+            imap.oauth2_login(imap_account.email, imap_account.access_token)
+        else:
+            aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
+            password = aes.decrypt( base64.b64decode(imap_account.password) )
+
+            index = 0
+            last_string = password[-1]
+            for c in reversed(password):
+                if last_string != c:
+                    password = password[:(-1)*index]
+                    break
+                index = index + 1
+
+            imap.login(imap_account.email, password) 
+
+        res['imap'] = imap
+        res['status'] = True
+    except IMAPClient.Error, e:
+        try: 
+            print "try to renew token"
+            if imap_account.is_oauth:
+                oauth = GoogleOauth2()
+                response = oauth.RefreshToken(imap_account.refresh_token)
+                imap.oauth2_login(imap_account.email, response['access_token'])
+
+                imap_account.access_token = response['access_token']
+                imap_account.save()
+                res['status'] = True
+            else:
+                res['code'] = "Can't authenticate your email"
+        except IMAPClient.Error, e:  
+            res['code'] = "Can't authenticate your email"
+
+            # Delete this ImapAccount information so that it requires user to reauthenticate
+            imap_account.delete()
+
+            # TODO email to the user that there is error at authenticating email
+        except Exception, e:
+            # TODO add exception
+            print e
+            res['code'] = msg_code['UNKNOWN_ERROR']
+
+    return res
 
 def append(imap, subject, content):
     new_message = message.Message()
@@ -64,7 +117,7 @@ def interpret(imap, code, search_creteria, is_test=False):
             res['imap_log'] = logstr
             res['imap_error'] = True
 
-        def add_flags(flags): 
+        def add_notes(flags): 
             if not is_test: 
                 pile.add_flags(flags)
 
@@ -102,7 +155,7 @@ def interpret(imap, code, search_creteria, is_test=False):
         def get_subject():
             return pile.get_subjects()[0]
 
-        def get_flag():        
+        def get_note():        
             return pile.get_flags()[0]
 
 
@@ -124,7 +177,7 @@ def interpret(imap, code, search_creteria, is_test=False):
         def get_subjects():
             return pile.get_subjects()
 
-        def get_flags():        
+        def get_notes():        
             return pile.get_flags()
 
         def mark_read(is_seen):
@@ -145,7 +198,7 @@ def interpret(imap, code, search_creteria, is_test=False):
             
             print format_log("Move Message from %s to %s" % (search_creteria, src_folder, dst_folder), False)  
 
-        def remove_flags(flags): 
+        def remove_notes(flags): 
             if not is_test: 
                 pile.remove_flags(flags)
 
