@@ -1729,11 +1729,10 @@ def run_mailbot(user, email, code, is_test, is_running, push=True):
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
+        authenticate( imapAccount )
+
         imapAccount.is_test = is_test
         imapAccount.is_running = is_running
-
-        imap = IMAPClient(imapAccount.host, use_uid=True)
-        authenticate( imap )
 
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
