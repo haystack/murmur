@@ -1731,10 +1731,10 @@ def run_mailbot(user, email, code, is_test, is_running, push=True):
         imapAccount = ImapAccount.objects.get(email=email)
         auth_res = authenticate( imapAccount )
         if not auth_res['status']:
-            continue
+            raise ValueError('Something went wrong during authentication. Refresh and try again!')
 
         imap = auth_res['imap']
-        
+
         imapAccount.is_test = is_test
         imapAccount.is_running = is_running
 
