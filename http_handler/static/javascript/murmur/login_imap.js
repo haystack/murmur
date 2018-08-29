@@ -27,13 +27,17 @@ $(document).ready(function() {
     });
 
     document.addEventListener("mv-load", function(){
-        
-
-        var arrows = [13, 37, 38, 39, 40];
+    
+        var arrows = [13, 27, 37, 38, 39, 40];
         editor.on("keyup", function(cm, e) {
             if (arrows.indexOf(e.keyCode) < 0) {
             editor.execCommand("autocomplete")
             }
+        });
+
+        var method_names = [];
+        document.querySelectorAll('#apis-container h4').forEach(function(element) {
+            method_names.push( element.innerHTML.split("(")[0] );
         });
 
         CodeMirror.registerHelper('hint', 'dictionaryHint', function(editor) {
@@ -42,13 +46,18 @@ $(document).ready(function() {
             var start = cur.ch;
             var end = start;
 
-            var method_names = [];
-            document.querySelectorAll('#apis-container h4').forEach(function(element) {
-                method_names.push( element.innerHTML.split("(")[0] );
-            });
+            while (end < curLine.length && /[\w$]/.test(curLine.charAt(end))) ++end;
+            while (start && /[\w$]/.test(curLine.charAt(start - 1))) --start;
+            var curWord = start !== end && curLine.slice(start, end);
+            var regex = new RegExp('^' + curWord, 'i');
+
+            var suggestion = method_names.filter(function(item) {
+                return item.match(regex);
+            }).sort();
+            suggestion.length == 1 ? suggestion.push(" ") : console.log();
 
             return {
-                list: method_names,
+                list: suggestion,
                 from: CodeMirror.Pos(cur.line, start),
                 to: CodeMirror.Pos(cur.line, end)
             }
