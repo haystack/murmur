@@ -163,7 +163,8 @@ if WEBSITE == 'murmur':
                     url(r'^adjust_list_can_post', 'browser.views.adjust_list_can_post'),
                     url(r'^adjust_list_can_receive', 'browser.views.adjust_list_can_receive'),
 
-                    url(r'^login_email', 'browser.views.login_imap_view'),
+                    url(r'^editor', 'browser.views.login_imap_view'),
+                    url(r'^docs', 'browser.views.docs_view'),
                     url(r'^login_imap', 'browser.views.login_imap'),
                     url(r'^run_mailbot', 'browser.views.run_mailbot'),
                     url(r'^fetch_execution_log', 'browser.views.fetch_execution_log'),

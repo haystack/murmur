@@ -395,7 +395,7 @@ def login_imap_view(request):
 	imap_authenticated = False
 	is_test = False
 	is_running = False
-	
+
 	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
 		if imap.exists():
@@ -405,6 +405,11 @@ def login_imap_view(request):
 			is_running = imap[0].is_running
 
 	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 'imap_authenticated': imap_authenticated, 'imap_code': imap_code,'website': WEBSITE}
+
+@render_to(WEBSITE+"/docs.html")
+def docs_view(request):
+	return {'user': request.user, 'website': WEBSITE}
+
 
 @render_to(WEBSITE+"/add_members.html")
 @login_required
