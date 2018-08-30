@@ -126,9 +126,9 @@ $(document).ready(function() {
     }
 
     function get_current_mode() {
-        return {"id": $(".nav.nav-tabs li.active").attr("mode-id"),
-            "name": $(".nav.nav-tabs li.active a").text(), 
-            "code": editor_dict[ $(".nav.nav-tabs li.active").attr("mode-id") ].getValue()}
+        return {"id": document.querySelector('.nav.nav-tabs li.active').getAttribute('mode-id'),
+            "name": document.querySelector('.nav.nav-tabs li.active span').innerHTML, 
+            "code": editor_dict[ document.querySelector('.nav.nav-tabs li.active').getAttribute('mode-id') ].getValue()}
     }
 
     function get_running() {

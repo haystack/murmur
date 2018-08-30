@@ -374,7 +374,7 @@ class MailbotMode(models.Model):
 
 	imap_acoount = models.ForeignKey('ImapAccount')
 
-	class Meta:=
+	class Meta:
 		unique_together = ("uid", "imap_acoount")
 
 class Following(models.Model):
