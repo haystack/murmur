@@ -76,11 +76,11 @@
 								<ul class="nav nav-tabs" role="tablist">
 									{% for mode in modes %}
 										{% if current_mode == mode %}
-											<li class="active" mode-id="'"+ {{mode.uid}} + "'">	
+											<li class="active" mode-id={{ mode.uid }}>	
 										{% else %}
-											<li mode-id="'"+ {{mode.uid}} + "'">
+											<li mode-id={{ mode.uid }}>
 										{% endif %}
-											<a href="'#editor-tab" + {{mode.uid}} + "'" data-toggle="tab">
+											<a href="#editor-tab_{{mode.uid}}" data-toggle="tab">
 													<span class="tab-title">
 													{{ mode.name }}
 													</span>
@@ -92,11 +92,11 @@
 								<div class="tab-content">
 									{% for mode in modes %}
 										{% if current_mode == mode %}
-											<div class="tab-pane active" id="editor-tab_"+ {{mode.uid}} + "'">
+											<div class="tab-pane active" id="editor-tab_{{mode.uid}}">
 										{% else %}
-											<div class="tab-pane" id="editor-tab_"+ {{mode.uid}} + "'">
+											<div class="tab-pane" id="editor-tab_{{mode.uid}}">
 										{% endif %}
-												<textarea class="mode-editor" id="editor-"+ {{mode.uid}} + "'">
+												<textarea class="mode-editor" id="editor-{{mode.uid}}">
 {{ mode.code }}					
 												</textarea>
 									  		</div>

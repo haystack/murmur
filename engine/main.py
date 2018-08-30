@@ -1750,6 +1750,7 @@ def run_mailbot(user, email, mode_id, mode_name, code, is_test, is_running, push
             mailbotMode.code = code
 
         imapAccount.current_mode = mailbotMode
+        imapAccount.save()
 
         if imapAccount.is_running:
             res = interpret(imap, code, "UID %d" % uid, is_test)
