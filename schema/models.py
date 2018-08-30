@@ -352,7 +352,9 @@ class ImapAccount(models.Model):
 	access_token = models.CharField('access_token', max_length=200, blank=True)
 	refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
 
-	code = models.TextField(null=True, blank=True)
+	current_mode = models.ForeignKey('MailbotMode', null=True, blank=True)
+
+	# code = models.TextField(null=True, blank=True)
 	execution_log = models.TextField(default="")
 	is_test = models.BooleanField(default=True)
 	is_running = models.BooleanField(default=False)
@@ -363,6 +365,14 @@ class ImapAccount(models.Model):
 	repeat_action = models.CharField('repeat_action', max_length=1000, blank=True)
 
 	# user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+
+class MailbotMode(models.Model):
+	id = models.AutoField(primary_key=True)
+	
+	name = models.CharField('mode_name', max_length=100)
+	code = models.TextField(null=True, blank=True)
+
+	imap_acoount = models.ForeignKey('ImapAccount')
 
 class Following(models.Model):
 	id = models.AutoField(primary_key=True)
