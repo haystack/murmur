@@ -75,6 +75,52 @@ $(document).ready(function() {
         };
     });
 
+    $(".nav-tabs").on("click", "a", function (e) {
+        e.preventDefault();
+        if (!$(this).hasClass('add-contact')) {
+            $(this).tab('show');
+        }
+    })
+    .on("click", "span.close", function () {
+        var anchor = $(this).siblings('a');
+        $(anchor.attr('href')).remove();
+        $(this).parent().remove();
+        $(".nav-tabs li").children('a').first().click();
+    });
+
+    $('.add-contact').click(function (e) {
+        e.preventDefault();
+        var id = $(".nav-tabs").children().length; //think about it ;)
+        var tabId = 'contact_' + id;
+        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title">New Tab</span></a> <span class="close"> x </span></li>');
+        $('.tab-content').append('<div class="tab-pane" id="editor-tab_' + id + '"><textarea id="editor-' + id + '"></textarea></div>');
+        $('.nav-tabs li:nth-child(' + id + ') a').click();
+
+        var editor = CodeMirror.fromTextArea(document.getElementById("editor-" + id), {
+            mode: {name: "python",
+                version: 3,
+                singleLineStringErrors: false},
+            lineNumbers: true,
+            indentUnit: 4,
+            matchBrackets: true
+        });
+
+        var arrows = [13, 27, 37, 38, 39, 40];
+        editor.on("keyup", function(cm, e) {
+          if (arrows.indexOf(e.keyCode) < 0) {
+            editor.execCommand("autocomplete")
+          }
+        })
+    });
+
+    var editHandler = function() {
+      $(this).attr("contenteditable", "true").focusout(function() {
+        $(this).removeAttr("contenteditable").off("focusout");
+      });
+    };
+    
+    $( "body" ).on( "click", ".nav-tabs .tab-title", editHandler);
+
     var log_backup = "";
 
     // $("#password-container").hide();
