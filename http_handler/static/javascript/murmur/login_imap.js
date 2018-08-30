@@ -26,8 +26,7 @@ $(document).ready(function() {
         matchBrackets: true
     });
 
-    document.addEventListener("mv-load", function(){
-    
+    document.addEventListener("mv-load", function(){   
         var arrows = [13, 27, 37, 38, 39, 40];
         editor.on("keyup", function(cm, e) {
             if (arrows.indexOf(e.keyCode) < 0) {
@@ -116,6 +115,11 @@ $(document).ready(function() {
 			$(".oauth").hide();
             $(".plain").show();
 		}
+    }
+
+    function get_current_mode() {
+        return {"id": $(".nav.nav-tabs li.active").attr("mode-id"),
+            "name": $(".nav.nav-tabs li.active a").text()}
     }
 
     function get_running() {
@@ -222,8 +226,13 @@ $(document).ready(function() {
         });
 
         function run_code(is_dry_run, is_running) {
+            var cur_mode = get_current_mode();
+
+
             var params = {
                 'email': $("#input-email").val(),
+                'mode_id': cur_mode['id'],
+                'mode_name': cur_mode['name'],
                 'code': editor.getValue(),
                 'test_run': is_dry_run,
                 'is_running': is_running

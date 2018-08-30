@@ -1724,7 +1724,7 @@ def fetch_execution_log(user, email, push=True):
     logging.debug(res)
     return res 
 
-def run_mailbot(user, email, code, is_test, is_running, push=True):
+def run_mailbot(user, email, mode_id, mode_name, code, is_test, is_running, push=True):
     res = {'status' : False, 'imap_error': False}
 
     try:
@@ -1740,18 +1740,25 @@ def run_mailbot(user, email, code, is_test, is_running, push=True):
 
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
-        imapAccount.save()
+
+        mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_acoount=imapAccount)
+        if not mailbotMode.exists():
+            mailbotMode = MailbotMode(uid=mode_id, name=mode_name, code=code, imap_acoount=imapAccount)
+            mailbotMode.save()
+        else:
+            mailbotMode = mailbotMode[0]
+            mailbotMode.code = code
+
+        imapAccount.current_mode = mailbotMode
 
         if imapAccount.is_running:
             res = interpret(imap, code, "UID %d" % uid, is_test)
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:
-                imapAccount.code = code 
-                imapAccount.save()
-
                 res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log']) 
         else:
+
             res['imap_log'] = "Your mailbot stops running"
 
         res['status'] = True

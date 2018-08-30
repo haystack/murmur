@@ -367,12 +367,16 @@ class ImapAccount(models.Model):
 	# user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
 
 class MailbotMode(models.Model):
-	id = models.AutoField(primary_key=True)
-	
+	uid = models.IntegerField()
+
 	name = models.CharField('mode_name', max_length=100)
 	code = models.TextField(null=True, blank=True)
 
 	imap_acoount = models.ForeignKey('ImapAccount')
+
+	class Meta:
+		db_table = "murmur_mailbotmode"
+		unique_together = ("uid", "imap_acoount")
 
 class Following(models.Model):
 	id = models.AutoField(primary_key=True)
