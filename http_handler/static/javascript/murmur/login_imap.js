@@ -18,10 +18,11 @@ $(document).ready(function() {
 
     // init editor  
     
-    
+    var editor_dict = {};
 
     document.addEventListener("mv-load", function(){   
         document.querySelectorAll('.mode-editor').forEach(function(element) {
+            
             var editor = CodeMirror.fromTextArea(element, {
                 mode: {name: "python",
                     version: 3,
@@ -30,6 +31,8 @@ $(document).ready(function() {
                 indentUnit: 4,
                 matchBrackets: true
             });
+
+            editor_dict[element.id.split("-")[1]] = editor;
 
             var arrows = [13, 27, 37, 38, 39, 40];
             editor.on("keyup", function(cm, e) {
@@ -124,7 +127,8 @@ $(document).ready(function() {
 
     function get_current_mode() {
         return {"id": $(".nav.nav-tabs li.active").attr("mode-id"),
-            "name": $(".nav.nav-tabs li.active a").text()}
+            "name": $(".nav.nav-tabs li.active a").text(), 
+            "code": editor_dict[ $(".nav.nav-tabs li.active").attr("mode-id") ].getValue()}
     }
 
     function get_running() {
@@ -238,7 +242,7 @@ $(document).ready(function() {
                 'email': $("#input-email").val(),
                 'mode_id': cur_mode['id'],
                 'mode_name': cur_mode['name'],
-                'code': editor.getValue(),
+                'code': cur_mode['code'],
                 'test_run': is_dry_run,
                 'is_running': is_running
             };
