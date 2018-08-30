@@ -92,7 +92,7 @@ $(document).ready(function() {
         e.preventDefault();
         var id = $(".nav-tabs").children().length; //think about it ;)
         var tabId = 'contact_' + id;
-        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title">New Tab</span></a> <span class="close"> x </span></li>');
+        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span></a> <span class="close"> x </span></li>');
         $('.tab-content').append('<div class="tab-pane" id="editor-tab_' + id + '"><textarea id="editor-' + id + '"></textarea></div>');
         $('.nav-tabs li:nth-child(' + id + ') a').click();
 
@@ -114,12 +114,15 @@ $(document).ready(function() {
     });
 
     var editHandler = function() {
-      $(this).attr("contenteditable", "true").focusout(function() {
+      var t = $(this);
+      t.css("visibility", "hidden");
+      $(this).prev().attr("contenteditable", "true").focusout(function() {
         $(this).removeAttr("contenteditable").off("focusout");
+        t.css("visibility", "visible");
       });
     };
     
-    $( "body" ).on( "click", ".nav-tabs .tab-title", editHandler);
+    $( "body" ).on( "click", ".nav-tabs .fa-edit", editHandler);
 
     var log_backup = "";
 
@@ -172,9 +175,23 @@ $(document).ready(function() {
     }
 
     function get_current_mode() {
-        return {"id": document.querySelector('.nav.nav-tabs li.active').getAttribute('mode-id'),
-            "name": document.querySelector('.nav.nav-tabs li.active span').innerHTML, 
-            "code": editor_dict[ document.querySelector('.nav.nav-tabs li.active').getAttribute('mode-id') ].getValue()}
+        return {"id": document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
+            "name": document.querySelector('.nav.nav-tabs li.active .tab-title').innerHTML, 
+            "code": editor_dict[ document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id') ].getValue()
+        };
+    }
+
+    function get_modes() {
+        var modes = []
+        document.querySelectorAll('.nav.nav-tabs li .tab-title').forEach(function(element) {
+            modes.push({
+                "id": element.getAttribute('mode-id'),
+                "name": element.innerHTML, 
+                "code": editor_dict[ element.getAttribute('mode-id') ].getValue()
+            });
+        });
+
+        return modes;
     }
 
     function get_running() {
@@ -283,12 +300,12 @@ $(document).ready(function() {
         function run_code(is_dry_run, is_running) {
             var cur_mode = get_current_mode();
 
+            var modes = get_modes();
 
             var params = {
+                'current_mode_id': cur_mode['id'],
+                'modes': modes,
                 'email': $("#input-email").val(),
-                'mode_id': cur_mode['id'],
-                'mode_name': cur_mode['name'],
-                'code': cur_mode['code'],
                 'test_run': is_dry_run,
                 'is_running': is_running
             };

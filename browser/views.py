@@ -1478,13 +1478,13 @@ def run_mailbot(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		
-		mode_id = request.POST['mode_id']
-		mode_name = request.POST['mode_name']
-		code = request.POST['code']
+		current_mode_id = request.POST['current_mode_id']
+		modes = request.POST['modes']
 		is_test = True if request.POST['test_run'] == "true" else False
 		is_running = True if request.POST['is_running'] == "true" else False
-
-		res = engine.main.run_mailbot(user, request.user.email, mode_id, mode_name, code, is_test, is_running)
+		print "modes"
+		print modes
+		res = engine.main.run_mailbot(user, request.user.email, current_mode_id, modes, is_test, is_running)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

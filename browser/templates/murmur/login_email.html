@@ -76,14 +76,15 @@
 								<ul class="nav nav-tabs" role="tablist">
 									{% for mode in modes %}
 										{% if current_mode == mode %}
-											<li class="active" mode-id={{ mode.uid }}>	
+											<li class="active">	
 										{% else %}
-											<li mode-id={{ mode.uid }}>
+											<li>
 										{% endif %}
 											<a href="#editor-tab_{{mode.uid}}" data-toggle="tab">
-													<span class="tab-title">
+													<span class="tab-title" mode-id={{ mode.uid }}>
 													{{ mode.name }}
 													</span>
+													<i class="far fa-edit"></i>
 												</a><span>x</span>
 											</li>
 									{% endfor %}
@@ -105,7 +106,13 @@
 								
 							{% else %}
 								<ul class="nav nav-tabs" role="tablist">
-									<li class="active" mode-id=0><a href="#editor-tab_0" data-toggle="tab"><span class="tab-title">Default</span></a><span>x</span></li>
+									<li class="active" >
+										<a href="#editor-tab_0" data-toggle="tab">
+											<span class="tab-title" mode-id=0>
+												Default
+											</span>
+											<i class="far fa-edit"></i>
+										</a><span>x</span></li>
 									<li><a href="#" class="add-contact">+ Add Mode</a></li>
 								</ul>
 								<div class="tab-content">
@@ -167,7 +174,6 @@ elif "action required" in get_subject():
 {% block customjs %}
 	<script type="text/javascript" src="/static/javascript/notify.js"></script>
 
-	<script type="text/javascript" src="/static/javascript/mailbot/bootstrap.bundle.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/fontawesome-all.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/codemirror.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/addon/edit/matchbrackets.js"></script>
