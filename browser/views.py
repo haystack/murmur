@@ -405,10 +405,10 @@ def login_imap_view(request):
 			is_test = imap[0].is_test
 			is_running = imap[0].is_running
 
-			current_mode = imap.current_mode
+			current_mode = imap[0].current_mode
 
 			modes = MailbotMode.objects.filter(imap_acoount=imap[0])
-			mode_exist = mode.exists()
+			mode_exist = modes.exists()
 				
 
 	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 

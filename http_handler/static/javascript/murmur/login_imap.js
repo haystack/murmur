@@ -17,21 +17,26 @@ $(document).ready(function() {
     //   });
 
     // init editor  
-    var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-        mode: {name: "python",
-            version: 3,
-            singleLineStringErrors: false},
-        lineNumbers: true,
-        indentUnit: 4,
-        matchBrackets: true
-    });
+    
+    
 
     document.addEventListener("mv-load", function(){   
-        var arrows = [13, 27, 37, 38, 39, 40];
-        editor.on("keyup", function(cm, e) {
-            if (arrows.indexOf(e.keyCode) < 0) {
-            editor.execCommand("autocomplete")
-            }
+        document.querySelectorAll('.mode-editor').forEach(function(element) {
+            var editor = CodeMirror.fromTextArea(element, {
+                mode: {name: "python",
+                    version: 3,
+                    singleLineStringErrors: false},
+                lineNumbers: true,
+                indentUnit: 4,
+                matchBrackets: true
+            });
+
+            var arrows = [13, 27, 37, 38, 39, 40];
+            editor.on("keyup", function(cm, e) {
+                if (arrows.indexOf(e.keyCode) < 0) {
+                editor.execCommand("autocomplete")
+                }
+            });
         });
 
         var method_names = [];
