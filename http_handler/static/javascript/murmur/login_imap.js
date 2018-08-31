@@ -180,18 +180,18 @@ $(document).ready(function() {
     }
 
     function get_modes() {
-        var modes = [];
+        var modes = {};
 
         document.querySelectorAll('.CodeMirror').forEach(function(element) { 
             var id = element.parentElement.id.split("_")[1];
             code = element.CodeMirror.getValue(),
             name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML;
 
-            modes.push({
+            modes[id] = {
                 "id": id,
                 "name": name, 
                 "code": code
-            });
+            };
         });
 
         return modes;
@@ -307,7 +307,7 @@ $(document).ready(function() {
 
             var params = {
                 'current_mode_id': cur_mode['id'],
-                'modes': modes,
+                'modes': JSON.stringify(modes),
                 'email': $("#input-email").val(),
                 'test_run': is_dry_run,
                 'is_running': is_running

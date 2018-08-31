@@ -1479,7 +1479,7 @@ def run_mailbot(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		
 		current_mode_id = request.POST['current_mode_id']
-		modes = request.POST['modes']
+		modes = json.loads(request.POST['modes']) 
 		is_test = True if request.POST['test_run'] == "true" else False
 		is_running = True if request.POST['is_running'] == "true" else False
 		print "modes"
