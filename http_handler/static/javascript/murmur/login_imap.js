@@ -3,7 +3,8 @@ $(document).ready(function() {
     var user_name = $.trim($('#user_email').text()),
         btn_login = $("#btn-login"),
         btn_test_run = $("#btn-test-run"),
-        btn_code_sumbit = $("#btn-code-submit");
+        btn_code_sumbit = $("#btn-code-submit"),
+        btn_incoming_save = $("#btn-incoming-save");
     
     var test_mode_msg = {true: "You are currently at test mode. Mailbot will simulate your rule but not actually run the rule.", 
         false: "Mailbot will apply your rules to your incoming emails. "};
@@ -20,7 +21,7 @@ $(document).ready(function() {
     var unsaved_tabs = [];
     
     document.addEventListener("mv-load", function(){   
-        document.querySelectorAll('.mode-editor').forEach(function(element) {
+        document.querySelectorAll('textarea.editor').forEach(function(element) {
             var mode_id = element.id.split("-")[1];
             $('.nav-tabs li a[href="#editor-tab_'+ mode_id +'"]').click();
 
@@ -96,7 +97,7 @@ $(document).ready(function() {
         e.preventDefault();
         var id = $(".nav-tabs").children().length; //think about it ;)
         $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
-        $('.tab-content').append('<div class="tab-pane" id="editor-tab_' + id + '"><textarea id="editor-' + id + '"></textarea></div>');
+        $('.tab-content').append('<div class="tab-pane" id="editor-tab_' + id + '"><textarea class="editor mode-editor" id="editor-' + id + '"></textarea></div>');
         $('.nav-tabs li:nth-child(' + id + ') a').click();
 
         unsaved_tabs.push( id );

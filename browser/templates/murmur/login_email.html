@@ -82,6 +82,7 @@
 					  <div class="card">
 						<div class="card-header">
 							<h4>Rules for incoming emails</h4> 
+							<button class="btn btn-primary" id="btn-incoming-save" style="float: right;">Save</button>
 						</div>
 						<div class="card-block">
 							{% if mode_exist %}
@@ -109,7 +110,7 @@
 										{% else %}
 											<div class="tab-pane" id="editor-tab_{{mode.uid}}">
 										{% endif %}
-												<textarea class="mode-editor" id="editor-{{mode.uid}}">
+												<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
 {{ mode.code }}					
 												</textarea>
 									  		</div>
@@ -129,7 +130,7 @@
 								</ul>
 								<div class="tab-content">
 									<div class="tab-pane active" id="editor-tab_0">
-											  <textarea class="mode-editor" id="editor-0">
+											  <textarea class="editor mode-editor" id="editor-0">
 if "newsletter" in get_subject():
     print "Delete the email from %s at %s" % (get_sender(), get_date())
     delete()
@@ -151,6 +152,29 @@ elif "action required" in get_subject():
 						<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
 					  </div>
 					</div>
+
+					<div class="card">
+							<div class="card-header">
+								<h4>Rules for email shortcuts</h4> 
+								<button class="btn btn-primary" id="btn-shortcut-save" style="float: right;">Save</button>
+								<br>
+								You can manipulate Mailbot from your email interface. Define your shortcut below, then when you forward an email with the shortcut to mailbot@murmur-dev.csail.mit.edu, Mailbot will run the action for you!
+							</div>
+							<div class="card-block">
+								<textarea class="editor shortcut-editor" id="editor-shortcut">
+	if "newsletter" in get_subject():
+		print "Delete the email from %s at %s" % (get_sender(), get_date())
+		delete()
+		
+	elif "csail-related" in get_subject():
+		mark_read(True)
+			
+	elif "action required" in get_subject():
+		add_flags(["TODO"])
+		print "Flags are ", get_flags()
+	</textarea>
+							</div>
+						  </div>
 			  </div>
 
 			  <div id="apis-container" style="display:none;" mv-app="api" mv-storage="https://github.com/soyapark/mailbot">
