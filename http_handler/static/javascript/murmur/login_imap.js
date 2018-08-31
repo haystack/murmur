@@ -184,6 +184,10 @@ $(document).ready(function() {
         
     });
 
+    btn_incoming_save.click(function() {
+        run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running() ); 
+    });
+
     $('#test-mode[type=checkbox]').change(function() {
         var want_test = $(this).is(":checked");
         $("#mode-msg").text( test_mode_msg[ want_test ] );
