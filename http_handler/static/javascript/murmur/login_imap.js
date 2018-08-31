@@ -140,13 +140,13 @@ $(document).ready(function() {
         });
     });
 
-    $(".dropdown li a").click(function(){
+    $("body").on("click", ".dropdown li a", function() {
         $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
         $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
 
         // update current_mode
         run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running());
-    });
+    })
 
     var log_backup = "";
 
