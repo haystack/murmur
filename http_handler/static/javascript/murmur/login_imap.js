@@ -131,7 +131,7 @@ $(document).ready(function() {
 
     // Reload dropdown menu
     $("#current_mode_dropdown").on("click", function() {
-        var $ul = $(this).find('.dropdown-menu');
+        var $ul = $(this).parents(".dropdown").find('.dropdown-menu');
         $ul.empty();
 
         var modes = get_modes();
