@@ -18,8 +18,6 @@ $(document).ready(function() {
 
     // init editor  
     
-    var editor_dict = {};
-
     document.addEventListener("mv-load", function(){   
         document.querySelectorAll('.mode-editor').forEach(function(element) {
             
@@ -31,8 +29,6 @@ $(document).ready(function() {
                 indentUnit: 4,
                 matchBrackets: true
             });
-
-            editor_dict[element.id.split("-")[1]] = editor;
 
             var arrows = [13, 27, 37, 38, 39, 40];
             editor.on("keyup", function(cm, e) {
@@ -91,8 +87,7 @@ $(document).ready(function() {
     $('.add-contact').click(function (e) {
         e.preventDefault();
         var id = $(".nav-tabs").children().length; //think about it ;)
-        var tabId = 'contact_' + id;
-        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span></a> <span class="close"> x </span></li>');
+        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><i class="fas fa-pen"></i></a> <span class="close"> x </span></li>');
         $('.tab-content').append('<div class="tab-pane" id="editor-tab_' + id + '"><textarea id="editor-' + id + '"></textarea></div>');
         $('.nav-tabs li:nth-child(' + id + ') a').click();
 
@@ -175,19 +170,27 @@ $(document).ready(function() {
     }
 
     function get_current_mode() {
-        return {"id": document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
+        var id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
+            code = document.querySelector('#editor-tab_'+ id +' .CodeMirror').CodeMirror.getValue();
+
+        return {"id": id,
             "name": document.querySelector('.nav.nav-tabs li.active .tab-title').innerHTML, 
-            "code": editor_dict[ document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id') ].getValue()
+            "code": code
         };
     }
 
     function get_modes() {
-        var modes = []
-        document.querySelectorAll('.nav.nav-tabs li .tab-title').forEach(function(element) {
+        var modes = [];
+
+        document.querySelectorAll('.CodeMirror').forEach(function(element) { 
+            var id = element.parentElement.id.split("_")[1];
+            code = element.CodeMirror.getValue(),
+            name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML;
+
             modes.push({
-                "id": element.getAttribute('mode-id'),
-                "name": element.innerHTML, 
-                "code": editor_dict[ element.getAttribute('mode-id') ].getValue()
+                "id": id,
+                "name": name, 
+                "code": code
             });
         });
 
