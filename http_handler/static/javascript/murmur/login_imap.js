@@ -140,9 +140,9 @@ $(document).ready(function() {
         });
     });
 
-    $(".mode-dropdown li a").click(function(){
-        $(this).parents(".mode-dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
-        $(this).parents(".mode-dropdown").find('.btn').val($(this).data('value'));
+    $(".dropdown li a").click(function(){
+        $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+        $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
 
         // update current_mode
         run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running());
