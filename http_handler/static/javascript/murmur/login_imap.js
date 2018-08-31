@@ -77,11 +77,13 @@ $(document).ready(function() {
             $(this).tab('show');
         }
     })
-    .on("click", "span.close", function () {
+    .on("click", "span.close", function () { // delete tab/mode
         var anchor = $(this).siblings('a');
         $(anchor.attr('href')).remove();
         $(this).parent().remove();
         $(".nav-tabs li").children('a').first().click();
+
+        delete_mode( $(this).siblings('a').attr('href').split("_")[1] );
     });
 
     $('.add-contact').click(function (e) {
@@ -117,7 +119,7 @@ $(document).ready(function() {
       });
     };
     
-    $( "body" ).on( "click", ".nav-tabs .fa-edit", editHandler);
+    $( "body" ).on( "click", ".nav-tabs .fa-pencil-alt", editHandler);
 
     var log_backup = "";
 
@@ -157,6 +159,27 @@ $(document).ready(function() {
         if(get_running())
             run_code( want_test, true ); 
     });
+
+    function delete_mode( id_to_delete ) {
+        var params = {
+            'id': id_to_delete
+        };
+
+        $.post('/delete_mailbot_mode', params,
+            function(res) {
+                // $('#donotsend-msg').hide();
+                console.log(res);
+                
+                // Auth success
+                if (res.status) {
+                    
+                }
+                else {
+                    notify(res, false);
+                }
+            }
+        );
+    }
 	
 	function toggle_login_mode() {
 		oauth = $('#rdo-oauth').is(":checked");

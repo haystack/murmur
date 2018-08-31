@@ -1490,6 +1490,20 @@ def run_mailbot(request):
 		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
+		
+@login_required
+def delete_mailbot_mode(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		
+		mode_id = request.POST['id']
+
+		res = engine.main.delete_mailbot_mode(user, request.user.email, mode_id)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
 def unblacklist_unwhitelist(request):

@@ -1711,11 +1711,33 @@ def fetch_execution_log(user, email, push=True):
     res = {'status' : False}
 
     try:
-        res['status'] = True
-
         imapAccount = ImapAccount.objects.get(email=email)
         res['imap_log'] = imapAccount.execution_log
 
+        res['status'] = True
+
+    except Exception, e:
+        # TODO add exception
+        print e
+        res['code'] = msg_code['UNKNOWN_ERROR']
+
+    logging.debug(res)
+    return res 
+
+def delete_mailbot_mode(user, email, mode_id, push=True):
+    res = {'status' : False}
+
+    try:
+        imapAccount = ImapAccount.objects.get(email=email)
+        mm = MailbotMode.objects.get(uid=mode_id, imap_acoount=imapAccount)
+        mm.delete()        
+
+        res['status'] = True
+
+    except ImapAccount.DoesNotExist:
+        res['code'] = "Error during deleting the mode. Please refresh the page."
+    except MailbotMode.DoesNotExist:
+        res['code'] = "Error during deleting the mode. Please refresh the page."
     except Exception, e:
         # TODO add exception
         print e
@@ -1742,19 +1764,22 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imapAccount.newest_msg_id = uid
 
         for key, value in modes.iteritems():
+            mode_id = value['id']
+            mode_name = value['name']
+            code = value['code']
             print value['id']
             print value['name']
             print value['code']
         
-        mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_acoount=imapAccount)
-        if not mailbotMode.exists():
-            mailbotMode = MailbotMode(uid=mode_id, name=mode_name, code=code, imap_acoount=imapAccount)
-            mailbotMode.save()
-        else:
-            mailbotMode = mailbotMode[0]
-            mailbotMode.code = code
+            mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_acoount=imapAccount)
+            if not mailbotMode.exists():
+                mailbotMode = MailbotMode(uid=mode_id, name=mode_name, code=code, imap_acoount=imapAccount)
+                mailbotMode.save()
+            else:
+                mailbotMode = mailbotMode[0]
+                mailbotMode.code = code
 
-        imapAccount.current_mode = mailbotMode
+        imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_acoount=imapAccount)[0]
         imapAccount.save()
 
         if imapAccount.is_running:
