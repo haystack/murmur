@@ -17,10 +17,13 @@ $(document).ready(function() {
     //   });
 
     // init editor  
+    var unsaved_tabs = [];
     
     document.addEventListener("mv-load", function(){   
         document.querySelectorAll('.mode-editor').forEach(function(element) {
-            
+            var mode_id = element.id.split("-")[1];
+            $('.nav-tabs li a[href="#editor-tab_'+ mode_id +'"]').click();
+
             var editor = CodeMirror.fromTextArea(element, {
                 mode: {name: "python",
                     version: 3,
@@ -83,7 +86,9 @@ $(document).ready(function() {
         $(this).parent().remove();
         $(".nav-tabs li").children('a').first().click();
 
-        delete_mode( $(this).siblings('a').attr('href').split("_")[1] );
+        var mode_id = $(this).siblings('a').attr('href').split("_")[1];
+        if( !unsaved_tabs.includes(mode_id) )
+            delete_mode( mode_id );
     });
 
     $('.add-contact').click(function (e) {
@@ -92,6 +97,8 @@ $(document).ready(function() {
         $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
         $('.tab-content').append('<div class="tab-pane" id="editor-tab_' + id + '"><textarea id="editor-' + id + '"></textarea></div>');
         $('.nav-tabs li:nth-child(' + id + ') a').click();
+
+        unsaved_tabs.push( id );
 
         var editor = CodeMirror.fromTextArea(document.getElementById("editor-" + id), {
             mode: {name: "python",
@@ -343,7 +350,10 @@ $(document).ready(function() {
                     
                     // Auth success
                     if (res.status) {
-                        // TODO spin cogs, give feedback it's running
+                        
+                        // Flush unsaved tags 
+                        unsaved_tabs = [];
+
                         if(res['imap_error'])  {
                             // append_log(res['imap_log'], true);
 

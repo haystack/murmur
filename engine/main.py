@@ -1730,6 +1730,11 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
     try:
         imapAccount = ImapAccount.objects.get(email=email)
         mm = MailbotMode.objects.get(uid=mode_id, imap_acoount=imapAccount)
+
+        if imapAccount.current_mode == mm:
+            imapAccount.current_mode = None
+            imapAccount.is_running = False
+            
         mm.delete()        
 
         res['status'] = True
