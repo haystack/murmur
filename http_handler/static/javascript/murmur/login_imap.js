@@ -382,7 +382,7 @@ $(document).ready(function() {
                         unsaved_tabs = [];
 
                         if(res['imap_error'])  {
-                            // append_log(res['imap_log'], true);
+                            append_log(res['imap_log'], true);
 
                             set_running(false);   
                         }
