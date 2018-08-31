@@ -1740,8 +1740,12 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
 
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
-        code = ''
-        mode_name=''
+
+        for key, value in modes.iteritems():
+            print value['id']
+            print value['name']
+            print value['code']
+        
         mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_acoount=imapAccount)
         if not mailbotMode.exists():
             mailbotMode = MailbotMode(uid=mode_id, name=mode_name, code=code, imap_acoount=imapAccount)

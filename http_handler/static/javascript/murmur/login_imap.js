@@ -87,7 +87,7 @@ $(document).ready(function() {
     $('.add-contact').click(function (e) {
         e.preventDefault();
         var id = $(".nav-tabs").children().length; //think about it ;)
-        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><i class="fas fa-pen"></i></a> <span class="close"> x </span></li>');
+        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
         $('.tab-content').append('<div class="tab-pane" id="editor-tab_' + id + '"><textarea id="editor-' + id + '"></textarea></div>');
         $('.nav-tabs li:nth-child(' + id + ') a').click();
 
@@ -174,7 +174,7 @@ $(document).ready(function() {
             code = document.querySelector('#editor-tab_'+ id +' .CodeMirror').CodeMirror.getValue();
 
         return {"id": id,
-            "name": document.querySelector('.nav.nav-tabs li.active .tab-title').innerHTML, 
+            "name": $.trim(document.querySelector('.nav.nav-tabs li.active .tab-title').innerHTML), 
             "code": code
         };
     }
@@ -189,7 +189,7 @@ $(document).ready(function() {
 
             modes[id] = {
                 "id": id,
-                "name": name, 
+                "name": $.trim( name ), 
                 "code": code
             };
         });
