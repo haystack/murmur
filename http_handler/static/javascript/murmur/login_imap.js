@@ -160,6 +160,9 @@ $(document).ready(function() {
 
     if(IS_RUNNING) {
         set_running(true);
+
+        // set dropdown to current mode name if exist
+        $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
     }
     
 	$('input[type=radio][name=auth-mode]').change(function() {
@@ -199,8 +202,11 @@ $(document).ready(function() {
                 
                 // Delete success
                 if (res.status) {
-                    if( id_to_delete == get_current_mode()['id'] )
+                    if( id_to_delete == get_current_mode()['id'] ) {
                         set_running(false);
+                        $(".dropdown .btn").html("Select your mode" + ' <span class="caret"></span>');
+                    }
+                        
                 }
                 else {
                     notify(res, false);

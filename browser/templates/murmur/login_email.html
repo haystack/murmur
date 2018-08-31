@@ -176,7 +176,8 @@ elif "action required" in get_subject():
 		var is_authenticated = {{ user.is_authenticated|yesno:"true,false" }},
 			is_imap_authenticated = {{ imap_authenticated|yesno:"true,false" }},
 			is_test = {{ is_test|yesno:"true,false" }},
-			IS_RUNNING = {{ is_running|yesno:"true,false" }};
+			IS_RUNNING = {{ is_running|yesno:"true,false" }},
+			current_mode = {{ current_mode.name }};
 	</script>
 	
 	  
