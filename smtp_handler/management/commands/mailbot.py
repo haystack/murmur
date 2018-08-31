@@ -63,7 +63,7 @@ class Command(BaseCommand):
 
                     # TODO send the error msg via email to the user
                     if res['imap_error']:
-                        pass
+                        imapAccount.is_running = False
 
                 
                 #if res['imap_error']:

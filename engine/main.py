@@ -1765,7 +1765,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imap = auth_res['imap']
 
         imapAccount.is_test = is_test
-        imapAccount.is_running = is_running
+        
 
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
@@ -1795,6 +1795,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:
                 res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log']) 
+                imapAccount.is_running = False
+                imapAccount.save()
         else:
 
             res['imap_log'] = "Your mailbot stops running"
