@@ -73,6 +73,7 @@ $(document).ready(function() {
             CodeMirror.showHint(cm, CodeMirror.hint.dictionaryHint);
         };
     });
+    
 
     $(".nav-tabs").on("click", "a", function (e) {
         e.preventDefault();
@@ -128,6 +129,25 @@ $(document).ready(function() {
     
     $( "body" ).on( "click", ".nav-tabs .fa-pencil-alt", editHandler);
 
+    // Reload dropdown menu
+    $("#current_mode_dropdown").on("click", function() {
+        var $ul = $(this).find('.dropdown-menu');
+        $ul.empty();
+
+        var modes = get_modes();
+        $.each( modes, function( key, value ) {
+            $ul.append( '<li><a href="#" data-value="action" mode-id='+ value.id + '>' + value.name + '</a></li>' );
+        });
+    });
+
+    $(".mode-dropdown li a").click(function(){
+        $(this).parents(".mode-dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+        $(this).parents(".mode-dropdown").find('.btn').val($(this).data('value'));
+
+        // update current_mode
+        run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running());
+    });
+
     var log_backup = "";
 
     // $("#password-container").hide();
@@ -177,9 +197,10 @@ $(document).ready(function() {
                 // $('#donotsend-msg').hide();
                 console.log(res);
                 
-                // Auth success
+                // Delete success
                 if (res.status) {
-                    
+                    if( id_to_delete == get_current_mode()['id'] )
+                        set_running(false);
                 }
                 else {
                     notify(res, false);
@@ -384,6 +405,8 @@ $(document).ready(function() {
         $(".default-text").blur();
 
     function append_log( log, is_error ) {
+        if(!log) return;
+
         var currentdate = new Date();
         var datetime = (currentdate.getMonth()+1) + "/"
             + currentdate.getDate() + "/" 

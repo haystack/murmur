@@ -15,9 +15,9 @@ class Command(BaseCommand):
     help = 'Process email'
 
     def handle(self, *args, **options):
-        imapAccounts = ImapAccount.objects.filter().exclude(code="")
+        imapAccounts = ImapAccount.objects.filter(is_running=True)
         for imapAccount in imapAccounts:
-            if not imapAccount.is_running:
+            if not imapAccount.current_mode:
                 continue
 
             res = {'status' : False, 'imap_error': False}
@@ -28,7 +28,7 @@ class Command(BaseCommand):
                 continue
 
             imap = auth_res['imap']
-            
+
             try:
                 new_uid = fetch_latest_email_id(imapAccount, imap)
 
@@ -44,7 +44,8 @@ class Command(BaseCommand):
                             continue
                             
                         print "Processing email UID", i
-                        res = interpret(imap, imapAccount.code, "UID %d" % (i))
+                        code = imapAccount.current_mode.code
+                        res = interpret(imap, code, "UID %d" % (i))
 
                         if res['imap_log'] != "":
                             now = datetime.datetime.now()

@@ -1716,6 +1716,8 @@ def fetch_execution_log(user, email, push=True):
 
         res['status'] = True
 
+    except ImapAccount.DoesNotExist:
+        res['code'] = "Error during authentication. Please refresh"
     except Exception, e:
         # TODO add exception
         print e
@@ -1734,7 +1736,7 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
         if imapAccount.current_mode == mm:
             imapAccount.current_mode = None
             imapAccount.is_running = False
-            
+
         mm.delete()        
 
         res['status'] = True
