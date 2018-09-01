@@ -1765,7 +1765,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imap = auth_res['imap']
 
         imapAccount.is_test = is_test
-        
+        imapAccount.is_running = is_running
 
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
