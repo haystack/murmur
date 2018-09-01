@@ -162,16 +162,19 @@ elif "action required" in get_subject():
 							</div>
 							<div class="card-block">
 								<textarea class="editor shortcut-editor" id="editor-shortcut">
-	if "newsletter" in get_subject():
-		print "Delete the email from %s at %s" % (get_sender(), get_date())
-		delete()
+import re
+regexp = re.compile(r'newsletter')
+
+if regexp.search('newsletter'):
+    print "Delete the email from %s at %s" % (get_sender(), get_date())
+    delete()
+    
+elif "csail-related" in get_subject():
+    mark_read(True)
 		
-	elif "csail-related" in get_subject():
-		mark_read(True)
-			
-	elif "action required" in get_subject():
-		add_flags(["TODO"])
-		print "Flags are ", get_flags()
+elif "action required" in get_subject():
+    add_note(["TODO"])
+    print "Notes are ", get_note()
 	</textarea>
 							</div>
 						  </div>
