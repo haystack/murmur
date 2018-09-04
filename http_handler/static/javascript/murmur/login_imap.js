@@ -73,6 +73,12 @@ $(document).ready(function() {
         CodeMirror.commands.autocomplete = function(cm) {
             CodeMirror.showHint(cm, CodeMirror.hint.dictionaryHint);
         };
+
+        // Hide body until editor is ready
+        setTimeout(() => {
+            $('#loading-wall').hide();
+            show_loader(false);
+        }, 500);
     });
     
 
@@ -219,6 +225,11 @@ $(document).ready(function() {
             }
         );
     }
+
+    function show_loader( is_show ) {
+        if(is_show) $(".sk-circle").show();
+        else $(".sk-circle").hide();
+    }
 	
 	function toggle_login_mode() {
 		oauth = $('#rdo-oauth').is(":checked");
@@ -321,6 +332,8 @@ $(document).ready(function() {
     }    
 
         btn_login.click(function() {
+                show_loader(true);
+
                 var params = {
                     'host': $("#input-host").val(),
                     'password': $('#rdo-oauth').is(":checked") ? $("#input-access-code").val() : $("#input-password").val(),
@@ -329,6 +342,7 @@ $(document).ready(function() {
         
                 $.post('/login_imap', params,
                     function(res) {
+                        show_loader(false);
                         // $('#donotsend-msg').hide();
                         console.log(res);
                         
@@ -363,6 +377,8 @@ $(document).ready(function() {
         });
 
         function run_code(is_dry_run, is_running) {
+            show_loader(true);
+
             var cur_mode = get_current_mode();
 
             var modes = get_modes();
@@ -377,7 +393,7 @@ $(document).ready(function() {
 
             $.post('/run_mailbot', params,
                 function(res) {
-                    // $('#donotsend-msg').hide();
+                    show_loader(false);
                     console.log(res);
                     
                     // Auth success
