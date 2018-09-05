@@ -55,11 +55,21 @@ def mailbot(message, host=None):
     elif WEBSITE == 'murmur':
         logging.debug("Email to mailbot@%s" % HOST)
 
+        name, addr = parseaddr(message['from'].lower())
+
+        try:
+            user = ImapAccount.objects.get(email=addr)
+
+        except ImapAccount.DoesNotExist:
+            error_msg = 'Your email engine is not registered or stopped due to error. Write down your own email rule at %s/editor' % host
+            send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
+            
         subject = "Re: " + message['Subject']
-        body = "Your mail engine runs"
+        body = "Your mail engine runs."
 
         mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = body)
         relay.deliver(mail)
+
 
 
 @route("(group_name)\\+create@(host)", group_name=".+", host=HOST)
@@ -706,7 +716,10 @@ handler_funcs = {
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
 def handle_post(message, address=None, host=None):
-    
+    # don't trigger by mailbot
+    if address == "mailbot":
+        return
+
     # restart the db connection
     django.db.close_connection()
     
