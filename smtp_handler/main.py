@@ -44,6 +44,23 @@ def all(message, address=None, host=None):
         mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
         relay.deliver(mail)
 
+@route("(address)@(host)", address="mailbot", host=HOST)
+@stateless
+def mailbot(message, address=None, host=None):
+    # no public groups to list on squadbox. 
+    if WEBSITE == 'squadbox':
+        logging.debug("Ignored message to all@%s, no public groups to list" % HOST)
+        return
+
+    elif WEBSITE == 'murmur':
+        logging.debug("Email to mailbot@%s" % HOST)
+
+        subject = "Re: " + message['Subject']
+        body = "Your mail engine runs"
+
+        mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = body)
+        relay.deliver(mail)
+
 
 @route("(group_name)\\+create@(host)", group_name=".+", host=HOST)
 @stateless
