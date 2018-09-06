@@ -58,10 +58,11 @@ def mailbot(message, host=None):
         logging.debug("Email to mailbot@%s" % HOST)
 
         name, addr = parseaddr(message['from'].lower())
-        print "mailbot", addr
         
         try:
+            addr = addr.strip()
             imapAccount = ImapAccount.objects.get(email=addr)
+            logging.debug("mailbot %s" % addr)
             auth_res = authenticate( imapAccount )
             if not auth_res['status']:
                 raise ValueError('Something went wrong during authentication. Log in again at %s/editor' % host)
@@ -95,10 +96,13 @@ def mailbot(message, host=None):
 
         except ImapAccount.DoesNotExist:
             error_msg = 'Your email engine is not registered or stopped due to error. Write down your own email rule at %s/editor' % host
-            send_email(subject = "Error", from_addr = NO_REPLY, to_addr = message['From'], body_plain = error_msg)
+            mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = error_msg)
+            relay.deliver(mail)
+            
         except Exception, e:
             logging.debug(e)
-            send_email(subject = "Error", from_addr = NO_REPLY, to_addr = message['From'], body_plain = e)
+            mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = str(e))
+            relay.deliver(mail)
 
         
 
