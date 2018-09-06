@@ -155,6 +155,7 @@ $(document).ready(function() {
 
     $("body").on("click", ".dropdown li a", function() {
         $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+        $(this).parents(".dropdown").find('.btn').attr('mode-id', $(this).attr('mode-id'));
         $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
 
         // update current_mode
@@ -249,7 +250,7 @@ $(document).ready(function() {
     }
 
     function get_current_mode() {
-        var id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
+        var id = $("#current_mode_dropdown").attr('mode-id'),
             code = document.querySelector('#editor-tab_'+ id +' .CodeMirror').CodeMirror.getValue();
 
         return {"id": id,
@@ -452,9 +453,9 @@ $(document).ready(function() {
         datetime = '';
 
         if(is_error) 
-            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).appendTo( "#console" ).addClass("error");
+            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" ).addClass("error");
 
-        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).appendTo( "#console" )
+        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" )
             .addClass("info");
     }   
 
