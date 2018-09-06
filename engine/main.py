@@ -1785,6 +1785,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
             else:
                 mailbotMode = mailbotMode[0]
                 mailbotMode.code = code
+                mailbotMode.save()
 
         imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_acoount=imapAccount)[0]
         imapAccount.save()

@@ -108,7 +108,9 @@ $(document).ready(function() {
         var id = Math.max.apply(null, modes_keys) +1 ; // avoid same ID
         $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
         $('.tab-content').append('<div class="tab-pane" id="editor-tab_' + id + '"><textarea class="editor mode-editor" id="editor-' + id + '"></textarea></div>');
-        $('.nav-tabs li:nth-child(' + id + ') a').click();
+
+        // Move to the just added tab
+        $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
 
         unsaved_tabs.push( id );
 
