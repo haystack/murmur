@@ -5,7 +5,7 @@ $(document).ready(function() {
         btn_test_run = $("#btn-test-run"),
         btn_code_sumbit = $("#btn-code-submit"),
         btn_incoming_save = $("#btn-incoming-save"),
-        btn_shortcut_save = $("btn-shortcut-save");
+        btn_shortcut_save = $("#btn-shortcut-save");
     
     var test_mode_msg = {true: "You are currently at test mode. Mailbot will simulate your rule but not actually run the rule.", 
         false: "Mailbot will apply your rules to your incoming emails. "};
@@ -446,7 +446,7 @@ $(document).ready(function() {
             show_loader(true);
 
             var params = {
-                'shortcuts' : document.querySelector('#editor-shortcut').CodeMirror.getValue()
+                'shortcuts' : document.querySelector('#editor-shortcut-container .CodeMirror').CodeMirror.getValue()
             };
 
             $.post('/save_shortcut', params,
