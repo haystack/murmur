@@ -280,6 +280,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False):
         def set_mode(mode_index):
             mm = MailbotMode.objects.filter(uid=mode_index, imap_acoount=imap_account)
             if mm.exists():
+                mm = mm[0]
                 if not is_test: 
                     imap_account.current_mode = mm
 
