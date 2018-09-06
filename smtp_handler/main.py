@@ -58,6 +58,9 @@ def mailbot(message, host=None):
         logging.debug("Email to mailbot@%s" % HOST)
 
         name, addr = parseaddr(message['from'].lower())
+
+        # restart the db connection
+        django.db.close_connection()
         
         try:
             addr = addr.strip()
@@ -72,7 +75,6 @@ def mailbot(message, host=None):
 
             latest_email_uid = imap.search(["HEADER", "Message-ID", message["In-Reply-To"]])
             # imap.search(["HEADER", "Message-ID", search_message_id])
-            print latest_email_uid
             response = imap.fetch(latest_email_uid, ['RFC822'])
 
             # TODO parse the command 
@@ -86,21 +88,23 @@ def mailbot(message, host=None):
                 email_to = str(header.make_header(header.decode_header(email_message['To'])))
                 subject = str(header.make_header(header.decode_header(email_message['Subject'])))
 
-                print "Forward email", subject, email_from
+                logging.debug("Forward email %s %s" % (subject, email_from) )
             
             subject = "Re: " + message['Subject']
-            body = "Your mail engine runs."
+            body = "Your mail engine runs. %s %s" % (subject, email_from)
 
             mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = body)
             relay.deliver(mail)
 
         except ImapAccount.DoesNotExist:
+            subject = "Re: " + message['Subject']
             error_msg = 'Your email engine is not registered or stopped due to error. Write down your own email rule at %s/editor' % host
             mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = error_msg)
             relay.deliver(mail)
             
         except Exception, e:
             logging.debug(e)
+            subject = "Re: " + message['Subject']
             mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = str(e))
             relay.deliver(mail)
 
