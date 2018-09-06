@@ -5,7 +5,7 @@ from http_handler.settings import WEBSITE
 from schema.models import *
 from lamson.mail import MailResponse
 from email.utils import *
-from email import message_from_string
+from email import message_from_string, header
 from engine.main import *
 from engine.s3_storage import upload_message
 from utils import *
@@ -13,6 +13,8 @@ from django.db.utils import OperationalError
 from datetime import datetime
 import pytz
 import django.db
+from browser.imap import *
+from imapclient import IMAPClient
 
 '''
 Murmur Mail Interface Handler
@@ -58,19 +60,43 @@ def mailbot(message, host=None):
         name, addr = parseaddr(message['from'].lower())
 
         try:
-            user = ImapAccount.objects.get(email=addr)
+            imapAccount = ImapAccount.objects.get(email=addr)
+            auth_res = authenticate( imapAccount )
+            if not auth_res['status']:
+                raise ValueError('Something went wrong during authentication. Log in again at %s/editor' % host)
+
+            imap = auth_res['imap']
+            imap.select_folder('INBOX')
+
+            latest_email_uid = imap.search(["HEADER", "Message-ID", message["In-Reply-To"]])
+            # imap.search(["HEADER", "Message-ID", search_message_id])
+            print latest_email_uid
+            response = imap.fetch(latest_email_uid, ['RFC822'])
+
+            # TODO parse the command 
+            # email_message = message_from_string(str(message))
+            for msgid, edata in response.items():
+                raw_email_string = edata[b'RFC822'].decode('utf-8')
+                email_message = message_from_string(raw_email_string)
+
+                # Header Details
+                email_from = str(header.make_header(header.decode_header(email_message['From'])))
+                email_to = str(header.make_header(header.decode_header(email_message['To'])))
+                subject = str(header.make_header(header.decode_header(email_message['Subject'])))
+
+                print "Forward email", subject, email_from
+            
+            subject = "Re: " + message['Subject']
+            body = "Your mail engine runs."
+
+            mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = body)
+            relay.deliver(mail)
 
         except ImapAccount.DoesNotExist:
             error_msg = 'Your email engine is not registered or stopped due to error. Write down your own email rule at %s/editor' % host
             send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
 
-        # TODO parse the command 
-
-        subject = "Re: " + message['Subject']
-        body = "Your mail engine runs."
-
-        mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = body)
-        relay.deliver(mail)
+        
 
 
 

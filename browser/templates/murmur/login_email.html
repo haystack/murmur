@@ -98,6 +98,8 @@
 					  <div class="card">
 						<div class="card-header">
 							<h4>Rules for incoming emails</h4> 
+							The following rule will be applied when a new mail arrives. 
+							<br>
 							<button class="btn btn-primary" id="btn-incoming-save" style="float: right;">Save</button>
 						</div>
 						<div class="card-block">
@@ -172,9 +174,9 @@ elif "action required" in get_subject():
 					<div class="card">
 							<div class="card-header">
 								<h4>Rules for email shortcuts</h4> 
-								<button class="btn btn-primary" id="btn-shortcut-save" style="float: right;">Save</button>
-								<br>
 								You can manipulate Mailbot from your email interface. Define your shortcut below, then when you forward an email with the shortcut to mailbot@murmur-dev.csail.mit.edu, Mailbot will run the action for you!
+								<br>
+								<button class="btn btn-primary" id="btn-shortcut-save" style="float: right;">Save</button>
 							</div>
 							<div class="card-block">
 								<textarea class="editor shortcut-editor" id="editor-shortcut">
