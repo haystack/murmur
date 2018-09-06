@@ -268,8 +268,25 @@ def interpret(imap, code, search_creteria, is_test=False):
         
             print format_log("Rename a folder %s to %s" % (old_name, new_name), False)
 
-        # print "code"
-        # print code
+        def get_mode():
+            if imap_account.current_mode:
+                return imap_account.current_mode.uid
+
+            else:
+                return None
+
+        def set_mode(mode_index):
+            mm = MailbotMode.objects.filter(uid=mode_index, imap_acoount=imap_account)
+            if mm.exists():
+                if not is_test: 
+                    imap_account.current_mode = mm
+
+                print format_log("Set your mail mode to %s (%d)" % (mm.name, mode_index), False)  
+                return True
+            else:
+                print format_log("A mode ID %d not exist!" % (mode_index), True)  
+                return False
+
         try:
             exec code in globals(), locals()
         except Exception as e:

@@ -63,7 +63,9 @@ def mailbot(message, host=None):
         except ImapAccount.DoesNotExist:
             error_msg = 'Your email engine is not registered or stopped due to error. Write down your own email rule at %s/editor' % host
             send_error_email(group_name, error_msg, addr, ADMIN_EMAILS)
-            
+
+        # TODO parse the command 
+
         subject = "Re: " + message['Subject']
         body = "Your mail engine runs."
 

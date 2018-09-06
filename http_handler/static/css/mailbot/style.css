@@ -176,3 +176,7 @@
             transform: scale(1);
   }
 }
+
+#console {
+  margin-bottom: 90px;
+}

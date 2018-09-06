@@ -111,7 +111,7 @@
 										{% endif %}
 											<a href="#editor-tab_{{mode.uid}}" data-toggle="tab">
 													<span class="tab-title" mode-id={{ mode.uid }}>
-													{{ mode.name }}
+													{{ mode.name }} ({{ mode.uid }})
 													</span>
 													<i class="fas fa-pencil-alt"></i>
 												</a><span class="close">x</span>
@@ -155,7 +155,7 @@ elif "csail-related" in get_subject():
     mark_read(True)
 		
 elif "action required" in get_subject():
-    add_flags(["TODO"])
+	add_note(["TODO"])
     print "Flags are ", get_flags()
 </textarea>
 									</div>
