@@ -73,12 +73,14 @@ def mailbot(message, host=None):
             imap = auth_res['imap']
             imap.select_folder('INBOX')
 
+            entire_message = message_from_string(message)
+            entire_body = get_body(entire_message)
+
+            # Get a forwarded message
             latest_email_uid = imap.search(["HEADER", "Message-ID", message["In-Reply-To"]])
-            # imap.search(["HEADER", "Message-ID", search_message_id])
+
             response = imap.fetch(latest_email_uid, ['RFC822'])
 
-            # TODO parse the command 
-            # email_message = message_from_string(str(message))
             for msgid, edata in response.items():
                 raw_email_string = edata[b'RFC822'].decode('utf-8')
                 email_message = message_from_string(raw_email_string)
@@ -87,14 +89,18 @@ def mailbot(message, host=None):
                 email_from = str(header.make_header(header.decode_header(email_message['From'])))
                 email_to = str(header.make_header(header.decode_header(email_message['To'])))
                 subject = str(header.make_header(header.decode_header(email_message['Subject'])))
+                forwarded_body = get_body(email_message)
 
                 logging.debug("Forward email %s %s" % (subject, email_from) )
             
-            subject = "Re: " + message['Subject']
-            body = "Your mail engine runs. %s %s" % (subject, email_from)
+                subject = "Re: " + message['Subject']
+                body = "Your mail engine runs. %s %s %d %d" % (subject, email_from, len(entire_body['plain']), len(forwarded_body['plain']))
 
-            mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = body)
-            relay.deliver(mail)
+                mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = body)
+                relay.deliver(mail)
+
+            # Log out after after conduct required action
+            imap.logout()
 
         except ImapAccount.DoesNotExist:
             subject = "Re: " + message['Subject']
