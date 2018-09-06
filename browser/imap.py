@@ -90,7 +90,7 @@ def format_log(msg, is_error=False):
     else:
         return "[Info] " + msg
 
-def interpret(imap, code, search_creteria, is_test=False):
+def interpret(imap_account, imap, code, search_creteria, is_test=False):
     res = {'status' : False, 'imap_error': False}
     pile = Pile(imap, search_creteria)
     messages = imap.search( search_creteria )

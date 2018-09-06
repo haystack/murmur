@@ -101,8 +101,9 @@ $(document).ready(function() {
 
     $('.add-contact').click(function (e) {
         e.preventDefault();
+        // TODO get max id of current mode
         var id = $(".nav-tabs").children().length - 1; // without add-contact button
-        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
+        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
         $('.tab-content').append('<div class="tab-pane" id="editor-tab_' + id + '"><textarea class="editor mode-editor" id="editor-' + id + '"></textarea></div>');
         $('.nav-tabs li:nth-child(' + id + ') a').click();
 

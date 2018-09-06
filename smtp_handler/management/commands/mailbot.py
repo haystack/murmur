@@ -45,7 +45,7 @@ class Command(BaseCommand):
                             
                         print "Processing email UID", i
                         code = imapAccount.current_mode.code
-                        res = interpret(imap, code, "UID %d" % (i))
+                        res = interpret(imapAccount, imap, code, "UID %d" % (i))
 
                         if res['imap_log'] != "":
                             now = datetime.datetime.now()

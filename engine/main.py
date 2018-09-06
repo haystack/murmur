@@ -1790,7 +1790,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imapAccount.save()
 
         if imapAccount.is_running:
-            res = interpret(imap, code, "UID %d" % uid, is_test)
+            res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:
