@@ -181,12 +181,15 @@ elif "action required" in get_subject():
 							</div>
 							<div class="card-block" id="editor-shortcut-container">
 								<textarea class="editor shortcut-editor" id="editor-shortcut">
+										{% if shortcuts_exist %}
+{{ shortcuts }}
+										{% else %}
 import re
 regexp = re.compile(r'NOTE')
 
 if regexp.search( get_content() ):
     add_note(["TODO"])
-    
+										{% endif %}    
 	</textarea>
 							</div>
 						  </div>

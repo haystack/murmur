@@ -397,6 +397,7 @@ def login_imap_view(request):
 	mode_exist = False
 	modes = []
 	current_mode = None
+	shortcuts = ''
 
 	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
@@ -409,11 +410,13 @@ def login_imap_view(request):
 
 			modes = MailbotMode.objects.filter(imap_acoount=imap[0])
 			mode_exist = modes.exists()
+
+			shortcuts = imap[0].shortcuts
 				
 
 	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 
 		'mode_exist': mode_exist, 'modes': modes, 'current_mode': current_mode,
-		'imap_authenticated': imap_authenticated, 'website': WEBSITE}
+		'imap_authenticated': imap_authenticated, 'website': WEBSITE, 'shortcuts': shortcuts}
 
 @render_to(WEBSITE+"/docs.html")
 def docs_view(request):

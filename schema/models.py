@@ -353,7 +353,7 @@ class ImapAccount(models.Model):
 	refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
 
 	current_mode = models.ForeignKey('MailbotMode', null=True, blank=True)
-	shortcuts = models.TextField(null=True, blank=True)
+	shortcuts = models.TextField(default="")
 
 	# code = models.TextField(null=True, blank=True)
 	execution_log = models.TextField(default="")
