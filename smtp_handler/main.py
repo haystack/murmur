@@ -99,11 +99,11 @@ def mailbot(message, host=None):
                 subject = "Re: " + message['Subject']
                 body = ''
 
-                if not imapAccount['shortcuts']:
+                if not imapAccount.shortcuts:
                     body = "You don't have email shortcuts yet! Define your shortcuts here %s/editor" % host
 
                 else:
-                    res = interpret(imapAccount, imap, imapAccount['shortcuts'], "UID %s" % latest_email_uid[0], False, code_body)
+                    res = interpret(imapAccount, imap, imapAccount.shortcuts, "UID %s" % latest_email_uid[0], False, code_body)
 
                     now = datetime.now()
                     now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
