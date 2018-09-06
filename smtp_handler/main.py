@@ -46,7 +46,7 @@ def all(message, address=None, host=None):
         mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
         relay.deliver(mail)
 
-@route("mailbot@(host)", host=HOST)
+@route("mailbot@(host)", host=".+")
 @stateless
 def mailbot(message, host=None):
     # no public groups to list on squadbox. 
@@ -108,10 +108,11 @@ def mailbot(message, host=None):
                     now = datetime.now()
                     now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
                     if not res['imap_error']:
-                        body = 'Your mail shortcut is successfully applied! \n' + now_format + res['imap_log']
+                        body = 'Your mail shortcut is successfully applied! \n'
                     else:
-                        body = 'Something went wrong! \n' + now_format + res['imap_error']
+                        body = 'Something went wrong! \n'
                 
+                    body = body + now_format + res['imap_log']
                 mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = body)
                 relay.deliver(mail)
 
