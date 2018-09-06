@@ -398,7 +398,8 @@ def login_imap_view(request):
 	modes = []
 	current_mode = None
 	shortcuts = ''
-
+	shortcuts_exist = False
+	
 	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
 		if imap.exists():
@@ -412,11 +413,14 @@ def login_imap_view(request):
 			mode_exist = modes.exists()
 
 			shortcuts = imap[0].shortcuts
+			if len(shortcuts) > 0:
+				shortcuts_exist = True
 				
 
 	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 
 		'mode_exist': mode_exist, 'modes': modes, 'current_mode': current_mode,
-		'imap_authenticated': imap_authenticated, 'website': WEBSITE, 'shortcuts': shortcuts}
+		'imap_authenticated': imap_authenticated, 'website': WEBSITE, 
+		'shortcuts_exist': shortcuts_exist, 'shortcuts': shortcuts}
 
 @render_to(WEBSITE+"/docs.html")
 def docs_view(request):
