@@ -177,22 +177,16 @@ elif "action required" in get_subject():
 								You can manipulate Mailbot from your email interface. Define your shortcut below, then when you forward an email with the shortcut to mailbot@murmur-dev.csail.mit.edu, Mailbot will run the action for you!
 								<br>
 								<button class="btn btn-primary" id="btn-shortcut-save" style="float: right;">Save</button>
+								<br><br>
 							</div>
 							<div class="card-block">
 								<textarea class="editor shortcut-editor" id="editor-shortcut">
 import re
-regexp = re.compile(r'newsletter')
+regexp = re.compile(r'NOTE')
 
-if regexp.search('newsletter'):
-    print "Delete the email from %s at %s" % (get_sender(), get_date())
-    delete()
-    
-elif "csail-related" in get_subject():
-    mark_read(True)
-		
-elif "action required" in get_subject():
+if regexp.search( get_content() ):
     add_note(["TODO"])
-    print "Notes are ", get_note()
+    
 	</textarea>
 							</div>
 						  </div>
@@ -226,7 +220,8 @@ elif "action required" in get_subject():
 			is_imap_authenticated = {{ imap_authenticated|yesno:"true,false" }},
 			is_test = {{ is_test|yesno:"true,false" }},
 			IS_RUNNING = {{ is_running|yesno:"true,false" }},
-			current_mode = "{{ current_mode.name }}";
+			current_mode = "{{ current_mode.name }}",
+			current_mode_id = "{{ current_mode.uid }}";
 	</script>
 	
 	  

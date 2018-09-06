@@ -1821,6 +1821,31 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
     logging.debug(res)
     return res 
 
+def save_shortcut(user, email, shortcuts, push=True):
+    res = {'status' : False, 'imap_error': False}
+
+    try:
+        imapAccount = ImapAccount.objects.get(email=email)
+        
+        imapAccount.shortcuts = shortcuts
+        imapAccount.save()
+
+        res['status'] = True
+            
+
+    except IMAPClient.Error, e:
+        res['code'] = e
+    except ImapAccount.DoesNotExist:
+        res['code'] = "Not logged into IMAP"
+    except Exception, e:
+        # TODO add exception
+        print e
+        res['code'] = msg_code['UNKNOWN_ERROR']
+
+    logging.debug(res)
+    return res 
+
+
 # add a new entry to whitelist/blacklist table, or update existing one
 # user is the user who is adding them(we need to make sure they are authorized,
 # emaild is a string of comma separated addresses to be blacklisted/whitelisted)

@@ -73,7 +73,7 @@ def mailbot(message, host=None):
             imap = auth_res['imap']
             imap.select_folder('INBOX')
 
-            entire_message = message_from_string(message)
+            entire_message = message_from_string(str(message))
             entire_body = get_body(entire_message)
 
             # Get a forwarded message
@@ -92,10 +92,26 @@ def mailbot(message, host=None):
                 forwarded_body = get_body(email_message)
 
                 logging.debug("Forward email %s %s" % (subject, email_from) )
-            
-                subject = "Re: " + message['Subject']
-                body = "Your mail engine runs. %s %s %d %d" % (subject, email_from, len(entire_body['plain']), len(forwarded_body['plain']))
 
+                # Get code part 
+                # TODO remove header of previous email 
+                code_body = entire_body['plain'][:(-1)*len(forwarded_body['plain'])]
+                subject = "Re: " + message['Subject']
+                body = ''
+
+                if not imapAccount.shortcuts:
+                    body = "You don't have email shortcuts yet! Define your shortcuts here %s/editor" % host
+
+                else:
+                    res = interpret(imapAccount, imap, imapAccount.shortcuts, search_creteria, False, code_body)
+
+                    now = datetime.now()
+                    now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
+                    if not res['imap_error']:
+                        body = 'Your mail shortcut is successfully applied! \n' + now_format + res['imap_log']
+                    else:
+                        body = 'Something went wrong! \n' + now_format + res['imap_error']
+                
                 mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = body)
                 relay.deliver(mail)
 

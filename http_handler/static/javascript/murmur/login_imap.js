@@ -4,7 +4,8 @@ $(document).ready(function() {
         btn_login = $("#btn-login"),
         btn_test_run = $("#btn-test-run"),
         btn_code_sumbit = $("#btn-code-submit"),
-        btn_incoming_save = $("#btn-incoming-save");
+        btn_incoming_save = $("#btn-incoming-save"),
+        btn_shortcut_save = $("btn-shortcut-save");
     
     var test_mode_msg = {true: "You are currently at test mode. Mailbot will simulate your rule but not actually run the rule.", 
         false: "Mailbot will apply your rules to your incoming emails. "};
@@ -177,6 +178,7 @@ $(document).ready(function() {
 
         // set dropdown to current mode name if exist
         $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
+        $(".dropdown .btn").attr('mode-id', current_mode_id);
     }
     
 	$('input[type=radio][name=auth-mode]').change(function() {
@@ -200,6 +202,10 @@ $(document).ready(function() {
     btn_incoming_save.click(function() {
         run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running() ); 
     });
+
+    btn_shortcut_save.click(function() {
+        save_shortcut();
+    })
 
     $('#test-mode[type=checkbox]').change(function() {
         var want_test = $(this).is(":checked");
@@ -419,6 +425,37 @@ $(document).ready(function() {
 
                             set_running(is_running);   
                         }
+
+                        if (res.code) { 
+                            // some emails are not added since they are not members of the group
+                            // $('#donotsend-msg').show();
+                            // $('#donotsend-msg').html(res['code']);
+                        }
+                        else {                        
+                            notify(res, true);
+                        }
+                    }
+                    else {
+                        notify(res, false);
+                    }
+                }
+            );
+        }
+
+        function save_shortcut() {
+            show_loader(true);
+
+            var params = {
+                'shortcuts' : document.querySelector('#editor-shortcut').CodeMirror.getValue()
+            };
+
+            $.post('/save_shortcut', params,
+                function(res) {
+                    show_loader(false);
+                    console.log(res);
+                    
+                    // Auth success
+                    if (res.status) {
 
                         if (res.code) { 
                             // some emails are not added since they are not members of the group

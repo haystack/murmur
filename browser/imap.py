@@ -92,7 +92,7 @@ def format_log(msg, is_error=False):
     else:
         return "[Info] " + msg
 
-def interpret(imap_account, imap, code, search_creteria, is_test=False):
+def interpret(imap_account, imap, code, search_creteria, is_test=False, email_content=None):
     res = {'status' : False, 'imap_error': False}
     pile = Pile(imap, search_creteria)
     messages = imap.search( search_creteria )
@@ -147,7 +147,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False):
             return pile.get_senders()[0]
 
         def get_content():
-            return pile.get_contents()[0]
+            if email_content:
+                return email_content
+            else:
+                return pile.get_contents()[0]
 
         def get_date():
             return pile.get_dates()[0][1]

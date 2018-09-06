@@ -167,6 +167,8 @@ if WEBSITE == 'murmur':
                     url(r'^docs', 'browser.views.docs_view'),
                     url(r'^login_imap', 'browser.views.login_imap'),
                     url(r'^run_mailbot', 'browser.views.run_mailbot'),
+                    url(r'^save_shortcut', 'browser.views.save_shortcut'),
+                    
                     url(r'^delete_mailbot_mode', 'browser.views.delete_mailbot_mode'),
                     url(r'^fetch_execution_log', 'browser.views.fetch_execution_log'),
 
