@@ -6,6 +6,9 @@ $(document).ready(function() {
         btn_code_sumbit = $("#btn-code-submit"),
         btn_incoming_save = $("#btn-incoming-save"),
         btn_shortcut_save = $("#btn-shortcut-save");
+
+    // Disable all the buttons for a while until it is sure that the sure is authenticated
+    $(".btn").prop("disabled",true);
     
     var test_mode_msg = {true: "You are currently at test mode. Mailbot will simulate your rule but not actually run the rule.", 
         false: "Mailbot will apply your rules to your incoming emails. "};
@@ -171,6 +174,8 @@ $(document).ready(function() {
 
     if(is_imap_authenticated) {
         fetch_log(); 
+
+        $(".btn").prop("disabled",false);
     }
 
     if(IS_RUNNING) {
@@ -179,6 +184,13 @@ $(document).ready(function() {
         // set dropdown to current mode name if exist
         $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
         $(".dropdown .btn").attr('mode-id', current_mode_id);
+    } else {
+        // init $("#current_mode_dropdown") with a default value if there is no selected mode yet
+        var random_id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
+            random_mode_name = $.trim( document.querySelector('.nav.nav-tabs span[mode-id="'+ random_id + '"]').innerHTML );
+
+        $(".dropdown .btn").html(random_mode_name + ' <span class="caret"></span>');
+        $(".dropdown .btn").attr('mode-id', random_id);
     }
     
 	$('input[type=radio][name=auth-mode]').change(function() {
@@ -284,7 +296,7 @@ $(document).ready(function() {
     }
 
     function get_running() {
-        if( btn_code_sumbit.text() == "Stop") return true;
+        if( btn_code_sumbit.text() == "Disable") return true;
         else return false;
     }
 
@@ -292,13 +304,13 @@ $(document).ready(function() {
         // Start running
         if(start_running) {
             spinStatusCog(true);
-            btn_code_sumbit.text("Stop");
+            btn_code_sumbit.text("Disable");
         }
         
         // Stop running
         else {
             spinStatusCog(false);
-            btn_code_sumbit.text("Save & Run");
+            btn_code_sumbit.text("Enable");
         }
     }
     

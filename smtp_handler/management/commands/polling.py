@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 try:
                     new_uid = fetch_latest_email_id(imapAccount, imap_dict[imapAccount.email])
 
-                    # execute user's rule only when there is a new email arrive
+                    # execute user's rule only when there is a new email arrives
                     if new_uid > imapAccount.newest_msg_id:
                         imap_dict[imapAccount.email].select_folder("INBOX")
                         execution_logs = ""
