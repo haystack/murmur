@@ -66,9 +66,8 @@ class Command(BaseCommand):
                         imapAccount.is_running = False
                         # send_error_email()
 
+                imap.logout()
                 
-                #if res['imap_error']:
-                #    imapAccount.save()
             except IMAPClient.Error, e:
                 res['code'] = e
             except Exception, e:

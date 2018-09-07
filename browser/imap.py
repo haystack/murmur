@@ -186,7 +186,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def get_notes():        
             return pile.get_flags()
 
-        def mark_read(is_seen):
+        def mark_read(is_seen=True):
             if not is_test: 
                 pile.mark_read(is_seen, messages)
                 

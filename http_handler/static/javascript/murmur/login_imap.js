@@ -336,7 +336,7 @@ $(document).ready(function() {
             }
         );
         
-        setTimeout(fetch_log, 30 * 1000); // 30 second
+        setTimeout(fetch_log, 5 * 1000); // 5 second
     }
 
     function validateEmail(email) {
