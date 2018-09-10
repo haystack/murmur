@@ -12,6 +12,8 @@ from imapclient import IMAPClient
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE, IMAP_SECRET
 from engine.google_auth import *
 from Crypto.Cipher import AES
+from engine.constants import *
+from datetime import datetime, time, timedelta
 
 def authenticate(imap_account):
     res = {'status' : False, 'imap_error': False}
@@ -142,6 +144,57 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 imap.delete_messages(messages)
 
             print format_log("Delete Message %s" % (search_creteria), False)  
+
+        def get_history(email, hours=24, cond=True):
+            if len(email) == 0:
+                raise Exception('get_history(): email address is not provided') 
+            
+            if hours <= 0:
+                raise Exception('get_history(): hours must be bigger than 0') 
+
+            # get uid of emails within interval
+            now = datetime.now()
+            start_time = now - timedelta(hours = hours) 
+            today_email = Pile(imap, 'SINCE "%d-%s-%d"' % (start_time.day, calendar.month_abbr[start_time.month], start_time.year))
+            min_msgid = 99999
+            emails = []
+            for msg in today_email.get_date():
+                msgid, t = msg
+                date_tuple = email.utils.parsedate_tz(t)
+                if date_tuple:
+                    local_date = datetime.fromtimestamp(
+                        email.utils.mktime_tz(date_tuple))
+
+                    if start_time < local_date:
+                        emails.append( msgid )
+
+            received_cnt = 0
+            sent_cnt = 0
+            cond_cnt = 0
+            for i in range(len(emails)):
+                email = Pile(imap, "UID %d" % (emails[i]))
+
+                rs = email.get_recipients()
+                ss = email.get_senders()
+
+                for j in range(len(rs)):
+                    if email in rs[j]:
+                        sent_cnt = sent_cnt + 1
+                        break
+
+                for j in range(len(ss)):
+                    if email in ss[j]:
+                        received_cnt = received_cnt + 1
+                        break
+
+                if cond == True:
+                    cond_cnt = cond_cnt + 1
+                else:
+                    cond(email)
+
+            r = {'received_emails': received_cnt, 'sent_emails': sent_cnt, 'cond': cond_cnt}
+
+            return r
 
         def get_sender():
             return pile.get_senders()[0]

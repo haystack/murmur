@@ -1,9 +1,13 @@
+#console {
+  overflow-y: scroll;height: 200px;background: black;padding: 10px;
+}
+
 .error {
     color: red;
 }
 
 .info {
-    color: darkblue;
+    color: blue;
 }
 
 .switch-wrapper {
