@@ -1661,12 +1661,6 @@ def login_imap(user, password, host, is_oauth, push=True):
         if not imapAccount.exists():
             imapAccount = ImapAccount(email=email, password=base64.b64encode(password), host=host)
             imapAccount.host = host
-            if is_oauth:
-                imapAccount.is_oauth = is_oauth
-                imapAccount.access_token = access_token
-                imapAccount.refresh_token = refresh_token
-
-            imapAccount.save()
 
             # = imapAccount
         else:
@@ -1674,6 +1668,13 @@ def login_imap(user, password, host, is_oauth, push=True):
             res['imap_code'] = imapAccount.code
             res['imap_log'] = imapAccount.execution_log
 
+
+        if is_oauth:
+            imapAccount.is_oauth = is_oauth
+            imapAccount.access_token = access_token
+            imapAccount.refresh_token = refresh_token
+
+        imapAccount.save()
         
 
         # u = UserProfile.objects.filter(email=email)
