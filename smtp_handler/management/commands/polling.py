@@ -10,8 +10,7 @@ from engine.constants import *
 from smtp_handler.Pile import *
 import datetime
 from http_handler.settings import WEBSITE, BASE_URL
-from config.settings import relay
-from lamson.mail import MailResponse
+from smtp_handler.utils import *
 
 class Command(BaseCommand):
     args = ''
@@ -73,8 +72,7 @@ class Command(BaseCommand):
                         subject = "[" + WEBSITE + "] Error during executing your email engine"
                         body = "Folling error occurs during executing your email engine \n" + res['imap_log']
                         body += "\nTo fix the error and re-activate your engine, visit " + host + "/editor"
-                        mail = MailResponse(From = WEBSITE + "@" + BASE_URL, To = imapAccount.email, Subject = subject, Body = body)
-                        relay.deliver(mail)
+                        send_email(subject, WEBSITE + "@" + BASE_URL, imapAccount.email, body)
 
                         # TODO send the error msg via email to the user
                         if res['imap_error']:
@@ -83,8 +81,7 @@ class Command(BaseCommand):
                             subject = "[" + WEBSITE + "] Error during executing your email engine"
                             body = "Folling error occurs during executing your email engine \n" + res['imap_log']
                             body += "\nTo fix the error and re-activate your engine, visit " + host + "/editor"
-                            mail = MailResponse(From = WEBSITE + "@" + BASE_URL, To = imapAccount.email, Subject = subject, Body = body)
-                            relay.deliver(mail)
+                            send_email(subject, WEBSITE + "@" + BASE_URL, imapAccount.email, body)
                     
                 except IMAPClient.Error, e:
                     res['code'] = e
