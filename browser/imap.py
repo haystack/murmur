@@ -19,7 +19,7 @@ import calendar
 
 
 def authenticate(imap_account):
-    res = {'status' : False, 'imap_error': False}
+    res = {'status' : False, 'imap_error': False, 'imap_log': ""}
     email_addr = ""
     try:  
         imap = IMAPClient(imap_account.host, use_uid=True)
@@ -104,7 +104,9 @@ def fetch_latest_email_id(imap_account, imap_client):
 
     return max(uid_list)
 
-def format_log(msg, is_error=False):
+def format_log(msg, is_error=False, subject = ""):
+
+    s = "Subject: " + subject
     if is_error:
         return "[Error] " + msg
     else:
@@ -145,25 +147,25 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if not is_test: 
                 pile.add_flags(flags)
 
-            print format_log("Add %s to Message %s" % (flags, search_creteria), False) 
+            print format_log("Add %s to Message %s" % (flags, search_creteria), False, get_subject()) 
             
         def copy(dst_folder):
             src_folder = "INBOX"
-            if not imap.folder_exists(src_folder):
-                format_log("Copy Message; source folder %s not exist" % src_folder, True)  
+            if not imap.folder_exists(dst_folder):
+                format_log("Copy Message; source folder %s not exist" % dst_folder, True, get_subject())  
                 return
 
             if not is_test: 
                 select_folder(src_folder)
                 imap.copy(messages, dst_folder)
 
-            print format_log("Copy Message %s from folder %s to %s" % (search_creteria, src_folder, dst_folder), False)  
+            print format_log("Copy Message %s from folder %s to %s" % (search_creteria, src_folder, dst_folder), False, get_subject())  
 
         def delete():
             if not is_test: 
                 imap.delete_messages(messages)
 
-            print format_log("Delete Message %s \n**Warning: your following action might throw erros as you delete the message" % (search_creteria), False)  
+            print format_log("Delete Message %s \n**Warning: your following action might throw erros as you delete the message" % (search_creteria), False, get_subject())  
 
         def get_history(email, hours=24, cond=True):
             if len(email) == 0:
@@ -313,12 +315,12 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if not is_test: 
                 pile.mark_read(is_seen)
                 
-            print format_log("Mark Message %s %s" % (search_creteria, "read" if is_seen else "unread"), False)  
+            print format_log("Mark Message %s %s" % (search_creteria, "read" if is_seen else "unread"), False, get_subject())  
 
         def move(dst_folder):
-            # if not imap.folder_exists(src_folder):
-            #     format_log("Move Message; source folder %s not exist" % src_folder, True)  
-            #     return
+            if not imap.folder_exists(dst_folder):
+                format_log("Move Message; source folder %s not exist" % dst_folder, True, get_subject())  
+                return
             src_folder = "INBOX"
 
             if not is_test: 
@@ -326,13 +328,13 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 copy(src_folder, dst_folder)
                 delete()
             
-            print format_log("Move Message from %s to %s \n**Warning: your following action might throw erros as you move the message" % (src_folder, dst_folder), False)  
+            print format_log("Move Message from %s to %s \n**Warning: your following action might throw erros as you move the message" % (src_folder, dst_folder), False, get_subject())  
 
         def remove_notes(flags): 
             if not is_test: 
                 pile.remove_flags(flags)
 
-            print format_log("Remove flags %s of Message %s" % (flags, search_creteria), False)  
+            print format_log("Remove flags %s of Message %s" % (flags, search_creteria), False, get_subject())  
 
         # return a list of email UIDs
         def search(criteria=u'ALL', charset=None, folder=None):
@@ -366,20 +368,20 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def create_folder(folder):
             if imap.folder_exists(folder):
-                format_log("Create folder; folder %s already exist" % folder, True)  
+                format_log("Create folder; folder %s already exist" % folder, True, get_subject())  
                 return
             
             if not is_test: 
                 imap.create_folder(folder)
 
-            print format_log("Create a folder %s" % folder, False)  
+            print format_log("Create a folder %s" % folder, False, get_subject())  
 
         def list_folders(directory=u'', pattern=u'*'):
             return imap.list_folders(directory, pattern)
 
         def select_folder(folder):
             if not imap.folder_exists(folder):
-                format_log("Select folder; folder %s not exist" % folder, True)  
+                format_log("Select folder; folder %s not exist" % folder, True, get_subject())  
                 return
 
             imap.select_folder(folder)
@@ -387,13 +389,13 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def rename_folder(old_name, new_name):
             if imap.folder_exists(new_name):
-                format_log("Rename folder; folder %s already exist. Try other name" % new_name, True)  
+                format_log("Rename folder; folder %s already exist. Try other name" % new_name, True, get_subject())  
                 return
 
             if not is_test: 
                 imap.rename_folder(old_name, new_name)
         
-            print format_log("Rename a folder %s to %s" % (old_name, new_name), False)
+            print format_log("Rename a folder %s to %s" % (old_name, new_name), False, get_subject())
 
         def get_mode():
             if imap_account.current_mode:
@@ -409,10 +411,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 if not is_test: 
                     imap_account.current_mode = mm
 
-                print format_log("Set your mail mode to %s (%d)" % (mm.name, mode_index), False)  
+                print format_log("Set your mail mode to %s (%d)" % (mm.name, mode_index), False, get_subject())  
                 return True
             else:
-                print format_log("A mode ID %d not exist!" % (mode_index), True)  
+                print format_log("A mode ID %d not exist!" % (mode_index), True, get_subject())  
                 return False
 
         try:
@@ -420,8 +422,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         except Exception as e:
             catch_exception(e)
 
-        if not res['imap_error']:
-            res['imap_log'] = s.getvalue()
+        res['imap_log'] = s.getvalue() + res['imap_log']
 
         return res
 

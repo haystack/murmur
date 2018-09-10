@@ -20,6 +20,7 @@ class Command(BaseCommand):
         imap_dict = {}
         while True:
             imapAccounts = ImapAccount.objects.filter(is_running=True)
+            
             for imapAccount in imapAccounts:
                 if not imapAccount.current_mode:
                     continue
@@ -40,6 +41,7 @@ class Command(BaseCommand):
 
                 try:
                     new_uid = fetch_latest_email_id(imapAccount, imap_dict[imapAccount.email])
+                    processing_subject = ""
 
                     # execute user's rule only when there is a new email arrives
                     if new_uid > imapAccount.newest_msg_id:
@@ -48,6 +50,7 @@ class Command(BaseCommand):
                         for i in range(imapAccount.newest_msg_id +1, new_uid+1): 
                             p = Pile(imap_dict[imapAccount.email], "UID %d" % (i))
                             print "Sender of new email is", p.get_senders()
+                            processing_subject = p.get_subject()
 
                             if p.get_senders()[0] == WEBSITE + "@" + BASE_URL:
                                 continue
@@ -73,10 +76,10 @@ class Command(BaseCommand):
                         if res['imap_error']:
                             imapAccount.is_running = False
                             imapAccount.save()
-                            
+
                             # send_error_email()
                             subject = "[" + WEBSITE + "] Error during executing your email engine"
-                            body = "Following error occurs during executing your email engine \n" + res['imap_log']
+                            body = "Following error occurs during executing your email engine of email " + processing_subject + "\n"+ res['imap_log']
                             body += "\nTo fix the error and re-activate your engine, visit " + BASE_URL + "/editor"
                             send_email(subject, WEBSITE + "@" + BASE_URL, imapAccount.email, body)
                     
