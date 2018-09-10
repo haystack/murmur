@@ -76,7 +76,8 @@ def authenticate(imap_account):
 
         # TODO don't delete
         # Delete this ImapAccount information so that it requires user to reauthenticate
-        imap_account.delete()
+        imap_account.password = ""
+        imap_account.save()
 
     return res
 

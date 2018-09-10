@@ -90,7 +90,7 @@ def index(request):
 									context_instance=RequestContext(request))
 		else:
 			return HttpResponseRedirect('/editor')
-			
+
 	else:
 		if WEBSITE == 'murmur':
 			return HttpResponseRedirect('/posts')
@@ -408,7 +408,7 @@ def login_imap_view(request):
 	
 	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
-		if imap.exists():
+		if imap.exists() and imap[0].password != "":
 			imap_authenticated = True
 			is_test = imap[0].is_test
 			is_running = imap[0].is_running
