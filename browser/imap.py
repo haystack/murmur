@@ -174,20 +174,19 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             start_time = now - timedelta(hours = hours) 
             heuristic_id = imap_account.newest_msg_id -100 if imap_account.newest_msg_id -100 > 1 else 1
             print 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year)
-            print imap.search( 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year) )
-            # today_email = Pile(imap, 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year))
+            today_email = Pile(imap, 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year))
             # min_msgid = 99999
             # logging.debug("before get dates")
-            # emails = []
-            # for msg in today_email.get_dates():
-            #     msgid, t = msg
-            #     date_tuple = utils.parsedate_tz(t)
-            #     if date_tuple:
-            #         local_date = datetime.fromtimestamp(
-            #             utils.mktime_tz(date_tuple))
+            emails = []
+            for msg in today_email.get_dates():
+                msgid, t = msg
+                date_tuple = utils.parsedate_tz(t)
+                if date_tuple:
+                    local_date = datetime.fromtimestamp(
+                        utils.mktime_tz(date_tuple))
 
-            #         if start_time < local_date:
-            #             emails.append( msgid )
+                    if start_time < local_date:
+                        emails.append( msgid )
 
             received_cnt = 0
             sent_cnt = 0
