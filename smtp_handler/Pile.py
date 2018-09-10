@@ -41,8 +41,8 @@ class Pile():
         if len(unreads) > 0:
             self.mark_read(False)
 
-        if not inCludeID:
-            return results
+        # if not inCludeID:
+        #     return results
 
         return id_results
 
@@ -91,7 +91,13 @@ class Pile():
         return self.remove_flags(self.get_IDs(), flags)
 
     def get_dates(self):
-        return self.get_email('Date', True)
+        dates = self.get_email('Date')
+        results = []
+        for i in range(len(dates)):
+            msgid, d = dates[i]
+            results.append( d )
+
+        return results
 
     def get_flags(self):
         messages = self.imap.search( self.search_criteria )
