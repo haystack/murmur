@@ -54,7 +54,7 @@ class Pile():
         return self.get_recipients()
 
     def get_content(self):
-        return self.get_contents()
+        return self.get_contents()[0]
 
     def remove_note(self, flags):
         return self.remove_flags(self.get_IDs(), flags)
@@ -105,7 +105,10 @@ class Pile():
         response = self.imap.fetch(messages, ['RFC822'])
         bodys = []
         for msgid, data in response.items():
-            body = email.message_from_string(data[b'RFC822'].decode('utf-8'))
+            raw_string = data[b'RFC822'].decode("utf-8").encode("ascii", "ignore")
+
+            body = email.message_from_string(raw_string)
+            
             bodys.append( self.get_first_text_block(body) )
             # print (body)
 
@@ -128,7 +131,8 @@ class Pile():
 
         for msgid, data in response.items():
             # print (data[b'BODY[HEADER]'])
-            msg = parser.parsestr(data[b'RFC822'].decode("utf-8"))
+            raw_string = data[b'RFC822'].decode("utf-8").encode("ascii", "ignore")
+            msg = parser.parsestr( raw_string )
             results.append( msg[header] )
             id_results.append( (msgid, msg[header]) )
 
