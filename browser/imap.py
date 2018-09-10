@@ -7,13 +7,14 @@ except ImportError:
 import contextlib
 from smtp_handler.utils import *
 from smtp_handler.Pile import *
-from email import message_from_string,message
+from email import message_from_string,message, utils
 from imapclient import IMAPClient
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE, IMAP_SECRET
 from engine.google_auth import *
 from Crypto.Cipher import AES
 from engine.constants import *
 from datetime import datetime, time, timedelta
+import calendar
 
 def authenticate(imap_account):
     res = {'status' : False, 'imap_error': False}
@@ -158,12 +159,12 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             today_email = Pile(imap, 'SINCE "%d-%s-%d"' % (start_time.day, calendar.month_abbr[start_time.month], start_time.year))
             min_msgid = 99999
             emails = []
-            for msg in today_email.get_date():
+            for msg in today_email.get_dates():
                 msgid, t = msg
-                date_tuple = email.utils.parsedate_tz(t)
+                date_tuple = utils.parsedate_tz(t)
                 if date_tuple:
                     local_date = datetime.fromtimestamp(
-                        email.utils.mktime_tz(date_tuple))
+                        utils.mktime_tz(date_tuple))
 
                     if start_time < local_date:
                         emails.append( msgid )
