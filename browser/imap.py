@@ -200,7 +200,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                     if cond == True:
                         cond_cnt = cond_cnt + 1
                     else:
-                        cond(p)
+                        if cond(p):
+                            cond_cnt = cond_cnt + 1
 
             r = {'received_emails': received_cnt, 'sent_emails': sent_cnt, 'cond': cond_cnt}
 
