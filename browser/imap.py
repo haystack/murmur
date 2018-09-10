@@ -52,7 +52,7 @@ def authenticate(imap_account):
                 imap_account.access_token = response['access_token']
                 imap_account.save()
 
-                auth_res['imap'] = imap
+                res['imap'] = imap
                 res['status'] = True
             else:
                 res['code'] = "Can't authenticate your email"

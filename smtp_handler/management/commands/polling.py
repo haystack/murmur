@@ -72,9 +72,11 @@ class Command(BaseCommand):
 
                         if res['imap_error']:
                             imapAccount.is_running = False
+                            imapAccount.save()
+                            
                             # send_error_email()
                             subject = "[" + WEBSITE + "] Error during executing your email engine"
-                            body = "Folling error occurs during executing your email engine \n" + res['imap_log']
+                            body = "Following error occurs during executing your email engine \n" + res['imap_log']
                             body += "\nTo fix the error and re-activate your engine, visit " + BASE_URL + "/editor"
                             send_email(subject, WEBSITE + "@" + BASE_URL, imapAccount.email, body)
                     
