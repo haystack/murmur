@@ -14,6 +14,37 @@ class Pile():
         self.imap = imap
         self.search_criteria = search_criteria
         # print ("info", self.search_criteria)
+        self.EMAIL = self.init_email()
+
+    def init_email(self):
+        unreads = self.get_unread_emails()
+
+        results = []
+        id_results = []
+        messages = self.imap.search( self.search_criteria )
+        # raw=email.message_from_bytes(data[0][1])
+        response = self.imap.fetch(messages, ['RFC822'])
+        parser = HeaderParser()
+
+        if response is None:
+            return []
+
+        for msgid, data in response.items():
+            if b'RFC822' not in data:
+                continue
+            # print (data[b'BODY[HEADER]'])
+            raw_string = data[b'RFC822'].decode("utf-8").encode("ascii", "ignore")
+            msg = parser.parsestr( raw_string )
+            results.append( msg[header] )
+            id_results.append( (msgid, msg[header]) )
+
+        if len(unreads) > 0:
+            self.mark_read(False)
+
+        if not inCludeID:
+            return results
+
+        return id_results
 
     def add_flags(self, flags):
         if type(flags) is not list:
@@ -121,34 +152,8 @@ class Pile():
         return bodys
 
     def get_email(self, header, inCludeID=False):
-        unreads = self.get_unread_emails()
-
-        results = []
-        id_results = []
-        messages = self.imap.search( self.search_criteria )
-        # raw=email.message_from_bytes(data[0][1])
-        response = self.imap.fetch(messages, ['RFC822'])
-        parser = HeaderParser()
-
-        if response is None:
-            return []
-
-        for msgid, data in response.items():
-            if b'RFC822' not in data:
-                continue
-            # print (data[b'BODY[HEADER]'])
-            raw_string = data[b'RFC822'].decode("utf-8").encode("ascii", "ignore")
-            msg = parser.parsestr( raw_string )
-            results.append( msg[header] )
-            id_results.append( (msgid, msg[header]) )
-
-        if len(unreads) > 0:
-            self.mark_read(False)
-
-        if not inCludeID:
-            return results
-
-        return id_results
+        return self.EMAIL
+        
 
     def get_unread_emails(self):
         messages = self.imap.search( self.search_criteria )
