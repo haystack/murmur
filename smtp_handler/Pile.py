@@ -93,7 +93,7 @@ class Pile():
         if maintype == 'multipart':
             for part in email_message_instance.get_payload():
                 if part.get_content_maintype() == 'text':
-                    print (part.get_payload())
+                    return part.get_payload()
                 return None
         elif maintype == 'text':
             return email_message_instance.get_payload()
