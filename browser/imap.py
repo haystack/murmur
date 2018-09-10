@@ -70,7 +70,7 @@ def authenticate(imap_account):
         # email to the user that there is error at authenticating email
         if len(email_addr) > 0:
             subject = "[" + WEBSITE + "] Authentication error occurs"
-            body = "Authentication error occurs! \n" + res['imap_error']
+            body = "Authentication error occurs! \n" + str(res['imap_error'])
             body += "\nPlease log in again at " + BASE_URL + "/editor"
             send_email(subject, WEBSITE + "@" + BASE_URL, email_addr, body)
 
