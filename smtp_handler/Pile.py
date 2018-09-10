@@ -35,8 +35,8 @@ class Pile():
             # print (data[b'BODY[HEADER]'])
             raw_string = data[b'RFC822'].decode("utf-8").encode("ascii", "ignore")
             msg = parser.parsestr( raw_string )
-            results.append( msg[header] )
-            id_results.append( (msgid, msg[header]) )
+            results.append( msg )
+            id_results.append( (msgid, msg) )
 
         if len(unreads) > 0:
             self.mark_read(False)
@@ -152,7 +152,13 @@ class Pile():
         return bodys
 
     def get_email(self, header, inCludeID=False):
-        return self.EMAIL
+        results = []
+        for i in range(len(self.EMAIL)):
+
+            msgid, msg = self.EMAIL[i]
+            results.append( (msgid, msg[header]) )
+
+        return results
         
 
     def get_unread_emails(self):
