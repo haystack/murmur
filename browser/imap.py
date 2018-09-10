@@ -172,6 +172,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             start_time = now - timedelta(hours = hours) 
             today_email = Pile(imap, 'SINCE "%d-%s-%d"' % (start_time.day, calendar.month_abbr[start_time.month], start_time.year))
             min_msgid = 99999
+            logging.debug("before get dates")
             emails = []
             for msg in today_email.get_dates():
                 msgid, t = msg

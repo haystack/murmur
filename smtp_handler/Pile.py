@@ -105,6 +105,9 @@ class Pile():
         response = self.imap.fetch(messages, ['RFC822'])
         bodys = []
         for msgid, data in response.items():
+            if b'RFC822' not in data:
+                continue
+
             raw_string = data[b'RFC822'].decode("utf-8").encode("ascii", "ignore")
 
             body = email.message_from_string(raw_string)
@@ -131,6 +134,8 @@ class Pile():
             return []
 
         for msgid, data in response.items():
+            if b'RFC822' not in data:
+                continue
             # print (data[b'BODY[HEADER]'])
             raw_string = data[b'RFC822'].decode("utf-8").encode("ascii", "ignore")
             msg = parser.parsestr( raw_string )
@@ -139,7 +144,7 @@ class Pile():
 
         if len(unreads) > 0:
             self.mark_read(False)
-            
+
         if not inCludeID:
             return results
 
