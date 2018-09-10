@@ -1731,7 +1731,7 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
-        mm = MailbotMode.objects.get(uid=mode_id, imap_acoount=imapAccount)
+        mm = MailbotMode.objects.get(uid=mode_id, imap_account=imapAccount)
 
         if imapAccount.current_mode == mm:
             imapAccount.current_mode = None
@@ -1778,16 +1778,16 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
             print value['name']
             print value['code']
         
-            mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_acoount=imapAccount)
+            mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_account=imapAccount)
             if not mailbotMode.exists():
-                mailbotMode = MailbotMode(uid=mode_id, name=mode_name, code=code, imap_acoount=imapAccount)
+                mailbotMode = MailbotMode(uid=mode_id, name=mode_name, code=code, imap_account=imapAccount)
                 mailbotMode.save()
             else:
                 mailbotMode = mailbotMode[0]
                 mailbotMode.code = code
                 mailbotMode.save()
 
-        imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_acoount=imapAccount)[0]
+        imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_account=imapAccount)[0]
         imapAccount.save()
 
         if imapAccount.is_running:

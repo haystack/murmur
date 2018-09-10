@@ -285,7 +285,7 @@ class UserProfile(AbstractBaseUser):
 	date_joined = models.DateTimeField(auto_now=True)
 	hash = models.CharField(max_length=40, default="")
 
-	imap_acoount = models.ForeignKey('ImapAccount', null=True, blank=True)
+	imap_account = models.ForeignKey('ImapAccount', null=True, blank=True)
 
 	# newest_msg_id = models.IntegerField(default=-1)
 
@@ -373,10 +373,10 @@ class MailbotMode(models.Model):
 	name = models.CharField('mode_name', max_length=100)
 	code = models.TextField(null=True, blank=True)
 
-	imap_acoount = models.ForeignKey('ImapAccount')
+	imap_account = models.ForeignKey('ImapAccount')
 
 	class Meta:
-		unique_together = ("uid", "imap_acoount")
+		unique_together = ("uid", "imap_account")
 
 class Following(models.Model):
 	id = models.AutoField(primary_key=True)

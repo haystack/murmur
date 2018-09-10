@@ -409,7 +409,7 @@ def login_imap_view(request):
 
 			current_mode = imap[0].current_mode
 
-			modes = MailbotMode.objects.filter(imap_acoount=imap[0])
+			modes = MailbotMode.objects.filter(imap_account=imap[0])
 			mode_exist = modes.exists()
 
 			shortcuts = imap[0].shortcuts

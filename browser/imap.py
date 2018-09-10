@@ -178,20 +178,26 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 rs = p.get_recipients()
                 ss = p.get_senders()
 
+                with_email = False
+
+                # check if how many msg sent to this email
                 for j in range(len(rs)):
-                    if email in rs[j]:
+                    if email in rs[j] and imap_account.email in ss[0]:
                         sent_cnt = sent_cnt + 1
+                        with_email = True
                         break
 
                 for j in range(len(ss)):
                     if email in ss[j]:
                         received_cnt = received_cnt + 1
+                        with_email = True
                         break
 
-                if cond == True:
-                    cond_cnt = cond_cnt + 1
-                else:
-                    cond(email)
+                if with_email:
+                    if cond == True:
+                        cond_cnt = cond_cnt + 1
+                    else:
+                        cond(email)
 
             r = {'received_emails': received_cnt, 'sent_emails': sent_cnt, 'cond': cond_cnt}
 
@@ -335,7 +341,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 return None
 
         def set_mode(mode_index):
-            mm = MailbotMode.objects.filter(uid=mode_index, imap_acoount=imap_account)
+            mm = MailbotMode.objects.filter(uid=mode_index, imap_account=imap_account)
             if mm.exists():
                 mm = mm[0]
                 if not is_test: 
