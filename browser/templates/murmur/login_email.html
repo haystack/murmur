@@ -90,7 +90,7 @@
 						{% if imap_authenticated %}
 							<button class="btn btn-primary" id="btn-code-submit">Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% else %}
-							<button class="btn btn-primary" id="btn-code-submit" disabled>Enable</button>
+							<button class="btn btn-primary" id="btn-code-submit" disabled>Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% endif %}
 				  </div>
 				</div>
@@ -156,10 +156,7 @@ if "newsletter" in get_subject():
     
 elif "csail-related" in get_subject():
     mark_read(True)
-		
-elif "action required" in get_subject():
-	add_notes(["TODO"])
-    print "Flags are ", get_note()
+
 </textarea>
 									</div>
 								</div>

@@ -95,6 +95,9 @@ def format_log(msg, is_error=False):
     else:
         return "[Info] " + msg
 
+def wrapper(imap_account, imap, code, search_creteria, is_test=False, email_content=None):
+    interpret(imap_account, imap, code, search_creteria, is_test, email_content)
+
 def interpret(imap_account, imap, code, search_creteria, is_test=False, email_content=None):
     res = {'status' : False, 'imap_error': False}
     pile = Pile(imap, search_creteria)
@@ -197,7 +200,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                     if cond == True:
                         cond_cnt = cond_cnt + 1
                     else:
+                        messages_cpy = messages
+                        messages = [emails[i]]
                         cond(email)
+                        messages = messages_cpy
 
             r = {'received_emails': received_cnt, 'sent_emails': sent_cnt, 'cond': cond_cnt}
 
