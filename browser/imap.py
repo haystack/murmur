@@ -147,7 +147,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
             print format_log("Add %s to Message %s" % (flags, search_creteria), False) 
             
-        def copy(src_folder, dst_folder):
+        def copy(dst_folder):
+            src_folder = "INBOX"
             if not imap.folder_exists(src_folder):
                 format_log("Copy Message; source folder %s not exist" % src_folder, True)  
                 return
