@@ -173,24 +173,63 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             now = datetime.now()
             start_time = now - timedelta(hours = hours) 
             heuristic_id = imap_account.newest_msg_id -100 if imap_account.newest_msg_id -100 > 1 else 1
-            print 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year)
-            today_email = Pile(imap, 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year))
+            today_email_ids = imap.search( 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year) )
+             
+            # today_email = Pile(imap, 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year))
             # min_msgid = 99999
             # logging.debug("before get dates")
-            emails = []
-            for msg in today_email.get_dates():
-                msgid, t = msg
+
+            received_cnt = 0
+            sent_cnt = 0
+            cond_cnt = 0
+            for msgid in today_email_ids:
+                p = Pile(imap, 'UID %d' % (msgid))
+
+                t = p.get_dates()
                 date_tuple = utils.parsedate_tz(t)
                 if date_tuple:
                     local_date = datetime.fromtimestamp(
                         utils.mktime_tz(date_tuple))
 
-                    if start_time < local_date:
-                        emails.append( msgid )
+                    if start_time >= local_date:
+                        continue
 
-            received_cnt = 0
-            sent_cnt = 0
-            cond_cnt = 0
+                    rs = p.get_recipients()
+                    ss = p.get_senders()
+
+                    with_email = False
+
+                    # check if how many msg sent to this email
+                    for j in range(len(rs)):
+                        if email in rs[j] and imap_account.email in ss[0]:
+                            sent_cnt = sent_cnt + 1
+                            with_email = True
+                            break
+
+                    for j in range(len(ss)):
+                        if email in ss[j]:
+                            received_cnt = received_cnt + 1
+                            with_email = True
+                            break
+
+                    if with_email:
+                        if cond == True:
+                            cond_cnt = cond_cnt + 1
+                        else:
+                            if cond(p):
+                                cond_cnt = cond_cnt + 1
+                        
+            # for msg in today_email.get_dates():
+            #     msgid, t = msg
+            #     date_tuple = utils.parsedate_tz(t)
+            #     if date_tuple:
+            #         local_date = datetime.fromtimestamp(
+            #             utils.mktime_tz(date_tuple))
+
+            #         if start_time < local_date:
+            #             emails.append( msgid )
+
+          
             # for i in range(len(emails)):
             #     p = Pile(imap, "UID %d" % (emails[i]))
 
