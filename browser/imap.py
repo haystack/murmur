@@ -18,7 +18,7 @@ import calendar
 
 def authenticate(imap_account):
     res = {'status' : False, 'imap_error': False}
-
+    email_addr = ""
     try:  
         imap = IMAPClient(imap_account.host, use_uid=True)
         if imap_account.is_oauth:
@@ -36,6 +36,7 @@ def authenticate(imap_account):
                     break
                 index = index + 1
 
+            email_addr = imap_account.email
             imap.login(imap_account.email, password) 
 
         res['imap'] = imap
@@ -58,14 +59,22 @@ def authenticate(imap_account):
         except IMAPClient.Error, e:  
             res['code'] = "Can't authenticate your email"
 
-            # Delete this ImapAccount information so that it requires user to reauthenticate
-            imap_account.delete()
-
-            # TODO email to the user that there is error at authenticating email
         except Exception, e:
             # TODO add exception
             print e
             res['code'] = msg_code['UNKNOWN_ERROR']
+
+    if res['status'] == False:
+        # email to the user that there is error at authenticating email
+        if len(email_addr) > 0:
+            subject = "[" + WEBSITE + "] Authentication error occurs"
+            body = "Authentication error occurs! "
+            body += "\nPlease log in again at " + BASE_URL + "/editor"
+            send_email(subject, WEBSITE + "@" + BASE_URL, email_addr, body)
+
+        # TODO don't delete
+        # Delete this ImapAccount information so that it requires user to reauthenticate
+        imap_account.delete()
 
     return res
 

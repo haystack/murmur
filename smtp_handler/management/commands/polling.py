@@ -28,6 +28,7 @@ class Command(BaseCommand):
                 
                 
                 if imapAccount.email not in imap_dict:
+                    auth_res = {'status' : False, 'imap': None}
                     auth_res = authenticate( imapAccount )
                     if not auth_res['status']:
                         continue
@@ -56,7 +57,7 @@ class Command(BaseCommand):
                             res = interpret(imapAccount, imap_dict[imapAccount.email], code, "UID %d" % (i))
 
                             if res['imap_log'] != "":
-                                now = datetime.datetime.now()
+                                now = datetime.now()
                                 now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
                                 execution_logs = now_format + " " + res['imap_log'] + "\n" + execution_logs
                     
@@ -69,18 +70,12 @@ class Command(BaseCommand):
 
                         imapAccount.save()
 
-                        subject = "[" + WEBSITE + "] Error during executing your email engine"
-                        body = "Folling error occurs during executing your email engine \n" + res['imap_log']
-                        body += "\nTo fix the error and re-activate your engine, visit " + host + "/editor"
-                        send_email(subject, WEBSITE + "@" + BASE_URL, imapAccount.email, body)
-
-                        # TODO send the error msg via email to the user
                         if res['imap_error']:
                             imapAccount.is_running = False
                             # send_error_email()
                             subject = "[" + WEBSITE + "] Error during executing your email engine"
                             body = "Folling error occurs during executing your email engine \n" + res['imap_log']
-                            body += "\nTo fix the error and re-activate your engine, visit " + host + "/editor"
+                            body += "\nTo fix the error and re-activate your engine, visit " + BASE_URL + "/editor"
                             send_email(subject, WEBSITE + "@" + BASE_URL, imapAccount.email, body)
                     
                 except IMAPClient.Error, e:
