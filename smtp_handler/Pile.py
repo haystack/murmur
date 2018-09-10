@@ -162,7 +162,7 @@ class Pile():
         for i in range(len(self.EMAIL)):
 
             msgid, msg = self.EMAIL[i]
-            results.append( (msgid, msg[header]) )
+            results.append( msg[header] )
 
         return results
         
