@@ -408,7 +408,7 @@ def login_imap_view(request):
 	
 	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
-		if imap.exists() and imap[0].password != "":
+		if imap.exists() and ((imap[0].is_oauth and imap[0].access_token != "") or (not imap[0].is_oauth and imap[0].password != ""))):
 			imap_authenticated = True
 			is_test = imap[0].is_test
 			is_running = imap[0].is_running
