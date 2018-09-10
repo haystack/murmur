@@ -83,15 +83,21 @@ def error(request):
 def index(request):
 	homepage = "%s/home.html" % WEBSITE
 	if not request.user.is_authenticated():
-		return render_to_response(homepage,
-					  			{'form': AuthenticationForm(),
-					  			'reg_form': RegistrationForm()},
-					   			context_instance=RequestContext(request))
+		if WEBSITE == 'murmur' or WEBSITE == 'squadbox':
+			return render_to_response(homepage,
+									{'form': AuthenticationForm(),
+									'reg_form': RegistrationForm()},
+									context_instance=RequestContext(request))
+		else:
+			return HttpResponseRedirect('/editor')
+			
 	else:
 		if WEBSITE == 'murmur':
 			return HttpResponseRedirect('/posts')
 		elif WEBSITE == 'squadbox':
 			return HttpResponseRedirect('/my_group_list')
+		else:
+			return HttpResponseRedirect('/editor')
 	
 	
 @render_to(WEBSITE+'/posts.html')

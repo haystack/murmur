@@ -21,6 +21,7 @@ def authenticate(imap_account):
     email_addr = ""
     try:  
         imap = IMAPClient(imap_account.host, use_uid=True)
+        email_addr = imap_account.email
         if imap_account.is_oauth:
             # TODO if access_token is expired, then get a new token 
             imap.oauth2_login(imap_account.email, imap_account.access_token)
@@ -36,7 +37,6 @@ def authenticate(imap_account):
                     break
                 index = index + 1
 
-            email_addr = imap_account.email
             imap.login(imap_account.email, password) 
 
         res['imap'] = imap
