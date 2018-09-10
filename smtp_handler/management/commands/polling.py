@@ -9,6 +9,9 @@ from imapclient import IMAPClient
 from engine.constants import *
 from smtp_handler.Pile import *
 import datetime
+from http_handler.settings import WEBSITE, BASE_URL
+from config.settings import relay
+from lamson.mail import MailResponse
 
 class Command(BaseCommand):
     args = ''
@@ -46,7 +49,7 @@ class Command(BaseCommand):
                             p = Pile(imap_dict[imapAccount.email], "UID %d" % (i))
                             print "Sender of new email is", p.get_senders()
 
-                            if p.get_senders()[0] == "mailbot-log@murmur.csail.mit.edu":
+                            if p.get_senders()[0] == WEBSITE + "@" + BASE_URL:
                                 continue
                                 
                             print "Processing email UID", i
@@ -67,10 +70,21 @@ class Command(BaseCommand):
 
                         imapAccount.save()
 
+                        subject = "[" + WEBSITE + "] Error during executing your email engine"
+                        body = "Folling error occurs during executing your email engine \n" + res['imap_log']
+                        body += "\nTo fix the error and re-activate your engine, visit " + host + "/editor"
+                        mail = MailResponse(From = WEBSITE + "@" + BASE_URL, To = imapAccount.email, Subject = subject, Body = body)
+                        relay.deliver(mail)
+
                         # TODO send the error msg via email to the user
                         if res['imap_error']:
                             imapAccount.is_running = False
                             # send_error_email()
+                            subject = "[" + WEBSITE + "] Error during executing your email engine"
+                            body = "Folling error occurs during executing your email engine \n" + res['imap_log']
+                            body += "\nTo fix the error and re-activate your engine, visit " + host + "/editor"
+                            mail = MailResponse(From = WEBSITE + "@" + BASE_URL, To = imapAccount.email, Subject = subject, Body = body)
+                            relay.deliver(mail)
                     
                 except IMAPClient.Error, e:
                     res['code'] = e

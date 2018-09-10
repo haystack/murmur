@@ -112,7 +112,8 @@ class Pile():
             bodys.append( self.get_first_text_block(body) )
             # print (body)
 
-        # self.mark_read(False, unreads)
+        if len(unreads) > 0:
+            self.mark_read(False)
 
         return bodys
 
@@ -136,7 +137,9 @@ class Pile():
             results.append( msg[header] )
             id_results.append( (msgid, msg[header]) )
 
-        # self.mark_read(False, unreads)
+        if len(unreads) > 0:
+            self.mark_read(False)
+            
         if not inCludeID:
             return results
 

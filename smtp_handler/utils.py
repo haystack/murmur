@@ -62,6 +62,8 @@ if WEBSITE == 'murmur':
 	PLAIN_SUBHEAD = '***\nMurmur\n'
 elif WEBSITE == 'squadbox':
 	PLAIN_SUBHEAD = '***\nSquadbox\n'
+else:
+	PLAIN_SUBHEAD = '***\nYouPS\n'
 
 PLAIN_SUBTAIL = '\n***\n'
 

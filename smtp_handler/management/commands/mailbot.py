@@ -9,6 +9,7 @@ from imapclient import IMAPClient
 from engine.constants import *
 from smtp_handler.Pile import *
 import datetime
+from http_handler.settings import WEBSITE
 
 class Command(BaseCommand):
     args = ''
@@ -40,7 +41,7 @@ class Command(BaseCommand):
                         p = Pile(imap, "UID %d" % (i))
                         print "Sender of new email is", p.get_senders()
 
-                        if p.get_senders()[0] == "mailbot-log@murmur.csail.mit.edu":
+                        if p.get_senders()[0] == WEBSITE + "@murmur.csail.mit.edu":
                             continue
                             
                         print "Processing email UID", i
