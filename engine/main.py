@@ -1755,7 +1755,7 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
     return res 
 
 def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=True):
-    res = {'status' : False, 'imap_error': False}
+    res = {'status' : False, 'imap_error': False, 'imap_log': ""}
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)

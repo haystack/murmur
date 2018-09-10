@@ -106,17 +106,17 @@ def fetch_latest_email_id(imap_account, imap_client):
 
 def format_log(msg, is_error=False, subject = ""):
 
-    s = "Subject: " + subject
+    s = "Subject: " + subject + " "
     if is_error:
-        return "[Error] " + msg
+        return "[Error] " + s + msg
     else:
-        return "[Info] " + msg
+        return "[Info] " + s + msg
 
 def wrapper(imap_account, imap, code, search_creteria, is_test=False, email_content=None):
     interpret(imap_account, imap, code, search_creteria, is_test, email_content)
 
 def interpret(imap_account, imap, code, search_creteria, is_test=False, email_content=None):
-    res = {'status' : False, 'imap_error': False}
+    res = {'status' : False, 'imap_error': False, 'imap_log': ""}
     pile = Pile(imap, search_creteria)
     messages = imap.search( search_creteria )
 
@@ -152,7 +152,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def copy(dst_folder):
             src_folder = "INBOX"
             if not imap.folder_exists(dst_folder):
-                format_log("Copy Message; source folder %s not exist" % dst_folder, True, get_subject())  
+                create_folder(dst_folder)
+                print format_log("Copy Message; destionation folder %s not exist. Just create a new folder %s " % (dst_folder, dst_folder), True, get_subject())
                 return
 
             if not is_test: 
@@ -319,7 +320,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def move(dst_folder):
             if not imap.folder_exists(dst_folder):
-                format_log("Move Message; source folder %s not exist" % dst_folder, True, get_subject())  
+                create_folder(dst_folder)
+                print format_log("Move Message; destination folder %s not exist. Just create a new folder %s" % (dst_folder, dst_folder), True, get_subject())  
                 return
             src_folder = "INBOX"
 
