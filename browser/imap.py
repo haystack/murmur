@@ -173,10 +173,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             sent_cnt = 0
             cond_cnt = 0
             for i in range(len(emails)):
-                email = Pile(imap, "UID %d" % (emails[i]))
+                p = Pile(imap, "UID %d" % (emails[i]))
 
-                rs = email.get_recipients()
-                ss = email.get_senders()
+                rs = p.get_recipients()
+                ss = p.get_senders()
 
                 for j in range(len(rs)):
                     if email in rs[j]:
