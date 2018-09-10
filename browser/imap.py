@@ -200,10 +200,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                     if cond == True:
                         cond_cnt = cond_cnt + 1
                     else:
-                        messages_cpy = messages
-                        messages = [emails[i]]
-                        cond(email)
-                        messages = messages_cpy
+                        cond(p)
 
             r = {'received_emails': received_cnt, 'sent_emails': sent_cnt, 'cond': cond_cnt}
 
@@ -254,7 +251,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def mark_read(is_seen=True):
             if not is_test: 
-                pile.mark_read(is_seen, messages)
+                pile.mark_read(is_seen)
                 
             print format_log("Mark Message %s %s" % (search_creteria, "read" if is_seen else "unread"), False)  
 
@@ -292,16 +289,14 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             select_folder('INBOX')
             return imap.search(criteria, charset)
 
-        def get_body_test(messages):
+        def get_body_test(m):
             # raw=email.message_from_bytes(data[0][1])
-            response = imap.fetch(messages, ['BODY[TEXT]'])
+            response = imap.fetch(m, ['BODY[TEXT]'])
             bodys = []
             for msgid, data in response.items():
                 body = email.message_from_string(data[b'BODY[TEXT]'].decode('utf-8'))
                 bodys.append( get_body(body) )
                 # print (body)
-
-            # self.mark_read(False, unreads)
             
             # email_message = email.message_from_string(str(message))
             # msg_text = get_body(email_message)

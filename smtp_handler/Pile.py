@@ -38,6 +38,27 @@ class Pile():
         # print (messages)
         return len(messages)
 
+    def get_date(self):
+        return self.get_dates()
+
+    def get_note(self):
+        return get_flags()
+
+    def get_subject(self):
+        return self.get_subjects()
+
+    def get_sender(self):
+        return self.get_senders()
+
+    def get_recipient(self):
+        return self.get_recipients()
+
+    def get_content(self):
+        return self.get_contents()
+
+    def remove_note(self, flags):
+        return self.remove_flags(self.get_IDs(), flags)
+
     def get_dates(self):
         return self.get_email('Date', True)
 
@@ -133,12 +154,12 @@ class Pile():
 
         return read_emails
 
-    def mark_read(self, inIsSeen, inMsgs):
+    def mark_read(self, inIsSeen):
         # if true, add SEEN flags
         if inIsSeen: 
-            self.imap.set_flags(inMsgs, '\\Seen')            
+            self.imap.set_flags(self.get_IDs(), '\\Seen')            
         else: 
-            self.imap.remove_flags(inMsgs, '\\Seen')     
+            self.imap.remove_flags(self.get_IDs(), '\\Seen')     
     
 
     def remove_flags(self, flags):

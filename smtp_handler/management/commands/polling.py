@@ -23,7 +23,7 @@ class Command(BaseCommand):
                     continue
 
                 res = {'status' : False, 'imap_error': False}
-                print "RUN MAILbot of ", imapAccount.email
+                
                 
                 if imapAccount.email not in imap_dict:
                     auth_res = authenticate( imapAccount )
@@ -32,6 +32,8 @@ class Command(BaseCommand):
 
                     imap = auth_res['imap']
                     imap_dict[imapAccount.email] = imap
+
+                    print "Reauth ", imapAccount.email
 
                 try:
                     new_uid = fetch_latest_email_id(imapAccount, imap_dict[imapAccount.email])
