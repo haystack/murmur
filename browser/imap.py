@@ -182,17 +182,17 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             received_cnt = 0
             sent_cnt = 0
             cond_cnt = 0
-            for msgid in today_email_ids:
+            for msgid in reversed(today_email_ids):
                 p = Pile(imap, 'UID %d' % (msgid))
 
-                t = p.get_dates()
+                t = p.get_dates()[0][1]
                 date_tuple = utils.parsedate_tz(t)
                 if date_tuple:
                     local_date = datetime.fromtimestamp(
                         utils.mktime_tz(date_tuple))
 
-                    if start_time >= local_date:
-                        continue
+                    if start_time > local_date:
+                        break
 
                     rs = p.get_recipients()
                     ss = p.get_senders()
