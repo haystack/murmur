@@ -162,7 +162,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if not is_test: 
                 imap.delete_messages(messages)
 
-            print format_log("Delete Message %s" % (search_creteria), False)  
+            print format_log("Delete Message %s \n**Warning: your following action might throw erros as you delete the message" % (search_creteria), False)  
 
         def get_history(email, hours=24, cond=True):
             if len(email) == 0:
@@ -261,7 +261,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             #             if cond(p):
             #                 cond_cnt = cond_cnt + 1
 
-            r = {'received_emails': received_cnt, 'sent_emails': sent_cnt, 'cond': cond_cnt}
+            r = {'received_emails': received_cnt, 'cond': cond_cnt}
 
             return r
 

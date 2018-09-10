@@ -138,7 +138,7 @@ $(document).ready(function() {
     var editHandler = function() {
       var t = $(this);
       t.css("visibility", "hidden");
-      $(this).prev().attr("contenteditable", "true").focusout(function() {
+      $(this).siblings('.tab-title').attr("contenteditable", "true").focusout(function() {
         $(this).removeAttr("contenteditable").off("focusout");
         t.css("visibility", "visible");
       });
