@@ -102,14 +102,14 @@ class Pile():
         unreads = self.get_unread_emails()
         messages = self.imap.search( self.search_criteria )
         # raw=email.message_from_bytes(data[0][1])
-        response = self.imap.fetch(messages, ['BODY[TEXT]'])
+        response = self.imap.fetch(messages, ['RFC822'])
         bodys = []
         for msgid, data in response.items():
-            body = email.message_from_string(data[b'BODY[TEXT]'].decode('utf-8'))
+            body = email.message_from_string(data[b'RFC822'].decode('utf-8'))
             bodys.append( self.get_first_text_block(body) )
             # print (body)
 
-        self.mark_read(False, unreads)
+        # self.mark_read(False, unreads)
 
         return bodys
 
@@ -120,7 +120,7 @@ class Pile():
         id_results = []
         messages = self.imap.search( self.search_criteria )
         # raw=email.message_from_bytes(data[0][1])
-        response = self.imap.fetch(messages, ['BODY[HEADER]'])
+        response = self.imap.fetch(messages, ['RFC822'])
         parser = HeaderParser()
 
         if response is None:
@@ -128,11 +128,11 @@ class Pile():
 
         for msgid, data in response.items():
             # print (data[b'BODY[HEADER]'])
-            msg = parser.parsestr(data[b'BODY[HEADER]'].decode("utf-8"))
+            msg = parser.parsestr(data[b'RFC822'].decode("utf-8"))
             results.append( msg[header] )
             id_results.append( (msgid, msg[header]) )
 
-        self.mark_read(False, unreads)
+        # self.mark_read(False, unreads)
         if not inCludeID:
             return results
 
