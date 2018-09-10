@@ -91,11 +91,11 @@ class Pile():
         return self.remove_flags(self.get_IDs(), flags)
 
     def get_dates(self):
-        dates = self.get_email('Date')
+        header = 'Date'
         results = []
-        for i in range(len(dates)):
-            msgid, d = dates[i]
-            results.append( d )
+        for i in range(len(self.EMAIL)):
+            msgid, msg = self.EMAIL[i]
+            results.append( (msgid, msg[header]) )
 
         return results
 
