@@ -57,10 +57,12 @@ def authenticate(imap_account):
             else:
                 res['code'] = "Can't authenticate your email"
         except IMAPClient.Error, e:  
+            res['imap_error'] = e
             res['code'] = "Can't authenticate your email"
 
         except Exception, e:
             # TODO add exception
+            res['imap_error'] = e
             print e
             res['code'] = msg_code['UNKNOWN_ERROR']
 
@@ -68,7 +70,7 @@ def authenticate(imap_account):
         # email to the user that there is error at authenticating email
         if len(email_addr) > 0:
             subject = "[" + WEBSITE + "] Authentication error occurs"
-            body = "Authentication error occurs! "
+            body = "Authentication error occurs! \n" + res['imap_error']
             body += "\nPlease log in again at " + BASE_URL + "/editor"
             send_email(subject, WEBSITE + "@" + BASE_URL, email_addr, body)
 
