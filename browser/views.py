@@ -408,19 +408,20 @@ def login_imap_view(request):
 	
 	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
-		if imap.exists() and ((imap[0].is_oauth and imap[0].access_token != "") or (not imap[0].is_oauth and imap[0].password != ""))):
-			imap_authenticated = True
-			is_test = imap[0].is_test
-			is_running = imap[0].is_running
+		if imap.exists():
+			if (imap[0].is_oauth and imap[0].access_token != "") or (not imap[0].is_oauth and imap[0].password != ""):
+				imap_authenticated = True
+				is_test = imap[0].is_test
+				is_running = imap[0].is_running
 
-			current_mode = imap[0].current_mode
+				current_mode = imap[0].current_mode
 
-			modes = MailbotMode.objects.filter(imap_account=imap[0])
-			mode_exist = modes.exists()
+				modes = MailbotMode.objects.filter(imap_account=imap[0])
+				mode_exist = modes.exists()
 
-			shortcuts = imap[0].shortcuts
-			if len(shortcuts) > 0:
-				shortcuts_exist = True
+				shortcuts = imap[0].shortcuts
+				if len(shortcuts) > 0:
+					shortcuts_exist = True
 				
 
 	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 

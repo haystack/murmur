@@ -173,7 +173,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             now = datetime.now()
             start_time = now - timedelta(hours = hours) 
             heuristic_id = imap_account.newest_msg_id -100 if imap_account.newest_msg_id -100 > 1 else 1
-            today_email = Pile(imap, 'AND UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year))
+            today_email = Pile(imap, 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year))
             min_msgid = 99999
             logging.debug("before get dates")
             emails = []
