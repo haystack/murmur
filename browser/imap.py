@@ -314,17 +314,18 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 
             print format_log("Mark Message %s %s" % (search_creteria, "read" if is_seen else "unread"), False)  
 
-        def move(src_folder, dst_folder):
-            if not imap.folder_exists(src_folder):
-                format_log("Move Message; source folder %s not exist" % src_folder, True)  
-                return
+        def move(dst_folder):
+            # if not imap.folder_exists(src_folder):
+            #     format_log("Move Message; source folder %s not exist" % src_folder, True)  
+            #     return
+            src_folder = "INBOX"
 
             if not is_test: 
                 select_folder(src_folder)
                 copy(src_folder, dst_folder)
                 delete()
             
-            print format_log("Move Message from %s to %s" % (search_creteria, src_folder, dst_folder), False)  
+            print format_log("Move Message from %s to %s \n**Warning: your following action might throw erros as you move the message" % (src_folder, dst_folder), False)  
 
         def remove_notes(flags): 
             if not is_test: 
