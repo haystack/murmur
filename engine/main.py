@@ -1665,7 +1665,7 @@ def login_imap(user, password, host, is_oauth, push=True):
             # = imapAccount
         else:
             imapAccount = imapAccount[0]
-            res['imap_code'] = imapAccount.code
+            res['imap_code'] = imapAccount.current_mode.code
             res['imap_log'] = imapAccount.execution_log
 
 
