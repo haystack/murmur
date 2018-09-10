@@ -8,6 +8,7 @@ import contextlib
 from smtp_handler.utils import *
 from smtp_handler.Pile import *
 from email import message_from_string,message, utils
+from email.utils import parseaddr
 from imapclient import IMAPClient
 from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE, IMAP_SECRET
 from engine.google_auth import *
@@ -15,6 +16,7 @@ from Crypto.Cipher import AES
 from engine.constants import *
 from datetime import datetime, time, timedelta
 import calendar
+
 
 def authenticate(imap_account):
     res = {'status' : False, 'imap_error': False}
@@ -173,7 +175,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             now = datetime.now()
             start_time = now - timedelta(hours = hours) 
             heuristic_id = imap_account.newest_msg_id -100 if imap_account.newest_msg_id -100 > 1 else 1
-            today_email_ids = imap.search( 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year) )
+            name, sender_addr = parseaddr(get_sender().lower())
+            today_email_ids = imap.search( 'FROM %s SINCE "%d-%s-%d"' % (sender_addr, start_time.day, calendar.month_abbr[start_time.month], start_time.year) )
              
             # today_email = Pile(imap, 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year))
             # min_msgid = 99999
