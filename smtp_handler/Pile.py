@@ -153,7 +153,7 @@ class Pile():
 
     def mark_read(self, is_seen=True, is_test=False):
         if not is_test: 
-            self.mark_read(is_seen)
+            self.mark_read_meta(is_seen)
 
         print format_log("Mark Message a message %s" % ("read" if is_seen else "unread"), False, self.get_subject())  
 
