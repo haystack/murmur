@@ -227,9 +227,9 @@ class Pile():
             return
             
         if not is_test: 
-            self.create_folder_meta(folder)
+            self.delete_folder_meta(folder)
 
-        print format_log("Create a folder %s" % folder, False, self.get_subject())  
+        print format_log("delete_folder(): Delete a folder %s" % folder, False, self.get_subject())  
 
     
     def list_folders(self, directory=u'', pattern=u'*'):
