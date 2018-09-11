@@ -106,7 +106,7 @@ def fetch_latest_email_id(imap_account, imap_client):
 
 def format_log(msg, is_error=False, subject = ""):
 
-    s = "Subject: " + subject + " "
+    s = "Subject: " + subject + " | "
     if is_error:
         return "[Error] " + s + msg
     else:
@@ -144,28 +144,13 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             res['imap_error'] = True
 
         def add_notes(flags): 
-            if not is_test: 
-                pile.add_flags(flags)
+            pile.add_notes(flags, is_test)
 
-            print format_log("Add %s to Message %s" % (flags, search_creteria), False, get_subject()) 
-            
         def copy(dst_folder):
-            src_folder = "INBOX"
-            if not imap.folder_exists(dst_folder):
-                create_folder(dst_folder)
-                print format_log("Copy Message; destionation folder %s not exist. Just create a new folder %s " % (dst_folder, dst_folder), True, get_subject())
-
-            if not is_test: 
-                select_folder(src_folder)
-                imap.copy(messages, dst_folder)
-
-            print format_log("Copy Message %s from folder %s to %s" % (search_creteria, src_folder, dst_folder), False, get_subject())  
+            pile.copy(dst_folder, is_test)
 
         def delete():
-            if not is_test: 
-                imap.delete_messages(messages)
-
-            print format_log("Delete Message %s \n**Warning: your following action might throw erros as you delete the message" % (search_creteria), False, get_subject())  
+            pile.delete(is_test)
 
         def get_history(email, hours=24, cond=True):
             if len(email) == 0:
@@ -269,13 +254,13 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             return r
 
         def get_sender():
-            return pile.get_senders()[0]
+            return pile.get_sender()
 
         def get_content():
             if email_content:
                 return email_content
             else:
-                return pile.get_contents()[0]
+                return pile.get_content()
 
         def get_date():
             return pile.get_dates()[0][1]
@@ -284,20 +269,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             pass
 
         def get_subject():
-            return pile.get_subjects()[0]
-
-        def get_note():        
-            return pile.get_flags()[0]
-
-
-        def get_senders():
-            return pile.get_senders()
+            return pile.get_subject()
 
         def get_recipients():
             return pile.get_recipients()
-
-        def get_contents():
-            return pile.get_contents()
 
         def get_dates():
             return pile.get_dates()
@@ -305,37 +280,18 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def get_attachments():    
             pass
 
-        def get_subjects():
-            return pile.get_subjects()
-
         def get_notes():        
             return pile.get_flags()
 
         def mark_read(is_seen=True):
-            if not is_test: 
-                pile.mark_read(is_seen)
+            pile.mark_read(is_seen, is_test)
                 
-            print format_log("Mark Message %s %s" % (search_creteria, "read" if is_seen else "unread"), False, get_subject())  
-
-        def move(dst_folder):
-            if not imap.folder_exists(dst_folder):
-                create_folder(dst_folder)
-                print format_log("Move Message; destination folder %s not exist. Just create a new folder %s" % (dst_folder, dst_folder), False, get_subject())  
-
-            src_folder = "INBOX"
-
-            if not is_test: 
-                select_folder(src_folder)
-                copy(dst_folder)
-                delete()
             
-            print format_log("Move Message from %s to %s \n**Warning: your following action might throw erros as you move the message" % (src_folder, dst_folder), False, get_subject())  
+        def move(dst_folder):
+            pile.move(dst_folder, is_test)
 
         def remove_notes(flags): 
-            if not is_test: 
-                pile.remove_flags(flags)
-
-            print format_log("Remove flags %s of Message %s" % (flags, search_creteria), False, get_subject())  
+            pile.remove_notes(flags, is_test)
 
         # return a list of email UIDs
         def search(criteria=u'ALL', charset=None, folder=None):
@@ -368,17 +324,13 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             return bodys
 
         def create_folder(folder):
-            if imap.folder_exists(folder):
-                format_log("Create folder; folder %s already exist" % folder, True, get_subject())  
-                return
-            
-            if not is_test: 
-                imap.create_folder(folder)
+            pile.create_folder(folder, is_test)
 
-            print format_log("Create a folder %s" % folder, False, get_subject())  
+        def delete_folder(folder):
+            pile.delete_folder(folder, is_test)
 
         def list_folders(directory=u'', pattern=u'*'):
-            return imap.list_folders(directory, pattern)
+            return pile.list_folders(directory, pattern)
 
         def select_folder(folder):
             if not imap.folder_exists(folder):
@@ -389,14 +341,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             print "Select a folder " + folder 
 
         def rename_folder(old_name, new_name):
-            if imap.folder_exists(new_name):
-                format_log("Rename folder; folder %s already exist. Try other name" % new_name, True, get_subject())  
-                return
-
-            if not is_test: 
-                imap.rename_folder(old_name, new_name)
-        
-            print format_log("Rename a folder %s to %s" % (old_name, new_name), False, get_subject())
+            pile.rename_folder(old_name, new_name, is_test)
+  
 
         def get_mode():
             if imap_account.current_mode:
