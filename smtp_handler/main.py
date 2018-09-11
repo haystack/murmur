@@ -48,7 +48,7 @@ def all(message, address=None, host=None):
 
 @route("(address)@(host)", address=WEBSITE, host=".+")
 @stateless
-def mailbot(message, host=None):
+def mailbot(message, address=None, host=None):
     # no public groups to list on squadbox. 
     if WEBSITE == 'squadbox' or WEBSITE == 'murmur':
         logging.debug("Ignored message to all@%s, no public groups to list" % HOST)
@@ -82,7 +82,7 @@ def mailbot(message, host=None):
             response = imap.fetch(latest_email_uid, ['RFC822'])
 
             for msgid, edata in response.items():
-                raw_email_string = edata[b'RFC822'].decode('utf-8')
+                raw_email_string = edata[b'RFC822'].decode('utf-8').encode("ascii", "ignore")
                 email_message = message_from_string(raw_email_string)
 
                 # Header Details
@@ -113,7 +113,7 @@ def mailbot(message, host=None):
                         body = 'Something went wrong! \n'
                 
                     body = body + now_format + res['imap_log']
-                mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = body)
+                mail = MailResponse(From = WEBSITE+"@" + host, To = message['From'], Subject = subject, Body = body)
                 relay.deliver(mail)
 
             # Log out after after conduct required action
@@ -121,14 +121,14 @@ def mailbot(message, host=None):
 
         except ImapAccount.DoesNotExist:
             subject = "Re: " + message['Subject']
-            error_msg = 'Your email engine is not registered or stopped due to error. Write down your own email rule at %s/editor' % host
-            mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = error_msg)
+            error_msg = 'Your email engine is not registered or stopped due to an error. Write down your own email rule at %s/editor' % host
+            mail = MailResponse(From = WEBSITE+"@" + host, To = message['From'], Subject = subject, Body = error_msg)
             relay.deliver(mail)
             
         except Exception, e:
             logging.debug(e)
             subject = "Re: " + message['Subject']
-            mail = MailResponse(From = "mailbot@" + host, To = message['From'], Subject = subject, Body = str(e))
+            mail = MailResponse(From = WEBSITE+"@" + host, To = message['From'], Subject = subject, Body = str(e))
             relay.deliver(mail)
 
         

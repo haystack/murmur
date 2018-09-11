@@ -23,6 +23,7 @@ class Pile():
         self.search_criteria = search_criteria
         # print ("info", self.search_criteria)
         self.is_valid = True
+        self.EMAIL = []
         self.EMAIL = self.init_email()
 
     def init_email(self):
@@ -168,8 +169,7 @@ class Pile():
 
 
     def move_meta(self, dst_folder):
-        self.copy_meta(dst_folder)
-        self.delete_meta()
+        self.imap.move(self.get_IDs(), dst_folder)
 
     def move(self, dst_folder, is_test=False):
         if len(dst_folder) == 0:
