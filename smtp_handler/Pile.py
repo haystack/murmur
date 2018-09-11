@@ -192,7 +192,7 @@ class Pile():
         if not is_test: 
             self.remove_notes_meta(self.get_IDs(), flags)
 
-        print format_log("Remove flags %s of Message %s" % (flags, self.search_creteria), False, self.get_subject())  
+        print format_log("Remove flags %s of a message" % (flags), False, self.get_subject())  
 
 
     #################################
