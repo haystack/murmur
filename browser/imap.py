@@ -19,7 +19,7 @@ import calendar
 
 
 def authenticate(imap_account):
-    res = {'status' : False, 'imap_error': False, 'imap_log': ""}
+    res = {'status' : False, 'imap_error': False, 'imap_log': "", 'imap': None}
     email_addr = ""
     try:  
         imap = IMAPClient(imap_account.host, use_uid=True)
