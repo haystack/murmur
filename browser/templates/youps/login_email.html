@@ -169,7 +169,7 @@ def paper_related_debate(email):
     return False
 
 interaction = get_history(get_sender(), 5, paper_related_debate)	
-if interaction.cond > 7:
+if interaction['cond'] > 7:
     move("conference")
 </textarea>
 									</div>
