@@ -50,9 +50,9 @@ class Command(BaseCommand):
                         for i in range(imapAccount.newest_msg_id +1, new_uid+1): 
                             if len(imap_dict[imapAccount.email].search("UID %d" % (i))) == 0:
                                 continue
-                                
+
                             p = Pile(imap_dict[imapAccount.email], "UID %d" % (i))
-                            if p.check_email():
+                            if not p.check_email():
                                 continue
 
                             print "Sender of new email is", p.get_sender()
