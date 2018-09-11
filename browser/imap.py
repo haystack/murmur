@@ -154,7 +154,6 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if not imap.folder_exists(dst_folder):
                 create_folder(dst_folder)
                 print format_log("Copy Message; destionation folder %s not exist. Just create a new folder %s " % (dst_folder, dst_folder), True, get_subject())
-                return
 
             if not is_test: 
                 select_folder(src_folder)
@@ -321,8 +320,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def move(dst_folder):
             if not imap.folder_exists(dst_folder):
                 create_folder(dst_folder)
-                print format_log("Move Message; destination folder %s not exist. Just create a new folder %s" % (dst_folder, dst_folder), True, get_subject())  
-                return
+                print format_log("Move Message; destination folder %s not exist. Just create a new folder %s" % (dst_folder, dst_folder), False, get_subject())  
+
             src_folder = "INBOX"
 
             if not is_test: 
