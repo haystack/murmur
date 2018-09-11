@@ -216,7 +216,7 @@ class Pile():
 
 
     def delete_folder_meta(self, folder):
-        self.imap.create_folder(folder)
+        self.imap.delete_folder(folder)
 
     def delete_folder(self, folder, is_test=False):
         if len(folder) == 0:
