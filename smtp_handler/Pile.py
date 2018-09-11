@@ -129,7 +129,7 @@ class Pile():
 
         if not is_test: 
             self.imap.select_folder(src_folder)
-            self.imap.copy_meta(self.get_IDs(), dst_folder)
+            self.copy_meta(self.get_IDs(), dst_folder)
 
         print format_log("copy(): a message from folder %s to %s" % (src_folder, dst_folder), False, self.get_subject())          
 
