@@ -357,6 +357,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 mm = mm[0]
                 if not is_test: 
                     imap_account.current_mode = mm
+                    imap_account.save()
 
                 print format_log("Set your mail mode to %s (%d)" % (mm.name, mode_index), False, get_subject())  
                 return True
