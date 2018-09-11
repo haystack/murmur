@@ -117,8 +117,15 @@ def wrapper(imap_account, imap, code, search_creteria, is_test=False, email_cont
 
 def interpret(imap_account, imap, code, search_creteria, is_test=False, email_content=None):
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
-    pile = Pile(imap, search_creteria)
     messages = imap.search( search_creteria )
+    is_valid = True
+
+    if len(messages) == 0:
+        is_valid = False
+    
+    pile = Pile(imap, search_creteria)  
+    if not pile.check_email():
+        is_valid = False
 
     @contextlib.contextmanager
     def stdoutIO(stdout=None):
@@ -364,7 +371,9 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 return False
 
         try:
-            exec code in globals(), locals()
+            if is_valid:
+                exec code in globals(), locals()
+                            
         except Exception as e:
             catch_exception(e)
 
