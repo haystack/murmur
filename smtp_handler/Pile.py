@@ -198,10 +198,10 @@ class Pile():
     #################################
     ### Folder functions
 
-    def create_folder_meta(folder):
+    def create_folder_meta(self, folder):
         self.imap.create_folder(folder)
 
-    def create_folder(folder, is_test=False):
+    def create_folder(self, folder, is_test=False):
         if len(folder) == 0:
             raise Exception('create_folder(): args folder_name must be but non-empty string but a given value is ' + folder)
 
@@ -215,10 +215,10 @@ class Pile():
         print format_log("Create a folder %s" % folder, False, self.get_subject())  
 
 
-    def delete_folder_meta(folder):
+    def delete_folder_meta(self, folder):
         self.imap.create_folder(folder)
 
-    def delete_folder(folder, is_test=False):
+    def delete_folder(self, folder, is_test=False):
         if len(folder) == 0:
             raise Exception('delete_folder(): args folder_name must be but non-empty string but a given value is ' + folder)
 
@@ -232,14 +232,14 @@ class Pile():
         print format_log("Create a folder %s" % folder, False, self.get_subject())  
 
     
-    def list_folders(directory=u'', pattern=u'*'):
+    def list_folders(self, directory=u'', pattern=u'*'):
         return self.imap.list_folders(directory, pattern)
 
     
-    def rename_folder_meta(old_name, new_name):
+    def rename_folder_meta(self, old_name, new_name):
         self.imap.rename_folder(old_name, new_name)
 
-    def rename_folder(old_name, new_name, is_test=False):
+    def rename_folder(self, old_name, new_name, is_test=False):
         if len(old_name) == 0:
             raise Exception('rename_folder(): args folder_name must be but non-empty string but a given value is ' + old_name)
 
