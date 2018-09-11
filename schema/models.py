@@ -338,6 +338,7 @@ class UserProfile(AbstractBaseUser):
 		return self.is_admin
  
 class ImapAccount(models.Model):
+	id = models.AutoField(primary_key=True)
 	newest_msg_id = models.IntegerField(default=-1)
 
 	email = models.EmailField(
