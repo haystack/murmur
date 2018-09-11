@@ -131,7 +131,7 @@ class Pile():
             self.imap.select_folder(src_folder)
             self.imap.copy_meta(self.get_IDs(), dst_folder)
 
-        print format_log("copy(): %s from folder %s to %s" % (self.search_creteria, src_folder, dst_folder), False, self.get_subject())          
+        print format_log("copy(): a message from folder %s to %s" % (src_folder, dst_folder), False, self.get_subject())          
 
 
     def delete_meta(self):
@@ -141,7 +141,7 @@ class Pile():
         if not is_test: 
             self.delete_meta()
 
-        print format_log("Delete Message %s \n**Warning: your following action might throw erros as you delete the message" % (self.search_creteria), False, self.get_subject())
+        print format_log("delete(): delete a message \n**Warning: your following action might throw erros as you delete the message", False, self.get_subject())
 
 
     def mark_read_meta(self, inIsSeen=True):
@@ -155,7 +155,7 @@ class Pile():
         if not is_test: 
             self.mark_read(is_seen)
 
-        print format_log("Mark Message %s %s" % (self.search_creteria, "read" if is_seen else "unread"), False, self.get_subject())  
+        print format_log("Mark Message a message %s" % ("read" if is_seen else "unread"), False, self.get_subject())  
 
 
     def move_meta(self, dst_folder):
