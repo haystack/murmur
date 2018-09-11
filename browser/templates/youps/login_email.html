@@ -197,10 +197,15 @@ if interaction.cond > 7:
 {{ shortcuts }}
 										{% else %}
 import re
-regexp = re.compile(r'NOTE')
 
-if regexp.search( get_content() ):
-    add_notes(["TODO"])
+# NOTE x, y, z => add notes [x,y,z] to the email
+m = re.search('(?<=NOTE)(.*)', get_content())
+add_notes( m.groups()[0].split(",") )
+										    
+if "TODO" in get_content() and "soya@mit.edu" in get_sender():
+    move("todo")	
+										    
+print get_sender()	
 										{% endif %}    
 	</textarea>
 							</div>
