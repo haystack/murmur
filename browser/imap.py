@@ -176,7 +176,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             for msgid in reversed(today_email_ids):
                 p = Pile(imap, 'UID %d' % (msgid))
 
-                t = p.get_dates()[0][1]
+                t = p.get_date()
                 date_tuple = utils.parsedate_tz(t)
                 if date_tuple:
                     local_date = datetime.fromtimestamp(
@@ -263,7 +263,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 return pile.get_content()
 
         def get_date():
-            return pile.get_dates()[0][1]
+            return pile.get_date()
 
         def get_attachment():    
             pass
@@ -274,8 +274,6 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def get_recipients():
             return pile.get_recipients()
 
-        def get_dates():
-            return pile.get_dates()
 
         def get_attachments():    
             pass

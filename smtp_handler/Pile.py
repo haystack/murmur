@@ -59,12 +59,16 @@ class Pile():
     def get_content(self):
         contents = self.get_contents()
         if len(contents) > 0:
-            return self.get_contents()[0]
+            return contents[0]
         else:
             return ""
 
     def get_date(self):
-        return self.get_dates()
+        dates = self.get_dates()
+        if len(dates) > 0:
+            return dates[0]
+        else:
+            return ""
         
     def get_notes(self):
         messages = self.imap.search( self.search_criteria )
@@ -273,26 +277,6 @@ class Pile():
         # print (messages)
         return len(messages)
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    def get_dates(self):
-        header = 'Date'
-        results = []
-        for i in range(len(self.EMAIL)):
-            msgid, msg = self.EMAIL[i]
-            results.append( (msgid, msg[header]) )
-
-        return results
 
         
 
@@ -307,7 +291,10 @@ class Pile():
     def get_senders(self):
         return self.get_email('From')
 
-    
+    def get_dates(self):
+        return self.get_email('Date')
+
+
 
     def get_first_text_block(self,email_message_instance):
         maintype = email_message_instance.get_content_maintype()
