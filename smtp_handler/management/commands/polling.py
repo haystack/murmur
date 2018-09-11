@@ -56,10 +56,10 @@ class Command(BaseCommand):
                                 continue
 
                             print "Sender of new email is", p.get_sender()
-                            processing_subject = p.get_subject()
-
-                            if p.get_sender() == WEBSITE + "@" + BASE_URL:
+                            # if it's the email from admin, then skip it
+                            if WEBSITE in p.get_sender():
                                 continue
+                            processing_subject = p.get_subject()
                                 
                             print "Processing email UID", i
                             code = imapAccount.current_mode.code

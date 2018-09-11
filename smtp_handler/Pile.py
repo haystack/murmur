@@ -116,11 +116,11 @@ class Pile():
 
     def add_notes(self, flags, is_test=False):
         if type(flags) is not list:
-            raise Exception('add_flags(): args flags must be a list of strings')
+            raise Exception('add_notes(): args flags must be a list of strings')
 
         for f in flags:
             if not isinstance(f, str):
-                raise Exception('add_flags(): args flags must be a list of strings')
+                raise Exception('add_notes(): args flags must be a list of strings')
         
         for f in range(len(flags)):
             flags[f] = flags[f].strip()
