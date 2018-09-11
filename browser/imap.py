@@ -326,7 +326,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
             if not is_test: 
                 select_folder(src_folder)
-                copy(src_folder, dst_folder)
+                copy(dst_folder)
                 delete()
             
             print format_log("Move Message from %s to %s \n**Warning: your following action might throw erros as you move the message" % (src_folder, dst_folder), False, get_subject())  
