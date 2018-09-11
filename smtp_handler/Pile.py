@@ -54,6 +54,11 @@ class Pile():
 
         return id_results
 
+    def check_email(self):
+        if self.EMAIL == []:
+            return False
+        return True
+
     #################################
     ### Getter functions
     def get_content(self):

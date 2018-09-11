@@ -48,11 +48,17 @@ class Command(BaseCommand):
                         imap_dict[imapAccount.email].select_folder("INBOX")
                         execution_logs = ""
                         for i in range(imapAccount.newest_msg_id +1, new_uid+1): 
+                            if len(imap_dict[imapAccount.email].search("UID %d" % (i))) == 0:
+                                continue
+                                
                             p = Pile(imap_dict[imapAccount.email], "UID %d" % (i))
-                            print "Sender of new email is", p.get_senders()
+                            if p.check_email():
+                                continue
+
+                            print "Sender of new email is", p.get_sender()
                             processing_subject = p.get_subject()
 
-                            if p.get_senders()[0] == WEBSITE + "@" + BASE_URL:
+                            if p.get_sender() == WEBSITE + "@" + BASE_URL:
                                 continue
                                 
                             print "Processing email UID", i
