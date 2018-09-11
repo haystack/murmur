@@ -125,13 +125,13 @@ class Pile():
         src_folder = "INBOX"
         if not self.imap.folder_exists(dst_folder):
             self.create_folder_meta(dst_folder)
-            print format_log("Copy Message; destionation folder %s not exist. Just create a new folder %s " % (dst_folder, dst_folder), True, self.get_subject())
+            print format_log("copy(): destionation folder %s not exist. Just create a new folder %s " % (dst_folder, dst_folder), False, self.get_subject())
 
         if not is_test: 
             self.imap.select_folder(src_folder)
-            imap.copy_meta(self.get_IDs(), dst_folder)
+            self.imap.copy_meta(self.get_IDs(), dst_folder)
 
-        print format_log("Copy Message %s from folder %s to %s" % (self.search_creteria, src_folder, dst_folder), False, self.get_subject())          
+        print format_log("copy(): %s from folder %s to %s" % (self.search_creteria, src_folder, dst_folder), False, self.get_subject())          
 
 
     def delete_meta(self):
@@ -369,7 +369,7 @@ class Pile():
 
 
 
-        print format_log("Mark Message %s %s" % (search_creteria, "read" if is_seen else "unread"), False, self.get_subject())   
+        print format_log("Mark Message %s %s" % (self.search_creteria, "read" if is_seen else "unread"), False, self.get_subject())   
 
 
     
