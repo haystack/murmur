@@ -149,7 +149,7 @@ class Pile():
         if inIsSeen: 
             self.imap.set_flags(self.get_IDs(), '\\Seen')            
         else: 
-            self.imap.remove_notes(self.get_IDs(), '\\Seen')    
+            self.imap.remove_flags(self.get_IDs(), '\\Seen')    
 
     def mark_read(self, is_seen=True, is_test=False):
         if not is_test: 
