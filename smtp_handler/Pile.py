@@ -190,7 +190,7 @@ class Pile():
                 raise Exception('add_flags(): args flags must be a list of strings')
 
         if not is_test: 
-            self.remove_notes_meta(self.get_IDs(), flags)
+            self.remove_notes_meta(flags)
 
         print format_log("Remove flags %s of a message" % (flags), False, self.get_subject())  
 
