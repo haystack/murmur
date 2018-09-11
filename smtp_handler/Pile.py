@@ -122,6 +122,9 @@ class Pile():
             if not isinstance(f, str):
                 raise Exception('add_flags(): args flags must be a list of strings')
         
+        for f in range(len(flags)):
+            flags[f] = flags[f].strip()
+
         if not is_test: 
             self.add_flags(flags)
 
