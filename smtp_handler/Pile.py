@@ -22,6 +22,7 @@ class Pile():
         self.imap = imap
         self.search_criteria = search_criteria
         # print ("info", self.search_criteria)
+        self.is_valid = True
         self.EMAIL = self.init_email()
 
     def init_email(self):
@@ -35,6 +36,7 @@ class Pile():
         parser = HeaderParser()
 
         if response is None:
+            is_valid = False
             return []
 
         for msgid, data in response.items():
@@ -55,9 +57,7 @@ class Pile():
         return id_results
 
     def check_email(self):
-        if self.EMAIL == []:
-            return False
-        return True
+        return self.is_valid
 
     #################################
     ### Getter functions
