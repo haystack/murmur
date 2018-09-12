@@ -44,7 +44,7 @@ class Command(BaseCommand):
                     processing_subject = ""
 
                     processed = False
-                    for msgid, edata in imap_dict[imapAccount.email].get_flags([latest_email_uid]).items():
+                    for msgid, edata in imap_dict[imapAccount.email].get_flags([new_uid]).items():
                         if "YouPS" in edata:
                             processed = True
                             break
