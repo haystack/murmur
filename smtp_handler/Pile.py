@@ -85,9 +85,10 @@ class Pile():
         for msgid, data in self.get_notes_meta().items():
             # print('   ID %d: flags=%s ' % (msgid,
             #                                 data))
-            if data == "YouPS":
-                continue      
-            flags.append( data ) 
+            for f in data:
+                if "YouPS" == f:
+                    continue      
+                flags.append( f ) 
 
         return flags
 
