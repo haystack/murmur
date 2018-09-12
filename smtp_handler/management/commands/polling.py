@@ -53,7 +53,9 @@ class Command(BaseCommand):
                     if not processed:
                         imap_dict[imapAccount.email].select_folder("INBOX")
                         execution_logs = ""
-                        for i in range(imapAccount.newest_msg_id +1, new_uid+1): 
+                        start_uid = imapAccount.newest_msg_id +1 if imapAccount.newest_msg_id +1 < new_uid else new_uid
+
+                        for i in range(start_uid, new_uid+1): 
                             # when the message get deleted
                             if len(imap_dict[imapAccount.email].search("UID %d" % (i))) == 0:
                                 continue
