@@ -92,6 +92,18 @@ class Pile():
 
         return flags
 
+    def get_gmail_labels(self):
+        flags = []
+        for msgid, data in self.imap.get_gmail_labels().items():
+            # print('   ID %d: flags=%s ' % (msgid,
+            #                                 data))
+            for f in data:
+                if "YouPS" == f:
+                    continue      
+                flags.append( f ) 
+
+        return flags
+
     def get_sender(self):
         senders = self.get_senders() 
         if len(senders) > 0:
@@ -112,7 +124,14 @@ class Pile():
     ### Getter functions
     #################################
     
+    def add_gmail_labels_meta(self, flags):
+        self.imap.add_gmail_labels(self.get_IDs(), flags)
 
+    def add_gmail_labels(self, flags, is_test=False):
+        if not is_test:
+            self.add_gmail_labels_meta(flags)
+
+        print format_log("add_gmail_labels(): add gmail labels to a message %s" % str(flags), False, self.get_subject())   
 
     def add_flags(self, flags):
         self.imap.add_flags(self.get_IDs(), flags) 

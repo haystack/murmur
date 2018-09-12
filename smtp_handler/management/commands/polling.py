@@ -64,10 +64,13 @@ class Command(BaseCommand):
                             if not p.check_email():
                                 continue
 
-                            print "Sender of new email is", p.get_sender()
+                            
                             # if it's the email from admin, then skip it
                             if WEBSITE in p.get_sender():
+                                p.add_flags(['YouPS'])  
                                 continue
+
+                            print "Sender of new email is", p.get_sender()
                             processing_subject = p.get_subject()
                                 
                             print "Processing email UID", i

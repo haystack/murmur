@@ -151,6 +151,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             res['imap_log'] = logstr
             res['imap_error'] = True
 
+
+        def add_gmail_labels(flags):
+            pile.add_gmail_labels(flags, is_test)
+
         def add_notes(flags): 
             pile.add_notes(flags, is_test)
 
@@ -288,6 +292,9 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def get_notes():        
             return pile.get_notes()
+
+        def get_gmail_labels():
+            return pile.get_gmail_labels()
 
         def mark_read(is_seen=True):
             pile.mark_read(is_seen, is_test)
