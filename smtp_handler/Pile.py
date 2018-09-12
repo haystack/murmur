@@ -75,16 +75,18 @@ class Pile():
             return dates[0]
         else:
             return ""
-        
-    def get_notes(self):
-        messages = self.imap.search( self.search_criteria )
 
-        flags = {}
-        for msgid, data in self.imap.get_flags(messages).items():
+
+     def get_notes_meta(self):
+         return self.imap.get_flags(self.get_IDs())
+
+    def get_notes(self):
+        flags = []
+        for msgid, data in self.get_notes_meta().items():
             # print('   ID %d: flags=%s ' % (msgid,
             #                                 data))
                   
-            flags[msgid] = data
+            flags.append( data ) 
 
         return flags
 
@@ -112,7 +114,6 @@ class Pile():
 
     def add_flags(self, flags):
         self.imap.add_flags(self.get_IDs(), flags) 
-        print ("Successfuly add flags: " + str(flags))
 
     def add_notes(self, flags, is_test=False):
         if type(flags) is not list:
@@ -128,7 +129,7 @@ class Pile():
         if not is_test: 
             self.add_flags(flags)
 
-        print ("Successfuly add flags: " + str(flags))
+        print ("Successfuly add notes: " + str(flags))
 
 
     def copy_meta(self, src_folder, dst_folder):
@@ -349,7 +350,7 @@ class Pile():
     def get_unread_emails(self):
         messages = self.imap.search( self.search_criteria )
 
-        flags = self.get_notes()
+        flags = self.get_notes_meta()
 
         if flags is None:
             return []
