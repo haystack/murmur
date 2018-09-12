@@ -100,7 +100,7 @@ def mailbot(message, address=None, host=None):
                 body = ''
 
                 if not imapAccount.shortcuts:
-                    body = "You don't have email shortcuts yet! Define your shortcuts here %s/editor" % host
+                    body = "You don't have email shortcuts yet! Define your shortcuts here %s/editor" % "murmur-1604@csail.mit.edu"
 
                 else:
                     res = interpret(imapAccount, imap, imapAccount.shortcuts, "UID %s" % latest_email_uid[0], False, code_body)
@@ -121,7 +121,7 @@ def mailbot(message, address=None, host=None):
 
         except ImapAccount.DoesNotExist:
             subject = "Re: " + message['Subject']
-            error_msg = 'Your email engine is not registered or stopped due to an error. Write down your own email rule at %s/editor' % host
+            error_msg = 'Your email engine is not registered or stopped due to an error. Write down your own email rule at %s/editor' % "murmur-1604@csail.mit.edu"
             mail = MailResponse(From = WEBSITE+"@" + host, To = message['From'], Subject = subject, Body = error_msg)
             relay.deliver(mail)
             

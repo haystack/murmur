@@ -331,7 +331,7 @@ $(document).ready(function() {
         $.post('/fetch_execution_log', params,
             function(res) {
                 // $('#donotsend-msg').hide();
-                console.log(res);
+                // console.log(res);
                 
                 // Auth success
                 if (res.status) {

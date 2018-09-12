@@ -158,7 +158,8 @@ if "csail-related" in get_subject():
 #    set_mode(1) # change my email mode to busy mode
 
 ## If it's not lunch time, then just archieve the email
-hour = int(get_date().split(" ")[4].split(":")[0]) # get_date() example: Tue, 11 Sep 2018 15:02:58 -0400 (EDT)
+from datetime import datetime
+hour = datetime.now().hour
 if hour < 12 or hour > 13:
     delete()
     

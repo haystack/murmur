@@ -43,8 +43,14 @@ class Command(BaseCommand):
                     new_uid = fetch_latest_email_id(imapAccount, imap_dict[imapAccount.email])
                     processing_subject = ""
 
+                    processed = False
+                    for msgid, edata in imap_dict[imapAccount.email].get_flags([latest_email_uid]).items():
+                        if "YouPS" in edata:
+                            processed = True
+                            break
+
                     # execute user's rule only when there is a new email arrives
-                    if new_uid > imapAccount.newest_msg_id:
+                    if not processed:
                         imap_dict[imapAccount.email].select_folder("INBOX")
                         execution_logs = ""
                         for i in range(imapAccount.newest_msg_id +1, new_uid+1): 

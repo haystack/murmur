@@ -374,7 +374,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         try:
             if is_valid:
                 exec code in globals(), locals()
-                            
+                pile.add_flags(['YouPS'])            
         except Exception as e:
             catch_exception(e)
 
