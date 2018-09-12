@@ -94,7 +94,7 @@ class Pile():
 
     def get_gmail_labels(self):
         flags = []
-        for msgid, data in self.imap.get_gmail_labels().items():
+        for msgid, data in self.imap.get_gmail_labels( self.get_IDs() ).items():
             # print('   ID %d: flags=%s ' % (msgid,
             #                                 data))
             for f in data:
