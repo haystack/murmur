@@ -77,7 +77,7 @@ class Pile():
             return ""
 
 
-     def get_notes_meta(self):
+    def get_notes_meta(self):
          return self.imap.get_flags(self.get_IDs())
 
     def get_notes(self):
