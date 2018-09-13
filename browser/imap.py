@@ -159,6 +159,9 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def add_gmail_labels(flags):
             pile.add_gmail_labels(flags, is_test)
 
+        def add_labels(flags): 
+            add_notes(flags)
+
         def add_notes(flags): 
             pile.add_notes(flags, is_test)
 
@@ -294,6 +297,9 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def get_attachments():    
             pass
 
+        def get_labels():
+            return get_notes()
+
         def get_notes():        
             return pile.get_notes()
 
@@ -307,8 +313,14 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def move(dst_folder):
             pile.move(dst_folder, is_test)
 
+        def remove_labels(flags):
+            remove_notes(flags)
+
         def remove_notes(flags): 
             pile.remove_notes(flags, is_test)
+
+        def remove_gmail_labels(flags):
+            pile.remove_gmail_labels(flags)
 
         # return a list of email UIDs
         def search(criteria=u'ALL', charset=None, folder=None):

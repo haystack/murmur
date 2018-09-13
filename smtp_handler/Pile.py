@@ -92,6 +92,9 @@ class Pile():
 
         return flags
 
+    def get_labels(self):
+        self.get_notes():
+
     def get_gmail_labels(self):
         flags = []
         for msgid, data in self.imap.get_gmail_labels( self.get_IDs() ).items():
@@ -135,6 +138,9 @@ class Pile():
 
     def add_flags(self, flags):
         self.imap.add_flags(self.get_IDs(), flags) 
+
+    def add_labels(self, flags, is_test=False):
+        self.add_notes(self, flags, is_test)
 
     def add_notes(self, flags, is_test=False):
         if type(flags) is not list:
@@ -214,6 +220,9 @@ class Pile():
 
     def remove_notes_meta(self, flags):
         self.imap.remove_flags(self.get_IDs(), flags)
+
+    def remove_labels(self, flags, is_test=False):
+        self.remove_notes(flags, is_test)
 
     def remove_notes(self, flags, is_test=False):
         if type(flags) is not list:

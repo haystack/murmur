@@ -165,7 +165,7 @@ if hour < 12 or hour > 13:
     
 ## If there are many emails exchanged in given time span, then save it to other folder to revisit    
 def paper_related_debate(email):
-    if "paper" in email.get_notes() and "myadvisor@mit.edu" in email.get_recipients():
+    if "paper" in email.get_subject() and "myadvisor@mit.edu" in email.get_recipients():
         return True
     return False
 
@@ -199,9 +199,9 @@ if interaction['cond'] > 7:
 										{% else %}
 import re
 
-# NOTE x, y, z => add notes [x,y,z] to the email
-m = re.search('(?<=NOTE)(.*)', get_content())
-add_notes( m.groups()[0].split(",") )
+# LABEL x, y, z => add labels [x,y,z] to the email
+m = re.search('(?<=LABEL)(.*)', get_content())
+add_labels( m.groups()[0].split(",") ) # if you are using gmail, then add_gmail_labels
 										    
 if "TODO" in get_content() and "soya@mit.edu" in get_sender():
     move("todo")	
