@@ -106,7 +106,6 @@ def fetch_latest_email_id(imap_account, imap_client):
     return max(uid_list)
 
 def format_log(msg, is_error=False, subject = ""):
-
     s = "Subject: " + subject + " | "
     if is_error:
         return "[Error] " + s + msg
@@ -151,6 +150,11 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             res['imap_log'] = logstr
             res['imap_error'] = True
 
+        def send(subject="", to_addr, body=""):
+            if len(to_addr) == 0:
+                raise Exception('send(): recipient email address is not provided') 
+
+            send_email(subject, imap_account.email, to_addr, body)
 
         def add_gmail_labels(flags):
             pile.add_gmail_labels(flags, is_test)
