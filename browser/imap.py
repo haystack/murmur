@@ -150,7 +150,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             res['imap_log'] = logstr
             res['imap_error'] = True
 
-        def send(subject="", to_addr, body=""):
+        def send(subject="", to_addr="", body=""):
             if len(to_addr) == 0:
                 raise Exception('send(): recipient email address is not provided') 
 
