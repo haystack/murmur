@@ -93,7 +93,7 @@ class Pile():
         return flags
 
     def get_labels(self):
-        self.get_notes():
+        self.get_notes()
 
     def get_gmail_labels(self):
         flags = []
@@ -226,17 +226,30 @@ class Pile():
 
     def remove_notes(self, flags, is_test=False):
         if type(flags) is not list:
-            raise Exception('add_flags(): args flags must be a list of strings')
+            raise Exception('remove_labels(): args flags must be a list of strings')
 
         for f in flags:
             if not isinstance(f, str):
-                raise Exception('add_flags(): args flags must be a list of strings')
+                raise Exception('remove_labels(): args flags must be a list of strings')
 
         if not is_test: 
             self.remove_notes_meta(flags)
 
-        print format_log("Remove flags %s of a message" % (flags), False, self.get_subject())  
+        print format_log("Remove labels %s of a message" % (flags), False, self.get_subject())  
 
+
+    def remove_gmail_labels(self, flags, is_test=False):
+        if type(flags) is not list:
+            raise Exception('remove_gmail_labels(): args flags must be a list of strings')
+
+        for f in flags:
+            if not isinstance(f, str):
+                raise Exception('remove_gmail_labels(): args flags must be a list of strings')
+
+        if not is_test: 
+            self.imap.remove_gmail_labels(flags)
+
+        print format_log("Remove labels %s of a message" % (flags), False, self.get_subject())  
 
     #################################
     ### Folder functions
