@@ -323,7 +323,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             pile.remove_notes(flags, is_test)
 
         def remove_gmail_labels(flags):
-            pile.remove_gmail_labels(flags)
+            pile.remove_gmail_labels(flags, is_test)
 
         # return a list of email UIDs
         def search(criteria=u'ALL', charset=None, folder=None):

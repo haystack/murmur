@@ -247,7 +247,7 @@ class Pile():
                 raise Exception('remove_gmail_labels(): args flags must be a list of strings')
 
         if not is_test: 
-            self.imap.remove_gmail_labels(flags)
+            self.imap.remove_gmail_labels(self.get_IDs(), flags)
 
         print format_log("Remove labels %s of a message" % (flags), False, self.get_subject())  
 
