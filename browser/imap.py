@@ -154,7 +154,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if len(to_addr) == 0:
                 raise Exception('send(): recipient email address is not provided') 
 
-            send_email(subject, imap_account.email, to_addr, body)
+            if not is_test:
+                send_email(subject, imap_account.email, to_addr, body)
+            #print to_addr
+            print format_log("send(): send a message to  %s" % str(to_addr), False, get_subject())
 
         def add_gmail_labels(flags):
             pile.add_gmail_labels(flags, is_test)
