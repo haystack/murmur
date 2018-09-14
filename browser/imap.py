@@ -98,7 +98,7 @@ def fetch_latest_email_id(imap_account, imap_client):
 
     # init
     if imap_account.newest_msg_id == -1:
-        uid_list = imap_client.search("UID 99999:*")
+        uid_list = imap_client.search("UID 199510:*")
 
     else:
         uid_list = imap_client.search("UID %d:*" % imap_account.newest_msg_id)

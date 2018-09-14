@@ -44,7 +44,16 @@ class Pile():
             if b'RFC822' not in data:
                 continue
             # print (data[b'BODY[HEADER]'])
-            raw_string = data[b'RFC822'].decode("utf-8").encode("ascii", "ignore")
+            new_text = ''
+            if isinstance(data[b'RFC822'], unicode):
+                logging.debug("it's unicode, no need to change")
+                new_text = data[b'RFC822']
+
+            else:
+                logging.debug("not unicode, convert using utf-8")
+                new_text = unicode(data[b'RFC822'], "utf-8", "ignore")
+
+            raw_string = new_text.decode("utf-8").encode("ascii", "ignore")
             msg = parser.parsestr( raw_string )
             results.append( msg )
             id_results.append( (msgid, msg) )

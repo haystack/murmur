@@ -29,6 +29,7 @@ class Command(BaseCommand):
                 
                 
                 if imapAccount.email not in imap_dict:
+                    print "Attempt to auth ", imapAccount.email
                     auth_res = {'status' : False, 'imap': None}
                     auth_res = authenticate( imapAccount )
                     if not auth_res['status']:
@@ -38,6 +39,8 @@ class Command(BaseCommand):
                     imap_dict[imapAccount.email] = imap
 
                     print "Reauth ", imapAccount.email
+
+                    new_uid = -1
 
                 try:
                     new_uid = fetch_latest_email_id(imapAccount, imap_dict[imapAccount.email])
@@ -78,13 +81,13 @@ class Command(BaseCommand):
                             res = interpret(imapAccount, imap_dict[imapAccount.email], code, "UID %d" % (i))
 
                             if res['imap_log'] != "":
+                                print "Polling: " + res['imap_log']
                                 now = datetime.now()
                                 now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
                                 execution_logs = now_format + " " + res['imap_log'] + "\n" + execution_logs
                     
                         imapAccount.newest_msg_id = new_uid
                         
-                        print execution_logs
                         if execution_logs != "":
                             # append(imap, "Murmur mailbot log", res['imap_log'])
                             imapAccount.execution_log = execution_logs + imapAccount.execution_log 
@@ -110,6 +113,13 @@ class Command(BaseCommand):
                 except Exception, e:
                     # TODO add exception
                     print e
+                    # if error occurs just skip the email 
+                    if new_uid > 0:
+                        msgs = imap_dict[imapAccount.email].search( "UID %d" % (new_uid) )
+                        imap_dict[imapAccount.email].add_flags(msgs, ['YouPS'])
+                        imapAccount.newest_msg_id = new_uid +1
+                        imapAccount.save()
+
                     res['code'] = msg_code['UNKNOWN_ERROR']
 
                 res['status'] = True
