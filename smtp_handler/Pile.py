@@ -195,7 +195,7 @@ class Pile():
 
 
     def has_label(self, label):
-        for msgid, data in self.get_notes_meta( self.get_IDs() ).items():
+        for msgid, data in self.get_notes_meta().items():
             for f in data:
                 if f == label:
                     return True
