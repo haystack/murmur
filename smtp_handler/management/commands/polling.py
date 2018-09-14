@@ -47,10 +47,9 @@ class Command(BaseCommand):
                     processing_subject = ""
 
                     processed = False
-                    for msgid, edata in imap_dict[imapAccount.email].get_flags([new_uid]).items():
-                        if "YouPS" in edata:
-                            processed = True
-                            break
+                    p = Pile(imap_dict[imapAccount.email], "UID %d" % (new_uid))
+                    if p.has_label("YouPS"):
+                        continue
 
                     # execute user's rule only when there is a new email arrives
                     if not processed:
@@ -62,6 +61,8 @@ class Command(BaseCommand):
                             # when the message get deleted
                             if len(imap_dict[imapAccount.email].search("UID %d" % (i))) == 0:
                                 continue
+
+                            print "Processing email UID", i
 
                             p = Pile(imap_dict[imapAccount.email], "UID %d" % (i))
                             if not p.check_email():
@@ -76,7 +77,6 @@ class Command(BaseCommand):
                             print "Sender of new email is", p.get_sender()
                             processing_subject = p.get_subject()
                                 
-                            print "Processing email UID", i
                             code = imapAccount.current_mode.code
                             res = interpret(imapAccount, imap_dict[imapAccount.email], code, "UID %d" % (i))
 

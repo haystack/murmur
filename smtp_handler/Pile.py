@@ -102,7 +102,7 @@ class Pile():
         return flags
 
     def get_labels(self):
-        self.get_notes()
+        return self.get_notes()
 
     def get_gmail_labels(self):
         flags = []
@@ -193,6 +193,14 @@ class Pile():
 
         print format_log("delete(): delete a message \n**Warning: your following action might throw erros as you delete the message", False, self.get_subject())
 
+
+    def has_label(self, label):
+        for msgid, data in self.get_notes_meta( self.get_IDs() ).items():
+            for f in data:
+                if f == label:
+                    return True
+
+        return False
 
     def mark_read_meta(self, inIsSeen=True):
         # if true, add SEEN flags
@@ -377,7 +385,16 @@ class Pile():
             if b'RFC822' not in data:
                 continue
 
-            raw_string = data[b'RFC822'].decode("utf-8").encode("ascii", "ignore")
+            new_text = ''
+            if isinstance(data[b'RFC822'], unicode):
+                # logging.debug("it's unicode, no need to change")
+                new_text = data[b'RFC822']
+
+            else:
+                # logging.debug("not unicode, convert using utf-8")
+                new_text = unicode(data[b'RFC822'], "utf-8", "ignore")
+
+            raw_string = new_text.decode("utf-8").encode("ascii", "ignore")
 
             body = email.message_from_string(raw_string)
             
