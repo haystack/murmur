@@ -384,6 +384,12 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 return None
 
         def set_mode(mode_index):
+            try: 
+                mode_index = int(mode_index)
+            except ValueError:
+                raise Exception('set_mode(): args mode_index must be a index (integer)')
+
+            
             mm = MailbotMode.objects.filter(uid=mode_index, imap_account=imap_account)
             if mm.exists():
                 mm = mm[0]

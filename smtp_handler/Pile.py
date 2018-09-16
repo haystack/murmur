@@ -59,7 +59,7 @@ class Pile():
             id_results.append( (msgid, msg) )
 
         if len(unreads) > 0:
-            self.mark_read(False)
+            self.mark_read_meta(False)
 
         # if not inCludeID:
         #     return results
