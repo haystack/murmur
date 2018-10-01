@@ -138,14 +138,15 @@ def posts(request):
 		if not active_group['active']:
 			return HttpResponseRedirect('/group_list')
 		elif group.public or is_member:
-			if request.flavour == "mobile":
-				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
-			else:
-				if is_member:
-					request.session['active_group'] = active_group['name']
-					return page_info
-				else:
-					return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+			return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+			# if request.flavour == "mobile":
+			# 	return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
+			# else:
+			# 	if is_member:
+			# 		request.session['active_group'] = active_group['name']
+			# 		return page_info
+			# 	else:
+			# 		return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
 		else:
 			if len(groups) == 0:
 				return HttpResponseRedirect('/group_list')
@@ -325,12 +326,13 @@ def settings(request):
 def my_groups(request):
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		if request.flavour == "mobile":
-			return HttpResponseRedirect('/my_group_list')
-		else:
-			groups = Group.objects.filter(membergroup__member=user).values("name")
-			info = engine.main.check_admin(user,groups)
-			return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info':info}	
+		return HttpResponseRedirect('/my_group_list')
+		# if request.flavour == "mobile":
+		# 	return HttpResponseRedirect('/my_group_list')
+		# else:
+		# 	groups = Group.objects.filter(membergroup__member=user).values("name")
+		# 	info = engine.main.check_admin(user,groups)
+		# 	return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info':info}	
 	else:
 		return HttpResponseRedirect(global_settings.LOGIN_URL)
 
@@ -387,13 +389,13 @@ def group_list(request):
 	else:
 		return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
 
-@render_to("login_imap.html")
+@render_to(WEBSITE+"/login_email.html")
 @login_required
 def login_imap_view(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
 	
 	try:
-		return {'user': request.user, 'website': WEBSITE, 'active_group_role' : 'admin'}
+		return {'user': request.user, 'website': WEBSITE}
 
 	except Group.DoesNotExist:
 		return redirect('/404?e=admin')
@@ -429,7 +431,6 @@ def add_dissimulate_view(request, group_name):
 
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
-
 
 @render_to(WEBSITE+"/add_list.html")
 @login_required
@@ -1417,6 +1418,21 @@ def donotsend_list(request):
 		group_name = request.POST['group_name']
 		sender_emails = request.POST['senders']
 		res = engine.main.update_donotsend_list(user, group_name, sender_emails)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def login_imap(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		
+		email = request.POST['email']
+		password = request.POST['password']
+		host = request.POST['host']
+		res = engine.main.login_imap(user, email, password, host)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
