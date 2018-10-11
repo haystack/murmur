@@ -195,6 +195,34 @@ class MurmurMailResponse(object):
     def keys(self):
         return self.base.keys()
 
+    def multipart_handle(self, mail):
+        msg = MIMEMultipart('related')
+        msg['Subject'] = mail.Subject
+        msg['From'] = mail.From
+        msg['To'] = mail.To
+
+        msgAlternative = MIMEMultipart('alternative')
+        
+
+        msgText = MIMEText(mail.Body)
+        msgAlternative.attach(msgText)
+
+        # We reference the image in the IMG SRC attribute by the ID we give it below
+        msgText = MIMEText(mail.Html, 'html')
+        msgAlternative.attach(msgText)
+
+        for att in mail.attachments:
+            part = MIMEBase('application', 'octect-stream')
+            part.set_payload(att['data'])
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', 'attachment; filename=%s' % att['filename'])
+
+            msg.attach(part)
+
+
+        msg.attach(msgAlternative)
+        return msg
+
     @property
     def msg(self):
         warnings.warn("The .msg attribute is deprecated, use .base instead.  This will be gone in Lamson 1.0",
