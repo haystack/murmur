@@ -449,10 +449,7 @@ def handle_post_murmur(message, group, host, verified):
                     if membergroup.receive_attachments:
                         add_attachments(mail, attachments)
 
-                    if len(mail.attachments) > 0:
-                        relay.deliver(mail.multipart_handle(mail), To=recip.email)
-                    else:
-                        relay.deliver(mail, To = recip.email)
+                    relay.deliver(mail, To = recip.email)
 
             fwd_to_lists = ForwardingList.objects.filter(group=g, can_receive=True) 
 
