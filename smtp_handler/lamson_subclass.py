@@ -162,18 +162,26 @@ class MurmurMailResponse(object):
 
         if self.Body and self.Html:
             self.multipart = True
-            self.base.content_encoding['Content-Type'] = ('multipart/alternative', {})
+            #self.base.content_encoding['Content-Type'] = ('multipart/alternative', {})
 
         if self.multipart:
             self.base.body = None
+            self.base.content_encoding['Content-Type'] = ('multipart/related', {})
+
+            alternative = MurmurMailBase()
+            alternative.content_encoding['Content-Type'] = ('multipart/alternative', {})
+
+            self.base.parts.append(alternative)
+
             if self.Body:
-                self.base.attach_text(self.Body, 'text/plain')
+                alternative.attach_text(self.Body, 'text/plain')
 
             if self.Html:
-                self.base.attach_text(self.Html, 'text/html')
+                alternative.attach_text(self.Html, 'text/html')
 
             for args in self.attachments:
                 self._encode_attachment(**args)
+
 
         elif self.Body:
             self.base.body = self.Body
