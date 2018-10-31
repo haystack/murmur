@@ -109,30 +109,6 @@ def posts(request):
 			active_group = load_groups(request, groups, user, group_name=group_name)
 		else:
 			active_group = load_groups(request, groups, user)
-			
-		tag_info = None
-		member_info = None
-		is_member = False
-
-		if active_group['active']:
-			group = Group.objects.get(name=active_group['name'])
-			active_group['description'] = group.description
-			member = MemberGroup.objects.filter(member=user, group=group)
-			if member.count() > 0:
-				is_member = True
-				member_info = member[0]
-	
-			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
-			for tag in tag_info:
-				tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
-				tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
-			
-		page_info = {"user": user, 
-					"active_group": active_group, 
-					"groups": groups, 
-					"tag_info": tag_info, 
-					"member_info": member_info,
-					}
 		
 		# not a member of any groups
 		if not active_group['active']:
@@ -197,8 +173,26 @@ def post_list(request):
 				print e
 				res['code'] = msg_code['UNKNOWN_ERROR']
 			logging.debug(res)
+
+			tag_info = None
+			member_info = None
+			is_member = False
+
+			if active_group['active']:
+				group = Group.objects.get(name=active_group['name'])
+				active_group['description'] = group.description
+				member = MemberGroup.objects.filter(member=user, group=group)
+				if member.count() > 0:
+					is_member = True
+					member_info = member[0]
+		
+				tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
+				for tag in tag_info:
+					tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
+					tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
 					
-			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group}
+			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group"tag_info": tag_info, 
+						"member_info": member_info}
 		else:
 			return redirect('/404?e=member')
 	else:
