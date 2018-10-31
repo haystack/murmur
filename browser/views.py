@@ -110,6 +110,8 @@ def posts(request):
 		else:
 			active_group = load_groups(request, groups, user)
 		
+		group = Group.objects.get(name=active_group['name'])
+
 		# not a member of any groups
 		if not active_group['active']:
 			return HttpResponseRedirect('/group_list')
