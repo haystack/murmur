@@ -110,7 +110,12 @@ def posts(request):
 		else:
 			active_group = load_groups(request, groups, user)
 		
-		group = Group.objects.get(name=active_group['name'])
+		if active_group['active']:
+			group = Group.objects.get(name=active_group['name'])
+			active_group['description'] = group.description
+			member = MemberGroup.objects.filter(member=user, group=group)
+			if member.count() > 0:
+				is_member = True
 
 		# not a member of any groups
 		if not active_group['active']:
@@ -178,7 +183,6 @@ def post_list(request):
 
 			tag_info = None
 			member_info = None
-			is_member = False
 
 			if active_group['active']:
 				group = Group.objects.get(name=active_group['name'])
