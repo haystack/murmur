@@ -191,7 +191,7 @@ def post_list(request):
 					tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
 					tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
 					
-			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group"tag_info": tag_info, 
+			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group, "tag_info": tag_info, 
 						"member_info": member_info}
 		else:
 			return redirect('/404?e=member')
