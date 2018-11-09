@@ -103,6 +103,10 @@ def fetch_latest_email_id(imap_account, imap_client):
     else:
         uid_list = imap_client.search("UID %d:*" % imap_account.newest_msg_id)
 
+    # error handling for empty inbox
+    if len(uid_list) == 0:
+        uid_list = [1]
+
     return max(uid_list)
 
 def format_log(msg, is_error=False, subject = ""):

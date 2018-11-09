@@ -101,7 +101,7 @@ class Command(BaseCommand):
                             # send_error_email()
                             subject = "[" + WEBSITE + "] Error during executing your email engine"
                             body = "Following error occurs during executing your email engine of email " + processing_subject + "\n"+ res['imap_log']
-                            body += "\nTo fix the error and re-activate your engine, visit " + BASE_URL + "/editor"
+                            body += "\nTo fix the error and re-activate your engine, visit " + WEBSITE + ".csail.mit.edu/editor"
                             send_email(subject, WEBSITE + "@" + BASE_URL, imapAccount.email, body)
                     
                 except IMAPClient.Error, e:
