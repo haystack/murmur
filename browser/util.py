@@ -141,7 +141,9 @@ if their "alt" tag (the filename) matches a stored attachment, replaces the src 
 to the image on S3.
 '''
 def fix_html_and_img_srcs(msg_id, post_text):
-
+    post_text = post_text.replace("<br>", " ")
+    post_text = post_text.replace("<br/>", " ")
+    
     post_soup = BeautifulSoup(post_text, 'html5lib')
     imgs = post_soup.find_all('img')
     attachments = Attachment.objects.filter(msg_id=msg_id)
