@@ -72,12 +72,14 @@
 				{% endif %}
 				<P></P><BR>
 				<div>
-					{% if member_info.no_emails %}
-						You are currently set to <b>receive no emails</b> from this group, except those you follow. <br />You can follow individual threads or all threads with a specific tag.
-					{% elif member_info.always_follow_thread %}
-						You are currently set to <b>receive all emails</b> from this group, except those you mute. <br />You can mute individual threads or threads with a specific tag.
-					{% else %}
-						You are currently set to <b>receive the first email of each thread</b> from this group, except those you follow. <br />You can follow individual threads or all threads with a specific tag.
+					{% if member_info %}
+						{% if member_info.no_emails %}
+							You are currently set to <b>receive no emails</b> from this group, except those you follow. <br />You can follow individual threads or all threads with a specific tag.
+						{% elif member_info.always_follow_thread %}
+							You are currently set to <b>receive all emails</b> from this group, except those you mute. <br />You can mute individual threads or threads with a specific tag.
+						{% else %}
+							You are currently set to <b>receive the first email of each thread</b> from this group, except those you follow. <br />You can follow individual threads or all threads with a specific tag.
+						{% endif %}
 					{% endif %}
 					<BR>
 					<a href="/groups/{{active_group.name}}/edit_my_settings">Change your settings.</a>
