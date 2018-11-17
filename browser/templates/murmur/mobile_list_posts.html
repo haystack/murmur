@@ -47,17 +47,19 @@
 							</td>
 							
 							<td>
-								{% if member_info.no_emails or not member_info.always_follow_thread %}
-									{% if tag.followed %}
-										<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unfollow this tag</label>
+								{% if member_info %}
+									{% if member_info.no_emails or not member_info.always_follow_thread %}
+										{% if tag.followed %}
+											<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unsubscribe this tag</label>
+										{% else %}
+											<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Subscribe this tag</label>
+										{% endif %}
 									{% else %}
-										<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Follow this tag</label>
-									{% endif %}
-								{% else %}
-									{% if tag.muted %}
-										<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unmute this tag</label>
-									{% else %}
-										<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Mute this tag</label>
+										{% if tag.muted %}
+											<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unsubscribe this tag</label>
+										{% else %}
+											<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Subscribe this tag</label>
+										{% endif %}
 									{% endif %}
 								{% endif %}
 							</td>

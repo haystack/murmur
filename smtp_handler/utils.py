@@ -500,7 +500,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	if membergroup.no_emails:
 		content += "<BR><BR>You are set to receive no emails from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>" % (addr)
 	elif membergroup.always_follow_thread:
-		content += "<BR><BR>You are set to receive all emails from this group, except for the threads you mute. <BR><a href=\"%s\">Change your settings</a>" % (addr)
+		content += "<BR><BR>You are set to receive all emails from this group, except for the threads you mute. <BR>You can change the setting to receive less emails from this mailing list. <BR><a href=\"%s\">Change your settings</a>" % (addr)
 	else:
 		content += "<BR><BR>You are set to receive only the 1st email from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>" % (addr)
 
@@ -566,7 +566,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	if membergroup.no_emails:
 		content += "\n\nYou are set to receive no emails from this group, except for the threads you follow. \nChange your settings<%s>" % (addr)
 	elif membergroup.always_follow_thread:
-		content += "\n\nYou are set to receive all emails from this group, except for the threads you mute. \nChange your settings<%s>" % (addr)
+		content += "\n\nYou are set to receive all emails from this group, except for the threads you mute. \nYou can change the setting to receive less emails from this mailing list. \nChange your settings<%s>" % (addr)
 	else:
 		content += "\n\nYou are set to receive only the 1st email from this group, except for the threads you follow. \nChange your settings<%s>" % (addr)
 
