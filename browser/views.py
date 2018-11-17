@@ -153,6 +153,8 @@ def posts(request):
 
 @render_to(WEBSITE+'/mobile_list_posts.html')
 def post_list(request):
+	tag_info = None
+
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
@@ -160,7 +162,7 @@ def post_list(request):
 		active_group = load_groups(request, groups, user)
 		is_member = False
 		group_name = request.GET.get('group_name')
-		tag_info = None
+		
 
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
@@ -209,6 +211,8 @@ def post_list(request):
 		active_group = {'name': request.GET.get('group_name')}
 		if active_group['name']:
 			group = Group.objects.get(name=active_group['name'])
+			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
+			
 			if not group.public:
 				return redirect('/404?e=member')
 			else:
