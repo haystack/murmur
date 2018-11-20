@@ -153,6 +153,8 @@ def posts(request):
 
 @render_to(WEBSITE+'/mobile_list_posts.html')
 def post_list(request):
+	tag_info = None
+
 	if request.user.is_authenticated():
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
@@ -160,10 +162,14 @@ def post_list(request):
 		active_group = load_groups(request, groups, user)
 		is_member = False
 		group_name = request.GET.get('group_name')
+		
+
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
 			is_member = MemberGroup.objects.filter(member=user, group=group).exists()
 			group_name = active_group['name']
+
+			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
 			
 		if group.public or is_member:
 			if is_member:
@@ -181,7 +187,6 @@ def post_list(request):
 				res['code'] = msg_code['UNKNOWN_ERROR']
 			logging.debug(res)
 
-			tag_info = None
 			member_info = None
 
 			if active_group['active']:
@@ -191,8 +196,7 @@ def post_list(request):
 				if member.count() > 0:
 					is_member = True
 					member_info = member[0]
-		
-				tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
+				
 				for tag in tag_info:
 					tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
 					tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
@@ -207,11 +211,13 @@ def post_list(request):
 		active_group = {'name': request.GET.get('group_name')}
 		if active_group['name']:
 			group = Group.objects.get(name=active_group['name'])
+			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
+			
 			if not group.public:
 				return redirect('/404?e=member')
 			else:
 				res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False, return_replies=False)
-				return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group}
+				return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group, "tag_info": tag_info}
 		else:
 			return HttpResponseRedirect(global_settings.LOGIN_URL)
 		

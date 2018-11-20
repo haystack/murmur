@@ -15,12 +15,16 @@
 				<input type="hidden" id="member" name="member" value="{{ thread.member }}" readonly>
 				<input type="hidden" id="no_emails" name="no_emails" value="{{ thread.no_emails }}" readonly>
 				<input type="hidden" id="always_follow" name="always_follow" value="{{ thread.always_follow }}" readonly>
-				<div style="float:right">
-					<button type="button" id="btn-follow" style="margin: 5px; display: none;">Follow</button>
-					<button type="button" id="btn-unfollow" style="margin: 5px; display: none;">Unfollow</button>
-					<button type="button" id="btn-mute" style="margin: 5px; display: none;">Mute</button>
-					<button type="button" id="btn-unmute" style="margin: 5px; display: none;">Unmute</button>
-				</div>
+				{% if user.is_authenticated %}
+					{% if thread.member %}
+						<div style="float:right">
+							<button type="button" id="btn-follow" style="margin: 5px; display: none;">Subscribe</button>
+							<button type="button" id="btn-unfollow" style="margin: 5px; display: none;">Unsubscribe</button>
+							<button type="button" id="btn-mute" style="margin: 5px; display: none;">Mute</button>
+							<button type="button" id="btn-unmute" style="margin: 5px; display: none;">Unmute</button>
+						</div>
+					{% endif %}
+				{% endif %}
 				<div>
 					<a href="/posts?group_name={{ active_group.name }}"><button type="button" style="margin: 5px;">View Posts</button></a>
 					<a href="/groups/{{ active_group.name }}"><button type="button" style="margin: 5px;">Group Info</button></a>
