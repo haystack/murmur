@@ -535,6 +535,41 @@ $(document).ready(function(){
 		};
 	}
 
+	function init_search_bar() {
+		var group_name = $("#group_name").text();
+		var posts = new Bloodhound({
+			datumTokenizer: Bloodhound.tokenizers.obj.whitespace("text", "subject", "from"),
+			queryTokenizer: Bloodhound.tokenizers.whitespace,
+			local: p_list
+		});
+		posts.initialize();
+	
+		$("#text-search-post").typeahead({
+			minLength: 2,
+			highlight: true,
+			hint: false,
+		}, {
+			name: 'posts',
+			displayKey: 'subject',
+			source: posts.ttAdapter(),
+			highlighter: function(item) {
+				return item.subject + item.text;
+			},
+			templates: {
+				empty: [
+				  '<div class="empty-message">',
+				  'unable to find any posts that match the current query',
+				  '</div>'
+				].join('\n'),
+				suggestion: function (post) {
+					return '<a href="/thread?group_name=' + group_name + '&tid=' + post.tid + '"><div class="suggestion">' + post.subject.trunc(43) + '<br />' + post.from + '<br />' + post.text.trunc(40) + '</div></a>';
+				}
+			 }
+		}).on('typeahead:selected', function($e, datum) {
+			window.location.href = '/thread?group_name=' + group_name + '&tid=' + datum.tid;
+		});;
+	}
+
 	function populate_groups_table(res){
 		var groups_table = $("#groups-table");
 		groups_table.html("");
@@ -1277,7 +1312,7 @@ $(document).ready(function(){
 		} else {
 			groups_table.children().first().click();
 		}
-	} else if (window.location.pathname.indexOf('/posts') != -1) {
+	} else if (window.location.pathname.indexOf('/post') != -1) {
 		init_posts_page();	
 		setInterval(refresh_posts, 50000);
 	}
