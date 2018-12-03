@@ -19,7 +19,7 @@
 						<span class="mod label">Mod</span>
 					{% endif %}
 					
-					
+				<div style="display:none;" id="group_name">{{ active_group.name }}</div>
 				<h1>{{ active_group.name }}</h1>
 				{% if active_group.description %}
 					<i>{{ active_group.description }}</i>
@@ -161,6 +161,10 @@
 
 {% block customjs %}
 <script src="/static/javascript/pagination.js"></script>
-
+<script type="text/javascript" src="/static/javascript/third-party/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/static/javascript/third-party/ckeditor/ckeditor.js"></script>
+<script type="text/javascript" src="/static/javascript/third-party/typeahead.js/typeahead.jquery.min.js"></script>
+<script type="text/javascript" src="/static/javascript/third-party/typeahead.js/bloodhound.min.js"></script>
+<script type="text/javascript" src="/static/javascript/murmur/main.js"></script>
 {% endblock %}
 

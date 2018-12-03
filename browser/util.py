@@ -140,9 +140,10 @@ this function cleans the HTML up and then goes through and finds all the inline 
 if their "alt" tag (the filename) matches a stored attachment, replaces the src with a link 
 to the image on S3.
 '''
-def fix_html_and_img_srcs(msg_id, post_text):
-    post_text = post_text.replace("<br>", " ")
-    post_text = post_text.replace("<br/>", " ")
+def fix_html_and_img_srcs(msg_id, post_text, include_line_break = True):
+    if not include_line_break:
+        post_text = post_text.replace("<br>", " ")
+        post_text = post_text.replace("<br/>", " ")
     
     post_soup = BeautifulSoup(post_text, 'html5lib')
     imgs = post_soup.find_all('img')

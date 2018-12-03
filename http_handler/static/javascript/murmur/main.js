@@ -5,6 +5,8 @@ String.prototype.trunc = String.prototype.trunc ||
 
 $(document).ready(function(){
 	/* Global Objects */
+	var follow_text = "subscribe";
+
 	posts_local_data = {};
 
 	groups_local_data = {};
@@ -419,7 +421,7 @@ $(document).ready(function(){
 				function(res){
 					if(res.status){
 						var tag_button = $('#tag_' + params.index + '_button');
-						tag_button.text('Unfollow this tag');
+						tag_button.text('Un'+ follow_text + ' this tag');
 						
 						var uf_tag = bind(unfollow_tag, params);
 						tag_button.bind("click");
@@ -438,7 +440,7 @@ $(document).ready(function(){
 				function(res){
 					if(res.status){
 						var tag_button = $('#tag_' + params.index + '_button');
-						tag_button.text('Follow this tag');
+						tag_button.text(follow_text.charAt(0).toUpperCase() + follow_text.slice(1) + ' this tag');
 						
 						var f_tag = bind(follow_tag, params);
 						tag_button.bind("click");
@@ -531,6 +533,41 @@ $(document).ready(function(){
 		return function () {
 			return fnc(val);
 		};
+	}
+
+	function init_search_bar() {
+		var group_name = $("#group_name").text();
+		var posts = new Bloodhound({
+			datumTokenizer: Bloodhound.tokenizers.obj.whitespace("text", "subject", "from"),
+			queryTokenizer: Bloodhound.tokenizers.whitespace,
+			local: p_list
+		});
+		posts.initialize();
+	
+		$("#text-search-post").typeahead({
+			minLength: 2,
+			highlight: true,
+			hint: false,
+		}, {
+			name: 'posts',
+			displayKey: 'subject',
+			source: posts.ttAdapter(),
+			highlighter: function(item) {
+				return item.subject + item.text;
+			},
+			templates: {
+				empty: [
+				  '<div class="empty-message">',
+				  'unable to find any posts that match the current query',
+				  '</div>'
+				].join('\n'),
+				suggestion: function (post) {
+					return '<a href="/thread?group_name=' + group_name + '&tid=' + post.tid + '"><div class="suggestion">' + post.subject.trunc(43) + '<br />' + post.from + '<br />' + post.text.trunc(40) + '</div></a>';
+				}
+			 }
+		}).on('typeahead:selected', function($e, datum) {
+			window.location.href = '/thread?group_name=' + group_name + '&tid=' + datum.tid;
+		});;
 	}
 
 	function populate_groups_table(res){
@@ -968,8 +1005,8 @@ $(document).ready(function(){
 		var content = '<div class="main-area-content">';
 		content += '<div>';
 		content += '<div style="float:right">';
-		content += '<button type="button" id="btn-follow" style="margin:5px;">Follow</button>';
-		content += '<button type="button" id="btn-unfollow" style="margin:5px;">Unfollow</button>';
+		content += '<button type="button" id="btn-follow" style="margin:5px;">'+ follow_text.charAt(0).toUpperCase() + follow_text.slice(1) + '</button>';
+		content += '<button type="button" id="btn-unfollow" style="margin:5px;">Un' + follow_text + '</button>';
 		content += '<button type="button" id="btn-mute" style="margin:5px;">Mute</button>';
 		content += '<button type="button" id="btn-unmute" style="margin:5px;">Unmute</button>';
 		content += '</div>';
@@ -1175,11 +1212,11 @@ $(document).ready(function(){
 					  'group': active_group,
 					  'index': index};
 			
-			if (tag_type == "Follow this tag") {
+			if (tag_type == follow_text.charAt(0).toUpperCase() + follow_text.slice(1) + " this tag") {
 				var f_tag = bind(follow_tag, params);
 				$(this).bind("click");
 				$(this).click(f_tag);
-			} else if (tag_type == "Unfollow this tag") {
+			} else if (tag_type == "Un" + follow_text + " this tag") {
 				var uf_tag = bind(unfollow_tag, params);
 				$(this).bind("click");
 				$(this).click(uf_tag);
@@ -1275,7 +1312,7 @@ $(document).ready(function(){
 		} else {
 			groups_table.children().first().click();
 		}
-	} else if (window.location.pathname.indexOf('/posts') != -1) {
+	} else if (window.location.pathname.indexOf('/post') != -1) {
 		init_posts_page();	
 		setInterval(refresh_posts, 50000);
 	}
