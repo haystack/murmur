@@ -1,5 +1,7 @@
 import base64, email, hashlib, json, logging, random, re, requests, sys, time
 
+from browser.imap import *
+
 from schema.models import ImapAccount, MailbotMode
 
 from Crypto.Cipher import AES
@@ -161,11 +163,11 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
 
         for key, value in modes.iteritems():
             mode_id = value['id']
-            mode_name = value['name']
-            code = value['code']
-            print value['id']
-            print value['name']
-            print value['code']
+            mode_name = value['name'].decode('utf-8')
+            code = value['code'].decode('utf-8')
+            print mode_id
+            print mode_name
+            print code
         
             mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_account=imapAccount)
             if not mailbotMode.exists():

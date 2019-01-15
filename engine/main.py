@@ -11,7 +11,6 @@ from lamson.mail import MailResponse
 from pytz import utc
 
 from browser.util import *
-from browser.imap import *
 from constants import *
 from engine.google_auth import *
 from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
