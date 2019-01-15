@@ -7,6 +7,60 @@ $(document).ready(function() {
         btn_incoming_save = $("#btn-incoming-save"),
         btn_shortcut_save = $("#btn-shortcut-save");
 
+    function append_log( log, is_error ) {
+        if(!log) return;
+
+        var datetime = format_date();
+
+        if(is_error) 
+            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" ).addClass("error");
+
+        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" )
+            .addClass("info");
+    }   
+
+    function format_date() {
+        var currentdate = new Date();
+        var datetime = (currentdate.getMonth()+1) + "/"
+            + currentdate.getDate() + "/" 
+            + currentdate.getFullYear() + " @ "  
+            + currentdate.getHours() + ":"  
+            + currentdate.getMinutes() + ":" 
+            + currentdate.getSeconds()
+            + " | ";
+    }
+
+    function guess_host( email_addr ) {
+        $("#link-less-secure").attr('href', "");
+        $("#rdo-oauth").attr('disabled', "");
+        
+        if( validateEmail(email_addr) ) {
+            $("#password-container").show();
+            toggle_login_mode();
+
+            if( email_addr.includes("gmail")) {
+                $("#input-host").val("imap.gmail.com");
+                $("#link-less-secure").attr('href', "https://myaccount.google.com/lesssecureapps");
+                $("#rdo-oauth").removeAttr('disabled');
+
+                $(".oauth").show();
+            }
+            else {
+                $(".oauth").remove();
+
+                $("#rdo-plain").not(':checked').prop("checked", true);
+                
+                if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");
+                else if ( email_addr.includes("csail")) $("#input-host").val("imap.csail.mit.edu");
+                else if ( email_addr.includes("mit")) $("#input-host").val("imap.exchange.mit.edu");
+                else $("#input-host").val("");
+
+                $(".oauth").hide();
+            }
+        }
+        else $("#password-container").hide();
+    }
+
     // Disable all the buttons for a while until it is sure that the user is authenticated
     $(".btn").prop("disabled",true);
     
@@ -15,7 +69,7 @@ $(document).ready(function() {
 
     $("#mode-msg").text( test_mode_msg[is_test] );
 
-    // Set
+    // for demo; set date to now
     $(".current-date").text(format_date());
 
     // Create the sandbox:
@@ -488,59 +542,5 @@ $(document).ready(function() {
         }
     
         $(".default-text").blur();
-
-    function append_log( log, is_error ) {
-        if(!log) return;
-
-        var datetime = format_date();
-
-        if(is_error) 
-            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" ).addClass("error");
-
-        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" )
-            .addClass("info");
-    }   
-
-    function format_date() {
-        var currentdate = new Date();
-        var datetime = (currentdate.getMonth()+1) + "/"
-            + currentdate.getDate() + "/" 
-            + currentdate.getFullYear() + " @ "  
-            + currentdate.getHours() + ":"  
-            + currentdate.getMinutes() + ":" 
-            + currentdate.getSeconds()
-            + " | ";
-    }
-
-    function guess_host( email_addr ) {
-        $("#link-less-secure").attr('href', "");
-        $("#rdo-oauth").attr('disabled', "");
-        
-        if( validateEmail(email_addr) ) {
-            $("#password-container").show();
-            toggle_login_mode();
-
-            if( email_addr.includes("gmail")) {
-                $("#input-host").val("imap.gmail.com");
-                $("#link-less-secure").attr('href', "https://myaccount.google.com/lesssecureapps");
-                $("#rdo-oauth").removeAttr('disabled');
-
-                $(".oauth").show();
-            }
-            else {
-                $(".oauth").remove();
-
-                $("#rdo-plain").not(':checked').prop("checked", true);
-                
-                if ( email_addr.includes("yahoo")) $("#input-host").val("imap.mail.yahoo.com");
-                else if ( email_addr.includes("csail")) $("#input-host").val("imap.csail.mit.edu");
-                else if ( email_addr.includes("mit")) $("#input-host").val("imap.exchange.mit.edu");
-                else $("#input-host").val("");
-
-                $(".oauth").hide();
-            }
-        }
-        else $("#password-container").hide();
-    }
 
 });
