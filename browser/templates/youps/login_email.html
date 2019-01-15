@@ -180,6 +180,7 @@ if interaction['cond'] > 7:
 					  <div id="console" class="info">
 						<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
 						{% if user.is_authenticated %}
+						{% else %}
 							<p class="info"><span class='current-date'>01/09/2019 21:25:12</span> <i class="fas fa-lg fa-envelope-square"></i> [csail-related] | marked as read</p>
 						{% endif %}
 					  </div>
