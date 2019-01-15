@@ -28,6 +28,8 @@ $(document).ready(function() {
             + currentdate.getMinutes() + ":" 
             + currentdate.getSeconds()
             + " | ";
+
+        return datetime;
     }
 
     function guess_host( email_addr ) {
