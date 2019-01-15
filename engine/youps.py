@@ -1,4 +1,4 @@
-import base64, email, hashlib, json, logging, random, re, requests, sys, time
+import base64, email, hashlib, json, logging, random, re, requests, sys, time, traceback
 
 from browser.imap import *
 
@@ -207,6 +207,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
     except Exception, e:
         # TODO add exception
         print e
+        print (traceback.format_exc())
         res['code'] = msg_code['UNKNOWN_ERROR']
 
     logging.debug(res)
