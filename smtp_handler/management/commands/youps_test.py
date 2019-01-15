@@ -40,7 +40,7 @@ class Command(BaseCommand):
         ]
 
         for t in test_cases:
-            send_email()(t['subject'], t['from_addr'], to_addr, t['body_plain'], t['body_html'])
+            send_email(t['subject'], t['from_addr'], to_addr, t['body_plain'], t['body_html'])
 
                     
             
