@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import base64
 
 from django.core.management.base import BaseCommand, CommandError
@@ -25,21 +26,21 @@ class Command(BaseCommand):
         to_addr = args[0]
         test_cases = [
             {
-                'subject': 'test email'
+                'subject': 'test email',
                 'from_addr': 'test@youps.csail.mit.edu',
-                'body_plain': 'hello world'
+                'body_plain': 'hello world',
                 'body_html': 'hi'
             },
             {
-                'subject': 'test email with emoji 🤷‍♀️'
+                'subject': 'test email with emoji 🤷‍♀️',
                 'from_addr': 'test@youps.csail.mit.edu',
-                'body_plain': 'hello world'
+                'body_plain': 'hello world',
                 'body_html': '😎'
             },
         ]
 
         for t in test_cases:
-            send_email()(t['subject'], t['from_addr'], to_addr, t['body_plain'], t['body_html']):
+            send_email()(t['subject'], t['from_addr'], to_addr, t['body_plain'], t['body_html'])
 
                     
             
