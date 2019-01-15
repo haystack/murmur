@@ -7,13 +7,16 @@ $(document).ready(function() {
         btn_incoming_save = $("#btn-incoming-save"),
         btn_shortcut_save = $("#btn-shortcut-save");
 
-    // Disable all the buttons for a while until it is sure that the sure is authenticated
+    // Disable all the buttons for a while until it is sure that the user is authenticated
     $(".btn").prop("disabled",true);
     
-    var test_mode_msg = {true: "You are currently at test mode. Mailbot will simulate your rule but not actually run the rule.", 
-        false: "Mailbot will apply your rules to your incoming emails. "};
+    var test_mode_msg = {true: "You are currently at test mode. YoUPS will simulate your rule but not actually run the rule.", 
+        false: "YoUPS will apply your rules to your incoming emails. "};
 
     $("#mode-msg").text( test_mode_msg[is_test] );
+
+    // Set
+    $(".current-date").text(format_date());
 
     // Create the sandbox:
     // window.sandbox = new Sandbox.View({
@@ -489,6 +492,16 @@ $(document).ready(function() {
     function append_log( log, is_error ) {
         if(!log) return;
 
+        var datetime = format_date();
+
+        if(is_error) 
+            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" ).addClass("error");
+
+        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" )
+            .addClass("info");
+    }   
+
+    function format_date() {
         var currentdate = new Date();
         var datetime = (currentdate.getMonth()+1) + "/"
             + currentdate.getDate() + "/" 
@@ -497,15 +510,7 @@ $(document).ready(function() {
             + currentdate.getMinutes() + ":" 
             + currentdate.getSeconds()
             + " | ";
-
-        datetime = '';
-
-        if(is_error) 
-            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" ).addClass("error");
-
-        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" )
-            .addClass("info");
-    }   
+    }
 
     function guess_host( email_addr ) {
         $("#link-less-secure").attr('href', "");

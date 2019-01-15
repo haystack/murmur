@@ -32,11 +32,10 @@
 			<p hidden id="website-name">{{website}}</p>
 
 			<h3>Email Rule Editor</h3>
-			<a href="/docs">View API docs</a>
+			<a href="/docs" style="float: right;margin-top: -30px;">View API docs</a>
 			<hr>
 			
 			<form id="login-email-form">
-				Program your inbox!<br><br>
 				<!-- <label for="input-email">Email address: </label>
 				<input id="input-email" type="email" style="box-sizing: border-box;"></input>
 				<br> -->
@@ -62,10 +61,9 @@
 						<button type="button" id="btn-login" style="margin-top:10px;">Log in to your email</button>
 					{% endif %}
 				{% else %}
-					<a type="button" href="/accounts/login/?next=/editor" style="margin-top:10px;">Log in to Murmur</a> or <a type="button" href="/accounts/register/?next=/editor" style="margin-top:10px;">Create a new murmur account</a>
+					<a type="button" href="/accounts/login/?next=/editor" style="margin-top:10px;">Log in to YoUPS</a> or <a type="button" href="/accounts/register/?next=/editor" style="margin-top:10px;">Create a new YoUPS account</a> to start!
 				{% endif %}
 			</form>
-			<br>
 			<div id="editor-container">
 				<div id="status">
 				  <!-- This rule will be applied to your incoming emails.   -->
@@ -181,13 +179,16 @@ if interaction['cond'] > 7:
 		
 					  <div id="console" class="info">
 						<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
+						{% if user.is_authenticated %}
+							<p class="info"><span class='current-date'>01/09/2019 21:25:12</span> <i class="fas fa-lg fa-envelope-square"></i> [csail-related] | marked as read</p>
+						{% endif %}
 					  </div>
 					</div>
 
 					<div class="card">
 							<div class="card-header">
 								<h4>Rules for email shortcuts</h4> 
-								You can manipulate Mailbot from your email interface. Define your shortcut below, then when you forward an email with the shortcut to {{website}}@murmur-1604.csail.mit.edu, Mailbot will run the action for you!
+								You can use your YoUPS rule from your email interface. Define your shortcut below, then when you forward an email with the shortcut to {{website}}@{{website}}.csail.mit.edu, YoUPS will run the action for you!
 								<br>
 								<button class="btn btn-primary" id="btn-shortcut-save" style="float: right;">Save</button>
 								<br><br>
@@ -270,7 +271,7 @@ print get_sender()
 	<script type="text/javascript" src="/static/javascript/mailbot/console/prettify.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/console/DAT.GUI.min.js"></script>
 
-	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
+	<script src="/static/javascript/third-party/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/mailbot/jquery.switchButton.js"></script>
 	
 	<script src="https://get.mavo.io/mavo.js"></script>

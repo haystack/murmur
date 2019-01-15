@@ -1,5 +1,5 @@
 #console {
-  overflow-y: scroll;height: 200px;background: black;padding: 10px;
+  overflow-y: scroll;height: 200px;background:#47697F;padding: 10px;
 }
 
 .error {
@@ -7,7 +7,7 @@
 }
 
 .info {
-    color: blue;
+    /* color: blue; */
 }
 
 .switch-wrapper {

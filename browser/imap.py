@@ -74,19 +74,22 @@ def authenticate(imap_account):
             subject = "[" + WEBSITE + "] Authentication error occurs"
             body = "Authentication error occurs! \n" + str(res['imap_error'])
             body += "\nPlease log in again at " + BASE_URL + "/editor"
-            send_email(subject, WEBSITE + "@" + BASE_URL, email_addr, body)
-
+            send_email(subject, WEBSITE + "@" + BASE_URL, email_addr, body)        
+            
         # TODO don't delete
         # Delete this ImapAccount information so that it requires user to reauthenticate
         imap_account.password = ""
         imap_account.access_token = ""
+
+        # turn off the email engine
+        imap_account.is_running = False
         imap_account.save()
 
     return res
 
 def append(imap, subject, content):
     new_message = message.Message()
-    new_message["From"] = "mailbot-log@murmur.csail.mit.edu"
+    new_message["From"] = "mailbot-log@" + BASE_URL
     new_message["Subject"] = subject
     new_message.set_payload(content)
     
