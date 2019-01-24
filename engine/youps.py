@@ -20,7 +20,7 @@ def login_imap(user, password, host, is_oauth, push=True):
         access_token = ''
         password_original = password
         if is_oauth:
-            # TODO If this imap account is already mapped with this account, by pass the login. 
+            # TODO If this imap account is already mapped with this account, by pass the login.
             oauth = GoogleOauth2()
             response = oauth.generate_oauth2_token(password)
             refresh_token = response['refresh_token']
@@ -28,9 +28,9 @@ def login_imap(user, password, host, is_oauth, push=True):
 
             imap.oauth2_login(email, access_token)
 
-        else:   
+        else:
             imap.login(email, password)
-             
+
             #encrypt password then save
             aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
 
@@ -65,7 +65,7 @@ def login_imap(user, password, host, is_oauth, push=True):
             imapAccount.refresh_token = refresh_token
 
         imapAccount.save()
-        
+
 
         # u = UserProfile.objects.filter(email=email)
         # if not u.exists():
@@ -79,7 +79,7 @@ def login_imap(user, password, host, is_oauth, push=True):
         #     u = u[0]
         #     imapAccount = u
         #     res['imap_code'] = imapAccount.code
-        
+
         # u.host = host
         # u.imap_password = password
 
@@ -96,7 +96,7 @@ def login_imap(user, password, host, is_oauth, push=True):
         res['code'] = msg_code['UNKNOWN_ERROR']
 
     logging.debug(res)
-    return res 
+    return res
 
 def fetch_execution_log(user, email, push=True):
     res = {'status' : False}
@@ -115,7 +115,7 @@ def fetch_execution_log(user, email, push=True):
         res['code'] = msg_code['UNKNOWN_ERROR']
 
     logging.debug(res)
-    return res 
+    return res
 
 def delete_mailbot_mode(user, email, mode_id, push=True):
     res = {'status' : False}
@@ -128,7 +128,7 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
             imapAccount.current_mode = None
             imapAccount.is_running = False
 
-        mm.delete()        
+        mm.delete()
 
         res['status'] = True
 
@@ -142,7 +142,7 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
         res['code'] = msg_code['UNKNOWN_ERROR']
 
     logging.debug(res)
-    return res 
+    return res
 
 def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=True):
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
@@ -168,7 +168,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
             print mode_id
             print mode_name
             print code
-        
+
             mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_account=imapAccount)
             if not mailbotMode.exists():
                 mailbotMode = MailbotMode(uid=mode_id, name=mode_name, code=code, imap_account=imapAccount)
@@ -186,7 +186,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:
-                res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log']) 
+                res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log'])
                 now = datetime.now()
                 now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
                 res['imap_log'] = now_format + res['imap_log']
@@ -198,7 +198,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
             res['imap_log'] = "Your mailbot stops running"
 
         res['status'] = True
-            
+
 
     except IMAPClient.Error, e:
         res['code'] = e
@@ -211,19 +211,19 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         res['code'] = msg_code['UNKNOWN_ERROR']
 
     logging.debug(res)
-    return res 
+    return res
 
 def save_shortcut(user, email, shortcuts, push=True):
     res = {'status' : False, 'imap_error': False}
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
-        
+
         imapAccount.shortcuts = shortcuts
         imapAccount.save()
 
         res['status'] = True
-            
+
 
     except IMAPClient.Error, e:
         res['code'] = e
@@ -235,4 +235,4 @@ def save_shortcut(user, email, shortcuts, push=True):
         res['code'] = msg_code['UNKNOWN_ERROR']
 
     logging.debug(res)
-    return res 
+    return res

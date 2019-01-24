@@ -20,3 +20,10 @@ schema/migrations/*
 gmail_setup/client_secrets.json
 
 sandbox/
+\.idea/
+
+\.vscode/
+
+venv/
+
+\.python-version
