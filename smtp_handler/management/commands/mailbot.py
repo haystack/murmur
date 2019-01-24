@@ -7,6 +7,7 @@ from imapclient import IMAPClient
 from engine.constants import msg_code
 from smtp_handler.Pile import Pile
 from http_handler.settings import WEBSITE
+import traceback
 
 class Command(BaseCommand):
     args = ''
@@ -43,6 +44,7 @@ class Command(BaseCommand):
 
                         print "Processing email UID", i
                         code = imapAccount.current_mode.code
+
                         res = interpret(imapAccount, imap, code, "UID %d" % (i))
 
                         if res['imap_log'] != "":
@@ -71,6 +73,8 @@ class Command(BaseCommand):
             except Exception, e:
                 # TODO add exception
                 print e
+                # TODO this should be logged but idk where logs go... LSM
+                print traceback.format_exc()
                 res['code'] = msg_code['UNKNOWN_ERROR']
 
             res['status'] = True

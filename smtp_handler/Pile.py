@@ -35,13 +35,19 @@ class Pile():
         self.EMAIL = self.init_email()
 
     def init_email(self):
+        """Get all emails passing the search criteria and return them
+
+        Returns:
+            List[Tuple[int, message]]: List of email uids and messages
+                which pass self.search_criteria
+        """
+
         unreads = self.get_unread_emails()
 
-        results = []
         id_results = []
         messages = self.imap.search( self.search_criteria )
-        # raw=email.message_from_bytes(data[0][1])
         response = self.imap.fetch(messages, ['RFC822'])
+
         parser = HeaderParser()
 
         if response is None:
@@ -51,7 +57,6 @@ class Pile():
         for msgid, data in response.items():
             if b'RFC822' not in data:
                 continue
-            # print (data[b'BODY[HEADER]'])
             new_text = ''
             if isinstance(data[b'RFC822'], unicode):
                 logging.debug("it's unicode, no need to change")
@@ -63,14 +68,11 @@ class Pile():
 
             raw_string = new_text.decode("utf-8").encode("ascii", "ignore")
             msg = parser.parsestr( raw_string )
-            results.append( msg )
             id_results.append( (msgid, msg) )
 
         if len(unreads) > 0:
             self.mark_read_meta(False)
 
-        # if not inCludeID:
-        #     return results
 
         return id_results
 
@@ -95,6 +97,12 @@ class Pile():
 
 
     def get_notes_meta(self):
+        """Get flags for all emails which pass the search critera
+
+        Returns:
+            Dict[str, Tuple[str]]: Dictionary of msgid: (flag1, flag2, flag3)
+        """
+
         return self.imap.get_flags(self.get_IDs())
 
     def get_notes(self):
@@ -386,28 +394,52 @@ class Pile():
     def get_contents(self):
         unreads = self.get_unread_emails()
         messages = self.imap.search( self.search_criteria )
-        # raw=email.message_from_bytes(data[0][1])
         response = self.imap.fetch(messages, ['RFC822'])
         bodys = []
-        for msgid, data in response.items():
+        for msgid, data in response.iteritems():
             if b'RFC822' not in data:
                 continue
 
-            new_text = ''
-            if isinstance(data[b'RFC822'], unicode):
-                # logging.debug("it's unicode, no need to change")
-                new_text = data[b'RFC822']
+            # print "PARSING CONTENTS"
 
-            else:
-                # logging.debug("not unicode, convert using utf-8")
-                new_text = unicode(data[b'RFC822'], "utf-8", "ignore")
+            email_message = email.message_from_string(data[b'RFC822'])
 
-            raw_string = new_text.decode("utf-8").encode("ascii", "ignore")
+            # keys ['Delivered-To', 'Received', 'X-Received', 'ARC-Seal',
+            # 'ARC-Message-Signature', 'ARC-Authentication-Results',
+            # 'Return-Path', 'Received', 'Received-SPF',
+            # 'Authentication-Results', 'DKIM-Signature',
+            # 'X-Google-DKIM-Signature', 'X-Gm-Message-State',
+            # 'X-Google-Smtp-Source', 'X-Received', 'MIME-Version', 'From',
+            # 'Date', 'Message-ID', 'Subject', 'To', 'Content-Type']
 
-            body = email.message_from_string(raw_string)
+            # print 'id', msgid
+            # print 'keys', str(email_message.keys())
+            # print 'from', email_message.get('From')
+            # print 'to', email_message.get('To')
+            # print 'subject', email_message.get('Subject')
+            # print 'date', email_message.get('Date')
 
-            bodys.append( self.get_first_text_block(body) )
-            # print (body)
+            text = ""
+            html = ""
+            for part in email_message.walk():
+                if part.is_multipart():
+                    continue
+                else:
+                    decoded = part.get_payload(decode=True)
+                    charset = part.get_content_charset()
+                    if charset is not None:
+                        decoded = unicode(part.get_payload(decode=True), str(charset), "ignore").encode('utf8', 'replace')
+
+                    content_type = part.get_content_type()
+                    if content_type == 'text/plain':
+                        text += decoded
+                    elif content_type == 'text/html':
+                        html += decoded
+                    else:
+                        # TODO should be a log but idk where logs go... LSM
+                        print 'unknown content type', content_type
+
+            bodys.append(text if text != "" else html)
 
         if len(unreads) > 0:
             self.mark_read(False)
@@ -425,23 +457,21 @@ class Pile():
 
 
     def get_unread_emails(self):
-        messages = self.imap.search( self.search_criteria )
+        """Return uids of messages which pass the search critera and are not flagged as seen.
+
+        Returns:
+            List[int]: unique ids of messages which pass the search critera and are not flagged as seen.
+        """
 
         flags = self.get_notes_meta()
 
         if flags is None:
             return []
 
-        read_emails = []
+        unread_emails = []
 
         for msgid, data in flags.items():
             if b'\\Seen' not in data:
-                read_emails.append(msgid)
+                unread_emails.append(msgid)
 
-        return read_emails
-
-
-
-        print format_log("Mark Message %s %s" % (self.search_creteria, "read" if is_seen else "unread"), False, self.get_subject())
-
-
+        return unread_emails
