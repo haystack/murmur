@@ -61,6 +61,7 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 
 #### run murmur server
 * If running email server: `lamson start`
+	+ ⚠️ If it is not running without any error msg or throws `connection refused` error, then check your email port being used by other services (e.g., `netstat -peanut | grep ":587"`) and check logs at logs/lamson.err. If the port is being used, use another port or kill the process using the port.   
 * Webserver: `python manage.py runserver`
 
 #### enable daily digest feature
