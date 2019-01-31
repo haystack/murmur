@@ -5,27 +5,29 @@ try:
 except ImportError:
     import io
 import contextlib
-from smtp_handler.utils import *
-from smtp_handler.Pile import *
-from email import message_from_string,message, utils
+from smtp_handler.utils import send_email, get_body
+from smtp_handler.Pile import Pile
+from email import message, utils, message_from_string
 from email.utils import parseaddr
 from imapclient import IMAPClient
-from http_handler.settings import BASE_URL, DEFAULT_FROM_EMAIL, WEBSITE, IMAP_SECRET
-from engine.google_auth import *
+from http_handler.settings import BASE_URL, WEBSITE, IMAP_SECRET
+from engine.google_auth import GoogleOauth2
 from Crypto.Cipher import AES
-from engine.constants import *
-from datetime import datetime, time, timedelta
+from engine.constants import msg_code
+from datetime import datetime, timedelta
+from schema.models import MailbotMode
 import calendar
+import base64
 
 
 def authenticate(imap_account):
     res = {'status' : False, 'imap_error': False, 'imap_log': "", 'imap': None}
     email_addr = ""
-    try:  
+    try:
         imap = IMAPClient(imap_account.host, use_uid=True)
         email_addr = imap_account.email
         if imap_account.is_oauth:
-            # TODO if access_token is expired, then get a new token 
+            # TODO if access_token is expired, then get a new token
             imap.oauth2_login(imap_account.email, imap_account.access_token)
         else:
             aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
@@ -39,12 +41,12 @@ def authenticate(imap_account):
                     break
                 index = index + 1
 
-            imap.login(imap_account.email, password) 
+            imap.login(imap_account.email, password)
 
         res['imap'] = imap
         res['status'] = True
     except IMAPClient.Error, e:
-        try: 
+        try:
             print "try to renew token"
             if imap_account.is_oauth:
                 oauth = GoogleOauth2()
@@ -58,7 +60,7 @@ def authenticate(imap_account):
                 res['status'] = True
             else:
                 res['code'] = "Can't authenticate your email"
-        except IMAPClient.Error, e:  
+        except IMAPClient.Error, e:
             res['imap_error'] = e
             res['code'] = "Can't authenticate your email"
 
@@ -68,14 +70,14 @@ def authenticate(imap_account):
             print e
             res['code'] = msg_code['UNKNOWN_ERROR']
 
-    if res['status'] == False:
+    if res['status'] is False:
         # email to the user that there is error at authenticating email
         if len(email_addr) > 0:
             subject = "[" + WEBSITE + "] Authentication error occurs"
             body = "Authentication error occurs! \n" + str(res['imap_error'])
             body += "\nPlease log in again at " + BASE_URL + "/editor"
-            send_email(subject, WEBSITE + "@" + BASE_URL, email_addr, body)        
-            
+            send_email(subject, WEBSITE + "@" + BASE_URL, email_addr, body)
+
         # TODO don't delete
         # Delete this ImapAccount information so that it requires user to reauthenticate
         imap_account.password = ""
@@ -92,7 +94,7 @@ def append(imap, subject, content):
     new_message["From"] = "mailbot-log@" + BASE_URL
     new_message["Subject"] = subject
     new_message.set_payload(content)
-    
+
     imap.append('INBOX', str(new_message), ('murmur-log'))
 
 def fetch_latest_email_id(imap_account, imap_client):
@@ -129,8 +131,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
     if len(messages) == 0:
         is_valid = False
-    
-    pile = Pile(imap, search_creteria)  
+
+    pile = Pile(imap, search_creteria)
     if not pile.check_email():
         is_valid = False
 
@@ -144,7 +146,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         sys.stdout = old
 
     with stdoutIO() as s:
-        def catch_exception(e):   
+        def catch_exception(e):
             etype, evalue = sys.exc_info()[:2]
             estr = traceback.format_exception_only(etype, evalue)
             logstr = 'Error during executing your code \n'
@@ -159,20 +161,20 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def send(subject="", to_addr="", body=""):
             if len(to_addr) == 0:
-                raise Exception('send(): recipient email address is not provided') 
+                raise Exception('send(): recipient email address is not provided')
 
             if not is_test:
                 send_email(subject, imap_account.email, to_addr, body)
-            #print to_addr
+            # print to_addr
             print format_log("send(): send a message to  %s" % str(to_addr), False, get_subject())
 
         def add_gmail_labels(flags):
             pile.add_gmail_labels(flags, is_test)
 
-        def add_labels(flags): 
+        def add_labels(flags):
             add_notes(flags)
 
-        def add_notes(flags): 
+        def add_notes(flags):
             pile.add_notes(flags, is_test)
 
         def copy(dst_folder):
@@ -183,18 +185,18 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def get_history(email, hours=24, cond=True):
             if len(email) == 0:
-                raise Exception('get_history(): email address is not provided') 
-            
+                raise Exception('get_history(): email address is not provided')
+
             if hours <= 0:
-                raise Exception('get_history(): hours must be bigger than 0') 
+                raise Exception('get_history(): hours must be bigger than 0')
 
             # get uid of emails within interval
             now = datetime.now()
-            start_time = now - timedelta(hours = hours) 
+            start_time = now - timedelta(hours = hours)
             heuristic_id = imap_account.newest_msg_id -100 if imap_account.newest_msg_id -100 > 1 else 1
             name, sender_addr = parseaddr(get_sender().lower())
             today_email_ids = imap.search( 'FROM %s SINCE "%d-%s-%d"' % (sender_addr, start_time.day, calendar.month_abbr[start_time.month], start_time.year) )
-             
+
             # today_email = Pile(imap, 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year))
             # min_msgid = 99999
             # logging.debug("before get dates")
@@ -233,12 +235,12 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                             break
 
                     if with_email:
-                        if cond == True:
+                        if cond is True:
                             cond_cnt = cond_cnt + 1
                         else:
                             if cond(p):
                                 cond_cnt = cond_cnt + 1
-                        
+
             # for msg in today_email.get_dates():
             #     msgid, t = msg
             #     date_tuple = utils.parsedate_tz(t)
@@ -249,7 +251,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             #         if start_time < local_date:
             #             emails.append( msgid )
 
-          
+
             # for i in range(len(emails)):
             #     p = Pile(imap, "UID %d" % (emails[i]))
 
@@ -294,7 +296,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def get_date():
             return pile.get_date()
 
-        def get_attachment():    
+        def get_attachment():
             pass
 
         def get_subject():
@@ -304,13 +306,13 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             return pile.get_recipients()
 
 
-        def get_attachments():    
+        def get_attachments():
             pass
 
         def get_labels():
             return get_notes()
 
-        def get_notes():        
+        def get_notes():
             return pile.get_notes()
 
         def get_gmail_labels():
@@ -318,15 +320,15 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def mark_read(is_seen=True):
             pile.mark_read(is_seen, is_test)
-                
-            
+
+
         def move(dst_folder):
             pile.move(dst_folder, is_test)
 
         def remove_labels(flags):
             remove_notes(flags)
 
-        def remove_notes(flags): 
+        def remove_notes(flags):
             pile.remove_notes(flags, is_test)
 
         def remove_gmail_labels(flags):
@@ -338,7 +340,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             # iterate through all the functions
             if folder is None:
                 pass
-            
+
             # iterate through a folder of list of folder
             else:
                 # if it's a list iterate
@@ -353,10 +355,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             response = imap.fetch(m, ['BODY[TEXT]'])
             bodys = []
             for msgid, data in response.items():
-                body = email.message_from_string(data[b'BODY[TEXT]'].decode('utf-8'))
+                body = message_from_string(data[b'BODY[TEXT]'].decode('utf-8'))
                 bodys.append( get_body(body) )
                 # print (body)
-            
+
             # email_message = email.message_from_string(str(message))
             # msg_text = get_body(email_message)
 
@@ -373,15 +375,15 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def select_folder(folder):
             if not imap.folder_exists(folder):
-                format_log("Select folder; folder %s not exist" % folder, True, get_subject())  
+                format_log("Select folder; folder %s not exist" % folder, True, get_subject())
                 return
 
             imap.select_folder(folder)
-            print "Select a folder " + folder 
+            print "Select a folder " + folder
 
         def rename_folder(old_name, new_name):
             pile.rename_folder(old_name, new_name, is_test)
-  
+
 
         def get_mode():
             if imap_account.current_mode:
@@ -391,29 +393,29 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 return None
 
         def set_mode(mode_index):
-            try: 
+            try:
                 mode_index = int(mode_index)
             except ValueError:
                 raise Exception('set_mode(): args mode_index must be a index (integer)')
 
-            
+
             mm = MailbotMode.objects.filter(uid=mode_index, imap_account=imap_account)
             if mm.exists():
                 mm = mm[0]
-                if not is_test: 
+                if not is_test:
                     imap_account.current_mode = mm
                     imap_account.save()
 
-                print format_log("Set your mail mode to %s (%d)" % (mm.name, mode_index), False, get_subject())  
+                print format_log("Set your mail mode to %s (%d)" % (mm.name, mode_index), False, get_subject())
                 return True
             else:
-                print format_log("A mode ID %d not exist!" % (mode_index), True, get_subject())  
+                print format_log("A mode ID %d not exist!" % (mode_index), True, get_subject())
                 return False
 
         try:
             if is_valid:
                 exec code in globals(), locals()
-                pile.add_flags(['YouPS'])            
+                pile.add_flags(['YouPS'])
         except Exception as e:
             catch_exception(e)
 
@@ -421,7 +423,6 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         return res
 
-    
-        
 
-        
+
+

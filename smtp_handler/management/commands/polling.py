@@ -1,16 +1,12 @@
-import base64
-
-from django.core.management.base import BaseCommand, CommandError
-from smtp_handler.utils import *
-from schema.models import *
-from datetime import datetime, timedelta
-from browser.imap import *
+from django.core.management.base import BaseCommand
+from smtp_handler.utils import send_email
+from schema.models import ImapAccount
+from datetime import datetime
+from browser.imap import authenticate, fetch_latest_email_id, interpret
 from imapclient import IMAPClient
-from engine.constants import *
-from smtp_handler.Pile import *
-import datetime
+from engine.constants import msg_code
+from smtp_handler.Pile import Pile
 from http_handler.settings import WEBSITE, BASE_URL
-from smtp_handler.utils import *
 
 class Command(BaseCommand):
     args = ''
@@ -20,14 +16,14 @@ class Command(BaseCommand):
         imap_dict = {}
         while True:
             imapAccounts = ImapAccount.objects.filter(is_running=True)
-            
+
             for imapAccount in imapAccounts:
                 if not imapAccount.current_mode:
                     continue
 
                 res = {'status' : False, 'imap_error': False}
-                
-                
+
+
                 if imapAccount.email not in imap_dict:
                     print "Attempt to auth ", imapAccount.email
                     auth_res = {'status' : False, 'imap': None}
@@ -57,7 +53,7 @@ class Command(BaseCommand):
                         execution_logs = ""
                         start_uid = imapAccount.newest_msg_id +1 if imapAccount.newest_msg_id +1 < new_uid else new_uid
 
-                        for i in range(start_uid, new_uid+1): 
+                        for i in range(start_uid, new_uid+1):
                             # when the message get deleted
                             if len(imap_dict[imapAccount.email].search("UID %d" % (i))) == 0:
                                 continue
@@ -68,15 +64,15 @@ class Command(BaseCommand):
                             if not p.check_email():
                                 continue
 
-                            
+
                             # if it's the email from admin, then skip it
                             if WEBSITE in p.get_sender():
-                                p.add_flags(['YouPS'])  
+                                p.add_flags(['YouPS'])
                                 continue
 
                             print "Sender of new email is", p.get_sender()
                             processing_subject = p.get_subject()
-                                
+
                             code = imapAccount.current_mode.code
                             res = interpret(imapAccount, imap_dict[imapAccount.email], code, "UID %d" % (i))
 
@@ -85,12 +81,12 @@ class Command(BaseCommand):
                                 now = datetime.now()
                                 now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
                                 execution_logs = now_format + " " + res['imap_log'] + "\n" + execution_logs
-                    
+
                         imapAccount.newest_msg_id = new_uid
-                        
+
                         if execution_logs != "":
                             # append(imap, "Murmur mailbot log", res['imap_log'])
-                            imapAccount.execution_log = execution_logs + imapAccount.execution_log 
+                            imapAccount.execution_log = execution_logs + imapAccount.execution_log
 
                         imapAccount.save()
 
@@ -103,7 +99,7 @@ class Command(BaseCommand):
                             body = "Following error occurs during executing your email engine of email " + processing_subject + "\n"+ res['imap_log']
                             body += "\nTo fix the error and re-activate your engine, visit " + WEBSITE + ".csail.mit.edu/editor"
                             send_email(subject, WEBSITE + "@" + BASE_URL, imapAccount.email, body)
-                    
+
                 except IMAPClient.Error, e:
                     res['code'] = e
 
@@ -113,7 +109,7 @@ class Command(BaseCommand):
                 except Exception, e:
                     # TODO add exception
                     print e
-                    # if error occurs just skip the email 
+                    # if error occurs just skip the email
                     if new_uid > 0:
                         msgs = imap_dict[imapAccount.email].search( "UID %d" % (new_uid) )
                         imap_dict[imapAccount.email].add_flags(msgs, ['YouPS'])
@@ -124,5 +120,5 @@ class Command(BaseCommand):
 
                 res['status'] = True
 
-                    
-            
+
+
