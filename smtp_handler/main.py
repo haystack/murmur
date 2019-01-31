@@ -5,7 +5,7 @@ from http_handler.settings import WEBSITE
 from schema.models import *
 from lamson.mail import MailResponse
 from email.utils import *
-from email import message_from_string
+from email import message_from_string, header
 from engine.main import *
 from engine.s3_storage import upload_message
 from utils import *
@@ -13,6 +13,8 @@ from django.db.utils import OperationalError
 from datetime import datetime
 import pytz
 import django.db
+from browser.imap import *
+from imapclient import IMAPClient
 
 '''
 Murmur Mail Interface Handler
@@ -43,6 +45,94 @@ def all(message, address=None, host=None):
             body = "Error Message: %s" %(res['code'])
         mail = MailResponse(From = NO_REPLY, To = message['From'], Subject = subject, Body = body)
         relay.deliver(mail)
+
+@route("(address)@(host)", address=WEBSITE, host=".+")
+@stateless
+def mailbot(message, address=None, host=None):
+    # no public groups to list on squadbox. 
+    if WEBSITE == 'squadbox' or WEBSITE == 'murmur':
+        logging.debug("Ignored message to all@%s, no public groups to list" % HOST)
+        return
+
+    else:
+        logging.debug("Email to mailbot@%s" % HOST)
+
+        name, addr = parseaddr(message['from'].lower())
+
+        # restart the db connection
+        django.db.close_connection()
+        
+        try:
+            addr = addr.strip()
+            imapAccount = ImapAccount.objects.get(email=addr)
+            logging.debug("mailbot %s" % addr)
+            auth_res = authenticate( imapAccount )
+            if not auth_res['status']:
+                raise ValueError('Something went wrong during authentication. Log in again at %s/editor' % host)
+
+            imap = auth_res['imap']
+            imap.select_folder('INBOX')
+
+            entire_message = message_from_string(str(message))
+            entire_body = get_body(entire_message)
+
+            # Get a forwarded message
+            latest_email_uid = imap.search(["HEADER", "Message-ID", message["In-Reply-To"]])
+
+            response = imap.fetch(latest_email_uid, ['RFC822'])
+
+            for msgid, edata in response.items():
+                raw_email_string = edata[b'RFC822'].decode('utf-8').encode("ascii", "ignore")
+                email_message = message_from_string(raw_email_string)
+
+                # Header Details
+                email_from = str(header.make_header(header.decode_header(email_message['From'])))
+                email_to = str(header.make_header(header.decode_header(email_message['To'])))
+                subject = str(header.make_header(header.decode_header(email_message['Subject'])))
+                forwarded_body = get_body(email_message)
+
+                logging.debug("Forward email %s %s" % (subject, email_from) )
+
+                # Get code part 
+                # TODO remove header of previous email 
+                code_body = entire_body['plain'][:(-1)*len(forwarded_body['plain'])]
+                subject = "Re: " + message['Subject']
+                body = ''
+
+                if not imapAccount.shortcuts:
+                    body = "You don't have email shortcuts yet! Define your shortcuts here %s/editor" % "murmur-1604@csail.mit.edu"
+
+                else:
+                    res = interpret(imapAccount, imap, imapAccount.shortcuts, "UID %s" % latest_email_uid[0], False, code_body)
+
+                    now = datetime.now()
+                    now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
+                    if not res['imap_error']:
+                        body = 'Your mail shortcut is successfully applied! \n'
+                    else:
+                        body = 'Something went wrong! \n'
+                
+                    body = body + now_format + res['imap_log']
+                mail = MailResponse(From = WEBSITE+"@" + host, To = message['From'], Subject = subject, Body = body)
+                relay.deliver(mail)
+
+            # Log out after after conduct required action
+            imap.logout()
+
+        except ImapAccount.DoesNotExist:
+            subject = "Re: " + message['Subject']
+            error_msg = 'Your email engine is not registered or stopped due to an error. Write down your own email rule at %s/editor' % "murmur-1604@csail.mit.edu"
+            mail = MailResponse(From = WEBSITE+"@" + host, To = message['From'], Subject = subject, Body = error_msg)
+            relay.deliver(mail)
+            
+        except Exception, e:
+            logging.debug(e)
+            subject = "Re: " + message['Subject']
+            mail = MailResponse(From = WEBSITE+"@" + host, To = message['From'], Subject = subject, Body = str(e))
+            relay.deliver(mail)
+
+        
+
 
 
 @route("(group_name)\\+create@(host)", group_name=".+", host=HOST)
@@ -689,7 +779,10 @@ handler_funcs = {
 @route("(address)@(host)", address=".+", host=HOST)
 @stateless
 def handle_post(message, address=None, host=None):
-    
+    # don't trigger by mailbot
+    if address == "mailbot":
+        return
+
     # restart the db connection
     django.db.close_connection()
     

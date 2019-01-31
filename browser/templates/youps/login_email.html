@@ -1,0 +1,283 @@
+{% extends website|add:"/base.html" %}
+{% block customcss %}
+<link rel="stylesheet" href="/static/css/mailbot/libs/codemirror.css">
+<!-- <link rel="stylesheet" href="/static/css/mailbot/libs/fontawesome-all.min.css"> -->
+<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
+<!-- Interactive console styles -->
+<!-- <link rel="stylesheet" href="/static/css/mailbot/libs/sandbox.css" /> -->
+<link rel="stylesheet" href="/static/css/mailbot/style.css">
+<link rel="stylesheet" href="/static/css/mailbot/libs/jquery.switchButton.css" />
+<link rel="stylesheet" href="/static/css/mailbot/libs/show-hint.css" />
+{% endblock %}
+
+{% block content %}
+	<div id="loading-wall"></div>
+	<div class="sk-circle">
+			<div class="sk-circle1 sk-child"></div>
+			<div class="sk-circle2 sk-child"></div>
+			<div class="sk-circle3 sk-child"></div>
+			<div class="sk-circle4 sk-child"></div>
+			<div class="sk-circle5 sk-child"></div>
+			<div class="sk-circle6 sk-child"></div>
+			<div class="sk-circle7 sk-child"></div>
+			<div class="sk-circle8 sk-child"></div>
+			<div class="sk-circle9 sk-child"></div>
+			<div class="sk-circle10 sk-child"></div>
+			<div class="sk-circle11 sk-child"></div>
+			<div class="sk-circle12 sk-child"></div>
+	</div>
+	
+	<div class="container">
+		<div class="group-container">
+			<p hidden id="website-name">{{website}}</p>
+
+			<h3>Email Rule Editor</h3>
+			<a href="/docs" style="float: right;margin-top: -30px;">View API docs</a>
+			<hr>
+			
+			<form id="login-email-form">
+				<!-- <label for="input-email">Email address: </label>
+				<input id="input-email" type="email" style="box-sizing: border-box;"></input>
+				<br> -->
+				{% if user.is_authenticated %}
+					{% if imap_authenticated %}
+
+					{% else %}
+						<div id="password-container">
+								<input type="radio" name="auth-mode" value="oauth" id="rdo-oauth"><label for="rdo-oauth">Oauth </label>
+								<input type="radio" name="auth-mode" value="plain" id="rdo-plain" checked><label for="rdo-plain">Plain password </label>
+								<br>
+								<a class="btn btn-info oauth" style="color:white;" target="_blank" href="https://accounts.google.com/o/oauth2/auth?client_id=1035128514395-ljeutpptbag8unpv2lgo1k93eiq006f6.apps.googleusercontent.com&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob&response_type=code&scope=https%3A%2F%2Fmail.google.com%2F">Get access code</a>
+								<label class="plain" for="input-password">Password: </label>
+								<input class="plain" id="input-password" type="password" style="box-sizing: border-box;"></input>
+								<label class="oauth" for="input-access-code">Access code: </label>
+								<input class="oauth" id="input-access-code" type="text" style="box-sizing: border-box;"></input>
+								<label for="input-host">Host (e.g. imap.xxx .. ): </label>
+								<input id="input-host" type="text" style="box-sizing: border-box;"></input>
+								<br><br>
+								<div style="diplay:none;color:red;" id="donotsend-msg"></div>
+								<p class="plain">Before you log in, go to <a id="link-less-secure">"Less secure apps" section of my Account.</a> And Enable less secure log in.</p>
+						</div>
+						<button type="button" id="btn-login" style="margin-top:10px;">Log in to your email</button>
+					{% endif %}
+				{% else %}
+					<a type="button" href="/accounts/login/?next=/editor" style="margin-top:10px;">Log in to YoUPS</a> or <a type="button" href="/accounts/register/?next=/editor" style="margin-top:10px;">Create a new YoUPS account</a> to start!
+				{% endif %}
+			</form>
+			<div id="editor-container">
+				<div id="status">
+				  <!-- This rule will be applied to your incoming emails.   -->
+				  <div class="fa-3x">
+						Status: <span class="fa-layers fa-fw">
+							<i class="fas fa-sync"></i>
+							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
+						</span>
+						<div class="dropdown" style="display: inline;">
+								<label style="font-size: medium;">Select your mode: </label>
+								<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+								  Default
+								  <span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu" aria-labelledby="current_mode_dropdown">
+								  <li><a href="#" data-value="action">Action</a></li>
+								  <li><a href="#" data-value="another action">Another action</a></li>
+								  <li><a href="#" data-value="something else here">Something else here</a></li>
+								  <li><a href="#" data-value="separated link">Separated link</a></li>
+								</ul>
+						</div>
+						{% if imap_authenticated %}
+							<button class="btn btn-primary" id="btn-code-submit">Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
+						{% else %}
+							<button class="btn btn-primary" id="btn-code-submit" disabled>Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
+						{% endif %}
+				  </div>
+				</div>
+		
+					<div style="padding-top: 40px;">
+					  <div class="card">
+						<div class="card-header">
+							<h4>Rules for incoming emails</h4> 
+							The following rule will be applied when a new mail arrives. 
+							<br>
+							<button class="btn btn-primary" id="btn-incoming-save" style="float: right;">Save</button>
+						</div>
+						<div class="card-block">
+							{% if mode_exist %}
+								<ul class="nav nav-tabs" role="tablist">
+									{% for mode in modes %}
+										{% if current_mode == mode %}
+											<li class="active">	
+										{% else %}
+											<li>
+										{% endif %}
+											<a href="#editor-tab_{{mode.uid}}" data-toggle="tab">
+													<span class="tab-title" mode-id={{ mode.uid }}>
+													{{ mode.name }} ({{ mode.uid }})
+													</span>
+													<i class="fas fa-pencil-alt"></i>
+												</a><span class="close">x</span>
+											</li>
+									{% endfor %}
+									<li><a href="#" class="add-contact">+ Add Mode</a></li>
+								</ul>
+								<div class="tab-content">
+									{% for mode in modes %}
+										{% if current_mode == mode %}
+											<div class="tab-pane active" id="editor-tab_{{mode.uid}}">
+										{% else %}
+											<div class="tab-pane" id="editor-tab_{{mode.uid}}">
+										{% endif %}
+												<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
+{{ mode.code }}					
+												</textarea>
+									  		</div>
+									{% endfor %}		
+								</div>
+								
+							{% else %}
+								<ul class="nav nav-tabs" role="tablist">
+									<li class="active" >
+										<a href="#editor-tab_0" data-toggle="tab">
+											<span class="tab-title" mode-id=0>
+												Default
+											</span>
+											<i class="fas fa-pencil-alt"></i>
+										</a><span class="close">x</span></li>
+									<li><a href="#" class="add-contact">+ Add Mode</a></li>
+								</ul>
+								<div class="tab-content">
+									<div class="tab-pane active" id="editor-tab_0">
+											  <textarea class="editor mode-editor" id="editor-0"> 												  
+if "csail-related" in get_subject():
+    mark_read(True)
+
+## If I get a certain email, then change my email to emergency/busy mode.      
+#if "David Karger" in get_sender() and "deadline" in get_subject():
+#    set_mode(1) # change my email mode to busy mode
+
+## If it's not lunch time, then just archieve the email
+from datetime import datetime
+hour = datetime.now().hour
+if (hour < 12 or hour > 13) and "vultures" in get_sender():
+    delete()
+    
+## If there are many emails exchanged in given time span, then save it to other folder to revisit    
+def paper_related_debate(email):
+    if "paper" in email.get_subject() and "myadvisor@mit.edu" in email.get_recipients():
+        return True
+    return False
+
+interaction = get_history(get_sender(), 5, paper_related_debate)	
+if interaction['cond'] > 7:
+    move("conference")
+</textarea>
+									</div>
+								</div>
+							{% endif %}
+						</div>
+					  </div>
+		
+					  <div id="console" class="info">
+						<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
+						{% if user.is_authenticated %}
+						{% else %}
+							<p class="info"><span class='current-date'>01/09/2019 21:25:12</span> <i class="fas fa-lg fa-envelope-square"></i> [csail-related] Looking for roommates, available next month | marked as read</p>
+						{% endif %}
+					  </div>
+					</div>
+
+					<div class="card">
+							<div class="card-header">
+								<h4>Rules for email shortcuts</h4> 
+								You can use your YoUPS rule from your email interface. Define your shortcut below, then when you forward an email with the shortcut to {{website}}@{{website}}.csail.mit.edu, YoUPS will run the action for you!
+								<br>
+								<button class="btn btn-primary" id="btn-shortcut-save" style="float: right;">Save</button>
+								<br><br>
+							</div>
+							<div class="card-block" id="editor-shortcut-container">
+								<textarea class="editor shortcut-editor" id="editor-shortcut">
+										{% if shortcuts_exist %}
+{{ shortcuts }}
+										{% else %}
+import re
+
+# LABEL x, y, z => add labels [x,y,z] to the email
+m = re.search('(?<=LABEL)(.*)', get_content())
+add_labels( m.groups()[0].split(",") ) # if you are using gmail, then add_gmail_labels
+										    
+if "TODO" in get_content() and "soya@mit.edu" in get_sender():
+    move("todo")	
+										    
+print get_sender()	
+										{% endif %}    
+	</textarea>
+							</div>
+						  </div>
+			  </div>
+
+			  <div id="apis-container" style="display:none;" mv-app="api" mv-storage="https://github.com/soyapark/mailbot">
+				<h3>Retreive metadata of an email</h3>
+                <div property="getter" mv-multiple>
+                    <h4>[name] ([params])</h4>
+                </div>
+                <br>
+                <h3>Action on an email</h3>
+                <div property="methods"  mv-multiple>
+                    <h4>[name] ([params])</h4>
+                  </div>
+                  <br>
+                <h3>Action on a folder</h3>
+                <div property="folder"  mv-multiple>
+                    <h4>[name] ([params])</h4>
+				</div>
+				<h3>Action on a mode</h3>
+                <div property="mode"  mv-multiple>
+                    <h4>[name] ([params])</h4>
+                </div>
+			  </div>
+			  <!-- END editor col -->	
+		</div>
+	</div>
+	<script type="text/javascript">
+		var is_authenticated = {{ user.is_authenticated|yesno:"true,false" }},
+			is_imap_authenticated = {{ imap_authenticated|yesno:"true,false" }},
+			is_test = {{ is_test|yesno:"true,false" }},
+			IS_RUNNING = {{ is_running|yesno:"true,false" }},
+			current_mode = "{{ current_mode.name }}",
+			current_mode_id = "{{ current_mode.uid }}";
+	</script>
+	
+	  
+	<!-- <a href="/groups/{{group_info.name}}">Back to group info page</a> -->
+{% endblock %}
+
+{% block customjs %}
+	<script type="text/javascript" src="/static/javascript/notify.js"></script>
+
+	<script type="text/javascript" src="/static/javascript/mailbot/fontawesome-all.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/mailbot/codemirror.js"></script>
+	<script type="text/javascript" src="/static/javascript/mailbot/addon/edit/matchbrackets.js"></script>
+	<script type="text/javascript" src="/static/javascript/mailbot/python.js"></script>
+	<script type="text/javascript" src="/static/javascript/mailbot/addon/hint/show-hint.js"></script>
+	
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"></script>
+	
+	<!-- Underscore, Backbone, backbone-localStorage, jQuery -->
+	<script type="text/javascript" src="/static/javascript/mailbot/console/underscore.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/mailbot/console/backbone.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/mailbot/console/backbone-localStorage.min.js"></script>
+	
+	<!-- Some extras for the demo: -->
+	<script type="text/javascript" src="/static/javascript/mailbot/console/lettering.js"></script>
+	<script type="text/javascript" src="/static/javascript/mailbot/console/prettify.js"></script>
+	<script type="text/javascript" src="/static/javascript/mailbot/console/DAT.GUI.min.js"></script>
+
+	<script src="/static/javascript/mailbot/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/mailbot/jquery.switchButton.js"></script>
+	
+	<script src="https://get.mavo.io/mavo.js"></script>
+	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
+	<!-- <script type="text/javascript" src="/static/javascript/mailbot/console/sandbox-console.js"></script> -->
+
+	<script type="text/javascript" src="/static/javascript/murmur/login_imap.js"></script>
+{% endblock %}

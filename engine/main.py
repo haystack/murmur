@@ -12,13 +12,16 @@ from pytz import utc
 
 from browser.util import *
 from constants import *
+from engine.google_auth import *
 from engine.constants import extract_hash_tags, ALLOWED_MESSAGE_STATUSES
 from gmail_setup.api import update_gmail_filter, untrash_message
 from gmail_setup.views import build_services
-from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME, PERSPECTIVE_KEY
+from http_handler.settings import BASE_URL, WEBSITE, AWS_STORAGE_BUCKET_NAME, PERSPECTIVE_KEY, IMAP_SECRET
 from s3_storage import upload_attachments, download_attachments, download_message
 from schema.models import *
 from smtp_handler.utils import *
+
+from engine.youps import login_imap, fetch_execution_log, delete_mailbot_mode, run_mailbot, save_shortcut
 
 def list_groups(user=None):
     groups = []
@@ -1613,27 +1616,6 @@ def update_donotsend_list(user, group_name, emails, push=True):
     logging.debug(res)
     return res 
 
-def login_imap(user, email, password, host, push=True):
-    res = {'status' : False}
-
-    try:
-        if not ImapAccount.objects.filter(email=email).exists():
-            imapAccount = ImapAccount(email=email, password=password, host=host)
-            imapAccount.save()
-
-            res['code'] = "New user"
-
-        else:
-            res['code'] = "This account is already logged in!"
-        
-        res['status'] = True
-
-    except Exception, e:
-        print e
-        res['code'] = msg_code['UNKNOWN_ERROR']
-
-    logging.debug(res)
-    return res 
 
 # add a new entry to whitelist/blacklist table, or update existing one
 # user is the user who is adding them(we need to make sure they are authorized,

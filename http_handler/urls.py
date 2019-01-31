@@ -99,6 +99,16 @@ urlpatterns = patterns('',
 
     url(r'^activate_group', 'browser.views.activate_group'),
     url(r'^deactivate_group', 'browser.views.deactivate_group'),
+
+    # mailbot
+    url(r'^editor', 'browser.views.login_imap_view'),
+    url(r'^docs', 'browser.views.docs_view'),
+    url(r'^login_imap', 'browser.views.login_imap'),
+    url(r'^run_mailbot', 'browser.views.run_mailbot'),
+    url(r'^save_shortcut', 'browser.views.save_shortcut'),
+                    
+    url(r'^delete_mailbot_mode', 'browser.views.delete_mailbot_mode'),
+    url(r'^fetch_execution_log', 'browser.views.fetch_execution_log'),
     )
 
 # murmur-only patterns
@@ -163,8 +173,6 @@ if WEBSITE == 'murmur':
                     url(r'^adjust_list_can_post', 'browser.views.adjust_list_can_post'),
                     url(r'^adjust_list_can_receive', 'browser.views.adjust_list_can_receive'),
 
-                    url(r'^login_email', 'browser.views.login_imap_view'),
-                    url(r'^login_imap', 'browser.views.login_imap'),
                     url(r'^groups/(?P<group_name>[\w-]+)/add_donotsend', 'browser.views.add_dissimulate_view'),
                     url(r'^edit_donotsend', 'browser.views.edit_donotsend'),
                     url(r'^donotsend_list', 'browser.views.donotsend_list'),

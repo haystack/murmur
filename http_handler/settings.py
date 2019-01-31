@@ -48,6 +48,9 @@ def _get_website():
     return website
     
 WEBSITE = _get_website()
+CLIENT_ID = ''
+CLIENT_SECRET = ''
+IMAP_SECRET = ''
 
 try:
     execfile(SITE_ROOT + '/../private.py')
@@ -169,7 +172,12 @@ TEMPLATE_LOADERS = (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django_mobile.context_processors.flavour',
-    
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.request",
+    "django.core.context_processors.static",
 )
 
 MIDDLEWARE_CLASSES = (

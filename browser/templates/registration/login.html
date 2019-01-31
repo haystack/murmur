@@ -4,11 +4,12 @@
 <div class="accounts">
 	<h3>{{ website | title }} Login</h3>
 	<hr />
-	<form method="POST" action="." id='login-form'>
+	<form method="POST" action="{% url 'django.contrib.auth.views.login' %}" id='login-form'>
 		{% csrf_token %}
 		{{ form.as_p }}
 		<br />
-		<input type="submit" class="btn btn-primary" value="Log In" />
+		<input type="submit" class="btn btn-primary" value="login" />
+		<input type="hidden" name="next" value="{{ next }}" />
 	</form>
 	<br />
 	<P><a href="{% url "auth_password_reset" %}">Reset Password</a></p>
