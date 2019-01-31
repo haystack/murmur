@@ -531,7 +531,8 @@ def add_members(group_name, emails, add_as_mods, user):
             membergroup = MemberGroup.objects.get(group=group, member=user)
             is_admin = membergroup.admin
         if is_public or is_admin:
-            email_list = emails.strip().lower().split(',')
+            emails_txt = emails.strip().lower()
+            email_list = re.split('(?<!\d)[,;|/](?!\d)', emails_txt)
 
             for email in email_list:
                 _, email = parseaddr(email)

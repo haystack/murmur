@@ -79,7 +79,7 @@ ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "appli
 
 ALLOWED_MIMETYPES_STR = 'images (JPEG, BMP, GIF, PNG), PDFs, and Microsoft Office (Word, Excel, Powerpoint) files'
 
-MAX_ATTACHMENT_SIZE = 3000000
+MAX_ATTACHMENT_SIZE = 10000000
 
 # for creating squadbox ps 
 SQUADBOX_REASONS = {
