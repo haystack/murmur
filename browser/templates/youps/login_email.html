@@ -173,14 +173,15 @@ if interaction['cond'] > 7:
 					  </div>
 		
 					  <div id="console" class="info">
-						<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
 						<span id='engine-status-spinning-bar' class="fa-layers fa-fw fa-2x">
 							<i class="fas fa-sync"></i>
 							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
 						</span>
 						<span id='engine-status-msg'></span>
 						
-						<div id="console-output"></div>
+						<div id="console-output">
+							<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
+						</div>
 						{% if user.is_authenticated %}
 						{% else %}
 						

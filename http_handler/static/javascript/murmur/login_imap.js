@@ -245,6 +245,8 @@ $(document).ready(function() {
         $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
         $(".dropdown .btn").attr('mode-id', current_mode_id);
     } else {
+        set_running(false);
+
         // init $("#current_mode_dropdown") with a default value if there is no selected mode yet
         var random_id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
             random_mode_name = $.trim( document.querySelector('.nav.nav-tabs span[mode-id="'+ random_id + '"]').innerHTML );
