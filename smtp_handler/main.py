@@ -3,6 +3,7 @@ from lamson.routing import route, stateless
 from config.settings import relay
 from http_handler.settings import WEBSITE
 from schema.models import *
+from schema.models import ImapAccount
 from lamson.mail import MailResponse
 from email.utils import *
 from email import message_from_string, header
