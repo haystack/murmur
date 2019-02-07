@@ -64,6 +64,7 @@ class Message(models.Model):
     task = models.CharField('task', max_length=300, blank=True)
     
     class Meta:
+        db_table = "youps_messages"
 		unique_together = ("message_id", "imap_account")
 
 class Thread(models.Model):
@@ -78,4 +79,5 @@ class Thread(models.Model):
     task = models.CharField('task', max_length=300, blank=True)
 
     class Meta:
+        db_table = "youps_threads"
 		unique_together = ("id", "imap_account")
