@@ -80,4 +80,4 @@ class Thread(models.Model):
 
     class Meta:
         db_table = "youps_threads"
-		unique_together = ("id", "imap_account")
+        unique_together = ("id", "imap_account")
