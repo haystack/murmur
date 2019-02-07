@@ -65,7 +65,7 @@ class Message(models.Model):
     
     class Meta:
         db_table = "youps_messages"
-		unique_together = ("message_id", "imap_account")
+        unique_together = ("message_id", "imap_account")
 
 class Thread(models.Model):
     id = models.AutoField(primary_key=True)
