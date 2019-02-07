@@ -62,8 +62,8 @@ class Message(models.Model):
     topic = models.CharField('topic', max_length=300, blank=True)
     priority = models.CharField('priority', max_length=300, blank=True)
     task = models.CharField('task', max_length=300, blank=True)
- 
-	class Meta:
+    
+    class Meta:
 		unique_together = ("message_id", "imap_account")
 
 class Thread(models.Model):
