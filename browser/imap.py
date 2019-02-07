@@ -15,7 +15,7 @@ from engine.google_auth import GoogleOauth2
 from Crypto.Cipher import AES
 from engine.constants import msg_code
 from datetime import datetime, timedelta
-from schema.models import MailbotMode
+from schema.youps import MailbotMode
 import calendar
 import base64
 

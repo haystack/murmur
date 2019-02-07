@@ -2,7 +2,7 @@ import base64, email, hashlib, json, logging, random, re, requests, sys, time, t
 
 from browser.imap import *
 
-from schema.models import ImapAccount, MailbotMode
+from schema.youps import ImapAccount, MailbotMode
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
