@@ -54,7 +54,7 @@ class Message(models.Model):
     message_id = models.CharField('message_id', max_length=300)
 
     thread = models.ForeignKey('Thread')
-	imap_account = models.ForeignKey('ImapAccount')
+    imap_account = models.ForeignKey('ImapAccount')
 
     progress = models.CharField('progress', max_length=300, blank=True)
     deadline = models.DateTimeField(null=True, blank=True)
