@@ -50,14 +50,29 @@ class MailbotMode(models.Model):
 	class Meta:
 		unique_together = ("uid", "imap_account")
 
-class Message(models.Model):
-    message_id = models.CharField('message_id', max_length=300)
-
-    thread = models.ForeignKey('Thread')
+class Message_Thread(models.Model):
+    id = models.AutoField(primary_key=True)
     imap_account = models.ForeignKey('ImapAccount')
 
     progress = models.CharField('progress', max_length=300, blank=True)
-    deadline = models.DateTimeField(null=True, blank=True)
+    deadline = models.DateTimeField('deadline', null=True, blank=True)
+    category = models.CharField('category', max_length=300, blank=True)
+    topic = models.CharField('topic', max_length=300, blank=True)
+    priority = models.CharField('priority', max_length=300, blank=True)
+    task = models.CharField('task', max_length=300, blank=True)
+
+    class Meta:
+        db_table = "youps_threads"
+        unique_together = ("id", "imap_account")
+
+class Message(models.Model):
+    message_id = models.CharField('message_id', max_length=300)
+
+    thread = models.ForeignKey('Message_Thread')
+    imap_account = models.ForeignKey('ImapAccount')
+
+    progress = models.CharField('progress', max_length=300, blank=True)
+    deadline = models.DateTimeField('deadline', null=True, blank=True)
     category = models.CharField('category', max_length=300, blank=True)
     topic = models.CharField('topic', max_length=300, blank=True)
     priority = models.CharField('priority', max_length=300, blank=True)
@@ -67,17 +82,4 @@ class Message(models.Model):
         db_table = "youps_messages"
         unique_together = ("message_id", "imap_account")
 
-class Thread(models.Model):
-    id = models.AutoField(primary_key=True)
-    imap_account = models.ForeignKey('ImapAccount')
 
-    progress = models.CharField('progress', max_length=300, blank=True)
-    deadline = models.DateTimeField(null=True, blank=True)
-    category = models.CharField('category', max_length=300, blank=True)
-    topic = models.CharField('topic', max_length=300, blank=True)
-    priority = models.CharField('priority', max_length=300, blank=True)
-    task = models.CharField('task', max_length=300, blank=True)
-
-    class Meta:
-        db_table = "youps_threads"
-        unique_together = ("id", "imap_account")
