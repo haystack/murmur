@@ -13,9 +13,9 @@ $(document).ready(function() {
         var datetime = format_date();
 
         if(is_error) 
-            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" ).addClass("error");
+            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" ).addClass("error");
 
-        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" )
+        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" )
             .addClass("info");
     }   
 
@@ -398,7 +398,7 @@ $(document).ready(function() {
                 // Auth success
                 if (res.status) {
                     if( log_backup != res['imap_log']){
-                        $("#console").html("");
+                        $("#console-output").html("");
                         append_log(res['imap_log'], false);
                     }
                     
