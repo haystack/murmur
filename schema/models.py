@@ -364,6 +364,22 @@ class MailbotMode(models.Model):
 	class Meta:
 		unique_together = ("uid", "imap_account")
 
+class Contact(models.Model):
+	name = models.CharField('contact_name', max_length=100)
+	email = models.EmailField(
+        verbose_name='email address',
+        max_length=255,
+        unique=True,
+    )
+	organization = models.TextField(null=True, blank=True)
+	geolocation = models.TextField(null=True, blank=True)
+	availability = models.TextField(null=True, blank=True)
+
+	imap_account = models.ForeignKey('ImapAccount')
+
+	class Meta:
+		unique_together = ("email", "imap_account")
+
 class Following(models.Model):
 	id = models.AutoField(primary_key=True)
 	thread = models.ForeignKey('Thread')

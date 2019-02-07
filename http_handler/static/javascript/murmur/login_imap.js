@@ -84,6 +84,7 @@ $(document).ready(function() {
     var unsaved_tabs = [];
     
     document.addEventListener("mv-load", function(){   
+        // Init editor autocomplete
         document.querySelectorAll('textarea.editor').forEach(function(element) {
             var mode_id = element.id.split("-")[1];
             $('.nav-tabs li a[href="#editor-tab_'+ mode_id +'"]').click();

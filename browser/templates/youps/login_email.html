@@ -67,14 +67,9 @@
 			<div id="editor-container">
 				<div id="status">
 				  <!-- This rule will be applied to your incoming emails.   -->
-				  <div class="fa-3x">
-						Status: <span class="fa-layers fa-fw">
-							<i class="fas fa-sync"></i>
-							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
-						</span>
-						<div class="dropdown" style="display: inline;">
-								<label style="font-size: medium;">Select your mode: </label>
-								<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					<div class="dropdown" style="display: inline;">
+						<label style="font-size: medium;">Select your mode: </label>
+						<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 								  Default
 								  <span class="caret"></span>
 								</button>
@@ -84,13 +79,13 @@
 								  <li><a href="#" data-value="something else here">Something else here</a></li>
 								  <li><a href="#" data-value="separated link">Separated link</a></li>
 								</ul>
-						</div>
+					</div>
 						{% if imap_authenticated %}
 							<button class="btn btn-primary" id="btn-code-submit">Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% else %}
 							<button class="btn btn-primary" id="btn-code-submit" disabled>Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% endif %}
-				  </div>
+				  
 				</div>
 		
 					<div style="padding-top: 40px;">
@@ -179,8 +174,15 @@ if interaction['cond'] > 7:
 		
 					  <div id="console" class="info">
 						<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
+						<span id='engine-status-spinning-bar' class="fa-layers fa-fw fa-2x">
+							<i class="fas fa-sync"></i>
+							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
+						</span>
+						<span id='engine-status-msg'>Your email engine is not running at the moment.</span>
+
 						{% if user.is_authenticated %}
 						{% else %}
+						
 							<p class="info"><span class='current-date'>01/09/2019 21:25:12</span> <i class="fas fa-lg fa-envelope-square"></i> [csail-related] Looking for roommates, available next month | marked as read</p>
 						{% endif %}
 					  </div>
