@@ -82,4 +82,20 @@ class Message(models.Model):
         db_table = "youps_messages"
         unique_together = ("message_id", "imap_account")
 
+class Contact(models.Model):
+	name = models.CharField('contact_name', max_length=100)
+	email = models.EmailField(
+        verbose_name='email address',
+        max_length=255,
+        unique=True,
+    )
+	organization = models.TextField(null=True, blank=True)
+	geolocation = models.TextField(null=True, blank=True)
+	availability = models.TextField(null=True, blank=True)
 
+	imap_account = models.ForeignKey('ImapAccount') # it belongs to this imap_account
+
+	class Meta:
+		unique_together = ("email", "imap_account")
+
+# class Youps_user(models.Model):

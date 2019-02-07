@@ -364,12 +364,14 @@ $(document).ready(function() {
         // Start running
         if(start_running) {
             spinStatusCog(true);
+            $("#engine-status-msg").text("Your email engine is running.");
             btn_code_sumbit.text("Disable");
         }
         
         // Stop running
         else {
             spinStatusCog(false);
+            $("#engine-status-msg").text("Your email engine is not running at the moment.");
             btn_code_sumbit.text("Enable");
         }
     }
