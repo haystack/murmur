@@ -4,6 +4,7 @@ import base64
 from django.core.management.base import BaseCommand, CommandError
 from smtp_handler.utils import *
 from schema.models import *
+from schema.youps import ImapAccount
 from datetime import datetime, timedelta
 from browser.imap import *
 from imapclient import IMAPClient

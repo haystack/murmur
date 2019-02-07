@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 # from smtp_handler.utils import *
-from schema.models import ImapAccount
+from schema.youps import ImapAccount
 from datetime import datetime
 from browser.imap import fetch_latest_email_id, authenticate, interpret
 from imapclient import IMAPClient
