@@ -67,7 +67,7 @@ class Message(models.Model):
 		unique_together = ("message_id", "imap_account")
 
 class Thread(models.Model):
-    id = models.IntegerField()
+    id = models.AutoField(primary_key=True)
     imap_account = models.ForeignKey('ImapAccount')
 
     progress = models.CharField('progress', max_length=300, blank=True)
