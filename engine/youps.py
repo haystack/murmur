@@ -9,7 +9,7 @@ from imapclient import IMAPClient
 import string
 import random
 
-from engine.tasks import add_task
+from http_handler.tasks import add_task
 
 def login_imap(user, password, host, is_oauth, push=True):
     res = {'status' : False}
@@ -163,7 +163,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
 
-        add_task.delay( imapAccount, True )
+        add_task.delay( imapAccount.email, True )
 
         for key, value in modes.iteritems():
             mode_id = value['id']

@@ -92,11 +92,11 @@ class TaskScheduler(models.Model):
 
     @staticmethod
     def schedule_every(task_name, period, every, args=None, kwargs=None):
-		""" schedules a task by name every "every" "period". So an example call would be:
-		TaskScheduler('mycustomtask', 'seconds', 30, [1,2,3]) 
-		that would schedule your custom task to run every 30 seconds with the arguments 1,2 and 3 passed to the actual task. """
-		permissible_periods = ['days', 'hours', 'minutes', 'seconds']
-		if period not in permissible_periods:
+        """ schedules a task by name every "every" "period". So an example call would be:
+        TaskScheduler('mycustomtask', 'seconds', 30, [1,2,3]) 
+        that would schedule your custom task to run every 30 seconds with the arguments 1,2 and 3 passed to the actual task. """
+        permissible_periods = ['days', 'hours', 'minutes', 'seconds']
+        if period not in permissible_periods:
             raise Exception('Invalid period specified')
         # create the periodic task and the interval
         ptask_name = "%s_%s" % (task_name, datetime.datetime.now()) # create some name for the period task
@@ -106,7 +106,7 @@ class TaskScheduler(models.Model):
         else: # create a brand new interval schedule
             interval_schedule = IntervalSchedule()
             interval_schedule.every = every # should check to make sure this is a positive int
-            interval_schedule.period = period 
+            interval_schedule.period = period
             interval_schedule.save()
         ptask = PeriodicTask(name=ptask_name, task=task_name, interval=interval_schedule)
         if args:

@@ -32,8 +32,8 @@ def test(arg):
     print("TEST TASK  " + arg)
 
 
-@periodic_task(run_every=(crontab(minute='*/15')), name="some_task", ignore_result=True)
-def some_task():
-    # do something
-    logger.info("Saved image from Flickr")
-    print ("perioid task")
+# @periodic_task(run_every=(crontab(minute='*/15')), name="some_task", ignore_result=True)
+# def some_task():
+#     # do something
+#     logger.info("Saved image from Flickr")
+#     print ("perioid task")
