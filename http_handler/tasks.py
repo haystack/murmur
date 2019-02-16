@@ -1,7 +1,7 @@
 from celery.decorators import task, periodic_task
 from celery.utils.log import get_task_logger
 
-from schema.youps import ImapAccount
+from schema.youps import ImapAccount, TaskScheduler
 
 logger = get_task_logger(__name__)
 
@@ -13,8 +13,9 @@ def add_task(imap_account, mode):
 
     # determine it is periodic or not 
     # callback to user profile to make sure we are not running out-dated code
-    print("ADD TASK performed!" + imap_account.email)
-    return imap_account.email
+    print("ADD TASK performed!" + imap_account)
+    TaskScheduler.schedule_every('test', 'seconds', 3, [1,2,3])
+    return imap_account
 
 # this is for static task scheduling
 # @on_after_configure.connect
@@ -25,10 +26,8 @@ def add_task(imap_account, mode):
 #     # Calls test('world') every 30 seconds
 #     sender.add_periodic_task(30.0, test.s('world'), expires=10)
 
-# TODO try to add simple task and see how to print out task, try to call this from somewhere 
-
-@task
-def test(arg):
+@task(name="test")
+def test(args)
     print("TEST TASK  " + arg)
 
 
