@@ -99,7 +99,7 @@ class TaskScheduler(models.Model):
         if period not in permissible_periods:
             raise Exception('Invalid period specified')
         # create the periodic task and the interval
-        ptask_name = "%s_%s" % (task_name, datetime.datetime.now()) # create some name for the period task
+        ptask_name = "%s_%s" % (task_name, datetime.now()) # create some name for the period task
         interval_schedules = IntervalSchedule.objects.filter(period=period, every=every)
         if interval_schedules: # just check if interval schedules exist like that already and reuse em
             interval_schedule = interval_schedules[0]

@@ -14,7 +14,7 @@ def add_task(imap_account, mode):
     # determine it is periodic or not 
     # callback to user profile to make sure we are not running out-dated code
     print("ADD TASK performed!" + imap_account)
-    TaskScheduler.schedule_every('test', 'seconds', 3, [1,2,3])
+    TaskScheduler.schedule_every('test123', 'seconds', 3, [1,2,3])
     return imap_account
 
 # this is for static task scheduling
@@ -26,8 +26,9 @@ def add_task(imap_account, mode):
 #     # Calls test('world') every 30 seconds
 #     sender.add_periodic_task(30.0, test.s('world'), expires=10)
 
-@task(name="test")
-def test(args)
+@task(name="test123")
+def test123(args):
+    logger.info("Test task perform")
     print("TEST TASK  " + arg)
 
 
