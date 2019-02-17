@@ -96,8 +96,8 @@
 					<div style="padding-top: 40px;">
 					  <div class="card">
 						<div class="card-header">
-							<h4>Rules for incoming emails</h4> 
-							The following rule will be applied when a new mail arrives. 
+							<h4>Your email scripts</h4> 
+							Following rules will execute once. You can use setInterval() to periodically update attribute or execute rules based on the value of attributes.  							
 							<br>
 							<button class="btn btn-primary" id="btn-incoming-save" style="float: right;">Save</button>
 						</div>
@@ -185,6 +185,25 @@ if interaction['cond'] > 7:
 						{% endif %}
 					  </div>
 					</div>
+
+					<div class="card">
+						<div class="card-header">
+							<h4>Shared functions</h4> 
+							You can write shared functions or code here and call them from any modes.
+							<br>
+							<button class="btn btn-primary" id="btn-shared-save" style="float: right;">Save</button>
+							<br><br>
+						</div>
+						<div class="card-block" id="editor-shared-container">
+							<textarea class="editor shared-editor" id="editor-shared">
+									{% if shortcuts_exist %}
+{{ shortcuts }}
+									{% else %}
+# add example of shared code here. 
+									{% endif %}    
+</textarea>
+						</div>
+					  </div>
 
 					<div class="card">
 							<div class="card-header">
@@ -279,5 +298,5 @@ print get_sender()
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
 	<!-- <script type="text/javascript" src="/static/javascript/mailbot/console/sandbox-console.js"></script> -->
 
-	<script type="text/javascript" src="/static/javascript/murmur/login_imap.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/login_imap.js"></script>
 {% endblock %}

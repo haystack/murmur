@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 from schema.youps import MailbotMode
 import calendar
 import base64
-
+from http_handler.tasks import add_periodic_task
 
 def authenticate(imap_account):
     res = {'status' : False, 'imap_error': False, 'imap_log': "", 'imap': None}
@@ -158,6 +158,15 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             # Send this error msg to the user
             res['imap_log'] = logstr
             res['imap_error'] = True
+
+        def set_interval(interval=None, func=None):
+            if not interval:
+                raise Exception('set_interval(): requires interval (in second)')
+
+            if not func:
+                raise Exception('set_interval(): requires code to be executed periodically')
+
+            add_periodic_task.delay( interval, imap_account, imap, func, search_creteria, is_test=False, email_content=None )
 
         def send(subject="", to_addr="", body=""):
             if len(to_addr) == 0:

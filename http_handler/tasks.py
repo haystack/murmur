@@ -2,34 +2,35 @@ from celery.decorators import task, periodic_task
 from celery.utils.log import get_task_logger
 
 from schema.youps import ImapAccount, TaskScheduler
+from browser.imap import interpret
 
 logger = get_task_logger(__name__)
 
+# celery -A http_handler worker -l debug
+# celery -A http_handler beat --max-interval=10 -S djcelery.schedulers.DatabaseSchedule -l debug
 
-@task(name="add_task")
-def add_task(imap_account, mode):
-    """sends an email when feedback form is filled successfully"""
+@task(name="add_periodic_task")
+def add_periodic_task(interval, imap_account, imap, code, search_creteria, is_test=False, email_content=None):
+    """ create a new periodic task
+
+    Args:
+        interval (number): interval of how often to run the code in sec
+        the rest args are same as imap.interpret's
+    """
     logger.info("ADD TASK performed!")
 
     # determine it is periodic or not 
     # callback to user profile to make sure we are not running out-dated code
-    print("ADD TASK performed!" + imap_account)
-    TaskScheduler.schedule_every('test123', 'seconds', 3, [1,2,3])
+    print("ADD periodic task TASK performed!" + imap_account.email)
+    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, [imap_account, imap, code, search_creteria, is_test, email_content])
     return imap_account
 
-# this is for static task scheduling
-# @on_after_configure.connect
-# def setup_periodic_tasks(sender, **kwargs):
-#     # Calls test('hello') every 10 seconds.
-#     sender.add_periodic_task(10.0, test.s('hello'), name='add every 10')
+def remove_periodic_task():
+    pass
 
-#     # Calls test('world') every 30 seconds
-#     sender.add_periodic_task(30.0, test.s('world'), expires=10)
-
-@task(name="test123")
-def test123(args):
-    logger.info("Test task perform")
-    print("TEST TASK  " + arg)
+@task(name="run_interpret")
+def run_interpret(imap_account, imap, code, search_creteria, is_test=False, email_content=None):
+    interpret(imap_account, imap, code, search_creteria, is_test, email_content)
 
 
 # @periodic_task(run_every=(crontab(minute='*/15')), name="some_task", ignore_result=True)
