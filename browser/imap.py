@@ -166,7 +166,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if not func:
                 raise Exception('set_interval(): requires code to be executed periodically')
 
-            add_periodic_task.delay( interval, imap_account, imap, func, search_creteria, is_test=False, email_content=None )
+            add_periodic_task.delay( interval, imap_account.id, func, search_creteria, is_test=False, email_content=None )
 
         def send(subject="", to_addr="", body=""):
             if len(to_addr) == 0:

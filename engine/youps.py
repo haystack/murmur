@@ -163,7 +163,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
 
-        add_periodic_task.delay( 3, imapAccount.id, imap, "print 'PERIODIC TEST'", "UID 10000" )
+        add_periodic_task.delay( 3, imapAccount.id, "print 'PERIODIC TEST'", "UID 10000" )
 
         for key, value in modes.iteritems():
             mode_id = value['id']
