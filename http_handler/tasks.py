@@ -3,6 +3,7 @@ from celery.utils.log import get_task_logger
 
 from schema.youps import ImapAccount, TaskScheduler
 
+import json
 
 logger = get_task_logger(__name__)
 
@@ -25,7 +26,6 @@ def add_periodic_task(interval, imap_account_id, code, search_creteria, is_test=
     
     args = json.dumps([imap_account_id, code, search_creteria])
     TaskScheduler.schedule_every('run_interpret', 'seconds', interval, args)
-    return imapAccount
 
 def remove_periodic_task():
     pass
@@ -40,11 +40,11 @@ def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_c
         raise ValueError('Something went wrong during authentication. Refresh and try again!')
         
     imap = auth_res['imap']
-
+    imap.select_folder('INBOX')
     res = interpret(imap_account, imap, code, search_creteria, is_test, email_content)
     print res['imap_log']
 
-
+    logger.info(res['imap_log'])
 # @periodic_task(run_every=(crontab(minute='*/15')), name="some_task", ignore_result=True)
 # def some_task():
 #     # do something

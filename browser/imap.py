@@ -18,7 +18,9 @@ from datetime import datetime, timedelta
 from schema.youps import MailbotMode
 import calendar
 import base64
+import json
 from http_handler.tasks import add_periodic_task
+import marshal, ujson
 
 def authenticate(imap_account):
     res = {'status' : False, 'imap_error': False, 'imap_log': "", 'imap': None}
@@ -166,7 +168,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if not func:
                 raise Exception('set_interval(): requires code to be executed periodically')
 
-            add_periodic_task.delay( interval, imap_account.id, func, search_creteria, is_test=False, email_content=None )
+            args = ujson.dumps( [interval, imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test=False, email_content=None] )
+            add_periodic_task.delay( args )
 
         def send(subject="", to_addr="", body=""):
             if len(to_addr) == 0:
