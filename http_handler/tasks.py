@@ -3,7 +3,7 @@ from celery.utils.log import get_task_logger
 
 from schema.youps import ImapAccount, TaskScheduler
 
-import json
+import json, ujson, types, marshal
 
 logger = get_task_logger(__name__)
 
@@ -11,7 +11,7 @@ logger = get_task_logger(__name__)
 # celery -A http_handler beat --max-interval=10 -S djcelery.schedulers.DatabaseScheduler -l debug
 
 @task(name="add_periodic_task")
-def add_periodic_task(interval, imap_account_id, code, search_creteria, is_test=False, email_content=None):
+def add_periodic_task(interval, args):
     """ create a new periodic task
 
     Args:
@@ -24,14 +24,21 @@ def add_periodic_task(interval, imap_account_id, code, search_creteria, is_test=
     # callback to user profile to make sure we are not running out-dated code
     print("ADD periodic task TASK performed!")
     
-    args = json.dumps([imap_account_id, code, search_creteria])
+    # args = json.dumps([imap_account_id, code, search_creteria])
     TaskScheduler.schedule_every('run_interpret', 'seconds', interval, args)
 
 def remove_periodic_task():
     pass
 
 @task(name="run_interpret")
-def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_content=None):
+def run_interpret(args):
+    args = ujson.loads(args)
+    imap_account_id = args[0]
+    code = marshal.loads(args[1])
+    search_creteria = args[2]
+    is_test = args[3]
+    email_content = args[4]
+    
     from browser.imap import interpret, authenticate
     imap_account = ImapAccount.objects.get(id=imap_account_id)
     auth_res = authenticate( imap_account )

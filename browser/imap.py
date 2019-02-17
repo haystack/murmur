@@ -168,8 +168,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if not func:
                 raise Exception('set_interval(): requires code to be executed periodically')
 
-            args = ujson.dumps( [interval, imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test=False, email_content=None] )
-            add_periodic_task.delay( args )
+            args = ujson.dumps( [imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test=False, email_content=None] )
+            add_periodic_task.delay( interval, args )
 
         def send(subject="", to_addr="", body=""):
             if len(to_addr) == 0:
