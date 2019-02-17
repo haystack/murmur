@@ -21,9 +21,10 @@ def add_periodic_task(interval, imap_account_id, code, search_creteria, is_test=
 
     # determine it is periodic or not 
     # callback to user profile to make sure we are not running out-dated code
-    print("ADD periodic task TASK performed!" + imap_account_id)
+    print("ADD periodic task TASK performed!")
     
-    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, [imap_account_id, code, search_creteria, is_test, email_content])
+    args = json.dumps([imap_account_id, code, search_creteria])
+    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, args)
     return imapAccount
 
 def remove_periodic_task():
@@ -40,7 +41,8 @@ def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_c
         
     imap = auth_res['imap']
 
-    interpret(imap_account, imap, code, search_creteria, is_test, email_content)
+    res = interpret(imap_account, imap, code, search_creteria, is_test, email_content)
+    print res['imap_log']
 
 
 # @periodic_task(run_every=(crontab(minute='*/15')), name="some_task", ignore_result=True)
