@@ -81,9 +81,9 @@
 								</ul>
 					</div>
 						{% if imap_authenticated %}
-							<button class="btn btn-primary" id="btn-code-submit">Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
+							<button class="btn btn-primary" id="btn-code-submit">RUN</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% else %}
-							<button class="btn btn-primary" id="btn-code-submit" disabled>Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
+							<button class="btn btn-primary" id="btn-code-submit" disabled>RUN</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% endif %}
 				  
 				</div>
@@ -180,7 +180,7 @@ if interaction['cond'] > 7:
 						<span id='engine-status-msg'></span>
 						<span id='user-status-msg'></span>
 						<div id="console-output">
-							<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
+							<p class="info">Output from the engine will be sent to your inbox. {% if not is_running %}Press a button "RUN" to start your engine.{% endif %}</p>
 						</div>
 						{% if user.is_authenticated %}
 						{% else %}

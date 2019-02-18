@@ -377,14 +377,14 @@ $(document).ready(function() {
         if(start_running) {
             spinStatusCog(true);
             $("#engine-status-msg").text("Your email engine is running.");
-            btn_code_sumbit.text("Disable");
+            btn_code_sumbit.text("STOP");
         }
         
         // Stop running
         else {
             spinStatusCog(false);
             $("#engine-status-msg").text("Your email engine is not running at the moment.");
-            btn_code_sumbit.text("Enable");
+            btn_code_sumbit.text("RUN");
         }
     }
     

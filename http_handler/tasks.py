@@ -24,6 +24,7 @@ def add_periodic_task(interval, args):
 
     imap_account = ImapAccount.objects.get(id=imap_account_id)
     imap_account.status_msg = imap_account.status_msg + "[%s]set_interval(): executing every %d seconds\n" % (ptask_name, interval)
+    imap_account.save()
     
 
 @task(name="remove_periodic_task")
@@ -47,7 +48,7 @@ def remove_periodic_task(imap_account_id, ptask_name=None):
     status_msgs = imap_account.status_msg.split('\n')
     
     # update status msg for the user
-    new_msg = "".join([ x+"\n" for x in status_msgs if not x.startswith( "#%d" % (imap_account_id) )])
+    new_msg = "".join([ x+"\n" for x in status_msgs if not x.startswith( "[%d" % (imap_account_id) )])
     imap_account.status_msg = new_msg
     imap_account.save()
 
