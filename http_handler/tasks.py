@@ -17,9 +17,9 @@ def add_periodic_task(interval, args):
         args (json): arguments for interpret () function
     """
     logger.info("ADD TASK performed!")
-    
-    # args = json.dumps([imap_account_id, code, search_creteria])
-    ptask_name = "%d_%d" % (args[0], random.randint(1, 10000)) 
+    imap_account_id = ujson.loads(args)[0]
+
+    ptask_name = "%d_%d" % (int(imap_account_id), random.randint(1, 10000))
     TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args)
 
 @task(name="remove_periodic_task")
@@ -60,10 +60,14 @@ def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_c
     imap = auth_res['imap']
     imap.select_folder('INBOX')
     res = interpret(imap_account, imap, code, search_creteria, is_test, email_content)
-    print res['imap_log']
 
     logger.info(res['imap_log'])
+
+    # @Luke
     # TODO add logs to users' execution_log
+    # we need a setter function that is dealing with text encoding. Every log should be added through the function. 
+    # save_exeucution_log(imap_account, res['imap_log'])
+
 
 # @periodic_task(run_every=(crontab(minute='*/15')), name="some_task", ignore_result=True)
 # def some_task():
