@@ -9,7 +9,7 @@ from imapclient import IMAPClient
 import string
 import random
 
-from http_handler.tasks import add_periodic_task
+from http_handler.tasks import remove_periodic_task
 
 def login_imap(user, password, host, is_oauth, push=True):
     res = {'status' : False}
@@ -163,7 +163,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
 
-        # add_periodic_task.delay( 3, imapAccount.id, "print 'PERIODIC TEST'", "UID 10000" )
+        # remove all the periodic tasks of this user to keep tasks up-to-date
+        remove_periodic_task.delay( imapAccount.id )
 
         for key, value in modes.iteritems():
             mode_id = value['id']

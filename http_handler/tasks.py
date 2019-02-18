@@ -1,14 +1,11 @@
 from celery.decorators import task, periodic_task
 from celery.utils.log import get_task_logger
 
-from schema.youps import ImapAccount, TaskScheduler
+from schema.youps import ImapAccount, TaskScheduler, PeriodicTask
 
-import json, ujson, types, marshal
+import json, ujson, types, marshal, random
 
 logger = get_task_logger(__name__)
-
-# celery -A http_handler worker -l debug
-# celery -A http_handler beat --max-interval=10 -S djcelery.schedulers.DatabaseScheduler -l debug
 
 @task(name="add_periodic_task")
 def add_periodic_task(interval, args):
@@ -17,28 +14,42 @@ def add_periodic_task(interval, args):
     Args:
         interval (number): interval of how often to run the code in sec
         the rest args are same as imap.interpret's
+        args (json): arguments for interpret () function
     """
     logger.info("ADD TASK performed!")
-
-    # determine it is periodic or not 
-    # callback to user profile to make sure we are not running out-dated code
-    print("ADD periodic task TASK performed!")
     
     # args = json.dumps([imap_account_id, code, search_creteria])
-    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, args)
+    ptask_name = "%d_%d" % (args[0], random.randint(1, 10000)) 
+    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args)
 
-def remove_periodic_task():
-    pass
+@task(name="remove_periodic_task")
+def remove_periodic_task(imap_account_id, ptask_name=None):
+    """ remove a new periodic task. If ptask_name is given, then remove that specific task.
+    Otherwise remove all tasks that are associated with the IMAP account ID. 
+
+    Args:
+        imap_account_id (number): id of associated ImapAccount object
+        ptask_name (string): a name of the specific task to be deleted
+    """
+    if ptask_name is None:
+        ptask_prefix = '%d_' % imap_account_id
+        PeriodicTask.objects.filter(name__startswith=ptask_prefix).delete()
+
+    else:
+        PeriodicTask.objects.filter(name=ptask_name).delete()
 
 @task(name="run_interpret")
-def run_interpret(args):
-    args = ujson.loads(args)
-    imap_account_id = args[0]
-    code = marshal.loads(args[1])
-    search_creteria = args[2]
-    is_test = args[3]
-    email_content = args[4]
-    
+def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_content=None):
+    """ execute 
+
+    Args:
+        imap_account_id (number): id of associated ImapAccount object
+        code (code object): which code to run
+        search_creteria (string): IMAP query. To which email to run the code
+        is_test (boolean): True- just printing the log. False- executing the code
+        email_content (string): for email shortcut --> potential deprecate  
+    """
+    code = marshal.loads(code)
     from browser.imap import interpret, authenticate
     imap_account = ImapAccount.objects.get(id=imap_account_id)
     auth_res = authenticate( imap_account )
@@ -52,6 +63,8 @@ def run_interpret(args):
     print res['imap_log']
 
     logger.info(res['imap_log'])
+    # TODO add logs to users' execution_log
+
 # @periodic_task(run_every=(crontab(minute='*/15')), name="some_task", ignore_result=True)
 # def some_task():
 #     # do something
