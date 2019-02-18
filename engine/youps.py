@@ -106,7 +106,7 @@ def fetch_execution_log(user, email, push=True):
     try:
         imapAccount = ImapAccount.objects.get(email=email)
         res['imap_log'] = imapAccount.execution_log
-
+        res['user_status_msg'] = imapAccount.status_msg
         res['status'] = True
 
     except ImapAccount.DoesNotExist:

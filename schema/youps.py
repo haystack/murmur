@@ -29,7 +29,7 @@ class ImapAccount(models.Model):
 
 	# code = models.TextField(null=True, blank=True)
 	execution_log = models.TextField(default="")
-    status_msg = models.TextField(default="")
+	status_msg = models.TextField(default="")
 	is_test = models.BooleanField(default=True)
 	is_running = models.BooleanField(default=False)
 

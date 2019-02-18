@@ -48,7 +48,7 @@ def remove_periodic_task(imap_account_id, ptask_name=None):
     status_msgs = imap_account.status_msg.split('\n')
     
     # update status msg for the user
-    new_msg = "".join([ x+"\n" for x in status_msgs if not x.startswith( "[%d" % (imap_account_id) )])
+    new_msg = "".join([ x+"\n" for x in status_msgs if len(x.strip()) > 0 and not x.startswith( "[%d" % (imap_account_id) )])
     imap_account.status_msg = new_msg
     imap_account.save()
 
