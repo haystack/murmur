@@ -26,6 +26,8 @@ $(document).ready(function() {
 
         $.each( msg.split("\n"), function( key, value ) {
             value = $.trim(value);
+            if(value == "") return;
+            
             $( "<p>" + 
             '<span class="fa-layers fa-fw fa-2x"><i class="fas fa-sync"></i><span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span></span>'
             + value.replace(/ *\[[^\]]*]/, '') + "</p>" ).prependTo( "#user-status-msg" )
