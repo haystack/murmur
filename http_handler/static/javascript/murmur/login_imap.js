@@ -13,9 +13,9 @@ $(document).ready(function() {
         var datetime = format_date();
 
         if(is_error) 
-            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" ).addClass("error");
+            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" ).addClass("error");
 
-        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console" )
+        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" )
             .addClass("info");
     }   
 
@@ -84,6 +84,7 @@ $(document).ready(function() {
     var unsaved_tabs = [];
     
     document.addEventListener("mv-load", function(){   
+        // Init editor autocomplete
         document.querySelectorAll('textarea.editor').forEach(function(element) {
             var mode_id = element.id.split("-")[1];
             $('.nav-tabs li a[href="#editor-tab_'+ mode_id +'"]').click();
@@ -244,6 +245,8 @@ $(document).ready(function() {
         $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
         $(".dropdown .btn").attr('mode-id', current_mode_id);
     } else {
+        set_running(false);
+
         // init $("#current_mode_dropdown") with a default value if there is no selected mode yet
         var random_id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
             random_mode_name = $.trim( document.querySelector('.nav.nav-tabs span[mode-id="'+ random_id + '"]').innerHTML );
@@ -363,12 +366,14 @@ $(document).ready(function() {
         // Start running
         if(start_running) {
             spinStatusCog(true);
+            $("#engine-status-msg").text("Your email engine is running.");
             btn_code_sumbit.text("Disable");
         }
         
         // Stop running
         else {
             spinStatusCog(false);
+            $("#engine-status-msg").text("Your email engine is not running at the moment.");
             btn_code_sumbit.text("Enable");
         }
     }
@@ -395,7 +400,7 @@ $(document).ready(function() {
                 // Auth success
                 if (res.status) {
                     if( log_backup != res['imap_log']){
-                        $("#console").html("");
+                        $("#console-output").html("");
                         append_log(res['imap_log'], false);
                     }
                     
