@@ -25,9 +25,13 @@ $(document).ready(function() {
         if(!msg) return;
 
         $.each( msg.split("\n"), function( key, value ) {
-            value = value.strip();
-            $( "<p>" + value.replace(/ *\[[^\]]*]/, '') + "</p>" ).prependTo( "#user-status-msg" )
+            value = $.trim(value);
+            $( "<p>" + 
+            '<span class="fa-layers fa-fw fa-2x"><i class="fas fa-sync"></i><span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span></span>'
+            + value.replace(/ *\[[^\]]*]/, '') + "</p>" ).prependTo( "#user-status-msg" )
             .addClass("info");
+
+            spinStatusCog(true);
         });
         
     }
@@ -247,23 +251,21 @@ $(document).ready(function() {
         fetch_log(); 
 
         $(".btn").prop("disabled",false);
-    }
-
-    if(IS_RUNNING) {
-        set_running(true);
 
         // set dropdown to current mode name if exist
-        $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
-        $(".dropdown .btn").attr('mode-id', current_mode_id);
-    } else {
-        set_running(false);
+        if(current_mode) {
+            $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
+            $(".dropdown .btn").attr('mode-id', current_mode_id);
+        }
 
-        // init $("#current_mode_dropdown") with a default value if there is no selected mode yet
-        var random_id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
+        else {
+            // init $("#current_mode_dropdown") with a default value if there is no selected mode yet
+            var random_id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
             random_mode_name = $.trim( document.querySelector('.nav.nav-tabs span[mode-id="'+ random_id + '"]').innerHTML );
 
-        $(".dropdown .btn").html(random_mode_name + ' <span class="caret"></span>');
-        $(".dropdown .btn").attr('mode-id', random_id);
+            $(".dropdown .btn").html(random_mode_name + ' <span class="caret"></span>');
+            $(".dropdown .btn").attr('mode-id', random_id);
+        }
     }
     
 	$('input[type=radio][name=auth-mode]').change(function() {
@@ -420,7 +422,7 @@ $(document).ready(function() {
                     log_backup = res['imap_log'];
 
                     // if status_msg exists, it means a code is running 
-                    if(res['user_status_msg'].strip() != "")
+                    if( $.trim( res['user_status_msg'] ) != "")
                         set_running(true)
                     else set_running(false)
 
