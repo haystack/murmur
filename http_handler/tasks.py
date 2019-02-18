@@ -22,6 +22,10 @@ def add_periodic_task(interval, args):
     ptask_name = "%d_%d" % (int(imap_account_id), random.randint(1, 10000))
     TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args)
 
+    imap_account = ImapAccount.objects.get(id=imap_account_id)
+    imap_account.status_msg = imap_account.status_msg + "[%s]set_interval(): executing every %d seconds\n" % (ptask_name, interval)
+    
+
 @task(name="remove_periodic_task")
 def remove_periodic_task(imap_account_id, ptask_name=None):
     """ remove a new periodic task. If ptask_name is given, then remove that specific task.
@@ -31,12 +35,21 @@ def remove_periodic_task(imap_account_id, ptask_name=None):
         imap_account_id (number): id of associated ImapAccount object
         ptask_name (string): a name of the specific task to be deleted
     """
+
     if ptask_name is None:
         ptask_prefix = '%d_' % imap_account_id
-        PeriodicTask.objects.filter(name__startswith=ptask_prefix).delete()
+        PeriodicTask.objects.filter(name__startswith=ptask_prefix).delete()      
 
     else:
         PeriodicTask.objects.filter(name=ptask_name).delete()
+
+    imap_account = ImapAccount.objects.get(id=imap_account_id)
+    status_msgs = imap_account.status_msg.split('\n')
+    
+    # update status msg for the user
+    new_msg = "".join([ x+"\n" for x in status_msgs if not x.startswith( "#%d" % (imap_account_id) )])
+    imap_account.status_msg = new_msg
+    imap_account.save()
 
 @task(name="run_interpret")
 def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_content=None):

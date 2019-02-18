@@ -28,6 +28,7 @@ class ImapAccount(models.Model):
 	shortcuts = models.TextField(default="")
 
 	# code = models.TextField(null=True, blank=True)
+    status_msg = models.TextField(default="")
 	execution_log = models.TextField(default="")
 	is_test = models.BooleanField(default=True)
 	is_running = models.BooleanField(default=False)
@@ -98,7 +99,6 @@ class Contact(models.Model):
 	class Meta:
 		unique_together = ("email", "imap_account")
 
-<<<<<<< HEAD
 from djcelery.models import PeriodicTask, IntervalSchedule
 from datetime import datetime
 
@@ -150,6 +150,3 @@ class TaskScheduler(models.Model):
         ptask = self.periodic_task
         self.delete()
         ptask.delete()
-=======
-# class Youps_user(models.Model):
->>>>>>> master

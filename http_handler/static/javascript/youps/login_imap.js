@@ -7,6 +7,8 @@ $(document).ready(function() {
         btn_incoming_save = $("#btn-incoming-save"),
         btn_shortcut_save = $("#btn-shortcut-save");
 
+    var log_backup = "", user_status_backup = "";
+
     function append_log( log, is_error ) {
         if(!log) return;
 
@@ -18,6 +20,16 @@ $(document).ready(function() {
         else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" )
             .addClass("info");
     }   
+
+    function append_status_msg( msg, is_error ) {
+        if(!msg) return;
+        
+        for(var l in msg.split("\n")) {
+            $( "<p>" + datetime + l.replace(/ *\[[^\]]*]/, '') + "</p>" ).prependTo( "#user-status-msg" )
+            .addClass("info");
+        }
+        
+    }
 
     function format_date() {
         var currentdate = new Date();
@@ -226,8 +238,6 @@ $(document).ready(function() {
         run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running());
     })
 
-    var log_backup = "";
-
     // $("#password-container").hide();
     guess_host($("#user-full-email").text());
     toggle_login_mode();
@@ -399,12 +409,21 @@ $(document).ready(function() {
                 
                 // Auth success
                 if (res.status) {
+                    // Update execution log
                     if( log_backup != res['imap_log']){
                         $("#console-output").html("");
                         append_log(res['imap_log'], false);
                     }
                     
                     log_backup = res['imap_log'];
+
+                    // Update status msg
+                    if( user_status_backup != res['user_status_msg']){
+                        $("#user-status-msg").html("");
+                        append_status_msg(res['user_status_msg'], false);
+                    }
+                    
+                    user_status_backup = res['user_status_msg'];
                 }
                 else {
                     notify(res, false);
@@ -412,7 +431,7 @@ $(document).ready(function() {
             }
         );
         
-        setTimeout(fetch_log, 5 * 1000); // 5 second
+        setTimeout(fetch_log, 2 * 1000); // 2 second
     }
 
     function validateEmail(email) {
