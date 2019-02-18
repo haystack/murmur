@@ -23,11 +23,12 @@ $(document).ready(function() {
 
     function append_status_msg( msg, is_error ) {
         if(!msg) return;
-        
-        for(var l in msg.split("\n")) {
-            $( "<p>" + datetime + l.replace(/ *\[[^\]]*]/, '') + "</p>" ).prependTo( "#user-status-msg" )
+
+        $.each( msg.split("\n"), function( key, value ) {
+            value = value.strip();
+            $( "<p>" + value.replace(/ *\[[^\]]*]/, '') + "</p>" ).prependTo( "#user-status-msg" )
             .addClass("info");
-        }
+        });
         
     }
 
@@ -368,8 +369,7 @@ $(document).ready(function() {
     }
 
     function get_running() {
-        if( btn_code_sumbit.text() == "Disable") return true;
-        else return false;
+        return is_running;
     }
 
     function set_running(start_running) {
@@ -378,6 +378,7 @@ $(document).ready(function() {
             spinStatusCog(true);
             $("#engine-status-msg").text("Your email engine is running.");
             btn_code_sumbit.text("STOP");
+            is_running = true;
         }
         
         // Stop running
@@ -385,6 +386,7 @@ $(document).ready(function() {
             spinStatusCog(false);
             $("#engine-status-msg").text("Your email engine is not running at the moment.");
             btn_code_sumbit.text("RUN");
+            is_running = false;
         }
     }
     
@@ -416,6 +418,11 @@ $(document).ready(function() {
                     }
                     
                     log_backup = res['imap_log'];
+
+                    // if status_msg exists, it means a code is running 
+                    if(res['user_status_msg'].strip() != "")
+                        set_running(true)
+                    else set_running(false)
 
                     // Update status msg
                     if( user_status_backup != res['user_status_msg']){
