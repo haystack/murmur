@@ -394,12 +394,16 @@ $(document).ready(function() {
     
     function spinStatusCog(spin) {
         if(spin) {
-            document.querySelector(".fa-sync").classList.add("fa-spin");
-            document.querySelector(".idle-mark").style.display = "none";
+            if( fa_sync = document.querySelector(".fa-sync"))
+                fa_sync.classList.add("fa-spin");
+            if( idle_mark = document.querySelector(".idle-mark"))
+                idle_mark.style.display = "none";
         }
         else {
-            document.querySelector(".fa-sync").classList.remove("fa-spin");
-            document.querySelector(".idle-mark").style.display = "inline-block";
+            if( fa_sync = document.querySelector(".fa-sync"))
+                fa_sync.classList.remove("fa-spin");
+            if( idle_mark = document.querySelector(".idle-mark"))   
+                idle_mark.style.display = "inline-block";
         }
     }
 
