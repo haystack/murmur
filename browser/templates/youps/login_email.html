@@ -1,13 +1,13 @@
 {% extends website|add:"/base.html" %}
 {% block customcss %}
-<link rel="stylesheet" href="/static/css/mailbot/libs/codemirror.css">
-<!-- <link rel="stylesheet" href="/static/css/mailbot/libs/fontawesome-all.min.css"> -->
+<link rel="stylesheet" href="/static/css/youps/libs/codemirror.css">
+<!-- <link rel="stylesheet" href="/static/css/youps/libs/fontawesome-all.min.css"> -->
 <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
 <!-- Interactive console styles -->
-<!-- <link rel="stylesheet" href="/static/css/mailbot/libs/sandbox.css" /> -->
-<link rel="stylesheet" href="/static/css/mailbot/style.css">
-<link rel="stylesheet" href="/static/css/mailbot/libs/jquery.switchButton.css" />
-<link rel="stylesheet" href="/static/css/mailbot/libs/show-hint.css" />
+<!-- <link rel="stylesheet" href="/static/css/youps/libs/sandbox.css" /> -->
+<link rel="stylesheet" href="/static/css/youps/style.css">
+<link rel="stylesheet" href="/static/css/youps/libs/jquery.switchButton.css" />
+<link rel="stylesheet" href="/static/css/youps/libs/show-hint.css" />
 {% endblock %}
 
 {% block content %}
@@ -67,14 +67,9 @@
 			<div id="editor-container">
 				<div id="status">
 				  <!-- This rule will be applied to your incoming emails.   -->
-				  <div class="fa-3x">
-						Status: <span class="fa-layers fa-fw">
-							<i class="fas fa-sync"></i>
-							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
-						</span>
-						<div class="dropdown" style="display: inline;">
-								<label style="font-size: medium;">Select your mode: </label>
-								<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+					<div class="dropdown" style="display: inline;">
+						<label style="font-size: medium;">Select your mode: </label>
+						<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 								  Default
 								  <span class="caret"></span>
 								</button>
@@ -84,13 +79,13 @@
 								  <li><a href="#" data-value="something else here">Something else here</a></li>
 								  <li><a href="#" data-value="separated link">Separated link</a></li>
 								</ul>
-						</div>
+					</div>
 						{% if imap_authenticated %}
 							<button class="btn btn-primary" id="btn-code-submit">Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% else %}
 							<button class="btn btn-primary" id="btn-code-submit" disabled>Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% endif %}
-				  </div>
+				  
 				</div>
 		
 					<div style="padding-top: 40px;">
@@ -178,9 +173,18 @@ if interaction['cond'] > 7:
 					  </div>
 		
 					  <div id="console" class="info">
-						<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
+						<span id='engine-status-spinning-bar' class="fa-layers fa-fw fa-2x">
+							<i class="fas fa-sync"></i>
+							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
+						</span>
+						<span id='engine-status-msg'></span>
+						
+						<div id="console-output">
+							<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
+						</div>
 						{% if user.is_authenticated %}
 						{% else %}
+						
 							<p class="info"><span class='current-date'>01/09/2019 21:25:12</span> <i class="fas fa-lg fa-envelope-square"></i> [csail-related] Looking for roommates, available next month | marked as read</p>
 						{% endif %}
 					  </div>
@@ -273,30 +277,30 @@ print get_sender()
 {% block customjs %}
 	<script type="text/javascript" src="/static/javascript/notify.js"></script>
 
-	<script type="text/javascript" src="/static/javascript/mailbot/fontawesome-all.min.js"></script>
-	<script type="text/javascript" src="/static/javascript/mailbot/codemirror.js"></script>
-	<script type="text/javascript" src="/static/javascript/mailbot/addon/edit/matchbrackets.js"></script>
-	<script type="text/javascript" src="/static/javascript/mailbot/python.js"></script>
-	<script type="text/javascript" src="/static/javascript/mailbot/addon/hint/show-hint.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/fontawesome-all.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/codemirror.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/addon/edit/matchbrackets.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/python.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/addon/hint/show-hint.js"></script>
 	
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"></script>
 	
 	<!-- Underscore, Backbone, backbone-localStorage, jQuery -->
-	<script type="text/javascript" src="/static/javascript/mailbot/console/underscore.min.js"></script>
-	<script type="text/javascript" src="/static/javascript/mailbot/console/backbone.min.js"></script>
-	<script type="text/javascript" src="/static/javascript/mailbot/console/backbone-localStorage.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/console/underscore.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/console/backbone.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/console/backbone-localStorage.min.js"></script>
 	
 	<!-- Some extras for the demo: -->
-	<script type="text/javascript" src="/static/javascript/mailbot/console/lettering.js"></script>
-	<script type="text/javascript" src="/static/javascript/mailbot/console/prettify.js"></script>
-	<script type="text/javascript" src="/static/javascript/mailbot/console/DAT.GUI.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/console/lettering.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/console/prettify.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/console/DAT.GUI.min.js"></script>
 
-	<script src="/static/javascript/mailbot/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="/static/javascript/mailbot/jquery.switchButton.js"></script>
+	<script src="/static/javascript/youps/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/jquery.switchButton.js"></script>
 	
 	<script src="https://get.mavo.io/mavo.js"></script>
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
-	<!-- <script type="text/javascript" src="/static/javascript/mailbot/console/sandbox-console.js"></script> -->
+	<!-- <script type="text/javascript" src="/static/javascript/youps/console/sandbox-console.js"></script> -->
 
 	<script type="text/javascript" src="/static/javascript/youps/login_imap.js"></script>
 {% endblock %}
