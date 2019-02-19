@@ -1,0 +1,291 @@
+{
+	"getter_archieve": [
+		{
+			"name": "get_content",
+			"params": "",
+			"description": "Return contents of this email / thread. \n\n Developers can selectively retrieve some emails of the thread by using parameter cond. cond should be a callable that returns boolean. Default value of cond is True and it will retrieve from all emails in the thread.",
+			"example": "",
+			"thread": "get_contents",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_date",
+			"params": "",
+			"description": "Return arrival date of this email / thread. <br>Developers can selectively retrieve some emails of the thread by using parameter cond. cond should be a callable that returns boolean. Default value of cond is True and it will retrieve from all emails in the thread.",
+			"example": [
+				"print get_date()",
+				">>> ['Wed, 29 Aug 2018 01:59:59 -0400']", 
+				" ",
+				"print get_dates()", 
+				">>> ['Wed, 29 Aug 2018 00:23:12 -0400', 'Wed, 29 Aug 2018 01:01:03 -0400', 'Wed, 29 Aug 2018 01:59:59 -0400']"
+			],
+			"thread": "get_dates",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_gmail_labels",
+			"params": "",
+			"description": "Return a list of notes of this email / thread. <br>Developers can selectively retrieve some emails of the thread by using parameter cond. cond should be a callable that returns boolean. Default value of cond is True and it will retrieve from all emails in the thread.",
+			"example": "",
+			"thread": "get_notes",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_note",
+			"params": "",
+			"description": "Return a list of notes of this email / thread. <br>Developers can selectively retrieve some emails of the thread by using parameter cond. cond should be a callable that returns boolean. Default value of cond is True and it will retrieve from all emails in the thread.",
+			"example": "",
+			"thread": "get_notes",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_sender",
+			"params": "",
+			"description": "Return a sender of this email / thread. <br>Developers can selectively retrieve some emails of the thread by using parameter cond. cond should be a callable that returns boolean. Default value of cond is True and it will retrieve from all emails in the thread.",
+			"example": [
+				"print get_sender()",
+				">>> ['Soya Park <soya@mit.edu>']", 
+				" ",
+				"def only_important():",
+				"   if 'important' in get_note():",
+				"      return True",
+				"   return False",
+				"print get_senders( cond = only_important )",
+				">>> [['David Karger <david@mit.edu>'], ['David Karger <david@mit.edu>']]"
+			],
+			"thread": "get_senders",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_subject",
+			"params": "",
+			"description": "Return a subject of this email / thread. <br>Developers can selectively retrieve some emails of the thread by using parameter cond. cond should be a callable that returns boolean. Default value of cond is True and it will retrieve from all emails in the thread.",
+			"example": "",
+			"thread": "get_subjects",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_recipient",
+			"params": "",
+			"description": "Return a list of recipients of this email. <br>Developers can selectively retrieve some emails of the thread by using parameter cond. cond should be a callable that returns boolean. Default value of cond is True and it will retrieve from all emails in the thread.",
+			"example": [
+				"print get_recipient()",
+				">>> ['Soya Park <soya@mit.edu>', 'Amy Zhang <zhang@mit.edu>']", 
+				"print get_recipients()", 
+				">>> [['Soya Park <soya@mit.edu>'], ['David Karger <david@mit.edu>', 'Amy Zhang <zhang@mit.edu>'], ['Soya Park <soya@mit.edu>', 'Amy Zhang <zhang@mit.edu>']]"],
+			"thread": "get_recipients",
+			"thread_params": "cond = True"
+		}
+	],
+	"getter": [
+		{
+			"name": "get_content",
+			"params": "",
+			"description": "Return a content of this email.",
+			"example": "",
+			"thread": "get_contents",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_date",
+			"params": "",
+			"description": "Return an arrival date of this email.",
+			"example": [
+				"print get_date()",
+				">>> ['Wed, 29 Aug 2018 01:59:59 -0400']"
+			],
+			"thread": "get_dates",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_gmail_labels",
+			"params": "",
+			"description": "Return a list of labels of this email.",
+			"example": "",
+			"thread": "get_notes",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_labels",
+			"params": "",
+			"description": "Return a list of notes of this email.",
+			"example": "",
+			"thread": "get_notes",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_sender",
+			"params": "",
+			"description": "Return a sender of this email.",
+			"example": [
+				"print get_sender()",
+				">>> ['Soya Park <soya@mit.edu>']"
+			],
+			"thread": "get_senders",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_subject",
+			"params": "",
+			"description": "Return a subject of this email.",
+			"example": "",
+			"thread": "get_subjects",
+			"thread_params": "cond = True"
+		},
+		{
+			"name": "get_recipients",
+			"params": "",
+			"description": "Return a list of recipients of this email.",
+			"example": [
+				"print get_recipients()",
+				">>> ['Soya Park <soya@mit.edu>', 'Amy Zhang <zhang@mit.edu>']"
+			],
+			"thread": "get_recipients",
+			"thread_params": "cond = True"
+		}
+	],
+	"mode": [
+		{
+			"name": "get_history",
+			"params": "email, hours = 24, cond = True",
+			"description": "Get an interaction history with this recipient. To specify the range of time, set parameter hours. Parameter cond should be a callable that returns boolean. Default value of cond is True and it will retrieve from all emails exchanged with a contact of the email.",
+			"example": [
+				"def draft_email(email):",
+				"   if 'draft' in email.get_labels():",
+				"      return True",
+				"   return False",
+				"",
+				"print get_history('soya@mit.edu', 3, draft_email) ",
+				">>> {'received_emails': 5, 'cond': 2}"
+			]
+		},
+		{
+			"name": "get_mode",
+			"params": "",
+			"description": "Get an index of a current email mode",
+			"example": ""
+		},
+		{
+			"name": "set_mode",
+			"params": "mode_index",
+			"description": "Change a current email mode",
+			"example": ""
+
+		}
+	],
+	"methods": [
+		{
+			"name": "add_gmail_labels",
+			"params": "labels",
+			"description": "Add labels to email in the current folder.",
+			"example": [
+				"add_gmail_labels([“important”, “deadline”])"
+			],
+			"thread": "add_labels",
+			"thread_params": "flags, cond = True"
+		},
+		{
+			"name": "add_labels",
+			"params": "labels",
+			"description": "Add note to email in the currently folder.",
+			"example": [
+				"add_labels([“important”, “deadline”])"
+			],
+			"thread": "add_notes",
+			"thread_params": "flags, cond = True"
+		},
+		{
+			"name": "copy",
+			"params": "dst_folder",
+			"description": "Copy this email from the current folder to dst_folder. If folder dst_folder does not exist, our engine creates a new folder with the name dst_folder",
+			"example": "",
+			"thread": "copys",
+			"thread_params": "src_folder, dst_folder, cond = True"
+
+		},
+		{
+			"name": "delete",
+			"params": "",
+			"description": "Delete this email from the currently selected folder.",
+			"example": "",
+			"thread": "deletes",
+			"thread_params": "flags, cond = True"
+
+		},
+		{
+			"name": "mark_read",
+			"params": "is_read=True",
+			"description": "If is_read is true, then mark the email as read, otherwise mark it as unread. <br>Developers can selectively retrieve some emails of the thread by using parameter cond. cond should be a callable that returns boolean. Default value of cond is True and it will retrieve from all emails in the thread.",
+			"example": "",
+			"thread": "mark_reads",
+			"thread_params": "flags, cond = True"
+
+		},
+		{
+			"name": "move",
+			"params": "dst_folder",
+			"description": "Move this email to dst_folder.  If folder dst_folder does not exist, our engine creates a new folder with the name dst_folder",
+			"example": [
+				"move('conference')"
+			],
+			"thread": "moves",
+			"thread_params": "flags, cond = True"
+
+		},
+		{
+			"name": "remove_gmail_labels",
+			"params": "labels",
+			"description": "Remove one or more labels from this email in the currently selected folder. labels should be a list of strings.",
+			"example": "",
+			"thread": "remove_notes",
+			"thread_params": "flags, cond = True"
+
+		},
+		{
+			"name": "remove_labels",
+			"params": "labels",
+			"description": "Remove one or more labels from this email in the currently selected folder. labels should be a list of strings.",
+			"example": "",
+			"thread": "remove_notes",
+			"thread_params": "flags, cond = True"
+
+		},
+		{
+			"name": "send",
+			"params": "subject, recipient_address, body",
+			"description": "send an email",
+			"example": "",
+			"thread": "remove_notes",
+			"thread_params": "flags, cond = True"
+
+		}
+	],
+	"folder": [
+		{
+			"name": "create_folder",
+			"params": "folder_name",
+			"description": "Create a new folder folder_name",
+			"example": ""
+		},
+		{
+			"name": "delete_folder",
+			"params": "folder_name",
+			"description": "Delete a folder folder_name",
+			"example": ""
+
+		},
+		{
+			"name": "list_folders",
+			"params": "",
+			"description": "Get a list of folders",
+			"example": ["print list_folders()", ">>>  [(('\\HasNoChildren',), '/', u'Boomerang'), (('\\HasChildren',), '/', u'Boomerang-Outbox'), (('\\HasNoChildren',), '/', u'Boomerang-Outbox/Cancelled'), (('\\HasNoChildren',), '/', u'Boomerang-Returned'), (('\\HasNoChildren',), '/', u'INBOX'), (('\\HasChildren', '\\Noselect'), '/', u'[Gmail]'), (('\\All', '\\HasNoChildren'), '/', u'[Gmail]/All Mail'), (('\\Drafts', '\\HasNoChildren'), '/', u'[Gmail]/Drafts'), (('\\HasNoChildren', '\\Important'), '/', u'[Gmail]/Important'), (('\\HasNoChildren', '\\Sent'), '/', u'[Gmail]/Sent Mail'), (('\\HasNoChildren', '\\Junk'), '/', u'[Gmail]/Spam'), (('\\Flagged', '\\HasNoChildren'), '/', u'[Gmail]/Starred'), (('\\HasNoChildren', '\\Trash')]"]
+		},
+		{
+			"name": "rename_folder",
+			"params": "old_name, new_name",
+			"description": "Change the name of a folder",
+			"example": ""
+
+		}
+	]
+}
