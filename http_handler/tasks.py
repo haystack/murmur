@@ -8,7 +8,7 @@ import json, ujson, types, marshal, random
 logger = get_task_logger(__name__)
 
 @task(name="add_periodic_task")
-def add_periodic_task(interval, args):
+def add_periodic_task(interval, args, expires=None):
     """ create a new periodic task
 
     Args:
@@ -19,11 +19,15 @@ def add_periodic_task(interval, args):
     logger.info("ADD TASK performed!")
     imap_account_id = ujson.loads(args)[0]
 
+    # TODO naming meaningful to distinguish one-off and interval running 
     ptask_name = "%d_%d" % (int(imap_account_id), random.randint(1, 10000))
-    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args)
+    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args, expires=expires)
 
     imap_account = ImapAccount.objects.get(id=imap_account_id)
-    imap_account.status_msg = imap_account.status_msg + "[%s]set_interval(): executing every %d seconds\n" % (ptask_name, interval)
+    if expires: # set_timeout
+        imap_account.status_msg = imap_account.status_msg + "[%s]set_timeout(): will be executed after %d seconds\n" % (ptask_name, interval)
+    else:
+        imap_account.status_msg = imap_account.status_msg + "[%s]set_interval(): executing every %d seconds\n" % (ptask_name, interval)
     imap_account.save()
     
 

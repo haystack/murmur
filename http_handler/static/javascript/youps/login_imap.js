@@ -510,7 +510,7 @@ $(document).ready(function() {
                 'modes': JSON.stringify(modes),
                 'email': $("#input-email").val(),
                 'test_run': is_dry_run,
-                'is_running': is_running
+                'run_request': is_running
             };
 
             $.post('/run_mailbot', params,

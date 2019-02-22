@@ -107,7 +107,7 @@ class TaskScheduler(models.Model):
     periodic_task = models.ForeignKey(PeriodicTask)
 
     @staticmethod
-    def schedule_every(task_name, period, every, ptask_name=None, args=None, kwargs=None):
+    def schedule_every(task_name, period, every, ptask_name=None, args=None, kwargs=None, expires=None):
         """ schedules a task by name every "every" "period". So an example call would be:
         TaskScheduler('mycustomtask', 'seconds', 30, [1,2,3]) 
         that would schedule your custom task to run every 30 seconds with the arguments 1,2 and 3 passed to the actual task. """
@@ -125,7 +125,7 @@ class TaskScheduler(models.Model):
             interval_schedule.every = every # should check to make sure this is a positive int
             interval_schedule.period = period
             interval_schedule.save()
-        ptask = PeriodicTask(name=ptask_name, task=task_name, interval=interval_schedule)
+        ptask = PeriodicTask(name=ptask_name, task=task_name, interval=interval_schedule, expires=expires)
         if args:
             ptask.args = args
         if kwargs:

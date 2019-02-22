@@ -146,7 +146,7 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
     logging.debug(res)
     return res
 
-def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=True):
+def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=True):
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
 
     try:
@@ -158,7 +158,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imap = auth_res['imap']
 
         imapAccount.is_test = is_test
-        imapAccount.is_running = is_running
+        imapAccount.is_running = run_request
 
         uid = fetch_latest_email_id(imapAccount, imap)
         imapAccount.newest_msg_id = uid
@@ -186,7 +186,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_account=imapAccount)[0]
         imapAccount.save()
 
-        if imapAccount.is_running:
+        if run_request:
             res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
 
             # if the code execute well without any bug, then save the code to DB
