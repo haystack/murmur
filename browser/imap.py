@@ -18,7 +18,9 @@ from datetime import datetime, timedelta
 from schema.youps import MailbotMode
 import calendar
 import base64
+import logging
 
+logger = logging.getLogger('youps')
 
 def authenticate(imap_account):
     res = {'status' : False, 'imap_error': False, 'imap_log': "", 'imap': None}
@@ -47,7 +49,7 @@ def authenticate(imap_account):
         res['status'] = True
     except IMAPClient.Error, e:
         try:
-            print "try to renew token"
+            logger.debug('try to renew token')
             if imap_account.is_oauth:
                 oauth = GoogleOauth2()
                 response = oauth.RefreshToken(imap_account.refresh_token)
@@ -59,15 +61,17 @@ def authenticate(imap_account):
                 res['imap'] = imap
                 res['status'] = True
             else:
+                # TODO this is not DRY and not useful error messages
+                logger.error("cannot renew token for non-oauth account")
                 res['code'] = "Can't authenticate your email"
         except IMAPClient.Error, e:
+            logger.exception("failed to authenticate email")
             res['imap_error'] = e
             res['code'] = "Can't authenticate your email"
-
         except Exception, e:
+            logger.exception("failed to authenticate email")
             # TODO add exception
             res['imap_error'] = e
-            print e
             res['code'] = msg_code['UNKNOWN_ERROR']
 
     if res['status'] is False:
