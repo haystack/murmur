@@ -53,8 +53,8 @@ class Command(BaseCommand):
                         logger.debug('new email sender: %s' % p.get_senders())
 
                         # TODO why are we ignoring this
-                        if p.get_senders()[0] == WEBSITE + "@murmur.csail.mit.edu":
-                            continue
+                        # if p.get_senders()[0] == WEBSITE + "@murmur.csail.mit.edu":
+                        #     continue
 
                         # get the code the user is going to run
                         logger.debug('new email UID: %s' % i)
