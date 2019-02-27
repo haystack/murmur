@@ -90,13 +90,6 @@ class Command(BaseCommand):
                 res['code'] = e
             except Exception, e:
                 logger.exception("failure in fetch or user code")
-                # TODO add exception
-                print e
-                # TODO this should be logged but idk where logs go... LSM
-                print traceback.format_exc()
                 res['code'] = msg_code['UNKNOWN_ERROR']
 
             res['status'] = True
-
-
-
