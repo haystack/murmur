@@ -8,6 +8,8 @@ from oauth2client.django_orm import FlowField, CredentialsField
 from http_handler import settings
 from http_handler.settings import AUTH_USER_MODEL
 
+import ast
+
 class ImapAccount(models.Model):
 	id = models.AutoField(primary_key=True)
 	newest_msg_id = models.IntegerField(default=-1)
@@ -49,6 +51,30 @@ class MailbotMode(models.Model):
 
 	class Meta:
 		unique_together = ("uid", "imap_account")
+
+class Folder(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField('name', max_length=300, blank=True)
+    imap_account = models.ForeignKey('ImapAccount')
+
+    # to keep track of changes of flags within folder
+    highest_modseq = models.IntegerField(default=-1)
+    flags = ListField() # a list of flags
+
+    class Meta:
+        db_table = "youps_folder"
+        unique_together = ("id", "imap_account")
+
+# This model is to have many-to-many relation of MailbotMode and Folder
+class MailbotMode_Folder(models.Mode):
+    mode = models.ForeignKey('MailbotMode')
+    folder = models.ForeignKey('Folder')
+    imap_account = models.ForeignKey('ImapAccount')
+
+    class Meta:
+        db_table = "youps_mailbotmode_folder"
+        unique_together = ("mode", "folder")
+    pass
 
 class Message_Thread(models.Model):
     id = models.AutoField(primary_key=True)
@@ -99,3 +125,29 @@ class Contact(models.Model):
 		unique_together = ("email", "imap_account")
 
 # class Youps_user(models.Model):
+
+class ListField(models.TextField):
+    __metaclass__ = models.SubfieldBase
+    description = "Stores a python list"
+
+    def __init__(self, *args, **kwargs):
+        super(ListField, self).__init__(*args, **kwargs)
+
+    def to_python(self, value):
+        if not value:
+            value = []
+
+        if isinstance(value, list):
+            return value
+
+        return ast.literal_eval(value)
+
+    def get_prep_value(self, value):
+        if value is None:
+            return value
+
+        return unicode(value)
+
+    def value_to_string(self, obj):
+        value = self._get_val_from_obj(obj)
+        return self.get_db_prep_value(value)
