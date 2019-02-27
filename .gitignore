@@ -27,3 +27,4 @@ sandbox/
 venv/
 
 \.python-version
+scripts/send_email.py

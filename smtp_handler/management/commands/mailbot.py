@@ -8,6 +8,10 @@ from engine.constants import msg_code
 from smtp_handler.Pile import Pile
 from http_handler.settings import WEBSITE
 import traceback
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     args = ''
@@ -21,6 +25,8 @@ class Command(BaseCommand):
 
             res = {'status' : False, 'imap_error': False}
             print "RUN MAILbot of ", imapAccount.email
+            print(__name__)
+            logger.debug('TEST TEST LOG')
 
             auth_res = authenticate( imapAccount )
             if not auth_res['status']:
