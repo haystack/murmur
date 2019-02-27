@@ -1,5 +1,5 @@
 from __future__ import unicode_literals, print_function, division
-from imapclient import IMAPClient
+from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 from event import Event
 import logging 
 import typing as t
@@ -18,6 +18,8 @@ class MailBox:
         # Events
         self.newMessage = Event()  # type: Event
 
+        self._sync_with_imap()
+
     def _sync_with_imap(self):
         """Helper method to synchronize with the imap server.
         """
@@ -26,7 +28,9 @@ class MailBox:
         # and https://tools.ietf.org/html/rfc4549
 
         for folder_name in self._list_folders():
-            folder_name.
+            response = self.imap.select_folder(folder_name)
+            logger.debug("select_folder response: %s" % response)
+
 
         
         # loop over all the folders
