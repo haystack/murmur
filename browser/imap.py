@@ -118,13 +118,6 @@ def fetch_latest_email_id(imap_account, imap_client):
 
     return max(uid_list)
 
-def format_log(msg, is_error=False, subject = ""):
-    s = "Subject: " + subject + " | "
-    if is_error:
-        return "[Error] " + s + msg
-    else:
-        return "[Info] " + s + msg
-
 def wrapper(imap_account, imap, code, search_creteria, is_test=False, email_content=None):
     interpret(imap_account, imap, code, search_creteria, is_test, email_content)
 
@@ -171,8 +164,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
             if not is_test:
                 send_email(subject, imap_account.email, to_addr, body)
-            # print to_addr
-            print format_log("send(): send a message to  %s" % str(to_addr), False, get_subject())
+            logger.debug("send(): sent a message to  %s" % str(to_addr))
 
         def add_gmail_labels(flags):
             pile.add_gmail_labels(flags, is_test)
@@ -382,11 +374,11 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def select_folder(folder):
             if not imap.folder_exists(folder):
-                format_log("Select folder; folder %s not exist" % folder, True, get_subject())
+                logger.error("Select folder; folder %s not exist" % folder)
                 return
 
             imap.select_folder(folder)
-            print "Select a folder " + folder
+            logger.debug("Select a folder %s" % folder)
 
         def rename_folder(old_name, new_name):
             pile.rename_folder(old_name, new_name, is_test)
@@ -395,7 +387,6 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def get_mode():
             if imap_account.current_mode:
                 return imap_account.current_mode.uid
-
             else:
                 return None
 
@@ -413,10 +404,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                     imap_account.current_mode = mm
                     imap_account.save()
 
-                print format_log("Set your mail mode to %s (%d)" % (mm.name, mode_index), False, get_subject())
+                logger.debug("Set mail mode to %s (%d)" % (mm.name, mode_index))
                 return True
             else:
-                print format_log("A mode ID %d not exist!" % (mode_index), True, get_subject())
+                logger.error("A mode ID %d not exist!" % (mode_index))
                 return False
 
         try:
