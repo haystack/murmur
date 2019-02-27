@@ -149,6 +149,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         yield stdout
         sys.stdout = old
 
+    logger = logging.getLogger('youps.user')
+
     with stdoutIO() as s:
         def catch_exception(e):
             etype, evalue = sys.exc_info()[:2]
@@ -292,6 +294,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             return pile.get_sender()
 
         def get_content():
+            logger.debug("call get_content")
             if email_content:
                 return email_content
             else:

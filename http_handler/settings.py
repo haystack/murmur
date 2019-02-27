@@ -286,7 +286,7 @@ LOGGING = {
         },
         # this handler logs to the console
         'custom.console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stdout',  # Default is stderr
             'formatter': 'custom.brief'
@@ -295,6 +295,10 @@ LOGGING = {
     'loggers': {
         'youps': {
             'handlers': ['custom.file', 'custom.console'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+        'youps.user': {
             'level': 'DEBUG',
             'propagate': True
         },

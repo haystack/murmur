@@ -53,13 +53,12 @@ class Command(BaseCommand):
                         logger.debug('new email sender: %s' % p.get_senders())
 
                         # TODO why are we ignoring this
-                        # if p.get_senders()[0] == WEBSITE + "@murmur.csail.mit.edu":
-                        #     continue
+                        if len(p.get_senders()) != 0 and p.get_senders()[0] == WEBSITE + "@murmur.csail.mit.edu":
+                            continue
 
                         # get the code the user is going to run
                         logger.debug('new email UID: %s' % i)
                         code = imapAccount.current_mode.code
-                        logger.info("Current Mode Code type  %s" % type(code))
 
                         # run the user's code
                         res = interpret(imapAccount, imap, code, "UID %d" % (i))
@@ -83,6 +82,7 @@ class Command(BaseCommand):
                         imapAccount.is_running = False
                         # send_error_email()
 
+                # log out of the user's account
                 imap.logout()
 
             except IMAPClient.Error, e:
