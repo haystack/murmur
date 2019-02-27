@@ -98,6 +98,7 @@ def append(imap, subject, content):
     imap.append('INBOX', str(new_message), ('murmur-log'))
 
 def fetch_latest_email_id(imap_account, imap_client):
+    print("NAMEEEEE", __name__)
     imap_client.select_folder("INBOX")
     uid_list = []
 
