@@ -5,4 +5,5 @@ pep8==1.7.1
 pip-chill==0.1.8
 pydocstyle==3.0.0
 pylint==1.9.4
+rope==0.12.0
 yagmail==0.11.214
