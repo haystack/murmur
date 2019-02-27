@@ -7,7 +7,6 @@ from imapclient import IMAPClient
 from engine.constants import msg_code
 from smtp_handler.Pile import Pile
 from http_handler.settings import WEBSITE
-import traceback
 import logging
 
 # Get an instance of a logger
