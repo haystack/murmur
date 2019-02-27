@@ -249,6 +249,26 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    # custom formatters used to describe the logs
+    'formatters': {
+        # this formatter just includes the message
+        'custom.brief' : {
+            'format': '%(message)s'
+        },
+        # this formatter includes the time, log level, logger name, and message
+        'custom.precise' : {
+            'format' : '%(asctime)s %(levelname)-8s %(name)-15s %(message)s',
+            'datefmt' : '%Y-%m-%d %H:%M:%S''format'
+        },
+        # this formatter includes file name and line number info
+        'custom.debug': {
+            'format': '%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         }
     },
     'handlers': {
@@ -256,20 +276,38 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        # this handler logs to a file
+        'custom.file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/home/ubuntu/production/mailx/logs/mailbot.log',
+            'formatter': 'custom.debug'
+        },
+        # this handler logs to the console
+        'custom.console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',  # Default is stderr
+            'formatter': 'custom.brief'
         }
     },
     'loggers': {
+        'youps': {
+            'handlers': ['custom.file', 'custom.console'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
-
         # comment this out if you want to see DB queries in logs
         'django.db.backends': {
             'handlers': None, 
             'propagate': False,
-            'level':'DEBUG',
+            'level': 'DEBUG'
         },
     }
 }
