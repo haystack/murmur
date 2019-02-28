@@ -113,7 +113,7 @@ class Folder():
                 logger.critical('Missing SEQ in message data')
             if 'FLAGS' not in message_data:
                 logger.critical('Missing FLAGS in message data')
-            
+
             message_schema = MessageSchema(imap_account=self._schema.imap_account,
                                            folder_schema=self._schema,
                                            uid=uid,
@@ -125,10 +125,10 @@ class Folder():
 
     def _should_completely_refresh(self, uid_validity):
         """Determine if the folder should completely refresh it's cache.
-        
+
         Args:
             uid_validity (int): UIDVALIDITY returned from select command
-        
+
         Returns:
             bool: True if the folder should completely refresh
         """
