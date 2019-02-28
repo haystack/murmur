@@ -64,11 +64,10 @@ class MailBox:
                 logger.debug('folder %s should completely refresh' % folder)
                 folder._completely_refresh_cache()
             else:
-                logger.debug('folder %s normal refresh' % folder)
                 folder._refresh_cache(uid_next)
             
-            # folder._uid_next = uid_next
-            # folder._uid_validity = uid_validity
+            folder._uid_next = uid_next
+            folder._uid_validity = uid_validity
             
 
     def _find_or_create_folder(self, name):

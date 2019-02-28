@@ -117,6 +117,8 @@ class Folder():
             uid_next (int): UIDNEXT returned from select command
         """
 
+        logger.debug('folder %s normal refresh' % self)
+
         # if the uid has not changed then we don't need to get new messages
         if uid_next != self._uid_next:
             # get all the descriptors for the new messages
@@ -162,7 +164,7 @@ class Folder():
             message_schema.flags = message_data['FLAGS'] 
             message_schema.msn = message_data['SEQ']
             message_schema.save()
-            # TODO maybe tell the user that flags changed?
+            # TODO maybe trigger the user 
         logger.debug("folder %s updated cached messages" % self)
 
     def _save_new_messages(self, last_seen_uid):
