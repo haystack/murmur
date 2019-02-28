@@ -30,44 +30,46 @@ class MailBox:
         # and https://tools.ietf.org/html/rfc4549
 
         for folder in self._list_selectable_folders():
-            response = self._imap_client.select_folder(folder.name)
-            logger.info('select_folder response: %s' % response)
+            logger.debug(folder)
+        # for folder in self._list_selectable_folders():
+        #     response = self._imap_client.select_folder(folder.name)
+        #     logger.info('select_folder response: %s' % response)
 
-            # log information about flags returned
-            if 'HIGHESTMODSEQ' in response:
-                # https://wiki.mozilla.org/Thunderbird:IMAP_RFC_4551_Implementation
-                logger.debug('server supports rfc 4551')
-            if 'EXISTS' in response:
-                logger.debug('folder %s contains %d messages' % (folder, response['EXISTS']))
-            if 'RECENT' in response:
-                logger.debug('folder %s contains %d recent messages' % (folder, response['RECENT']))
-            if 'UIDNEXT' in response:
-                logger.debug('folder %s next UID is %d' % (response['UIDNEXT']))
-            else:
-                logger.critical('folder %s did not return UIDNEXT' % folder)
-            if 'UIDVALIDITY' in response:
-                logger.debug('folder %s UIDVALIDITY %d' % (response['UIDVALIDITY']))
-            else:
-                logger.critical('folder %s did not return UIDVALIDITY' % folder)
-            if 'PERMANENTFLAGS' in response and '\\*' in response['PERMANENTFLAGS']:
-                logger.debug('folder %s supports custom flags')
-            else:
-                logger.critical('folder %s does not support custom flags or did not return PERMANENTFLAGS')
+        #     # log information about flags returned
+        #     if 'HIGHESTMODSEQ' in response:
+        #         # https://wiki.mozilla.org/Thunderbird:IMAP_RFC_4551_Implementation
+        #         logger.debug('server supports rfc 4551')
+        #     if 'EXISTS' in response:
+        #         logger.debug('folder %s contains %d messages' % (folder, response['EXISTS']))
+        #     if 'RECENT' in response:
+        #         logger.debug('folder %s contains %d recent messages' % (folder, response['RECENT']))
+        #     if 'UIDNEXT' in response:
+        #         logger.debug('folder %s next UID is %d' % (response['UIDNEXT']))
+        #     else:
+        #         logger.critical('folder %s did not return UIDNEXT' % folder)
+        #     if 'UIDVALIDITY' in response:
+        #         logger.debug('folder %s UIDVALIDITY %d' % (response['UIDVALIDITY']))
+        #     else:
+        #         logger.critical('folder %s did not return UIDVALIDITY' % folder)
+        #     if 'PERMANENTFLAGS' in response and '\\*' in response['PERMANENTFLAGS']:
+        #         logger.debug('folder %s supports custom flags')
+        #     else:
+        #         logger.critical('folder %s does not support custom flags or did not return PERMANENTFLAGS')
 
-            assert 'UIDNEXT' in response and 'UIDVALIDITY' in response, "Missing UID Information"
-            uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
+        #     assert 'UIDNEXT' in response and 'UIDVALIDITY' in response, "Missing UID Information"
+        #     uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
 
-            # TODO get the folder
-            folder = Folder(folder, self._imap_client)
+        #     # TODO get the folder
+        #     folder = Folder(folder, self._imap_client)
 
-            if folder._should_completely_refresh(uid_validity):
-                try:
-                    folder._completely_refresh_cache()
-                except NotImplementedError:
-                    continue
-            else:
-                logger.debug('folder %s normal refresh' % folder)
-                folder._refresh_cache(uid_next)
+        #     if folder._should_completely_refresh(uid_validity):
+        #         try:
+        #             folder._completely_refresh_cache()
+        #         except NotImplementedError:
+        #             continue
+        #     else:
+        #         logger.debug('folder %s normal refresh' % folder)
+        #         folder._refresh_cache(uid_next)
             
 
     def _find_or_create_folder(self, name):
