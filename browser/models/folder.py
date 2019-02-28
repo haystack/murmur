@@ -3,7 +3,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 import typing as t  # noqa: F401 ignore unused we use it for typing
 import logging 
 from .message import Message
-from schema.youps import Message as MessageSchema
+from schema.youps import MessageSchema
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
