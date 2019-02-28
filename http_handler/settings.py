@@ -281,7 +281,7 @@ LOGGING = {
         'custom.file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/home/ubuntu/production/mailx/logs/mailbot.log',
+            'filename': '/home/ubuntu/production/mailx/logs/youps.log',
             'formatter': 'custom.debug'
         },
         # this handler logs to the console
