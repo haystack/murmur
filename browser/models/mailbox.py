@@ -72,11 +72,11 @@ class MailBox:
     def _find_or_create_folder(self, flags, name):
         # type: (t.List[t.AnyStr], t.AnyStr) -> Folder
 
-        folder_schema = None 
-        try:
-            folder_schema = FolderSchema.objects.get(imap_account_id=self._imap_account.id, name=name)
-        except FolderSchema.Does
-
+        # folder_schema = None 
+        # try:
+        #     folder_schema = FolderSchema.objects.get(imap_account_id=self._imap_account.id, name=name)
+        # except FolderSchema.Does
+        pass
 
 
     def _list_selectable_folders(self, root=''):

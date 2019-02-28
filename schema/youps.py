@@ -5,8 +5,6 @@ import logging
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
-import ast
-
 class ImapAccount(models.Model):
     
     # the primary key
@@ -18,17 +16,13 @@ class ImapAccount(models.Model):
         unique=True,
     )
 
-	is_oauth = models.BooleanField(default=False)
-	access_token = models.CharField('access_token', max_length=200, blank=True)
-	refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
-	is_initialized = models.BooleanField(default=False)
-
-    password = models.CharField('password', max_length=100, blank=True)
-    host = models.CharField('host', max_length=100)
-
     is_oauth = models.BooleanField(default=False)
     access_token = models.CharField('access_token', max_length=200, blank=True)
     refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
+    is_initialized = models.BooleanField(default=False)
+
+    password = models.CharField('password', max_length=100, blank=True)
+    host = models.CharField('host', max_length=100)
 
     current_mode = models.ForeignKey('MailbotMode', null=True, blank=True)
     shortcuts = models.TextField(default="")
@@ -170,4 +164,3 @@ class Contact(models.Model):
     class Meta:
         unique_together = ("email", "imap_account")
 
-# class Youps_user(models.Model):
