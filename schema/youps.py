@@ -52,8 +52,10 @@ class MailbotMode(models.Model):
 	class Meta:
 		unique_together = ("uid", "imap_account")
 
+# we save folders flat. e.g., parents/child
 class Folder(models.Model):
     id = models.AutoField(primary_key=True)
+    newest_msg_uid = models.IntegerField(default=-1)
     name = models.CharField('name', max_length=300, blank=True)
     imap_account = models.ForeignKey('ImapAccount')
 

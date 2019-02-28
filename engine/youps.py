@@ -98,6 +98,31 @@ def login_imap(user, password, host, is_oauth, push=True):
     logging.debug(res)
     return res
 
+def init_inbox(imap_client, imap_account):
+    """this procedure is required when a new user first register to YoUPS
+    1) Scrape folder using IMAP list_folders() to register Folder instances belong to the user
+    2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
+
+    Args:
+        imap_client (imapclient.IMAPClient): authenticated imap_client instance
+        imap_account (Models.ImapAccount): 
+    """
+
+    # 1) Register folders
+    folders = imap_client.list_folders()
+    for f in folders:
+        name = f[2]
+        folder = Folder(name=name, imap_account=imap_account)
+
+        select_response = imap_client.select_folder(name)
+        folder.newest_msg_uid = select_response['UIDNEXT'] - 1
+        folder.highest_modseq = select_response['HIGHESTMODSEQ']
+        folder.flags = list(select_response['FLAGS'])
+
+        folder.save()
+
+
+
 def fetch_execution_log(user, email, push=True):
     res = {'status' : False}
 
@@ -155,6 +180,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
 
         imap = auth_res['imap']
 
+        init_inbox(imap, imapAccount)
         imapAccount.is_test = is_test
         imapAccount.is_running = is_running
 

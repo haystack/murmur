@@ -475,3 +475,15 @@ class Pile():
                 unread_emails.append(msgid)
 
         return unread_emails
+
+class Folder_wrapper():
+    def __init__(self, imap, search_criteria):
+        """create a new pile
+
+        Args:
+            imap (imapclient.IMAPClient): connection to an imap server
+            search_criteria (Union[str, List[str]]): string or list of strings
+                of search criteria to search the imap server
+        """
+
+        pass
