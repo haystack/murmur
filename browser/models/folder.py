@@ -105,10 +105,9 @@ class Folder():
 
     def _get_new_messages(self, last_seen_uid):
         logger.debug("folder %s getting new messages" % self)
-        fetch_data = self._imap_client.fetch('%d:*' % last_seen_uid + 1, Message._descriptors)
+        fetch_data = self._imap_client.fetch('%d:*' % (last_seen_uid + 1), Message._descriptors)
 
         for uid in fetch_data:
-            logger.debug("creating new message")
             message_data = fetch_data[uid]
             if 'SEQ' not in message_data:
                 logger.critical('Missing SEQ in message data')
