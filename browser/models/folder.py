@@ -3,28 +3,73 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 import typing as t  # noqa: F401 ignore unused we use it for typing
 import logging 
 from .message import Message
-from schema.youps import MessageSchema
+from schema.youps import MessageSchema, FolderSchema  # noqa: F401 ignore unused we use it for typing
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 class Folder():
-    def __init__(self, name, imap):
-        # type: (t.Text, IMAPClient) -> Folder
+    def __init__(self, folder_schema, imap_client):
+        # type: (FolderSchema, IMAPClient) -> Folder
+
+        self._schema = folder_schema  # type: FolderSchema
 
         # the connection to the server
-        self._imap = imap  # type: IMAPClient
+        self._imap_client = imap_client  # type: IMAPClient
 
-        # if this changes then there is new mail
-        self._uid_next = -1  # type: int
+    @property
+    def _uid_next(self):
+        # type: () -> int
+        return self._schema.uid_next
 
-        # if this changes we need to resync the entire folder
-        self._uid_validity = -1  # type: int
+    @_uid_next.setter
+    def _uid_next(self, value):
+        # type: (int) -> None
+        self._schema.uid_next = value
+        self._schema.save()
 
-        # should contain the full path to the folder i.e. "work/projects/youps"
-        self.name = name  # type: t.Text 
+    @property
+    def _uid_validity(self):
+        # type: () -> int
+        return self._schema.uid_validity
 
-        # the last seen uid that we know about
-        self._last_seen_uid = -1  # type: int
+    @_uid_validity.setter
+    def _uid_validity(self, value):
+        # type: (int) -> None
+        self._schema.uid_validity = value
+        self._schema.save()
+
+    @property
+    def name(self):
+        # type: () -> t.Text
+        return self._schema.name
+
+    @name.setter
+    def name(self, value):
+        # type: (t.Text) -> None
+        self._schema.name = value
+        self._schema.save()
+
+    @property
+    def flags(self):
+        # type: () -> t.List[t.AnyStr]
+        return self._schema.flags
+
+    @flags.setter
+    def flags(self, value):
+        # type: (t.List[t.AnyStr]) -> None
+        self._schema.flags = value
+        self._schema.save()
+
+    @property
+    def _last_seen_uid(self):
+        # type: () -> int
+        return self._schema.last_seen_uid
+
+    @_last_seen_uid.setter
+    def _last_seen_uid(self, value):
+        # type: (int) -> None
+        self._schema.last_seen_uid = value
+        self._schema.save()
 
     def _completely_refresh_cache(self):
         """Called when the uid_validity has changed or first time seeing the folder.
@@ -71,7 +116,7 @@ class Folder():
         # if the uid has not changed then we don't need to get new messages
         if uid_next != self._uid_next:
             # get all the descriptors for the new messages
-            fetch_data = self._imap.fetch('%d:*' % self._last_seen_uid + 1, Message._descriptors)  # type: t.Dict[int, t.Dict[str, t.Any]]
+            fetch_data = self._imap_client.fetch('%d:*' % self._last_seen_uid + 1, Message._descriptors)  # type: t.Dict[int, t.Dict[str, t.Any]]
             
             for uid in fetch_data:
                 # TODO create a new message
@@ -79,7 +124,7 @@ class Folder():
                 pass
 
         # get all the flags for the old messages
-        fetch_data = self._imap.fetch('1:%d' % self._last_seen_uid, ['FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]] 
+        fetch_data = self._imap_client.fetch('1:%d' % self._last_seen_uid, ['FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]] 
         
         for message in search_messages.where(uid <= self._last_seen_uid):
             # remove any cached messages which are not returned by the server

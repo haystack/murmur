@@ -46,6 +46,7 @@ class FolderSchema(models.Model):
     # each folder is associated with a single ImapAccount
     imap_account = models.ForeignKey(ImapAccount)
     # new messages have a uid >= uid_next if we get a new message this value changes
+    # TODO determine better way of specifying not initiated -1 can be used
     uid_next = models.IntegerField(default=-1)
     # if this changes we have to invalidate our entire cache and refresh
     uid_validity = models.IntegerField(default=-1)
