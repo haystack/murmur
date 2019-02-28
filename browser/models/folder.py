@@ -103,7 +103,12 @@ class Folder():
         fetch_data = self._imap_client.fetch('1:*', Message._descriptors)
 
         for uid in fetch_data:
-            logger.debug("Message %d: %s" % (uid, fetch_data[uid]))
+            logger.debug("Message: uid %d, msn %d, flags: %s", (uid, fetch_data['SEQ'], fetch_data['FLAGS']))
+            # message_schema = MessageSchema(imap_account=self._schema.imap_account,
+            #                                folder_schema=self._schema,
+            #                                uid=uid,
+            #                                msn=fetch_data['SEQ'],
+            #                                flags=fetch_data['FLAGS'])
 
     def _should_completely_refresh(self, uid_validity):
         """Determine if the folder should completely refresh it's cache.
