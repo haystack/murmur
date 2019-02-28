@@ -2,25 +2,35 @@ import base64, email, hashlib, json, logging, random, re, requests, sys, time, t
 
 from browser.imap import *
 
-from schema.youps import ImapAccount, MailbotMode, Folder_Model
+from schema.youps import ImapAccount, MailbotMode, FolderSchema
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
 import string
 import random
 
-def login_imap(user, password, host, is_oauth, push=True):
+def login_imap(email, password, host, is_oauth):
+    """This function is called only once per each user when they first attempt to login to YoUPS.
+    check if we are able to login to the user's imap using given credientials.
+    if we can, encrypt and store credientials on our DB. 
+
+        Args:
+            email (string): user's email address
+            password (string): if is_oauth True, then it contains oauth token. Otherwise, it is plain password
+            host (string): IMAP host address
+            is_oauth (boolean): if the user is using oauth or not
+    """
+
     res = {'status' : False}
 
     try:
         imap = IMAPClient(host, use_uid=True)
-        email = user.email
 
-        refresh_token = ''
+	refresh_token = ''
         access_token = ''
         password_original = password
         if is_oauth:
-            # TODO If this imap account is already mapped with this account, by pass the login.
+            # TODO If this imap account is already mapped with this account, bypass the login.
             oauth = GoogleOauth2()
             response = oauth.generate_oauth2_token(password)
             refresh_token = response['refresh_token']
@@ -44,9 +54,6 @@ def login_imap(user, password, host, is_oauth, push=True):
                 password = password + (padding * (16 - extra))
             password = aes.encrypt(password)
 
-        # Log out after auth verification
-        imap.logout()
-
         imapAccount = ImapAccount.objects.filter(email=email)
         if not imapAccount.exists():
             imapAccount = ImapAccount(email=email, password=base64.b64encode(password), host=host)
@@ -66,24 +73,20 @@ def login_imap(user, password, host, is_oauth, push=True):
 
         imapAccount.save()
 
+        # TODO maybe not logout, cuz we might want to keep use the same instance for Luke's folder scraping
+        # Log out after auth verification
+        imap.logout()
 
-        # u = UserProfile.objects.filter(email=email)
-        # if not u.exists():
-        #     u = UserProfile.objects.create_user(email, password_original)
+        # TODO call Luke's folder scraping folder from here
+        """this procedure is required when a new user first register to YoUPS
+        1) Scrape folder using IMAP list_folders() to register Folder instances belong to the user
+        2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
+        """
 
-        #     res['code'] = "New user"
-        # else:
-        #     res['code'] = "This account is already logged in!"
-
-        #     # if user has source code running, send it
-        #     u = u[0]
-        #     imapAccount = u
-        #     res['imap_code'] = imapAccount.code
-
-        # u.host = host
-        # u.imap_password = password
-
-        # u.save()
+        # now user can use youps
+        imapAccount.is_initialized = True
+        imapAccount.save()
+        # TODO notify the user that their account is ready to be used
 
         res['status'] = True
 
@@ -97,40 +100,6 @@ def login_imap(user, password, host, is_oauth, push=True):
 
     logging.debug(res)
     return res
-
-def init_inbox(imap_client, imap_account):
-    """this procedure is required when a new user first register to YoUPS
-    1) Scrape folder using IMAP list_folders() to register Folder instances belong to the user
-    2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
-
-    Args:
-        imap_client (imapclient.IMAPClient): authenticated imap_client instance
-        imap_account (Models.ImapAccount): 
-    """
-
-    # 1) Register folders
-    # TODO use Luke's selectable_folder method
-    folders = imap_client.list_folders()
-    for f in folders:
-        try:
-            name = f[2]
-            select_response = imap_client.select_folder(name)
-            folder = Folder_Model(name=name, imap_account=imap_account)
-            folder.newest_msg_uid = select_response['UIDNEXT'] - 1
-            folder.highest_modseq = select_response['HIGHESTMODSEQ']
-            folder.set_flags( list(select_response['FLAGS']) ) 
-
-            folder.save()
-        except Exception as ex:
-            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-            message = template.format(type(ex).__name__, ex.args)
-            print message
-
-
-    # now user can use youps
-    imap_account.is_initialized = True
-    imap_account.save()
-    # TODO notify the user that their account is ready to be used
 
 def fetch_execution_log(user, email, push=True):
     res = {'status' : False}
@@ -179,6 +148,16 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
     return res
 
 def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=True):
+    """This function is called everytime users hit "run", "stop" or "save" their scripts.
+
+        Args:
+            user (Model.UserProfile)
+            email (string): user's email address
+            current_mode_id (integer): ID of currently selected/running mode
+            modes (list): a list of dicts that each element is information about each user's mode
+            is_test (boolean): if is_test is True, then it just simulates the user's script and prints out log but not actually execute it.  
+            is_running (boolean): potentially deprecated as we move toward one-off running fashion. 
+    """
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
 
     try:
@@ -189,7 +168,6 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
 
         imap = auth_res['imap']
 
-        init_inbox(imap, imapAccount)
         imapAccount.is_test = is_test
         imapAccount.is_running = is_running
 
