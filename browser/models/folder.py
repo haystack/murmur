@@ -87,7 +87,6 @@ class Folder():
         self._schema.is_selectable = value
         self._schema.save()
 
-
     def _completely_refresh_cache(self):
         """Called when the uid_validity has changed or first time seeing the folder.
 
@@ -100,28 +99,31 @@ class Folder():
         # delete any messages already stored in the folder
         MessageSchema.objects.filter(folder_schema=self._schema).delete()
 
-        # get new messages starting from the last seen uid of 0
-        self._get_new_messages(0)
+        # save new messages starting from the last seen uid of 0
+        self._save_new_messages(0)
+        # TODO maybe trigger the user
 
-    def _get_new_messages(self, last_seen_uid):
-        logger.debug("folder %s getting new messages" % self)
-        fetch_data = self._imap_client.fetch('%d:*' % (last_seen_uid + 1), Message._descriptors)
+    def _refresh_cache(self, uid_next):
+        # type: (int) -> None
+        """Called during normal synchronization to refresh the cache.
 
-        for uid in fetch_data:
-            message_data = fetch_data[uid]
-            if 'SEQ' not in message_data:
-                logger.critical('Missing SEQ in message data')
-            if 'FLAGS' not in message_data:
-                logger.critical('Missing FLAGS in message data')
+        Should get new messages and build message number to UID map for the
+        new messages.
 
-            message_schema = MessageSchema(imap_account=self._schema.imap_account,
-                                           folder_schema=self._schema,
-                                           uid=uid,
-                                           msn=message_data['SEQ'],
-                                           flags=message_data['FLAGS'])
-            message_schema.save()
-            logger.debug("folder %s saved new message" % self)
+        Should update cached flags on old messages, find out which old messages
+        got expunged, build a message number to UID map for old messages.
 
+        Args:
+            uid_next (int): UIDNEXT returned from select command
+        """
+
+        # if the uid has not changed then we don't need to get new messages
+        if uid_next != self._uid_next:
+            # get all the descriptors for the new messages
+            self._save_new_messages(self._last_seen_uid)
+            # TODO maybe trigger the user
+
+        self._update_cached_message_flags()
 
     def _should_completely_refresh(self, uid_validity):
         """Determine if the folder should completely refresh it's cache.
@@ -142,38 +144,43 @@ class Folder():
             return True
         return False
 
-
-    def _refresh_cache(self, uid_next):
-        # type: (int) -> None
-        """Called during normal synchronization to refresh the cache.
-
-        Should get new messages and build message number to UID map for the
-        new messages.
-
-        Should update cached flags on old messages, find out which old messages
-        got expunged, build a message number to UID map for old messages.
-
-        Args:
-            uid_next (int): UIDNEXT returned from select command
-        """
-
-        # if the uid has not changed then we don't need to get new messages
-        if uid_next != self._uid_next:
-            # get all the descriptors for the new messages
-            fetch_data = self._imap_client.fetch('%d:*' % self._last_seen_uid + 1, Message._descriptors)  # type: t.Dict[int, t.Dict[str, t.Any]]
-            
-            for uid in fetch_data:
-                # TODO create a new message
-                # TODO maybe trigger the user
-                pass
+    def _update_cached_message_flags(self):
+        logger.debug("folder %s updating cached message flags" % self)
 
         # get all the flags for the old messages
         fetch_data = self._imap_client.fetch('1:%d' % self._last_seen_uid, ['FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]] 
-        
-        for message in search_messages.where(uid <= self._last_seen_uid):
-            # remove any cached messages which are not returned by the server
-            if message._uid not in fetch_data:
-                message._remove_from_cache()
-            message.update_flags(fetch_data[b'FLAGS'])
-            message._refresh_cache(fetch_data[message._uid])
+        # update flags in the cache 
+        for message_schema in MessageSchema.objects.filter(folder_schema=self._schema):
+            # if we don't get any information about the message we have to remove it from the cache
+            if message_schema.uid not in fetch_data:
+                message_schema.delete()
+            message_data = fetch_data[message_schema.uid]
+            if 'SEQ' not in message_data:
+                logger.critical('Missing SEQ in message data')
+            if 'FLAGS' not in message_data:
+                logger.critical('Missing FLAGS in message data')
+            message_schema.flags = message_data['FLAGS'] 
+            message_schema.msn = message_data['SEQ']
+            message_schema.save()
             # TODO maybe tell the user that flags changed?
+        logger.debug("folder %s updated cached messages" % self)
+
+    def _save_new_messages(self, last_seen_uid):
+        logger.debug("folder %s getting new messages" % self)
+        fetch_data = self._imap_client.fetch('%d:*' % (last_seen_uid + 1), Message._descriptors)
+
+        for uid in fetch_data:
+            message_data = fetch_data[uid]
+            if 'SEQ' not in message_data:
+                logger.critical('Missing SEQ in message data')
+            if 'FLAGS' not in message_data:
+                logger.critical('Missing FLAGS in message data')
+
+            message_schema = MessageSchema(imap_account=self._schema.imap_account,
+                                           folder_schema=self._schema,
+                                           uid=uid,
+                                           msn=message_data['SEQ'],
+                                           flags=message_data['FLAGS'])
+            message_schema.save()
+
+        logger.debug("folder %s saved new messages" % self)
