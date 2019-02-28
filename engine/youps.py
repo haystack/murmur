@@ -1,13 +1,15 @@
-import base64, email, hashlib, json, logging, random, re, requests, sys, time, traceback
-
-from browser.imap import *
-
-from schema.youps import ImapAccount, MailbotMode, FolderSchema
-
+import base64
+import logging
+import random
+import traceback
+from browser.imap import GoogleOauth2
+from http_handler.settings import IMAP_SECRET
+from schema.youps import ImapAccount, MailbotMode
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
+from engine.constants import msg_code
+from browser.imap import authenticate
 import string
-import random
 
 def login_imap(email, password, host, is_oauth):
     """This function is called only once per each user when they first attempt to login to YoUPS.
@@ -26,9 +28,8 @@ def login_imap(email, password, host, is_oauth):
     try:
         imap = IMAPClient(host, use_uid=True)
 
-	refresh_token = ''
+        refresh_token = ''
         access_token = ''
-        password_original = password
         if is_oauth:
             # TODO If this imap account is already mapped with this account, bypass the login.
             oauth = GoogleOauth2()
@@ -41,7 +42,7 @@ def login_imap(email, password, host, is_oauth):
         else:
             imap.login(email, password)
 
-            #encrypt password then save
+            # encrypt password then save
             aes = AES.new(IMAP_SECRET, AES.MODE_CBC, 'This is an IV456')
 
             # padding password
@@ -166,13 +167,14 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         if not auth_res['status']:
             raise ValueError('Something went wrong during authentication. Refresh and try again!')
 
-        imap = auth_res['imap']
+        imap = auth_res['imap']  # noqa: F841 ignore unused
 
         imapAccount.is_test = is_test
         imapAccount.is_running = is_running
 
-        uid = fetch_latest_email_id(imapAccount, imap)
-        imapAccount.newest_msg_id = uid
+        # TODO these don't work anymore
+        # uid = fetch_latest_email_id(imapAccount, imap)
+        # imapAccount.newest_msg_id = uid
 
         for key, value in modes.iteritems():
             mode_id = value['id']
@@ -194,21 +196,22 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_account=imapAccount)[0]
         imapAccount.save()
 
-        if imapAccount.is_running:
-            res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
 
-            # if the code execute well without any bug, then save the code to DB
-            if not res['imap_error']:
-                res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log'])
-                now = datetime.now()
-                now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
-                res['imap_log'] = now_format + res['imap_log']
-            else:
-                imapAccount.is_running = False
-                imapAccount.save()
-        else:
+        # if imapAccount.is_running:
+        #     res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
 
-            res['imap_log'] = "Your mailbot stops running"
+        #     # if the code execute well without any bug, then save the code to DB
+        #     if not res['imap_error']:
+        #         res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log'])
+        #         now = datetime.now()
+        #         now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
+        #         res['imap_log'] = now_format + res['imap_log']
+        #     else:
+        #         imapAccount.is_running = False
+        #         imapAccount.save()
+        # else:
+
+        #     res['imap_log'] = "Your mailbot stops running"
 
         res['status'] = True
 
