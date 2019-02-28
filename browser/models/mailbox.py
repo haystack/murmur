@@ -96,7 +96,6 @@ class MailBox:
         folder_results = self._imap_client.list_folders('', root + '%')
         logger.debug('selectable_folder_results %s' % folder_results)
         for (flags, delimiter, name) in folder_results:
-            logger.debug('IN LOOP')
 
             folder = self._find_or_create_folder(name)  # type: Folder
 
@@ -128,6 +127,7 @@ class MailBox:
                 continue
 
             yield folder
+            logger.debug('IN LOOP')
     
     def _check_for_new_emails(self):
         found_new_emails = False
