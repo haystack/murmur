@@ -1475,7 +1475,7 @@ def login_imap(request):
 		is_oauth = True if request.POST['is_oauth'] == "true" else False
 		password = request.POST['password']
 
-		res = engine.main.login_imap(user, password, host, is_oauth)
+		res = engine.main.login_imap(user.email, password, host, is_oauth)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
