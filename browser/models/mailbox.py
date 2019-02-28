@@ -4,24 +4,26 @@ from event import Event
 import logging 
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from .folder import Folder
+from schema.youps import ImapAccount, FolderSchema
 
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 class MailBox:
-    def __init__(self, imap):
-        # type: (IMAPClient) -> MailBox 
+    def __init__(self, imap_account, imap_client):
+        # type: (ImapAccount, IMAPClient) -> MailBox 
         """Create a new instance of the client's mailbox using a connection
         to an IMAPClient.
         """
-        self._imap = imap  # type: IMAPClient    
+        self._imap_client = imap_client  # type: IMAPClient    
+
+        self._imap_account = imap_account  # type: ImapAccount
 
         # Events
         self.newMessage = Event()  # type: Event
 
-        self._sync_with_imap()
 
-    def _sync_with_imap(self):
+    def _sync(self):
         """Helper method to synchronize with the imap server.
         """
         # should do a couple things based on
@@ -29,7 +31,7 @@ class MailBox:
         # and https://tools.ietf.org/html/rfc4549
 
         for folder_name in self._list_selectable_folders():
-            response = self._imap.select_folder(folder_name)
+            response = self._imap_client.select_folder(folder_name)
             logger.info('select_folder response: %s' % response)
 
             # log information about flags returned
@@ -42,18 +44,23 @@ class MailBox:
                 logger.debug('folder %s contains %d recent messages' % (folder_name, response['RECENT']))
             if 'UIDNEXT' in response:
                 logger.debug('folder %s next UID is %d' % (response['UIDNEXT']))
+            else:
+                logger.critical('folder %s did not return UIDNEXT' % folder_name)
             if 'UIDVALIDITY' in response:
                 logger.debug('folder %s UIDVALIDITY %d' % (response['UIDVALIDITY']))
+            else:
+                logger.critical('folder %s did not return UIDVALIDITY' % folder_name)
             if 'PERMANENTFLAGS' in response and '\\*' in response['PERMANENTFLAGS']:
                 logger.debug('folder %s supports custom flags')
             else:
-                logger.critical('folder %s does not support custom flags')
+                logger.critical('folder %s does not support custom flags or did not return PERMANENTFLAGS')
 
-            exists, recent, uid_next, uid_validity = response['EXISTS'], response['RECENT'], response['UIDNEXT'], response['UIDNEXT']
+            assert 'UIDNEXT' in response and 'UIDVALIDITY' in response, "Missing UID Information"
+            uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
 
 
             # TODO get the folder
-            folder = Folder(folder_name, self._imap)
+            folder = Folder(folder_name, self._imap_client)
 
             if folder._should_completely_refresh(uid_validity):
                 folder._completely_refresh_cache()
@@ -61,6 +68,14 @@ class MailBox:
                 logger.debug('folder %s normal refresh' % folder_name)
                 folder._refresh_cache(uid_next)
             
+
+    def _find_or_create_folder(self, flags, name):
+        # type: (t.List[t.AnyStr], t.AnyStr) -> Folder
+
+        folder_schema = None 
+        try:
+            folder_schema = FolderSchema.objects.get(imap_account_id=self._imap_account.id, name=name)
+        except FolderSchema.Does
 
 
 
@@ -72,7 +87,8 @@ class MailBox:
         # we want to avoid listing all the folders 
         # https://www.imapwiki.org/ClientImplementation/MailboxList
         # we basically only want to list folders when we have to
-        for (flags, delimiter, name) in self._imap.list_folders('', root + '%'):
+        for (flags, delimiter, name) in self._imap_client.list_folders('', root + '%'):
+            
             # assume there are children unless specifically told otherwise
             recurse_children = True
 

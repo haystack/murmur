@@ -1,26 +1,20 @@
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, User
-from django.core.mail import send_mail
 from django.db import models
-from django.utils.http import urlquote
-from jsonfield import JSONField
-from oauth2client.django_orm import FlowField, CredentialsField
+import json
+import typing as t  # noqa: F401 ignore unused we use it for typing
+import logging
 
-from http_handler import settings
-from http_handler.settings import AUTH_USER_MODEL
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 class ImapAccount(models.Model):
-    # Primary Key
+    
+    # the primary key
     id = models.AutoField(primary_key=True)
-
-    # TODO we need to remove this
-    newest_msg_id = models.IntegerField(default=-1)
 
     email = models.EmailField(
         verbose_name='email address',
         max_length=255,
         unique=True,
     )
-
 
     password = models.CharField('password', max_length=100, blank=True)
     host = models.CharField('host', max_length=100)
@@ -44,6 +38,75 @@ class ImapAccount(models.Model):
     repeat_action = models.CharField('repeat_action', max_length=1000, blank=True)
 
     # user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+
+class FolderSchema(models.Model):
+    # the primary key
+    id = models.AutoField(primary_key=True)
+    # each folder is associated with a single ImapAccount
+    imap_account = models.ForeignKey(ImapAccount)
+    # new messages have a uid >= uid_next if we get a new message this value changes
+    uid_next = models.IntegerField(default=-1)
+    # if this changes we have to invalidate our entire cache and refresh
+    uid_validity = models.IntegerField(default=-1)
+    # the name of the folder including it's entire path i.e. "work/project/youps"
+    name = models.TextField()
+    # the last seen uid which is helpful for reducing bandwith when syncing
+    last_seen_uid = models.IntegerField(default=-1)
+    # the flags associated with the folder 
+    _flags = models.TextField(db_column="flags")
+
+    @property
+    def flags(self):
+        # type: () -> t.List[t.AnyStr]
+        return json.loads(self._flags)
+
+    @flags.setter
+    def flags(self, value):
+        # type: (t.List[t.AnyStr]) -> None
+        self._flags = json.dumps(value)
+
+    class Meta:
+        db_table = "youps_folder"
+        unique_together = ("name", "imap_account")
+
+
+class MessageSchema(models.Model):
+    # the primary key
+    id = models.AutoField(primary_key=True)
+    # each message is associated with a single ImapAccount
+    imap_account = models.ForeignKey('ImapAccount')
+    # each message is associated with a single Folder
+    folder_schema = models.ForeignKey(FolderSchema)
+    # each message has a uid
+    uid = models.IntegerField(default=-1)
+    # the message sequence number identifies the offest of the message in the folder
+    msn = models.IntegerField(default=-1)
+    # the flags associated with the message
+    _flags = models.TextField(db_column="flags")
+
+    @property
+    def flags(self):
+        # type: () -> t.List[t.AnyStr]
+        return json.loads(self._flags)
+
+    @flags.setter
+    def flags(self, value):
+        # type: (t.List[t.AnyStr]) -> None
+        self._flags = json.dumps(value)
+
+
+    progress = models.CharField('progress', max_length=300, blank=True)
+    deadline = models.DateTimeField('deadline', null=True, blank=True)
+    category = models.CharField('category', max_length=300, blank=True)
+    topic = models.CharField('topic', max_length=300, blank=True)
+    priority = models.CharField('priority', max_length=300, blank=True)
+    task = models.CharField('task', max_length=300, blank=True)
+
+    class Meta:
+        db_table = "youps_message"
+        # message uid is unique per folder, folder is already unique per account
+        unique_together = ("uid", "folder_schema")
+
 
 class MailbotMode(models.Model):
     uid = models.IntegerField()
@@ -71,22 +134,6 @@ class Message_Thread(models.Model):
         db_table = "youps_threads"
         unique_together = ("id", "imap_account")
 
-class Message(models.Model):
-    message_id = models.CharField('message_id', max_length=300)
-
-    thread = models.ForeignKey('Message_Thread')
-    imap_account = models.ForeignKey('ImapAccount')
-
-    progress = models.CharField('progress', max_length=300, blank=True)
-    deadline = models.DateTimeField('deadline', null=True, blank=True)
-    category = models.CharField('category', max_length=300, blank=True)
-    topic = models.CharField('topic', max_length=300, blank=True)
-    priority = models.CharField('priority', max_length=300, blank=True)
-    task = models.CharField('task', max_length=300, blank=True)
-    
-    class Meta:
-        db_table = "youps_messages"
-        unique_together = ("message_id", "imap_account")
 
 class Contact(models.Model):
     name = models.CharField('contact_name', max_length=100)
@@ -99,7 +146,7 @@ class Contact(models.Model):
     geolocation = models.TextField(null=True, blank=True)
     availability = models.TextField(null=True, blank=True)
 
-    imap_account = models.ForeignKey('ImapAccount') # it belongs to this imap_account
+    imap_account = models.ForeignKey('ImapAccount')  # it belongs to this imap_account
 
     class Meta:
         unique_together = ("email", "imap_account")
