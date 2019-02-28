@@ -36,7 +36,10 @@ class Command(BaseCommand):
             # get an imapclient which is authenticated
             imap = auth_res['imap']
 
-            MailBox(imap)
+            # create the mailbox
+            mailbox = MailBox(imapAccount, imap)
+            # sync the mailbox with imap
+            mailbox._sync() 
 
             try:
                 # get the UID of the latest message received by the user
