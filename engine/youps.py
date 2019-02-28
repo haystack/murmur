@@ -117,7 +117,7 @@ def init_inbox(imap_client, imap_account):
         select_response = imap_client.select_folder(name)
         folder.newest_msg_uid = select_response['UIDNEXT'] - 1
         folder.highest_modseq = select_response['HIGHESTMODSEQ']
-        folder.flags = list(select_response['FLAGS'])
+        folder.set_flags( list(select_response['FLAGS']) ) 
 
         folder.save()
 

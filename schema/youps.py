@@ -41,6 +41,7 @@ class ImapAccount(models.Model):
 
 	# user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
 
+
 class MailbotMode(models.Model):
 	uid = models.IntegerField()
 
@@ -61,14 +62,20 @@ class Folder(models.Model):
 
     # to keep track of changes of flags within folder
     highest_modseq = models.IntegerField(default=-1)
-    flags = ListField() # a list of flags
+    flags = models.TextField(null=True, blank=True)  # a strigified list of flags
+
+    def set_flags(self, flag_lst):
+        self.flags = repr(flag_lst)
+        
+    def get_flags(self):
+        return ast.literal_eval( self.flags )
 
     class Meta:
         db_table = "youps_folder"
         unique_together = ("id", "imap_account")
 
 # This model is to have many-to-many relation of MailbotMode and Folder
-class MailbotMode_Folder(models.Mode):
+class MailbotMode_Folder(models.Model):
     mode = models.ForeignKey('MailbotMode')
     folder = models.ForeignKey('Folder')
     imap_account = models.ForeignKey('ImapAccount')
@@ -127,29 +134,3 @@ class Contact(models.Model):
 		unique_together = ("email", "imap_account")
 
 # class Youps_user(models.Model):
-
-class ListField(models.TextField):
-    __metaclass__ = models.SubfieldBase
-    description = "Stores a python list"
-
-    def __init__(self, *args, **kwargs):
-        super(ListField, self).__init__(*args, **kwargs)
-
-    def to_python(self, value):
-        if not value:
-            value = []
-
-        if isinstance(value, list):
-            return value
-
-        return ast.literal_eval(value)
-
-    def get_prep_value(self, value):
-        if value is None:
-            return value
-
-        return unicode(value)
-
-    def value_to_string(self, obj):
-        value = self._get_val_from_obj(obj)
-        return self.get_db_prep_value(value)
