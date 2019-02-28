@@ -65,10 +65,12 @@ class MailBox:
                 folder._completely_refresh_cache()
             else:
                 folder._refresh_cache(uid_next)
-            
+
             folder._uid_next = uid_next
+            assert folder._uid_next == uid_next
             folder._uid_validity = uid_validity
-            
+            assert folder._uid_validity == uid_validity
+
 
     def _find_or_create_folder(self, name):
         # type: (t.AnyStr) -> Folder
