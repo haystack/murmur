@@ -25,7 +25,7 @@ class ImapAccount(models.Model):
 	is_oauth = models.BooleanField(default=False)
 	access_token = models.CharField('access_token', max_length=200, blank=True)
 	refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
-    is_initialized = models.BooleanField(default=False)
+	is_initialized = models.BooleanField(default=False)
 
 	current_mode = models.ForeignKey('MailbotMode', null=True, blank=True)
 	shortcuts = models.TextField(default="")
@@ -57,7 +57,9 @@ class MailbotMode(models.Model):
 # we save folders flat. e.g., parents/child
 class Folder_Model(models.Model):
     id = models.AutoField(primary_key=True)
-    newest_msg_uid = models.IntegerField(default=-1)
+    uid_next = models.IntegerField(default=-1)
+    uid_validity = models.IntegerField(default=-1)
+    last_seen_uid = models.IntegerField(default=-1)
     name = models.CharField('name', max_length=300, blank=True)
     imap_account = models.ForeignKey('ImapAccount')
 
