@@ -51,7 +51,7 @@ class FolderSchema(models.Model):
     uid_validity = models.IntegerField(default=-1)
     # the name of the folder including it's entire path i.e. "work/project/youps"
     # TODO we need to determine the actual max length
-    name = models.TextField(max_length=1000)
+    name = models.CharField(max_length=1000)
     # the last seen uid which is helpful for reducing bandwith when syncing
     last_seen_uid = models.IntegerField(default=-1)
     # the flags associated with the folder 
