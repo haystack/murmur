@@ -2,7 +2,7 @@ from __future__ import unicode_literals, print_function, division
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 import typing as t  # noqa: F401 ignore unused we use it for typing
 import logging 
-from .message import Message
+from message import Message
 from schema.youps import MessageSchema, FolderSchema  # noqa: F401 ignore unused we use it for typing
 
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -76,13 +76,34 @@ class Folder():
         self._schema.last_seen_uid = value
         self._schema.save()
 
+    @property
+    def _is_selectable(self):
+        # type: () -> bool 
+        return self._schema.is_selectable
+
+    @_is_selectable.setter
+    def _is_selectable(self, value):
+        # type: (bool) -> None
+        self._schema.is_selectable = value
+        self._schema.save()
+
+
     def _completely_refresh_cache(self):
         """Called when the uid_validity has changed or first time seeing the folder.
 
         Should completely remove any messages stored in this folder and rebuild
         the cache of messages from scratch.
         """
-        pass 
+
+        logger.info("folder %s completely refreshing cache" % self)
+
+        # delete any messages already stored in the folder
+        MessageSchema.objects.filter(folder_schema=self._schema).delete()
+
+        fetch_data = self._imap_client.fetch('1:*', Message._descriptors)
+
+        for uid in fetch_data:
+            logger.debug("Message %d: %s" % (uid, fetch_data[uid]))
 
     def _should_completely_refresh(self, uid_validity):
         """Determine if the folder should completely refresh it's cache.

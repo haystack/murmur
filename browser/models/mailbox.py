@@ -64,14 +64,6 @@ class MailBox:
                 logger.debug('folder %s should completely refresh' % folder)
                 folder._completely_refresh_cache()
 
-        #     # TODO get the folder
-        #     folder = Folder(folder, self._imap_client)
-
-        #     if folder._should_completely_refresh(uid_validity):
-        #         try:
-        #             folder._completely_refresh_cache()
-        #         except NotImplementedError:
-        #             continue
         #     else:
         #         logger.debug('folder %s normal refresh' % folder)
         #         folder._refresh_cache(uid_next)
@@ -121,8 +113,11 @@ class MailBox:
 
             # do not yield folders which are not selectable
             if '\\Noselect' in flags:
-                logger.debug('folder %s is not selectable' % name)
+                folder._is_selectable = False
                 continue
+            else:
+                # TODO we should verify this in the return from select_folder
+                folder._is_selectable = True
 
             yield folder
 
