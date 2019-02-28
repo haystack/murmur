@@ -3,6 +3,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 from event import Event
 import logging 
 import typing as t  # noqa: F401 ignore unused we use it for typing
+from .folder import Folder
 
 
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -13,7 +14,7 @@ class MailBox:
         """Create a new instance of the client's mailbox using a connection
         to an IMAPClient.
         """
-        self.imap = imap  # type: IMAPClient    
+        self._imap = imap  # type: IMAPClient    
 
         # Events
         self.newMessage = Event()  # type: Event
@@ -28,15 +29,16 @@ class MailBox:
         # and https://tools.ietf.org/html/rfc4549
 
         for folder_name in self._list_selectable_folders():
-            response = self.imap.select_folder(folder_name)
+            response = self._imap.select_folder(folder_name)
+            logger.info('select_folder response: %s' % response)
+
+            # log information about flags returned
             if 'HIGHESTMODSEQ' in response:
                 # https://wiki.mozilla.org/Thunderbird:IMAP_RFC_4551_Implementation
                 logger.debug('server supports rfc 4551')
             if 'EXISTS' in response:
-                # see exists response
                 logger.debug('folder %s contains %d messages' % (folder_name, response['EXISTS']))
             if 'RECENT' in response:
-                # see recent response
                 logger.debug('folder %s contains %d recent messages' % (folder_name, response['RECENT']))
             if 'UIDNEXT' in response:
                 logger.debug('folder %s next UID is %d' % (response['UIDNEXT']))
@@ -47,7 +49,20 @@ class MailBox:
             else:
                 logger.critical('folder %s does not support custom flags')
 
-            logger.debug('select_folder response: %s' % response)
+            exists, recent, uid_next, uid_validity = response['EXISTS'], response['RECENT'], response['UIDNEXT'], response['UIDNEXT']
+
+
+            # TODO get the folder
+            folder = Folder(folder_name, self._imap)
+
+            if folder._should_completely_refresh(uid_validity):
+                folder._completely_refresh_cache()
+            else:
+                logger.debug('folder %s normal refresh' % folder_name)
+                folder._refresh_cache(uid_next)
+            
+
+
 
     def _list_selectable_folders(self, root=''):
         # type: (t.Text) -> t.Generator[t.Text]
@@ -57,12 +72,12 @@ class MailBox:
         # we want to avoid listing all the folders 
         # https://www.imapwiki.org/ClientImplementation/MailboxList
         # we basically only want to list folders when we have to
-        for (flags, delimiter, name) in self.imap.list_folders('', root + '%'):
+        for (flags, delimiter, name) in self._imap.list_folders('', root + '%'):
             # assume there are children unless specifically told otherwise
             recurse_children = True
 
             # we look at all the flags here
-            logger.debug('folder: %s, flags: %s, delimiter: %s' % (name, flags, delimiter))
+            logger.info('folder: %s, flags: %s, delimiter: %s' % (name, flags, delimiter))
             if '\\HasNoChildren' in flags:
                 logger.debug('folder %s has no children' % name)
                 recurse_children = False
@@ -88,6 +103,8 @@ class MailBox:
         found_new_emails = False
         if found_new_emails:
             self.newMessage()
+
+
 
     
 
