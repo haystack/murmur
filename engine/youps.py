@@ -2,7 +2,7 @@ import base64, email, hashlib, json, logging, random, re, requests, sys, time, t
 
 from browser.imap import *
 
-from schema.youps import ImapAccount, MailbotMode
+from schema.youps import ImapAccount, MailbotMode, Folder_Model
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
@@ -109,19 +109,28 @@ def init_inbox(imap_client, imap_account):
     """
 
     # 1) Register folders
+    # TODO use Luke's selectable_folder method
     folders = imap_client.list_folders()
     for f in folders:
-        name = f[2]
-        folder = Folder(name=name, imap_account=imap_account)
+        try:
+            name = f[2]
+            select_response = imap_client.select_folder(name)
+            folder = Folder_Model(name=name, imap_account=imap_account)
+            folder.newest_msg_uid = select_response['UIDNEXT'] - 1
+            folder.highest_modseq = select_response['HIGHESTMODSEQ']
+            folder.set_flags( list(select_response['FLAGS']) ) 
 
-        select_response = imap_client.select_folder(name)
-        folder.newest_msg_uid = select_response['UIDNEXT'] - 1
-        folder.highest_modseq = select_response['HIGHESTMODSEQ']
-        folder.set_flags( list(select_response['FLAGS']) ) 
+            folder.save()
+        except Exception as ex:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(ex).__name__, ex.args)
+            print message
 
-        folder.save()
 
-
+    # now user can use youps
+    imap_account.is_initialized = True
+    imap_account.save()
+    # TODO notify the user that their account is ready to be used
 
 def fetch_execution_log(user, email, push=True):
     res = {'status' : False}

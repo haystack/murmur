@@ -25,6 +25,7 @@ class ImapAccount(models.Model):
 	is_oauth = models.BooleanField(default=False)
 	access_token = models.CharField('access_token', max_length=200, blank=True)
 	refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
+    is_initialized = models.BooleanField(default=False)
 
 	current_mode = models.ForeignKey('MailbotMode', null=True, blank=True)
 	shortcuts = models.TextField(default="")
@@ -54,7 +55,7 @@ class MailbotMode(models.Model):
 		unique_together = ("uid", "imap_account")
 
 # we save folders flat. e.g., parents/child
-class Folder(models.Model):
+class Folder_Model(models.Model):
     id = models.AutoField(primary_key=True)
     newest_msg_uid = models.IntegerField(default=-1)
     name = models.CharField('name', max_length=300, blank=True)
@@ -72,12 +73,12 @@ class Folder(models.Model):
 
     class Meta:
         db_table = "youps_folder"
-        unique_together = ("id", "imap_account")
+        unique_together = ("name", "imap_account")
 
 # This model is to have many-to-many relation of MailbotMode and Folder
 class MailbotMode_Folder(models.Model):
     mode = models.ForeignKey('MailbotMode')
-    folder = models.ForeignKey('Folder')
+    folder = models.ForeignKey('Folder_Model')
     imap_account = models.ForeignKey('ImapAccount')
 
     class Meta:

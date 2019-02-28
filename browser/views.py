@@ -414,6 +414,7 @@ def login_imap_view(request):
 				imap_authenticated = True
 				is_test = imap[0].is_test
 				is_running = imap[0].is_running
+				is_initialized = imap[0].is_initialized
 
 				current_mode = imap[0].current_mode
 
@@ -423,10 +424,15 @@ def login_imap_view(request):
 				shortcuts = imap[0].shortcuts
 				if len(shortcuts) > 0:
 					shortcuts_exist = True
+
+				if is_initialized:
+					# send their folder list
+					folders = Folder_Model.objects.filter(imap_account=imap[0])
+					mode_folder = MailbotMode_Folder.objects.filter(imap_account=imap[0])
 				
 
-	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 
-		'mode_exist': mode_exist, 'modes': modes, 'current_mode': current_mode,
+	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 'is_initialized': is_initialized,
+		'folders': folders, 'mode_folder': mode_folder,'mode_exist': mode_exist, 'modes': modes, 'current_mode': current_mode,
 		'imap_authenticated': imap_authenticated, 'website': WEBSITE, 
 		'shortcuts_exist': shortcuts_exist, 'shortcuts': shortcuts}
 
