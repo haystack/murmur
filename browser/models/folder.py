@@ -103,8 +103,10 @@ class Folder():
         fetch_data = self._imap_client.fetch('1:*', Message._descriptors)
 
         for uid in fetch_data:
-            logger.debug("Message: uid %s" % fetch_data)
-            # logger.debug("Message: uid %d, msn %d, flags: %s" % (uid, fetch_data['SEQ'], fetch_data['FLAGS']))
+            # logger.debug("Message: uid %s" % fetch_data)
+            # logger.debug("FLAGS %s" % 'FLAGS' in fetch_data[uid])
+            # logger.debug('SEQ %s' % 'SEQ' in fetch_data[uid])
+            logger.debug("Message: uid %d, msn %d, flags: %s" % (uid, fetch_data[uid]['SEQ'], fetch_data[uid]['FLAGS']))
             # message_schema = MessageSchema(imap_account=self._schema.imap_account,
             #                                folder_schema=self._schema,
             #                                uid=uid,
