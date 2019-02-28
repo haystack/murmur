@@ -406,9 +406,13 @@ def login_imap_view(request):
 	current_mode = None
 	shortcuts = ''
 	shortcuts_exist = False
-	
+        is_initialized = False 
+	folders = []
+	mode_folder = []
+
 	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
+		
 		if imap.exists():
 			if (imap[0].is_oauth and imap[0].access_token != "") or (not imap[0].is_oauth and imap[0].password != ""):
 				imap_authenticated = True
