@@ -8,6 +8,7 @@ from schema.youps import MessageSchema, FolderSchema  # noqa: F401 ignore unused
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 class Folder():
+
     def __init__(self, folder_schema, imap_client):
         # type: (FolderSchema, IMAPClient) -> Folder
 
@@ -15,6 +16,10 @@ class Folder():
 
         # the connection to the server
         self._imap_client = imap_client  # type: IMAPClient
+
+    def __str__(self):
+        # type: () -> t.AnyStr
+        return self.name
 
     @property
     def _uid_next(self):

@@ -93,6 +93,7 @@ class MailBox:
         # we want to avoid listing all the folders 
         # https://www.imapwiki.org/ClientImplementation/MailboxList
         # we basically only want to list folders when we have to
+        logger.debug('selectable_folder_results %s' % self._imap_client.list_folders('', root + '%'))
         for (flags, delimiter, name) in self._imap_client.list_folders('', root + '%'):
 
             folder = self._find_or_create_folder(name)  # type: Folder
