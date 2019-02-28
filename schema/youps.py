@@ -46,11 +46,13 @@ class FolderSchema(models.Model):
     # each folder is associated with a single ImapAccount
     imap_account = models.ForeignKey(ImapAccount)
     # new messages have a uid >= uid_next if we get a new message this value changes
+    # TODO determine better way of specifying not initiated -1 can be used
     uid_next = models.IntegerField(default=-1)
     # if this changes we have to invalidate our entire cache and refresh
     uid_validity = models.IntegerField(default=-1)
     # the name of the folder including it's entire path i.e. "work/project/youps"
-    name = models.TextField()
+    # TODO we need to determine the actual max length CHARFIELD cause mysql indexess`
+    name = models.CharField(max_length=300)
     # the last seen uid which is helpful for reducing bandwith when syncing
     last_seen_uid = models.IntegerField(default=-1)
     # the flags associated with the folder 
@@ -124,7 +126,7 @@ class MailbotMode(models.Model):
 # This model is to have many-to-many relation of MailbotMode and Folder
 class MailbotMode_Folder(models.Model):
     mode = models.ForeignKey('MailbotMode')
-    folder = models.ForeignKey('Folder_Model')
+    folder = models.ForeignKey('FolderSchema')
     imap_account = models.ForeignKey('ImapAccount')
 
     class Meta:
