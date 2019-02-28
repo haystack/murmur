@@ -30,10 +30,8 @@ class MailBox:
         # and https://tools.ietf.org/html/rfc4549
 
         for folder in self._list_selectable_folders():
-            logger.debug(folder)
-        # for folder in self._list_selectable_folders():
-        #     response = self._imap_client.select_folder(folder.name)
-        #     logger.info('select_folder response: %s' % response)
+            response = self._imap_client.select_folder(folder.name)
+            logger.info('select_folder response: %s' % response)
 
         #     # log information about flags returned
         #     if 'HIGHESTMODSEQ' in response:
@@ -95,9 +93,7 @@ class MailBox:
         # we want to avoid listing all the folders 
         # https://www.imapwiki.org/ClientImplementation/MailboxList
         # we basically only want to list folders when we have to
-        folder_results = self._imap_client.list_folders('', root + '%')
-        logger.debug('selectable_folder_results %s' % folder_results)
-        for (flags, delimiter, name) in folder_results:
+        for (flags, delimiter, name) in self._imap_client.list_folders('', root + '%'):
 
             folder = self._find_or_create_folder(name)  # type: Folder
 
@@ -129,7 +125,7 @@ class MailBox:
                 continue
 
             yield folder
-            logger.debug('IN LOOP')
+
     
     def _check_for_new_emails(self):
         found_new_emails = False
