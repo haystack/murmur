@@ -108,6 +108,7 @@ class Folder():
         fetch_data = self._imap_client.fetch('%d:*' % last_seen_uid + 1, Message._descriptors)
 
         for uid in fetch_data:
+            logger.debug("creating new message")
             message_data = fetch_data[uid]
             if 'SEQ' not in message_data:
                 logger.critical('Missing SEQ in message data')
