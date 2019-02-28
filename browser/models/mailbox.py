@@ -62,6 +62,7 @@ class MailBox:
 
             if folder._should_completely_refresh(uid_validity):
                 logger.debug('folder %s should completely refresh' % folder)
+                folder._completely_refresh_cache()
 
         #     # TODO get the folder
         #     folder = Folder(folder, self._imap_client)

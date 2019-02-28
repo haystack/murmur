@@ -82,7 +82,7 @@ class Folder():
         Should completely remove any messages stored in this folder and rebuild
         the cache of messages from scratch.
         """
-        raise NotImplementedError("complete refresh not implemented")
+        pass 
 
     def _should_completely_refresh(self, uid_validity):
         """Determine if the folder should completely refresh it's cache.

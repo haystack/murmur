@@ -58,6 +58,8 @@ class FolderSchema(models.Model):
     # the flags associated with the folder 
     _flags = models.TextField(db_column="flags")
 
+    # TODO add selectable field
+
     @property
     def flags(self):
         # type: () -> t.List[t.AnyStr]
