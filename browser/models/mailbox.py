@@ -54,8 +54,14 @@ class MailBox:
         #     else:
         #         logger.critical('folder %s does not support custom flags or did not return PERMANENTFLAGS')
 
-        #     assert 'UIDNEXT' in response and 'UIDVALIDITY' in response, "Missing UID Information"
-        #     uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
+            if not ('UIDNEXT' in response and 'UIDVALIDITY' in response):
+                logger.critical("Missing UID Information for folder %s" % folder)
+
+            assert 'UIDNEXT' in response and 'UIDVALIDITY' in response, "Missing UID Information"
+            uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
+
+            if folder._should_completely_refresh(uid_validity):
+                logger.debug('folder %s should completely refresh' % folder)
 
         #     # TODO get the folder
         #     folder = Folder(folder, self._imap_client)
@@ -106,14 +112,7 @@ class MailBox:
             # we look at all the flags here
             logger.info('folder: %s, flags: %s, delimiter: %s' % (name, flags, delimiter))
             if '\\HasNoChildren' in flags:
-                logger.debug('folder %s has no children' % name)
                 recurse_children = False
-            if '\\HasChildren' in flags:
-                logger.debug('folder %s has children' % name)
-            if '\\Unmarked' in flags:
-                logger.debug('folder %s does not have messages' % name)
-            if '\\Marked' in flags:
-                logger.debug('folder %s marked by server probably contains messages' % name)
 
             if recurse_children:
                 for child_folder in self._list_selectable_folders(name + delimiter):
@@ -126,7 +125,7 @@ class MailBox:
 
             yield folder
 
-    
+
     def _check_for_new_emails(self):
         found_new_emails = False
         if found_new_emails:
