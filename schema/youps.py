@@ -58,7 +58,7 @@ class FolderSchema(models.Model):
     # the flags associated with the folder 
     _flags = models.TextField(db_column="flags")
 
-    # TODO add selectable field
+    is_selectable =  models.BooleanField(default=False)
 
     @property
     def flags(self):
