@@ -2,7 +2,7 @@ import base64, email, hashlib, json, logging, random, re, requests, sys, time, t
 
 from browser.imap import *
 
-from schema.youps import ImapAccount, MailbotMode, Folder_Model
+from schema.youps import ImapAccount, MailbotMode, FolderSchema
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
@@ -24,7 +24,9 @@ def login_imap(email, password, host, is_oauth):
     res = {'status' : False}
 
     try:
-        refresh_token = ''
+        imap = IMAPClient(host, use_uid=True)
+
+	refresh_token = ''
         access_token = ''
         password_original = password
         if is_oauth:
@@ -166,7 +168,6 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
 
         imap = auth_res['imap']
 
-        init_inbox(imap, imapAccount)
         imapAccount.is_test = is_test
         imapAccount.is_running = is_running
 
