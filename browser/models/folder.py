@@ -95,23 +95,33 @@ class Folder():
         the cache of messages from scratch.
         """
 
-        logger.info("folder %s completely refreshing cache" % self)
+        logger.debug("folder %s completely refreshing cache" % self)
 
         # delete any messages already stored in the folder
         MessageSchema.objects.filter(folder_schema=self._schema).delete()
 
-        fetch_data = self._imap_client.fetch('1:*', Message._descriptors)
+        # get new messages starting from the last seen uid of 0
+        self._get_new_messages(0)
+
+    def _get_new_messages(self, last_seen_uid):
+        logger.debug("folder %s getting new messages" % self)
+        fetch_data = self._imap_client.fetch('%d:*' % last_seen_uid + 1, Message._descriptors)
 
         for uid in fetch_data:
-            # logger.debug("Message: uid %s" % fetch_data)
-            # logger.debug("FLAGS %s" % 'FLAGS' in fetch_data[uid])
-            # logger.debug('SEQ %s' % 'SEQ' in fetch_data[uid])
-            logger.debug("Message: uid %d, msn %d, flags: %s" % (uid, fetch_data[uid]['SEQ'], fetch_data[uid]['FLAGS']))
-            # message_schema = MessageSchema(imap_account=self._schema.imap_account,
-            #                                folder_schema=self._schema,
-            #                                uid=uid,
-            #                                msn=fetch_data['SEQ'],
-            #                                flags=fetch_data['FLAGS'])
+            message_data = fetch_data[uid]
+            if 'SEQ' not in message_data:
+                logger.critical('Missing SEQ in message data')
+            if 'FLAGS' not in message_data:
+                logger.critical('Missing FLAGS in message data')
+            
+            message_schema = MessageSchema(imap_account=self._schema.imap_account,
+                                           folder_schema=self._schema,
+                                           uid=uid,
+                                           msn=message_data['SEQ'],
+                                           flags=message_data['FLAGS'])
+            message_schema.save()
+            logger.debug("folder %s saved new message" % self)
+
 
     def _should_completely_refresh(self, uid_validity):
         """Determine if the folder should completely refresh it's cache.
