@@ -41,7 +41,7 @@ class Command(BaseCommand):
             # sync the mailbox with imap
             mailbox._sync() 
 
-            return
+            continue
 
             try:
                 # get the UID of the latest message received by the user
