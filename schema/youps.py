@@ -124,7 +124,7 @@ class MailbotMode(models.Model):
 # This model is to have many-to-many relation of MailbotMode and Folder
 class MailbotMode_Folder(models.Model):
     mode = models.ForeignKey('MailbotMode')
-    folder = models.ForeignKey('Folder_Model')
+    folder = models.ForeignKey('FolderSchema')
     imap_account = models.ForeignKey('ImapAccount')
 
     class Meta:
