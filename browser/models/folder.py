@@ -203,5 +203,5 @@ class Folder(object):
                                            msn=message_data['SEQ'],
                                            flags=message_data['FLAGS'])
             message_schema.save()
-            logger.debug("%s saved new message with uid" % (self, uid))
+            logger.debug("%s saved new message with uid %d" % (self, uid))
 
