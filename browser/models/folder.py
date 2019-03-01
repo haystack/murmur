@@ -20,7 +20,7 @@ class Folder(object):
 
     def __str__(self):
         # type: () -> t.AnyStr
-        return self.name
+        return "folder: %s" % (self.name)
 
     @property
     def _uid_next(self):
@@ -43,7 +43,6 @@ class Folder(object):
         # type: (int) -> None
         self._schema.uid_validity = value
         self._schema.save()
-        logger.info("SAVED uid_validity")
 
     @property
     def name(self):
@@ -96,7 +95,7 @@ class Folder(object):
         the cache of messages from scratch.
         """
 
-        logger.debug("folder %s completely refreshing cache" % self)
+        logger.debug("%s completely refreshing cache" % self)
 
         # delete any messages already stored in the folder
         MessageSchema.objects.filter(folder_schema=self._schema).delete()
@@ -106,6 +105,7 @@ class Folder(object):
         # TODO maybe trigger the user
 
         self._update_last_seen_uid()
+        logger.debug("%s finished completely refreshing cache" % self)
 
 
     def _update_last_seen_uid(self):
@@ -113,9 +113,8 @@ class Folder(object):
         max_uid = max_uid['uid__max']
         if max_uid is None:
             max_uid = 0
-        logger.info('maxuid %s', max_uid)
-        logger.info('folder %s: updated max_uid %d' % (self, max_uid))
         self._last_seen_uid = max_uid
+        logger.debug('%s updated max_uid %d' % (self, max_uid))
 
     def _refresh_cache(self, uid_next):
         # type: (int) -> None
@@ -130,9 +129,6 @@ class Folder(object):
         Args:
             uid_next (int): UIDNEXT returned from select command
         """
-
-        logger.debug('folder %s normal refresh' % self)
-
         # if the uid has not changed then we don't need to get new messages
         if uid_next != self._uid_next:
             # get all the descriptors for the new messages
@@ -144,6 +140,7 @@ class Folder(object):
             self._update_cached_message_flags()
 
         self._update_last_seen_uid()
+        logger.debug("%s finished normal refresh")
 
     def _should_completely_refresh(self, uid_validity):
         """Determine if the folder should completely refresh it's cache.
@@ -157,16 +154,13 @@ class Folder(object):
 
         # type: (int) -> bool
         if self._uid_validity == -1:
-            logger.debug("folder %s seen for first time" % self.name)
             return True
         if self._uid_validity != uid_validity:
-            logger.critical('folder %s uid_validity changed must rebuild cache' % self.name)
+            logger.debug('folder %s uid_validity changed must rebuild cache' % self.name)
             return True
         return False
 
     def _update_cached_message_flags(self):
-        logger.debug("folder %s updating cached message flags" % self)
-
         # get all the flags for the old messages
         fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), ['FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]] 
         # update flags in the cache 
@@ -174,6 +168,7 @@ class Folder(object):
             # if we don't get any information about the message we have to remove it from the cache
             if message_schema.uid not in fetch_data:
                 message_schema.delete()
+                logger.debug("%s deleted message")
             message_data = fetch_data[message_schema.uid]
             if 'SEQ' not in message_data:
                 logger.critical('Missing SEQ in message data')
@@ -183,10 +178,10 @@ class Folder(object):
             message_schema.msn = message_data['SEQ']
             message_schema.save()
             # TODO maybe trigger the user 
-        logger.debug("folder %s updated cached messages" % self)
+
+        logger.debug("%s updated flags" % self)
 
     def _save_new_messages(self, last_seen_uid):
-        logger.debug("folder %s getting new messages" % self)
         fetch_data = self._imap_client.fetch('%d:*' % (last_seen_uid + 1), Message._descriptors)
 
         for uid in fetch_data:
@@ -203,4 +198,5 @@ class Folder(object):
                                            flags=message_data['FLAGS'])
             message_schema.save()
 
-        logger.debug("folder %s saved new messages" % self)
+        logger.debug("%s saved %d new messages" % (self, len(fetch_data)))
+

@@ -22,6 +22,10 @@ class MailBox(object):
         self.newMessage = Event()  # type: Event
 
 
+    def __str__(self):
+        return "mailbox: %s" % (self._imap_account.email)
+
+
     def _sync(self):
         """Helper method to synchronize with the imap server.
         """
@@ -31,7 +35,6 @@ class MailBox(object):
 
         for folder in self._list_selectable_folders():
             response = self._imap_client.select_folder(folder.name)
-            logger.debug('select_folder response: %s' % response)
 
         #     # log information about flags returned
         #     if 'HIGHESTMODSEQ' in response:
@@ -55,30 +58,22 @@ class MailBox(object):
         #         logger.critical('folder %s does not support custom flags or did not return PERMANENTFLAGS')
 
             if not ('UIDNEXT' in response and 'UIDVALIDITY' in response):
-                logger.critical("Missing UID Information for folder %s" % folder)
+                logger.critical("%s Missing UID Information" % folder)
 
             assert 'UIDNEXT' in response and 'UIDVALIDITY' in response, "Missing UID Information"
             uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
 
 
-            logger.info("folder %s: uid_next %d uid_validity %d" % (folder, folder._uid_next, folder._uid_validity))
-            logger.info("uid_next %d, uid_validity %d" % (uid_next, uid_validity))
-
+            # check if we are doing a total refresh or just a normal refresh
+            # total refresh occurs the first time we see a folder and 
+            # when the UIDVALIDITY changes
             if folder._should_completely_refresh(uid_validity):
-                logger.debug('folder %s should completely refresh' % folder)
                 folder._completely_refresh_cache()
             else:
-                logger.info("folder %s: normal refresh" % folder)
                 folder._refresh_cache(uid_next)
 
             folder._uid_next = uid_next
-            assert folder._uid_next == uid_next
             folder._uid_validity = uid_validity
-            assert folder._uid_validity == uid_validity
-            logger.info("folder %s: uid_next %d uid_validity %d" % (folder, folder._uid_next, folder._uid_validity))
-            logger.info("folder schema %s: uid_next %d uid_validity %d" % (folder, folder._schema.uid_next, folder._schema.uid_validity))
-            
-
 
     def _find_or_create_folder(self, name):
         # type: (t.AnyStr) -> Folder
@@ -86,11 +81,10 @@ class MailBox(object):
         folder_schema = None  # type: FolderSchema
         try:
             folder_schema = FolderSchema.objects.get(imap_account = self._imap_account, name = name)
-            logger.debug("found folder %s" % name)
         except FolderSchema.DoesNotExist:
             folder_schema = FolderSchema(imap_account=self._imap_account, name=name)
             folder_schema.save()
-            logger.debug("created folder %s" % name)
+            logger.debug("created folder %s in database" % name)
 
         return Folder(folder_schema, self._imap_client)
 
@@ -114,7 +108,6 @@ class MailBox(object):
             recurse_children = True
 
             # we look at all the flags here
-            logger.debug('folder: %s, flags: %s, delimiter: %s' % (name, flags, delimiter))
             if '\\HasNoChildren' in flags:
                 recurse_children = False
 
