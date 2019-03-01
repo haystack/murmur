@@ -10,7 +10,7 @@ from http_handler.settings import WEBSITE
 import logging
 
 # Get an instance of a logger
-logger = logging.getLogger('youps')
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 class Command(BaseCommand):
     args = ''
@@ -36,10 +36,13 @@ class Command(BaseCommand):
             # get an imapclient which is authenticated
             imap = auth_res['imap']
 
-            # create the mailbox
-            mailbox = MailBox(imapAccount, imap)
-            # sync the mailbox with imap
-            mailbox._sync() 
+            try:
+                # create the mailbox
+                mailbox = MailBox(imapAccount, imap)
+                # sync the mailbox with imap
+                mailbox._sync()
+            except Exception:
+                logger.exception("mailbox sync failed")
 
             continue
 
