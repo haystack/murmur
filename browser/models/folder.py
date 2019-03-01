@@ -218,6 +218,7 @@ class Folder(object):
 
         for uid in fetch_data:
             message_data = fetch_data[uid]
+            logger.debug("Message %d data: %s" % (uid, message_data))
             if 'SEQ' not in message_data:
                 logger.critical('Missing SEQ in message data')
                 logger.critical('Message data %s' % message_data)

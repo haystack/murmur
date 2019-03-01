@@ -7,7 +7,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 class Message(object):
 
     # the descriptors we are cacheing for each message
-    _descriptors = ['FLAGS']  # type: t.List[t.Text]
+    _descriptors = ['ALL']  # type: t.List[t.Text]
 
     def __init__(self, message_schema, imap_client):
         # type: (MessageSchema, IMAPClient) -> Message
