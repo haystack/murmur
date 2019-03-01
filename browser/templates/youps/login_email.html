@@ -113,18 +113,21 @@
 												</a><span class="close">x</span>
 											</li>
 									{% endfor %}
-									<li><a href="#" class="add-contact">+ Add Mode</a></li>
+									<li><a href="#" class="add-tab">+ Add Mode</a></li>
 								</ul>
 								<div class="tab-content">
 									{% for mode in modes %}
 										{% if current_mode == mode %}
-											<div class="tab-pane active" id="editor-tab_{{mode.uid}}">
+											<div class="tab-pane row active">
 										{% else %}
-											<div class="tab-pane" id="editor-tab_{{mode.uid}}">
+											<div class="tab-pane row">
 										{% endif %}
-												<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
-{{ mode.code }}					
-												</textarea>
+												<div class="folder-container"></div>
+												<div class="editor-container" id="editor-tab_{{mode.uid}}">
+														<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
+{{ mode.code }}
+														</textarea>
+												</div>
 									  		</div>
 									{% endfor %}		
 								</div>
@@ -138,7 +141,7 @@
 											</span>
 											<i class="fas fa-pencil-alt"></i>
 										</a><span class="close">x</span></li>
-									<li><a href="#" class="add-contact">+ Add Mode</a></li>
+									<li><a href="#" class="add-tab">+ Add Mode</a></li>
 								</ul>
 								<div class="tab-content">
 									<div class="tab-pane active" id="editor-tab_0">
@@ -266,6 +269,9 @@ print get_sender()
 			is_imap_authenticated = {{ imap_authenticated|yesno:"true,false" }},
 			is_test = {{ is_test|yesno:"true,false" }},
 			IS_RUNNING = {{ is_running|yesno:"true,false" }},
+			IS_INITIALIZED = {{ is_running|yesno:"true,false" }},
+			folders = {{ folders }},
+			mode_folder = {{ mode_folder }},
 			current_mode = "{{ current_mode.name }}",
 			current_mode_id = "{{ current_mode.uid }}";
 	</script>

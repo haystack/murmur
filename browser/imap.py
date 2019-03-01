@@ -21,6 +21,9 @@ import base64
 import json
 from http_handler.tasks import add_periodic_task
 import marshal, ujson
+import logging
+
+logger = logging.getLogger('youps')
 
 def authenticate(imap_account):
     res = {'status' : False, 'imap_error': False, 'imap_log': "", 'imap': None}
@@ -49,7 +52,7 @@ def authenticate(imap_account):
         res['status'] = True
     except IMAPClient.Error, e:
         try:
-            print "try to renew token"
+            logger.debug('try to renew token')
             if imap_account.is_oauth:
                 oauth = GoogleOauth2()
                 response = oauth.RefreshToken(imap_account.refresh_token)
@@ -61,15 +64,17 @@ def authenticate(imap_account):
                 res['imap'] = imap
                 res['status'] = True
             else:
+                # TODO this is not DRY and not useful error messages
+                logger.error("cannot renew token for non-oauth account")
                 res['code'] = "Can't authenticate your email"
         except IMAPClient.Error, e:
+            logger.exception("failed to authenticate email")
             res['imap_error'] = e
             res['code'] = "Can't authenticate your email"
-
         except Exception, e:
+            logger.exception("failed to authenticate email")
             # TODO add exception
             res['imap_error'] = e
-            print e
             res['code'] = msg_code['UNKNOWN_ERROR']
 
     if res['status'] is False:
@@ -116,13 +121,6 @@ def fetch_latest_email_id(imap_account, imap_client):
 
     return max(uid_list)
 
-def format_log(msg, is_error=False, subject = ""):
-    s = "Subject: " + subject + " | "
-    if is_error:
-        return "[Error] " + s + msg
-    else:
-        return "[Info] " + s + msg
-
 def wrapper(imap_account, imap, code, search_creteria, is_test=False, email_content=None):
     interpret(imap_account, imap, code, search_creteria, is_test, email_content)
 
@@ -146,6 +144,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         sys.stdout = stdout
         yield stdout
         sys.stdout = old
+
+    logger = logging.getLogger('youps.user')
 
     with stdoutIO() as s:
         def catch_exception(e):
@@ -193,8 +193,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
             if not is_test:
                 send_email(subject, imap_account.email, to_addr, body)
-            # print to_addr
-            print format_log("send(): send a message to  %s" % str(to_addr), False, get_subject())
+            logger.debug("send(): sent a message to  %s" % str(to_addr))
 
         def add_gmail_labels(flags):
             pile.add_gmail_labels(flags, is_test)
@@ -316,6 +315,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             return pile.get_sender()
 
         def get_content():
+            logger.debug("call get_content")
             if email_content:
                 return email_content
             else:
@@ -403,11 +403,11 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
         def select_folder(folder):
             if not imap.folder_exists(folder):
-                format_log("Select folder; folder %s not exist" % folder, True, get_subject())
+                logger.error("Select folder; folder %s not exist" % folder)
                 return
 
             imap.select_folder(folder)
-            print "Select a folder " + folder
+            logger.debug("Select a folder %s" % folder)
 
         def rename_folder(old_name, new_name):
             pile.rename_folder(old_name, new_name, is_test)
@@ -416,7 +416,6 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         def get_mode():
             if imap_account.current_mode:
                 return imap_account.current_mode.uid
-
             else:
                 return None
 
@@ -434,10 +433,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                     imap_account.current_mode = mm
                     imap_account.save()
 
-                print format_log("Set your mail mode to %s (%d)" % (mm.name, mode_index), False, get_subject())
+                logger.debug("Set mail mode to %s (%d)" % (mm.name, mode_index))
                 return True
             else:
-                print format_log("A mode ID %d not exist!" % (mode_index), True, get_subject())
+                logger.error("A mode ID %d not exist!" % (mode_index))
                 return False
 
         try:

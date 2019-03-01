@@ -86,12 +86,12 @@ DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': MYSQL["NAME"],# Or path to database file if using sqlite3.
-        'USER': MYSQL["USER"], # Not used with sqlite3.
-        'PASSWORD': MYSQL["PASSWORD"],# Not used with sqlite3.
-        'HOST': MYSQL["HOST"], # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '', # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': MYSQL["NAME"],  # Or path to database file if using sqlite3.
+        'USER': MYSQL["USER"],  # Not used with sqlite3.
+        'PASSWORD': MYSQL["PASSWORD"],  # Not used with sqlite3.
+        'HOST': MYSQL["HOST"],  # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',  # Set to empty string for default. Not used with sqlite3.
         'STORAGE_ENGINE': 'MyISAM',
         'OPTIONS': {'charset': 'utf8mb4'},
     }
@@ -153,8 +153,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
-
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
     'compressor.finders.CompressorFinder',
 )
 
@@ -164,10 +163,9 @@ SECRET_KEY = 'fr&amp;qg*+c!z6q_^v6o1kzd6lxj-3m3q-=oku8f52*c+@)+1hnx+'
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django_mobile.loader.Loader',
-    
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -223,15 +221,15 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    
-    #our apps
+
+    # our apps
     'http_handler',
     'schema',
     'browser',
     'smtp_handler',
     'gmail_setup',
-    
-    #third party apps
+
+    # third party apps
     'registration',
     'south',
     'django_mobile',
@@ -250,6 +248,26 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    # custom formatters used to describe the logs
+    'formatters': {
+        # this formatter just includes the message
+        'custom.brief' : {
+            'format': '%(message)s'
+        },
+        # this formatter includes the time, log level, logger name, and message
+        'custom.precise' : {
+            'format' : '%(asctime)s %(levelname)-8s %(name)-15s %(message)s',
+            'datefmt' : '%Y-%m-%d %H:%M:%S''format'
+        },
+        # this formatter includes file name and line number info
+        'custom.debug': {
+            'format': '%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         }
     },
     'handlers': {
@@ -257,29 +275,52 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        # this handler logs to a file
+        'custom.file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/home/ubuntu/production/mailx/logs/youps.log',
+            'formatter': 'custom.debug'
+        },
+        # this handler logs to the console
+        'custom.console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',  # Default is stderr
+            'formatter': 'custom.brief'
         }
     },
     'loggers': {
+        'youps': {
+            'handlers': ['custom.file', 'custom.console'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+        'youps.user': {
+            'level': 'DEBUG',
+            'propagate': True
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
-
-        # comment this out if you want to see DB queries in logs
+        # switch the handler comments below if you want to see DB queries in logs
         'django.db.backends': {
             'handlers': None, 
+            # 'handlers': ['custom.file'],
             'propagate': False,
-            'level':'DEBUG',
+            'level': 'DEBUG'
         },
     }
 }
 
 # celery settings
 try:
-        from celeryconfig import *
+    from celeryconfig import *
 except ImportError:
-        pass
+    pass
 
 # celery db settings
 
@@ -291,9 +332,9 @@ except Exception as eggs:
 
 # local Settings - overriden by local_settings.py
 try:
-        from local_settings import *
+    from local_settings import *
 except ImportError:
-        pass
+    pass
 
 # Storage for attachments
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
