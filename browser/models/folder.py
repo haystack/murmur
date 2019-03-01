@@ -109,8 +109,8 @@ class Folder(object):
 
 
     def _update_last_seen_uid(self):
-        max_uid = MessageSchema.objects.filter(folder_schema=self._schema).aggregate(Max('uid'))
-        max_uid = max_uid['uid__max']
+        max_uid = MessageSchema.objects.filter(folder_schema=self._schema).aggregate(Max('uid'))  # type: t.Dict[t.AnyStr, int]
+        max_uid = max_uid.get('uid__max', 0)
         logger.info('folder %s: updated max_uid %d' % (self, max_uid))
         self._last_seen_uid = max_uid
 
@@ -136,7 +136,10 @@ class Folder(object):
             self._save_new_messages(self._last_seen_uid)
             # TODO maybe trigger the user
 
-        self._update_cached_message_flags()
+        # if the last seen uid is zero we haven't seen any messages
+        if not self._last_seen_uid == 0:
+            self._update_cached_message_flags()
+
         self._update_last_seen_uid()
 
     def _should_completely_refresh(self, uid_validity):
@@ -183,7 +186,6 @@ class Folder(object):
         logger.debug("folder %s getting new messages" % self)
         fetch_data = self._imap_client.fetch('%d:*' % (last_seen_uid + 1), Message._descriptors)
 
-        max_uid = self._last_seen_uid
         for uid in fetch_data:
             message_data = fetch_data[uid]
             if 'SEQ' not in message_data:
@@ -197,7 +199,5 @@ class Folder(object):
                                            msn=message_data['SEQ'],
                                            flags=message_data['FLAGS'])
             message_schema.save()
-            if uid > max_uid:
-                max_uid = uid
 
         logger.debug("folder %s saved new messages" % self)
