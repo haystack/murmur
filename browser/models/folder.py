@@ -42,6 +42,7 @@ class Folder():
         # type: (int) -> None
         self._schema.uid_validity = value
         self._schema.save()
+        logger.info("SAVED uid_validity")
 
     @property
     def name(self):

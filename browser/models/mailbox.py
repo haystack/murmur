@@ -75,7 +75,8 @@ class MailBox:
             folder._uid_validity = uid_validity
             assert folder._uid_validity == uid_validity
             logger.info("folder %s: uid_next %d uid_validity %d" % (folder, folder._uid_next, folder._uid_validity))
-            folder._schema.save()
+            logger.info("folder schema %s: uid_next %d uid_validity %d" % (folder, folder._schema.uid_next, folder._schema.uid_validity))
+            
 
 
     def _find_or_create_folder(self, name):
