@@ -110,7 +110,9 @@ class Folder(object):
 
     def _update_last_seen_uid(self):
         max_uid = MessageSchema.objects.filter(folder_schema=self._schema).aggregate(Max('uid'))  # type: t.Dict[t.AnyStr, int]
-        max_uid = max_uid.get('uid__max', 0)
+        max_uid = max_uid['uid__max']
+        if max_uid is None:
+            max_uid = 0
         logger.info('maxuid %s', max_uid)
         logger.info('folder %s: updated max_uid %d' % (self, max_uid))
         self._last_seen_uid = max_uid
