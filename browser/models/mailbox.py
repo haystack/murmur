@@ -8,30 +8,29 @@ from folder import Folder
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
+
 class MailBox(object):
     def __init__(self, imap_account, imap_client):
-        # type: (ImapAccount, IMAPClient) -> MailBox 
+        # type: (ImapAccount, IMAPClient) -> MailBox
         """Create a new instance of the client's mailbox using a connection
         to an IMAPClient.
         """
-        self._imap_client = imap_client  # type: IMAPClient    
+        self._imap_client = imap_client  # type: IMAPClient
 
         self._imap_account = imap_account  # type: ImapAccount
 
         # Events
         self.newMessage = Event()  # type: Event
 
-
     def __str__(self):
         # type: () -> t.AnyStr
         """Produce a string representation of the mailbox
-        
+
         Returns:
             str: string representation of the mailbox
         """
 
         return "mailbox: %s" % (self._imap_account.email)
-
 
     def _sync(self):
         # type: () -> None
@@ -55,9 +54,8 @@ class MailBox(object):
 
             uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
 
-
             # check if we are doing a total refresh or just a normal refresh
-            # total refresh occurs the first time we see a folder and 
+            # total refresh occurs the first time we see a folder and
             # when the UIDVALIDITY changes
             if folder._should_completely_refresh(uid_validity):
                 folder._completely_refresh_cache()
@@ -71,28 +69,29 @@ class MailBox(object):
     def _find_or_create_folder(self, name):
         # type: (t.AnyStr) -> Folder
         """Return a reference to the folder with the given name.
-        
+
         Returns:
             Folder: Folder associated with the passed in name
         """
 
         folder_schema = None  # type: FolderSchema
         try:
-            folder_schema = FolderSchema.objects.get(imap_account = self._imap_account, name = name)
+            folder_schema = FolderSchema.objects.get(
+                imap_account=self._imap_account, name=name)
         except FolderSchema.DoesNotExist:
-            folder_schema = FolderSchema(imap_account=self._imap_account, name=name)
+            folder_schema = FolderSchema(
+                imap_account=self._imap_account, name=name)
             folder_schema.save()
             logger.debug("created folder %s in database" % name)
 
         return Folder(folder_schema, self._imap_client)
-
 
     def _list_selectable_folders(self, root=''):
         # type: (t.Text) -> t.Generator[Folder]
         """Generate all the folders in the Mailbox
         """
 
-        # we want to avoid listing all the folders 
+        # we want to avoid listing all the folders
         # https://www.imapwiki.org/ClientImplementation/MailboxList
         # we basically only want to list folders when we have to
         for (flags, delimiter, name) in self._imap_client.list_folders('', root + '%'):
@@ -101,7 +100,7 @@ class MailBox(object):
 
             # TODO maybe fire if the flags have changed
             folder.flags = flags
-            
+
             # assume there are children unless specifically told otherwise
             recurse_children = True
 
@@ -123,9 +122,3 @@ class MailBox(object):
                 folder._is_selectable = True
 
             yield folder
-
-
-
-
-    
-

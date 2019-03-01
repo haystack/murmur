@@ -1,12 +1,13 @@
 from __future__ import unicode_literals, print_function, division
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 import typing as t  # noqa: F401 ignore unused we use it for typing
-import logging 
+import logging
 from message import Message
 from schema.youps import MessageSchema, FolderSchema  # noqa: F401 ignore unused we use it for typing
 from django.db.models import Max
 
 logger = logging.getLogger('youps')  # type: logging.Logger
+
 
 class Folder(object):
 
@@ -109,13 +110,13 @@ class Folder(object):
         self._update_last_seen_uid()
         logger.debug("%s finished completely refreshing cache" % self)
 
-
     def _update_last_seen_uid(self):
         # type () -> None
         """Updates the last seen uid to be equal to the maximum uid in this folder's cache
         """
 
-        max_uid = MessageSchema.objects.filter(folder_schema=self._schema).aggregate(Max('uid'))  # type: t.Dict[t.AnyStr, int]
+        max_uid = MessageSchema.objects.filter(folder_schema=self._schema).aggregate(
+            Max('uid'))  # type: t.Dict[t.AnyStr, int]
         max_uid = max_uid['uid__max']
         if max_uid is None:
             max_uid = 0
@@ -163,7 +164,8 @@ class Folder(object):
         if self._uid_validity == -1:
             return True
         if self._uid_validity != uid_validity:
-            logger.debug('folder %s uid_validity changed must rebuild cache' % self.name)
+            logger.debug(
+                'folder %s uid_validity changed must rebuild cache' % self.name)
             return True
         return False
 
@@ -172,7 +174,8 @@ class Folder(object):
         """Update the flags on any cached messages.
         """
         # get all the flags for the old messages
-        fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), ['FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]] 
+        fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), [
+                                             'FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]]
         # update flags in the cache
         for message_schema in MessageSchema.objects.filter(folder_schema=self._schema):
 
@@ -182,7 +185,8 @@ class Folder(object):
             # if we don't get any information about the message we have to remove it from the cache
             if message_schema.uid not in fetch_data:
                 message_schema.delete()
-                logger.debug("%s deleted message with uid %d" % (self, message_schema.uid))
+                logger.debug("%s deleted message with uid %d" %
+                             (self, message_schema.uid))
                 continue
             message_data = fetch_data[message_schema.uid]
             # TODO make this more DRY
@@ -194,7 +198,7 @@ class Folder(object):
                 logger.critical('Missing FLAGS in message data')
                 logger.critical('Message data %s' % message_data)
                 continue
-            message_schema.flags = message_data['FLAGS'] 
+            message_schema.flags = message_data['FLAGS']
             message_schema.msn = message_data['SEQ']
             message_schema.save()
             # TODO maybe trigger the user
@@ -209,7 +213,8 @@ class Folder(object):
             last_seen_uid (int): the max uid we have stored, should be 0 if there are no messages stored.
         """
 
-        fetch_data = self._imap_client.fetch('%d:*' % (last_seen_uid + 1), Message._descriptors)
+        fetch_data = self._imap_client.fetch(
+            '%d:*' % (last_seen_uid + 1), Message._descriptors)
 
         for uid in fetch_data:
             message_data = fetch_data[uid]
@@ -229,4 +234,3 @@ class Folder(object):
                                            flags=message_data['FLAGS'])
             message_schema.save()
             logger.debug("%s saved new message with uid %d" % (self, uid))
-
