@@ -32,6 +32,70 @@ $(document).ready(function() {
         return datetime;
     }
 
+    function init_editor(editor_elem) {
+        var editor = CodeMirror.fromTextArea(editor_elem, {
+            mode: {name: "python",
+                version: 3,
+                singleLineStringErrors: false},
+            lineNumbers: true,
+            indentUnit: 4,
+            matchBrackets: true
+        });
+
+        var arrows = [13, 27, 37, 38, 39, 40];
+        editor.on("keyup", function(cm, e) {
+          if (arrows.indexOf(e.keyCode) < 0) {
+            editor.execCommand("autocomplete")
+          }
+        })
+    }
+
+    function init_folder_selector($folder_container) {
+        // nested tree checkboxs http://jsfiddle.net/rn290ywf/
+        // TODO just for test
+        folders = ['Boomerang', 'Boomerang-Outbox', 'Boomerang-Outbox/Cancelled/A', 'Boomerang-Returned', 'INBOX', '[Gmail]/All Mail', '[Gmail]/Drafts', '[Gmail]/Important', '[Gmail]/Sent Mail', '[Gmail]/Spam', '[Gmail]/Starred', '[Gmail]/Trash', 'bundle_test', 'how is it going', 'myriad', 'myriad/haystack-potluck', 'test1', 'test2', 'test3', 'test4']
+        
+        // Init a new folder list
+
+        // create folder nested structures
+        folders_nested = {}
+        $.each(folders, function(index, value) {
+            if(value.includes("/")) {
+                pwd = value.split("/")
+                d = folders_nested
+                $.each(pwd, function(i, v) {
+                    if(v in d) {}
+                    else { d[v] = {}
+                    }
+                    d = d[v]
+                })
+                folders_nested = $.extend(folders_nested,d)
+            }        
+        })
+
+        function isDict(v) {
+            return typeof v==='object' && v!==null && !(v instanceof Array) && !(v instanceof Date);
+        }
+
+        // dict => <ul><li>key1</li> <li>key2</li></ul>
+        function rec_add_nested(d) {
+            var $ul = $("<ul></ul>");
+            for (var key in d) {
+                console.log(key, isDict(d[key]))
+                $ul.append("<li><input type='checkbox'>" + key + "</li>")
+                if( Object.keys(d[key]).length > 0 ) { $ul.append(rec_add_nested(d[key])) } 
+                // else {
+                //     $ul.append("<li>" + key + "</li>")
+                // }
+            }
+
+            return $ul;
+        }
+        
+        u = rec_add_nested(folders_nested)
+        folder_container.append(u)
+    }
+
     function guess_host( email_addr ) {
         $("#link-less-secure").attr('href', "");
         $("#rdo-oauth").attr('disabled', "");
@@ -84,27 +148,18 @@ $(document).ready(function() {
     var unsaved_tabs = [];
     
     document.addEventListener("mv-load", function(){   
-        // Init editor autocomplete
+        // Init editor & its autocomplete
         document.querySelectorAll('textarea.editor').forEach(function(element) {
             var mode_id = element.id.split("-")[1];
             $('.nav-tabs li a[href="#editor-tab_'+ mode_id +'"]').click();
 
-            var editor = CodeMirror.fromTextArea(element, {
-                mode: {name: "python",
-                    version: 3,
-                    singleLineStringErrors: false},
-                lineNumbers: true,
-                indentUnit: 4,
-                matchBrackets: true
-            });
-
-            var arrows = [13, 27, 37, 38, 39, 40];
-            editor.on("keyup", function(cm, e) {
-                if (arrows.indexOf(e.keyCode) < 0) {
-                editor.execCommand("autocomplete")
-                }
-            });
+            init_editor(element);
         });
+
+        // Init folder container
+        init_folder_selector( $(".folder-container") )
+
+        // Load mode - folder selection
 
         var method_names = [];
         document.querySelectorAll('#apis-container h4').forEach(function(element) {
@@ -185,25 +240,7 @@ $(document).ready(function() {
 
         unsaved_tabs.push( id );
 
-        // Init a new folder
-        
-
-        // Init a new editor
-        var editor = CodeMirror.fromTextArea(document.getElementById("editor-" + id), {
-            mode: {name: "python",
-                version: 3,
-                singleLineStringErrors: false},
-            lineNumbers: true,
-            indentUnit: 4,
-            matchBrackets: true
-        });
-
-        var arrows = [13, 27, 37, 38, 39, 40];
-        editor.on("keyup", function(cm, e) {
-          if (arrows.indexOf(e.keyCode) < 0) {
-            editor.execCommand("autocomplete")
-          }
-        })
+        init_editor( document.getElementById("editor-" + id) );
     });
 
     var editHandler = function() {
