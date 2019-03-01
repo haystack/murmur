@@ -18,6 +18,9 @@ from datetime import datetime, timedelta
 from schema.youps import MailbotMode
 import calendar
 import base64
+import json
+from http_handler.tasks import add_periodic_task
+import marshal, ujson
 import logging
 
 logger = logging.getLogger('youps')
@@ -157,6 +160,32 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             # Send this error msg to the user
             res['imap_log'] = logstr
             res['imap_error'] = True
+
+        def set_interval(interval=None, func=None):
+            if not interval:
+                raise Exception('set_interval(): requires interval (in second)')
+
+            if interval < 1:
+                raise Exception('set_interval(): requires interval larger than 1 sec')
+
+            if not func:
+                raise Exception('set_interval(): requires code to be executed periodically')
+
+            args = ujson.dumps( [imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test, email_content] )
+            add_periodic_task.delay( interval, args )
+
+        def set_timeout(delay=None, func=None):
+            if not delay:
+                raise Exception('set_timeout(): requires delay (in second)')
+
+            if delay < 1:
+                raise Exception('set_timeout(): requires delay larger than 1 sec')
+
+            if not func:
+                raise Exception('set_timeout(): requires code to be executed periodically')
+
+            args = ujson.dumps( [imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test, email_content] )
+            add_periodic_task.delay( delay, args, delay * 2 - 0.5 ) # make it expire right before 2nd execution happens 
 
         def send(subject="", to_addr="", body=""):
             if len(to_addr) == 0:

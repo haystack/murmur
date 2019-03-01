@@ -108,7 +108,7 @@ def fetch_execution_log(user, email, push=True):
     try:
         imapAccount = ImapAccount.objects.get(email=email)
         res['imap_log'] = imapAccount.execution_log
-
+        res['user_status_msg'] = imapAccount.status_msg
         res['status'] = True
 
     except ImapAccount.DoesNotExist:
@@ -170,11 +170,14 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imap = auth_res['imap']  # noqa: F841 ignore unused
 
         imapAccount.is_test = is_test
-        imapAccount.is_running = is_running
+        imapAccount.is_running = run_request
 
         # TODO these don't work anymore
         # uid = fetch_latest_email_id(imapAccount, imap)
         # imapAccount.newest_msg_id = uid
+
+        # remove all the periodic tasks of this user to keep tasks up-to-date
+        remove_periodic_task.delay( imapAccount.id )
 
         for key, value in modes.iteritems():
             mode_id = value['id']
@@ -196,6 +199,11 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_account=imapAccount)[0]
         imapAccount.save()
 
+<<<<<<< HEAD
+        if run_request:
+            res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
+=======
+>>>>>>> event_queue
 
         # if imapAccount.is_running:
         #     res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
