@@ -1,4 +1,3 @@
-
 # Baed on https://stackoverflow.com/questions/1092531/event-system-in-python/1096614#1096614
 
 class Event:
@@ -40,14 +39,21 @@ class Event:
             raise ValueError("Handler is not handling this event, so cannot unhandle it.")
         return self
 
-    def fire(self, *args, **kargs):
+    def fire(self, *args, **kwargs):
         for handler in self.handlers:
-            handler(*args, **kargs)
+            handler(*args, **kwargs)
 
     def getHandlerCount(self):
         return len(self.handlers)
 
-    __iadd__ = handle
-    __isub__ = unhandle
-    __call__ = fire
-    __len__  = getHandlerCount
+    def __iadd__(self, handler):
+        self.handle(handler)    
+
+    def __isub__(self, handler):
+        self.unhandle(handler)
+
+    def __call__(self, *args, **kwargs):
+        self.fire(*args, **kwargs)
+
+    def __len__(self):
+        return self.getHandlerCount()

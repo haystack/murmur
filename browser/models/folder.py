@@ -234,3 +234,8 @@ class Folder(object):
                                            flags=message_data['FLAGS'])
             message_schema.save()
             logger.debug("%s saved new message with uid %d" % (self, uid))
+
+            if last_seen_uid != 0:
+                # TODO trigger new message event
+                pass
+        
