@@ -41,7 +41,7 @@ class MailBox(object):
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
         # and https://tools.ietf.org/html/rfc4549
-
+        # TODO for future work per folder might be highest common denominator for parallelizing
         for folder in self._list_selectable_folders():
 
             # response contains folder level information such as
