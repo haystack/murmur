@@ -8,7 +8,7 @@ from folder import Folder
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
-class MailBox:
+class MailBox(object):
     def __init__(self, imap_account, imap_client):
         # type: (ImapAccount, IMAPClient) -> MailBox 
         """Create a new instance of the client's mailbox using a connection
@@ -70,10 +70,9 @@ class MailBox:
             else:
                 folder._refresh_cache(uid_next)
 
-            folder._schema.uid_next = uid_next
+            folder._uid_next = uid_next
             assert folder._uid_next == uid_next
-            folder._schema.uid_validity = uid_validity
-            folder._schema.save()
+            folder._uid_validity = uid_validity
             assert folder._uid_validity == uid_validity
             logger.info("folder %s: uid_next %d uid_validity %d" % (folder, folder._uid_next, folder._uid_validity))
             logger.info("folder schema %s: uid_next %d uid_validity %d" % (folder, folder._schema.uid_next, folder._schema.uid_validity))

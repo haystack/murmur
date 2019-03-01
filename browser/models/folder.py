@@ -7,7 +7,7 @@ from schema.youps import MessageSchema, FolderSchema  # noqa: F401 ignore unused
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
-class Folder():
+class Folder(object):
 
     def __init__(self, folder_schema, imap_client):
         # type: (FolderSchema, IMAPClient) -> Folder

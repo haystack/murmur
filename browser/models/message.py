@@ -1,7 +1,7 @@
 from __future__ import unicode_literals, print_function, division
 import typing as t  # noqa: F401 ignore unused we use it for typing
 
-class Message():
+class Message(object):
 
     # the descriptors we are cacheing for each message 
     _descriptors = ['FLAGS']  # type: t.List[t.Text]
