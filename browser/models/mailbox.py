@@ -29,8 +29,6 @@ class MailBox(object):
         # https://stackoverflow.com/questions/9956324/imap-synchronization
         # and https://tools.ietf.org/html/rfc4549
 
-        return
-
         for folder in self._list_selectable_folders():
             response = self._imap_client.select_folder(folder.name)
             logger.debug('select_folder response: %s' % response)
@@ -70,7 +68,8 @@ class MailBox(object):
                 logger.debug('folder %s should completely refresh' % folder)
                 folder._completely_refresh_cache()
             else:
-                folder._refresh_cache(uid_next)
+                logger.info("folder %s: normal refresh" % folder)
+                # folder._refresh_cache(uid_next)
 
             folder._uid_next = uid_next
             assert folder._uid_next == uid_next
