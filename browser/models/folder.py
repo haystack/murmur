@@ -166,10 +166,15 @@ class Folder(object):
         fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), ['FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]] 
         # update flags in the cache 
         for message_schema in MessageSchema.objects.filter(folder_schema=self._schema):
+
+            # ignore cached messages that we just fetched
+            if message_schema.uid > self._last_seen_uid:
+                continue
             # if we don't get any information about the message we have to remove it from the cache
             if message_schema.uid not in fetch_data:
                 message_schema.delete()
                 logger.debug("%s deleted message with uid %d" % (self, message_schema.uid))
+                continue
             message_data = fetch_data[message_schema.uid]
             # TODO make this more DRY
             if 'SEQ' not in message_data:
