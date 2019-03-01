@@ -140,7 +140,7 @@ class Folder(object):
             self._update_cached_message_flags()
 
         self._update_last_seen_uid()
-        logger.debug("%s finished normal refresh")
+        logger.debug("%s finished normal refresh" % (self))
 
     def _should_completely_refresh(self, uid_validity):
         """Determine if the folder should completely refresh it's cache.
