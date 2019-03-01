@@ -113,8 +113,9 @@ class Folder(object):
         max_uid = max_uid['uid__max']
         if max_uid is None:
             max_uid = 0
-        self._last_seen_uid = max_uid
-        logger.debug('%s updated max_uid %d' % (self, max_uid))
+        if self._last_seen_uid != max_uid:
+            self._last_seen_uid = max_uid
+            logger.debug('%s updated max_uid %d' % (self, max_uid))
 
     def _refresh_cache(self, uid_next):
         # type: (int) -> None
