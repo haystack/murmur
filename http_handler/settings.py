@@ -277,7 +277,7 @@ LOGGING = {
         },
         # this handler logs to a file
         'custom.file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': '/home/ubuntu/production/mailx/logs/youps.log',
             'formatter': 'custom.debug'
