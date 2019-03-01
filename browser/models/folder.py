@@ -4,6 +4,7 @@ import typing as t  # noqa: F401 ignore unused we use it for typing
 import logging 
 from message import Message
 from schema.youps import MessageSchema, FolderSchema  # noqa: F401 ignore unused we use it for typing
+from django.db.models import Max
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -104,6 +105,14 @@ class Folder(object):
         self._save_new_messages(0)
         # TODO maybe trigger the user
 
+        self._update_last_seen_uid()
+
+
+    def _update_last_seen_uid(self):
+        max_uid = MessageSchema.objects.filter(folder_schema=self._schema).aggregate(Max('uid'))
+        logger.info('folder %s: updated max_uid %d' % (self, max_uid))
+        self._last_seen_uid = max_uid
+
     def _refresh_cache(self, uid_next):
         # type: (int) -> None
         """Called during normal synchronization to refresh the cache.
@@ -127,6 +136,7 @@ class Folder(object):
             # TODO maybe trigger the user
 
         self._update_cached_message_flags()
+        self._update_last_seen_uid()
 
     def _should_completely_refresh(self, uid_validity):
         """Determine if the folder should completely refresh it's cache.
@@ -151,7 +161,7 @@ class Folder(object):
         logger.debug("folder %s updating cached message flags" % self)
 
         # get all the flags for the old messages
-        fetch_data = self._imap_client.fetch('1:%d' % self._last_seen_uid, ['FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]] 
+        fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), ['FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]] 
         # update flags in the cache 
         for message_schema in MessageSchema.objects.filter(folder_schema=self._schema):
             # if we don't get any information about the message we have to remove it from the cache
@@ -172,6 +182,7 @@ class Folder(object):
         logger.debug("folder %s getting new messages" % self)
         fetch_data = self._imap_client.fetch('%d:*' % (last_seen_uid + 1), Message._descriptors)
 
+        max_uid = self._last_seen_uid
         for uid in fetch_data:
             message_data = fetch_data[uid]
             if 'SEQ' not in message_data:
@@ -185,5 +196,7 @@ class Folder(object):
                                            msn=message_data['SEQ'],
                                            flags=message_data['FLAGS'])
             message_schema.save()
+            if uid > max_uid:
+                max_uid = uid
 
         logger.debug("folder %s saved new messages" % self)
