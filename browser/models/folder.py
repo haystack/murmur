@@ -139,7 +139,7 @@ class Folder():
 
         # type: (int) -> bool
         if self._uid_validity == -1:
-            logger.info("folder %s seen for first time" % self.name)
+            logger.debug("folder %s seen for first time" % self.name)
             return True
         if self._uid_validity != uid_validity:
             logger.critical('folder %s uid_validity changed must rebuild cache' % self.name)

@@ -31,7 +31,7 @@ class MailBox:
 
         for folder in self._list_selectable_folders():
             response = self._imap_client.select_folder(folder.name)
-            logger.info('select_folder response: %s' % response)
+            logger.debug('select_folder response: %s' % response)
 
         #     # log information about flags returned
         #     if 'HIGHESTMODSEQ' in response:
@@ -59,6 +59,10 @@ class MailBox:
 
             assert 'UIDNEXT' in response and 'UIDVALIDITY' in response, "Missing UID Information"
             uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
+
+
+            logger.info("folder %s: uid_next %d uid_validity %d" % (folder, folder.uid_next, folder.uid_validity))
+            logger.info("uid_next %d, uid_validity %d" % (uid_next, uid_validity))
 
             if folder._should_completely_refresh(uid_validity):
                 logger.debug('folder %s should completely refresh' % folder)
@@ -106,7 +110,7 @@ class MailBox:
             recurse_children = True
 
             # we look at all the flags here
-            logger.info('folder: %s, flags: %s, delimiter: %s' % (name, flags, delimiter))
+            logger.debug('folder: %s, flags: %s, delimiter: %s' % (name, flags, delimiter))
             if '\\HasNoChildren' in flags:
                 recurse_children = False
 
