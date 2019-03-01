@@ -277,7 +277,7 @@ LOGGING = {
         },
         # this handler logs to a file
         'custom.file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': '/home/ubuntu/production/mailx/logs/youps.log',
             'formatter': 'custom.debug'
@@ -305,10 +305,10 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        # comment this out if you want to see DB queries in logs
+        # switch the handler comments below if you want to see DB queries in logs
         'django.db.backends': {
-            # 'handlers': None, 
-            'handlers': ['custom.file'],
+            'handlers': None, 
+            # 'handlers': ['custom.file'],
             'propagate': False,
             'level': 'DEBUG'
         },
