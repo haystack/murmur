@@ -70,9 +70,10 @@ class MailBox:
             else:
                 folder._refresh_cache(uid_next)
 
-            folder._uid_next(uid_next)
+            folder._schema.uid_next = uid_next
             assert folder._uid_next == uid_next
-            folder._uid_validity(uid_validity)
+            folder._schema.uid_validity = uid_validity
+            folder._schema.save()
             assert folder._uid_validity == uid_validity
             logger.info("folder %s: uid_next %d uid_validity %d" % (folder, folder._uid_next, folder._uid_validity))
             logger.info("folder schema %s: uid_next %d uid_validity %d" % (folder, folder._schema.uid_next, folder._schema.uid_validity))
