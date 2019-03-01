@@ -61,7 +61,7 @@ class MailBox:
             uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
 
 
-            logger.info("folder %s: uid_next %d uid_validity %d" % (folder, folder._uid_next, folder._uid_next))
+            logger.info("folder %s: uid_next %d uid_validity %d" % (folder, folder._uid_next, folder._uid_validity))
             logger.info("uid_next %d, uid_validity %d" % (uid_next, uid_validity))
 
             if folder._should_completely_refresh(uid_validity):
@@ -74,7 +74,7 @@ class MailBox:
             assert folder._uid_next == uid_next
             folder._uid_validity = uid_validity
             assert folder._uid_validity == uid_validity
-            logger.info("folder %s: uid_next %d uid_validity %d" % (folder, folder._uid_next, folder._uid_next))
+            logger.info("folder %s: uid_next %d uid_validity %d" % (folder, folder._uid_next, folder._uid_validity))
 
 
 
@@ -130,11 +130,6 @@ class MailBox:
 
             yield folder
 
-
-    def _check_for_new_emails(self):
-        found_new_emails = False
-        if found_new_emails:
-            self.newMessage()
 
 
 
