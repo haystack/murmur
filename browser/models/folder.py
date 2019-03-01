@@ -169,12 +169,17 @@ class Folder(object):
             # if we don't get any information about the message we have to remove it from the cache
             if message_schema.uid not in fetch_data:
                 message_schema.delete()
-                logger.debug("%s deleted message")
+                logger.debug("%s deleted message with uid %d" % (self, message_schema.uid))
             message_data = fetch_data[message_schema.uid]
+            # TODO make this more DRY
             if 'SEQ' not in message_data:
                 logger.critical('Missing SEQ in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
             if 'FLAGS' not in message_data:
                 logger.critical('Missing FLAGS in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
             message_schema.flags = message_data['FLAGS'] 
             message_schema.msn = message_data['SEQ']
             message_schema.save()
