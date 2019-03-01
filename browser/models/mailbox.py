@@ -33,8 +33,6 @@ class MailBox(object):
         # https://stackoverflow.com/questions/9956324/imap-synchronization
         # and https://tools.ietf.org/html/rfc4549
 
-        return
-
         for folder in self._list_selectable_folders():
             response = self._imap_client.select_folder(folder.name)
 
