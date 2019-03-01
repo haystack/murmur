@@ -1,7 +1,7 @@
 from __future__ import unicode_literals, print_function, division
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 from event import Event
-import logging 
+import logging
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from schema.youps import ImapAccount, FolderSchema  # noqa: F401 ignore unused we use it for typing
 from folder import Folder
@@ -23,44 +23,36 @@ class MailBox(object):
 
 
     def __str__(self):
+        # type: () -> t.AnyStr
+        """Produce a string representation of the mailbox
+        
+        Returns:
+            str: string representation of the mailbox
+        """
+
         return "mailbox: %s" % (self._imap_account.email)
 
 
     def _sync(self):
-        """Helper method to synchronize with the imap server.
+        # type: () -> None
+        """Synchronize the mailbox with the imap server.
         """
+
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
         # and https://tools.ietf.org/html/rfc4549
 
         for folder in self._list_selectable_folders():
+
+            # response contains folder level information such as
+            # uid validity, uid next, and highest mod seq
             response = self._imap_client.select_folder(folder.name)
 
-        #     # log information about flags returned
-        #     if 'HIGHESTMODSEQ' in response:
-        #         # https://wiki.mozilla.org/Thunderbird:IMAP_RFC_4551_Implementation
-        #         logger.debug('server supports rfc 4551')
-        #     if 'EXISTS' in response:
-        #         logger.debug('folder %s contains %d messages' % (folder, response['EXISTS']))
-        #     if 'RECENT' in response:
-        #         logger.debug('folder %s contains %d recent messages' % (folder, response['RECENT']))
-        #     if 'UIDNEXT' in response:
-        #         logger.debug('folder %s next UID is %d' % (response['UIDNEXT']))
-        #     else:
-        #         logger.critical('folder %s did not return UIDNEXT' % folder)
-        #     if 'UIDVALIDITY' in response:
-        #         logger.debug('folder %s UIDVALIDITY %d' % (response['UIDVALIDITY']))
-        #     else:
-        #         logger.critical('folder %s did not return UIDVALIDITY' % folder)
-        #     if 'PERMANENTFLAGS' in response and '\\*' in response['PERMANENTFLAGS']:
-        #         logger.debug('folder %s supports custom flags')
-        #     else:
-        #         logger.critical('folder %s does not support custom flags or did not return PERMANENTFLAGS')
-
+            # our algorithm doesn't work without these
             if not ('UIDNEXT' in response and 'UIDVALIDITY' in response):
                 logger.critical("%s Missing UID Information" % folder)
+                continue
 
-            assert 'UIDNEXT' in response and 'UIDVALIDITY' in response, "Missing UID Information"
             uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
 
 
@@ -72,11 +64,17 @@ class MailBox(object):
             else:
                 folder._refresh_cache(uid_next)
 
+            # update the folder's uid next and uid validity
             folder._uid_next = uid_next
             folder._uid_validity = uid_validity
 
     def _find_or_create_folder(self, name):
         # type: (t.AnyStr) -> Folder
+        """Return a reference to the folder with the given name.
+        
+        Returns:
+            Folder: Folder associated with the passed in name
+        """
 
         folder_schema = None  # type: FolderSchema
         try:
@@ -91,7 +89,7 @@ class MailBox(object):
 
     def _list_selectable_folders(self, root=''):
         # type: (t.Text) -> t.Generator[Folder]
-        """List all the folders in the Mailbox
+        """Generate all the folders in the Mailbox
         """
 
         # we want to avoid listing all the folders 
@@ -111,6 +109,7 @@ class MailBox(object):
             if '\\HasNoChildren' in flags:
                 recurse_children = False
 
+            # do depth first search and return child folders if they exist
             if recurse_children:
                 for child_folder in self._list_selectable_folders(name + delimiter):
                     yield child_folder
