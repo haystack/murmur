@@ -71,6 +71,7 @@ class MailBox(object):
 
     def _run_user_code(self):
         while not self.event_data_queue.empty():
+            logger.debug("Popping event queue to run users' code")
             event_data = self.event_data_queue.get()
             event_data.fire_event(self.newMessage)
 

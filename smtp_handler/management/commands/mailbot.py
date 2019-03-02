@@ -41,6 +41,8 @@ class Command(BaseCommand):
                 mailbox = MailBox(imapAccount, imap)
                 # sync the mailbox with imap
                 mailbox._sync()
+                logger.info("Mailbox sync done")
+                
                 # after sync, logout to prevent multi-connection issue
                 imap.logout()
             except Exception:

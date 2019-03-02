@@ -175,6 +175,8 @@ class Folder(object):
         # type: () -> None
         """Update the flags on any cached messages.
         """
+        logger.debug("%s started updating flags" % self)
+        
         # get all the flags for the old messages
         fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), [
                                              'FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]]
