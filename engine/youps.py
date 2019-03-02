@@ -8,8 +8,10 @@ from schema.youps import ImapAccount, MailbotMode
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
 from engine.constants import msg_code
-from browser.imap import authenticate
+from browser.imap import authenticate, interpret
 import string
+
+from http_handler.tasks import remove_periodic_task
 
 def login_imap(email, password, host, is_oauth):
     """This function is called only once per each user when they first attempt to login to YoUPS.
@@ -148,7 +150,7 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
     logging.debug(res)
     return res
 
-def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=True):
+def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=True):
     """This function is called everytime users hit "run", "stop" or "save" their scripts.
 
         Args:
@@ -157,7 +159,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
             current_mode_id (integer): ID of currently selected/running mode
             modes (list): a list of dicts that each element is information about each user's mode
             is_test (boolean): if is_test is True, then it just simulates the user's script and prints out log but not actually execute it.  
-            is_running (boolean): potentially deprecated as we move toward one-off running fashion. 
+            run_request (boolean): potentially deprecated as we move toward one-off running fashion. 
     """
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
 
@@ -200,7 +202,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imapAccount.save()
 
         if run_request:
-            res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
+            # TODO change with appropriate search_criteria
+            res = interpret(imapAccount, imap, code, "UID %d" % 10000, is_test)
 
         # if imapAccount.is_running:
         #     res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
