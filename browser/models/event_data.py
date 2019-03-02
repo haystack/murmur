@@ -29,7 +29,7 @@ class NewMessageData(AbstractEventData):
     def __init__(self, imap_account, search_criteria, folder_schema):
         super(NewMessageData, self).__init__()
         self.imap_account = imap_account
-        self.code = Action.objects.filter(trigger="arrival", folder=self._schema)[0] # TODO what if there are many arrival functions in one mode?
+        self.code = Action.objects.filter(trigger="arrival", folder=folder_schema)[0] # TODO what if there are many arrival functions in one mode?
         self.search_criteria = search_criteria
         self.folder_schema = folder_schema
 

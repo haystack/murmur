@@ -228,9 +228,10 @@ class Folder(object):
                 logger.critical('Missing FLAGS in message data')
                 logger.critical('Message data %s' % message_data)
                 continue
-
-            ms = MessageSchema.object.filter(uid=uid, folder_schema=self._schema)
+            
+            ms = MessageSchema.objects.filter(uid=uid, folder_schema=self._schema)
             if ms.exists():
+                ms = ms[0]
                 ms.msn = message_data['SEQ']
                 ms.flags = message_data['FLAGS']
 
