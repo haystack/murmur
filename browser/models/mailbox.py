@@ -70,9 +70,9 @@ class MailBox(object):
             folder._uid_validity = uid_validity
 
     def _run_user_code(self):
-        # TODO pop events not iterate
-        for nmd in self.event_data_queue():
-            nmd.fire_event(self.newMessage)
+        while not self.event_data_queue.empty():
+            event_data = self.event_data_queue.get()
+            event_data.fire_event(self.newMessage)
 
     def _find_or_create_folder(self, name):
         # type: (t.AnyStr) -> Folder
