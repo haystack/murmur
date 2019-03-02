@@ -33,7 +33,14 @@ class NewMessageData(AbstractEventData):
     def __init__(self, imap_account, search_criteria, folder_schema):
         super(NewMessageData, self).__init__()
         self.imap_account = imap_account
-        self.code = Action.objects.filter(trigger="arrival", folder=folder_schema)[0] # TODO what if there are many arrival functions in one mode?
+        
+        actions = Action.objects.filter(trigger="arrival", folder=folder_schema)
+        if actions.exists():
+            # TODO what if there are many arrival functions in one mode?
+            actions = actions[0]
+        else: 
+            actions = ""
+        self.code = ""
         self.search_criteria = search_criteria
         self.folder_schema = folder_schema
         logger.debug("event data created %s Folder: %s" % (self.search_criteria, self.folder_schema.name))
