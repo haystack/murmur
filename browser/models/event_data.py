@@ -38,17 +38,17 @@ class NewMessageData(AbstractEventData):
         if actions.exists():
             # TODO what if there are many arrival functions in one mode?
             actions = actions[0]
+            self.code = actions.code
         else: 
-            actions = ""
-        self.code = ""
+            self.code = ""
         self.search_criteria = search_criteria
         self.folder_schema = folder_schema
         logger.debug("event data created %s Folder: %s" % (self.search_criteria, self.folder_schema.name))
 
     def fire_event(self, event):
         logger.debug("event data about to be fired %s Folder: %s" % (self.search_criteria, self.folder_schema.name))
-        event.fire(self.get_message())
+        event.fire(imap_account_id=self.imap_account.id, code=self.code, search_criteria=self.search_criteria, folder_name=self.folder_schema.name)
 
     def get_message(self):
-        # TODO more defensive (e.g. what if there is no message filtered?)
-        return MessageSchema.objects.filter(imap_account=self.imap_account)
+        # return MessageSchema.objects.filter(imap_account=self.imap_account)
+        pass

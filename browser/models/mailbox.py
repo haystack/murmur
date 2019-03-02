@@ -23,8 +23,6 @@ class MailBox(object):
 
         # Events
         self.newMessage = Event()  # type: Event
-        # TODO is it correct?
-        self.newMessage += run_interpret
 
         self.event_data_queue = Queue()
 
@@ -74,9 +72,11 @@ class MailBox(object):
 
     def _run_user_code(self):
         while not self.event_data_queue.empty():
+            self.newMessage.handle( run_interpret.delay )
             logger.debug("Popping event queue to run users' code")
             event_data = self.event_data_queue.get()
             event_data.fire_event(self.newMessage)
+            self.newMessage.unhandle( run_interpret.delay )
 
     def _find_or_create_folder(self, name):
         # type: (t.AnyStr) -> Folder
