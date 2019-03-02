@@ -229,12 +229,19 @@ class Folder(object):
                 logger.critical('Message data %s' % message_data)
                 continue
 
-            message_schema = MessageSchema(imap_account=self._schema.imap_account,
-                                           folder_schema=self._schema,
-                                           uid=uid,
-                                           msn=message_data['SEQ'],
-                                           flags=message_data['FLAGS'])
-            message_schema.save()
+            ms = MessageSchema.object.filter(uid=uid, folder_schema=self._schema)
+            if ms.exists():
+                ms.msn = message_data['SEQ']
+                ms.flags = message_data['FLAGS']
+
+                ms.save()
+            else:
+                message_schema = MessageSchema(imap_account=self._schema.imap_account,
+                                            folder_schema=self._schema,
+                                            uid=uid,
+                                            msn=message_data['SEQ'],
+                                            flags=message_data['FLAGS'])
+                message_schema.save()
             logger.debug("%s saved new message with uid %d" % (self, uid))
 
             if last_seen_uid != 0:
