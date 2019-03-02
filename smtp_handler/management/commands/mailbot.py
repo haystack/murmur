@@ -42,14 +42,13 @@ class Command(BaseCommand):
                 # sync the mailbox with imap
                 mailbox._sync()
                 logger.info("Mailbox sync done")
-                
-                # after sync, logout to prevent multi-connection issue
-                imap.logout()
             except Exception:
                 logger.exception("mailbox sync failed")
 
             try:
                 mailbox = MailBox(imapAccount, imap)
+                # after sync, logout to prevent multi-connection issue
+                imap.logout()
                 mailbox._run_user_code()  
             except Exception:
                 logger.exception("mailbox task running failed")
