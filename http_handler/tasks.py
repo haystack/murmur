@@ -4,9 +4,12 @@ from celery.utils.log import get_task_logger
 from schema.youps import ImapAccount, TaskScheduler, PeriodicTask
 
 import json, ujson, types, marshal, random
+import new
+import pickle
 
-logger = get_task_logger(__name__)
+import logging
 
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 @task(name="add_periodic_task")
 def add_periodic_task(interval, args, expires=None):
@@ -57,6 +60,11 @@ def remove_periodic_task(imap_account_id, ptask_name=None):
     imap_account.status_msg = new_msg
     imap_account.save()
 
+def co_loads(s):
+    """loads a code object pickled with co_dumps() return a code object ready for exec()"""
+    r = pickle.loads(s)
+    return new.code(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11])
+
 @task(name="run_interpret")
 def run_interpret(imap_account_id, code, search_criteria, is_test=False, email_content=None, folder_name=None):
     """ execute the given code object.
@@ -70,7 +78,7 @@ def run_interpret(imap_account_id, code, search_criteria, is_test=False, email_c
     """
     logger.info("Task run interpret")
 
-    code = marshal.loads(code)
+    code = code(co_loads)
     from browser.imap import interpret, authenticate
     imap_account = ImapAccount.objects.get(id=imap_account_id)
     auth_res = authenticate( imap_account )

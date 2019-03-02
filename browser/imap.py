@@ -20,6 +20,8 @@ import calendar
 import base64
 import json
 from http_handler.tasks import add_periodic_task
+import new
+import pickle
 import marshal, ujson
 import logging
 
@@ -161,6 +163,16 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             res['imap_log'] = logstr
             res['imap_error'] = True
 
+        def co_dumps(co):
+            """pickles a code object,arg s is the string with code
+            returns the code object pickled as a string"""
+            # co = compile(s,'<string>','exec')
+            co_tup=[co.co_argcount,co.co_nlocals, co.co_stacksize,co.co_flags,
+            co.co_code,co.co_consts,co.co_names,co.co_varnames,co.co_filename,
+            co.co_name,co.co_firstlineno,co.co_lnotab]
+            return pickle.dumps(co_tup)
+
+
         def on_message_arrival(func=None):
             if not func or type(func).__name__ != "function":
                 raise Exception('on_message_arrival(): requires callback function but it is %s ' % type(func).__name__)
@@ -170,7 +182,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
             # TODO replace with the right folder
             current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
-            action = Action(trigger="arrival", code=marshal.dumps(func.func_code), folder=current_folder_schema)
+            action = Action(trigger="arrival", code=co_dumps(func.func_code), folder=current_folder_schema)
             action.save()
 
         def set_interval(interval=None, func=None):
