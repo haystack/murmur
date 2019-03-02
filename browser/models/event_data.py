@@ -1,4 +1,4 @@
-from _future_ import unicode_literals, print_function, division
+from __future__ import unicode_literals, print_function, division
 from abc import ABCMeta, abstractmethod
 from event import Event  # noqa: F401 ignore unused we use it for typing
 import typing as t  # noqa: F401 ignore unused we use it for typing

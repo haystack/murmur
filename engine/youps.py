@@ -13,6 +13,10 @@ import string
 
 from http_handler.tasks import remove_periodic_task
 
+import logging
+
+logger = logging.getLogger('youps')  # type: logging.Logger
+
 def login_imap(email, password, host, is_oauth):
     """This function is called only once per each user when they first attempt to login to YoUPS.
     check if we are able to login to the user's imap using given credientials.
@@ -202,15 +206,14 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         imapAccount.save()
 
         if run_request:
+            # TODO run it several times over for the selected folders
             # TODO change with appropriate search_criteria
+            imap.select_folder("INBOX")
             res = interpret(imapAccount, imap, code, "UID %d" % 10000, is_test)
 
-        # if imapAccount.is_running:
-        #     res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
-
-        #     # if the code execute well without any bug, then save the code to DB
-        #     if not res['imap_error']:
-        #         res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log'])
+            # if the code execute well without any bug, then save the code to DB
+            if not res['imap_error']:
+                res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log'])
         #         now = datetime.now()
         #         now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
         #         res['imap_log'] = now_format + res['imap_log']
