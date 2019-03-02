@@ -2,6 +2,8 @@ from _future_ import unicode_literals, print_function, division
 from abc import ABCMeta, abstractmethod
 from event import Event  # noqa: F401 ignore unused we use it for typing
 import typing as t  # noqa: F401 ignore unused we use it for typing
+from schema.youps import Action, MessageSchema
+
 # class Abstract:
 #     _metaclass_ = ABCMeta
 
@@ -24,13 +26,16 @@ class AbstractEventData(object):
         pass
 
 class NewMessageData(AbstractEventData):
-    def __init__(self, n):
+    def __init__(self, imap_account, search_criteria, folder_schema):
         super(NewMessageData, self).__init__()
+        self.imap_account = imap_account
+        self.code = Action.objects.filter(trigger="arrival", folder=self._schema)[0] # TODO what if there are many arrival functions in one mode?
+        self.search_criteria = search_criteria
+        self.folder_schema = folder_schema
 
+    def fire_event(self, event):
+        event.fire(self.get_message())
 
-    def fire_event(event):
-        event.fire(Messagefromuid())
-
-
-if _name_ == '_main_':
-    a = NewMessageData(3)
+    def get_message(self):
+        # TODO more defensive (e.g. what if there is no message filtered?)
+        return MessageSchema.obejcts.filter(imap_account=self.imap_account)

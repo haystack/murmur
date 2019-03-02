@@ -5,6 +5,8 @@ import logging
 from message import Message
 from schema.youps import MessageSchema, FolderSchema  # noqa: F401 ignore unused we use it for typing
 from django.db.models import Max
+from Queue import Queue
+from browser.models.event_data import NewMessageData
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -124,8 +126,8 @@ class Folder(object):
             self._last_seen_uid = max_uid
             logger.debug('%s updated max_uid %d' % (self, max_uid))
 
-    def _refresh_cache(self, uid_next):
-        # type: (int) -> None
+    def _refresh_cache(self, uid_next, event_data_queue):
+        # type: (int, Queue) -> None
         """Called during normal synchronization to refresh the cache.
 
         Should get new messages and build message number to UID map for the
@@ -140,7 +142,7 @@ class Folder(object):
         # if the uid has not changed then we don't need to get new messages
         if uid_next != self._uid_next:
             # get all the descriptors for the new messages
-            self._save_new_messages(self._last_seen_uid)
+            self._save_new_messages(self._last_seen_uid, event_data_queue)
             # TODO maybe trigger the user
 
         # if the last seen uid is zero we haven't seen any messages
@@ -205,8 +207,8 @@ class Folder(object):
 
         logger.debug("%s updated flags" % self)
 
-    def _save_new_messages(self, last_seen_uid):
-        # type: (int) -> None
+    def _save_new_messages(self, last_seen_uid, event_data_queue = None):
+        # type: (int, Queue) -> None
         """Save any messages we haven't seen before
 
         Args:
@@ -236,6 +238,5 @@ class Folder(object):
             logger.debug("%s saved new message with uid %d" % (self, uid))
 
             if last_seen_uid != 0:
-                # TODO trigger new message event
-                pass
+                event_data_queue.put(NewMessageData(self._schema.imap_account, "UID %d" % last_seen_uid, self._schema))
         

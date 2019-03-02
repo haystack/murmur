@@ -172,8 +172,16 @@ class Contact(models.Model):
 from djcelery.models import PeriodicTask, IntervalSchedule
 from datetime import datetime
 
-class TaskScheduler(models.Model):
+# This model is to collect action to-be-executed. (e.g., code object to be executed when the message has arrived)
+class Action(models.Model):
+    id = models.AutoField(primary_key=True)
+    
+    trigger = models.CharField('category', max_length=100, blank=True) # e.g., arrival, flag_changed 
+    code = models.TextField(null=True, blank=True) # stringified code object
+    folder = models.ForeignKey('FolderSchema')
 
+# This model is to handle dynamic periodic tasks
+class TaskScheduler(models.Model):
     periodic_task = models.ForeignKey(PeriodicTask)
 
     @staticmethod

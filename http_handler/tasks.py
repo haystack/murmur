@@ -7,14 +7,15 @@ import json, ujson, types, marshal, random
 
 logger = get_task_logger(__name__)
 
+
 @task(name="add_periodic_task")
 def add_periodic_task(interval, args, expires=None):
-    """ create a new periodic task
+    """ create a new dynamic periodic task
 
     Args:
         interval (number): interval of how often to run the code in sec
         the rest args are same as imap.interpret's
-        args (json): arguments for interpret () function
+        args (json): arguments for interpret() function
     """
     logger.info("ADD TASK performed!")
     imap_account_id = ujson.loads(args)[0]
@@ -57,8 +58,8 @@ def remove_periodic_task(imap_account_id, ptask_name=None):
     imap_account.save()
 
 @task(name="run_interpret")
-def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_content=None):
-    """ execute 
+def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_content=None, folder=None):
+    """ execute the given code object.
 
     Args:
         imap_account_id (number): id of associated ImapAccount object
@@ -76,7 +77,10 @@ def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_c
         raise ValueError('Something went wrong during authentication. Refresh and try again!')
         
     imap = auth_res['imap']
-    imap.select_folder('INBOX')
+    if folder is None: 
+        imap.select_folder('INBOX')
+    else:
+        imap.select_folder(folder.name)
     res = interpret(imap_account, imap, code, search_creteria, is_test, email_content)
 
     logger.info(res['imap_log'])

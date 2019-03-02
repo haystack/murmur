@@ -15,7 +15,7 @@ from engine.google_auth import GoogleOauth2
 from Crypto.Cipher import AES
 from engine.constants import msg_code
 from datetime import datetime, timedelta
-from schema.youps import MailbotMode
+from schema.youps import MailbotMode, Action, FolderSchema
 import calendar
 import base64
 import json
@@ -160,6 +160,18 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             # Send this error msg to the user
             res['imap_log'] = logstr
             res['imap_error'] = True
+
+        def on_message_arrival(func=None):
+            if not func or type(func).__name__ != "function"):
+                raise Exception('on_message_arrival(): requires callback function but it is %s ' % type(func).__name__)
+                
+            if func.func_code.co_argcount != 1:
+                raise Exception('on_message_arrival(): your callback function should have only 1 argument, but there are %d argument(s)' % func.func_code.co_argcount)
+
+            # TODO replace with the right folder
+            current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
+            action = Action(task_type="arrival", code=marshal.dumps(func.func_code), folder=current_folder_schema)
+            action.save()
 
         def set_interval(interval=None, func=None):
             if not interval:
