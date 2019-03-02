@@ -199,11 +199,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_account=imapAccount)[0]
         imapAccount.save()
 
-<<<<<<< HEAD
         if run_request:
             res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
-=======
->>>>>>> event_queue
 
         # if imapAccount.is_running:
         #     res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
