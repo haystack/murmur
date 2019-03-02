@@ -58,7 +58,7 @@ def remove_periodic_task(imap_account_id, ptask_name=None):
     imap_account.save()
 
 @task(name="run_interpret")
-def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_content=None, folder_name=None):
+def run_interpret(imap_account_id, code, search_criteria, is_test=False, email_content=None, folder_name=None):
     """ execute the given code object.
 
     Args:
@@ -83,7 +83,7 @@ def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_c
         imap.select_folder('INBOX')
     else:
         imap.select_folder(folder_name)
-    res = interpret(imap_account, imap, code, search_creteria, is_test, email_content)
+    res = interpret(imap_account, imap, code, search_criteria, is_test, email_content)
 
     logger.info(res['imap_log'])
 
