@@ -209,7 +209,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
             # TODO run it several times over for the selected folders
             # TODO change with appropriate search_criteria
             imap.select_folder("INBOX")
-            res = interpret(imapAccount, imap, code, "UID %d" % 10000, is_test)
+            res = interpret(imapAccount, imap, code, "UID %d:*" % 90000, is_test)
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:

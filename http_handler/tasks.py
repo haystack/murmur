@@ -68,6 +68,8 @@ def run_interpret(imap_account_id, code, search_creteria, is_test=False, email_c
         is_test (boolean): True- just printing the log. False- executing the code
         email_content (string): for email shortcut --> potential deprecate  
     """
+    logger.info("Task run interpret")
+
     code = marshal.loads(code)
     from browser.imap import interpret, authenticate
     imap_account = ImapAccount.objects.get(id=imap_account_id)

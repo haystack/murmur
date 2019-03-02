@@ -218,6 +218,7 @@ class Folder(object):
         fetch_data = self._imap_client.fetch(
             '%d:*' % (last_seen_uid + 1), Message._descriptors)
 
+        logger.info("start saving new messages..: %s" % self._schema.imap_account.email)
         for uid in fetch_data:
             message_data = fetch_data[uid]
             if 'SEQ' not in message_data:
@@ -247,4 +248,6 @@ class Folder(object):
 
             if last_seen_uid != 0:
                 event_data_queue.put(NewMessageData(self._schema.imap_account, "UID %d" % last_seen_uid, self._schema))
+
+        logger.info("finished saving new messages..: %s" % self._schema.imap_account.email)
         

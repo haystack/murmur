@@ -4,6 +4,10 @@ from event import Event  # noqa: F401 ignore unused we use it for typing
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from schema.youps import Action, MessageSchema
 
+import logging
+
+logger = logging.getLogger('youps')  # type: logging.Logger
+
 # class Abstract:
 #     _metaclass_ = ABCMeta
 
@@ -32,8 +36,10 @@ class NewMessageData(AbstractEventData):
         self.code = Action.objects.filter(trigger="arrival", folder=folder_schema)[0] # TODO what if there are many arrival functions in one mode?
         self.search_criteria = search_criteria
         self.folder_schema = folder_schema
+        logger.debug("event data created %s Folder: %s" % (self.search_criteria, self.folder_schema.name))
 
     def fire_event(self, event):
+        logger.debug("event data about to be fired %s Folder: %s" % (self.search_criteria, self.folder_schema.name))
         event.fire(self.get_message())
 
     def get_message(self):
