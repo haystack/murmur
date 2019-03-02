@@ -51,4 +51,4 @@ class NewMessageData(AbstractEventData):
 
     def get_message(self):
         # TODO more defensive (e.g. what if there is no message filtered?)
-        return MessageSchema.obejcts.filter(imap_account=self.imap_account)
+        return MessageSchema.objects.filter(imap_account=self.imap_account)
