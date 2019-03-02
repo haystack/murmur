@@ -162,7 +162,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             res['imap_error'] = True
 
         def on_message_arrival(func=None):
-            if not func or type(func).__name__ != "function"):
+            if not func or type(func).__name__ != "function":
                 raise Exception('on_message_arrival(): requires callback function but it is %s ' % type(func).__name__)
                 
             if func.func_code.co_argcount != 1:

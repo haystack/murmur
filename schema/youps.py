@@ -32,6 +32,7 @@ class ImapAccount(models.Model):
     execution_log = models.TextField(default="")
     is_test = models.BooleanField(default=True)
     is_running = models.BooleanField(default=False)
+    status_msg = models.TextField(default="")
 
     arrive_action = models.CharField('access_token', max_length=1000, blank=True)
     custom_action = models.CharField('custom_action', max_length=1000, blank=True)
