@@ -143,7 +143,7 @@ class ContactSchema(models.Model):
     id = models.AutoField(primary_key=True)
     # each contact is associated with a single ImapAccount
     imap_account = models.ForeignKey('ImapAccount')
-    name = models.TextField()
+    name = models.TextField(null=True, blank=True)
     email = models.EmailField(
         verbose_name='email address',
         max_length=255
