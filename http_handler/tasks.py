@@ -72,7 +72,7 @@ def run_interpret(imap_account_id, code, search_criteria, is_test=False, email_c
     """
     logger.info("Task run interpret imap_account: %d %s" % (imap_account_id, folder_name))
     
-    if type(code) !=str:
+    if type(code) == str:
         code = codeobject_loads(code)
 
     # code = marshal.loads(code)
