@@ -12,12 +12,11 @@ logger = logging.getLogger('youps')  # type: logging.Logger
 
 @task(name="add_periodic_task")
 def add_periodic_task(interval, imap_account_id, action_id, search_criteria, folder_name, expires=None):
-    """ create a new dynamic periodic task
+    """ create a new dynamic periodic task, mainly used for users' set_interval() call.
 
     Args:
         interval (number): interval of how often to run the code in sec
         the rest args are same as imap.interpret's
-        args (json): arguments for interpret() function
     """
     logger.info("ADD TASK performed!")
 
