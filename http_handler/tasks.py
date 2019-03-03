@@ -1,7 +1,7 @@
 from celery.decorators import task, periodic_task
 from celery.utils.log import get_task_logger
 
-from schema.youps import ImapAccount, TaskScheduler, PeriodicTask, FolderSchema
+from schema.youps import Action, ImapAccount, TaskScheduler, PeriodicTask, FolderSchema
 from smtp_handler.utils import codeobject_loads
 
 import json, ujson, types, marshal, random
@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 @task(name="add_periodic_task")
-def add_periodic_task(interval, imap_account_id, code, search_criteria, folder_name, expires=None):
+def add_periodic_task(interval, imap_account_id, action_id, search_criteria, folder_name, expires=None):
     """ create a new dynamic periodic task
 
     Args:
@@ -21,6 +21,7 @@ def add_periodic_task(interval, imap_account_id, code, search_criteria, folder_n
     """
     logger.info("ADD TASK performed!")
 
+    code = 'a=Action.objects.get(id=%d)\ncode_object=codeobject_loads(a.code)\ng = type(codeobject_loads)(code_object ,locals())\ng()' % actions.id
     args = ujson.dumps( [imap_account_id, code, search_criteria, folder_name] )
 
     # TODO naming meaningful to distinguish one-off and interval running 
@@ -47,7 +48,8 @@ def remove_periodic_task(imap_account_id, ptask_name=None):
 
     if ptask_name is None:
         ptask_prefix = '%d_' % imap_account_id
-        PeriodicTask.objects.filter(name__startswith=ptask_prefix).delete()      
+        PeriodicTask.objects.filter(name__startswith=ptask_prefix).delete()
+        Action.objects.filter(folder__imap_account__id=imap_account_id).delete()      
 
     else:
         PeriodicTask.objects.filter(name=ptask_name).delete()

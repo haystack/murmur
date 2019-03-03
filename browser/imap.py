@@ -190,7 +190,9 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
             # TODO replace with the right folder
             current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
-            add_periodic_task.delay( interval=interval, imap_account_id=imap_account.id, code=codeobject_dumps(func.func_code), search_criteria=search_creteria, folder_name=current_folder_schema.name)
+            action = Action(trigger="interval", code=codeobject_dumps(func.func_code), folder=current_folder_schema)
+            action.save()
+            add_periodic_task.delay( interval=interval, imap_account_id=imap_account.id, action_id=action.id, search_criteria=search_creteria, folder_name=current_folder_schema.name)
 
         def set_timeout(delay=None, func=None):
             if not delay:
@@ -461,6 +463,9 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if is_valid:
                 exec code in globals(), locals()
                 pile.add_flags(['YouPS'])
+                res['status'] = True
+        except Action.DoesNotExist:
+            logger.debug("An action is not existed right now. Maybe you change your script after this action was added to the queue.")
         except Exception as e:
             catch_exception(e)
 
