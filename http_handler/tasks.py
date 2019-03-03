@@ -72,10 +72,10 @@ def run_interpret(imap_account_id, code, search_criteria, is_test=False, email_c
         email_content (string): for email shortcut --> potential deprecate  
     """
     logger.info("Task run interpret imap_account: %d %s" % (imap_account_id, folder_name))
-    # code = co_loads(code)
+    #code = co_loads(code)
     code = 'code_object=co_loads(code)\ng = type(code_object)(code_object.func_code, globals())\ng(3)'
 
-    code = marshal.loads(code)
+    # code = marshal.loads(code)
     from browser.imap import interpret, authenticate
     imap_account = ImapAccount.objects.get(id=imap_account_id)
     auth_res = authenticate( imap_account )
