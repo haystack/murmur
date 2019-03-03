@@ -288,6 +288,7 @@ class Folder(object):
     def _parse_email_subject(self, subject):
         if subject is None:
             return None
+        logger.debug("parse subject: %s" % (subject))
         text, encoding = decode_header(subject)
         if encoding:
             text = text.decode(encoding)
