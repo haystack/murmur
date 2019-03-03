@@ -2,7 +2,8 @@ from __future__ import unicode_literals, print_function, division
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from schema.youps import MessageSchema  # noqa: F401 ignore unused we use it for typing
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
-
+from datetime import datetime  # noqa: F401 ignore unused we use it for typing
+from browser.models.contact import Contact
 
 class Message(object):
 
@@ -11,7 +12,7 @@ class Message(object):
 
     def __init__(self, message_schema, imap_client):
         # type: (MessageSchema, IMAPClient) -> Message
-       
+
         self._schema = message_schema  # type: MessageSchema
 
         # the connection to the server
@@ -28,7 +29,7 @@ class Message(object):
         # type: (int) -> None
         self._schema.uid = value
         self._schema.save()
-    
+
     @property
     def _msn(self):
         # type: () -> int
@@ -51,4 +52,63 @@ class Message(object):
         self._schema.flags = value
         self._schema.save()
 
-        
+    @property
+    def subject(self):
+        # type: () -> t.AnyStr
+        """Get the Subject of the message
+
+        Returns:
+            str: The subject of the message
+        """
+        return self._schema.subject
+
+    @property
+    def date(self):
+        # type: () -> datetime
+        """Get the date and time that the message was sent
+
+        Returns:
+            datetime: The date and time the message was sent
+        """
+        return self._schema.date
+
+    @property
+    def isRead(self):
+        # type: () -> bool
+        """Get if the message has been read
+
+        Returns:
+            bool: True if the message has been read
+        """
+        return '\\Seen' in self.flags
+
+    @property
+    def isDeleted(self):
+        # type: () -> bool
+        """Get if the message has been deleted
+
+        Returns:
+            bool: True if the message has been deleted
+        """
+        return '\\Deleted' in self.flags
+
+    @property
+    def isRecent(self):
+        # type: () -> bool
+        """Get if the message is recent
+
+        Returns:
+            bool: True if the message is recent
+        """
+        # TODO we will automatically remove the RECENT flag unless we make our imapclient ReadOnly
+        return '\\Recent' in self.flags
+
+    @property
+    def to(self):
+        # type: () -> t.List[Contact]
+        """Get the Contacts the message is addressed to
+
+        Returns:
+            t.List[Contact]: The contacts in the to field of the message
+        """
+        return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.to.all()]

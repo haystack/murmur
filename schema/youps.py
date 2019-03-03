@@ -154,7 +154,7 @@ class ContactSchema(models.Model):
 
     class Meta:
         db_table = "youps_contact"
-        # each contact is stored once per account 
+        # each contact is stored once per account
         unique_together = ("imap_account", "email")
 
 
