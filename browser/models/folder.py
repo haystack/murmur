@@ -289,7 +289,7 @@ class Folder(object):
         if subject is None:
             return None
         logger.debug("parse subject: %s" % (subject))
-        text, encoding = decode_header(subject)
+        text, encoding = decode_header(subject)[0]
         if encoding:
             text = text.decode(encoding)
         return text
