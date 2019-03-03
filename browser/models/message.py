@@ -112,3 +112,54 @@ class Message(object):
             t.List[Contact]: The contacts in the to field of the message
         """
         return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.to.all()]
+
+    @property
+    def from_(self):
+        # type: () -> t.List[Contact]
+        """Get the Contacts the message is addressed from 
+
+        Returns:
+            t.List[Contact]: The contacts in the from field of the message
+        """
+        return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.from_.all()]
+
+    @property
+    def sender(self):
+        # type: () -> t.List[Contact]
+        """Get the Contacts the message is sent from 
+
+        Returns:
+            t.List[Contact]: The contacts in the sender field of the message
+        """
+        return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.sender.all()]
+
+    @property
+    def reply_to(self):
+        # type: () -> t.List[Contact]
+        """Get the Contacts the message is replied to 
+
+        Returns:
+            t.List[Contact]: The contacts in the reply_to field of the message
+        """
+        return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.reply_to.all()]
+
+    @property
+    def cc(self):
+        # type: () -> t.List[Contact]
+        """Get the Contacts the message is cced to 
+
+        Returns:
+            t.List[Contact]: The contacts in the cc field of the message
+        """
+        return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.cc.all()]
+
+    @property
+    def bcc(self):
+        # type: () -> t.List[Contact]
+        """Get the Contacts the message is bcced to 
+
+        Returns:
+            t.List[Contact]: The contacts in the bcc field of the message
+        """
+        return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.bcc.all()]
+

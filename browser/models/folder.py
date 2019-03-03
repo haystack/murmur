@@ -286,11 +286,22 @@ class Folder(object):
 
 
     def _parse_email_subject(self, subject):
+        # type: (t.AnyStr) -> t.AnyStr
+        """This method parses a subject header which can contain unicode
+
+        Args:
+            subject (str): email subject header
+
+        Returns:
+            t.AnyStr: unicode string or a 8 bit string
+        """
+
         if subject is None:
             return None
-        logger.debug("parse subject: %s" % (subject))
         text, encoding = decode_header(subject)[0]
         if encoding:
+            if encoding != 'utf-8' or encoding != 'utf8':
+                logger.critical('parse_subject non utf8 encoding: %s' % encoding)
             text = text.decode(encoding)
         return text
 
