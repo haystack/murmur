@@ -300,7 +300,7 @@ class Folder(object):
             return None
         text, encoding = decode_header(subject)[0]
         if encoding:
-            if encoding != 'utf-8' or encoding != 'utf8':
+            if encoding != 'utf-8' and encoding != 'utf8':
                 logger.critical('parse_subject non utf8 encoding: %s' % encoding)
             text = text.decode(encoding)
         return text
