@@ -190,7 +190,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
             # TODO replace with the right folder
             current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
-            add_periodic_task.delay( interval=interval, imap_account=imap_account, code=codeobject_dumps(func.func_code), search_criteria=search_creteria, folder=current_folder_schema)
+            add_periodic_task.delay( interval=interval, imap_account_id=imap_account.id, code=codeobject_dumps(func.func_code), search_criteria=search_creteria, folder_name=current_folder_schema.name)
 
         def set_timeout(delay=None, func=None):
             if not delay:
