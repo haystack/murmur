@@ -162,4 +162,3 @@ class Message(object):
             t.List[Contact]: The contacts in the bcc field of the message
         """
         return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.bcc.all()]
-
