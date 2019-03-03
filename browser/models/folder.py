@@ -6,6 +6,7 @@ from message import Message
 from schema.youps import MessageSchema, FolderSchema, ContactSchema, ImapAccount  # noqa: F401 ignore unused we use it for typing
 from django.db.models import Max
 from imapclient.response_types import Address  # noqa: F401 ignore unused we use it for typing
+from email.header import decode_header
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -261,7 +262,7 @@ class Folder(object):
                                            msn=msn,
                                            flags=flags,
                                            date=envelope.date,
-                                           subject=envelope.subject,
+                                           subject=self._parse_email_subject(envelope.subject),
                                            message_id=envelope.message_id,
                                            internal_date=internal_date,
                                            )
@@ -283,6 +284,14 @@ class Folder(object):
 
             logger.debug("%s saved new message with uid %d" % (self, uid))
 
+
+    def _parse_email_subject(self, subject):
+        if subject is None:
+            return None
+        text, encoding = decode_header(subject)
+        if encoding:
+            text = text.decode(encoding)
+        return text
 
     def _find_or_create_contacts(self, addresses):
         # type: (t.List[Address]) -> t.List[ContactSchema]
