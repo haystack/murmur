@@ -268,12 +268,18 @@ class Folder(object):
             message_schema.save()
 
             # create and save the message contacts
-            message_schema.from_.add(*self._find_or_create_contacts(envelope.from_))
-            message_schema.sender.add(*self._find_or_create_contacts(envelope.sender))
-            message_schema.reply_to.add(*self._find_or_create_contacts(envelope.reply_to))
-            message_schema.to.add(*self._find_or_create_contacts(envelope.to))
-            message_schema.cc.add(*self._find_or_create_contacts(envelope.cc))
-            message_schema.bcc.add(*self._find_or_create_contacts(envelope.bcc))
+            if envelope.from_ is not None:
+                message_schema.from_.add(*self._find_or_create_contacts(envelope.from_))
+            if envelope.sender is not None:
+                message_schema.sender.add(*self._find_or_create_contacts(envelope.sender))
+            if envelope.reply_to is not None:
+                message_schema.reply_to.add(*self._find_or_create_contacts(envelope.reply_to))
+            if envelope.to is not None:
+                message_schema.to.add(*self._find_or_create_contacts(envelope.to))
+            if envelope.cc is not None:
+                message_schema.cc.add(*self._find_or_create_contacts(envelope.cc))
+            if envelope.bcc is not None:
+                message_schema.bcc.add(*self._find_or_create_contacts(envelope.bcc))
 
             logger.debug("%s saved new message with uid %d" % (self, uid))
 
@@ -285,10 +291,7 @@ class Folder(object):
         Returns:
             t.List[ContactSchema]: List of contacts associated with the addresses
         """
-
-        # if there are no addresses return none
-        if addresses is None:
-            return None
+        assert addresses is not None
 
         contact_schemas = []
         for address in addresses:
