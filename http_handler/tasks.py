@@ -21,7 +21,7 @@ def add_periodic_task(interval, imap_account_id, action_id, search_criteria, fol
     """
     logger.info("ADD TASK performed!")
 
-    code = 'a=Action.objects.get(id=%d)\ncode_object=codeobject_loads(a.code)\ng = type(codeobject_loads)(code_object ,locals())\ng()' % actions.id
+    code = 'a=Action.objects.get(id=%d)\ncode_object=codeobject_loads(a.code)\ng = type(codeobject_loads)(code_object ,locals())\ng()' % action_id
     args = ujson.dumps( [imap_account_id, code, search_criteria, folder_name] )
 
     # TODO naming meaningful to distinguish one-off and interval running 
