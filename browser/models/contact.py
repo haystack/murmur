@@ -2,6 +2,7 @@ from __future__ import unicode_literals, print_function, division
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 from schema.youps import ContactSchema  # noqa: F401 ignore unused we use it for typing
+from browser.models.message import Message
 
 class Contact(object):
 
@@ -32,3 +33,13 @@ class Contact(object):
             str: The name associated with this contact
         """
         return self._schema.name
+
+    @property
+    def messages_to(self):
+        # type: () -> t.List[Message]
+        """Get the Messages which are to this contact
+
+        Returns:
+            t.List[Message]: The messages where this contact is listed in the to field
+        """
+        return [Message(message_schema, self._imap_client) for message_schema in self._schema.to_messages.all()]
