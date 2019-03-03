@@ -5,7 +5,7 @@ try:
 except ImportError:
     import io
 import contextlib
-from smtp_handler.utils import send_email, get_body
+from smtp_handler.utils import send_email, get_body, codeobject_dumps, codeobject_loads
 from smtp_handler.Pile import Pile
 from email import message, utils, message_from_string
 from email.utils import parseaddr
@@ -20,8 +20,6 @@ import calendar
 import base64
 import json
 from http_handler.tasks import add_periodic_task
-import new
-import pickle
 import marshal, ujson
 import logging
 
@@ -147,7 +145,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         yield stdout
         sys.stdout = old
 
-    logger = logging.getLogger('youps')
+    logger = logging.getLogger('youps.user')
 
     with stdoutIO() as s:
         def catch_exception(e):
@@ -163,20 +161,6 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             res['imap_log'] = logstr
             res['imap_error'] = True
 
-        def co_dumps(co):
-            """pickles a code object,arg s is the string with code
-            returns the code object pickled as a string"""
-            # co = compile(s,'<string>','exec')
-            co_tup=[co.co_argcount,co.co_nlocals, co.co_stacksize,co.co_flags,
-            co.co_code,co.co_consts,co.co_names,co.co_varnames,co.co_filename,
-            co.co_name,co.co_firstlineno,co.co_lnotab]
-            return pickle.dumps(co_tup)
-
-        def co_loads(s):
-            """loads a code object pickled with co_dumps() return a code object ready for exec()"""
-            r = pickle.loads(s)
-            return new.code(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11])
-
         def on_message_arrival(func=None):
             if not func or type(func).__name__ != "function":
                 raise Exception('on_message_arrival(): requires callback function but it is %s ' % type(func).__name__)
@@ -184,9 +168,11 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if func.func_code.co_argcount != 1:
                 raise Exception('on_message_arrival(): your callback function should have only 1 argument, but there are %d argument(s)' % func.func_code.co_argcount)
 
+            # TODO warn users if it conatins send() and their own email (i.e., it potentially leads to infinite loops) 
+
             # TODO replace with the right folder
             current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
-            action = Action(trigger="arrival", code=co_dumps(func.func_code), folder=current_folder_schema)
+            action = Action(trigger="arrival", code=codeobject_dumps(func.func_code), folder=current_folder_schema)
             action.save()
 
         def set_interval(interval=None, func=None):
@@ -196,8 +182,11 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if interval < 1:
                 raise Exception('set_interval(): requires interval larger than 1 sec')
 
-            if not func:
-                raise Exception('set_interval(): requires code to be executed periodically')
+            if not func or type(func).__name__ != "function":
+                raise Exception('set_interval(): requires callback function but it is %s ' % type(func).__name__)
+                
+            if func.func_code.co_argcount != 0:
+                raise Exception('set_interval(): your callback function should have only 0 argument, but there are %d argument(s)' % func.func_code.co_argcount)
 
             args = ujson.dumps( [imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test, email_content] )
             add_periodic_task.delay( interval, args )

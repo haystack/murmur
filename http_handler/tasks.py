@@ -2,10 +2,9 @@ from celery.decorators import task, periodic_task
 from celery.utils.log import get_task_logger
 
 from schema.youps import ImapAccount, TaskScheduler, PeriodicTask
+from smtp_handler.utils import codeobject_loads
 
 import json, ujson, types, marshal, random
-import new
-import pickle
 
 import logging
 
@@ -66,14 +65,15 @@ def run_interpret(imap_account_id, code, search_criteria, is_test=False, email_c
 
     Args:
         imap_account_id (number): id of associated ImapAccount object
-        code (code object): which code to run
+        code (code object or string): which code to run
         search_creteria (string): IMAP query. To which email to run the code
         is_test (boolean): True- just printing the log. False- executing the code
         email_content (string): for email shortcut --> potential deprecate  
     """
     logger.info("Task run interpret imap_account: %d %s" % (imap_account_id, folder_name))
-    #code = co_loads(code)
-    code = 'code_object=co_loads(code)\ng = type(code_object)(code_object.func_code, globals())\ng(3)'
+    
+    if type(code) !=str:
+        code = codeobject_loads(code)
 
     # code = marshal.loads(code)
     from browser.imap import interpret, authenticate

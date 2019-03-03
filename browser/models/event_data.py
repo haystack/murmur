@@ -38,7 +38,8 @@ class NewMessageData(AbstractEventData):
         if actions.exists():
             # TODO what if there are many arrival functions in one mode?
             actions = actions[0]
-            self.code = actions.code
+            # TODO replace newMessage with the right Message object
+            self.code = 'newMessage="TODO REPLACE THIS"\na=Action.objects.filter(id=%d)[0]\ncode_object=co_loads(a.code)\ng = type(co_loads)(code_object ,locals())\ng(newMessage)' % actions.id
         else: 
             self.code = ""
         self.search_criteria = search_criteria
