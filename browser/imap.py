@@ -147,7 +147,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
         yield stdout
         sys.stdout = old
 
-    logger = logging.getLogger('youps.user')
+    logger = logging.getLogger('youps')
 
     with stdoutIO() as s:
         def catch_exception(e):
@@ -182,7 +182,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
             # TODO replace with the right folder
             current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
-            action = Action(trigger="arrival", code=co_dumps(func.func_code), folder=current_folder_schema)
+            action = Action(trigger="arrival", code=unicode(marshal.dumps(func.func_code)), folder=current_folder_schema)
             action.save()
 
         def set_interval(interval=None, func=None):

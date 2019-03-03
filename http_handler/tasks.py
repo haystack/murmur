@@ -78,7 +78,7 @@ def run_interpret(imap_account_id, code, search_criteria, is_test=False, email_c
     """
     logger.info("Task run interpret")
 
-    code = code(co_loads)
+    code = marshal.loads(code)
     from browser.imap import interpret, authenticate
     imap_account = ImapAccount.objects.get(id=imap_account_id)
     auth_res = authenticate( imap_account )
