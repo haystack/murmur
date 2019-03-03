@@ -176,7 +176,7 @@ class Folder(object):
         """Update the flags on any cached messages.
         """
         logger.debug("%s started updating flags" % self)
-        
+
         # get all the flags for the old messages
         fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), [
                                              'FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]]
@@ -232,24 +232,16 @@ class Folder(object):
                 logger.critical('Message data %s' % message_data)
                 continue
             
-            ms = MessageSchema.objects.filter(uid=uid, folder_schema=self._schema)
-            if ms.exists():
-                ms = ms[0]
-                ms.msn = message_data['SEQ']
-                ms.flags = message_data['FLAGS']
-
-                ms.save()
-            else:
-                message_schema = MessageSchema(imap_account=self._schema.imap_account,
+            message_schema = MessageSchema(imap_account=self._schema.imap_account,
                                             folder_schema=self._schema,
                                             uid=uid,
                                             msn=message_data['SEQ'],
                                             flags=message_data['FLAGS'])
-                message_schema.save()
+            message_schema.save()
             logger.debug("%s saved new message with uid %d" % (self, uid))
 
             if last_seen_uid != 0:
-                event_data_queue.put(NewMessageData(self._schema.imap_account, "UID %d" % last_seen_uid, self._schema))
+                event_data_queue.put(NewMessageData(self._schema.imap_account, "UID %d" % uid, self._schema))
 
         logger.info("finished saving new messages..: %s" % self._schema.imap_account.email)
         

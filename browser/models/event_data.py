@@ -39,6 +39,7 @@ class NewMessageData(AbstractEventData):
             # TODO what if there are many arrival functions in one mode?
             actions = actions[0]
             # TODO replace newMessage with the right Message object
+            # Get a user's code object from DB, and to make it callable cast it using a function. I use codeobject_loads() here to cast, but it could be any function.
             self.code = 'newMessage="TODO REPLACE THIS"\na=Action.objects.get(id=%d)\ncode_object=codeobject_loads(a.code)\ng = type(codeobject_loads)(code_object ,locals())\ng(newMessage)' % actions.id
         else: 
             self.code = ""
