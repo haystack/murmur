@@ -52,7 +52,7 @@ class FolderSchema(models.Model):
     uid_validity = models.IntegerField(default=-1)
     # the name of the folder including it's entire path i.e. "work/project/youps"
     # TODO we need to determine the actual max length CHARFIELD cause mysql indexess`
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=191)
     # the last seen uid which is helpful for reducing bandwith when syncing
     last_seen_uid = models.IntegerField(default=-1)
     # the flags associated with the folder 
@@ -146,7 +146,7 @@ class ContactSchema(models.Model):
     name = models.TextField(null=True, blank=True)
     email = models.EmailField(
         verbose_name='email address',
-        max_length=255
+        max_length=191
     )
     organization = models.TextField(null=True, blank=True)
     geolocation = models.TextField(null=True, blank=True)
