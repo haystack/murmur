@@ -21,9 +21,11 @@ def add_periodic_task(interval, imap_account_id, code, search_criteria, folder_n
     """
     logger.info("ADD TASK performed!")
 
+    args = ujson.dumps( [imap_account_id, code, search_criteria, folder_name] )
+
     # TODO naming meaningful to distinguish one-off and interval running 
     ptask_name = "%d_%d" % (int(imap_account_id), random.randint(1, 10000))
-    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, {"interval": interval, "imap_account_id": imap_account_id, "code": code, "search_criteria": search_criteria, "folder_name": folder_name}, expires=expires)
+    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args, expires=expires)
 
     imap_account = ImapAccount.objects.get(id=imap_account_id)
     if expires: # set_timeout
@@ -59,7 +61,7 @@ def remove_periodic_task(imap_account_id, ptask_name=None):
     imap_account.save()
 
 @task(name="run_interpret")
-def run_interpret(imap_account_id, code, search_criteria, is_test=False, email_content=None, folder_name=None):
+def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_test=False, email_content=None):
     """ execute the given code object.
 
     Args:
