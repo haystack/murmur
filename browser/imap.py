@@ -172,6 +172,10 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             co.co_name,co.co_firstlineno,co.co_lnotab]
             return pickle.dumps(co_tup)
 
+        def co_loads(s):
+            """loads a code object pickled with co_dumps() return a code object ready for exec()"""
+            r = pickle.loads(s)
+            return new.code(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11])
 
         def on_message_arrival(func=None):
             if not func or type(func).__name__ != "function":

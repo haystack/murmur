@@ -60,11 +60,6 @@ def remove_periodic_task(imap_account_id, ptask_name=None):
     imap_account.status_msg = new_msg
     imap_account.save()
 
-def co_loads(s):
-    """loads a code object pickled with co_dumps() return a code object ready for exec()"""
-    r = pickle.loads(s)
-    return new.code(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11])
-
 @task(name="run_interpret")
 def run_interpret(imap_account_id, code, search_criteria, is_test=False, email_content=None, folder_name=None):
     """ execute the given code object.
@@ -76,7 +71,9 @@ def run_interpret(imap_account_id, code, search_criteria, is_test=False, email_c
         is_test (boolean): True- just printing the log. False- executing the code
         email_content (string): for email shortcut --> potential deprecate  
     """
-    logger.info("Task run interpret")
+    logger.info("Task run interpret imap_account: %d %s" % (imap_account_id, folder_name))
+    # code = co_loads(code)
+    code = 'code_object=co_loads(code)\ng = type(code_object)(code_object.func_code, globals())\ng(3)'
 
     code = marshal.loads(code)
     from browser.imap import interpret, authenticate
