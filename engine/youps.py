@@ -4,7 +4,7 @@ import random
 import traceback
 from browser.imap import GoogleOauth2
 from http_handler.settings import IMAP_SECRET
-from schema.youps import ImapAccount, MailbotMode
+from schema.youps import ImapAccount, MailbotMode, Action
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
 from engine.constants import msg_code
@@ -182,7 +182,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         # uid = fetch_latest_email_id(imapAccount, imap)
         # imapAccount.newest_msg_id = uid
 
-        # remove all the periodic tasks of this user to keep tasks up-to-date
+        # remove all user's tasks of this user to keep tasks up-to-date
+        Action.objects.filter(folder__imap_account=imapAccount).delete()
         remove_periodic_task.delay( imapAccount.id )
 
         for key, value in modes.iteritems():
@@ -209,6 +210,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
             # TODO run it several times over for the selected folders
             # TODO change with appropriate search_criteria
             imap.select_folder("INBOX")
+            # TODO replace this with the right search criteria 
             res = interpret(imapAccount, imap, code, "UID %d:*" % 90000, is_test)
 
             # if the code execute well without any bug, then save the code to DB

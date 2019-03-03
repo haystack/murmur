@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 @task(name="add_periodic_task")
-def add_periodic_task(interval, args, expires=None):
+def add_periodic_task(interval, imap_account, code, search_criteria, folder, expires=None):
     """ create a new dynamic periodic task
 
     Args:
@@ -20,13 +20,11 @@ def add_periodic_task(interval, args, expires=None):
         args (json): arguments for interpret() function
     """
     logger.info("ADD TASK performed!")
-    imap_account_id = ujson.loads(args)[0]
 
     # TODO naming meaningful to distinguish one-off and interval running 
-    ptask_name = "%d_%d" % (int(imap_account_id), random.randint(1, 10000))
-    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args, expires=expires)
+    ptask_name = "%d_%d" % (int(imap_account.id), random.randint(1, 10000))
+    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, {"interval": interval, "imap_account_id": imap_account.id, "code": code, "search_criteria": search_criteria, "folder_name": folder.name}, expires=expires)
 
-    imap_account = ImapAccount.objects.get(id=imap_account_id)
     if expires: # set_timeout
         imap_account.status_msg = imap_account.status_msg + "[%s]set_timeout(): will be executed after %d seconds\n" % (ptask_name, interval)
     else:

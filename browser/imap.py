@@ -188,8 +188,9 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if func.func_code.co_argcount != 0:
                 raise Exception('set_interval(): your callback function should have only 0 argument, but there are %d argument(s)' % func.func_code.co_argcount)
 
-            args = ujson.dumps( [imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test, email_content] )
-            add_periodic_task.delay( interval, args )
+            # TODO replace with the right folder
+            current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
+            add_periodic_task.delay( interval=interval, imap_account=imap_account, code=codeobject_dumps(func.func_code), search_criteria=search_creteria, folder=current_folder_schema)
 
         def set_timeout(delay=None, func=None):
             if not delay:
