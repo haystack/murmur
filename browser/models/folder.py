@@ -286,6 +286,10 @@ class Folder(object):
             t.List[ContactSchema]: List of contacts associated with the addresses
         """
 
+        # if there are no addresses return none
+        if addresses is None:
+            return None
+
         contact_schemas = []
         for address in addresses:
             contact_schema = None  # type: ContactSchema
