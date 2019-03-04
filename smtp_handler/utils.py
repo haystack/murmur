@@ -10,8 +10,7 @@ from email import message_from_string
 from hashlib import sha1
 from html2text import html2text
 from markdown2 import markdown
-import new
-import pickle
+import new, pickle, chardet
 
 '''
 Murmur Mail Utils and Constants

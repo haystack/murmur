@@ -335,7 +335,7 @@ except ImportError:
 try:
     import djcelery
     djcelery.setup_loader()
-except Exception as eggs:
+except Exception as e:
     print str(e)
 
 # local Settings - overriden by local_settings.py

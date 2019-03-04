@@ -188,8 +188,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
 
         for key, value in modes.iteritems():
             mode_id = value['id']
-            mode_name = encoded_str_to_utf8_str(value['name'])
-	        code = encoded_str_to_utf8_str(value['code'])
+            mode_name = value['name'].encode('utf8', 'replace')
+            code = value['code'].encode('utf8', 'replace')
             print mode_id
             print mode_name
             print code
