@@ -10,7 +10,7 @@ from imapclient import IMAPClient
 from engine.constants import msg_code
 from browser.imap import authenticate, interpret
 import string
-
+from smtp_handler.utils import logging, encoded_str_to_utf8_str
 from http_handler.tasks import remove_periodic_task
 
 import logging
@@ -188,8 +188,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
 
         for key, value in modes.iteritems():
             mode_id = value['id']
-            mode_name = value['name'].encode('utf-8')
-            code = value['code'].encode('utf-8')
+            mode_name = encoded_str_to_utf8_str(value['name'])
+	        code = encoded_str_to_utf8_str(value['code'])
             print mode_id
             print mode_name
             print code
