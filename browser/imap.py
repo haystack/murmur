@@ -28,8 +28,8 @@ logger = logging.getLogger('youps')
 def authenticate(imap_account):
     res = {'status' : False, 'imap_error': False, 'imap_log': "", 'imap': None}
     email_addr = ""
+    imap = IMAPClient(imap_account.host, use_uid=True)
     try:
-        imap = IMAPClient(imap_account.host, use_uid=True)
         email_addr = imap_account.email
         if imap_account.is_oauth:
             # TODO if access_token is expired, then get a new token

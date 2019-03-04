@@ -277,7 +277,7 @@ class MyUserManager(BaseUserManager):
 class UserProfile(AbstractBaseUser):
 	email = models.EmailField(
         verbose_name='email address',
-        max_length=255,
+        max_length=191,
         unique=True,
     )
 	first_name = models.CharField('first name', max_length=30, blank=True)

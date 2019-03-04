@@ -6,13 +6,13 @@ import logging
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 class ImapAccount(models.Model):
-    
+
     # the primary key
     id = models.AutoField(primary_key=True)
 
     email = models.EmailField(
         verbose_name='email address',
-        max_length=255,
+        max_length=191,  # max 191 characters for utf8mb4 indexes in mysql
         unique=True,
     )
 
@@ -53,7 +53,7 @@ class FolderSchema(models.Model):
     uid_validity = models.IntegerField(default=-1)
     # the name of the folder including it's entire path i.e. "work/project/youps"
     # TODO we need to determine the actual max length CHARFIELD cause mysql indexess`
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=191)
     # the last seen uid which is helpful for reducing bandwith when syncing
     last_seen_uid = models.IntegerField(default=-1)
     # the flags associated with the folder 
@@ -91,6 +91,30 @@ class MessageSchema(models.Model):
     # the flags associated with the message
     _flags = models.TextField(db_column="flags")
 
+
+
+    # the date when the message was sent
+    date = models.DateTimeField()
+    # the subject of the message
+    subject = models.TextField(null=True, blank=True)
+    # the id of the message
+    message_id = models.TextField()
+    # the date when the message was received
+    internal_date = models.DateTimeField()
+    # the contacts the message is from 
+    from_ = models.ManyToManyField('ContactSchema', related_name='from_messages')
+    # the contact the message was sent by, i.e. if a program sends a message for someone else
+    sender = models.ManyToManyField('ContactSchema', related_name='sender_messages')
+    # if a reply is sent it should be sent to these contacts
+    reply_to = models.ManyToManyField('ContactSchema', related_name='reply_to_messages')
+    # the contact the message is to
+    to = models.ManyToManyField('ContactSchema', related_name='to_messages')
+    # the contact the message is cced to
+    cc = models.ManyToManyField('ContactSchema', related_name='cc_messages')
+    # the contact the message is bcced to
+    bcc = models.ManyToManyField('ContactSchema', related_name='bcc_messages')
+
+
     @property
     def flags(self):
         # type: () -> t.List[t.AnyStr]
@@ -113,6 +137,26 @@ class MessageSchema(models.Model):
         db_table = "youps_message"
         # message uid is unique per folder, folder is already unique per account
         unique_together = ("uid", "folder_schema")
+
+
+class ContactSchema(models.Model):
+    # the primary key
+    id = models.AutoField(primary_key=True)
+    # each contact is associated with a single ImapAccount
+    imap_account = models.ForeignKey('ImapAccount')
+    name = models.TextField(null=True, blank=True)
+    email = models.EmailField(
+        verbose_name='email address',
+        max_length=191
+    )
+    organization = models.TextField(null=True, blank=True)
+    geolocation = models.TextField(null=True, blank=True)
+    availability = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = "youps_contact"
+        # each contact is stored once per account
+        unique_together = ("imap_account", "email")
 
 
 class MailbotMode(models.Model):
@@ -152,23 +196,6 @@ class Message_Thread(models.Model):
     class Meta:
         db_table = "youps_threads"
         unique_together = ("id", "imap_account")
-
-
-class Contact(models.Model):
-    name = models.CharField('contact_name', max_length=100)
-    email = models.EmailField(
-        verbose_name='email address',
-        max_length=255,
-        unique=True,
-    )
-    organization = models.TextField(null=True, blank=True)
-    geolocation = models.TextField(null=True, blank=True)
-    availability = models.TextField(null=True, blank=True)
-
-    imap_account = models.ForeignKey('ImapAccount')  # it belongs to this imap_account
-
-    class Meta:
-        unique_together = ("email", "imap_account")
 
 from djcelery.models import PeriodicTask, IntervalSchedule
 from datetime import datetime

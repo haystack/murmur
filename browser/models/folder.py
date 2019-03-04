@@ -3,10 +3,13 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 import typing as t  # noqa: F401 ignore unused we use it for typing
 import logging
 from message import Message
-from schema.youps import MessageSchema, FolderSchema  # noqa: F401 ignore unused we use it for typing
+from schema.youps import MessageSchema, FolderSchema, ContactSchema, ImapAccount  # noqa: F401 ignore unused we use it for typing
 from django.db.models import Max
+from imapclient.response_types import Address  # noqa: F401 ignore unused we use it for typing
+from email.header import decode_header
 from Queue import Queue
 from browser.models.event_data import NewMessageData
+
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -90,6 +93,11 @@ class Folder(object):
         # type: (bool) -> None
         self._schema.is_selectable = value
         self._schema.save()
+
+    @property
+    def _imap_account(self):
+        # type: () -> ImapAccount
+        return self._schema.imap_account
 
     def _completely_refresh_cache(self):
         # type: () -> None
@@ -223,6 +231,7 @@ class Folder(object):
         logger.info("start saving new messages..: %s" % self._schema.imap_account.email)
         for uid in fetch_data:
             message_data = fetch_data[uid]
+            logger.debug("Message %d data: %s" % (uid, message_data))
             if 'SEQ' not in message_data:
                 logger.critical('Missing SEQ in message data')
                 logger.critical('Message data %s' % message_data)
@@ -231,17 +240,114 @@ class Folder(object):
                 logger.critical('Missing FLAGS in message data')
                 logger.critical('Message data %s' % message_data)
                 continue
-            
-            message_schema = MessageSchema(imap_account=self._schema.imap_account,
-                                            folder_schema=self._schema,
-                                            uid=uid,
-                                            msn=message_data['SEQ'],
-                                            flags=message_data['FLAGS'])
-            message_schema.save()
-            logger.debug("%s saved new message with uid %d" % (self, uid))
+            if 'INTERNALDATE' not in message_data:
+                logger.critical('Missing INTERNALDATE in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
+            if 'RFC822.SIZE' not in message_data:
+                logger.critical('Missing RFC822.SIZE in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
+            if 'ENVELOPE' not in message_data:
+                logger.critical('Missing ENVELOPE in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
+                
+            # this is the date the message was received by the server
+            internal_date = message_data['INTERNALDATE']  # type: datetime
+            envelope = message_data['ENVELOPE']
+            msn = message_data['SEQ']
+            flags = message_data['FLAGS']
 
+            logger.debug("message %d envelope %s" % (uid, envelope))
+
+            # create and save the message schema
+            message_schema = MessageSchema(imap_account=self._schema.imap_account,
+                                           folder_schema=self._schema,
+                                           uid=uid,
+                                           msn=msn,
+                                           flags=flags,
+                                           date=envelope.date,
+                                           subject=self._parse_email_subject(envelope.subject),
+                                           message_id=envelope.message_id,
+                                           internal_date=internal_date,
+                                           )
+            message_schema.save()
             if last_seen_uid != 0:
                 event_data_queue.put(NewMessageData(self._schema.imap_account, "UID %d" % uid, self._schema))
 
-        logger.info("finished saving new messages..: %s" % self._schema.imap_account.email)
-        
+            logger.info("finished saving new messages..: %s" % self._schema.imap_account.email)
+
+            # create and save the message contacts
+            if envelope.from_ is not None:
+                message_schema.from_.add(*self._find_or_create_contacts(envelope.from_))
+            if envelope.sender is not None:
+                message_schema.sender.add(*self._find_or_create_contacts(envelope.sender))
+            if envelope.reply_to is not None:
+                message_schema.reply_to.add(*self._find_or_create_contacts(envelope.reply_to))
+            if envelope.to is not None:
+                message_schema.to.add(*self._find_or_create_contacts(envelope.to))
+            if envelope.cc is not None:
+                message_schema.cc.add(*self._find_or_create_contacts(envelope.cc))
+            if envelope.bcc is not None:
+                message_schema.bcc.add(*self._find_or_create_contacts(envelope.bcc))
+
+            logger.debug("%s saved new message with uid %d" % (self, uid))
+
+    def _parse_email_subject(self, subject):
+        # type: (t.AnyStr) -> t.AnyStr
+        """This method parses a subject header which can contain unicode
+
+        Args:
+            subject (str): email subject header
+
+        Returns:
+            t.AnyStr: unicode string or a 8 bit string
+        """
+
+        if subject is None:
+            return None
+        text, encoding = decode_header(subject)[0]
+        if encoding:
+            if encoding != 'utf-8' and encoding != 'utf8':
+                logger.critical('parse_subject non utf8 encoding: %s' % encoding)
+            text = text.decode(encoding)
+        return text
+
+    def _find_or_create_contacts(self, addresses):
+        # type: (t.List[Address]) -> t.List[ContactSchema]
+        """Convert a list of addresses into a list of contact schemas.
+
+        Returns:
+            t.List[ContactSchema]: List of contacts associated with the addresses
+        """
+        assert addresses is not None
+
+        contact_schemas = []
+        for address in addresses:
+            contact_schema = None  # type: ContactSchema
+            email = "%s@%s" % (address.mailbox, address.host)
+            name = address.name
+            try:
+                contact_schema = ContactSchema.objects.get(
+                    imap_account=self._imap_account, email=email)
+            except ContactSchema.DoesNotExist:
+                contact_schema = ContactSchema(
+                    imap_account=self._imap_account, email=email, name=name)
+                contact_schema.save()
+                logger.debug("created contact %s in database" % name)
+            contact_schemas.append(contact_schema)
+        return contact_schemas
+
+
+    # def parse_envelope(envelope):
+    #     date = envelope.date # type: datetime
+    #     subject = envelope.subject # type: t.AnyStr
+    #     from_ = envelope.from_ # type: t.List[Address]
+    #     sender = envelope.sender  # type: t.List[Address]
+    #     reply_to = envelope.reply_to  # type: t.List[Address]
+    #     to = envelope.to  # type: t.List[Address]
+    #     cc = envelope.cc  # type: t.List[Address]
+    #     bcc = envelope.bcc  # type: t.List[Address]
+    #     in_reply_to = envelope.in_reply_to  # type: t.List[t.AnyStr] # TODO not sure what this is
+    #     message_id = envelope.message_id  # type: t.AnyStr
