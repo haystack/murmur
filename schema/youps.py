@@ -94,7 +94,7 @@ class MessageSchema(models.Model):
 
 
     # the date when the message was sent
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now=True)
     # the subject of the message
     subject = models.TextField(null=True, blank=True)
     # the id of the message
