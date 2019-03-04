@@ -1,5 +1,6 @@
 {% extends website|add:"/base.html" %}
 {% block customcss %}
+
 <link rel="stylesheet" href="/static/css/youps/libs/codemirror.css">
 <!-- <link rel="stylesheet" href="/static/css/youps/libs/fontawesome-all.min.css"> -->
 <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
@@ -7,16 +8,71 @@
 <!-- <link rel="stylesheet" href="/static/css/youps/libs/sandbox.css" /> -->
 
 <link rel="stylesheet" href="/static/css/youps/libs/jquery.switchButton.css" />
-<link rel="stylesheet" href="https://get.mavo.io/mavo.css"/>
+<link rel="stylesheet" href="https://get.mavo.io/mavo.css" />
 <link rel="stylesheet" href="/static/css/youps/libs/prism.css">
 <link rel="stylesheet" href="/static/css/youps/style.css">
 
 {% endblock %}
 
 {% block content %}
-	<div class="container">
-		<div class="group-container">
-			<p hidden id="website-name">{{website}}</p>
+
+
+    <div class="container" style="width:280px;  position:fixed; top: 50px;">
+        <div class="group-container">
+            <ul class="sidebar-list" style="list-style-type: none; padding-inline-start: 0px;">
+                <li>
+                  <a href="#getter-header"> Retreive metadata of an email </a>
+		  
+                    <ul class="sidebar-list" style="list-style-type: none;">
+                        <li><a href="#get_content"> get_content </a> </li>
+                        <li><a href="#get_date"> get_date </a> </li>
+                        <li><a href="#get_gmail_labels"> get_gmail_labels </a> </li>
+                        <li><a href="#get_labels"> get_labels </a> </li>
+                        <li><a href="#get_sender"> get_sender </a> </li>
+                        <li><a href="#get_subject"> get_subject </a> </li>
+                        <li><a href="#get_recipients"> get_recipients </a> </li>
+                    </ul>
+                </li>
+
+                <li>
+                  <a href="#method-header"> Action on an email </a>
+                    <ul class="sidebar-list" style="list-style-type: none;">
+                        <li><a href="#add_gmail_labels"> add_gmail_labels </a> </li>
+                        <li><a href="#add_labels"> add_labels </a> </li>
+                        <li><a href="#copy"> copy </a> </li>
+                        <li><a href="#delete"> delete </a> </li>
+                        <li><a href="#mark_read"> mark_read </a> </li>
+                        <li><a href="#move"> move </a> </li>
+                        <li><a href="#remove_gmail_labels"> remove_gmail_labels </a> </li>
+                        <li><a href="#remove_labels"> remove_labels </a> </li>
+                        <li><a href="#send"> send </a> </li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="#folder-header"> Action on a folder </a>
+                    <ul class="sidebar-list" style="list-style-type: none;">
+                        <li><a href="#create_folder"> create_folder </a> </li>
+                        <li><a href="#delete_folder"> delete_folder </a> </li>
+                        <li><a href="#list_folders"> list_folders </a> </li>
+                        <li><a href="#rename_folder"> rename_folder </a> </li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="#mode-header"> Manage your email mode </a>
+                    <ul class="sidebar-list" style="list-style-type: none;">
+                        <li><a href="#get_history"> get_history </a> </li>
+                        <li><a href="#get_mode"> get_mode </a> </li>
+                        <li><a href="#set_mode"> set_mode </a> </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="container" style="margin-top:0; margin-left:280px;">
+        <div class="group-container" style="overflow-y: scroll;">
+            <p hidden id="website-name">{{website}}</p>
 
             <h3>API docs</h3>
             <a href="/editor">Back to editor</a>
@@ -27,9 +83,9 @@
             mv-unauthenticated-permissions="read"
             mv-autosave="0"
             mv-server-push="true">
-                <h3>Retreive metadata of an email</h3>
-                <div property="getter" mv-multiple>
-                    <h4>[name] ([params]) </h4>
+                <div id="getter-header" style="padding-top: 50px; margin-top: -50px; margin-bottom: 50px"> <a href="#getter-header"> <h3> Retreive metadata of an email</h3> </a> </div>
+                <div id="[name]" property="getter" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                  <a href="#[name]"> <h4>[name] ([params]) </h4> </a>
                     <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
                     <p style="margin:0;">[description]</p>
                     <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
@@ -39,9 +95,9 @@
                     </pre>
                 </div>
                 <br>
-                <h3>Action on an email</h3>
-                <div property="methods"  mv-multiple>
-                    <h4>[name] ([params]) </h4>
+                <div id="method-header" style="padding-top: 50px; margin-top: -50px; margin-bottom: 50px"> <a href="#method-header"> <h3> Action on an email</h3> </a> </div>
+                <div id="[name]" property="methods" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                   <a href="#[name]"> <h4>[name] ([params]) </h4> </a>
                     <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
                     <p style="margin:0;">[description]</p>
                     <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
@@ -49,33 +105,32 @@
                             <!-- <h6 property="line"></g6> -->
                           </code>
                     </pre>
-                  </div>
-                  <br>
-                <h3>Action on a folder</h3>
-                <div property="folder"  mv-multiple>
-                        <h4>[name] ([params])</h4>
-                        <p style="margin:0;">[description]</p>
-                        <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
+                </div>
+                <br>
+                <div id="folder-header" style="padding-top: 50px; margin-top: -50px; margin-bottom: 50px"> <a href="folder-header"> <h3> Action on a folder</h3> </a> </div>
+                <div id="[name]" property="folder" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                    <a href="#[name]"> <h4>[name] ([params]) </h4> </a>
+                    <p style="margin:0;">[description]</p>
+                    <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
                             <code class="language-python" property="example" mv-multiple>
                                 <!-- <h6 property="line"></g6> -->
                               </code>
                         </pre>
                 </div>
-                <h3>Manage your email mode</h3>
-                <div property="mode"  mv-multiple>
-                        <h4>[name] ([params])</h4>
-                        <p style="margin:0;">[description]</p>
-                        <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
+                <div id="mode-header" style="padding-top: 50px; margin-top: -50px; margin-bottom: 50px"> <a href="#mode-header"> <h3> Manage your email mode</h3> </a> </div>
+                <div id="[name]" property="mode" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                    <a href="#[name]"> <h4>[name] ([params]) </h4> </a>
+                    <p style="margin:0;">[description]</p>
+                    <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
                             <code class="language-python" property="example" mv-multiple>
                                 <!-- <h6 property="line"></g6> -->
                               </code>
                         </pre>
                 </div>
             </main>
-		</div>
+        </div>
     </div>
-	  
-	<!-- <a href="/groups/{{group_info.name}}">Back to group info page</a> -->
+
 {% endblock %}
 
 {% block customjs %}
