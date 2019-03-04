@@ -32,6 +32,7 @@ class ImapAccount(models.Model):
     execution_log = models.TextField(default="")
     is_test = models.BooleanField(default=True)
     is_running = models.BooleanField(default=False)
+    status_msg = models.TextField(default="")
 
     arrive_action = models.CharField('access_token', max_length=1000, blank=True)
     custom_action = models.CharField('custom_action', max_length=1000, blank=True)
@@ -195,3 +196,63 @@ class Message_Thread(models.Model):
     class Meta:
         db_table = "youps_threads"
         unique_together = ("id", "imap_account")
+
+from djcelery.models import PeriodicTask, IntervalSchedule
+from datetime import datetime
+
+# This model is to store callback functions for set_interval() and on_message_arrival() etc
+class Action(models.Model):
+    id = models.AutoField(primary_key=True)
+    
+    trigger = models.CharField('trigger', max_length=100, blank=True) # e.g., arrival, interval, flag_changed 
+    code = models.TextField(null=True, blank=True) # stringified code object
+    folder = models.ForeignKey('FolderSchema')
+
+# We use this model to interact with Celery to handle dynamic periodic tasks
+class TaskScheduler(models.Model):
+    periodic_task = models.ForeignKey(PeriodicTask)
+
+    @staticmethod
+    def schedule_every(task_name, period, every, ptask_name=None, args=None, kwargs=None, expires=None):
+        """ schedules a task by name every "every" "period". So an example call would be:
+        TaskScheduler('mycustomtask', 'seconds', 30, [1,2,3]) 
+        that would schedule your custom task to run every 30 seconds with the arguments 1,2 and 3 passed to the actual task. """
+        permissible_periods = ['days', 'hours', 'minutes', 'seconds']
+        if period not in permissible_periods:
+            raise Exception('Invalid period specified')
+        # create the periodic task and the interval
+        if ptask_name is None:
+            ptask_name = "%s_%s" % (task_name, datetime.now()) # create some name for the period task
+        interval_schedules = IntervalSchedule.objects.filter(period=period, every=every)
+        if interval_schedules: # just check if interval schedules exist like that already and reuse em
+            interval_schedule = interval_schedules[0]
+        else: # create a brand new interval schedule
+            interval_schedule = IntervalSchedule()
+            interval_schedule.every = every # should check to make sure this is a positive int
+            interval_schedule.period = period
+            interval_schedule.save()
+        ptask = PeriodicTask(name=ptask_name, task=task_name, interval=interval_schedule, expires=expires)
+        if args:
+            ptask.args = args
+        if kwargs:
+            ptask.kwargs = kwargs
+        ptask.save()
+        return TaskScheduler.objects.create(periodic_task=ptask)
+
+    def stop(self):
+        """pauses the task"""
+        ptask = self.periodic_task
+        ptask.enabled = False
+        ptask.save()
+
+    def start(self):
+        """starts the task"""
+        ptask = self.periodic_task
+        ptask.enabled = True
+        ptask.save()
+
+    def terminate(self):
+        self.stop()
+        ptask = self.periodic_task
+        self.delete()
+        ptask.delete()

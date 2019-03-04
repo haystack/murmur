@@ -5,7 +5,7 @@ try:
 except ImportError:
     import io
 import contextlib
-from smtp_handler.utils import send_email, get_body
+from smtp_handler.utils import send_email, get_body, codeobject_dumps, codeobject_loads
 from smtp_handler.Pile import Pile
 from email import message, utils, message_from_string
 from email.utils import parseaddr
@@ -15,9 +15,12 @@ from engine.google_auth import GoogleOauth2
 from Crypto.Cipher import AES
 from engine.constants import msg_code
 from datetime import datetime, timedelta
-from schema.youps import MailbotMode
+from schema.youps import MailbotMode, Action, FolderSchema
 import calendar
 import base64
+import json
+from http_handler.tasks import add_periodic_task
+import marshal, ujson
 import logging
 
 logger = logging.getLogger('youps')
@@ -157,6 +160,52 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             # Send this error msg to the user
             res['imap_log'] = logstr
             res['imap_error'] = True
+
+        def on_message_arrival(func=None):
+            if not func or type(func).__name__ != "function":
+                raise Exception('on_message_arrival(): requires callback function but it is %s ' % type(func).__name__)
+                
+            if func.func_code.co_argcount != 1:
+                raise Exception('on_message_arrival(): your callback function should have only 1 argument, but there are %d argument(s)' % func.func_code.co_argcount)
+
+            # TODO warn users if it conatins send() and their own email (i.e., it potentially leads to infinite loops) 
+
+            # TODO replace with the right folder
+            current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
+            action = Action(trigger="arrival", code=codeobject_dumps(func.func_code), folder=current_folder_schema)
+            action.save()
+
+        def set_interval(interval=None, func=None):
+            if not interval:
+                raise Exception('set_interval(): requires interval (in second)')
+
+            if interval < 1:
+                raise Exception('set_interval(): requires interval larger than 1 sec')
+
+            if not func or type(func).__name__ != "function":
+                raise Exception('set_interval(): requires callback function but it is %s ' % type(func).__name__)
+                
+            if func.func_code.co_argcount != 0:
+                raise Exception('set_interval(): your callback function should have only 0 argument, but there are %d argument(s)' % func.func_code.co_argcount)
+
+            # TODO replace with the right folder
+            current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
+            action = Action(trigger="interval", code=codeobject_dumps(func.func_code), folder=current_folder_schema)
+            action.save()
+            add_periodic_task.delay( interval=interval, imap_account_id=imap_account.id, action_id=action.id, search_criteria=search_creteria, folder_name=current_folder_schema.name)
+
+        def set_timeout(delay=None, func=None):
+            if not delay:
+                raise Exception('set_timeout(): requires delay (in second)')
+
+            if delay < 1:
+                raise Exception('set_timeout(): requires delay larger than 1 sec')
+
+            if not func:
+                raise Exception('set_timeout(): requires code to be executed periodically')
+
+            args = ujson.dumps( [imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test, email_content] )
+            add_periodic_task.delay( delay, args, delay * 2 - 0.5 ) # make it expire right before 2nd execution happens 
 
         def send(subject="", to_addr="", body=""):
             if len(to_addr) == 0:
@@ -414,6 +463,9 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             if is_valid:
                 exec code in globals(), locals()
                 pile.add_flags(['YouPS'])
+                res['status'] = True
+        except Action.DoesNotExist:
+            logger.debug("An action is not existed right now. Maybe you change your script after this action was added to the queue.")
         except Exception as e:
             catch_exception(e)
 

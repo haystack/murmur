@@ -7,6 +7,9 @@ from schema.youps import MessageSchema, FolderSchema, ContactSchema, ImapAccount
 from django.db.models import Max
 from imapclient.response_types import Address  # noqa: F401 ignore unused we use it for typing
 from email.header import decode_header
+from Queue import Queue
+from browser.models.event_data import NewMessageData
+
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -131,8 +134,8 @@ class Folder(object):
             self._last_seen_uid = max_uid
             logger.debug('%s updated max_uid %d' % (self, max_uid))
 
-    def _refresh_cache(self, uid_next):
-        # type: (int) -> None
+    def _refresh_cache(self, uid_next, event_data_queue):
+        # type: (int, Queue) -> None
         """Called during normal synchronization to refresh the cache.
 
         Should get new messages and build message number to UID map for the
@@ -147,7 +150,7 @@ class Folder(object):
         # if the uid has not changed then we don't need to get new messages
         if uid_next != self._uid_next:
             # get all the descriptors for the new messages
-            self._save_new_messages(self._last_seen_uid)
+            self._save_new_messages(self._last_seen_uid, event_data_queue)
             # TODO maybe trigger the user
 
         # if the last seen uid is zero we haven't seen any messages
@@ -180,6 +183,8 @@ class Folder(object):
         # type: () -> None
         """Update the flags on any cached messages.
         """
+        logger.debug("%s started updating flags" % self)
+
         # get all the flags for the old messages
         fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), [
                                              'FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]]
@@ -212,8 +217,8 @@ class Folder(object):
 
         logger.debug("%s updated flags" % self)
 
-    def _save_new_messages(self, last_seen_uid):
-        # type: (int) -> None
+    def _save_new_messages(self, last_seen_uid, event_data_queue = None):
+        # type: (int, Queue) -> None
         """Save any messages we haven't seen before
 
         Args:
@@ -223,6 +228,7 @@ class Folder(object):
         fetch_data = self._imap_client.fetch(
             '%d:*' % (last_seen_uid + 1), Message._descriptors)
 
+        logger.info("start saving new messages..: %s" % self._schema.imap_account.email)
         for uid in fetch_data:
             message_data = fetch_data[uid]
             logger.debug("Message %d data: %s" % (uid, message_data))
@@ -267,6 +273,10 @@ class Folder(object):
                                            internal_date=internal_date,
                                            )
             message_schema.save()
+            if last_seen_uid != 0:
+                event_data_queue.put(NewMessageData(self._schema.imap_account, "UID %d" % uid, self._schema))
+
+            logger.info("finished saving new messages..: %s" % self._schema.imap_account.email)
 
             # create and save the message contacts
             if envelope.from_ is not None:
@@ -283,7 +293,6 @@ class Folder(object):
                 message_schema.bcc.add(*self._find_or_create_contacts(envelope.bcc))
 
             logger.debug("%s saved new message with uid %d" % (self, uid))
-
 
     def _parse_email_subject(self, subject):
         # type: (t.AnyStr) -> t.AnyStr
@@ -342,4 +351,3 @@ class Folder(object):
     #     bcc = envelope.bcc  # type: t.List[Address]
     #     in_reply_to = envelope.in_reply_to  # type: t.List[t.AnyStr] # TODO not sure what this is
     #     message_id = envelope.message_id  # type: t.AnyStr
-
