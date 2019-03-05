@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils.timezone import now
 from celery.decorators import task, periodic_task
 from celery.utils.log import get_task_logger
 from http_handler.settings import BASE_URL, WEBSITE, IMAP_SECRET
@@ -149,6 +151,7 @@ def loop_sync_user_inbox(imapAccount_email):
             send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
 
         # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
-        loop_sync_user_inbox.delay(imapAccount_email, countdown=3)
+        # using eta instead of countdown to prevent timezone issue
+        loop_sync_user_inbox.delay([imapAccount_email], eta=now() + timedelta(seconds=20))
     except Exception as e:
         logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e))
