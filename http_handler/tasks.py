@@ -141,5 +141,10 @@ def loop_sync_user_inbox(imapAccount):
     # after sync, logout to prevent multi-connection issue
     imap.logout()
 
+    if imapAccount.is_initialized is False:
+        #TODO send email to the user that youps is initialized 
+        imapAccount.is_initialized = True
+        imapAccount.save()
+
     # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
     loop_sync_user_inbox.delay(imapAccount, countdown=3)
