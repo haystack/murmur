@@ -121,31 +121,34 @@ def loop_sync_user_inbox(imapAccount_email):
         email_content (string): for email shortcut --> potential deprecate  
     """
     logger.info("Start syncing user's inbox: %s" % (imapAccount_email))
-    imapAccount = ImapAccount.objects.get(email=imapAccount_email)
+    try: 
+        imapAccount = ImapAccount.objects.get(email=imapAccount_email)
 
-    # authenticate with the user's imap server
-    auth_res = authenticate(imapAccount)
-    # if authentication failed we can't run anything
-    if not auth_res['status']:
-        # Stop doing loop
-        return
+        # authenticate with the user's imap server
+        auth_res = authenticate(imapAccount)
+        # if authentication failed we can't run anything
+        if not auth_res['status']:
+            # Stop doing loop
+            return
 
-    # get an imapclient which is authenticated
-    imap = auth_res['imap']
+        # get an imapclient which is authenticated
+        imap = auth_res['imap']
 
-    # create the mailbox
-    mailbox = MailBox(imapAccount, imap)
-    # sync the mailbox with imap
-    mailbox._sync()
-    logger.info("Mailbox sync done")
-    # after sync, logout to prevent multi-connection issue
-    imap.logout()
+        # create the mailbox
+        mailbox = MailBox(imapAccount, imap)
+        # sync the mailbox with imap
+        mailbox._sync()
+        logger.info("Mailbox sync done")
+        # after sync, logout to prevent multi-connection issue
+        imap.logout()
 
-    if imapAccount.is_initialized is False:
-        imapAccount.is_initialized = True
-        imapAccount.save()
+        if imapAccount.is_initialized is False:
+            imapAccount.is_initialized = True
+            imapAccount.save()
 
-        send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
+            send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
 
-    # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
-    loop_sync_user_inbox.delay(imapAccount, countdown=3)
+        # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
+        loop_sync_user_inbox.delay(imapAccount, countdown=3)
+    except Exception as e:
+        logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e))

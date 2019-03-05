@@ -106,7 +106,10 @@ class MailBox(object):
         # https://www.imapwiki.org/ClientImplementation/MailboxList
         # we basically only want to list folders when we have to
         for (flags, delimiter, name) in self._imap_client.list_folders('', root + '%'):
-
+            # TODO check if the user is using the gmail. 
+            # If it is gmail, then skip All Mail folder
+            if root == '[Gmail]' and name == "All Mail":
+                continue
             folder = self._find_or_create_folder(name)  # type: Folder
 
             # TODO maybe fire if the flags have changed
