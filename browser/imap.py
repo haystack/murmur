@@ -101,3 +101,4 @@ def append(imap, subject, content):
     new_message.set_payload(content)
 
     imap.append('INBOX', str(new_message), ('murmur-log'))
+

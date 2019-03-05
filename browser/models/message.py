@@ -162,3 +162,26 @@ class Message(object):
             t.List[Contact]: The contacts in the bcc field of the message
         """
         return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.bcc.all()]
+    
+        def get_date():
+        pass
+
+    def add_labels(flags):
+        # TODO if the user is using gmail then imap.add_gmail_labels() otherwise, imap.add_labels()
+        pass
+    
+    def remove_labels(flags):
+        # TODO if the user is using gmail then imap.remove_gmail_labels() otherwise, imap.remove_labels()
+        pass
+
+    def copy(dst_folder):
+        pass
+
+    def delete():
+        pass
+
+    def mark_read(is_seen=True):
+        pass
+
+    def move(dst_folder):
+        pass
