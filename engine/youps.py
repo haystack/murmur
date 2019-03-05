@@ -8,7 +8,8 @@ from schema.youps import ImapAccount, MailbotMode, Action
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
 from engine.constants import msg_code
-from browser.imap import authenticate, interpret
+from browser.imap import authenticate
+from browser.sandbox import interpret
 import string
 from browser.models.mailbox import MailBox
 

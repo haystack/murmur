@@ -64,7 +64,7 @@ if ENV == 'prod':
         BASE_URL = 'squadbox.csail.mit.edu'
     MYSQL = MYSQL_PROD
 elif ENV == 'staging':
-    BASE_URL = 'murmur-dev.csail.mit.edu'
+    BASE_URL = 'youps.csail.mit.edu'
     MYSQL = MYSQL_DEV
 else:
     BASE_URL = 'localhost:8000'

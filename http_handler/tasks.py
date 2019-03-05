@@ -6,7 +6,8 @@ from smtp_handler.utils import send_email, codeobject_loads
 
 import json, ujson, types, marshal, random
 from browser.models.mailbox import MailBox
-
+from browser.imap import authenticate
+from browser.sandbox import interpret
 
 import logging
 
@@ -108,8 +109,6 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 #     logger.info("Saved image from Flickr")
 #     print ("perioid task")
 
-# from browser.imap import authenticate
-
 @task(name="loop_sync_user_inbox")
 def loop_sync_user_inbox(imapAccount_email):
     """ execute the given code object.
@@ -143,9 +142,10 @@ def loop_sync_user_inbox(imapAccount_email):
     imap.logout()
 
     if imapAccount.is_initialized is False:
-        #TODO send email to the user that youps is initialized 
         imapAccount.is_initialized = True
         imapAccount.save()
+
+        send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
 
     # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
     loop_sync_user_inbox.delay(imapAccount, countdown=3)
