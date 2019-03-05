@@ -144,14 +144,15 @@ def loop_sync_user_inbox(imapAccount_email):
         # after sync, logout to prevent multi-connection issue
         imap.logout()
 
+        # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
+        # Use eta instead of countdown if you have timezone issue
+        loop_sync_user_inbox.apply_async([imapAccount_email], countdown=3)
+
         if imapAccount.is_initialized is False:
             imapAccount.is_initialized = True
             imapAccount.save()
 
             send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
 
-        # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
-        # using eta instead of countdown to prevent timezone issue
-        loop_sync_user_inbox.delay([imapAccount_email], eta=now() + timedelta(seconds=20))
     except Exception as e:
         logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e))
