@@ -9,7 +9,7 @@ from smtp_handler.Pile import Pile
 import contextlib
 from schema.youps import MailbotMode, Action, FolderSchema
 from smtp_handler.utils import send_email, get_body, codeobject_dumps, codeobject_loads
-from http_handler.tasks import add_periodic_task
+
 from datetime import datetime, timedelta
 from email.utils import parseaddr
 from email import message, utils
@@ -67,6 +67,8 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
             action = Action(trigger="arrival", code=codeobject_dumps(func.func_code), folder=current_folder_schema)
             action.save()
+
+        from http_handler.tasks import add_periodic_task
 
         def set_interval(interval=None, func=None):
             if not interval:
@@ -290,7 +292,7 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
 
             select_folder('INBOX')
             return imap.search(criteria, charset)
-            
+
         def create_folder(folder):
             pile.create_folder(folder, is_test)
 
