@@ -149,6 +149,6 @@ def loop_sync_user_inbox(imapAccount_email):
             send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
 
         # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
-        loop_sync_user_inbox.delay(imapAccount, countdown=3)
+        loop_sync_user_inbox.delay(imapAccount_email, countdown=3)
     except Exception as e:
         logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e))
