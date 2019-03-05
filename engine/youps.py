@@ -10,8 +10,9 @@ from imapclient import IMAPClient
 from engine.constants import msg_code
 from browser.imap import authenticate, interpret
 import string
+from browser.models.mailbox import MailBox
 
-from http_handler.tasks import remove_periodic_task
+from http_handler.tasks import remove_periodic_task, loop_sync_user_inbox
 
 import logging
 
@@ -80,19 +81,25 @@ def login_imap(email, password, host, is_oauth):
 
         imapAccount.save()
 
-        # TODO maybe not logout, cuz we might want to keep use the same instance for Luke's folder scraping
-        # Log out after auth verification
-        imap.logout()
-
-        # TODO call Luke's folder scraping folder from here
         """this procedure is required when a new user first register to YoUPS
         1) Scrape folder using IMAP list_folders() to register Folder instances belong to the user
         2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
         """
+        # create the mailbox
+        mailbox = MailBox(imapAccount, imap)
+        # sync the mailbox with imap
+        mailbox._sync()
+        logger.info("Mailbox sync done")
+        # after sync, logout to prevent multi-connection issue
+        imap.logout()
 
         # now user can use youps
         imapAccount.is_initialized = True
         imapAccount.save()
+
+        # start keeping eye on users' inbox
+        loop_sync_user_inbox.delay(imapAccount)
+
         # TODO notify the user that their account is ready to be used
 
         res['status'] = True
