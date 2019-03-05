@@ -98,7 +98,7 @@ def login_imap(email, password, host, is_oauth):
         # imapAccount.save()
 
         # start keeping eye on users' inbox
-        loop_sync_user_inbox.delay(imapAccount)
+        loop_sync_user_inbox.delay(imapAccount.email)
 
         # TODO notify the user that their account is ready to be used
 

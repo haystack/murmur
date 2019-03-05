@@ -108,10 +108,10 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 #     logger.info("Saved image from Flickr")
 #     print ("perioid task")
 
-from browser.imap import authenticate
+# from browser.imap import authenticate
 
 @task(name="loop_sync_user_inbox")
-def loop_sync_user_inbox(imapAccount):
+def loop_sync_user_inbox(imapAccount_email):
     """ execute the given code object.
 
     Args:
@@ -121,7 +121,8 @@ def loop_sync_user_inbox(imapAccount):
         is_test (boolean): True- just printing the log. False- executing the code
         email_content (string): for email shortcut --> potential deprecate  
     """
-    logger.info("Start syncing user's inbox: %s" % (imapAccount.email))
+    logger.info("Start syncing user's inbox: %s" % (imapAccount_email))
+    imapAccount = ImapAccount.objects.get(email=imapAccount_email)
 
     # authenticate with the user's imap server
     auth_res = authenticate(imapAccount)
