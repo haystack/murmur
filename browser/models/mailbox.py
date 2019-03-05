@@ -6,7 +6,6 @@ import typing as t  # noqa: F401 ignore unused we use it for typing
 from schema.youps import ImapAccount, FolderSchema  # noqa: F401 ignore unused we use it for typing
 from folder import Folder
 from Queue import Queue
-from http_handler.tasks import run_interpret
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -107,7 +106,10 @@ class MailBox(object):
         # https://www.imapwiki.org/ClientImplementation/MailboxList
         # we basically only want to list folders when we have to
         for (flags, delimiter, name) in self._imap_client.list_folders('', root + '%'):
-
+            # TODO check if the user is using the gmail. 
+            # If it is gmail, then skip All Mail folder
+            if name == "[Gmail]/All Mail":
+                continue
             folder = self._find_or_create_folder(name)  # type: Folder
 
             # TODO maybe fire if the flags have changed

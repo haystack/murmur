@@ -64,7 +64,7 @@ if ENV == 'prod':
         BASE_URL = 'squadbox.csail.mit.edu'
     MYSQL = MYSQL_PROD
 elif ENV == 'staging':
-    BASE_URL = 'murmur-dev.csail.mit.edu'
+    BASE_URL = 'youps.csail.mit.edu'
     MYSQL = MYSQL_DEV
 else:
     BASE_URL = 'localhost:8000'
@@ -126,7 +126,7 @@ USE_I18N = True
 USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = True
+USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -302,7 +302,7 @@ LOGGING = {
     'loggers': {
         'youps': {
             'handlers': ['custom.file', 'custom.console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True
         },
         'youps.user': {

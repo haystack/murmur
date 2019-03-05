@@ -1,5 +1,4 @@
 # Baed on https://stackoverflow.com/questions/1092531/event-system-in-python/1096614#1096614
-from http_handler.tasks import run_interpret
 
 class Event:
     """Simple wrapper for a events
