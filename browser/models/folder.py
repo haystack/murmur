@@ -276,7 +276,7 @@ class Folder(object):
             if last_seen_uid != 0:
                 event_data_queue.put(NewMessageData(self._schema.imap_account, "UID %d" % uid, self._schema))
 
-            logger.info("finished saving new messages..: %s" % self._schema.imap_account.email)
+            logger.debug("finished saving new messages..: %s" % self._schema.imap_account.email)
 
             # create and save the message contacts
             if envelope.from_ is not None:
