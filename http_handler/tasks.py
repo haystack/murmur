@@ -6,7 +6,7 @@ from smtp_handler.utils import send_email, codeobject_loads
 
 import json, ujson, types, marshal, random
 from browser.models.mailbox import MailBox
-from browser.imap import authenticate
+
 
 import logging
 
@@ -107,6 +107,8 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 #     # do something
 #     logger.info("Saved image from Flickr")
 #     print ("perioid task")
+
+from browser.imap import authenticate
 
 @task(name="loop_sync_user_inbox")
 def loop_sync_user_inbox(imapAccount):

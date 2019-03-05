@@ -6,7 +6,6 @@ import typing as t  # noqa: F401 ignore unused we use it for typing
 from schema.youps import ImapAccount, FolderSchema  # noqa: F401 ignore unused we use it for typing
 from folder import Folder
 from Queue import Queue
-from http_handler.tasks import run_interpret
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
