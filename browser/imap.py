@@ -215,21 +215,6 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
                 send_email(subject, imap_account.email, to_addr, body)
             logger.debug("send(): sent a message to  %s" % str(to_addr))
 
-        def add_gmail_labels(flags):
-            pile.add_gmail_labels(flags, is_test)
-
-        def add_labels(flags):
-            add_notes(flags)
-
-        def add_notes(flags):
-            pile.add_notes(flags, is_test)
-
-        def copy(dst_folder):
-            pile.copy(dst_folder, is_test)
-
-        def delete():
-            pile.delete(is_test)
-
         def get_history(email, hours=24, cond=True):
             if len(email) == 0:
                 raise Exception('get_history(): email address is not provided')
@@ -330,57 +315,6 @@ def interpret(imap_account, imap, code, search_creteria, is_test=False, email_co
             r = {'received_emails': received_cnt, 'cond': cond_cnt}
 
             return r
-
-        def get_sender():
-            return pile.get_sender()
-
-        def get_content():
-            logger.debug("call get_content")
-            if email_content:
-                return email_content
-            else:
-                return pile.get_content()
-
-        def get_date():
-            return pile.get_date()
-
-        def get_attachment():
-            pass
-
-        def get_subject():
-            return pile.get_subject()
-
-        def get_recipients():
-            return pile.get_recipients()
-
-
-        def get_attachments():
-            pass
-
-        def get_labels():
-            return get_notes()
-
-        def get_notes():
-            return pile.get_notes()
-
-        def get_gmail_labels():
-            return pile.get_gmail_labels()
-
-        def mark_read(is_seen=True):
-            pile.mark_read(is_seen, is_test)
-
-
-        def move(dst_folder):
-            pile.move(dst_folder, is_test)
-
-        def remove_labels(flags):
-            remove_notes(flags)
-
-        def remove_notes(flags):
-            pile.remove_notes(flags, is_test)
-
-        def remove_gmail_labels(flags):
-            pile.remove_gmail_labels(flags, is_test)
 
         # return a list of email UIDs
         def search(criteria=u'ALL', charset=None, folder=None):
