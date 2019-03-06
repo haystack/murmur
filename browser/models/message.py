@@ -163,7 +163,7 @@ class Message(object):
         """
         return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.bcc.all()]
     
-        def get_date():
+    def get_date():
         pass
 
     def add_labels(flags):
