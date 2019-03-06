@@ -465,6 +465,7 @@ $(document).ready(function() {
         return re.test(String(email).toLowerCase());
     }    
 
+        // When user first try to login to their imap. 
         btn_login.click(function() {
                 show_loader(true);
 
@@ -494,13 +495,14 @@ $(document).ready(function() {
                             append_log(res['imap_log'], false)
                             
                             if (res.code) { 
-                                // some emails are not added since they are not members of the group
-                                // $('#donotsend-msg').show();
-                                // $('#donotsend-msg').html(res['code']);
                             }
                             else {                        
                                 notify(res, true);
                             }
+
+                            // then ask user to wait until YoUPS intialize their inbox
+                            show_loader(true);
+                            $("$loading-wall span").show();
                         }
                         else {
                             notify(res, false);
