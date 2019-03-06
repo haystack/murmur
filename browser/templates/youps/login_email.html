@@ -11,7 +11,12 @@
 {% endblock %}
 
 {% block content %}
-	<div id="loading-wall"></div>
+	<div id="loading-wall">
+		{% if imap_authenticated %}
+		{% else %}
+			<span style='display:none;top: 300px;position: fixed;'>We are initializing your inbox! Will email you when it is ready!</span>
+		{% endif %}
+	</div>
 	<div class="sk-circle">
 			<div class="sk-circle1 sk-child"></div>
 			<div class="sk-circle2 sk-child"></div>
@@ -26,7 +31,6 @@
 			<div class="sk-circle11 sk-child"></div>
 			<div class="sk-circle12 sk-child"></div>
 	</div>
-	
 	<div class="container">
 		<div class="group-container">
 			<p hidden id="website-name">{{website}}</p>
