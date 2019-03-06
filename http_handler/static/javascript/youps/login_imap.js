@@ -112,7 +112,7 @@ $(document).ready(function() {
         }
         
         u = rec_add_nested(folders_nested)
-        folder_container.append(u)
+        $folder_container.append(u)
     }
 
     function guess_host( email_addr ) {
