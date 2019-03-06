@@ -117,7 +117,7 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 
 @task(name="add_user_sync")
 def add_user_sync(imapAccount_email):
-    ptask_name = "sync_%d" % (int(imapAccount_email))
+    ptask_name = "sync_%s" % (imapAccount_email)
     args = ujson.dumps( [imapAccount_email] )
     TaskScheduler.schedule_every('loop_sync_user_inbox', 'seconds', 4, ptask_name, args)
 
