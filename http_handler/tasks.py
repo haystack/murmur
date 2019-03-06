@@ -155,16 +155,12 @@ def init_sync_user_inbox(imapAccount_email):
 
             send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
 
-            add_user_sync.apply_async([imapAccount_email])
+            ptask_name = "sync_%s" % (imapAccount_email)
+            args = ujson.dumps( [imapAccount_email] )
+            TaskScheduler.schedule_every('loop_sync_user_inbox', 'seconds', 4, ptask_name, args)
 
     except Exception as e:
-        logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e))
-
-@task(name="add_user_sync")
-def add_user_sync(imapAccount_email):
-    ptask_name = "sync_%s" % (imapAccount_email)
-    args = ujson.dumps( [imapAccount_email] )
-    TaskScheduler.schedule_every('loop_sync_user_inbox', 'seconds', 4, ptask_name, args)
+        logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e)) 
 
 
 @task(name="loop_sync_user_inbox")
