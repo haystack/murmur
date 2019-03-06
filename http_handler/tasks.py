@@ -152,7 +152,7 @@ def init_sync_user_inbox(imapAccount_email):
 
             ptask_name = "sync_%s" % (imapAccount_email)
             args = ujson.dumps( [imapAccount_email] )
-            TaskScheduler.schedule_every('loop_sync_user_inbox', 'seconds', 4, ptask_name, args)
+            TaskScheduler.schedule_every('init_sync_user_inbox', 'seconds', 4, ptask_name, args)
     except ImapAccount.DoesNotExist:
         PeriodicTask.objects.filter(name="sync_%s" % (imapAccount_email)).delete()
         logger.exception("syncing fails Remove periodic tasks. imap_account not exist %s" % (imapAccount_email))
