@@ -115,6 +115,28 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 #     logger.info("Saved image from Flickr")
 #     print ("perioid task")
 
+def user_sync(imapAccount_email):
+    imapAccount = ImapAccount.objects.get(email=imapAccount_email)
+
+    # authenticate with the user's imap server
+    auth_res = authenticate(imapAccount)
+    # if authentication failed we can't run anything
+    if not auth_res['status']:
+        # Stop doing loop
+        return
+
+    # get an imapclient which is authenticated
+    imap = auth_res['imap']
+
+    # create the mailbox
+    mailbox = MailBox(imapAccount, imap)
+    # sync the mailbox with imap
+    mailbox._sync()
+    logger.info("Mailbox sync done")
+    # after sync, logout to prevent multi-connection issue
+    imap.logout()
+    
+
 @task(name="init_sync_user_inbox")
 def init_sync_user_inbox(imapAccount_email):
     """ execute the given code object.
@@ -124,30 +146,9 @@ def init_sync_user_inbox(imapAccount_email):
     """
     logger.info("Start syncing user's inbox: %s" % (imapAccount_email))
     try: 
+        user_sync(imapAccount_email)
+        
         imapAccount = ImapAccount.objects.get(email=imapAccount_email)
-
-        # authenticate with the user's imap server
-        auth_res = authenticate(imapAccount)
-        # if authentication failed we can't run anything
-        if not auth_res['status']:
-            # Stop doing loop
-            return
-
-        # get an imapclient which is authenticated
-        imap = auth_res['imap']
-
-        # create the mailbox
-        mailbox = MailBox(imapAccount, imap)
-        # sync the mailbox with imap
-        mailbox._sync()
-        logger.info("Mailbox sync done")
-        # after sync, logout to prevent multi-connection issue
-        imap.logout()
-
-        # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
-        # Use eta instead of countdown if you have timezone issue
-        # loop_sync_user_inbox.apply_async([imapAccount_email], countdown=3)
-
         if imapAccount.is_initialized is False:
             imapAccount.is_initialized = True
             imapAccount.save()
