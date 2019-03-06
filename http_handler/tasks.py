@@ -115,11 +115,56 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 #     logger.info("Saved image from Flickr")
 #     print ("perioid task")
 
+@task(name="init_sync_user_inbox")
+def init_sync_user_inbox(imapAccount_email):
+    """ execute the given code object.
+
+    Args:
+        imapAccount_email (string):  
+    """
+    logger.info("Start syncing user's inbox: %s" % (imapAccount_email))
+    try: 
+        imapAccount = ImapAccount.objects.get(email=imapAccount_email)
+
+        # authenticate with the user's imap server
+        auth_res = authenticate(imapAccount)
+        # if authentication failed we can't run anything
+        if not auth_res['status']:
+            # Stop doing loop
+            return
+
+        # get an imapclient which is authenticated
+        imap = auth_res['imap']
+
+        # create the mailbox
+        mailbox = MailBox(imapAccount, imap)
+        # sync the mailbox with imap
+        mailbox._sync()
+        logger.info("Mailbox sync done")
+        # after sync, logout to prevent multi-connection issue
+        imap.logout()
+
+        # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
+        # Use eta instead of countdown if you have timezone issue
+        # loop_sync_user_inbox.apply_async([imapAccount_email], countdown=3)
+
+        if imapAccount.is_initialized is False:
+            imapAccount.is_initialized = True
+            imapAccount.save()
+
+            send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
+
+            add_user_sync.apply_async([imapAccount_email])
+
+    except Exception as e:
+        logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e))
+
 @task(name="add_user_sync")
 def add_user_sync(imapAccount_email):
     ptask_name = "sync_%s" % (imapAccount_email)
     args = ujson.dumps( [imapAccount_email] )
     TaskScheduler.schedule_every('loop_sync_user_inbox', 'seconds', 4, ptask_name, args)
+
 
 @task(name="loop_sync_user_inbox")
 def loop_sync_user_inbox(imapAccount_email):
@@ -157,12 +202,6 @@ def loop_sync_user_inbox(imapAccount_email):
         # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
         # Use eta instead of countdown if you have timezone issue
         # loop_sync_user_inbox.apply_async([imapAccount_email], countdown=3)
-
-        if imapAccount.is_initialized is False:
-            imapAccount.is_initialized = True
-            imapAccount.save()
-
-            send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
 
     except Exception as e:
         logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e))

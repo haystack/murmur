@@ -13,7 +13,7 @@ from browser.sandbox import interpret
 import string
 from browser.models.mailbox import MailBox
 
-from http_handler.tasks import remove_periodic_task, add_user_sync
+from http_handler.tasks import remove_periodic_task, init_sync_user_inbox
 
 import logging
 
@@ -87,7 +87,7 @@ def login_imap(email, password, host, is_oauth):
         2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
         """
         # start keeping eye on users' inbox
-        add_user_sync.delay(imapAccount.email)
+        init_sync_user_inbox.delay(imapAccount.email)
 
         # TODO notify the user that their account is ready to be used
 
