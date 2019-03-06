@@ -11,7 +11,12 @@
 {% endblock %}
 
 {% block content %}
-	<div id="loading-wall"></div>
+	<div id="loading-wall">
+		{% if imap_authenticated %}
+		{% else %}
+			<span style='display:none;top: 300px;position: fixed;'>We are initializing your inbox! Will email you when it is ready!</span>
+		{% endif %}
+	</div>
 	<div class="sk-circle">
 			<div class="sk-circle1 sk-child"></div>
 			<div class="sk-circle2 sk-child"></div>
@@ -26,7 +31,6 @@
 			<div class="sk-circle11 sk-child"></div>
 			<div class="sk-circle12 sk-child"></div>
 	</div>
-	
 	<div class="container">
 		<div class="group-container">
 			<p hidden id="website-name">{{website}}</p>
@@ -81,9 +85,9 @@
 								</ul>
 					</div>
 						{% if imap_authenticated %}
-							<button class="btn btn-primary" id="btn-code-submit">Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
+							<button class="btn btn-primary" id="btn-code-submit">RUN</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% else %}
-							<button class="btn btn-primary" id="btn-code-submit" disabled>Enable</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
+							<button class="btn btn-primary" id="btn-code-submit" disabled>RUN</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
 						{% endif %}
 				  
 				</div>
@@ -91,8 +95,8 @@
 					<div style="padding-top: 40px;">
 					  <div class="card">
 						<div class="card-header">
-							<h4>Rules for incoming emails</h4> 
-							The following rule will be applied when a new mail arrives. 
+							<h4>Your email scripts</h4> 
+							Following rules will execute once. You can use set_interval() to periodically update attribute or execute rules based on the value of attributes.  							
 							<br>
 							<button class="btn btn-primary" id="btn-incoming-save" style="float: right;">Save</button>
 						</div>
@@ -176,14 +180,14 @@ if interaction['cond'] > 7:
 					  </div>
 		
 					  <div id="console" class="info">
-						<span id='engine-status-spinning-bar' class="fa-layers fa-fw fa-2x">
+						<!-- <span id="engine-status-spinning-bar" class="fa-layers fa-fw fa-2x">
 							<i class="fas fa-sync"></i>
 							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
 						</span>
-						<span id='engine-status-msg'></span>
-						
+						<span id='engine-status-msg'></span> -->
+						<span id='user-status-msg'></span>
 						<div id="console-output">
-							<p class="info">Output from the engine will be sent to your inbox. Press a button "RUN" to start your engine.</p>
+							<p class="info">Output from the engine will be sent to your inbox. {% if not is_running %}Press a button "RUN" to start your engine.{% endif %}</p>
 						</div>
 						{% if user.is_authenticated %}
 						{% else %}
@@ -192,6 +196,25 @@ if interaction['cond'] > 7:
 						{% endif %}
 					  </div>
 					</div>
+
+					<div class="card">
+						<div class="card-header">
+							<h4>Shared functions</h4> 
+							You can write shared functions or code here and call them from any modes.
+							<br>
+							<button class="btn btn-primary" id="btn-shared-save" style="float: right;">Save</button>
+							<br><br>
+						</div>
+						<div class="card-block" id="editor-shared-container">
+							<textarea class="editor shared-editor" id="editor-shared">
+									{% if shortcuts_exist %}
+{{ shortcuts }}
+									{% else %}
+# add example of shared code here. 
+									{% endif %}    
+</textarea>
+						</div>
+					  </div>
 
 					<div class="card">
 							<div class="card-header">
@@ -251,7 +274,7 @@ print get_sender()
 			is_test = {{ is_test|yesno:"true,false" }},
 			IS_RUNNING = {{ is_running|yesno:"true,false" }},
 			IS_INITIALIZED = {{ is_running|yesno:"true,false" }},
-			folders = {{ folders }},
+			folders = {{ folders|safe }},
 			mode_folder = {{ mode_folder }},
 			current_mode = "{{ current_mode.name }}",
 			current_mode_id = "{{ current_mode.uid }}";
@@ -289,5 +312,5 @@ print get_sender()
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
 	<!-- <script type="text/javascript" src="/static/javascript/youps/console/sandbox-console.js"></script> -->
 
-	<script type="text/javascript" src="/static/javascript/murmur/login_imap.js"></script>
+	<script type="text/javascript" src="/static/javascript/youps/login_imap.js"></script>
 {% endblock %}

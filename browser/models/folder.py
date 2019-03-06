@@ -1,13 +1,20 @@
 from __future__ import unicode_literals, print_function, division
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 import typing as t  # noqa: F401 ignore unused we use it for typing
-import logging 
+import logging
 from message import Message
-from schema.youps import MessageSchema, FolderSchema  # noqa: F401 ignore unused we use it for typing
+from schema.youps import MessageSchema, FolderSchema, ContactSchema, ImapAccount  # noqa: F401 ignore unused we use it for typing
+from django.db.models import Max
+from imapclient.response_types import Address  # noqa: F401 ignore unused we use it for typing
+from email.header import decode_header
+from Queue import Queue
+from browser.models.event_data import NewMessageData
+
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
-class Folder():
+
+class Folder(object):
 
     def __init__(self, folder_schema, imap_client):
         # type: (FolderSchema, IMAPClient) -> Folder
@@ -19,7 +26,7 @@ class Folder():
 
     def __str__(self):
         # type: () -> t.AnyStr
-        return self.name
+        return "folder: %s" % (self.name)
 
     @property
     def _uid_next(self):
@@ -78,7 +85,7 @@ class Folder():
 
     @property
     def _is_selectable(self):
-        # type: () -> bool 
+        # type: () -> bool
         return self._schema.is_selectable
 
     @_is_selectable.setter
@@ -87,14 +94,20 @@ class Folder():
         self._schema.is_selectable = value
         self._schema.save()
 
+    @property
+    def _imap_account(self):
+        # type: () -> ImapAccount
+        return self._schema.imap_account
+
     def _completely_refresh_cache(self):
+        # type: () -> None
         """Called when the uid_validity has changed or first time seeing the folder.
 
         Should completely remove any messages stored in this folder and rebuild
         the cache of messages from scratch.
         """
 
-        logger.debug("folder %s completely refreshing cache" % self)
+        logger.debug("%s completely refreshing cache" % self)
 
         # delete any messages already stored in the folder
         MessageSchema.objects.filter(folder_schema=self._schema).delete()
@@ -103,8 +116,26 @@ class Folder():
         self._save_new_messages(0)
         # TODO maybe trigger the user
 
-    def _refresh_cache(self, uid_next):
-        # type: (int) -> None
+        # finally update our last seen uid (this uses the cached messages to determine last seen uid)
+        self._update_last_seen_uid()
+        logger.debug("%s finished completely refreshing cache" % self)
+
+    def _update_last_seen_uid(self):
+        # type () -> None
+        """Updates the last seen uid to be equal to the maximum uid in this folder's cache
+        """
+
+        max_uid = MessageSchema.objects.filter(folder_schema=self._schema).aggregate(
+            Max('uid'))  # type: t.Dict[t.AnyStr, int]
+        max_uid = max_uid['uid__max']
+        if max_uid is None:
+            max_uid = 0
+        if self._last_seen_uid != max_uid:
+            self._last_seen_uid = max_uid
+            logger.debug('%s updated max_uid %d' % (self, max_uid))
+
+    def _refresh_cache(self, uid_next, event_data_queue):
+        # type: (int, Queue) -> None
         """Called during normal synchronization to refresh the cache.
 
         Should get new messages and build message number to UID map for the
@@ -116,18 +147,21 @@ class Folder():
         Args:
             uid_next (int): UIDNEXT returned from select command
         """
-
-        logger.debug('folder %s normal refresh' % self)
-
         # if the uid has not changed then we don't need to get new messages
         if uid_next != self._uid_next:
             # get all the descriptors for the new messages
-            self._save_new_messages(self._last_seen_uid)
+            self._save_new_messages(self._last_seen_uid, event_data_queue)
             # TODO maybe trigger the user
 
-        self._update_cached_message_flags()
+        # if the last seen uid is zero we haven't seen any messages
+        if not self._last_seen_uid == 0:
+            self._update_cached_message_flags()
+
+        self._update_last_seen_uid()
+        logger.debug("%s finished normal refresh" % (self))
 
     def _should_completely_refresh(self, uid_validity):
+        # type: (int) -> bool
         """Determine if the folder should completely refresh it's cache.
 
         Args:
@@ -137,52 +171,183 @@ class Folder():
             bool: True if the folder should completely refresh
         """
 
-        # type: (int) -> bool
         if self._uid_validity == -1:
-            logger.info("folder %s seen for first time" % self.name)
             return True
         if self._uid_validity != uid_validity:
-            logger.critical('folder %s uid_validity changed must rebuild cache' % self.name)
+            logger.debug(
+                'folder %s uid_validity changed must rebuild cache' % self.name)
             return True
         return False
 
     def _update_cached_message_flags(self):
-        logger.debug("folder %s updating cached message flags" % self)
+        # type: () -> None
+        """Update the flags on any cached messages.
+        """
+        logger.debug("%s started updating flags" % self)
 
         # get all the flags for the old messages
-        fetch_data = self._imap_client.fetch('1:%d' % self._last_seen_uid, ['FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]] 
-        # update flags in the cache 
+        fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), [
+                                             'FLAGS'])  # type: t.Dict[int, t.Dict[str, t.Any]]
+        # update flags in the cache
         for message_schema in MessageSchema.objects.filter(folder_schema=self._schema):
+
+            # ignore cached messages that we just fetched
+            if message_schema.uid > self._last_seen_uid:
+                continue
             # if we don't get any information about the message we have to remove it from the cache
             if message_schema.uid not in fetch_data:
                 message_schema.delete()
+                logger.debug("%s deleted message with uid %d" %
+                             (self, message_schema.uid))
+                continue
             message_data = fetch_data[message_schema.uid]
+            # TODO make this more DRY
             if 'SEQ' not in message_data:
                 logger.critical('Missing SEQ in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
             if 'FLAGS' not in message_data:
                 logger.critical('Missing FLAGS in message data')
-            message_schema.flags = message_data['FLAGS'] 
+                logger.critical('Message data %s' % message_data)
+                continue
+            message_schema.flags = message_data['FLAGS']
             message_schema.msn = message_data['SEQ']
             message_schema.save()
-            # TODO maybe trigger the user 
-        logger.debug("folder %s updated cached messages" % self)
+            # TODO maybe trigger the user
 
-    def _save_new_messages(self, last_seen_uid):
-        logger.debug("folder %s getting new messages" % self)
-        fetch_data = self._imap_client.fetch('%d:*' % (last_seen_uid + 1), Message._descriptors)
+        logger.debug("%s updated flags" % self)
 
+    def _save_new_messages(self, last_seen_uid, event_data_queue = None):
+        # type: (int, Queue) -> None
+        """Save any messages we haven't seen before
+
+        Args:
+            last_seen_uid (int): the max uid we have stored, should be 0 if there are no messages stored.
+        """
+
+        fetch_data = self._imap_client.fetch(
+            '%d:*' % (last_seen_uid + 1), Message._descriptors)
+
+        logger.info("start saving new messages..: %s" % self._schema.imap_account.email)
         for uid in fetch_data:
             message_data = fetch_data[uid]
+            logger.debug("Message %d data: %s" % (uid, message_data))
             if 'SEQ' not in message_data:
                 logger.critical('Missing SEQ in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
             if 'FLAGS' not in message_data:
                 logger.critical('Missing FLAGS in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
+            if 'INTERNALDATE' not in message_data:
+                logger.critical('Missing INTERNALDATE in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
+            if 'RFC822.SIZE' not in message_data:
+                logger.critical('Missing RFC822.SIZE in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
+            if 'ENVELOPE' not in message_data:
+                logger.critical('Missing ENVELOPE in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
+                
+            # this is the date the message was received by the server
+            internal_date = message_data['INTERNALDATE']  # type: datetime
+            envelope = message_data['ENVELOPE']
+            msn = message_data['SEQ']
+            flags = message_data['FLAGS']
 
+            logger.debug("message %d envelope %s" % (uid, envelope))
+
+            # create and save the message schema
             message_schema = MessageSchema(imap_account=self._schema.imap_account,
                                            folder_schema=self._schema,
                                            uid=uid,
-                                           msn=message_data['SEQ'],
-                                           flags=message_data['FLAGS'])
+                                           msn=msn,
+                                           flags=flags,
+                                           date=envelope.date,
+                                           subject=self._parse_email_subject(envelope.subject),
+                                           message_id=envelope.message_id,
+                                           internal_date=internal_date,
+                                           )
             message_schema.save()
+            if last_seen_uid != 0:
+                event_data_queue.put(NewMessageData(self._schema.imap_account, "UID %d" % uid, self._schema))
 
-        logger.debug("folder %s saved new messages" % self)
+            logger.debug("finished saving new messages..: %s" % self._schema.imap_account.email)
+
+            # create and save the message contacts
+            if envelope.from_ is not None:
+                message_schema.from_.add(*self._find_or_create_contacts(envelope.from_))
+            if envelope.sender is not None:
+                message_schema.sender.add(*self._find_or_create_contacts(envelope.sender))
+            if envelope.reply_to is not None:
+                message_schema.reply_to.add(*self._find_or_create_contacts(envelope.reply_to))
+            if envelope.to is not None:
+                message_schema.to.add(*self._find_or_create_contacts(envelope.to))
+            if envelope.cc is not None:
+                message_schema.cc.add(*self._find_or_create_contacts(envelope.cc))
+            if envelope.bcc is not None:
+                message_schema.bcc.add(*self._find_or_create_contacts(envelope.bcc))
+
+            logger.debug("%s saved new message with uid %d" % (self, uid))
+
+    def _parse_email_subject(self, subject):
+        # type: (t.AnyStr) -> t.AnyStr
+        """This method parses a subject header which can contain unicode
+
+        Args:
+            subject (str): email subject header
+
+        Returns:
+            t.AnyStr: unicode string or a 8 bit string
+        """
+
+        if subject is None:
+            return None
+        text, encoding = decode_header(subject)[0]
+        if encoding:
+            if encoding != 'utf-8' and encoding != 'utf8':
+                logger.critical('parse_subject non utf8 encoding: %s' % encoding)
+            text = text.decode(encoding)
+        return text
+
+    def _find_or_create_contacts(self, addresses):
+        # type: (t.List[Address]) -> t.List[ContactSchema]
+        """Convert a list of addresses into a list of contact schemas.
+
+        Returns:
+            t.List[ContactSchema]: List of contacts associated with the addresses
+        """
+        assert addresses is not None
+
+        contact_schemas = []
+        for address in addresses:
+            contact_schema = None  # type: ContactSchema
+            email = "%s@%s" % (address.mailbox, address.host)
+            name = address.name
+            try:
+                contact_schema = ContactSchema.objects.get(
+                    imap_account=self._imap_account, email=email)
+            except ContactSchema.DoesNotExist:
+                contact_schema = ContactSchema(
+                    imap_account=self._imap_account, email=email, name=name)
+                contact_schema.save()
+                logger.debug("created contact %s in database" % name)
+            contact_schemas.append(contact_schema)
+        return contact_schemas
+
+
+    # def parse_envelope(envelope):
+    #     date = envelope.date # type: datetime
+    #     subject = envelope.subject # type: t.AnyStr
+    #     from_ = envelope.from_ # type: t.List[Address]
+    #     sender = envelope.sender  # type: t.List[Address]
+    #     reply_to = envelope.reply_to  # type: t.List[Address]
+    #     to = envelope.to  # type: t.List[Address]
+    #     cc = envelope.cc  # type: t.List[Address]
+    #     bcc = envelope.bcc  # type: t.List[Address]
+    #     in_reply_to = envelope.in_reply_to  # type: t.List[t.AnyStr] # TODO not sure what this is
+    #     message_id = envelope.message_id  # type: t.AnyStr

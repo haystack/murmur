@@ -64,7 +64,7 @@ if ENV == 'prod':
         BASE_URL = 'squadbox.csail.mit.edu'
     MYSQL = MYSQL_PROD
 elif ENV == 'staging':
-    BASE_URL = 'murmur-dev.csail.mit.edu'
+    BASE_URL = 'youps.csail.mit.edu'
     MYSQL = MYSQL_DEV
 else:
     BASE_URL = 'localhost:8000'
@@ -86,14 +86,22 @@ DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': MYSQL["NAME"],# Or path to database file if using sqlite3.
-        'USER': MYSQL["USER"], # Not used with sqlite3.
-        'PASSWORD': MYSQL["PASSWORD"],# Not used with sqlite3.
-        'HOST': MYSQL["HOST"], # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '', # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.mysql',  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': MYSQL["NAME"],  # Or path to database file if using sqlite3.
+        'USER': MYSQL["USER"],  # Not used with sqlite3.
+        'PASSWORD': MYSQL["PASSWORD"],  # Not used with sqlite3.
+        'HOST': MYSQL["HOST"],  # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',  # Set to empty string for default. Not used with sqlite3.
         'STORAGE_ENGINE': 'MyISAM',
-        'OPTIONS': {'charset': 'utf8mb4'},
+        'OPTIONS': {
+            # Tell MySQLdb to connect with 'utf8mb4' character set
+            'charset': 'utf8mb4',
+        },
+        # Tell Django to build the test database with the 'utf8mb4' character set
+        'TEST': {
+            'CHARSET': 'utf8mb4',
+            'COLLATION': 'utf8mb4_unicode_ci',
+        }
     }
 }
 
@@ -118,7 +126,7 @@ USE_I18N = True
 USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = True
+USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -153,8 +161,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
-
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
     'compressor.finders.CompressorFinder',
 )
 
@@ -164,10 +171,9 @@ SECRET_KEY = 'fr&amp;qg*+c!z6q_^v6o1kzd6lxj-3m3q-=oku8f52*c+@)+1hnx+'
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django_mobile.loader.Loader',
-    
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -223,19 +229,20 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    
-    #our apps
+
+    # our apps
     'http_handler',
     'schema',
     'browser',
     'smtp_handler',
     'gmail_setup',
-    
-    #third party apps
+
+    # third party apps
     'registration',
     'south',
     'django_mobile',
-    'storages'
+    'storages',
+    'djcelery'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -295,7 +302,7 @@ LOGGING = {
     'loggers': {
         'youps': {
             'handlers': ['custom.file', 'custom.console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True
         },
         'youps.user': {
@@ -307,9 +314,10 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        # comment this out if you want to see DB queries in logs
+        # switch the handler comments below if you want to see DB queries in logs
         'django.db.backends': {
             'handlers': None, 
+            # 'handlers': ['custom.file'],
             'propagate': False,
             'level': 'DEBUG'
         },
@@ -318,17 +326,23 @@ LOGGING = {
 
 # celery settings
 try:
-        from celeryconfig import *
+    from celeryconfig import *
 except ImportError:
-        pass
+    pass
 
+# celery db settings
 
+try:
+    import djcelery
+    djcelery.setup_loader()
+except Exception as eggs:
+    print str(e)
 
 # local Settings - overriden by local_settings.py
 try:
-        from local_settings import *
+    from local_settings import *
 except ImportError:
-        pass
+    pass
 
 # Storage for attachments
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'

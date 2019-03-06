@@ -7,6 +7,8 @@ $(document).ready(function() {
         btn_incoming_save = $("#btn-incoming-save"),
         btn_shortcut_save = $("#btn-shortcut-save");
 
+    var log_backup = "", user_status_backup = "";
+
     function append_log( log, is_error ) {
         if(!log) return;
 
@@ -18,6 +20,23 @@ $(document).ready(function() {
         else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" )
             .addClass("info");
     }   
+
+    function append_status_msg( msg, is_error ) {
+        if(!msg) return;
+
+        $.each( msg.split("\n"), function( key, value ) {
+            value = $.trim(value);
+            if(value == "") return;
+            
+            $( "<p>" + 
+            '<span class="fa-layers fa-fw fa-2x"><i class="fas fa-sync"></i><span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span></span>'
+            + value.replace(/ *\[[^\]]*]/, '') + "</p>" ).prependTo( "#user-status-msg" )
+            .addClass("info");
+
+            spinStatusCog(true);
+        });
+        
+    }
 
     function format_date() {
         var currentdate = new Date();
@@ -274,8 +293,6 @@ $(document).ready(function() {
         run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running());
     })
 
-    var log_backup = "";
-
     // $("#password-container").hide();
     guess_host($("#user-full-email").text());
     toggle_login_mode();
@@ -284,23 +301,21 @@ $(document).ready(function() {
         fetch_log(); 
 
         $(".btn").prop("disabled",false);
-    }
-
-    if(IS_RUNNING) {
-        set_running(true);
 
         // set dropdown to current mode name if exist
-        $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
-        $(".dropdown .btn").attr('mode-id', current_mode_id);
-    } else {
-        set_running(false);
+        if(current_mode) {
+            $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
+            $(".dropdown .btn").attr('mode-id', current_mode_id);
+        }
 
-        // init $("#current_mode_dropdown") with a default value if there is no selected mode yet
-        var random_id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
+        else {
+            // init $("#current_mode_dropdown") with a default value if there is no selected mode yet
+            var random_id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
             random_mode_name = $.trim( document.querySelector('.nav.nav-tabs span[mode-id="'+ random_id + '"]').innerHTML );
 
-        $(".dropdown .btn").html(random_mode_name + ' <span class="caret"></span>');
-        $(".dropdown .btn").attr('mode-id', random_id);
+            $(".dropdown .btn").html(random_mode_name + ' <span class="caret"></span>');
+            $(".dropdown .btn").attr('mode-id', random_id);
+        }
     }
     
 	$('input[type=radio][name=auth-mode]').change(function() {
@@ -406,8 +421,7 @@ $(document).ready(function() {
     }
 
     function get_running() {
-        if( btn_code_sumbit.text() == "Disable") return true;
-        else return false;
+        return is_running;
     }
 
     function set_running(start_running) {
@@ -415,25 +429,31 @@ $(document).ready(function() {
         if(start_running) {
             spinStatusCog(true);
             $("#engine-status-msg").text("Your email engine is running.");
-            btn_code_sumbit.text("Disable");
+            btn_code_sumbit.text("STOP");
+            is_running = true;
         }
         
         // Stop running
         else {
             spinStatusCog(false);
             $("#engine-status-msg").text("Your email engine is not running at the moment.");
-            btn_code_sumbit.text("Enable");
+            btn_code_sumbit.text("RUN");
+            is_running = false;
         }
     }
     
     function spinStatusCog(spin) {
         if(spin) {
-            document.querySelector(".fa-sync").classList.add("fa-spin");
-            document.querySelector(".idle-mark").style.display = "none";
+            if( fa_sync = document.querySelector(".fa-sync"))
+                fa_sync.classList.add("fa-spin");
+            if( idle_mark = document.querySelector(".idle-mark"))
+                idle_mark.style.display = "none";
         }
         else {
-            document.querySelector(".fa-sync").classList.remove("fa-spin");
-            document.querySelector(".idle-mark").style.display = "inline-block";
+            if( fa_sync = document.querySelector(".fa-sync"))
+                fa_sync.classList.remove("fa-spin");
+            if( idle_mark = document.querySelector(".idle-mark"))   
+                idle_mark.style.display = "inline-block";
         }
     }
 
@@ -447,12 +467,26 @@ $(document).ready(function() {
                 
                 // Auth success
                 if (res.status) {
+                    // Update execution log
                     if( log_backup != res['imap_log']){
                         $("#console-output").html("");
                         append_log(res['imap_log'], false);
                     }
                     
                     log_backup = res['imap_log'];
+
+                    // if status_msg exists, it means a code is running 
+                    if( $.trim( res['user_status_msg'] ) != "")
+                        set_running(true)
+                    else set_running(false)
+
+                    // Update status msg
+                    if( user_status_backup != res['user_status_msg']){
+                        $("#user-status-msg").html("");
+                        append_status_msg(res['user_status_msg'], false);
+                    }
+                    
+                    user_status_backup = res['user_status_msg'];
                 }
                 else {
                     notify(res, false);
@@ -460,7 +494,7 @@ $(document).ready(function() {
             }
         );
         
-        setTimeout(fetch_log, 5 * 1000); // 5 second
+        setTimeout(fetch_log, 2 * 1000); // 2 second
     }
 
     function validateEmail(email) {
@@ -468,6 +502,7 @@ $(document).ready(function() {
         return re.test(String(email).toLowerCase());
     }    
 
+        // When user first try to login to their imap. 
         btn_login.click(function() {
                 show_loader(true);
 
@@ -497,13 +532,15 @@ $(document).ready(function() {
                             append_log(res['imap_log'], false)
                             
                             if (res.code) { 
-                                // some emails are not added since they are not members of the group
-                                // $('#donotsend-msg').show();
-                                // $('#donotsend-msg').html(res['code']);
                             }
                             else {                        
                                 notify(res, true);
                             }
+
+                            // then ask user to wait until YoUPS intialize their inbox
+                            show_loader(true);
+                            $("#loading-wall").show();
+                            $("#loading-wall span").show();
                         }
                         else {
                             notify(res, false);
@@ -524,7 +561,7 @@ $(document).ready(function() {
                 'modes': JSON.stringify(modes),
                 'email': $("#input-email").val(),
                 'test_run': is_dry_run,
-                'is_running': is_running
+                'run_request': is_running
             };
 
             $.post('/run_mailbot', params,

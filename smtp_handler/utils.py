@@ -10,6 +10,8 @@ from email import message_from_string
 from hashlib import sha1
 from html2text import html2text
 from markdown2 import markdown
+import new
+import pickle
 
 '''
 Murmur Mail Utils and Constants
@@ -739,3 +741,15 @@ def check_if_sender_approved_for_thread(group_name, sender_addr, subject):
 def check_if_sender_moderated_for_thread(group_name, sender_addr, subject):
 	hashed = get_sender_subject_hash(sender_addr, subject)
 	return ThreadHash.objects.filter(sender_subject_hash=hashed, group__name=group_name, moderate=True).exists()
+
+def codeobject_dumps(co):
+    """pickles a code object,arg s is the string with code returns the code object pickled as a string"""
+    co_tup=[co.co_argcount,co.co_nlocals, co.co_stacksize,co.co_flags,
+    co.co_code,co.co_consts,co.co_names,co.co_varnames,co.co_filename,
+    co.co_name,co.co_firstlineno,co.co_lnotab]
+    return pickle.dumps(co_tup)
+
+def codeobject_loads(s):
+    """loads a code object pickled with co_dumps() return a code object ready for exec()"""
+    r = pickle.loads(s)
+    return new.code(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11])

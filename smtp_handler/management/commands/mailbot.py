@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
 from schema.youps import ImapAccount
 from datetime import datetime
-from browser.imap import fetch_latest_email_id, authenticate, interpret
+from browser.imap import fetch_latest_email_id, authenticate
+from browser.sandbox import interpret
 from browser.models.mailbox import MailBox
 from imapclient import IMAPClient
 from engine.constants import msg_code
@@ -10,7 +11,7 @@ from http_handler.settings import WEBSITE
 import logging
 
 # Get an instance of a logger
-logger = logging.getLogger('youps')
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 class Command(BaseCommand):
     args = ''
@@ -36,10 +37,18 @@ class Command(BaseCommand):
             # get an imapclient which is authenticated
             imap = auth_res['imap']
 
-            # create the mailbox
-            mailbox = MailBox(imapAccount, imap)
-            # sync the mailbox with imap
-            mailbox._sync() 
+            try:
+                # create the mailbox
+                mailbox = MailBox(imapAccount, imap)
+                # sync the mailbox with imap
+                mailbox._sync()
+                logger.info("Mailbox sync done")
+                # after sync, logout to prevent multi-connection issue
+                imap.logout()
+                logger.info("Mailbox logged out to prevent multi-connection issue")
+                mailbox._run_user_code()  
+            except Exception:
+                logger.exception("mailbox task running failed")
 
             continue
 

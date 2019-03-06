@@ -4,12 +4,20 @@ import random
 import traceback
 from browser.imap import GoogleOauth2
 from http_handler.settings import IMAP_SECRET
-from schema.youps import ImapAccount, MailbotMode
+from schema.youps import ImapAccount, MailbotMode, Action
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
 from engine.constants import msg_code
 from browser.imap import authenticate
+from browser.sandbox import interpret
 import string
+from browser.models.mailbox import MailBox
+
+from http_handler.tasks import remove_periodic_task, init_sync_user_inbox
+
+import logging
+
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 def login_imap(email, password, host, is_oauth):
     """This function is called only once per each user when they first attempt to login to YoUPS.
@@ -74,19 +82,13 @@ def login_imap(email, password, host, is_oauth):
 
         imapAccount.save()
 
-        # TODO maybe not logout, cuz we might want to keep use the same instance for Luke's folder scraping
-        # Log out after auth verification
-        imap.logout()
-
-        # TODO call Luke's folder scraping folder from here
         """this procedure is required when a new user first register to YoUPS
         1) Scrape folder using IMAP list_folders() to register Folder instances belong to the user
         2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
         """
+        # start keeping eye on users' inbox
+        init_sync_user_inbox.delay(imapAccount.email)
 
-        # now user can use youps
-        imapAccount.is_initialized = True
-        imapAccount.save()
         # TODO notify the user that their account is ready to be used
 
         res['status'] = True
@@ -108,7 +110,7 @@ def fetch_execution_log(user, email, push=True):
     try:
         imapAccount = ImapAccount.objects.get(email=email)
         res['imap_log'] = imapAccount.execution_log
-
+        res['user_status_msg'] = imapAccount.status_msg
         res['status'] = True
 
     except ImapAccount.DoesNotExist:
@@ -148,7 +150,7 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
     logging.debug(res)
     return res
 
-def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=True):
+def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=True):
     """This function is called everytime users hit "run", "stop" or "save" their scripts.
 
         Args:
@@ -157,7 +159,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
             current_mode_id (integer): ID of currently selected/running mode
             modes (list): a list of dicts that each element is information about each user's mode
             is_test (boolean): if is_test is True, then it just simulates the user's script and prints out log but not actually execute it.  
-            is_running (boolean): potentially deprecated as we move toward one-off running fashion. 
+            run_request (boolean): potentially deprecated as we move toward one-off running fashion. 
     """
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
 
@@ -170,11 +172,15 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imap = auth_res['imap']  # noqa: F841 ignore unused
 
         imapAccount.is_test = is_test
-        imapAccount.is_running = is_running
+        imapAccount.is_running = run_request
 
         # TODO these don't work anymore
         # uid = fetch_latest_email_id(imapAccount, imap)
         # imapAccount.newest_msg_id = uid
+
+        # remove all user's tasks of this user to keep tasks up-to-date
+        Action.objects.filter(folder__imap_account=imapAccount).delete()
+        remove_periodic_task.delay( imapAccount.id )
 
         for key, value in modes.iteritems():
             mode_id = value['id']
@@ -196,13 +202,16 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, is_running, push=T
         imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_account=imapAccount)[0]
         imapAccount.save()
 
+        if run_request:
+            # TODO run it several times over for the selected folders
+            # TODO change with appropriate search_criteria
+            imap.select_folder("INBOX")
+            # TODO replace this with the right search criteria 
+            res = interpret(imapAccount, imap, code, "UID %d:*" % 90000, is_test)
 
-        # if imapAccount.is_running:
-        #     res = interpret(imapAccount, imap, code, "UID %d" % uid, is_test)
-
-        #     # if the code execute well without any bug, then save the code to DB
-        #     if not res['imap_error']:
-        #         res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log'])
+            # if the code execute well without any bug, then save the code to DB
+            if not res['imap_error']:
+                res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log'])
         #         now = datetime.now()
         #         now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
         #         res['imap_log'] = now_format + res['imap_log']
