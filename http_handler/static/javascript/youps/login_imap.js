@@ -502,6 +502,7 @@ $(document).ready(function() {
 
                             // then ask user to wait until YoUPS intialize their inbox
                             show_loader(true);
+                            $("#loading-wall").show();
                             $("#loading-wall span").show();
                         }
                         else {

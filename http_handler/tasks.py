@@ -205,6 +205,7 @@ def loop_sync_user_inbox(imapAccount_email):
         # loop_sync_user_inbox.apply_async([imapAccount_email], countdown=3)
     except ImapAccount.DoesNotExist:
         PeriodicTask.objects.filter(name="sync_%s" % (imapAccount_email)).delete()
+        logger.exception("syncing fails Remove periodic tasks. imap_account not exist %s" % (imapAccount_email))
 
     except Exception as e:
         logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e))
