@@ -13,7 +13,7 @@ from browser.sandbox import interpret
 import string
 from browser.models.mailbox import MailBox
 
-from http_handler.tasks import remove_periodic_task, loop_sync_user_inbox
+from http_handler.tasks import remove_periodic_task, add_user_sync
 
 import logging
 
@@ -86,20 +86,8 @@ def login_imap(email, password, host, is_oauth):
         1) Scrape folder using IMAP list_folders() to register Folder instances belong to the user
         2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
         """
-        # # create the mailbox
-        # mailbox = MailBox(imapAccount, imap)
-        # # sync the mailbox with imap
-        # mailbox._sync()
-        # logger.info("Mailbox sync done")
-        # # after sync, logout to prevent multi-connection issue
-        # imap.logout()
-
-        # # now user can use youps
-        # imapAccount.is_initialized = True
-        # imapAccount.save()
-
         # start keeping eye on users' inbox
-        loop_sync_user_inbox.delay(imapAccount.email)
+        add_user_sync.delay(imapAccount.email)
 
         # TODO notify the user that their account is ready to be used
 

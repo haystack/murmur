@@ -78,31 +78,35 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
         email_content (string): for email shortcut --> potential deprecate  
     """
     logger.info("Task run interpret imap_account: %d %s" % (imap_account_id, folder_name))
-    
-    if type(code) == str:
-        code = codeobject_loads(code)
+    try: 
+        if type(code) == str:
+            code = codeobject_loads(code)
 
-    # code = marshal.loads(code)
-    from browser.imap import interpret, authenticate
-    imap_account = ImapAccount.objects.get(id=imap_account_id)
-    auth_res = authenticate( imap_account )
-    # TODO auth handling
-    if not auth_res['status']:
-        raise ValueError('Something went wrong during authentication. Refresh and try again!')
-        
-    imap = auth_res['imap']
-    if folder_name is None: 
-        imap.select_folder('INBOX')
-    else:
-        imap.select_folder(folder_name)
-    res = interpret(imap_account, imap, code, search_criteria, is_test, email_content)
+        # code = marshal.loads(code)
+        from browser.imap import interpret, authenticate
+        imap_account = ImapAccount.objects.get(id=imap_account_id)
+        auth_res = authenticate( imap_account )
+        # TODO auth handling
+        if not auth_res['status']:
+            raise ValueError('Something went wrong during authentication. Refresh and try again!')
+            
+        imap = auth_res['imap']
+        if folder_name is None: 
+            imap.select_folder('INBOX')
+        else:
+            imap.select_folder(folder_name)
+        res = interpret(imap_account, imap, code, search_criteria, is_test, email_content)
 
-    logger.info(res['imap_log'])
+        logger.info(res['imap_log'])
 
-    # @Luke
-    # TODO add logs to users' execution_log
-    # we need a setter function that is dealing with text encoding. Every log should be added through the function. 
-    # save_exeucution_log(imap_account, res['imap_log'])
+        # @Luke
+        # TODO add logs to users' execution_log
+        # we need a setter function that is dealing with text encoding. Every log should be added through the function. 
+        # save_exeucution_log(imap_account, res['imap_log'])
+    except ImapAccount.DoesNotExist:
+        logger.exception("Remove periodic tasks fails ImapAccount object not exist. imap account id %s" % (imap_account_id))
+    except Exception as e:
+        logger.exception("Remove periodic tasks fails imap account id %s > %s" % (imap_account.email, e))
 
 
 # @periodic_task(run_every=(crontab(minute='*/15')), name="some_task", ignore_result=True)
@@ -110,6 +114,12 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 #     # do something
 #     logger.info("Saved image from Flickr")
 #     print ("perioid task")
+
+@task(name="add_user_sync")
+def add_user_sync(imapAccount_email):
+    ptask_name = "sync_%d" % (int(imapAccount_email))
+    args = ujson.dumps( [imapAccount_email] )
+    TaskScheduler.schedule_every('loop_sync_user_inbox', 'seconds', 4, ptask_name, args)
 
 @task(name="loop_sync_user_inbox")
 def loop_sync_user_inbox(imapAccount_email):
@@ -146,7 +156,7 @@ def loop_sync_user_inbox(imapAccount_email):
 
         # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
         # Use eta instead of countdown if you have timezone issue
-        loop_sync_user_inbox.apply_async([imapAccount_email], countdown=3)
+        # loop_sync_user_inbox.apply_async([imapAccount_email], countdown=3)
 
         if imapAccount.is_initialized is False:
             imapAccount.is_initialized = True
