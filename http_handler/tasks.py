@@ -203,6 +203,8 @@ def loop_sync_user_inbox(imapAccount_email):
         # The next sync is guaranteed to be executed at some time after 3secs, but not necessarily at that exact time
         # Use eta instead of countdown if you have timezone issue
         # loop_sync_user_inbox.apply_async([imapAccount_email], countdown=3)
+    except ImapAccount.DoesNotExist:
+        PeriodicTask.objects.filter(name="sync_%s" % (imapAccount_email)).delete()
 
     except Exception as e:
         logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e))
