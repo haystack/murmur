@@ -47,8 +47,7 @@ def interpret(mailbox, is_test=False):
         # define the variables accessible to the user
         user_environ = {
             'new_message_handler': mailbox.new_message_handler,
-            'on_message_arrival': on_message_arrival,
-            'mailbox': mailbox
+            'on_message_arrival': on_message_arrival
         }
         # execute the user's code 
         exec(code, user_environ)
