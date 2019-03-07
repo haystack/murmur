@@ -89,7 +89,7 @@ class MailBox(object):
             while True:
                 try:
                     event_data = self.event_data_queue.get_nowait()
-                    event_data.fire_event(self.newMessage)
+                    event_data.fire_event(self.new_message_handler)
                 except Queue.Empty:
                     break
                 except Exception:
