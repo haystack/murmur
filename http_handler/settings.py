@@ -267,6 +267,10 @@ LOGGING = {
         'custom.brief' : {
             'format': '%(message)s'
         },
+        # this formatter is for the user
+        'custom.user' : {
+            'format': '%(asctime)s %(levelname)-8s %(funcName)s %(messages)s'
+        },
         # this formatter includes the time, log level, logger name, and message
         'custom.precise' : {
             'format' : '%(asctime)s %(levelname)-8s %(name)-15s %(message)s',
@@ -296,7 +300,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stdout',  # Default is stderr
-            'formatter': 'custom.brief'
+            'formatter': 'custom.user'
         }
     },
     'loggers': {

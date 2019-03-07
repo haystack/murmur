@@ -4,6 +4,12 @@ from schema.youps import MessageSchema  # noqa: F401 ignore unused we use it for
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 from datetime import datetime  # noqa: F401 ignore unused we use it for typing
 from browser.models.contact import Contact
+import logging
+from collections.abc import Iterable
+
+
+userLogger = logging.getLogger('youps.user')  # type: logging.Logger
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 class Message(object):
 
@@ -18,6 +24,9 @@ class Message(object):
         # the connection to the server
         self._imap_client = imap_client  # type: IMAPClient
 
+    def __str__(self):
+        # type: () -> t.AnyStr
+        return "Message %d" % self._uid
 
     @property
     def _uid(self):
@@ -73,7 +82,7 @@ class Message(object):
         return self._schema.date
 
     @property
-    def isRead(self):
+    def is_read(self):
         # type: () -> bool
         """Get if the message has been read
 
@@ -83,7 +92,7 @@ class Message(object):
         return '\\Seen' in self.flags
 
     @property
-    def isDeleted(self):
+    def is_deleted(self):
         # type: () -> bool
         """Get if the message has been deleted
 
@@ -93,7 +102,7 @@ class Message(object):
         return '\\Deleted' in self.flags
 
     @property
-    def isRecent(self):
+    def is_recent(self):
         # type: () -> bool
         """Get if the message is recent
 
@@ -162,26 +171,106 @@ class Message(object):
             t.List[Contact]: The contacts in the bcc field of the message
         """
         return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.bcc.all()]
-    
-    def get_date():
-        pass
 
-    def add_labels(flags):
-        # TODO if the user is using gmail then imap.add_gmail_labels() otherwise, imap.add_labels()
-        pass
-    
-    def remove_labels(flags):
-        # TODO if the user is using gmail then imap.remove_gmail_labels() otherwise, imap.remove_labels()
-        pass
+    def add_labels(self, flags):
+        # type: (t.Iterable[t.AnyStr]) -> None
+        """Add each of the flags in a list of flags to the message
 
-    def copy(dst_folder):
-        pass
+        Raises:
+            TypeError: flags is not an iterable or a string
+            TypeError: any flag is not a string
+        """
+        ok, flags = self._check_flags(flags)
+        if not ok:
+            return
+        if self._is_gmail():
+            self._imap_client.add_gmail_labels(self._uid, flags)
+        else:
+            self._imap_client.add_flags(self._uid, flags)
 
-    def delete():
-        pass
+    def remove_labels(self, flags):
+        # type: (t.Iterable[t.AnyStr]) -> None
+        """Remove each of the flags in a list of flags from the message
 
-    def mark_read(is_seen=True):
-        pass
+        Raises:
+            TypeError: flags is not an iterable or a string
+            TypeError: any flag is not a string
+        """
+        ok, flags = self._check_flags()
+        if not ok:
+            return
+        if self._is_gmail():
+            self._imap_client.remove_gmail_labels(self._uid, flags)
+        else:
+            self._imap_client.remove_flags(self._uid, flags)
 
-    def move(dst_folder):
-        pass
+
+    def copy(self, dst_folder):
+        # type: (t.AnyStr) -> None
+        """Copy the message to another folder.
+        """
+        self._check_folder(dst_folder)
+        self._imap_client.copy(self.uid, dst_folder)
+
+    def delete(self):
+        # type: () -> None
+        """Mark a message as deleted, the imap server will move it to the deleted messages.
+        """
+        self._imap_client.add_flags(self._uid, '\\Deleted')
+
+    def mark_read(self):
+        # type: () -> None
+        """Mark a message as read.
+        """
+        self._imap_client.add_flags(self._uid, '\\Seen')
+
+    def mark_unread(self):
+        # type: () -> None
+        """Mark a message as unread
+        """
+        self._imap_client.remove_flags(self._uid, '\\Seen')
+
+    def move(self, dst_folder):
+        # type: (t.AnyStr) -> None
+        """Copy the message to another folder.
+        """
+        self._check_folder(dst_folder)
+        self._imap_client.move(self.uid, dst_folder)
+
+    def _check_folder(self, dst_folder):
+        if not isinstance(dst_folder, basestring):
+            raise TypeError("folder named must be a string")
+        if not self._imap_client.folder_exists(dst_folder):
+            userLogger.info("folder %s does not exist creating it for you" % dst_folder)
+            self._imap_client.create_folder(dst_folder)
+
+
+    def _check_flags(self, flags):
+        # type: (t.Iterable[t.AnyStr]) -> bool, t.Iterable[t.AnyStr]
+        ok = True
+        # allow user to pass in a string
+        if isinstance(flags, basestring):
+            flags = [flags]
+        elif not isinstance(flags, Iterable):
+            raise TypeError("flags must be a list")
+        # make sure all flags are strings
+        for flag in flags:
+            if not isinstance(flag, basestring):
+                raise TypeError("each flag must be string")
+        # remove extraneous white space
+        flags = [flag.strip() for flag in flags]
+        # remove empty strings
+        flags = [flag for flag in flags if flag]
+        if not flags:
+            ok = False
+            userLogger.info("No valid flags passed")
+        return ok, flags
+
+    def _is_gmail(self):
+        # type: () -> bool
+        """Use heuristic to determine if we are connected to a gmail server
+
+        Returns:
+            bool: true if we think we are connected to a gmail server
+        """
+        return self._imap_client.has_capability('X-GM-EXT-1')
