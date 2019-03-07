@@ -88,7 +88,7 @@ class MailBox(object):
             # fire new message events
             while True:
                 try:
-                    event_data = self.event_queue.get_nowait()
+                    event_data = self.event_data_queue.get_nowait()
                     event_data.fire_event(self.newMessage)
                 except Queue.Empty:
                     break
