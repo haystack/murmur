@@ -5,8 +5,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 from datetime import datetime  # noqa: F401 ignore unused we use it for typing
 from browser.models.contact import Contact
 import logging
-from collections.abc import Iterable
-
+from collections import Sequence
 
 userLogger = logging.getLogger('youps.user')  # type: logging.Logger
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -251,8 +250,8 @@ class Message(object):
         # allow user to pass in a string
         if isinstance(flags, basestring):
             flags = [flags]
-        elif not isinstance(flags, Iterable):
-            raise TypeError("flags must be a list")
+        elif not isinstance(flags, Sequence):
+            raise TypeError("flags must be a sequence")
         # make sure all flags are strings
         for flag in flags:
             if not isinstance(flag, basestring):
