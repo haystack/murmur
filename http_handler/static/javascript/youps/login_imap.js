@@ -406,7 +406,7 @@ $(document).ready(function() {
         var modes = {};
 
         document.querySelectorAll('.tab-content .CodeMirror').forEach(function(element) { 
-            var id = element.parentElement.id.split("_")[1];
+            var id = $(element).parents('.tab-pane').attr('id').split("_")[1];
             code = element.CodeMirror.getValue(),
             name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML;
 
