@@ -20,6 +20,7 @@ def interpret(mailbox, is_test=False):
 
     # assert we actually got a mailbox
     assert isinstance(mailbox, MailBox)
+    assert mailbox.new_message_handler is not None
 
     # set up the default result
     res = {'status': True, 'imap_error': False, 'imap_log': ""}
@@ -38,7 +39,10 @@ def interpret(mailbox, is_test=False):
         assert mailbox is not None
         assert isinstance(mailbox, MailBox)
         logger.info("called on_message_arrival")
+        assert mailbox.new_message_handler is not None
         mailbox.new_message_handler += func
+        assert mailbox.new_message_handler is not None
+
 
     # execute user code
     try:
