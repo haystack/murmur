@@ -35,6 +35,7 @@ def interpret(mailbox, is_test=False):
 
     # define user methods
     def on_message_arrival(func):
+        logger.info("called on_message_arrival")
         mailbox.new_message_handler += func
 
     # execute user code
@@ -55,6 +56,8 @@ def interpret(mailbox, is_test=False):
             try:
                 event_data = mailbox.event_data_queue.get_nowait()
                 if isinstance(event_data, NewMessageData):
+                    assert mailbox is not None
+                    assert mailbox.new_message_handler is not None
                     event_data.fire_event(mailbox.new_message_handler)
             except Queue.Empty:
                 break
