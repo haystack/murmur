@@ -209,7 +209,7 @@ class Message(object):
         """Copy the message to another folder.
         """
         self._check_folder(dst_folder)
-        self._imap_client.copy(self.uid, dst_folder)
+        self._imap_client.copy(self._uid, dst_folder)
 
     def delete(self):
         # type: () -> None
@@ -234,7 +234,7 @@ class Message(object):
         """Copy the message to another folder.
         """
         self._check_folder(dst_folder)
-        self._imap_client.move(self.uid, dst_folder)
+        self._imap_client.move(self._uid, dst_folder)
 
     def _check_folder(self, dst_folder):
         if not isinstance(dst_folder, basestring):
