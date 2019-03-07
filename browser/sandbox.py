@@ -52,13 +52,12 @@ def interpret(mailbox, is_test=False):
         userLogger.exception("failure running user %s code" % mailbox._imap_account.email)
         return res
     finally:
-        user_std_out.close()
         # set the stdout back to what it was
         sys.stdout = sys.__stdout__
+        res['imap_log'] = user_std_out.getvalue() + res['imap_log']
+        user_std_out.close()
+        return res
 
-    res['imap_log'] = user_std_out.getvalue() + res['imap_log']
-
-    return res
 
 
     # with stdoutIO() as s:
