@@ -5,7 +5,7 @@ import logging
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from schema.youps import ImapAccount, FolderSchema, MailbotMode  # noqa: F401 ignore unused we use it for typing
 from folder import Folder
-from Queue import Queue
+import Queue
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -23,7 +23,7 @@ class MailBox(object):
         # Events
         self.new_message_handler = Event()  # type: Event
 
-        self.event_data_queue = Queue()  # type: Queue
+        self.event_data_queue = Queue.Queue()  # type: Queue
 
     def __str__(self):
         # type: () -> t.AnyStr
