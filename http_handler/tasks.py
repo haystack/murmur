@@ -119,7 +119,7 @@ def init_sync_user_inbox(imapAccount_email):
         imapAccount_email (string):  
     """
     logger.info("Start syncing user's inbox: %s" % (imapAccount_email))
-    try: 
+    try:
         imapAccount = ImapAccount.objects.get(email=imapAccount_email)
 
         # authenticate with the user's imap server
@@ -143,6 +143,11 @@ def init_sync_user_inbox(imapAccount_email):
             # TODO maybe we should email the user
             return
         logger.info("Mailbox sync done: %s" % (imapAccount_email))
+
+        try:
+            mailbox._run_user_code()
+        except Exception():
+            logger.exception("Mailbox run user code failed")
         # after sync, logout to prevent multi-connection issue
         imap.logout()
         

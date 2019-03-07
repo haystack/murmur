@@ -1,4 +1,4 @@
-# Baed on https://stackoverflow.com/questions/1092531/event-system-in-python/1096614#1096614
+# Based on https://stackoverflow.com/questions/1092531/event-system-in-python/1096614#1096614
 
 class Event:
     """Simple wrapper for a events
@@ -47,7 +47,7 @@ class Event:
         return len(self.handlers)
 
     def __iadd__(self, handler):
-        self.handle(handler)    
+        self.handle(handler)
 
     def __isub__(self, handler):
         self.unhandle(handler)

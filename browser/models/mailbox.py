@@ -3,7 +3,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 from event import Event
 import logging
 import typing as t  # noqa: F401 ignore unused we use it for typing
-from schema.youps import ImapAccount, FolderSchema  # noqa: F401 ignore unused we use it for typing
+from schema.youps import ImapAccount, FolderSchema, MailbotMode  # noqa: F401 ignore unused we use it for typing
 from folder import Folder
 from Queue import Queue
 
@@ -21,9 +21,9 @@ class MailBox(object):
         self._imap_account = imap_account  # type: ImapAccount
 
         # Events
-        self.newMessage = Event()  # type: Event
+        self.new_message_handler = Event()  # type: Event
 
-        self.event_data_queue = Queue()
+        self.event_data_queue = Queue()  # type: Queue
 
     def __str__(self):
         # type: () -> t.AnyStr
@@ -70,12 +70,37 @@ class MailBox(object):
             folder._uid_validity = uid_validity
 
     def _run_user_code(self):
-        while not self.event_data_queue.empty():
-            self.newMessage.handle( run_interpret.delay )
-            logger.debug("Popping event queue to run users' code")
-            event_data = self.event_data_queue.get()
-            event_data.fire_event(self.newMessage)
-            self.newMessage.unhandle( run_interpret.delay )
+        from StringIO import StringIO
+        import sys
+
+        user_std_out = StringIO()
+
+        try:
+            # reassign stdout
+            sys.stdout = user_std_out
+
+            # iterate over the modes
+            mode = self._imap_account.current_mode()
+            # get the user's code
+            user_code = mode.code  # type: t.AnyStr
+            # make newMessage point to self.newMessage
+            exec(user_code, globals(), {'newMessage': self.new_message_handler})
+            # fire new message events
+            while True:
+                try:
+                    event_data = self.event_queue.get_nowait()
+                    event_data.fire_event(self.newMessage)
+                except Queue.Empty:
+                    break
+                except Exception:
+                    logger.exception("failure while parsing event data")
+                    break
+
+            logger.info('user output: %s' % user_std_out.getvalue())
+            user_std_out.close()
+        finally:
+            # reassign stdout
+            sys.stdout = sys.__stdout__
 
     def _find_or_create_folder(self, name):
         # type: (t.AnyStr) -> Folder

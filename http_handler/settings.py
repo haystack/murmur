@@ -301,8 +301,8 @@ LOGGING = {
     },
     'loggers': {
         'youps': {
-            'handlers': ['custom.file', 'custom.console'],
-            'level': 'INFO',
+            'handlers': ['custom.file'],
+            'level': 'DEBUG',
             'propagate': True
         },
         'youps.user': {

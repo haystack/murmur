@@ -274,7 +274,7 @@ class Folder(object):
                                            )
             message_schema.save()
             if last_seen_uid != 0:
-                event_data_queue.put(NewMessageData(self._schema.imap_account, "UID %d" % uid, self._schema))
+                event_data_queue.put(NewMessageData(Message(message_schema, self._imap_client)))
 
             logger.debug("finished saving new messages..: %s" % self._schema.imap_account.email)
 
@@ -338,16 +338,3 @@ class Folder(object):
                 logger.debug("created contact %s in database" % name)
             contact_schemas.append(contact_schema)
         return contact_schemas
-
-
-    # def parse_envelope(envelope):
-    #     date = envelope.date # type: datetime
-    #     subject = envelope.subject # type: t.AnyStr
-    #     from_ = envelope.from_ # type: t.List[Address]
-    #     sender = envelope.sender  # type: t.List[Address]
-    #     reply_to = envelope.reply_to  # type: t.List[Address]
-    #     to = envelope.to  # type: t.List[Address]
-    #     cc = envelope.cc  # type: t.List[Address]
-    #     bcc = envelope.bcc  # type: t.List[Address]
-    #     in_reply_to = envelope.in_reply_to  # type: t.List[t.AnyStr] # TODO not sure what this is
-    #     message_id = envelope.message_id  # type: t.AnyStr

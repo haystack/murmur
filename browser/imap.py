@@ -93,4 +93,3 @@ def authenticate(imap_account):
         imap_account.save()
 
     return res
-
