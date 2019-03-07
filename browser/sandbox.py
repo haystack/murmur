@@ -40,6 +40,7 @@ def interpret(mailbox, is_test=False):
         assert isinstance(mailbox, MailBox)
         logger.info("called on_message_arrival")
         assert mailbox.new_message_handler is not None
+        assert isinstance(mailbox.new_message_handler, NewMessageData)
         logger.info("type of new message handler %s" % type(mailbox.new_message_handler))
         mailbox.new_message_handler += func
         assert mailbox.new_message_handler is not None
