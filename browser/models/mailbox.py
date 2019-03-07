@@ -79,8 +79,8 @@ class MailBox(object):
             # reassign stdout
             sys.stdout = user_std_out
 
-            # iterate over the modes
-            mode = self._imap_account.current_mode()
+            # get the current mode 
+            mode = self._imap_account.current_mode
             # get the user's code
             user_code = mode.code  # type: t.AnyStr
             # make newMessage point to self.newMessage
