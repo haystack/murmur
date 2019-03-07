@@ -36,7 +36,7 @@ def interpret(mailbox, is_test=False):
         sys.stdout = user_std_out
 
         # execute the user's code with defined handlers
-        exec(code, globals(), {'newMessage', mailbox.new_message_handler})
+        exec(code, globals(), {'newMessage': mailbox.new_message_handler})
 
         # fire new message events
         while True:
