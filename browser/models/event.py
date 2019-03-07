@@ -44,9 +44,11 @@ class Event:
 
     def __iadd__(self, handler):
         self.handle(handler)
+        return self
 
     def __isub__(self, handler):
         self.unhandle(handler)
+        return self
 
     def __call__(self, *args, **kwargs):
         self.fire(*args, **kwargs)
