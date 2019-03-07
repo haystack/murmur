@@ -1,7 +1,6 @@
 from __future__ import unicode_literals, print_function, division
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 from event import Event
-from event_data import NewMessageData
 import logging
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from schema.youps import ImapAccount, FolderSchema, MailbotMode  # noqa: F401 ignore unused we use it for typing
@@ -73,7 +72,7 @@ class MailBox(object):
     def _run_user_code(self):
         from browser.sandbox import interpret
         res = interpret(self)
-        if res['status']:
+        if res['status'] and res['imap_log']:
             logger.info('user output: %s' % res['imap_log'])
 
 
