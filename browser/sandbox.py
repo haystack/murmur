@@ -9,6 +9,7 @@ from StringIO import StringIO
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 
 from browser.models.event_data import NewMessageData
+from browser.models.event import Event
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
 from schema.youps import Action  # noqa: F401 ignore unused we use it for typing
 
@@ -40,7 +41,7 @@ def interpret(mailbox, is_test=False):
         assert isinstance(mailbox, MailBox)
         logger.info("called on_message_arrival")
         assert mailbox.new_message_handler is not None
-        assert isinstance(mailbox.new_message_handler, NewMessageData)
+        assert isinstance(mailbox.new_message_handler, Event)
         logger.info("type of new message handler %s" % type(mailbox.new_message_handler))
         mailbox.new_message_handler += func
         assert mailbox.new_message_handler is not None
