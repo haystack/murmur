@@ -187,6 +187,7 @@
 
 .folder-container {
   width: 200px;
+  float: left;
 }
 
 .folder-container ul {
