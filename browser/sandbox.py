@@ -36,7 +36,6 @@ def interpret(mailbox, is_test=False):
 
     # define user methods
     def on_message_arrival(func):
-        global mailbox
         assert mailbox is not None
         assert isinstance(mailbox, MailBox)
         logger.info("called on_message_arrival")
@@ -53,7 +52,8 @@ def interpret(mailbox, is_test=False):
         # define the variables accessible to the user
         user_environ = {
             'new_message_handler': mailbox.new_message_handler,
-            'on_message_arrival': on_message_arrival
+            'on_message_arrival': on_message_arrival,
+            'mailbox': mailbox
         }
         # execute the user's code 
         exec(code, user_environ)
