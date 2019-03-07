@@ -10,7 +10,7 @@ from browser.models.event_data import NewMessageData
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
 from schema.youps import Action  # noqa: F401 ignore unused we use it for typing
 
-logger = logging.getLogger('youps')
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 
 def interpret(mailbox, is_test=False):
@@ -23,6 +23,9 @@ def interpret(mailbox, is_test=False):
 
     mode = mailbox._imap_account.current_mode
     code = mode.code 
+
+    logger.debug("mailbox %s", mailbox)
+    assert mailbox.new_message_handler is not None
 
     try:
         # set the stdout to a string
