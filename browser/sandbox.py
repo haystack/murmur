@@ -7,7 +7,6 @@ from StringIO import StringIO
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 
 from browser.models.event_data import NewMessageData
-from browser.models.event import Event
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
 from schema.youps import Action  # noqa: F401 ignore unused we use it for typing
 
@@ -21,7 +20,7 @@ def interpret(mailbox, is_test=False):
     assert isinstance(mailbox, MailBox)
 
     # set up the default result
-    res = {'status' : True, 'imap_error': False, 'imap_log': ""}
+    res = {'status': True, 'imap_error': False, 'imap_log': ""}
 
     # get the logger for user output
     userLogger = logging.getLogger('youps.user')  # type: logging.Logger
@@ -32,12 +31,22 @@ def interpret(mailbox, is_test=False):
     code = mode.code
     assert isinstance(code, unicode)
 
+    # define user methods
+    def on_message_arrival(func):
+        mailbox.new_message_handler += func
+
+    # execute user code
     try:
         # set the stdout to a string
         sys.stdout = user_std_out
 
-        # execute the user's code with defined handlers
-        exec(code, {'newMessage': mailbox.new_message_handler})
+        # define the variables accessible to the user
+        user_environ = {
+            'new_message_handler': mailbox.new_message_handler,
+            'on_message_arrival': on_message_arrival
+        }
+        # execute the user's code 
+        exec(code, user_environ)
 
         # fire new message events
         while True:
@@ -50,7 +59,8 @@ def interpret(mailbox, is_test=False):
 
     except Exception:
         res['status'] = False
-        userLogger.exception("failure running user %s code" % mailbox._imap_account.email)
+        userLogger.exception("failure running user %s code" %
+                             mailbox._imap_account.email)
         return res
     finally:
         # set the stdout back to what it was
@@ -76,11 +86,11 @@ def interpret(mailbox, is_test=False):
     #     def on_message_arrival(func=None):
     #         if not func or type(func).__name__ != "function":
     #             raise Exception('on_message_arrival(): requires callback function but it is %s ' % type(func).__name__)
-                
+
     #         if func.func_code.co_argcount != 1:
     #             raise Exception('on_message_arrival(): your callback function should have only 1 argument, but there are %d argument(s)' % func.func_code.co_argcount)
 
-    #         # TODO warn users if it conatins send() and their own email (i.e., it potentially leads to infinite loops) 
+    #         # TODO warn users if it conatins send() and their own email (i.e., it potentially leads to infinite loops)
 
     #         # TODO replace with the right folder
     #         current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
@@ -98,7 +108,7 @@ def interpret(mailbox, is_test=False):
 
     #         if not func or type(func).__name__ != "function":
     #             raise Exception('set_interval(): requires callback function but it is %s ' % type(func).__name__)
-                
+
     #         if func.func_code.co_argcount != 0:
     #             raise Exception('set_interval(): your callback function should have only 0 argument, but there are %d argument(s)' % func.func_code.co_argcount)
 
@@ -119,7 +129,7 @@ def interpret(mailbox, is_test=False):
     #             raise Exception('set_timeout(): requires code to be executed periodically')
 
     #         args = ujson.dumps( [imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test, email_content] )
-    #         add_periodic_task.delay( delay, args, delay * 2 - 0.5 ) # make it expire right before 2nd execution happens 
+    #         add_periodic_task.delay( delay, args, delay * 2 - 0.5 ) # make it expire right before 2nd execution happens
 
     #     def send(subject="", to_addr="", body=""):
     #         if len(to_addr) == 0:
@@ -129,125 +139,6 @@ def interpret(mailbox, is_test=False):
     #             send_email(subject, imap_account.email, to_addr, body)
     #         logger.debug("send(): sent a message to  %s" % str(to_addr))
 
-    #     def add_gmail_labels(flags):
-    #         pile.add_gmail_labels(flags, is_test)
-
-    #     def add_labels(flags):
-    #         add_notes(flags)
-
-    #     def add_notes(flags):
-    #         pile.add_notes(flags, is_test)
-
-    #     def copy(dst_folder):
-    #         pile.copy(dst_folder, is_test)
-
-    #     def delete():
-    #         pile.delete(is_test)
-
-    #     def get_history(email, hours=24, cond=True):
-    #         if len(email) == 0:
-    #             raise Exception('get_history(): email address is not provided')
-
-    #         if hours <= 0:
-    #             raise Exception('get_history(): hours must be bigger than 0')
-
-    #         # get uid of emails within interval
-    #         now = datetime.now()
-    #         start_time = now - timedelta(hours = hours)
-    #         heuristic_id = imap_account.newest_msg_id -100 if imap_account.newest_msg_id -100 > 1 else 1
-    #         name, sender_addr = parseaddr(get_sender().lower())
-    #         today_email_ids = imap.search( 'FROM %s SINCE "%d-%s-%d"' % (sender_addr, start_time.day, calendar.month_abbr[start_time.month], start_time.year) )
-
-    #         # today_email = Pile(imap, 'UID %d:* SINCE "%d-%s-%d"' % (heuristic_id, start_time.day, calendar.month_abbr[start_time.month], start_time.year))
-    #         # min_msgid = 99999
-    #         # logging.debug("before get dates")
-
-    #         received_cnt = 0
-    #         sent_cnt = 0
-    #         cond_cnt = 0
-    #         for msgid in reversed(today_email_ids):
-    #             p = Pile(imap, 'UID %d' % (msgid))
-
-    #             t = p.get_date()
-    #             date_tuple = utils.parsedate_tz(t)
-    #             if date_tuple:
-    #                 local_date = datetime.fromtimestamp(
-    #                     utils.mktime_tz(date_tuple))
-
-    #                 if start_time > local_date:
-    #                     break
-
-    #                 rs = p.get_recipients()
-    #                 ss = p.get_senders()
-
-    #                 with_email = False
-
-    #                 # check if how many msg sent to this email
-    #                 for j in range(len(rs)):
-    #                     if email in rs[j] and imap_account.email in ss[0]:
-    #                         sent_cnt = sent_cnt + 1
-    #                         with_email = True
-    #                         break
-
-    #                 for j in range(len(ss)):
-    #                     if email in ss[j]:
-    #                         received_cnt = received_cnt + 1
-    #                         with_email = True
-    #                         break
-
-    #                 if with_email:
-    #                     if cond is True:
-    #                         cond_cnt = cond_cnt + 1
-    #                     else:
-    #                         if cond(p):
-    #                             cond_cnt = cond_cnt + 1
-
-    #         # for msg in today_email.get_dates():
-    #         #     msgid, t = msg
-    #         #     date_tuple = utils.parsedate_tz(t)
-    #         #     if date_tuple:
-    #         #         local_date = datetime.fromtimestamp(
-    #         #             utils.mktime_tz(date_tuple))
-
-    #         #         if start_time < local_date:
-    #         #             emails.append( msgid )
-
-
-    #         # for i in range(len(emails)):
-    #         #     p = Pile(imap, "UID %d" % (emails[i]))
-
-    #         #     rs = p.get_recipients()
-    #         #     ss = p.get_senders()
-
-    #         #     with_email = False
-
-    #         #     # check if how many msg sent to this email
-    #         #     for j in range(len(rs)):
-    #         #         if email in rs[j] and imap_account.email in ss[0]:
-    #         #             sent_cnt = sent_cnt + 1
-    #         #             with_email = True
-    #         #             break
-
-    #         #     for j in range(len(ss)):
-    #         #         if email in ss[j]:
-    #         #             received_cnt = received_cnt + 1
-    #         #             with_email = True
-    #         #             break
-
-    #         #     if with_email:
-    #         #         if cond == True:
-    #         #             cond_cnt = cond_cnt + 1
-    #         #         else:
-    #         #             if cond(p):
-    #         #                 cond_cnt = cond_cnt + 1
-
-    #         r = {'received_emails': received_cnt, 'cond': cond_cnt}
-
-    #         return r
-
-    #     def get_sender():
-    #         return pile.get_sender()
-
     #     def get_content():
     #         logger.debug("call get_content")
     #         if email_content:
@@ -255,46 +146,11 @@ def interpret(mailbox, is_test=False):
     #         else:
     #             return pile.get_content()
 
-    #     def get_date():
-    #         return pile.get_date()
-
     #     def get_attachment():
     #         pass
 
-    #     def get_subject():
-    #         return pile.get_subject()
-
-    #     def get_recipients():
-    #         return pile.get_recipients()
-
-
     #     def get_attachments():
     #         pass
-
-    #     def get_labels():
-    #         return get_notes()
-
-    #     def get_notes():
-    #         return pile.get_notes()
-
-    #     def get_gmail_labels():
-    #         return pile.get_gmail_labels()
-
-    #     def mark_read(is_seen=True):
-    #         pile.mark_read(is_seen, is_test)
-
-
-    #     def move(dst_folder):
-    #         pile.move(dst_folder, is_test)
-
-    #     def remove_labels(flags):
-    #         remove_notes(flags)
-
-    #     def remove_notes(flags):
-    #         pile.remove_notes(flags, is_test)
-
-    #     def remove_gmail_labels(flags):
-    #         pile.remove_gmail_labels(flags, is_test)
 
     #     # return a list of email UIDs
     #     def search(criteria=u'ALL', charset=None, folder=None):
@@ -332,7 +188,6 @@ def interpret(mailbox, is_test=False):
     #     def rename_folder(old_name, new_name):
     #         pile.rename_folder(old_name, new_name, is_test)
 
-
     #     def get_mode():
     #         if imap_account.current_mode:
     #             return imap_account.current_mode.uid
@@ -344,7 +199,6 @@ def interpret(mailbox, is_test=False):
     #             mode_index = int(mode_index)
     #         except ValueError:
     #             raise Exception('set_mode(): args mode_index must be a index (integer)')
-
 
     #         mm = MailbotMode.objects.filter(uid=mode_index, imap_account=imap_account)
     #         if mm.exists():
