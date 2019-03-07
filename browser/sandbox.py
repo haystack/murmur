@@ -7,6 +7,7 @@ from StringIO import StringIO
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 
 from browser.models.event_data import NewMessageData
+from browser.models.event import Event
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
 from schema.youps import Action  # noqa: F401 ignore unused we use it for typing
 
@@ -15,6 +16,9 @@ logger = logging.getLogger('youps')  # type: logging.Logger
 
 def interpret(mailbox, is_test=False):
     # type: (Mailbox, bool) -> t.Dict[t.AnyStr, t.Any]
+    assert isinstance(mailbox, MailBox)
+    assert isinstance(mailbox.new_message_handler, Event)
+
     res = {'status' : True, 'imap_error': False, 'imap_log': ""}
 
     # get the logger for user output
@@ -22,10 +26,10 @@ def interpret(mailbox, is_test=False):
     user_std_out = StringIO()
 
     mode = mailbox._imap_account.current_mode
-    code = mode.code 
+    code = mode.code
+    assert isinstance(code, unicode)
 
     logger.debug("mailbox %s", mailbox)
-    assert mailbox.new_message_handler is not None
 
     try:
         # set the stdout to a string
