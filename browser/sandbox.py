@@ -16,27 +16,28 @@ logger = logging.getLogger('youps')  # type: logging.Logger
 
 def interpret(mailbox, is_test=False):
     # type: (Mailbox, bool) -> t.Dict[t.AnyStr, t.Any]
-    assert isinstance(mailbox, MailBox)
-    assert isinstance(mailbox.new_message_handler, Event)
 
+    # assert we actually got a mailbox
+    assert isinstance(mailbox, MailBox)
+
+    # set up the default result
     res = {'status' : True, 'imap_error': False, 'imap_log': ""}
 
     # get the logger for user output
     userLogger = logging.getLogger('youps.user')  # type: logging.Logger
     user_std_out = StringIO()
 
+    # get the current mode code
     mode = mailbox._imap_account.current_mode
     code = mode.code
     assert isinstance(code, unicode)
-
-    logger.debug("mailbox %s", mailbox)
 
     try:
         # set the stdout to a string
         sys.stdout = user_std_out
 
         # execute the user's code with defined handlers
-        exec(code, globals(), {'newMessage': mailbox.new_message_handler})
+        exec(code, {'newMessage': mailbox.new_message_handler})
 
         # fire new message events
         while True:
@@ -57,8 +58,6 @@ def interpret(mailbox, is_test=False):
         res['imap_log'] = user_std_out.getvalue() + res['imap_log']
         user_std_out.close()
         return res
-
-
 
     # with stdoutIO() as s:
     #     def catch_exception(e):
