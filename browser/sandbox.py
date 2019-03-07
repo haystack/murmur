@@ -51,7 +51,7 @@ def interpret(mailbox, is_test=False):
             'mailbox': mailbox
         }
         # execute the user's code 
-        exec(code, user_environ)
+        exec(code, globals(), user_environ)
 
         # fire new message events
         while True:
