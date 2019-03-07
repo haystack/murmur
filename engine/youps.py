@@ -1,21 +1,18 @@
 import base64
 import logging
 import random
+import string
 import traceback
-from browser.imap import GoogleOauth2
-from http_handler.settings import IMAP_SECRET
-from schema.youps import ImapAccount, MailbotMode, Action
+
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
-from engine.constants import msg_code
-from browser.imap import authenticate
+
+from browser.imap import GoogleOauth2, authenticate
 from browser.sandbox import interpret
-import string
-from browser.models.mailbox import MailBox
-
-from http_handler.tasks import remove_periodic_task, init_sync_user_inbox
-
-import logging
+from engine.constants import msg_code
+from http_handler.settings import IMAP_SECRET
+from http_handler.tasks import init_sync_user_inbox, remove_periodic_task
+from schema.youps import Action, ImapAccount, MailbotMode
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 

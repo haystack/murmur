@@ -1,17 +1,13 @@
-from datetime import timedelta
-from django.utils.timezone import now
-from celery.decorators import task, periodic_task
-from celery.utils.log import get_task_logger
-from http_handler.settings import BASE_URL, WEBSITE, IMAP_SECRET
-from schema.youps import Action, ImapAccount, TaskScheduler, PeriodicTask, FolderSchema
-from smtp_handler.utils import send_email, codeobject_loads
-
-import json, ujson, types, marshal, random
-from browser.models.mailbox import MailBox
-from browser.imap import authenticate
-from browser.sandbox import interpret
-
 import logging
+import random
+
+import ujson
+from browser.imap import authenticate
+from browser.models.mailbox import MailBox
+from celery.decorators import task
+from http_handler.settings import BASE_URL
+from schema.youps import Action, ImapAccount, PeriodicTask, TaskScheduler
+from smtp_handler.utils import codeobject_loads, send_email
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -33,7 +29,7 @@ def add_periodic_task(interval, imap_account_id, action_id, search_criteria, fol
     TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args, expires=expires)
 
     imap_account = ImapAccount.objects.get(id=imap_account_id)
-    if expires: # set_timeout
+    if expires:  # set_timeout
         imap_account.status_msg = imap_account.status_msg + "[%s]set_timeout(): will be executed after %d seconds\n" % (ptask_name, interval)
     else:
         imap_account.status_msg = imap_account.status_msg + "[%s]set_interval(): executing every %d seconds\n" % (ptask_name, interval)
@@ -73,7 +69,7 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
     Args:
         imap_account_id (number): id of associated ImapAccount object
         code (code object or string): which code to run
-        search_creteria (string): IMAP query. To which email to run the code
+        search_criteria (string): IMAP query. To which email to run the code
         is_test (boolean): True- just printing the log. False- executing the code
         email_content (string): for email shortcut --> potential deprecate  
     """
@@ -131,15 +127,21 @@ def init_sync_user_inbox(imapAccount_email):
         # if authentication failed we can't run anything
         if not auth_res['status']:
             # Stop doing loop
+            # TODO maybe we should email the user
             return
 
         # get an imapclient which is authenticated
         imap = auth_res['imap']
 
         # create the mailbox
-        mailbox = MailBox(imapAccount, imap)
-        # sync the mailbox with imap
-        mailbox._sync()
+        try:
+            mailbox = MailBox(imapAccount, imap)
+            # sync the mailbox with imap
+            mailbox._sync()
+        except Exception:
+            logger.exception("Mailbox sync failed")
+            # TODO maybe we should email the user
+            return
         logger.info("Mailbox sync done: %s" % (imapAccount_email))
         # after sync, logout to prevent multi-connection issue
         imap.logout()
@@ -147,9 +149,7 @@ def init_sync_user_inbox(imapAccount_email):
         if imapAccount.is_initialized is False:
             imapAccount.is_initialized = True
             imapAccount.save()
-
             send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
-
             ptask_name = "sync_%s" % (imapAccount_email)
             args = ujson.dumps( [imapAccount_email] )
             TaskScheduler.schedule_every('init_sync_user_inbox', 'seconds', 4, ptask_name, args)
