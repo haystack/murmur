@@ -109,7 +109,7 @@
 										{% else %}
 											<li>
 										{% endif %}
-											<a href="#editor-tab_{{mode.uid}}" data-toggle="tab">
+											<a href="#tab_{{mode.uid}}" data-toggle="tab">
 													<span class="tab-title" mode-id={{ mode.uid }}>
 													{{ mode.name }} ({{ mode.uid }})
 													</span>
@@ -122,12 +122,12 @@
 								<div class="tab-content">
 									{% for mode in modes %}
 										{% if current_mode == mode %}
-											<div class="tab-pane row active">
+											<div class="tab-pane row active" id="tab_{{mode.uid}}">
 										{% else %}
-											<div class="tab-pane row">
+											<div class="tab-pane row" id="tab_{{mode.uid}}">
 										{% endif %}
 												<div class="folder-container"></div>
-												<div class="editor-container" id="editor-tab_{{mode.uid}}">
+												<div class="editor-container">
 														<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
 {{ mode.code }}
 														</textarea>
@@ -139,7 +139,7 @@
 							{% else %}
 								<ul class="nav nav-tabs" role="tablist">
 									<li class="active" >
-										<a href="#editor-tab_0" data-toggle="tab">
+										<a href="#tab_0" data-toggle="tab">
 											<span class="tab-title" mode-id=0>
 												Default
 											</span>
@@ -148,7 +148,9 @@
 									<li><a href="#" class="add-tab">+ Add Mode</a></li>
 								</ul>
 								<div class="tab-content">
-									<div class="tab-pane active" id="editor-tab_0">
+									<div class="tab-pane active" id="tab_0">
+										<div class="folder-container"></div>
+										<div class="editor-container">
 											  <textarea class="editor mode-editor" id="editor-0"> 												  
 if "csail-related" in get_subject():
     mark_read(True)
@@ -173,6 +175,7 @@ interaction = get_history(get_sender(), 5, paper_related_debate)
 if interaction['cond'] > 7:
     move("conference")
 </textarea>
+										</div>
 									</div>
 								</div>
 							{% endif %}

@@ -170,7 +170,7 @@ $(document).ready(function() {
         // Init editor & its autocomplete
         document.querySelectorAll('textarea.editor').forEach(function(element) {
             var mode_id = element.id.split("-")[1];
-            $('.nav-tabs li a[href="#editor-tab_'+ mode_id +'"]').click();
+            $('.nav-tabs li a[href="#tab_'+ mode_id +'"]').click();
 
             init_editor(element);
         });
@@ -245,11 +245,11 @@ $(document).ready(function() {
 
         var id = Math.max.apply(null, modes_keys) +1 ; // avoid same ID
         // Add tab
-        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
+        $(this).closest('li').before('<li><a href="#tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
         // Add tab-pane
-        $('.tab-content').append(`<div class="tab-pane row"> 
+        $('.tab-content').append(`<div class="tab-pane row" id="tab_` + id + `"> 
                 <div class="folder-container"></div>
-                <div class="editor-container" id="editor-tab_` + id + `">
+                <div class="editor-container">
                     <textarea class="editor mode-editor" id="editor-` + id + `"></textarea>
                 </div>
             </div>`);
@@ -394,7 +394,7 @@ $(document).ready(function() {
 
     function get_current_mode() {
         var id = $("#current_mode_dropdown").attr('mode-id'),
-            code = document.querySelector('#editor-tab_'+ id +' .CodeMirror').CodeMirror.getValue();
+            code = document.querySelector('#tab_'+ id +' .CodeMirror').CodeMirror.getValue();
 
         return {"id": id,
             "name": $.trim(document.querySelector('.nav.nav-tabs li.active .tab-title').innerHTML), 
