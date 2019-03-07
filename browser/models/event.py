@@ -2,22 +2,18 @@
 
 class Event:
     """Simple wrapper for a events
-    
+
     Usage:
         > class MockFileWatcher:
         >     def __init__(self):
         >         self.fileChanged = Event()
-        > 
         >     def watchFiles(self):
         >         source_path = "foo"
         >         self.fileChanged(source_path)
-        > 
         > def log_file_change(source_path):
         >     print "%r changed." % (source_path,)
-        > 
         > def log_file_change2(source_path):
         >     print "%r changed!" % (source_path,)
-        > 
         > watcher              = MockFileWatcher()
         > watcher.fileChanged += log_file_change2
         > watcher.fileChanged += log_file_change

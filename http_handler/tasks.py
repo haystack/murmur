@@ -24,7 +24,7 @@ def add_periodic_task(interval, imap_account_id, action_id, search_criteria, fol
     code = 'a=Action.objects.get(id=%d)\ncode_object=codeobject_loads(a.code)\ng = type(codeobject_loads)(code_object ,locals())\ng()' % action_id
     args = ujson.dumps( [imap_account_id, code, search_criteria, folder_name] )
 
-    # TODO naming meaningful to distinguish one-off and interval running 
+    # TODO naming meaningful to distinguish one-off and interval running
     ptask_name = "%d_%d" % (int(imap_account_id), random.randint(1, 10000))
     TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args, expires=expires)
 
@@ -34,12 +34,12 @@ def add_periodic_task(interval, imap_account_id, action_id, search_criteria, fol
     else:
         imap_account.status_msg = imap_account.status_msg + "[%s]set_interval(): executing every %d seconds\n" % (ptask_name, interval)
     imap_account.save()
-    
+
 
 @task(name="remove_periodic_task")
 def remove_periodic_task(imap_account_id, ptask_name=None):
     """ remove a new periodic task. If ptask_name is given, then remove that specific task.
-    Otherwise remove all tasks that are associated with the IMAP account ID. 
+    Otherwise remove all tasks that are associated with the IMAP account ID.
 
     Args:
         imap_account_id (number): id of associated ImapAccount object
@@ -49,14 +49,14 @@ def remove_periodic_task(imap_account_id, ptask_name=None):
     if ptask_name is None:
         ptask_prefix = '%d_' % imap_account_id
         PeriodicTask.objects.filter(name__startswith=ptask_prefix).delete()
-        Action.objects.filter(folder__imap_account__id=imap_account_id).delete()      
+        Action.objects.filter(folder__imap_account__id=imap_account_id).delete()
 
     else:
         PeriodicTask.objects.filter(name=ptask_name).delete()
 
     imap_account = ImapAccount.objects.get(id=imap_account_id)
     status_msgs = imap_account.status_msg.split('\n')
-    
+
     # update status msg for the user
     new_msg = "".join([ x+"\n" for x in status_msgs if len(x.strip()) > 0 and not x.startswith( "[%d" % (imap_account_id) )])
     imap_account.status_msg = new_msg
@@ -71,7 +71,7 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
         code (code object or string): which code to run
         search_criteria (string): IMAP query. To which email to run the code
         is_test (boolean): True- just printing the log. False- executing the code
-        email_content (string): for email shortcut --> potential deprecate  
+        email_content (string): for email shortcut --> potential deprecate
     """
     logger.info("Task run interpret imap_account: %d %s" % (imap_account_id, folder_name))
     try: 
@@ -150,7 +150,6 @@ def init_sync_user_inbox(imapAccount_email):
             logger.exception("Mailbox run user code failed")
         # after sync, logout to prevent multi-connection issue
         imap.logout()
-        
         if imapAccount.is_initialized is False:
             imapAccount.is_initialized = True
             imapAccount.save()

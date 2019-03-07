@@ -306,6 +306,7 @@ LOGGING = {
             'propagate': True
         },
         'youps.user': {
+            'handlers': ['custom.console'],
             'level': 'DEBUG',
             'propagate': True
         },

@@ -71,38 +71,11 @@ class MailBox(object):
             folder._uid_validity = uid_validity
 
     def _run_user_code(self):
-        from StringIO import StringIO
-        import sys
+        from browser.sandbox import interpret
+        res = interpret(self)
+        if res['status']:
+            logger.info('user output: %s' % res['imap_log'])
 
-        user_std_out = StringIO()
-
-        try:
-            # reassign stdout
-            sys.stdout = user_std_out
-
-            # get the current mode 
-            mode = self._imap_account.current_mode
-            # get the user's code
-            user_code = mode.code  # type: t.AnyStr
-            # make newMessage point to self.newMessage
-            exec(user_code, globals(), {'newMessage': self.new_message_handler})
-            # fire new message events
-            while True:
-                try:
-                    event_data = self.event_data_queue.get_nowait()
-                    if isinstance(event_data, NewMessageData):
-                        event_data.fire_event(self.new_message_handler)
-                except Queue.Empty:
-                    break
-                except Exception:
-                    logger.exception("failure while parsing event data")
-                    break
-
-            logger.info('user output: %s' % user_std_out.getvalue())
-            user_std_out.close()
-        finally:
-            # reassign stdout
-            sys.stdout = sys.__stdout__
 
     def _find_or_create_folder(self, name):
         # type: (t.AnyStr) -> Folder
@@ -133,7 +106,7 @@ class MailBox(object):
         # https://www.imapwiki.org/ClientImplementation/MailboxList
         # we basically only want to list folders when we have to
         for (flags, delimiter, name) in self._imap_client.list_folders('', root + '%'):
-            # TODO check if the user is using the gmail. 
+            # TODO check if the user is using the gmail
             # If it is gmail, then skip All Mail folder
             if name == "[Gmail]/All Mail":
                 continue
