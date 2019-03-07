@@ -72,7 +72,8 @@ $(document).ready(function() {
     function init_folder_selector($folder_container) {
         // nested tree checkboxs http://jsfiddle.net/rn290ywf/
         // TODO just for test
-        folders = ['Boomerang', 'Boomerang-Outbox', 'Boomerang-Outbox/Cancelled/A', 'Boomerang-Returned', 'INBOX', '[Gmail]/All Mail', '[Gmail]/Drafts', '[Gmail]/Important', '[Gmail]/Sent Mail', '[Gmail]/Spam', '[Gmail]/Starred', '[Gmail]/Trash', 'bundle_test', 'how is it going', 'myriad', 'myriad/haystack-potluck', 'test1', 'test2', 'test3', 'test4']
+        if (folders.length ==0)
+            folders = ['Boomerang', 'Boomerang-Outbox', 'Boomerang-Outbox/Cancelled/A', 'Boomerang-Returned', 'INBOX', '[Gmail]/All Mail', '[Gmail]/Drafts', '[Gmail]/Important', '[Gmail]/Sent Mail', '[Gmail]/Spam', '[Gmail]/Starred', '[Gmail]/Trash', 'bundle_test', 'how is it going', 'myriad', 'myriad/haystack-potluck', 'test1', 'test2', 'test3', 'test4']
         
         // Init a new folder list
 
@@ -89,7 +90,10 @@ $(document).ready(function() {
                     d = d[v]
                 })
                 folders_nested = $.extend(folders_nested,d)
-            }        
+            } else { 
+                if( (value in folders_nested) == false)  
+                    folders_nested[value]= {} 
+                }        
         })
 
         function isDict(v) {
