@@ -1,6 +1,7 @@
 from __future__ import unicode_literals, print_function, division
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 from event import Event
+from event_data import NewMessageData
 import logging
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from schema.youps import ImapAccount, FolderSchema, MailbotMode  # noqa: F401 ignore unused we use it for typing
@@ -89,7 +90,8 @@ class MailBox(object):
             while True:
                 try:
                     event_data = self.event_data_queue.get_nowait()
-                    event_data.fire_event(self.new_message_handler)
+                    if isinstance(event_data, NewMessageData):
+                        event_data.fire_event(self.new_message_handler)
                 except Queue.Empty:
                     break
                 except Exception:
