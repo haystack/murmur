@@ -21,7 +21,6 @@ def interpret(mailbox, is_test=False):
     userLogger = logging.getLogger('youps.user')  # type: logging.Logger
     user_std_out = StringIO()
 
-    mailbox = mailbox  # type: Mailbox
     mode = mailbox._imap_account.current_mode
     code = mode.code 
 
@@ -44,7 +43,7 @@ def interpret(mailbox, is_test=False):
     except Exception:
         res['status'] = False
         userLogger.exception("failure running user %s code" % mailbox._imap_account.email)
-        return
+        return res
     finally:
         user_std_out.close()
         # set the stdout back to what it was
