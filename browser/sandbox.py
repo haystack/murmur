@@ -35,6 +35,8 @@ def interpret(mailbox, is_test=False):
 
     # define user methods
     def on_message_arrival(func):
+        assert mailbox is not None
+        assert isinstance(mailbox, MailBox)
         logger.info("called on_message_arrival")
         mailbox.new_message_handler += func
 
