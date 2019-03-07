@@ -142,6 +142,7 @@ def init_sync_user_inbox(imapAccount_email):
             logger.exception("Mailbox sync failed")
             # TODO maybe we should email the user
             return
+        return
         logger.info("Mailbox sync done: %s" % (imapAccount_email))
 
         try:
