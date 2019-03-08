@@ -273,6 +273,8 @@ $(document).ready(function() {
         unsaved_tabs.push( id );
 
         init_editor( document.getElementById("editor-" + id) );
+
+        init_folder_selector( $("#tab_" + id + " .folder-container") )
     });
 
     var editHandler = function() {
