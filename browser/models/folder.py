@@ -205,7 +205,7 @@ class Folder(object):
         # we just check the highestmodseq and revert to full sync if they don't match
         # this is kind of what thunderbird does https://wiki.mozilla.org/Thunderbird:IMAP_RFC_4551_Implementation
         if highest_mod_seq is not None:
-            if self.highest_mod_seq == highest_mod_seq:
+            if self._highest_mod_seq == highest_mod_seq:
                 logger.info("matching highest mod seq no flag update")
                 return
 
@@ -244,7 +244,7 @@ class Folder(object):
 
         logger.debug("%s updated flags" % self)
         if highest_mod_seq is not None:
-            self.highest_mod_seq = highest_mod_seq
+            self._highest_mod_seq = highest_mod_seq
             logger.info("%s updated highest mod seq to %d" % self, highest_mod_seq)
 
 
