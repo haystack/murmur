@@ -11,6 +11,30 @@ from smtp_handler.utils import codeobject_loads, send_email
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
+from celery.five import monotonic
+from contextlib import contextmanager
+from django.core.cache import cache
+from hashlib import md5
+
+LOCK_EXPIRE = 60 * 10  # Lock expires in 10 minutes
+
+@contextmanager
+def memcache_lock(lock_id, oid):
+    timeout_at = monotonic() + LOCK_EXPIRE - 3
+    # cache.add fails if the key already exists
+    status = cache.add(lock_id, oid, LOCK_EXPIRE)
+    try:
+        yield status
+    finally:
+        # memcache delete is very slow, but we have to use it to take
+        # advantage of using add() for atomic locking
+        if monotonic() < timeout_at and status:
+            # don't release the lock if we exceeded the timeout
+            # to lessen the chance of releasing an expired lock
+            # owned by someone else
+            # also don't release the lock if we didn't acquire it
+            cache.delete(lock_id)
+
 @task(name="add_periodic_task")
 def add_periodic_task(interval, imap_account_id, action_id, search_criteria, folder_name, expires=None):
     """ create a new dynamic periodic task, mainly used for users' set_interval() call.
@@ -111,6 +135,22 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 #     logger.info("Saved image from Flickr")
 #     print ("perioid task") 
 
+# A task being bound means the first argument to the task will always be the task instance (self), just like Python bound methods:
+@task(bind=True)
+def import_feed(self, imapAccount_email):
+    # The cache key consists of the task name and the MD5 digest
+    # of the feed URL.
+    feed_url_hexdigest = md5(imapAccount_email).hexdigest()
+    lock_id = '{0}-lock-{1}'.format(self.name, feed_url_hexdigest)
+    logger.debug('syncing..: %s', imapAccount_email)
+    with memcache_lock(lock_id, self.app.oid) as acquired:
+        if acquired:
+            logger.debug(
+        'Feed %s is acquired', imapAccount_email)
+        return
+    logger.debug(
+        'Feed %s is already being imported by another worker', imapAccount_email)
+
 @task(name="init_sync_user_inbox")
 def init_sync_user_inbox(imapAccount_email):
     """ execute the given code object.
@@ -163,3 +203,4 @@ def init_sync_user_inbox(imapAccount_email):
 
     except Exception as e:
         logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e)) 
+
