@@ -151,7 +151,7 @@ def import_feed(self, imapAccount_email):
     logger.debug(
         'Feed %s is already being imported by another worker', imapAccount_email)
 
-@task(name="init_sync_user_inbox")
+@task(bind=True, name="init_sync_user_inbox")
 def init_sync_user_inbox(imapAccount_email):
     """ execute the given code object.
 
@@ -162,41 +162,51 @@ def init_sync_user_inbox(imapAccount_email):
     try:
         imapAccount = ImapAccount.objects.get(email=imapAccount_email)
 
-        # authenticate with the user's imap server
-        auth_res = authenticate(imapAccount)
-        # if authentication failed we can't run anything
-        if not auth_res['status']:
-            # Stop doing loop
-            # TODO maybe we should email the user
-            return
+        feed_url_hexdigest = md5(imapAccount_email).hexdigest()
+        lock_id = '{0}-lock-{1}'.format(self.name, feed_url_hexdigest)
+        logger.debug('syncing..: %s', imapAccount_email)
+        with memcache_lock(lock_id, self.app.oid) as acquired:
+            if acquired:
+                logger.debug('Feed %s is acquired', imapAccount_email)
 
-        # get an imapclient which is authenticated
-        imap = auth_res['imap']
+                # authenticate with the user's imap server
+                auth_res = authenticate(imapAccount)
+                # if authentication failed we can't run anything
+                if not auth_res['status']:
+                    # Stop doing loop
+                    # TODO maybe we should email the user
+                    return
 
-        # create the mailbox
-        try:
-            mailbox = MailBox(imapAccount, imap)
-            # sync the mailbox with imap
-            mailbox._sync()
-        except Exception:
-            logger.exception("Mailbox sync failed")
-            # TODO maybe we should email the user
-            return
-        logger.info("Mailbox sync done: %s" % (imapAccount_email))
+                # get an imapclient which is authenticated
+                imap = auth_res['imap']
 
-        try:
-            mailbox._run_user_code()
-        except Exception():
-            logger.exception("Mailbox run user code failed")
-        # after sync, logout to prevent multi-connection issue
-        imap.logout()
-        if imapAccount.is_initialized is False:
-            imapAccount.is_initialized = True
-            imapAccount.save()
-            send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
-            ptask_name = "sync_%s" % (imapAccount_email)
-            args = ujson.dumps( [imapAccount_email] )
-            TaskScheduler.schedule_every('init_sync_user_inbox', 'seconds', 4, ptask_name, args)
+                # create the mailbox
+                try:
+                    mailbox = MailBox(imapAccount, imap)
+                    # sync the mailbox with imap
+                    mailbox._sync()
+                except Exception:
+                    logger.exception("Mailbox sync failed")
+                    # TODO maybe we should email the user
+                    return
+                logger.info("Mailbox sync done: %s" % (imapAccount_email))
+
+                try:
+                    mailbox._run_user_code()
+                except Exception():
+                    logger.exception("Mailbox run user code failed")
+                # after sync, logout to prevent multi-connection issue
+                imap.logout()
+                if imapAccount.is_initialized is False:
+                    imapAccount.is_initialized = True
+                    imapAccount.save()
+                    send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
+                    ptask_name = "sync_%s" % (imapAccount_email)
+                    args = ujson.dumps( [imapAccount_email] )
+                    TaskScheduler.schedule_every('init_sync_user_inbox', 'seconds', 4, ptask_name, args)
+        
+        logger.debug(
+            'Feed %s is already being imported by another worker', imapAccount_email)
     except ImapAccount.DoesNotExist:
         PeriodicTask.objects.filter(name="sync_%s" % (imapAccount_email)).delete()
         logger.exception("syncing fails Remove periodic tasks. imap_account not exist %s" % (imapAccount_email))
