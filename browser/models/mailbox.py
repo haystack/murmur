@@ -53,6 +53,13 @@ class MailBox(object):
             # response contains folder level information such as
             # uid validity, uid next, and highest mod seq
             response = self._imap_client.select_folder(folder.name)
+            if 'HIGHESTMODSEQ' not in response:
+                logger.critical("%s Missing HIGHESTMODSEQ information" % folder)
+            else:
+                logger.info("%s HIGHESTMODSEQ %d" % (folder, response['HIGHESTMODSEQ']))
+            if 'NOMODSEQ' not in response:
+                logger.critical("%s does not support cond store" % folder)
+
 
             # our algorithm doesn't work without these
             if not ('UIDNEXT' in response and 'UIDVALIDITY' in response):
@@ -60,6 +67,7 @@ class MailBox(object):
                 continue
 
             uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
+            highest_mod_seq = response.get('HIGHESTMODSEQ')
 
             # check if we are doing a total refresh or just a normal refresh
             # total refresh occurs the first time we see a folder and
@@ -67,7 +75,7 @@ class MailBox(object):
             if folder._should_completely_refresh(uid_validity):
                 folder._completely_refresh_cache()
             else:
-                folder._refresh_cache(uid_next, self.event_data_queue)
+                folder._refresh_cache(uid_next, highest_mod_seq, self.event_data_queue)
 
             # update the folder's uid next and uid validity
             folder._uid_next = uid_next

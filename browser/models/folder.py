@@ -245,7 +245,7 @@ class Folder(object):
         logger.debug("%s updated flags" % self)
         if highest_mod_seq is not None:
             self.highest_mod_seq = highest_mod_seq
-            logger.debug("%s updated highest mod seq" % self)
+            logger.info("%s updated highest mod seq to %d" % self, highest_mod_seq)
 
 
     def _save_new_messages(self, last_seen_uid, event_data_queue = None):
