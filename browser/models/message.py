@@ -209,7 +209,9 @@ class Message(object):
         """Copy the message to another folder.
         """
         self._check_folder(dst_folder)
-        self._imap_client.copy(self._uid, dst_folder)
+        if not self._is_message_already_in_dst_folder(dst_folder):
+            self._imap_client.copy(self._uid, dst_folder)
+
 
     def delete(self):
         # type: () -> None
@@ -231,10 +233,17 @@ class Message(object):
 
     def move(self, dst_folder):
         # type: (t.AnyStr) -> None
-        """Copy the message to another folder.
+        """Move the message to another folder.
         """
         self._check_folder(dst_folder)
-        self._imap_client.move(self._uid, dst_folder)
+        if not self._is_message_already_in_dst_folder(dst_folder):
+            self._imap_client.move(self._uid, dst_folder)
+
+    def _is_message_already_in_dst_folder(self, dst_folder):
+        if dst_folder == self._schema.folder_schema.name:
+            userLogger.info("message already in destination folder")
+            return False
+        return True
 
     def _check_folder(self, dst_folder):
         if not isinstance(dst_folder, basestring):
