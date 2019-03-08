@@ -42,6 +42,9 @@ class MailBox(object):
 
         assert len(set(self._list_selectable_folders())) == len(list(self._list_selectable_folders()))
 
+        supports_cond_store = self._supports_cond_store()
+        logger.info("supports cond store: %s" % supports_cond_store)
+
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
         # and https://tools.ietf.org/html/rfc4549
@@ -69,6 +72,17 @@ class MailBox(object):
             # update the folder's uid next and uid validity
             folder._uid_next = uid_next
             folder._uid_validity = uid_validity
+
+
+    def _supports_cond_store(self):
+        # type: () -> bool
+        """True if the imap server support RFC4551 which has 
+        things like HIGHESTMODSEQ
+
+        Returns:
+            bool: whether or not the imap server supports cond store
+        """
+        return self._imap_client.has_capability('CONDSTORE')
 
     def _run_user_code(self):
         from browser.sandbox import interpret

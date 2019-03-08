@@ -56,6 +56,8 @@ class FolderSchema(models.Model):
     name = models.CharField(max_length=191)
     # the last seen uid which is helpful for reducing bandwith when syncing
     last_seen_uid = models.IntegerField(default=-1)
+    # the highest mod seq useful for limiting getting the flags
+    highest_mod_seq = models.IntegerField(default=-1)
     # the flags associated with the folder 
     _flags = models.TextField(db_column="flags")
 
