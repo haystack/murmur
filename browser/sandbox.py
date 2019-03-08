@@ -28,6 +28,10 @@ def interpret(mailbox, is_test=False):
 
     # get the logger for user output
     userLogger = logging.getLogger('youps.user')  # type: logging.Logger
+    # get the stream handler associated with the user output
+    userLoggerStreamHandlers = filter(lambda h: isinstance(h, logging.StreamHandler), userLogger.handlers)
+    userLoggerStream = userLoggerStreamHandlers[0].stream if userLoggerStreamHandlers else None 
+    assert userLoggerStream is not None
     user_std_out = StringIO()
 
     # get the current mode code
@@ -43,13 +47,17 @@ def interpret(mailbox, is_test=False):
     try:
         # set the stdout to a string
         sys.stdout = user_std_out
-        userLogger.handlers[0].stream = user_std_out
+
+        # set the user logger to 
+        userLoggerStream = user_std_out
 
         # define the variables accessible to the user
         user_environ = {
             'new_message_handler': mailbox.new_message_handler,
             'on_message_arrival': on_message_arrival
         }
+
+        userLogger.info("test test test")
         # execute the user's code 
         exec(code, user_environ)
         
@@ -69,7 +77,7 @@ def interpret(mailbox, is_test=False):
     finally:
         # set the stdout back to what it was
         sys.stdout = sys.__stdout__
-        userLogger.handlers[0].stream = sys.__stdout__
+        userLoggerStream = sys.__stdout__
         res['imap_log'] = user_std_out.getvalue() + res['imap_log']
         user_std_out.close()
         return res
