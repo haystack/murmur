@@ -208,7 +208,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
 
             # Save selected folder for the mode
             for f in folders:
-                folder = FolderSchema.objects.filter(imap_account=imap, name=f)
+                folder = FolderSchema.objects.filter(imap_account=imapAccount, name=f)
                 mf = MailbotMode_Folder(mode=mailbotMode, folder=folder, imap_account=imapAccount)
                 mf.save()
 
