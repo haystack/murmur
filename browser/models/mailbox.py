@@ -42,8 +42,8 @@ class MailBox(object):
 
         assert len(set(self._list_selectable_folders())) == len(list(self._list_selectable_folders()))
 
-        supports_cond_store = self._supports_cond_store()
-        logger.info("supports cond store: %s" % supports_cond_store)
+        # not sure if this is necessary we can just check for highest_mod_seq below
+        # supports_cond_store = self._supports_cond_store()
 
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
