@@ -160,8 +160,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
             run_request (boolean): potentially deprecated as we move toward one-off running fashion. 
     """
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
-
-    logger.info("user %s has run, stop, or saved" % email)
+    logger = logging.getLogger('youps')  # type: logging.Logger
+    logger.critical("user %s has run, stop, or saved" % email)
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
