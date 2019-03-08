@@ -136,23 +136,8 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 #     print ("perioid task") 
 
 # A task being bound means the first argument to the task will always be the task instance (self), just like Python bound methods:
-@task(bind=True)
-def import_feed(self, imapAccount_email):
-    # The cache key consists of the task name and the MD5 digest
-    # of the feed URL.
-    feed_url_hexdigest = md5(imapAccount_email).hexdigest()
-    lock_id = '{0}-lock-{1}'.format(self.name, feed_url_hexdigest)
-    logger.debug('syncing..: %s', imapAccount_email)
-    with memcache_lock(lock_id, self.app.oid) as acquired:
-        if acquired:
-            logger.debug(
-        'Feed %s is acquired', imapAccount_email)
-        return
-    logger.debug(
-        'Feed %s is already being imported by another worker', imapAccount_email)
-
 @task(bind=True, name="init_sync_user_inbox")
-def init_sync_user_inbox(imapAccount_email):
+def init_sync_user_inbox(self, imapAccount_email):
     """ execute the given code object.
 
     Args:
@@ -167,7 +152,7 @@ def init_sync_user_inbox(imapAccount_email):
         logger.debug('syncing..: %s', imapAccount_email)
         with memcache_lock(lock_id, self.app.oid) as acquired:
             if acquired:
-                logger.debug('Feed %s is acquired', imapAccount_email)
+                logger.debug('Sync lock for %s is acquired', imapAccount_email)
 
                 # authenticate with the user's imap server
                 auth_res = authenticate(imapAccount)
@@ -206,7 +191,7 @@ def init_sync_user_inbox(imapAccount_email):
                     TaskScheduler.schedule_every('init_sync_user_inbox', 'seconds', 4, ptask_name, args)
         
         logger.debug(
-            'Feed %s is already being imported by another worker', imapAccount_email)
+            'Sync lock for %s is already being imported by another worker', imapAccount_email)
     except ImapAccount.DoesNotExist:
         PeriodicTask.objects.filter(name="sync_%s" % (imapAccount_email)).delete()
         logger.exception("syncing fails Remove periodic tasks. imap_account not exist %s" % (imapAccount_email))
