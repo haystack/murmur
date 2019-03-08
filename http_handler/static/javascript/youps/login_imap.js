@@ -106,7 +106,7 @@ $(document).ready(function() {
             for (var key in d) {
                 console.log(key, isDict(d[key]))
                 if (path=="") path = key;
-                else  path + "/" + key;
+                else  path = path + "/" + key;
                 var $li = $("<li><input type='checkbox' value='"+ path + "'>" + key + "</li>");
                 
                 if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key], path)) } 
