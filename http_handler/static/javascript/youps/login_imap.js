@@ -443,7 +443,7 @@ $(document).ready(function() {
             folders = [];
 
             $(element).parents('.tab-pane').find(".folder-container input:checked").each(function () {
-                folders.append($(this).attr('value'));s
+                folders.push($(this).attr('value'));
             });
             
 
