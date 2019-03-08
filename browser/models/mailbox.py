@@ -42,6 +42,9 @@ class MailBox(object):
 
         assert len(set(self._list_selectable_folders())) == len(list(self._list_selectable_folders()))
 
+        # not sure if this is necessary we can just check for highest_mod_seq below
+        # supports_cond_store = self._supports_cond_store()
+
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
         # and https://tools.ietf.org/html/rfc4549
@@ -57,6 +60,7 @@ class MailBox(object):
                 continue
 
             uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
+            highest_mod_seq = response.get('HIGHESTMODSEQ')
 
             # check if we are doing a total refresh or just a normal refresh
             # total refresh occurs the first time we see a folder and
@@ -64,18 +68,32 @@ class MailBox(object):
             if folder._should_completely_refresh(uid_validity):
                 folder._completely_refresh_cache()
             else:
-                folder._refresh_cache(uid_next, self.event_data_queue)
+                folder._refresh_cache(uid_next, highest_mod_seq, self.event_data_queue)
 
             # update the folder's uid next and uid validity
             folder._uid_next = uid_next
             folder._uid_validity = uid_validity
 
+
+    def _supports_cond_store(self):
+        # type: () -> bool
+        """True if the imap server support RFC4551 which has 
+        things like HIGHESTMODSEQ
+
+        Returns:
+            bool: whether or not the imap server supports cond store
+        """
+        return self._imap_client.has_capability('CONDSTORE')
+
     def _run_user_code(self):
         from browser.sandbox import interpret
-        code = self._imap_account.current_mode.code
-        res = interpret(self, code)
-        if res['imap_log']:
-            logger.info('user output: %s' % res['imap_log'])
+        if self._imap_account.current_mode is not None:
+            code = self._imap_account.current_mode.code
+            res = interpret(self, code)
+            if res['imap_log']:
+                logger.info('user output: %s' % res['imap_log'])
+            return res
+        return None
 
 
     def _find_or_create_folder(self, name):
