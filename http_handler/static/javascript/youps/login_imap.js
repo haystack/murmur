@@ -101,13 +101,13 @@ $(document).ready(function() {
         }
 
         // dict => <ul><li>key1 <ul><li>key1-1</li></ul></li> <li>key2</li></ul>
-        function rec_add_nested(d) {
+        function rec_add_nested(d, path) {
             var $ul = $("<ul></ul>");
             for (var key in d) {
                 console.log(key, isDict(d[key]))
                 var $li = $("<li><input type='checkbox' value='"+ key + "'>" + key + "</li>");
                 
-                if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key])) } 
+                if( Object.keys(d[key]).length > 0 ) { path = path + "/" + key; $li.append(rec_add_nested(d[key], path)) } 
 
                 $ul.append($li);
                 // else {
@@ -118,7 +118,7 @@ $(document).ready(function() {
             return $ul;
         }
         
-        u = rec_add_nested(folders_nested)
+        u = rec_add_nested(folders_nested, "")
         $folder_container.append(u)
     }
 
