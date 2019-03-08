@@ -228,7 +228,7 @@ class Folder(object):
         fetch_data = self._imap_client.fetch(
             '%d:*' % (last_seen_uid + 1), Message._descriptors)
 
-        logger.info("start saving new messages..: %s" % self._schema.imap_account.email)
+        logger.info("%s saving new messages" % (self))
         for uid in fetch_data:
             message_data = fetch_data[uid]
             logger.debug("Message %d data: %s" % (uid, message_data))
@@ -276,12 +276,12 @@ class Folder(object):
             try:
                 message_schema.save()
             except Exception:
-                logger.critical("folder %s failed to save message %s" % (self, uid))
+                logger.critical("%s failed to save message %s" % (self, uid))
                 raise
             if last_seen_uid != 0:
                 event_data_queue.put(NewMessageData(Message(message_schema, self._imap_client)))
 
-            logger.debug("finished saving new messages..: %s" % self._schema.imap_account.email)
+            logger.debug("%s finished saving new messages..:" % self)
 
             # create and save the message contacts
             if envelope.from_ is not None:
