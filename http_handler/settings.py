@@ -2,6 +2,7 @@
 
 import os
 import django
+import sys
 
 
 DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
@@ -267,6 +268,10 @@ LOGGING = {
         'custom.brief' : {
             'format': '%(message)s'
         },
+        # this formatter is for the user
+        'custom.user' : {
+            'format': '%(asctime)s %(levelname)-8s %(funcName)s %(message)s'
+        },
         # this formatter includes the time, log level, logger name, and message
         'custom.precise' : {
             'format' : '%(asctime)s %(levelname)-8s %(name)-15s %(message)s',
@@ -286,7 +291,7 @@ LOGGING = {
         },
         # this handler logs to a file
         'custom.file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': '/home/ubuntu/production/mailx/logs/youps.log',
             'formatter': 'custom.debug'
@@ -295,17 +300,18 @@ LOGGING = {
         'custom.console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stdout',  # Default is stderr
-            'formatter': 'custom.brief'
+            'stream': sys.stdout,  # Default is stderr
+            'formatter': 'custom.user'
         }
     },
     'loggers': {
         'youps': {
-            'handlers': ['custom.file', 'custom.console'],
-            'level': 'INFO',
+            'handlers': ['custom.file'],
+            'level': 'DEBUG',
             'propagate': True
         },
         'youps.user': {
+            'handlers': ['custom.console'],
             'level': 'DEBUG',
             'propagate': True
         },
