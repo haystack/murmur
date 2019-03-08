@@ -40,7 +40,7 @@ class MailBox(object):
         """Synchronize the mailbox with the imap server.
         """
 
-        assert len(set(self._list_selectable_folders)) == len(list(self._list_selectable_folders))
+        assert len(set(self._list_selectable_folders())) == len(list(self._list_selectable_folders()))
 
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
