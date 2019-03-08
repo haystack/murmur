@@ -184,3 +184,16 @@
 #console {
   margin-bottom: 90px;
 }
+
+.folder-container {
+  width: 200px;
+}
+
+.folder-container ul {
+  list-style-type: none;
+}
+
+.editor-container {
+  width: 100%;
+  padding-left: 200px;
+}

@@ -7,6 +7,8 @@ $(document).ready(function() {
         btn_incoming_save = $("#btn-incoming-save"),
         btn_shortcut_save = $("#btn-shortcut-save");
 
+    var log_backup = "", user_status_backup = "";
+
     function append_log( log, is_error ) {
         if(!log) return;
 
@@ -19,6 +21,23 @@ $(document).ready(function() {
             .addClass("info");
     }   
 
+    function append_status_msg( msg, is_error ) {
+        if(!msg) return;
+
+        $.each( msg.split("\n"), function( key, value ) {
+            value = $.trim(value);
+            if(value == "") return;
+            
+            $( "<p>" + 
+            '<span class="fa-layers fa-fw fa-2x"><i class="fas fa-sync"></i><span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span></span>'
+            + value.replace(/ *\[[^\]]*]/, '') + "</p>" ).prependTo( "#user-status-msg" )
+            .addClass("info");
+
+            spinStatusCog(true);
+        });
+        
+    }
+
     function format_date() {
         var currentdate = new Date();
         var datetime = (currentdate.getMonth()+1) + "/"
@@ -30,6 +49,70 @@ $(document).ready(function() {
             + " | ";
 
         return datetime;
+    }
+
+    function init_editor(editor_elem) {
+        var editor = CodeMirror.fromTextArea(editor_elem, {
+            mode: {name: "python",
+                version: 3,
+                singleLineStringErrors: false},
+            lineNumbers: true,
+            indentUnit: 4,
+            matchBrackets: true
+        });
+
+        var arrows = [13, 27, 37, 38, 39, 40];
+        editor.on("keyup", function(cm, e) {
+          if (arrows.indexOf(e.keyCode) < 0) {
+            editor.execCommand("autocomplete")
+          }
+        })
+    }
+
+    function init_folder_selector($folder_container) {
+        // nested tree checkboxs http://jsfiddle.net/rn290ywf/
+        // TODO just for test
+        folders = ['Boomerang', 'Boomerang-Outbox', 'Boomerang-Outbox/Cancelled/A', 'Boomerang-Returned', 'INBOX', '[Gmail]/All Mail', '[Gmail]/Drafts', '[Gmail]/Important', '[Gmail]/Sent Mail', '[Gmail]/Spam', '[Gmail]/Starred', '[Gmail]/Trash', 'bundle_test', 'how is it going', 'myriad', 'myriad/haystack-potluck', 'test1', 'test2', 'test3', 'test4']
+        
+        // Init a new folder list
+
+        // create folder nested structures
+        folders_nested = {}
+        $.each(folders, function(index, value) {
+            if(value.includes("/")) {
+                pwd = value.split("/")
+                d = folders_nested
+                $.each(pwd, function(i, v) {
+                    if(v in d) {}
+                    else { d[v] = {}
+                    }
+                    d = d[v]
+                })
+                folders_nested = $.extend(folders_nested,d)
+            }        
+        })
+
+        function isDict(v) {
+            return typeof v==='object' && v!==null && !(v instanceof Array) && !(v instanceof Date);
+        }
+
+        // dict => <ul><li>key1</li> <li>key2</li></ul>
+        function rec_add_nested(d) {
+            var $ul = $("<ul></ul>");
+            for (var key in d) {
+                console.log(key, isDict(d[key]))
+                $ul.append("<li><input type='checkbox'>" + key + "</li>")
+                if( Object.keys(d[key]).length > 0 ) { $ul.append(rec_add_nested(d[key])) } 
+                // else {
+                //     $ul.append("<li>" + key + "</li>")
+                // }
+            }
+
+            return $ul;
+        }
+        
+        u = rec_add_nested(folders_nested)
+        $folder_container.append(u)
     }
 
     function guess_host( email_addr ) {
@@ -84,27 +167,18 @@ $(document).ready(function() {
     var unsaved_tabs = [];
     
     document.addEventListener("mv-load", function(){   
-        // Init editor autocomplete
+        // Init editor & its autocomplete
         document.querySelectorAll('textarea.editor').forEach(function(element) {
             var mode_id = element.id.split("-")[1];
             $('.nav-tabs li a[href="#editor-tab_'+ mode_id +'"]').click();
 
-            var editor = CodeMirror.fromTextArea(element, {
-                mode: {name: "python",
-                    version: 3,
-                    singleLineStringErrors: false},
-                lineNumbers: true,
-                indentUnit: 4,
-                matchBrackets: true
-            });
-
-            var arrows = [13, 27, 37, 38, 39, 40];
-            editor.on("keyup", function(cm, e) {
-                if (arrows.indexOf(e.keyCode) < 0) {
-                editor.execCommand("autocomplete")
-                }
-            });
+            init_editor(element);
         });
+
+        // Init folder container
+        init_folder_selector( $(".folder-container") )
+
+        // Load mode - folder selection
 
         var method_names = [];
         document.querySelectorAll('#apis-container h4').forEach(function(element) {
@@ -148,7 +222,7 @@ $(document).ready(function() {
 
     $(".nav-tabs").on("click", "a", function (e) {
         e.preventDefault();
-        if (!$(this).hasClass('add-contact')) {
+        if (!$(this).hasClass('add-tab')) {
             $(this).tab('show');
         }
     })
@@ -163,36 +237,29 @@ $(document).ready(function() {
             delete_mode( mode_id );
     });
 
-    $('.add-contact').click(function (e) {
+    $('.add-tab').click(function (e) {
         e.preventDefault();
-        // TODO get max id of current mode
+
         var modes = get_modes();
         modes_keys = Object.keys(modes);
 
         var id = Math.max.apply(null, modes_keys) +1 ; // avoid same ID
+        // Add tab
         $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
-        $('.tab-content').append('<div class="tab-pane" id="editor-tab_' + id + '"><textarea class="editor mode-editor" id="editor-' + id + '"></textarea></div>');
+        // Add tab-pane
+        $('.tab-content').append(`<div class="tab-pane row"> 
+                <div class="folder-container"></div>
+                <div class="editor-container" id="editor-tab_` + id + `">
+                    <textarea class="editor mode-editor" id="editor-` + id + `"></textarea>
+                </div>
+            </div>`);
 
         // Move to the just added tab
         $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
 
         unsaved_tabs.push( id );
 
-        var editor = CodeMirror.fromTextArea(document.getElementById("editor-" + id), {
-            mode: {name: "python",
-                version: 3,
-                singleLineStringErrors: false},
-            lineNumbers: true,
-            indentUnit: 4,
-            matchBrackets: true
-        });
-
-        var arrows = [13, 27, 37, 38, 39, 40];
-        editor.on("keyup", function(cm, e) {
-          if (arrows.indexOf(e.keyCode) < 0) {
-            editor.execCommand("autocomplete")
-          }
-        })
+        init_editor( document.getElementById("editor-" + id) );
     });
 
     var editHandler = function() {
@@ -226,8 +293,6 @@ $(document).ready(function() {
         run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running());
     })
 
-    var log_backup = "";
-
     // $("#password-container").hide();
     guess_host($("#user-full-email").text());
     toggle_login_mode();
@@ -236,23 +301,21 @@ $(document).ready(function() {
         fetch_log(); 
 
         $(".btn").prop("disabled",false);
-    }
-
-    if(IS_RUNNING) {
-        set_running(true);
 
         // set dropdown to current mode name if exist
-        $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
-        $(".dropdown .btn").attr('mode-id', current_mode_id);
-    } else {
-        set_running(false);
+        if(current_mode) {
+            $(".dropdown .btn").html(current_mode + ' <span class="caret"></span>');
+            $(".dropdown .btn").attr('mode-id', current_mode_id);
+        }
 
-        // init $("#current_mode_dropdown") with a default value if there is no selected mode yet
-        var random_id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
+        else {
+            // init $("#current_mode_dropdown") with a default value if there is no selected mode yet
+            var random_id = document.querySelector('.nav.nav-tabs li.active .tab-title').getAttribute('mode-id'),
             random_mode_name = $.trim( document.querySelector('.nav.nav-tabs span[mode-id="'+ random_id + '"]').innerHTML );
 
-        $(".dropdown .btn").html(random_mode_name + ' <span class="caret"></span>');
-        $(".dropdown .btn").attr('mode-id', random_id);
+            $(".dropdown .btn").html(random_mode_name + ' <span class="caret"></span>');
+            $(".dropdown .btn").attr('mode-id', random_id);
+        }
     }
     
 	$('input[type=radio][name=auth-mode]').change(function() {
@@ -358,8 +421,7 @@ $(document).ready(function() {
     }
 
     function get_running() {
-        if( btn_code_sumbit.text() == "Disable") return true;
-        else return false;
+        return is_running;
     }
 
     function set_running(start_running) {
@@ -367,25 +429,31 @@ $(document).ready(function() {
         if(start_running) {
             spinStatusCog(true);
             $("#engine-status-msg").text("Your email engine is running.");
-            btn_code_sumbit.text("Disable");
+            btn_code_sumbit.text("STOP");
+            is_running = true;
         }
         
         // Stop running
         else {
             spinStatusCog(false);
             $("#engine-status-msg").text("Your email engine is not running at the moment.");
-            btn_code_sumbit.text("Enable");
+            btn_code_sumbit.text("RUN");
+            is_running = false;
         }
     }
     
     function spinStatusCog(spin) {
         if(spin) {
-            document.querySelector(".fa-sync").classList.add("fa-spin");
-            document.querySelector(".idle-mark").style.display = "none";
+            if( fa_sync = document.querySelector(".fa-sync"))
+                fa_sync.classList.add("fa-spin");
+            if( idle_mark = document.querySelector(".idle-mark"))
+                idle_mark.style.display = "none";
         }
         else {
-            document.querySelector(".fa-sync").classList.remove("fa-spin");
-            document.querySelector(".idle-mark").style.display = "inline-block";
+            if( fa_sync = document.querySelector(".fa-sync"))
+                fa_sync.classList.remove("fa-spin");
+            if( idle_mark = document.querySelector(".idle-mark"))   
+                idle_mark.style.display = "inline-block";
         }
     }
 
@@ -399,12 +467,26 @@ $(document).ready(function() {
                 
                 // Auth success
                 if (res.status) {
+                    // Update execution log
                     if( log_backup != res['imap_log']){
                         $("#console-output").html("");
                         append_log(res['imap_log'], false);
                     }
                     
                     log_backup = res['imap_log'];
+
+                    // if status_msg exists, it means a code is running 
+                    if( $.trim( res['user_status_msg'] ) != "")
+                        set_running(true)
+                    else set_running(false)
+
+                    // Update status msg
+                    if( user_status_backup != res['user_status_msg']){
+                        $("#user-status-msg").html("");
+                        append_status_msg(res['user_status_msg'], false);
+                    }
+                    
+                    user_status_backup = res['user_status_msg'];
                 }
                 else {
                     notify(res, false);
@@ -412,7 +494,7 @@ $(document).ready(function() {
             }
         );
         
-        setTimeout(fetch_log, 5 * 1000); // 5 second
+        setTimeout(fetch_log, 2 * 1000); // 2 second
     }
 
     function validateEmail(email) {
@@ -420,6 +502,7 @@ $(document).ready(function() {
         return re.test(String(email).toLowerCase());
     }    
 
+        // When user first try to login to their imap. 
         btn_login.click(function() {
                 show_loader(true);
 
@@ -449,13 +532,15 @@ $(document).ready(function() {
                             append_log(res['imap_log'], false)
                             
                             if (res.code) { 
-                                // some emails are not added since they are not members of the group
-                                // $('#donotsend-msg').show();
-                                // $('#donotsend-msg').html(res['code']);
                             }
                             else {                        
                                 notify(res, true);
                             }
+
+                            // then ask user to wait until YoUPS intialize their inbox
+                            show_loader(true);
+                            $("#loading-wall").show();
+                            $("#loading-wall span").show();
                         }
                         else {
                             notify(res, false);
@@ -476,7 +561,7 @@ $(document).ready(function() {
                 'modes': JSON.stringify(modes),
                 'email': $("#input-email").val(),
                 'test_run': is_dry_run,
-                'is_running': is_running
+                'run_request': is_running
             };
 
             $.post('/run_mailbot', params,

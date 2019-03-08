@@ -24,7 +24,7 @@ from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_K
 from registration.forms import RegistrationForm
 from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
                            MuteTag, Tag, UserProfile, Post, Attachment, DoNotSendList)
-from schema.youps import ImapAccount, MailbotMode
+from schema.youps import ImapAccount, MailbotMode, FolderSchema, MailbotMode_Folder
 from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
@@ -406,14 +406,19 @@ def login_imap_view(request):
 	current_mode = None
 	shortcuts = ''
 	shortcuts_exist = False
-	
+        is_initialized = False 
+	folders = []
+	mode_folder = []
+
 	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
+		
 		if imap.exists():
 			if (imap[0].is_oauth and imap[0].access_token != "") or (not imap[0].is_oauth and imap[0].password != ""):
 				imap_authenticated = True
 				is_test = imap[0].is_test
 				is_running = imap[0].is_running
+				is_initialized = imap[0].is_initialized
 
 				current_mode = imap[0].current_mode
 
@@ -423,10 +428,16 @@ def login_imap_view(request):
 				shortcuts = imap[0].shortcuts
 				if len(shortcuts) > 0:
 					shortcuts_exist = True
+
+				if is_initialized:
+					# send their folder list
+					folders = FolderSchema.objects.filter(imap_account=imap[0]).values('name')
+					folders = [str(f['name']) for f in folders]
+					mode_folder = MailbotMode_Folder.objects.filter(imap_account=imap[0])
 				
 
-	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 
-		'mode_exist': mode_exist, 'modes': modes, 'current_mode': current_mode,
+	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 'is_initialized': is_initialized,
+		'folders': folders, 'mode_folder': mode_folder,'mode_exist': mode_exist, 'modes': modes, 'current_mode': current_mode,
 		'imap_authenticated': imap_authenticated, 'website': WEBSITE, 
 		'shortcuts_exist': shortcuts_exist, 'shortcuts': shortcuts}
 
@@ -1469,7 +1480,7 @@ def login_imap(request):
 		is_oauth = True if request.POST['is_oauth'] == "true" else False
 		password = request.POST['password']
 
-		res = engine.main.login_imap(user, password, host, is_oauth)
+		res = engine.main.login_imap(user.email, password, host, is_oauth)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
@@ -1496,9 +1507,9 @@ def run_mailbot(request):
 		current_mode_id = request.POST['current_mode_id']
 		modes = json.loads(request.POST['modes']) 
 		is_test = True if request.POST['test_run'] == "true" else False
-		is_running = True if request.POST['is_running'] == "true" else False
+		run_request = True if request.POST['run_request'] == "true" else False
 		print "RECEIVE RUN MAILBOT REQUEST"
-		res = engine.main.run_mailbot(user, request.user.email, current_mode_id, modes, is_test, is_running)
+		res = engine.main.run_mailbot(user, request.user.email, current_mode_id, modes, is_test, run_request)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
