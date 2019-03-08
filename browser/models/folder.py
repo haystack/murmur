@@ -172,7 +172,7 @@ class Folder(object):
             # TODO maybe trigger the user
 
         # if the last seen uid is zero we haven't seen any messages
-        if not self._last_seen_uid == 0:
+        if self._last_seen_uid != 0:
             self._update_cached_message_flags(highest_mod_seq)
 
         self._update_last_seen_uid()
