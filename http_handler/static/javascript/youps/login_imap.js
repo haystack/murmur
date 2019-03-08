@@ -100,13 +100,16 @@ $(document).ready(function() {
             return typeof v==='object' && v!==null && !(v instanceof Array) && !(v instanceof Date);
         }
 
-        // dict => <ul><li>key1</li> <li>key2</li></ul>
+        // dict => <ul><li>key1 <ul><li>key1-1</li></ul></li> <li>key2</li></ul>
         function rec_add_nested(d) {
             var $ul = $("<ul></ul>");
             for (var key in d) {
                 console.log(key, isDict(d[key]))
-                $ul.append("<li><input type='checkbox'>" + key + "</li>")
-                if( Object.keys(d[key]).length > 0 ) { $ul.append(rec_add_nested(d[key])) } 
+                var $li = $("<li><input type='checkbox'>" + key + "</li>");
+                
+                if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key])) } 
+
+                $ul.append($li);
                 // else {
                 //     $ul.append("<li>" + key + "</li>")
                 // }
@@ -169,6 +172,12 @@ $(document).ready(function() {
 
     // init editor  
     var unsaved_tabs = [];
+
+
+    /**
+     * Event listeners 
+     * 
+     */
     
     document.addEventListener("mv-load", function(){   
         // Init editor & its autocomplete
@@ -296,6 +305,22 @@ $(document).ready(function() {
         // update current_mode
         run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running());
     })
+
+    $.extend($.expr[':'], {
+        unchecked: function (obj) {
+            return ((obj.type == 'checkbox' || obj.type == 'radio') && !$(obj).is(':checked'));
+        }
+    });
+
+    $('#editor-container').on('change', '.folder-container input:checkbox', function() {
+        $(this).next('ul').find('input:checkbox').prop('checked', $(this).prop("checked"));
+
+        for (var i = $('.folder-container').find('ul').length - 1; i >= 0; i--) {
+            $('.folder-container').find('ul:eq(' + i + ')').prev('input:checkbox').prop('checked', function () {
+                return $(this).next('ul').find('input:unchecked').length === 0 ? true : false;
+            });
+        }
+    });
 
     // $("#password-container").hide();
     guess_host($("#user-full-email").text());
