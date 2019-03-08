@@ -272,7 +272,12 @@ class Folder(object):
                                            message_id=envelope.message_id,
                                            internal_date=internal_date,
                                            )
-            message_schema.save()
+
+            try:
+                message_schema.save()
+            except Exception:
+                logger.critical("folder %s failed to save message %s" % (self, uid))
+                raise
             if last_seen_uid != 0:
                 event_data_queue.put(NewMessageData(Message(message_schema, self._imap_client)))
 
