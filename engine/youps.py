@@ -9,6 +9,7 @@ from imapclient import IMAPClient
 
 from browser.imap import GoogleOauth2, authenticate
 from browser.sandbox import interpret
+from browser.models.mailbox import Mailbox
 from engine.constants import msg_code
 from http_handler.settings import IMAP_SECRET
 from http_handler.tasks import init_sync_user_inbox, remove_periodic_task
@@ -204,7 +205,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
             # TODO change with appropriate search_criteria
             imap.select_folder("INBOX")
             # TODO replace this with the right search criteria 
-            res = interpret(imapAccount, imap, code, "UID %d:*" % 90000, is_test)
+            res = interpret(Mailbox(imapAccount, imap), code, is_test)
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:

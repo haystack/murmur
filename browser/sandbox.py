@@ -9,18 +9,19 @@ from StringIO import StringIO
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 
 from browser.models.event_data import NewMessageData
-from browser.models.event import Event
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
 from schema.youps import Action  # noqa: F401 ignore unused we use it for typing
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 
-def interpret(mailbox, is_test=False):
-    # type: (Mailbox, bool) -> t.Dict[t.AnyStr, t.Any]
+def interpret(mailbox, code, is_test=False):
+    # type: (Mailbox, unicode, bool) -> t.Dict[t.AnyStr, t.Any]
 
     # assert we actually got a mailbox
     assert isinstance(mailbox, MailBox)
+    # assert the code is unicode
+    assert isinstance(code, unicode)
     assert mailbox.new_message_handler is not None
 
     # set up the default result
@@ -30,14 +31,11 @@ def interpret(mailbox, is_test=False):
     userLogger = logging.getLogger('youps.user')  # type: logging.Logger
     # get the stream handler associated with the user output
     userLoggerStreamHandlers = filter(lambda h: isinstance(h, logging.StreamHandler), userLogger.handlers)
-    userLoggerStream = userLoggerStreamHandlers[0].stream if userLoggerStreamHandlers else None 
+    userLoggerStream = userLoggerStreamHandlers[0].stream if userLoggerStreamHandlers else None
     assert userLoggerStream is not None
-    user_std_out = StringIO()
 
-    # get the current mode code
-    mode = mailbox._imap_account.current_mode
-    code = mode.code
-    assert isinstance(code, unicode)
+    # create a string buffer to store stdout
+    user_std_out = StringIO()
 
     # define user methods
     def on_message_arrival(func):
@@ -48,7 +46,7 @@ def interpret(mailbox, is_test=False):
         # set the stdout to a string
         sys.stdout = user_std_out
 
-        # set the user logger to 
+        # set the user logger to
         userLoggerStream = user_std_out
 
         # define the variables accessible to the user
@@ -57,9 +55,9 @@ def interpret(mailbox, is_test=False):
             'on_message_arrival': on_message_arrival
         }
 
-        # execute the user's code 
+        # execute the user's code
         exec(code, user_environ)
-        
+
         # fire new message events
         while True:
             try:
