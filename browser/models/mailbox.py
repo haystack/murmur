@@ -68,6 +68,7 @@ class MailBox(object):
 
             uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
             highest_mod_seq = response.get('HIGHESTMODSEQ')
+            logger.info("%s second try HIGHESTMODSEQ %d" % (folder, highest_mod_seq))
 
             # check if we are doing a total refresh or just a normal refresh
             # total refresh occurs the first time we see a folder and
@@ -94,11 +95,13 @@ class MailBox(object):
 
     def _run_user_code(self):
         from browser.sandbox import interpret
-        code = self._imap_account.current_mode.code
-        res = interpret(self, code)
-        if res['imap_log']:
-            logger.info('user output: %s' % res['imap_log'])
-        return res
+        if self._imap_account.current_mode is not None:
+            code = self._imap_account.current_mode.code
+            res = interpret(self, code)
+            if res['imap_log']:
+                logger.info('user output: %s' % res['imap_log'])
+            return res
+        return None
 
 
     def _find_or_create_folder(self, name):
