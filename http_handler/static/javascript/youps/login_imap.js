@@ -73,7 +73,7 @@ $(document).ready(function() {
         // nested tree checkboxs http://jsfiddle.net/rn290ywf/
         // TODO just for test
         if (folders.length ==0)
-            folders = ['Boomerang', 'Boomerang-Outbox', 'Boomerang-Outbox/Cancelled/A', 'Boomerang-Returned', 'INBOX', '[Gmail]/All Mail', '[Gmail]/Drafts', '[Gmail]/Important', '[Gmail]/Sent Mail', '[Gmail]/Spam', '[Gmail]/Starred', '[Gmail]/Trash', 'bundle_test', 'how is it going', 'myriad', 'myriad/haystack-potluck', 'test1', 'test2', 'test3', 'test4']
+            folders = ['INBOX', 'Family','Family/Sub folder1','Family/Sub folder2', 'Conference', 'Internship', 'Budget']
         
         // Init a new folder list
 
