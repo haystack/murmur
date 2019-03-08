@@ -229,6 +229,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         res['code'] = "Not logged into IMAP"
     except Exception, e:
         # TODO add exception
+        logger.exception("failed while doing a user code run")
         print e
         print (traceback.format_exc())
         res['code'] = msg_code['UNKNOWN_ERROR']
