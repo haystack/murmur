@@ -195,6 +195,10 @@ $(document).ready(function() {
         init_folder_selector( $(".folder-container") )
 
         // Load mode - folder selection
+        $(".tab-pane").each(function() {
+            var mode_id = $(this).attr('id').split("-")[1];
+            debugger;
+        }) 
 
         var method_names = [];
         document.querySelectorAll('#apis-container h4').forEach(function(element) {

@@ -278,7 +278,7 @@ print get_sender()
 			IS_RUNNING = {{ is_running|yesno:"true,false" }},
 			IS_INITIALIZED = {{ is_running|yesno:"true,false" }},
 			folders = {{ folders|safe }},
-			mode_folder = {{ mode_folder }},
+			mode_folder = {{ mode_folder|safe }},
 			current_mode = "{{ current_mode.name }}",
 			current_mode_id = "{{ current_mode.uid }}";
 	</script>
