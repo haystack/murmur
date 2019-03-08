@@ -143,16 +143,15 @@ def init_sync_user_inbox(self, imapAccount_email):
     Args:
         imapAccount_email (string):  
     """
-    logger.info("Start syncing user's inbox: %s" % (imapAccount_email))
     try:
         imapAccount = ImapAccount.objects.get(email=imapAccount_email)  # type: ImapAccount
 
         feed_url_hexdigest = md5(imapAccount_email).hexdigest()
         lock_id = '{0}-lock-{1}'.format(self.name, feed_url_hexdigest)
-        logger.debug('syncing..: %s', imapAccount_email)
+        logger.info('syncing..: %s', imapAccount_email)
         with memcache_lock(lock_id, self.app.oid) as acquired:
             if acquired:
-                logger.debug('Sync lock for %s is acquired', imapAccount_email)
+                logger.info('Sync lock for %s is acquired', imapAccount_email)
 
                 # authenticate with the user's imap server
                 auth_res = authenticate(imapAccount)
@@ -190,7 +189,7 @@ def init_sync_user_inbox(self, imapAccount_email):
                     args = ujson.dumps( [imapAccount_email] )
                     TaskScheduler.schedule_every('init_sync_user_inbox', 'seconds', 4, ptask_name, args)
         
-        logger.debug(
+        logger.info(
             'Sync lock for %s is already being imported by another worker', imapAccount_email)
 
     except ImapAccount.DoesNotExist:
