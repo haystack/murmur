@@ -104,12 +104,13 @@ $(document).ready(function() {
         function rec_add_nested(d, path) {
             var $ul = $("<ul></ul>");
             for (var key in d) {
+                var p = ""
                 console.log(key, isDict(d[key]))
-                if (path=="") path = key;
-                else  path = path + "/" + key;
-                var $li = $("<li><input type='checkbox' value='"+ path + "'>" + key + "</li>");
+                if (path=="") p = key;
+                else  p = path + "/" + key;
+                var $li = $("<li><input type='checkbox' value='"+ p + "'>" + key + "</li>");
                 
-                if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key], path)) } 
+                if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key], p)) } 
 
                 $ul.append($li);
                 // else {
