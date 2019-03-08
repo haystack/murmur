@@ -42,8 +42,6 @@ class MailBox(object):
 
         assert len(set(self._list_selectable_folders())) == len(list(self._list_selectable_folders()))
 
-        logger.info("CAPABILIIES %s" % self._imap_client.capabilities())
-
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
         # and https://tools.ietf.org/html/rfc4549
