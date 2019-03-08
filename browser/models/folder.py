@@ -7,7 +7,7 @@ from schema.youps import MessageSchema, FolderSchema, ContactSchema, ImapAccount
 from django.db.models import Max
 from imapclient.response_types import Address  # noqa: F401 ignore unused we use it for typing
 from email.header import decode_header
-from Queue import Queue
+from Queue import Queue  # noqa: F401 ignore unused we use it for typing
 from browser.models.event_data import NewMessageData
 
 
@@ -55,6 +55,17 @@ class Folder(object):
     def _uid_validity(self, value):
         # type: (int) -> None
         self._schema.uid_validity = value
+        self._schema.save()
+
+    @property
+    def _highest_mod_seq(self):
+        # type: () -> int
+        return self._schema.highest_mod_seq
+
+    @_highest_mod_seq.setter
+    def _highest_mod_seq(self, value):
+        # type: (int) -> None
+        self._schema.highest_mod_seq = value
         self._schema.save()
 
     @property
@@ -141,8 +152,8 @@ class Folder(object):
             self._last_seen_uid = max_uid
             logger.debug('%s updated max_uid %d' % (self, max_uid))
 
-    def _refresh_cache(self, uid_next, event_data_queue):
-        # type: (int, Queue) -> None
+    def _refresh_cache(self, uid_next, highest_mod_seq, event_data_queue):
+        # type: (int, int, Queue) -> None
         """Called during normal synchronization to refresh the cache.
 
         Should get new messages and build message number to UID map for the
@@ -161,8 +172,8 @@ class Folder(object):
             # TODO maybe trigger the user
 
         # if the last seen uid is zero we haven't seen any messages
-        if not self._last_seen_uid == 0:
-            self._update_cached_message_flags()
+        if self._last_seen_uid != 0:
+            self._update_cached_message_flags(highest_mod_seq)
 
         self._update_last_seen_uid()
         logger.debug("%s finished normal refresh" % (self))
@@ -186,10 +197,18 @@ class Folder(object):
             return True
         return False
 
-    def _update_cached_message_flags(self):
-        # type: () -> None
+    def _update_cached_message_flags(self, highest_mod_seq):
+        # type: (int) -> None
         """Update the flags on any cached messages.
         """
+
+        # we just check the highestmodseq and revert to full sync if they don't match
+        # this is kind of what thunderbird does https://wiki.mozilla.org/Thunderbird:IMAP_RFC_4551_Implementation
+        if highest_mod_seq is not None:
+            if self._highest_mod_seq == highest_mod_seq:
+                logger.debug("%s matching highest mod seq no flag update" % self)
+                return
+
         logger.debug("%s started updating flags" % self)
 
         # get all the flags for the old messages
@@ -222,7 +241,12 @@ class Folder(object):
             message_schema.save()
             # TODO maybe trigger the user
 
+
         logger.debug("%s updated flags" % self)
+        if highest_mod_seq is not None:
+            self._highest_mod_seq = highest_mod_seq
+            logger.debug("%s updated highest mod seq to %d" % (self, highest_mod_seq))
+
 
     def _save_new_messages(self, last_seen_uid, event_data_queue = None):
         # type: (int, Queue) -> None

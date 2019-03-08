@@ -145,7 +145,7 @@ def init_sync_user_inbox(self, imapAccount_email):
     """
     logger.info("Start syncing user's inbox: %s" % (imapAccount_email))
     try:
-        imapAccount = ImapAccount.objects.get(email=imapAccount_email)
+        imapAccount = ImapAccount.objects.get(email=imapAccount_email)  # type: ImapAccount
 
         feed_url_hexdigest = md5(imapAccount_email).hexdigest()
         lock_id = '{0}-lock-{1}'.format(self.name, feed_url_hexdigest)
@@ -192,6 +192,7 @@ def init_sync_user_inbox(self, imapAccount_email):
         
         logger.debug(
             'Sync lock for %s is already being imported by another worker', imapAccount_email)
+
     except ImapAccount.DoesNotExist:
         PeriodicTask.objects.filter(name="sync_%s" % (imapAccount_email)).delete()
         logger.exception("syncing fails Remove periodic tasks. imap_account not exist %s" % (imapAccount_email))

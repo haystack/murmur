@@ -279,7 +279,7 @@ LOGGING = {
         },
         # this formatter includes file name and line number info
         'custom.debug': {
-            'format': '%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+            'format': '%(asctime)s %(levelname)-8s [%(processName)s:%(process)d] [%(filename)s:%(lineno)d] %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S'
         }
     },

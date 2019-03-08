@@ -161,6 +161,9 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
     """
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
     logger = logging.getLogger('youps')  # type: logging.Logger
+
+    # this log is going to stdout but not going to the logging file
+    # why are django settings not being picked up
     logger.critical("user %s has run, stop, or saved" % email)
 
     try:
@@ -205,7 +208,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         if run_request:
             logger.info("user %s run request" % imapAccount.email)
             # TODO replace this with the right search criteria 
-            res = interpret(MailBox(imapAccount, imap), code, is_test)
+            res = interpret(MailBox(imapAccount, imap), imapAccount.current_mode.code, is_test)
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:
