@@ -209,7 +209,7 @@ class Folder(object):
                 logger.info("matching highest mod seq no flag update")
                 return
 
-        logger.debug("%s started updating flags" % self)
+        logger.info("%s started updating flags" % self)
 
         # get all the flags for the old messages
         fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), [
