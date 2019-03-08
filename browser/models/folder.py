@@ -262,6 +262,7 @@ class Folder(object):
         # if there is only one item in the return field
         # and we already have it in our database
         # delete it to be safe and save it again
+        # TODO not sure why this happens maybe the folder._uid_next isn't getting updated properly
         if len(fetch_data) == 1 and last_seen_uid in fetch_data:
             already_saved = MessageSchema.objects.filter(folder_schema=self._schema, uid=last_seen_uid)
             if already_saved:
