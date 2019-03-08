@@ -270,7 +270,7 @@ LOGGING = {
         },
         # this formatter is for the user
         'custom.user' : {
-            'format': '%(asctime)s %(levelname)-8s %(funcName)s %(messages)s'
+            'format': '%(asctime)s %(levelname)-8s %(funcName)s %(message)s'
         },
         # this formatter includes the time, log level, logger name, and message
         'custom.precise' : {
