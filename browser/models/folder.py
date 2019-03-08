@@ -206,10 +206,10 @@ class Folder(object):
         # this is kind of what thunderbird does https://wiki.mozilla.org/Thunderbird:IMAP_RFC_4551_Implementation
         if highest_mod_seq is not None:
             if self._highest_mod_seq == highest_mod_seq:
-                logger.info("matching highest mod seq no flag update")
+                logger.debug("%s matching highest mod seq no flag update" % self)
                 return
 
-        logger.info("%s started updating flags" % self)
+        logger.debug("%s started updating flags" % self)
 
         # get all the flags for the old messages
         fetch_data = self._imap_client.fetch('1:%d' % (self._last_seen_uid), [
@@ -245,7 +245,7 @@ class Folder(object):
         logger.debug("%s updated flags" % self)
         if highest_mod_seq is not None:
             self._highest_mod_seq = highest_mod_seq
-            logger.info("%s updated highest mod seq to %d" % (self, highest_mod_seq))
+            logger.debug("%s updated highest mod seq to %d" % (self, highest_mod_seq))
 
 
     def _save_new_messages(self, last_seen_uid, event_data_queue = None):
