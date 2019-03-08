@@ -309,6 +309,7 @@ class Folder(object):
             except Exception:
                 logger.critical("%s failed to save message %d" % (self, uid))
                 logger.critical("%s stored last_seen_uid %d, passed last_seen_uid %d" % (self, self._last_seen_uid, last_seen_uid))
+                logger.critical("number of messages returned %d" % (len(fetch_data)))
                 raise
             if last_seen_uid != 0:
                 event_data_queue.put(NewMessageData(Message(message_schema, self._imap_client)))
