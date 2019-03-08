@@ -72,7 +72,7 @@ class MailBox(object):
     def _run_user_code(self):
         from browser.sandbox import interpret
         res = interpret(self)
-        if res['status'] and res['imap_log']:
+        if res['imap_log']:
             logger.info('user output: %s' % res['imap_log'])
 
 
