@@ -105,9 +105,11 @@ $(document).ready(function() {
             var $ul = $("<ul></ul>");
             for (var key in d) {
                 console.log(key, isDict(d[key]))
-                var $li = $("<li><input type='checkbox' value='"+ path + "/" + key + "'>" + key + "</li>");
+                if (path=="") path = key;
+                else  path + "/" + key;
+                var $li = $("<li><input type='checkbox' value='"+ path + "'>" + key + "</li>");
                 
-                if( Object.keys(d[key]).length > 0 ) { path = path + "/" + key; $li.append(rec_add_nested(d[key], path)) } 
+                if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key], path)) } 
 
                 $ul.append($li);
                 // else {
