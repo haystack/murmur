@@ -196,8 +196,12 @@ $(document).ready(function() {
 
         // Load mode - folder selection
         $(".tab-pane").each(function() {
-            var mode_id = $(this).attr('id').split("-")[1];
-            debugger;
+            var mode_id = $(this).attr('id').split("_")[1];
+            for(var i=0; i < mode_folder.length ; i++) {
+                if(mode_folder[i][1] == mode_id) {
+                    $(this).find('.folder-container input[value="'+ mode_folder[i][0] + '"]').prop( "checked", true );
+                }
+            }
         }) 
 
         var method_names = [];
