@@ -442,7 +442,7 @@ $(document).ready(function() {
             name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML,
             folders = [];
 
-            $(element).find(".folder-container input:checked").each(function () {
+            $(element).parents('.tab-pane').find(".folder-container input:checked").each(function () {
                 folders.append($(this).attr('value'));s
             });
             
