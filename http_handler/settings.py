@@ -2,6 +2,7 @@
 
 import os
 import django
+import sys
 
 
 DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
@@ -299,7 +300,7 @@ LOGGING = {
         'custom.console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stdout',  # Default is stderr
+            'stream': sys.stdout,  # Default is stderr
             'formatter': 'custom.user'
         }
     },
