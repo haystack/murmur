@@ -16,7 +16,7 @@ logger = logging.getLogger('youps')  # type: logging.Logger
 
 
 def interpret(mailbox, code, is_test=False):
-    # type: (Mailbox, unicode, bool) -> t.Dict[t.AnyStr, t.Any]
+    # type: (MailBox, unicode, bool) -> t.Dict[t.AnyStr, t.Any]
 
     # assert we actually got a mailbox
     assert isinstance(mailbox, MailBox)
