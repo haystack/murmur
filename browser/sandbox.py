@@ -43,6 +43,7 @@ def interpret(mailbox, is_test=False):
     try:
         # set the stdout to a string
         sys.stdout = user_std_out
+        userLogger.handlers[0].stream = user_std_out
 
         # define the variables accessible to the user
         user_environ = {
@@ -51,8 +52,8 @@ def interpret(mailbox, is_test=False):
         }
         # execute the user's code 
         exec(code, user_environ)
-        userLogger.info("User logger handlers %s" % userLogger.handlers)
-
+        userLogger.info("test test test")
+        
         # fire new message events
         while True:
             try:
@@ -69,6 +70,7 @@ def interpret(mailbox, is_test=False):
     finally:
         # set the stdout back to what it was
         sys.stdout = sys.__stdout__
+        userLogger.handlers[0].stream = sys.__stdout__
         res['imap_log'] = user_std_out.getvalue() + res['imap_log']
         user_std_out.close()
         return res
