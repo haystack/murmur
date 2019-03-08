@@ -593,7 +593,6 @@ $(document).ready(function() {
             var cur_mode = get_current_mode();
 
             var modes = get_modes();
-            var selected_folder = get_selected_folder();
 
             var params = {
                 'current_mode_id': cur_mode['id'],
