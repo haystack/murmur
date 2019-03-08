@@ -156,6 +156,8 @@ def init_sync_user_inbox(imapAccount_email):
             imapAccount.execution_log = result.get('imap_log') + imapAccount.execution_log
             imapAccount.save()
 
+        logger.info("execution log %s" % imapAccount.execution_log)
+
         if imapAccount.is_initialized is False:
             imapAccount.is_initialized = True
             imapAccount.save()
