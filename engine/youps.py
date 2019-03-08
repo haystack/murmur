@@ -4,7 +4,7 @@ import random
 import traceback
 from browser.imap import GoogleOauth2
 from http_handler.settings import IMAP_SECRET
-from schema.youps import ImapAccount, MailbotMode, Action
+from schema.youps import ImapAccount, MailbotMode, MailbotMode_Folder, Action, FolderSchema
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
 from engine.constants import msg_code
@@ -186,18 +186,32 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
             mode_id = value['id']
             mode_name = value['name'].encode('utf-8')
             code = value['code'].encode('utf-8')
+            folders = value['folders']
             print mode_id
             print mode_name
             print code
-
+            print folders
+            
             mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_account=imapAccount)
             if not mailbotMode.exists():
                 mailbotMode = MailbotMode(uid=mode_id, name=mode_name, code=code, imap_account=imapAccount)
                 mailbotMode.save()
+
             else:
                 mailbotMode = mailbotMode[0]
                 mailbotMode.code = code
                 mailbotMode.save()
+
+                # Remove old setting to re-save it
+                mf = MailbotMode_Folder.objects.filter(mode=mailbotMode, imap_account=imapAccount).filter()
+                mf.delete()
+
+            # Save selected folder for the mode
+            for f in folders:
+                folder = FolderSchema.objects.filter(imap_account=imap, name=f)
+                mf = MailbotMode_Folder(mode=mailbotMode, folder=folder, imap_account=imapAccount)
+                mf.save()
+
 
         imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_account=imapAccount)[0]
         imapAccount.save()
@@ -224,11 +238,12 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
 
         res['status'] = True
 
-
     except IMAPClient.Error, e:
         res['code'] = e
     except ImapAccount.DoesNotExist:
         res['code'] = "Not logged into IMAP"
+    except FolderSchema.DoesNotExist:
+        logger.debug("Folder is not found")
     except Exception, e:
         # TODO add exception
         print e

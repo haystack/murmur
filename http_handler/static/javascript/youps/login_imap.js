@@ -105,7 +105,7 @@ $(document).ready(function() {
             var $ul = $("<ul></ul>");
             for (var key in d) {
                 console.log(key, isDict(d[key]))
-                var $li = $("<li><input type='checkbox'>" + key + "</li>");
+                var $li = $("<li><input type='checkbox' value='"+ key + "'>" + key + "</li>");
                 
                 if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key])) } 
 
@@ -439,12 +439,19 @@ $(document).ready(function() {
         document.querySelectorAll('.tab-content .CodeMirror').forEach(function(element) { 
             var id = $(element).parents('.tab-pane').attr('id').split("_")[1];
             code = element.CodeMirror.getValue(),
-            name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML;
+            name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML,
+            folders = [];
+
+            $(element).find(".folder-container input:checked").each(function () {
+                folders.append($(this).attr('value'));s
+            });
+            
 
             modes[id] = {
                 "id": id,
                 "name": $.trim( name ), 
-                "code": code
+                "code": code,
+                "folders": folders
             };
         });
 
@@ -586,6 +593,7 @@ $(document).ready(function() {
             var cur_mode = get_current_mode();
 
             var modes = get_modes();
+            var selected_folder = get_selected_folder();
 
             var params = {
                 'current_mode_id': cur_mode['id'],
