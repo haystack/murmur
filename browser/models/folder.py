@@ -259,6 +259,11 @@ class Folder(object):
         fetch_data = self._imap_client.fetch(
             '%d:*' % (last_seen_uid + 1), Message._descriptors)
 
+        if len(fetch_data) == 1 and last_seen_uid in fetch_data:
+            already_saved = MessageSchema.objects.filter(folder_schema=self._schema, uid=last_seen_uid)
+            if already_saved:
+                logger.critical("already saved %s" % already_saved[0])
+
         logger.info("%s saving new messages" % (self))
         for uid in fetch_data:
             message_data = fetch_data[uid]
