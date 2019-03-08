@@ -161,6 +161,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
     """
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
 
+    logger.info("user %s has run, stop, or saved" % email)
+
     try:
         imapAccount = ImapAccount.objects.get(email=email)
         auth_res = authenticate( imapAccount )
