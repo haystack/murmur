@@ -201,9 +201,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         imapAccount.save()
 
         if run_request:
-            # TODO run it several times over for the selected folders
-            # TODO change with appropriate search_criteria
-            imap.select_folder("INBOX")
+            logger.info("user %s run request" % imapAccount.email)
             # TODO replace this with the right search criteria 
             res = interpret(MailBox(imapAccount, imap), code, is_test)
 
