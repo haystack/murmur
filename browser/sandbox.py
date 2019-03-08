@@ -57,7 +57,6 @@ def interpret(mailbox, is_test=False):
             'on_message_arrival': on_message_arrival
         }
 
-        userLogger.info("test test test")
         # execute the user's code 
         exec(code, user_environ)
         
