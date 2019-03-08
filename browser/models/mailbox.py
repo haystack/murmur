@@ -40,12 +40,13 @@ class MailBox(object):
         """Synchronize the mailbox with the imap server.
         """
 
+        assert len(set(self._list_selectable_folders)) == len(list(self._list_selectable_folders))
+
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
         # and https://tools.ietf.org/html/rfc4549
         # TODO for future work per folder might be highest common denominator for parallelizing
         for folder in self._list_selectable_folders():
-
             # response contains folder level information such as
             # uid validity, uid next, and highest mod seq
             response = self._imap_client.select_folder(folder.name)

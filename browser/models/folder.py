@@ -28,6 +28,13 @@ class Folder(object):
         # type: () -> t.AnyStr
         return "folder: %s" % (self.name)
 
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, Folder):
+            return self._schema == other._schema
+        return False
+
+
     @property
     def _uid_next(self):
         # type: () -> int
