@@ -52,7 +52,6 @@ def interpret(mailbox, is_test=False):
         }
         # execute the user's code 
         exec(code, user_environ)
-        userLogger.info("test test test")
         
         # fire new message events
         while True:
