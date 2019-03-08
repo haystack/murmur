@@ -57,7 +57,7 @@ class MailBox(object):
                 logger.critical("%s Missing HIGHESTMODSEQ information" % folder)
             else:
                 logger.info("%s HIGHESTMODSEQ %d" % (folder, response['HIGHESTMODSEQ']))
-            if 'NOMODSEQ' not in response:
+            if 'NOMODSEQ' in response:
                 logger.critical("%s does not support cond store" % folder)
 
 
