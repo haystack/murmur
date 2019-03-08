@@ -65,7 +65,6 @@ def interpret(mailbox, is_test=False):
         res['status'] = False
         userLogger.exception("failure running user %s code" %
                              mailbox._imap_account.email)
-        return res
     finally:
         # set the stdout back to what it was
         sys.stdout = sys.__stdout__

@@ -241,7 +241,7 @@ class Message(object):
 
     def _is_message_already_in_dst_folder(self, dst_folder):
         if dst_folder == self._schema.folder_schema.name:
-            userLogger.info("message already in destination folder")
+            userLogger.info("message already in destination folder: %s" % dst_folder)
             return False
         return True
 
