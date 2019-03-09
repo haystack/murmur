@@ -67,6 +67,17 @@ $(document).ready(function() {
             editor.execCommand("autocomplete")
           }
         })
+        
+        // Intialize accordin listener
+        $(editor_elem).parents(".editor-container").prepend(`<div class="container-namespace panel panel-info">
+            <div class="panel-heading panel-collapsed">
+                <h3 class="panel-title">Packages <span id="preview-namespace"></span></h3>
+                <span class="pull-right"><i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="panel-body" style="display:none;">import re, datetime, spacy</div>
+        </div>`);
+
+        $("#preview-namespace").text( $(".container-namespace .panel-body").text().split("import ")[1].trim() );
     }
 
     function init_folder_selector($folder_container) {
@@ -166,36 +177,6 @@ $(document).ready(function() {
 
     // for demo; set date to now
     $(".current-date").text(format_date());
-
-    // Intialize accordin listener
-	$(".tab-content").prepend(`<div class="container-namespace panel panel-info">
-        <div class="panel-heading panel-collapsed">
-            <h3 class="panel-title">Packages <span id="preview-namespace"></span></h3>
-            <span class="pull-right"><i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i></span>
-        </div>
-        <div class="panel-body" style="display:none;">import re, datetime, spacy</div>
-    </div>`);
-
-    $("#preview-namespace").text( $(".container-namespace .panel-body").text().split("import ")[1].trim() );
-
-    $(".panel-heading").click(function (e) {
-        e.preventDefault();
-
-        var $this = $(this);
-        if(!$this.hasClass('panel-collapsed')) { // close the panel
-            $this.parents('.panel').find('.panel-body').slideUp();
-            $this.addClass('panel-collapsed');
-            $this.find('.fa-chevron-down').hide();
-            $this.find('.fa-chevron-up').show();
-            $("#preview-namespace").show();
-        } else { // open the panel
-            $this.parents('.panel').find('.panel-body').slideDown();
-            $this.removeClass('panel-collapsed');
-            $this.find('.fa-chevron-up').hide();
-            $this.find('.fa-chevron-down').show();
-            $("#preview-namespace").hide();
-        }
-    });
 
     // Create the sandbox:
     // window.sandbox = new Sandbox.View({
@@ -366,6 +347,25 @@ $(document).ready(function() {
             });
         }
     });
+
+    $(".editor-container").on("click", ".panel-heading", function (e) {
+        e.preventDefault();
+
+        var $this = $(this);
+        if(!$this.hasClass('panel-collapsed')) { // close the panel
+            $this.parents('.panel').find('.panel-body').slideUp();
+            $this.addClass('panel-collapsed');
+            $this.find('.fa-chevron-down').hide();
+            $this.find('.fa-chevron-up').show();
+            $("#preview-namespace").show();
+        } else { // open the panel
+            $this.parents('.panel').find('.panel-body').slideDown();
+            $this.removeClass('panel-collapsed');
+            $this.find('.fa-chevron-up').hide();
+            $this.find('.fa-chevron-down').show();
+            $("#preview-namespace").hide();
+        }
+    })
 
     // $("#password-container").hide();
     guess_host($("#user-full-email").text());
