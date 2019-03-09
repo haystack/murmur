@@ -13,7 +13,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 from browser.models.event_data import NewMessageData
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
 from schema.youps import Action, TaskScheduler  # noqa: F401 ignore unused we use it for typing
-from smtp_handler.utils import codeobject_dumps
+from smtp_handler.utils import codeobject_dumps, is_gmail
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -41,6 +41,42 @@ def interpret(mailbox, code, is_test=False):
     user_std_out = StringIO()
 
     # define user methods
+    def create_draft(subject="", to_addr="", cc_addr="", bcc_addr="", body="", draft_folder="Drafts"):
+	    new_message = message.Message()
+        new_message["Subject"] = subject
+            
+        if type(to_addr) == 'list':
+            to_addr = ",".join(to_addr)
+        if type(cc_addr) == 'list':
+            cc_addr = ",".join(cc_addr)
+        if type(bcc_addr) == 'list':
+            bcc_addr = ",".join(bcc_addr)
+            
+        new_message["To"] = to_addr
+        new_message["Cc"] = cc_addr
+        new_message["Bcc"] = bcc_addr
+        new_message.set_payload(body) 
+            
+        # if Gmail
+        if is_gmail(mailbox._imap_client):
+            mailbox._imap_client.append('[Gmail]/Drafts', str(new_message))
+            
+        else:
+            try:
+                # if this imap service provides list capability takes advantage of it
+                if [l[0][0] for l in mailbox._imap_client.list_folders()].index('\\Drafts'):
+                    mailbox._imap_client.append(mailbox._imap_client.list_folders()[2][2], str(new_message))
+            except:
+                # otherwise try to guess a name of draft folder
+                try:
+                    mailbox._imap_client.append('Drafts', str(new_message))
+                except IMAPClient.Error, e:
+                    try:
+                        mailbox._imap_client.append('Draft', str(new_message))
+                    except IMAPClient.Error, e:
+                        if "append failed" in e:
+                            mailbox._imap_client.append(draft_folder, str(new_message))
+
     def on_message_arrival(func):
         mailbox.new_message_handler += func
 
@@ -82,6 +118,7 @@ def interpret(mailbox, code, is_test=False):
 
         # define the variables accessible to the user
         user_environ = {
+            'create_draft': create_draft,
             'new_message_handler': mailbox.new_message_handler,
             'on_message_arrival': on_message_arrival,
             'set_interval': set_interval
