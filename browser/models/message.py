@@ -6,6 +6,7 @@ from datetime import datetime  # noqa: F401 ignore unused we use it for typing
 from browser.models.contact import Contact
 import logging
 from collections import Sequence
+from smtp_handler.utils import is_gmail
 
 userLogger = logging.getLogger('youps.user')  # type: logging.Logger
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -182,7 +183,7 @@ class Message(object):
         ok, flags = self._check_flags(flags)
         if not ok:
             return
-        if self._is_gmail():
+        if is_gmail(self._imap_client):
             self._imap_client.add_gmail_labels(self._uid, flags)
         else:
             self._imap_client.add_flags(self._uid, flags)
@@ -198,7 +199,7 @@ class Message(object):
         ok, flags = self._check_flags()
         if not ok:
             return
-        if self._is_gmail():
+        if is_gmail():
             self._imap_client.remove_gmail_labels(self._uid, flags)
         else:
             self._imap_client.remove_flags(self._uid, flags)
@@ -274,11 +275,4 @@ class Message(object):
             userLogger.info("No valid flags passed")
         return ok, flags
 
-    def _is_gmail(self):
-        # type: () -> bool
-        """Use heuristic to determine if we are connected to a gmail server
-
-        Returns:
-            bool: true if we think we are connected to a gmail server
-        """
-        return self._imap_client.has_capability('X-GM-EXT-1')
+    

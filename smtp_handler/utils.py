@@ -753,3 +753,12 @@ def codeobject_loads(s):
     """loads a code object pickled with co_dumps() return a code object ready for exec()"""
     r = pickle.loads(s)
     return new.code(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11])
+
+def is_gmail(_imap_client):
+    # type: () -> bool
+    """Use heuristic to determine if we are connected to a gmail server
+
+    Returns:
+        bool: true if we think we are connected to a gmail server
+    """
+    return _imap_client.has_capability('X-GM-EXT-1')
