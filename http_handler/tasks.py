@@ -232,7 +232,7 @@ def init_sync_user_inbox(imapAccount_email):
         imapAccount = ImapAccount.objects.get(email=imapAccount_email)  # type: ImapAccount
 
         feed_url_hexdigest = md5(imapAccount_email).hexdigest()
-        lock_id = 'lock-{1}'.format(feed_url_hexdigest)
+        lock_id = 'lock-{0}'.format(feed_url_hexdigest)
         logger.info('syncing..: %s', imapAccount_email)
         with memcache_lock(lock_id) as acquired:
             if acquired:
@@ -274,9 +274,9 @@ def init_sync_user_inbox(imapAccount_email):
                     send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
                     ptask_name = "sync_%s" % (imapAccount_email)
                     args = ujson.dumps( [imapAccount_email] )
-                    # TaskScheduler.schedule_every('init_sync_user_inbox', 'seconds', 4, ptask_name, args)
+                    TaskScheduler.schedule_every('init_sync_user_inbox', 'seconds', 4, ptask_name, args)
 
-                init_sync_user_inbox.apply_async(args=[imapAccount_email], countdown=4, queue='default')
+                # init_sync_user_inbox.apply_async(args=[imapAccount_email], countdown=4, queue='default')
                 return
         
         logger.info(
