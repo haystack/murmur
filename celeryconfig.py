@@ -10,19 +10,19 @@ from kombu import Queue
 CELERY_DEFAULT_QUEUE = 'default'
 CELERY_QUEUES = (
     Queue('default'),
-    Queue('init_sync'),
+    Queue('new_user'),
     Queue('loop_sync'),
 )
 
-# from datetime import timedelta
+from datetime import timedelta
 
-# CELERYBEAT_SCHEDULE = {
-#     'add-every-30-seconds': {
-#         'task': 'tasks.add',
-#         'schedule': timedelta(seconds=30),
-#         'args': (16, 16),
-#         'options': {'queue' : 'loop_sync'} 
-#     },
-# }
+CELERYBEAT_SCHEDULE = {
+    'add-every-30-seconds': {
+        'task': 'tasks.loop_sync_user_inbox',
+        'schedule': timedelta(seconds=5),
+        'args': (),
+        'options': {'queue' : 'loop_sync'} 
+    },
+}
 
-# CELERY_TIMEZONE = 'UTC'
+CELERY_TIMEZONE = 'UTC'
