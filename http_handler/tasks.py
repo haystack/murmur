@@ -15,7 +15,7 @@ from celery.five import monotonic
 from contextlib import contextmanager
 from django.core.cache import cache
 from hashlib import md5
-
+from datetime import timedelta
 LOCK_EXPIRE = 60 * 10  # Lock expires in 10 minutes
 
 @contextmanager
