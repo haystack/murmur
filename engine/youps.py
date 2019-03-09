@@ -1,21 +1,22 @@
 import base64
 import logging
 import random
+import string
 import traceback
 from browser.imap import GoogleOauth2
 from http_handler.settings import IMAP_SECRET
 from schema.youps import ImapAccount, MailbotMode, MailbotMode_Folder, Action, FolderSchema
+
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
-from engine.constants import msg_code
-from browser.imap import authenticate
+
+from browser.imap import GoogleOauth2, authenticate
 from browser.sandbox import interpret
-import string
 from browser.models.mailbox import MailBox
-
-from http_handler.tasks import remove_periodic_task, init_sync_user_inbox
-
-import logging
+from engine.constants import msg_code
+from http_handler.settings import IMAP_SECRET
+from http_handler.tasks import init_sync_user_inbox, remove_periodic_task
+from schema.youps import Action, ImapAccount, MailbotMode
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -162,6 +163,11 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
             run_request (boolean): potentially deprecated as we move toward one-off running fashion. 
     """
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
+    logger = logging.getLogger('youps')  # type: logging.Logger
+
+    # this log is going to stdout but not going to the logging file
+    # why are django settings not being picked up
+    logger.critical("user %s has run, stop, or saved" % email)
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
@@ -217,11 +223,9 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         imapAccount.save()
 
         if run_request:
-            # TODO run it several times over for the selected folders
-            # TODO change with appropriate search_criteria
-            imap.select_folder("INBOX")
+            logger.info("user %s run request" % imapAccount.email)
             # TODO replace this with the right search criteria 
-            res = interpret(imapAccount, imap, code, "UID %d:*" % 90000, is_test)
+            res = interpret(MailBox(imapAccount, imap), imapAccount.current_mode.code, is_test)
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:
@@ -246,6 +250,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         logger.debug("Folder is not found, but it should exist!")
     except Exception, e:
         # TODO add exception
+        logger.exception("failed while doing a user code run")
         print e
         print (traceback.format_exc())
         res['code'] = msg_code['UNKNOWN_ERROR']

@@ -7,7 +7,7 @@ from schema.youps import MessageSchema, FolderSchema, ContactSchema, ImapAccount
 from django.db.models import Max
 from imapclient.response_types import Address  # noqa: F401 ignore unused we use it for typing
 from email.header import decode_header
-from Queue import Queue
+from Queue import Queue  # noqa: F401 ignore unused we use it for typing
 from browser.models.event_data import NewMessageData
 
 
@@ -27,6 +27,13 @@ class Folder(object):
     def __str__(self):
         # type: () -> t.AnyStr
         return "folder: %s" % (self.name)
+
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, Folder):
+            return self._schema == other._schema
+        return False
+
 
     @property
     def _uid_next(self):
@@ -48,6 +55,17 @@ class Folder(object):
     def _uid_validity(self, value):
         # type: (int) -> None
         self._schema.uid_validity = value
+        self._schema.save()
+
+    @property
+    def _highest_mod_seq(self):
+        # type: () -> int
+        return self._schema.highest_mod_seq
+
+    @_highest_mod_seq.setter
+    def _highest_mod_seq(self, value):
+        # type: (int) -> None
+        self._schema.highest_mod_seq = value
         self._schema.save()
 
     @property
@@ -134,8 +152,8 @@ class Folder(object):
             self._last_seen_uid = max_uid
             logger.debug('%s updated max_uid %d' % (self, max_uid))
 
-    def _refresh_cache(self, uid_next, event_data_queue):
-        # type: (int, Queue) -> None
+    def _refresh_cache(self, uid_next, highest_mod_seq, event_data_queue):
+        # type: (int, int, Queue) -> None
         """Called during normal synchronization to refresh the cache.
 
         Should get new messages and build message number to UID map for the
@@ -154,8 +172,8 @@ class Folder(object):
             # TODO maybe trigger the user
 
         # if the last seen uid is zero we haven't seen any messages
-        if not self._last_seen_uid == 0:
-            self._update_cached_message_flags()
+        if self._last_seen_uid != 0:
+            self._update_cached_message_flags(highest_mod_seq)
 
         self._update_last_seen_uid()
         logger.debug("%s finished normal refresh" % (self))
@@ -179,10 +197,18 @@ class Folder(object):
             return True
         return False
 
-    def _update_cached_message_flags(self):
-        # type: () -> None
+    def _update_cached_message_flags(self, highest_mod_seq):
+        # type: (int) -> None
         """Update the flags on any cached messages.
         """
+
+        # we just check the highestmodseq and revert to full sync if they don't match
+        # this is kind of what thunderbird does https://wiki.mozilla.org/Thunderbird:IMAP_RFC_4551_Implementation
+        if highest_mod_seq is not None:
+            if self._highest_mod_seq == highest_mod_seq:
+                logger.debug("%s matching highest mod seq no flag update" % self)
+                return
+
         logger.debug("%s started updating flags" % self)
 
         # get all the flags for the old messages
@@ -215,7 +241,12 @@ class Folder(object):
             message_schema.save()
             # TODO maybe trigger the user
 
+
         logger.debug("%s updated flags" % self)
+        if highest_mod_seq is not None:
+            self._highest_mod_seq = highest_mod_seq
+            logger.debug("%s updated highest mod seq to %d" % (self, highest_mod_seq))
+
 
     def _save_new_messages(self, last_seen_uid, event_data_queue = None):
         # type: (int, Queue) -> None
@@ -228,7 +259,17 @@ class Folder(object):
         fetch_data = self._imap_client.fetch(
             '%d:*' % (last_seen_uid + 1), Message._descriptors)
 
-        logger.info("start saving new messages..: %s" % self._schema.imap_account.email)
+        # if there is only one item in the return field
+        # and we already have it in our database
+        # delete it to be safe and save it again
+        # TODO not sure why this happens maybe the folder._uid_next isn't getting updated properly
+        if len(fetch_data) == 1 and last_seen_uid in fetch_data:
+            already_saved = MessageSchema.objects.filter(folder_schema=self._schema, uid=last_seen_uid)
+            if already_saved:
+                logger.critical("%s found already saved message, deleting it" % self)
+                already_saved[0].delete()
+
+        logger.info("%s saving new messages" % (self))
         for uid in fetch_data:
             message_data = fetch_data[uid]
             logger.debug("Message %d data: %s" % (uid, message_data))
@@ -272,11 +313,18 @@ class Folder(object):
                                            message_id=envelope.message_id,
                                            internal_date=internal_date,
                                            )
-            message_schema.save()
-            if last_seen_uid != 0:
-                event_data_queue.put(NewMessageData(self._schema.imap_account, "UID %d" % uid, self._schema))
 
-            logger.debug("finished saving new messages..: %s" % self._schema.imap_account.email)
+            try:
+                message_schema.save()
+            except Exception:
+                logger.critical("%s failed to save message %d" % (self, uid))
+                logger.critical("%s stored last_seen_uid %d, passed last_seen_uid %d" % (self, self._last_seen_uid, last_seen_uid))
+                logger.critical("number of messages returned %d" % (len(fetch_data)))
+                raise
+            if last_seen_uid != 0:
+                event_data_queue.put(NewMessageData(Message(message_schema, self._imap_client)))
+
+            logger.debug("%s finished saving new messages..:" % self)
 
             # create and save the message contacts
             if envelope.from_ is not None:
@@ -338,16 +386,3 @@ class Folder(object):
                 logger.debug("created contact %s in database" % name)
             contact_schemas.append(contact_schema)
         return contact_schemas
-
-
-    # def parse_envelope(envelope):
-    #     date = envelope.date # type: datetime
-    #     subject = envelope.subject # type: t.AnyStr
-    #     from_ = envelope.from_ # type: t.List[Address]
-    #     sender = envelope.sender  # type: t.List[Address]
-    #     reply_to = envelope.reply_to  # type: t.List[Address]
-    #     to = envelope.to  # type: t.List[Address]
-    #     cc = envelope.cc  # type: t.List[Address]
-    #     bcc = envelope.bcc  # type: t.List[Address]
-    #     in_reply_to = envelope.in_reply_to  # type: t.List[t.AnyStr] # TODO not sure what this is
-    #     message_id = envelope.message_id  # type: t.AnyStr
