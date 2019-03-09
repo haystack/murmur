@@ -275,53 +275,50 @@ def register_inbox(imapAccount_email):
 
 @task(name="loop_sync_user_inbox")
 def loop_sync_user_inbox():
-    try:
-        logger.info('Loop sync start..')
-        imapAccounts = ImapAccount.objects.filter(is_initialized=True)
-        for imapAccount in imapAccounts:
-            imapAccount_email = imapAccount.email
+    logger.info('Loop sync start..')
+    imapAccounts = ImapAccount.objects.filter(is_initialized=True)
+    for imapAccount in imapAccounts:
+        imapAccount_email = imapAccount.email
+
+        try:
+            logger.info('Start syncing %s ', imapAccount_email)
+
+            # authenticate with the user's imap server
+            auth_res = authenticate(imapAccount)
+            # if authentication failed we can't run anything
+            if not auth_res['status']:
+                # Stop doing loop
+                # TODO maybe we should email the user
+                return
+
+            # get an imapclient which is authenticated
+            imap = auth_res['imap']
+
+            # create the mailbox
+            try:
+                mailbox = MailBox(imapAccount, imap)
+                # sync the mailbox with imap
+                mailbox._sync()
+            except Exception:
+                logger.exception("Mailbox sync failed")
+                # TODO maybe we should email the user
+                continue
+            logger.info("Mailbox sync done: %s" % (imapAccount_email))
 
             try:
-                logger.info('Start syncing %s ', imapAccount_email)
+                mailbox._run_user_code()
+            except Exception():
+                logger.exception("Mailbox run user code failed")
+            
+            # after sync, logout to prevent multi-connection issue
+            imap.logout()
 
-                # authenticate with the user's imap server
-                auth_res = authenticate(imapAccount)
-                # if authentication failed we can't run anything
-                if not auth_res['status']:
-                    # Stop doing loop
-                    # TODO maybe we should email the user
-                    return
+            logger.info(
+                'Sync done for %s', imapAccount_email)
+        except ImapAccount.DoesNotExist:
+            imapAccount.is_initialized = False
+            imapAccount.save()
+            logger.exception("syncing fails Remove periodic tasks. imap_account not exist %s" % (imapAccount_email))
 
-                # get an imapclient which is authenticated
-                imap = auth_res['imap']
-
-                # create the mailbox
-                try:
-                    mailbox = MailBox(imapAccount, imap)
-                    # sync the mailbox with imap
-                    mailbox._sync()
-                except Exception:
-                    logger.exception("Mailbox sync failed")
-                    # TODO maybe we should email the user
-                    continue
-                logger.info("Mailbox sync done: %s" % (imapAccount_email))
-
-                try:
-                    mailbox._run_user_code()
-                except Exception():
-                    logger.exception("Mailbox run user code failed")
-                
-                # after sync, logout to prevent multi-connection issue
-                imap.logout()
-
-                logger.info(
-                    'Sync done for %s', imapAccount_email)
-            except ImapAccount.DoesNotExist:
-                imapAccount.is_initialized = False
-                imapAccount.save()
-                logger.exception("syncing fails Remove periodic tasks. imap_account not exist %s" % (imapAccount_email))
-
-            except Exception as e:
-                logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e)) 
-                
-         
+        except Exception as e:
+            logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e)) 
