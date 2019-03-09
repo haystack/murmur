@@ -88,7 +88,7 @@ def login_imap(email, password, host, is_oauth):
         2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
         """
         # start keeping eye on users' inbox
-        init_sync_user_inbox_wrapper.delay(imapAccount.email)
+        init_sync_user_inbox_wrapper.apply_async(args=[imapAccount.email], queue='init_sync')
 
         # TODO notify the user that their account is ready to be used
 
