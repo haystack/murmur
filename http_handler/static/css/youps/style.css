@@ -188,6 +188,13 @@
 .folder-container {
   width: 200px;
   float: left;
+  overflow-y: scroll;
+  height: 300px;
+}
+
+.folder-container > ul {
+  list-style-type: none;
+  margin-top: 8px;
 }
 
 .folder-container ul {
