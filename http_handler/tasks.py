@@ -4,7 +4,7 @@ import random
 import ujson
 from browser.imap import authenticate
 from browser.models.mailbox import MailBox
-from celery.decorators import task
+from celery.decorators import task, periodic_task
 from http_handler.settings import BASE_URL
 from schema.youps import Action, ImapAccount, PeriodicTask, TaskScheduler
 from smtp_handler.utils import codeobject_loads, send_email
