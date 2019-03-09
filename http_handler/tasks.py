@@ -149,6 +149,7 @@ def init_sync_user_inbox(self, imapAccount_email):
         imapAccount_email (string):  
     """
     try:
+        logger.info("Start syncing %s " % imapAccount_email)
         imapAccount = ImapAccount.objects.get(email=imapAccount_email)  # type: ImapAccount
 
         # logger.info('Sync lock for %s is acquired', imapAccount_email)
