@@ -1,5 +1,4 @@
 import logging
-import random
 
 import ujson
 from browser.imap import authenticate
@@ -14,7 +13,7 @@ logger = logging.getLogger('youps')  # type: logging.Logger
 
 
 @task(name="add_periodic_task")
-def add_periodic_task(interval, imap_account_id, action_id, search_criteria, folder_name, expires=None):
+def add_periodic_task(interval, action_id, expires=None):
     """ create a new dynamic periodic task, mainly used for users' set_interval() call.
 
     Args:
@@ -27,8 +26,7 @@ def add_periodic_task(interval, imap_account_id, action_id, search_criteria, fol
     args = ujson.dumps( [imap_account_id, code, search_criteria, folder_name] )
 
     # TODO naming meaningful to distinguish one-off and interval running
-    ptask_name = "%d_%d" % (int(imap_account_id), random.randint(1, 10000))
-    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args, expires=expires)
+    
 
     imap_account = ImapAccount.objects.get(id=imap_account_id)
     if expires:  # set_timeout

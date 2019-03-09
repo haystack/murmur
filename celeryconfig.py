@@ -9,7 +9,7 @@ from kombu import Queue
 
 CELERY_DEFAULT_QUEUE = 'default'
 CELERY_QUEUES = (
-    Queue('default'),
+    Queue('default', routing_key='default.#'),
     Queue('new_user', routing_key='new_user.#'),
     Queue('loop_sync', routing_key='loop_sync.#'),
 )
