@@ -348,7 +348,7 @@ $(document).ready(function() {
         }
     });
 
-    $(".editor-container").on("click", ".panel-heading", function (e) {
+    $("#editor-container").on("click", ".panel-heading", function (e) {
         e.preventDefault();
 
         var $this = $(this);

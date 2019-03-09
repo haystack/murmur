@@ -231,3 +231,7 @@
 .panel-title {
   font-size: 12px;
 }
+
+.panel-body {
+  height: 50px;
+}
