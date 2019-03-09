@@ -20,7 +20,7 @@ import functools
 LOCK_EXPIRE = 60 * 10  # Lock expires in 10 minutes
 
 @contextmanager
-def memcache_lock(lock_id, oid):
+def memcache_lock(lock_id):
     timeout_at = monotonic() + LOCK_EXPIRE - 3
     # cache.add fails if the key already exists
     # status = cache.add(lock_id, oid, LOCK_EXPIRE)
@@ -140,7 +140,7 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 @task(name="init_sync_user_inbox_wrapper")
 def init_sync_user_inbox_wrapper(imapAccount_email):
     logger.info('first syncing..: %s', imapAccount_email)
-    init_sync_user_inbox.apply_async(args=[imapAccount_email], queue='init_sync')
+    init_sync_user_inbox.apply_async(args=[imapAccount_email])
 
 def single_instance_task(timeout):
     def task_exc(func):
@@ -221,8 +221,8 @@ def fetch_articles(imapAccount_email):
 #         logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e)) 
 
 # A task being bound means the first argument to the task will always be the task instance (self), just like Python bound methods:
-@task(bind=True, name="init_sync_user_inbox")
-def init_sync_user_inbox(self, imapAccount_email):
+@task(name="init_sync_user_inbox")
+def init_sync_user_inbox(imapAccount_email):
     """ execute the given code object.
 
     Args:
@@ -232,9 +232,9 @@ def init_sync_user_inbox(self, imapAccount_email):
         imapAccount = ImapAccount.objects.get(email=imapAccount_email)  # type: ImapAccount
 
         feed_url_hexdigest = md5(imapAccount_email).hexdigest()
-        lock_id = '{0}-lock-{1}'.format(self.name, feed_url_hexdigest)
+        lock_id = 'lock-{1}'.format(feed_url_hexdigest)
         logger.info('syncing..: %s', imapAccount_email)
-        with memcache_lock(lock_id, self.app.oid) as acquired:
+        with memcache_lock(lock_id) as acquired:
             if acquired:
                 logger.info('Sync lock for %s is acquired', imapAccount_email)
 
