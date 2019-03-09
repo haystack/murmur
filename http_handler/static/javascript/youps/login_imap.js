@@ -72,14 +72,14 @@ $(document).ready(function() {
     function init_folder_selector($folder_container) {
         // nested tree checkboxs http://jsfiddle.net/rn290ywf/
         // TODO just for test
-        if (folders.length ==0)
-            folders = ['INBOX', 'Family','Family/Sub folder1','Family/Sub folder2', 'Conference', 'Internship', 'Budget']
+        if (FOLDERS.length ==0)
+            FOLDERS = ['INBOX', 'Family','Family/Sub folder1','Family/Sub folder2', 'Conference', 'Internship', 'Budget']
         
         // Init a new folder list
 
         // create folder nested structures
         folders_nested = {}
-        $.each(folders, function(index, value) {
+        $.each(FOLDERS, function(index, value) {
             if(value.includes("/")) {
                 pwd = value.split("/")
                 d = folders_nested
@@ -453,10 +453,10 @@ $(document).ready(function() {
             var id = $(element).parents('.tab-pane').attr('id').split("_")[1];
             code = element.CodeMirror.getValue(),
             name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML,
-            folders = [];
+            selected_folders = [];
 
             $(element).parents('.tab-pane').find(".folder-container input:checked").each(function () {
-                folders.push($(this).attr('value'));
+                selected_folders.push($(this).attr('value'));
             });
             
 
@@ -464,7 +464,7 @@ $(document).ready(function() {
                 "id": id,
                 "name": $.trim( name ), 
                 "code": code,
-                "folders": folders
+                "folders": selected_folders
             };
         });
 
