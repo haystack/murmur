@@ -151,7 +151,7 @@ def single_instance_task(timeout):
             if acquire_lock():
                 try:
                     logger.info("required lock")
-                    func(*args, **kwargs)
+                    func()
                 finally:
                     release_lock()
                     logger.info("released lock")
