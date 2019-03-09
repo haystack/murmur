@@ -15,7 +15,7 @@ from browser.sandbox import interpret
 from browser.models.mailbox import MailBox
 from engine.constants import msg_code
 from http_handler.settings import IMAP_SECRET
-from http_handler.tasks import init_sync_user_inbox, remove_periodic_task
+from http_handler.tasks import init_sync_user_inbox_wrapper, remove_periodic_task
 from schema.youps import Action, ImapAccount, MailbotMode
 
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -88,7 +88,7 @@ def login_imap(email, password, host, is_oauth):
         2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
         """
         # start keeping eye on users' inbox
-        init_sync_user_inbox.delay(imapAccount.email)
+        init_sync_user_inbox_wrapper.delay(imapAccount.email)
 
         # TODO notify the user that their account is ready to be used
 
