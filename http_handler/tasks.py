@@ -138,7 +138,7 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 @task(name="init_sync_user_inbox_wrapper")
 def init_sync_user_inbox_wrapper(imapAccount_email):
     logger.info('first syncing..: %s', imapAccount_email)
-    init_sync_user_inbox.apply_async(args=[imapAccount_email], queue='init_sync')
+    fetch_articles.apply_async(args=[imapAccount_email], queue='init_sync')
 
 def single_instance_task(timeout):
     def task_exc(func):
@@ -154,6 +154,11 @@ def single_instance_task(timeout):
                     release_lock()
         return wrapper
     return task_exc
+
+@periodic_task(run_every=timedelta(seconds=5))
+@single_instance_task(60*10)
+def fetch_articles():
+    logger.info("Start syncing %s " % "Hello")
 
 @single_instance_task(60*10)
 @task(name="init_sync_user_inbox")
