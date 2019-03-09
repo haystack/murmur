@@ -434,6 +434,7 @@ def login_imap_view(request):
 					folders = FolderSchema.objects.filter(imap_account=imap[0]).values('name')
 					folders = [str(f['name']) for f in folders]
 					mode_folder = MailbotMode_Folder.objects.filter(imap_account=imap[0])
+					mode_folder = [[str(mf.folder.name), str(mf.mode.uid)] for mf in mode_folder]
 				
 
 	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 'is_initialized': is_initialized,

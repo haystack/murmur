@@ -72,13 +72,14 @@ $(document).ready(function() {
     function init_folder_selector($folder_container) {
         // nested tree checkboxs http://jsfiddle.net/rn290ywf/
         // TODO just for test
-        folders = ['Boomerang', 'Boomerang-Outbox', 'Boomerang-Outbox/Cancelled/A', 'Boomerang-Returned', 'INBOX', '[Gmail]/All Mail', '[Gmail]/Drafts', '[Gmail]/Important', '[Gmail]/Sent Mail', '[Gmail]/Spam', '[Gmail]/Starred', '[Gmail]/Trash', 'bundle_test', 'how is it going', 'myriad', 'myriad/haystack-potluck', 'test1', 'test2', 'test3', 'test4']
+        if (FOLDERS.length ==0)
+            FOLDERS = ['INBOX', 'Family','Family/Sub folder1','Family/Sub folder2', 'Conference', 'Internship', 'Budget']
         
         // Init a new folder list
 
         // create folder nested structures
         folders_nested = {}
-        $.each(folders, function(index, value) {
+        $.each(FOLDERS, function(index, value) {
             if(value.includes("/")) {
                 pwd = value.split("/")
                 d = folders_nested
@@ -89,20 +90,29 @@ $(document).ready(function() {
                     d = d[v]
                 })
                 folders_nested = $.extend(folders_nested,d)
-            }        
+            } else { 
+                if( (value in folders_nested) == false)  
+                    folders_nested[value]= {} 
+                }        
         })
 
         function isDict(v) {
             return typeof v==='object' && v!==null && !(v instanceof Array) && !(v instanceof Date);
         }
 
-        // dict => <ul><li>key1</li> <li>key2</li></ul>
-        function rec_add_nested(d) {
+        // dict => <ul><li>key1 <ul><li>key1-1</li></ul></li> <li>key2</li></ul>
+        function rec_add_nested(d, path) {
             var $ul = $("<ul></ul>");
             for (var key in d) {
+                var p = ""
                 console.log(key, isDict(d[key]))
-                $ul.append("<li><input type='checkbox'>" + key + "</li>")
-                if( Object.keys(d[key]).length > 0 ) { $ul.append(rec_add_nested(d[key])) } 
+                if (path=="") p = key;
+                else  p = path + "/" + key;
+                var $li = $("<li><input type='checkbox' value='"+ p + "'>" + '<i class="far fa-folder-open"></i> ' + key + "</li>");
+                
+                if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key], p)) } 
+
+                $ul.append($li);
                 // else {
                 //     $ul.append("<li>" + key + "</li>")
                 // }
@@ -111,7 +121,7 @@ $(document).ready(function() {
             return $ul;
         }
         
-        u = rec_add_nested(folders_nested)
+        u = rec_add_nested(folders_nested, "")
         $folder_container.append(u)
     }
 
@@ -165,12 +175,18 @@ $(document).ready(function() {
 
     // init editor  
     var unsaved_tabs = [];
+
+
+    /**
+     * Event listeners 
+     * 
+     */
     
     document.addEventListener("mv-load", function(){   
         // Init editor & its autocomplete
         document.querySelectorAll('textarea.editor').forEach(function(element) {
             var mode_id = element.id.split("-")[1];
-            $('.nav-tabs li a[href="#editor-tab_'+ mode_id +'"]').click();
+            $('.nav-tabs li a[href="#tab_'+ mode_id +'"]').click();
 
             init_editor(element);
         });
@@ -179,6 +195,14 @@ $(document).ready(function() {
         init_folder_selector( $(".folder-container") )
 
         // Load mode - folder selection
+        $(".tab-pane").each(function() {
+            var mode_id = $(this).attr('id').split("_")[1];
+            for(var i=0; i < mode_folder.length ; i++) {
+                if(mode_folder[i][1] == mode_id) {
+                    $(this).find('.folder-container input[value="'+ mode_folder[i][0] + '"]').prop( "checked", true );
+                }
+            }
+        }) 
 
         var method_names = [];
         document.querySelectorAll('#apis-container h4').forEach(function(element) {
@@ -245,11 +269,11 @@ $(document).ready(function() {
 
         var id = Math.max.apply(null, modes_keys) +1 ; // avoid same ID
         // Add tab
-        $(this).closest('li').before('<li><a href="#editor-tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
+        $(this).closest('li').before('<li><a href="#tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
         // Add tab-pane
-        $('.tab-content').append(`<div class="tab-pane row"> 
+        $('.tab-content').append(`<div class="tab-pane row" id="tab_` + id + `"> 
                 <div class="folder-container"></div>
-                <div class="editor-container" id="editor-tab_` + id + `">
+                <div class="editor-container">
                     <textarea class="editor mode-editor" id="editor-` + id + `"></textarea>
                 </div>
             </div>`);
@@ -260,6 +284,8 @@ $(document).ready(function() {
         unsaved_tabs.push( id );
 
         init_editor( document.getElementById("editor-" + id) );
+
+        init_folder_selector( $("#tab_" + id + " .folder-container") )
     });
 
     var editHandler = function() {
@@ -292,6 +318,24 @@ $(document).ready(function() {
         // update current_mode
         run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running());
     })
+
+    $.extend($.expr[':'], {
+        unchecked: function (obj) {
+            return ((obj.type == 'checkbox' || obj.type == 'radio') && !$(obj).is(':checked'));
+        }
+    });
+
+    $('#editor-container').on('change', '.folder-container input:checkbox', function() {
+        // change children's value
+        $(this).siblings('ul').find('input:checkbox').prop('checked', $(this).prop("checked"));
+
+        for (var i = $('.folder-container').find('ul').length - 1; i >= 0; i--) {
+            // find parents value
+            $('.folder-container').find('ul:eq(' + i + ')').parents('li').find('> input').prop('checked', function () {
+                return $(this).siblings('ul').find('input:unchecked').length === 0 ? true : false;
+            });
+        }
+    });
 
     // $("#password-container").hide();
     guess_host($("#user-full-email").text());
@@ -394,7 +438,7 @@ $(document).ready(function() {
 
     function get_current_mode() {
         var id = $("#current_mode_dropdown").attr('mode-id'),
-            code = document.querySelector('#editor-tab_'+ id +' .CodeMirror').CodeMirror.getValue();
+            code = document.querySelector('#tab_'+ id +' .CodeMirror').CodeMirror.getValue();
 
         return {"id": id,
             "name": $.trim(document.querySelector('.nav.nav-tabs li.active .tab-title').innerHTML), 
@@ -406,14 +450,21 @@ $(document).ready(function() {
         var modes = {};
 
         document.querySelectorAll('.tab-content .CodeMirror').forEach(function(element) { 
-            var id = element.parentElement.id.split("_")[1];
+            var id = $(element).parents('.tab-pane').attr('id').split("_")[1];
             code = element.CodeMirror.getValue(),
-            name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML;
+            name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML,
+            selected_folders = [];
+
+            $(element).parents('.tab-pane').find(".folder-container input:checked").each(function () {
+                selected_folders.push($(this).attr('value'));
+            });
+            
 
             modes[id] = {
                 "id": id,
                 "name": $.trim( name ), 
-                "code": code
+                "code": code,
+                "folders": selected_folders
             };
         });
 
