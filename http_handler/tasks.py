@@ -138,7 +138,7 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 @task(name="init_sync_user_inbox_wrapper")
 def init_sync_user_inbox_wrapper(imapAccount_email):
     logger.info('first syncing..: %s', imapAccount_email)
-    init_sync_user_inbox.delay(imapAccount_email)
+    init_sync_user_inbox().apply_async(args=[imapAccount_email], queue='init_sync')
 
 # A task being bound means the first argument to the task will always be the task instance (self), just like Python bound methods:
 @task(bind=True, name="init_sync_user_inbox")
