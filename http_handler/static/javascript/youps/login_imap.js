@@ -326,11 +326,13 @@ $(document).ready(function() {
     });
 
     $('#editor-container').on('change', '.folder-container input:checkbox', function() {
-        $(this).next('ul').find('input:checkbox').prop('checked', $(this).prop("checked"));
+        // change children's value
+        $(this).siblings('ul').find('input:checkbox').prop('checked', $(this).prop("checked"));
 
         for (var i = $('.folder-container').find('ul').length - 1; i >= 0; i--) {
-            $('.folder-container').find('ul:eq(' + i + ')').prev('input:checkbox').prop('checked', function () {
-                return $(this).next('ul').find('input:unchecked').length === 0 ? true : false;
+            // find parents value
+            $('.folder-container').find('ul:eq(' + i + ')').parents('li').find('> input').prop('checked', function () {
+                return $(this).siblings('ul').find('input:unchecked').length === 0 ? true : false;
             });
         }
     });
