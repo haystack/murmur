@@ -18,7 +18,7 @@ from datetime import timedelta
 
 CELERYBEAT_SCHEDULE = {
     'add-every-30-seconds': {
-        'task': 'tasks.loop_sync_user_inbox',
+        'task': 'loop_sync_user_inbox',
         'schedule': timedelta(seconds=5),
         'args': (),
         'options': {'queue' : 'loop_sync'} 
