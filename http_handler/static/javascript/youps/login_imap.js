@@ -71,13 +71,13 @@ $(document).ready(function() {
         // Intialize accordin listener
         $(editor_elem).parents(".editor-container").prepend(`<div class="container-namespace panel panel-info">
             <div class="panel-heading panel-collapsed">
-                <h3 class="panel-title">Packages <span id="preview-namespace"></span></h3>
+                <h3 class="panel-title">Packages <span class="preview-namespace"></span></h3>
                 <span class="pull-right"><i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i></span>
             </div>
             <div class="panel-body" style="display:none;">import re, datetime, spacy</div>
         </div>`);
 
-        $("#preview-namespace").text( $(".container-namespace .panel-body").text().split("import ")[1].trim() );
+        $(".preview-namespace").text( $(".container-namespace .panel-body").text().split("import ")[1].trim() );
     }
 
     function init_folder_selector($folder_container) {
@@ -357,13 +357,13 @@ $(document).ready(function() {
             $this.addClass('panel-collapsed');
             $this.find('.fa-chevron-down').hide();
             $this.find('.fa-chevron-up').show();
-            $("#preview-namespace").show();
+            $this.find(".preview-namespace").show();
         } else { // open the panel
             $this.parents('.panel').find('.panel-body').slideDown();
             $this.removeClass('panel-collapsed');
             $this.find('.fa-chevron-up').hide();
             $this.find('.fa-chevron-down').show();
-            $("#preview-namespace").hide();
+            $this.find(".preview-namespace").hide();
         }
     })
 
