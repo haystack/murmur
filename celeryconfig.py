@@ -10,9 +10,13 @@ from kombu import Queue
 CELERY_DEFAULT_QUEUE = 'default'
 CELERY_QUEUES = (
     Queue('default'),
-    Queue('new_user'),
-    Queue('loop_sync'),
+    Queue('new_user', routing_key='new_user.#'),
+    Queue('loop_sync', routing_key='loop_sync.#'),
 )
+
+CELERY_DEFAULT_EXCHANGE = 'tasks'
+CELERY_DEFAULT_EXCHANGE_TYPE = 'topic'
+CELERY_DEFAULT_ROUTING_KEY = 'task.default'
 
 from datetime import timedelta
 
@@ -21,7 +25,7 @@ CELERYBEAT_SCHEDULE = {
         'task': 'loop_sync_user_inbox',
         'schedule': timedelta(seconds=5),
         'args': (),
-        'options': {'queue' : 'loop_sync'} 
+        'options': {'queue' : 'loop_sync', 'routing_key' : 'loop_sync.import'} 
     },
 }
 

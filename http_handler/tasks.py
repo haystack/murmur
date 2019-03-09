@@ -140,7 +140,7 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 @task(name="init_sync_user_inbox_wrapper")
 def init_sync_user_inbox_wrapper(imapAccount_email):
     logger.info('first syncing..: %s', imapAccount_email)
-    register_inbox.apply_async(args=[imapAccount_email], queue='new_user')
+    register_inbox.apply_async(args=[imapAccount_email], queue='new_user', routing_key='new_user.import')
 
 def single_instance_task(timeout):
     def task_exc(func):
