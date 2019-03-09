@@ -234,8 +234,15 @@ def init_sync_user_inbox(imapAccount_email):
         feed_url_hexdigest = md5(imapAccount_email).hexdigest()
         lock_id = 'lock-{0}'.format(feed_url_hexdigest)
         logger.info('syncing..: %s', imapAccount_email)
-        with memcache_lock(lock_id) as acquired:
-            if acquired:
+
+        # cache.add fails if if the key already exists
+        acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
+        # memcache delete is very slow, but we have to use it to take
+        # advantage of using add() for atomic locking
+        release_lock = lambda: cache.delete(lock_id)
+
+        if acquire_lock():
+            try:
                 logger.info('Sync lock for %s is acquired', imapAccount_email)
 
                 # authenticate with the user's imap server
@@ -278,6 +285,10 @@ def init_sync_user_inbox(imapAccount_email):
 
                 # init_sync_user_inbox.apply_async(args=[imapAccount_email], countdown=4, queue='default')
                 return
+            finally:
+                release_lock()
+            return
+                
         
         logger.info(
             'Sync lock for %s is already being imported by another worker', imapAccount_email) 
