@@ -42,7 +42,7 @@ def interpret(mailbox, code, is_test=False):
 
     # define user methods
     def create_draft(subject="", to_addr="", cc_addr="", bcc_addr="", body="", draft_folder="Drafts"):
-	    new_message = message.Message()
+        new_message = message.Message()
         new_message["Subject"] = subject
             
         if type(to_addr) == 'list':
@@ -66,7 +66,7 @@ def interpret(mailbox, code, is_test=False):
                 # if this imap service provides list capability takes advantage of it
                 if [l[0][0] for l in mailbox._imap_client.list_folders()].index('\\Drafts'):
                     mailbox._imap_client.append(mailbox._imap_client.list_folders()[2][2], str(new_message))
-            except:
+            except Exception as e:
                 # otherwise try to guess a name of draft folder
                 try:
                     mailbox._imap_client.append('Drafts', str(new_message))
