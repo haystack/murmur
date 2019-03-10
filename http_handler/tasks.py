@@ -150,7 +150,7 @@ def register_inbox(imapAccount_email):
 
         imapAccount.is_initialized = True
         imapAccount.save()
-        send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
+        send_email("Your YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
 
         logger.info(
             'Register done for %s', imapAccount_email)
