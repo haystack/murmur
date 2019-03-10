@@ -10,8 +10,7 @@ from email import message_from_string
 from hashlib import sha1
 from html2text import html2text
 from markdown2 import markdown
-import new
-import pickle
+import new, pickle, chardet
 
 '''
 Murmur Mail Utils and Constants
@@ -753,3 +752,41 @@ def codeobject_loads(s):
     """loads a code object pickled with co_dumps() return a code object ready for exec()"""
     r = pickle.loads(s)
     return new.code(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11])
+
+def encoded_str_to_utf8_str(encoded_str, original_encoding=None):
+	"""Convert a string in one encoding to a utf8 encoded string.
+
+	If you know the original encoding then fill it in. If you don't know then
+	we will try to guess.
+	
+	Args:
+		encoded_str (str): encoded string i.e. iso-8859-1 string 
+		orginal_encoding (str, optional): Defaults to None. the original 
+			encoding of the string i.e. iso-8859-1. If None we will use chardet
+			to try to guess the encoding 
+	
+	Returns:
+		str: string of bytes encoded with utf8 
+	"""
+
+	if original_encoding is None:
+		# TODO this also returns a confidence in ['confidence']
+		# we could log that value which ranges from 0-1
+		original_encoding = chardet.detect(encoded_str)['encoding']
+
+	return unicode(encoded_str, original_encoding, 'replace').encode('utf8', 'replace')
+
+def utf8_str_to_utf8_unicode(encoded_str):
+	"""Convert a utf8 encoded string into a utf8 encoded unicode object.
+
+	Should be used for libraries which only accept unicode objects. 
+
+
+	Args:
+		encoded_str (str): utf8 encoded string. 
+
+	Returns:
+		unicode: utf8 encoded unicode string 
+	"""
+
+	return unicode(encoded_str, 'utf8', 'replace')
