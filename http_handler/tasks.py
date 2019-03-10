@@ -1,42 +1,19 @@
 import logging
-import random
 
 import ujson
 from browser.imap import authenticate
 from browser.models.mailbox import MailBox
-from celery.decorators import task
+from celery.decorators import task, periodic_task
 from http_handler.settings import BASE_URL
 from schema.youps import Action, ImapAccount, PeriodicTask, TaskScheduler
 from smtp_handler.utils import codeobject_loads, send_email
+from datetime import timedelta
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
-from celery.five import monotonic
-from contextlib import contextmanager
-from django.core.cache import cache
-from hashlib import md5
-
-LOCK_EXPIRE = 60 * 10  # Lock expires in 10 minutes
-
-@contextmanager
-def memcache_lock(lock_id, oid):
-    timeout_at = monotonic() + LOCK_EXPIRE - 3
-    # cache.add fails if the key already exists
-    status = cache.add(lock_id, oid, LOCK_EXPIRE)
-    try:
-        yield status
-    finally:
-        # memcache delete is very slow, but we have to use it to take
-        # advantage of using add() for atomic locking
-        if monotonic() < timeout_at and status:
-            # don't release the lock if we exceeded the timeout
-            # to lessen the chance of releasing an expired lock
-            # owned by someone else
-            # also don't release the lock if we didn't acquire it
-            cache.delete(lock_id)
 
 @task(name="add_periodic_task")
-def add_periodic_task(interval, imap_account_id, action_id, search_criteria, folder_name, expires=None):
+def add_periodic_task(interval, action_id, expires=None):
     """ create a new dynamic periodic task, mainly used for users' set_interval() call.
 
     Args:
@@ -49,8 +26,7 @@ def add_periodic_task(interval, imap_account_id, action_id, search_criteria, fol
     args = ujson.dumps( [imap_account_id, code, search_criteria, folder_name] )
 
     # TODO naming meaningful to distinguish one-off and interval running
-    ptask_name = "%d_%d" % (int(imap_account_id), random.randint(1, 10000))
-    TaskScheduler.schedule_every('run_interpret', 'seconds', interval, ptask_name, args, expires=expires)
+    
 
     imap_account = ImapAccount.objects.get(id=imap_account_id)
     if expires:  # set_timeout
@@ -135,67 +111,104 @@ def run_interpret(imap_account_id, code, search_criteria, folder_name=None, is_t
 #     logger.info("Saved image from Flickr")
 #     print ("perioid task") 
 
-# A task being bound means the first argument to the task will always be the task instance (self), just like Python bound methods:
-@task(bind=True, name="init_sync_user_inbox")
-def init_sync_user_inbox(self, imapAccount_email):
+@task(name="register_inbox")
+def register_inbox(imapAccount_email):
     """ execute the given code object.
 
     Args:
         imapAccount_email (string):  
     """
     try:
-        imapAccount = ImapAccount.objects.get(email=imapAccount_email)  # type: ImapAccount
+        logger.info('first syncing..: %s', imapAccount_email)
+        imapAccount = ImapAccount.objects.get(email=imapAccount_email)
 
-        feed_url_hexdigest = md5(imapAccount_email).hexdigest()
-        lock_id = '{0}-lock-{1}'.format(self.name, feed_url_hexdigest)
-        logger.debug('syncing..: %s', imapAccount_email)
-        with memcache_lock(lock_id, self.app.oid) as acquired:
-            if acquired:
-                logger.debug('Sync lock for %s is acquired', imapAccount_email)
+        # authenticate with the user's imap server
+        auth_res = authenticate(imapAccount)
+        # if authentication failed we can't run anything
+        if not auth_res['status']:
+            # Stop doing loop
+            # TODO maybe we should email the user
+            return
 
-                # authenticate with the user's imap server
-                auth_res = authenticate(imapAccount)
-                # if authentication failed we can't run anything
-                if not auth_res['status']:
-                    # Stop doing loop
-                    # TODO maybe we should email the user
-                    return
+        # get an imapclient which is authenticated
+        imap = auth_res['imap']
 
-                # get an imapclient which is authenticated
-                imap = auth_res['imap']
+        # create the mailbox
+        mailbox = MailBox(imapAccount, imap)
+        # sync the mailbox with imap
+        mailbox._sync()
+  
+        logger.info("Mailbox sync done: %s" % (imapAccount_email))
 
-                # create the mailbox
-                try:
-                    mailbox = MailBox(imapAccount, imap)
-                    # sync the mailbox with imap
-                    mailbox._sync()
-                except Exception:
-                    logger.exception("Mailbox sync failed")
-                    # TODO maybe we should email the user
-                    return
-                logger.info("Mailbox sync done: %s" % (imapAccount_email))
-
-                try:
-                    mailbox._run_user_code()
-                except Exception():
-                    logger.exception("Mailbox run user code failed")
-                # after sync, logout to prevent multi-connection issue
-                imap.logout()
-                if imapAccount.is_initialized is False:
-                    imapAccount.is_initialized = True
-                    imapAccount.save()
-                    send_email("Yous YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
-                    ptask_name = "sync_%s" % (imapAccount_email)
-                    args = ujson.dumps( [imapAccount_email] )
-                    TaskScheduler.schedule_every('init_sync_user_inbox', 'seconds', 4, ptask_name, args)
+        try:
+            mailbox._run_user_code()
+        except Exception():
+            logger.exception("Mailbox run user code failed")
         
-        logger.debug(
-            'Sync lock for %s is already being imported by another worker', imapAccount_email)
+        # after sync, logout to prevent multi-connection issue
+        imap.logout()
 
+        imapAccount.is_initialized = True
+        imapAccount.save()
+        send_email("Your YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
+
+        logger.info(
+            'Register done for %s', imapAccount_email)
     except ImapAccount.DoesNotExist:
-        PeriodicTask.objects.filter(name="sync_%s" % (imapAccount_email)).delete()
+        imapAccount.is_initialized = False
+        imapAccount.save()
         logger.exception("syncing fails Remove periodic tasks. imap_account not exist %s" % (imapAccount_email))
 
     except Exception as e:
-        logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e)) 
+        logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e))     
 
+
+@task(name="loop_sync_user_inbox")
+def loop_sync_user_inbox():
+    logger.info('Loop sync start..')
+    imapAccounts = ImapAccount.objects.filter(is_initialized=True)
+    for imapAccount in imapAccounts:
+        imapAccount_email = imapAccount.email
+
+        try:
+            logger.info('Start syncing %s ', imapAccount_email)
+
+            # authenticate with the user's imap server
+            auth_res = authenticate(imapAccount)
+            # if authentication failed we can't run anything
+            if not auth_res['status']:
+                # Stop doing loop
+                # TODO maybe we should email the user
+                return
+
+            # get an imapclient which is authenticated
+            imap = auth_res['imap']
+
+            # create the mailbox
+            try:
+                mailbox = MailBox(imapAccount, imap)
+                # sync the mailbox with imap
+                mailbox._sync()
+            except Exception:
+                logger.exception("Mailbox sync failed")
+                # TODO maybe we should email the user
+                continue
+            logger.info("Mailbox sync done: %s" % (imapAccount_email))
+
+            try:
+                mailbox._run_user_code()
+            except Exception():
+                logger.exception("Mailbox run user code failed")
+            
+            # after sync, logout to prevent multi-connection issue
+            imap.logout()
+
+            logger.info(
+                'Sync done for %s', imapAccount_email)
+        except ImapAccount.DoesNotExist:
+            imapAccount.is_initialized = False
+            imapAccount.save()
+            logger.exception("syncing fails Remove periodic tasks. imap_account not exist %s" % (imapAccount_email))
+
+        except Exception as e:
+            logger.exception("User inbox syncing fails %s. Stop syncing %s" % (imapAccount_email, e)) 

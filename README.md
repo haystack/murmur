@@ -18,8 +18,10 @@ YoUPS uses [Celery 3.1](http://docs.celeryproject.org/en/3.1/index.html) to exec
 `celery -A http_handler beat --max-interval=10 -S djcelery.schedulers.DatabaseScheduler -l [info|debug]`
 
 Run as daemon, \
-`celery multi [start|restart|stopwait] worker1 -A http_handler --pidfile=logs/worker1.pid --logfile=logs/worker1.log`\
-`celery -A http_handler beat --max-interval=10 -S djcelery.schedulers.DatabaseScheduler -l [info|debug] --detach -f logs/beat.log`
+`celery multi [start|restart|stopwait] new_user-worker -A http_handler -l info --concurrency=1 -l INFO -Q new_user --pidfile=logs/new_user-worker.pid --logfile=logs/new_user-worker.log`\
+`celery multi [start|restart|stopwait] loop_sync-worker -A http_handler -l info --concurrency=1 -l INFO -Q loop_sync --pidfile=logs/loop_sync-worker.pid --logfile=logs/loop_sync-worker.log`\
+`celery multi [start|restart|stopwait] default-worker -A http_handler -l info -l INFO -Q default --pidfile=logs/default-worker.pid --logfile=logs/default-worker.log`\
+`celery -A http_handler beat --max-interval=10 -S djcelery.schedulers.DatabaseScheduler -l info --detach -f logs/beat.log`
 
 
 ## Database
