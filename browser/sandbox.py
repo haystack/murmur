@@ -77,13 +77,13 @@ def interpret(mailbox, code, is_simulate=False):
                             if "append failed" in e:
                                 mailbox._imap_client.append(draft_folder, str(new_message))
 
-        print "create_draft(): Your draft %s has been created" % subject
+        logger.debug("create_draft(): Your draft %s has been created" % subject)
 
     def create_folder(folder_name):
         if not is_simulate: 
             mailbox._imap_client.create_folder( folder_name )
 
-        print "create_folder(): A new folder %s has been created" % folder_name
+        logger.debug("create_folder(): A new folder %s has been created" % folder_name)
 
     def on_message_arrival(func):
         mailbox.new_message_handler += func
@@ -116,6 +116,14 @@ def interpret(mailbox, code, is_simulate=False):
         mailbox._imap_account.status_msg = mailbox._imap_account.status_msg + "[%s]set_interval(): executing every %d minutes \n" % (ptask_name, interval)
         mailbox._imap_account.save()
 
+    def send(subject="", to_addr="", body=""):
+        if len(to_addr) == 0:
+            raise Exception('send(): recipient email address is not provided')
+
+        if not is_simulate:
+            send_email(subject, mailbox._imap_account.email, to_addr, body)
+        logger.debug("send(): sent a message to  %s" % str(to_addr))
+
     # execute user code
     try:
         # set the stdout to a string
@@ -127,6 +135,7 @@ def interpret(mailbox, code, is_simulate=False):
         # define the variables accessible to the user
         user_environ = {
             'create_draft': create_draft,
+            'create_folder': create_folder,
             'new_message_handler': mailbox.new_message_handler,
             'on_message_arrival': on_message_arrival,
             'set_interval': set_interval
@@ -197,13 +206,7 @@ def interpret(mailbox, code, is_simulate=False):
     #         args = ujson.dumps( [imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test, email_content] )
     #         add_periodic_task.delay( delay, args, delay * 2 - 0.5 ) # make it expire right before 2nd execution happens
 
-    #     def send(subject="", to_addr="", body=""):
-    #         if len(to_addr) == 0:
-    #             raise Exception('send(): recipient email address is not provided')
 
-    #         if not is_test:
-    #             send_email(subject, imap_account.email, to_addr, body)
-    #         logger.debug("send(): sent a message to  %s" % str(to_addr))
 
     #     # return a list of email UIDs
     #     def search(criteria=u'ALL', charset=None, folder=None):
