@@ -7,7 +7,7 @@ import typing as t  # noqa: F401 ignore unused we use it for typing
 import ujson
 import random
 from StringIO import StringIO
-
+from email import message
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 
 from browser.models.event_data import NewMessageData
