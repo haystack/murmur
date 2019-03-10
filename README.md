@@ -20,3 +20,12 @@ YoUPS uses [Celery 3.1](http://docs.celeryproject.org/en/3.1/index.html) to exec
 Run as daemon, \
 `celery multi [start|restart|stopwait] worker1 -A http_handler --pidfile=logs/worker1.pid --logfile=logs/worker1.log`\
 `celery -A http_handler beat --max-interval=10 -S djcelery.schedulers.DatabaseScheduler -l [info|debug] --detach -f logs/beat.log`
+
+
+## Database
+
+1. Check out a how-to-setup instruction of [Murmur](https://github.com/haystack/murmur#setup-the-database) to learn how to set up the database on a new server.
+2. If you make any change to the database, you should migrate those change like this:\
+`python manage.py schemamigration schema --auto`\
+`python manage.py migrate schema`
+

@@ -3,10 +3,9 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 from event import Event
 import logging
 import typing as t  # noqa: F401 ignore unused we use it for typing
-from schema.youps import ImapAccount, FolderSchema  # noqa: F401 ignore unused we use it for typing
+from schema.youps import ImapAccount, FolderSchema, MailbotMode  # noqa: F401 ignore unused we use it for typing
 from folder import Folder
-from Queue import Queue
-from http_handler.tasks import run_interpret
+import Queue
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -22,9 +21,9 @@ class MailBox(object):
         self._imap_account = imap_account  # type: ImapAccount
 
         # Events
-        self.newMessage = Event()  # type: Event
+        self.new_message_handler = Event()  # type: Event
 
-        self.event_data_queue = Queue()
+        self.event_data_queue = Queue.Queue()  # type: Queue
 
     def __str__(self):
         # type: () -> t.AnyStr
@@ -41,12 +40,16 @@ class MailBox(object):
         """Synchronize the mailbox with the imap server.
         """
 
+        assert len(set(self._list_selectable_folders())) == len(list(self._list_selectable_folders()))
+
+        # not sure if this is necessary we can just check for highest_mod_seq below
+        # supports_cond_store = self._supports_cond_store()
+
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
         # and https://tools.ietf.org/html/rfc4549
         # TODO for future work per folder might be highest common denominator for parallelizing
         for folder in self._list_selectable_folders():
-
             # response contains folder level information such as
             # uid validity, uid next, and highest mod seq
             response = self._imap_client.select_folder(folder.name)
@@ -57,6 +60,7 @@ class MailBox(object):
                 continue
 
             uid_next, uid_validity = response['UIDNEXT'], response['UIDVALIDITY']
+            highest_mod_seq = response.get('HIGHESTMODSEQ')
 
             # check if we are doing a total refresh or just a normal refresh
             # total refresh occurs the first time we see a folder and
@@ -64,19 +68,33 @@ class MailBox(object):
             if folder._should_completely_refresh(uid_validity):
                 folder._completely_refresh_cache()
             else:
-                folder._refresh_cache(uid_next, self.event_data_queue)
+                folder._refresh_cache(uid_next, highest_mod_seq, self.event_data_queue)
 
             # update the folder's uid next and uid validity
             folder._uid_next = uid_next
             folder._uid_validity = uid_validity
 
+
+    def _supports_cond_store(self):
+        # type: () -> bool
+        """True if the imap server support RFC4551 which has 
+        things like HIGHESTMODSEQ
+
+        Returns:
+            bool: whether or not the imap server supports cond store
+        """
+        return self._imap_client.has_capability('CONDSTORE')
+
     def _run_user_code(self):
-        while not self.event_data_queue.empty():
-            self.newMessage.handle( run_interpret.delay )
-            logger.debug("Popping event queue to run users' code")
-            event_data = self.event_data_queue.get()
-            event_data.fire_event(self.newMessage)
-            self.newMessage.unhandle( run_interpret.delay )
+        from browser.sandbox import interpret
+        if self._imap_account.current_mode is not None:
+            code = self._imap_account.current_mode.code
+            res = interpret(self, code)
+            if res['imap_log']:
+                logger.info('user output: %s' % res['imap_log'])
+            return res
+        return None
+
 
     def _find_or_create_folder(self, name):
         # type: (t.AnyStr) -> Folder
@@ -107,7 +125,10 @@ class MailBox(object):
         # https://www.imapwiki.org/ClientImplementation/MailboxList
         # we basically only want to list folders when we have to
         for (flags, delimiter, name) in self._imap_client.list_folders('', root + '%'):
-
+            # TODO check if the user is using the gmail
+            # If it is gmail, then skip All Mail folder
+            if name == "[Gmail]/All Mail":
+                continue
             folder = self._find_or_create_folder(name)  # type: Folder
 
             # TODO maybe fire if the flags have changed

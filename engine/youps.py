@@ -1,19 +1,22 @@
 import base64
 import logging
 import random
+import string
 import traceback
 from browser.imap import GoogleOauth2
 from http_handler.settings import IMAP_SECRET
-from schema.youps import ImapAccount, MailbotMode, Action
+from schema.youps import ImapAccount, MailbotMode, MailbotMode_Folder, Action, FolderSchema
+
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
-from engine.constants import msg_code
-from browser.imap import authenticate, interpret
-import string
-from smtp_handler.utils import logging, encoded_str_to_utf8_str
-from http_handler.tasks import remove_periodic_task
 
-import logging
+from browser.imap import GoogleOauth2, authenticate
+from browser.sandbox import interpret
+from browser.models.mailbox import MailBox
+from engine.constants import msg_code
+from http_handler.settings import IMAP_SECRET
+from http_handler.tasks import init_sync_user_inbox, remove_periodic_task
+from schema.youps import Action, ImapAccount, MailbotMode
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -80,19 +83,13 @@ def login_imap(email, password, host, is_oauth):
 
         imapAccount.save()
 
-        # TODO maybe not logout, cuz we might want to keep use the same instance for Luke's folder scraping
-        # Log out after auth verification
-        imap.logout()
-
-        # TODO call Luke's folder scraping folder from here
         """this procedure is required when a new user first register to YoUPS
         1) Scrape folder using IMAP list_folders() to register Folder instances belong to the user
         2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
         """
+        # start keeping eye on users' inbox
+        init_sync_user_inbox.delay(imapAccount.email)
 
-        # now user can use youps
-        imapAccount.is_initialized = True
-        imapAccount.save()
         # TODO notify the user that their account is ready to be used
 
         res['status'] = True
@@ -166,6 +163,11 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
             run_request (boolean): potentially deprecated as we move toward one-off running fashion. 
     """
     res = {'status' : False, 'imap_error': False, 'imap_log': ""}
+    logger = logging.getLogger('youps')  # type: logging.Logger
+
+    # this log is going to stdout but not going to the logging file
+    # why are django settings not being picked up
+    logger.critical("user %s has run, stop, or saved" % email)
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
@@ -188,30 +190,42 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
 
         for key, value in modes.iteritems():
             mode_id = value['id']
-            mode_name = value['name'].encode('utf8', 'replace')
-            code = value['code'].encode('utf8', 'replace')
+            mode_name = value['name'].encode('utf-8')
+            code = value['code'].encode('utf-8')
+            folders = value['folders']
             print mode_id
             print mode_name
             print code
-
+            print folders
+            
             mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_account=imapAccount)
             if not mailbotMode.exists():
                 mailbotMode = MailbotMode(uid=mode_id, name=mode_name, code=code, imap_account=imapAccount)
                 mailbotMode.save()
+
             else:
                 mailbotMode = mailbotMode[0]
                 mailbotMode.code = code
                 mailbotMode.save()
 
+                # Remove old setting to re-save it
+                mf = MailbotMode_Folder.objects.filter(mode=mailbotMode, imap_account=imapAccount).filter()
+                mf.delete()
+
+            # Save selected folder for the mode
+            for f in folders:
+                folder = FolderSchema.objects.get(imap_account=imapAccount, name=f)
+                mf = MailbotMode_Folder(mode=mailbotMode, folder=folder, imap_account=imapAccount)
+                mf.save()
+
+
         imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_account=imapAccount)[0]
         imapAccount.save()
 
         if run_request:
-            # TODO run it several times over for the selected folders
-            # TODO change with appropriate search_criteria
-            imap.select_folder("INBOX")
+            logger.info("user %s run request" % imapAccount.email)
             # TODO replace this with the right search criteria 
-            res = interpret(imapAccount, imap, code, "UID %d:*" % 90000, is_test)
+            res = interpret(MailBox(imapAccount, imap), imapAccount.current_mode.code, is_test)
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:
@@ -228,13 +242,15 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
 
         res['status'] = True
 
-
     except IMAPClient.Error, e:
         res['code'] = e
     except ImapAccount.DoesNotExist:
         res['code'] = "Not logged into IMAP"
+    except FolderSchema.DoesNotExist:
+        logger.debug("Folder is not found, but it should exist!")
     except Exception, e:
         # TODO add exception
+        logger.exception("failed while doing a user code run")
         print e
         print (traceback.format_exc())
         res['code'] = msg_code['UNKNOWN_ERROR']

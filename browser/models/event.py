@@ -1,24 +1,19 @@
-# Baed on https://stackoverflow.com/questions/1092531/event-system-in-python/1096614#1096614
-from http_handler.tasks import run_interpret
+# Based on https://stackoverflow.com/questions/1092531/event-system-in-python/1096614#1096614
 
 class Event:
     """Simple wrapper for a events
-    
+
     Usage:
         > class MockFileWatcher:
         >     def __init__(self):
         >         self.fileChanged = Event()
-        > 
         >     def watchFiles(self):
         >         source_path = "foo"
         >         self.fileChanged(source_path)
-        > 
         > def log_file_change(source_path):
         >     print "%r changed." % (source_path,)
-        > 
         > def log_file_change2(source_path):
         >     print "%r changed!" % (source_path,)
-        > 
         > watcher              = MockFileWatcher()
         > watcher.fileChanged += log_file_change2
         > watcher.fileChanged += log_file_change
@@ -48,10 +43,12 @@ class Event:
         return len(self.handlers)
 
     def __iadd__(self, handler):
-        self.handle(handler)    
+        self.handle(handler)
+        return self
 
     def __isub__(self, handler):
         self.unhandle(handler)
+        return self
 
     def __call__(self, *args, **kwargs):
         self.fire(*args, **kwargs)

@@ -187,9 +187,51 @@
 
 .folder-container {
   width: 200px;
+  float: left;
+  overflow-y: scroll;
+  height: 300px;
+}
+
+.folder-container > ul {
+  list-style-type: none;
+  margin-top: 8px;
+}
+
+.folder-container ul {
+  list-style-type: none;
 }
 
 .editor-container {
   width: 100%;
   padding-left: 200px;
+}
+
+.container-namespace {
+  margin-bottom: 0;
+  /* border: 0; */
+}
+
+.container-namespace .panel-heading {
+  cursor: pointer;
+}
+
+.container-namespace .panel-body {
+  cursor: not-allowed;
+}
+
+.container-namespace .pull-right {
+  margin-top: -15px;
+}
+
+.preview-namespace {
+  opacity: 0.5;
+}
+
+
+.panel-title {
+  font-size: 12px;
+}
+
+.panel-body {
+  height: 50px;
 }

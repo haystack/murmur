@@ -56,6 +56,8 @@ class FolderSchema(models.Model):
     name = models.CharField(max_length=191)
     # the last seen uid which is helpful for reducing bandwith when syncing
     last_seen_uid = models.IntegerField(default=-1)
+    # the highest mod seq useful for limiting getting the flags
+    highest_mod_seq = models.IntegerField(default=-1)
     # the flags associated with the folder 
     _flags = models.TextField(db_column="flags")
 
@@ -196,6 +198,14 @@ class Message_Thread(models.Model):
     class Meta:
         db_table = "youps_threads"
         unique_together = ("id", "imap_account")
+
+# This model is to store callback functions for set_interval() and on_message_arrival() etc
+class Action(models.Model):
+    id = models.AutoField(primary_key=True)
+    
+    trigger = models.CharField('trigger', max_length=100, blank=True) # e.g., arrival, interval, flag_changed 
+    code = models.TextField(null=True, blank=True) # stringified code object
+    folder = models.ForeignKey('FolderSchema')
 
 from djcelery.models import PeriodicTask, IntervalSchedule
 from datetime import datetime

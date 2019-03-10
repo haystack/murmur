@@ -2,6 +2,7 @@
 
 import os
 import django
+import sys
 
 
 DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
@@ -64,7 +65,7 @@ if ENV == 'prod':
         BASE_URL = 'squadbox.csail.mit.edu'
     MYSQL = MYSQL_PROD
 elif ENV == 'staging':
-    BASE_URL = 'murmur-dev.csail.mit.edu'
+    BASE_URL = 'youps.csail.mit.edu'
     MYSQL = MYSQL_DEV
 else:
     BASE_URL = 'localhost:8000'
@@ -126,7 +127,7 @@ USE_I18N = True
 USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = True
+USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -267,6 +268,10 @@ LOGGING = {
         'custom.brief' : {
             'format': '%(message)s'
         },
+        # this formatter is for the user
+        'custom.user' : {
+            'format': '%(asctime)s %(levelname)-8s %(funcName)s %(message)s'
+        },
         # this formatter includes the time, log level, logger name, and message
         'custom.precise' : {
             'format' : '%(asctime)s %(levelname)-8s %(name)-15s %(message)s',
@@ -274,7 +279,7 @@ LOGGING = {
         },
         # this formatter includes file name and line number info
         'custom.debug': {
-            'format': '%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+            'format': '%(asctime)s %(levelname)-8s [%(processName)s:%(process)d] [%(filename)s:%(lineno)d] %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S'
         }
     },
@@ -286,7 +291,7 @@ LOGGING = {
         },
         # this handler logs to a file
         'custom.file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': '/home/ubuntu/production/mailx/logs/youps.log',
             'formatter': 'custom.debug'
@@ -295,17 +300,18 @@ LOGGING = {
         'custom.console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'stream': 'ext://sys.stdout',  # Default is stderr
-            'formatter': 'custom.brief'
+            'stream': sys.stdout,  # Default is stderr
+            'formatter': 'custom.user'
         }
     },
     'loggers': {
         'youps': {
-            'handlers': ['custom.file', 'custom.console'],
+            'handlers': ['custom.file'],
             'level': 'DEBUG',
             'propagate': True
         },
         'youps.user': {
+            'handlers': ['custom.console'],
             'level': 'DEBUG',
             'propagate': True
         },
