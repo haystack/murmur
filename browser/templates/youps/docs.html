@@ -119,6 +119,8 @@
     <script type="text/javascript" src="/static/javascript/youps/prism.js"></script>
 	<script type="text/javascript" src="/static/javascript/youps/jquery.switchButton.js"></script>
 
+    <script type="text/javascript" src="/static/javascript/youps/sidebar.js"></script>
+
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
 	<!-- <script type="text/javascript" src="/static/javascript/youps/console/sandbox-console.js"></script> -->
 
@@ -126,48 +128,8 @@
 
     <script>
         document.addEventListener("mv-load", function(){
-
-            var items = document.getElementsByTagName("main")[0].children;
-            var target = ""
-
-            for (i = 1; i < items.length; i++) {
-                var current = items[i]
-
-                if (current.id.includes("header")) {
-                    target = current.id.replace("header", "sidebar");
-
-                    var sublist = document.createElement("li");
-
-                    var header_ref = document.createElement("a");
-                    header_ref.href = "#" + current.id;
-                    var text = current.children[0].innerHTML;
-                    var end = text.indexOf("<a");
-                    header_ref.innerHTML = text.substring(0, end);
-                    sublist.appendChild(header_ref);
-
-                    var actions = document.createElement("ul");
-                    actions.id = target;
-                    actions.className = "sidebar-list";
-                    sublist.appendChild(actions);
-
-                    document.getElementById("sidebar_container").appendChild(sublist);
-                } else if (current.tagName == 'DIV') {
-                    // console.log(current);
-
-                    var action = document.createElement("li");
-
-                    var action_href = document.createElement("a");
-                    action_href.href = "#" + current.id;
-                    action_href.innerHTML = current.id;
-                    action.appendChild(action_href);
-
-                    document.getElementById(target).appendChild(action);
-
-                }
-                // console.log(items[i]);
-            }
+            sidebar_init();
             init_syntax();
-
         });
     </script>
 {% endblock %}
