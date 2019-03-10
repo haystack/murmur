@@ -13,7 +13,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 from browser.models.event_data import NewMessageData
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
 from schema.youps import Action, TaskScheduler  # noqa: F401 ignore unused we use it for typing
-from smtp_handler.utils import codeobject_dumps, is_gmail
+from smtp_handler.utils import codeobject_dumps, is_gmail, send_email
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -85,6 +85,12 @@ def interpret(mailbox, code, is_simulate=False):
 
         logger.debug("create_folder(): A new folder %s has been created" % folder_name)
 
+    def rename_folder(old_name, new_name):
+        if not is_simulate: 
+            mailbox._imap_client.rename_folder( old_name, new_name )
+
+        logger.debug("rename_folder(): Rename a folder %s to %s" % (old_name, new_name))
+
     def on_message_arrival(func):
         mailbox.new_message_handler += func
 
@@ -116,13 +122,13 @@ def interpret(mailbox, code, is_simulate=False):
         mailbox._imap_account.status_msg = mailbox._imap_account.status_msg + "[%s]set_interval(): executing every %d minutes \n" % (ptask_name, interval)
         mailbox._imap_account.save()
 
-    def send(subject="", to_addr="", body=""):
-        if len(to_addr) == 0:
+    def send(subject="", to="", body="", smtp=""):  # TODO add "cc", "bcc"
+        if len(to) == 0:
             raise Exception('send(): recipient email address is not provided')
 
         if not is_simulate:
-            send_email(subject, mailbox._imap_account.email, to_addr, body)
-        logger.debug("send(): sent a message to  %s" % str(to_addr))
+            send_email(subject, mailbox._imap_account.email, to, body)
+        logger.debug("send(): sent a message to  %s" % str(to))
 
     # execute user code
     try:
@@ -239,9 +245,6 @@ def interpret(mailbox, code, is_simulate=False):
 
     #         imap.select_folder(folder)
     #         logger.debug("Select a folder %s" % folder)
-
-    #     def rename_folder(old_name, new_name):
-    #         pile.rename_folder(old_name, new_name, is_test)
 
     #     def get_mode():
     #         if imap_account.current_mode:
