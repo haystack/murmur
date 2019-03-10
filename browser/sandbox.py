@@ -1,4 +1,4 @@
-from __future__ import unicode_literals, print_function, division
+from __future__ import unicode_literals, division
 
 import logging
 import Queue
@@ -18,7 +18,7 @@ from smtp_handler.utils import codeobject_dumps, is_gmail
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 
-def interpret(mailbox, code, is_test=False):
+def interpret(mailbox, code, is_simulate=False):
     # type: (MailBox, unicode, bool) -> t.Dict[t.AnyStr, t.Any]
 
     # assert we actually got a mailbox
@@ -57,25 +57,33 @@ def interpret(mailbox, code, is_test=False):
         new_message["Bcc"] = bcc_addr
         new_message.set_payload(body) 
             
-        # if Gmail
-        if is_gmail(mailbox._imap_client):
-            mailbox._imap_client.append('[Gmail]/Drafts', str(new_message))
-            
-        else:
-            try:
-                # if this imap service provides list capability takes advantage of it
-                if [l[0][0] for l in mailbox._imap_client.list_folders()].index('\\Drafts'):
-                    mailbox._imap_client.append(mailbox._imap_client.list_folders()[2][2], str(new_message))
-            except Exception as e:
-                # otherwise try to guess a name of draft folder
+        if not is_simulate:
+            if is_gmail(mailbox._imap_client):
+                mailbox._imap_client.append('[Gmail]/Drafts', str(new_message))
+                
+            else:
                 try:
-                    mailbox._imap_client.append('Drafts', str(new_message))
-                except IMAPClient.Error, e:
+                    # if this imap service provides list capability takes advantage of it
+                    if [l[0][0] for l in mailbox._imap_client.list_folders()].index('\\Drafts'):
+                        mailbox._imap_client.append(mailbox._imap_client.list_folders()[2][2], str(new_message))
+                except Exception as e:
+                    # otherwise try to guess a name of draft folder
                     try:
-                        mailbox._imap_client.append('Draft', str(new_message))
+                        mailbox._imap_client.append('Drafts', str(new_message))
                     except IMAPClient.Error, e:
-                        if "append failed" in e:
-                            mailbox._imap_client.append(draft_folder, str(new_message))
+                        try:
+                            mailbox._imap_client.append('Draft', str(new_message))
+                        except IMAPClient.Error, e:
+                            if "append failed" in e:
+                                mailbox._imap_client.append(draft_folder, str(new_message))
+
+        print "create_draft(): Your draft %s has been created" % subject
+
+    def create_folder(folder_name):
+        if not is_simulate: 
+            mailbox._imap_client.create_folder( folder_name )
+
+        print "create_folder(): A new folder %s has been created" % folder_name
 
     def on_message_arrival(func):
         mailbox.new_message_handler += func
@@ -197,19 +205,6 @@ def interpret(mailbox, code, is_test=False):
     #             send_email(subject, imap_account.email, to_addr, body)
     #         logger.debug("send(): sent a message to  %s" % str(to_addr))
 
-    #     def get_content():
-    #         logger.debug("call get_content")
-    #         if email_content:
-    #             return email_content
-    #         else:
-    #             return pile.get_content()
-
-    #     def get_attachment():
-    #         pass
-
-    #     def get_attachments():
-    #         pass
-
     #     # return a list of email UIDs
     #     def search(criteria=u'ALL', charset=None, folder=None):
     #         # TODO how to deal with folders
@@ -226,8 +221,7 @@ def interpret(mailbox, code, is_test=False):
     #         select_folder('INBOX')
     #         return imap.search(criteria, charset)
 
-    #     def create_folder(folder):
-    #         pile.create_folder(folder, is_test)
+
 
     #     def delete_folder(folder):
     #         pile.delete_folder(folder, is_test)
