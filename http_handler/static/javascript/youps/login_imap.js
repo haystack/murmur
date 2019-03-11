@@ -518,7 +518,7 @@ $(document).ready(function() {
         else {
             spinStatusCog(false);
             $("#engine-status-msg").text("Your email engine is not running at the moment.");
-            btn_code_sumbit.text("RUN");
+            btn_code_sumbit.text("Apply");
             is_running = false;
         }
     }
