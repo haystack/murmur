@@ -280,7 +280,7 @@ $(document).ready(function() {
 
         var id = Math.max.apply(null, modes_keys) +1 ; // avoid same ID
         // Add tab
-        $(this).closest('li').before('<li><a href="#tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
+        $(this).closest('li').before('<li><a href="#tab_' + id + '"><span class="tab-title" mode-id=' + id + '>On meeting</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
         // Add tab-pane
         $('.tab-content').append(`<div class="tab-pane row" id="tab_` + id + `"> 
                 <div class="folder-container"></div>
