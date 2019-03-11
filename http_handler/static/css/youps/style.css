@@ -181,6 +181,10 @@
   }
 }
 
+#status {
+  float:right;
+}
+
 #console {
   margin-bottom: 90px;
 }

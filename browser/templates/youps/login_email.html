@@ -35,7 +35,7 @@
 		<div class="group-container">
 			<p hidden id="website-name">{{website}}</p>
 
-			<h3>Email Rule Editor</h3>
+			<h3>YoUPS Filter Editor</h3>
 			<a href="/docs" style="float: right;margin-top: -30px;">View API docs</a>
 			<hr>
 			
@@ -72,7 +72,7 @@
 				<div id="status">
 				  <!-- This rule will be applied to your incoming emails.   -->
 					<div class="dropdown" style="display: inline;">
-						<label style="font-size: medium;">Select your mode: </label>
+						<label style="font-size: medium;">Mode: </label>
 						<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
 								  Default
 								  <span class="caret"></span>
@@ -92,13 +92,22 @@
 				  
 				</div>
 		
-					<div style="padding-top: 40px;">
+					<div>
 					  <div class="card">
 						<div class="card-header">
-							<h4>Your email scripts</h4> 
-							Following rules will execute once. You can use set_interval() to periodically update attribute or execute rules based on the value of attributes.  							
-							<br>
-							<button class="btn btn-primary" id="btn-incoming-save" style="float: right;">Save</button>
+							<div id="status">
+								<div class="dropdown" style="display: inline;">
+									<label style="font-size: medium;">Select your mode: </label>
+									<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" mode-id="0">Default <span class="caret"></span></button>
+									<ul class="dropdown-menu" aria-labelledby="current_mode_dropdown">
+										<!-- This will be replaced by js -->
+										<li><a href="#" data-value="action">Action</a></li>
+									</ul>
+								</div>
+														
+								<button class="btn btn-info" id="btn-code-submit">Simulate</button>
+								<button class="btn btn-primary" id="btn-code-submit">RUN</button>
+							</div>
 						</div>
 						<div class="card-block">
 							{% if mode_exist %}
