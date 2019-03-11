@@ -69,44 +69,25 @@
 				{% endif %}
 			</form>
 			<div id="editor-container">
-				<div id="status">
-				  <!-- This rule will be applied to your incoming emails.   -->
-					<div class="dropdown" style="display: inline;">
-						<label style="font-size: medium;">Mode: </label>
-						<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-								  Default
-								  <span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu" aria-labelledby="current_mode_dropdown">
-								  <li><a href="#" data-value="action">Action</a></li>
-								  <li><a href="#" data-value="another action">Another action</a></li>
-								  <li><a href="#" data-value="something else here">Something else here</a></li>
-								  <li><a href="#" data-value="separated link">Separated link</a></li>
-								</ul>
-					</div>
-						{% if imap_authenticated %}
-							<button class="btn btn-primary" id="btn-code-submit">RUN</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
-						{% else %}
-							<button class="btn btn-primary" id="btn-code-submit" disabled>RUN</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
-						{% endif %}
-				  
-				</div>
-		
 					<div>
 					  <div class="card">
 						<div class="card-header">
 							<div id="status">
 								<div class="dropdown" style="display: inline;">
-									<label style="font-size: medium;">Select your mode: </label>
+									<label style="font-size: medium;">Mode: </label>
 									<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" mode-id="0">Default <span class="caret"></span></button>
 									<ul class="dropdown-menu" aria-labelledby="current_mode_dropdown">
 										<!-- This will be replaced by js -->
 										<li><a href="#" data-value="action">Action</a></li>
 									</ul>
 								</div>
-														
-								<button class="btn btn-info" id="btn-code-submit">Simulate</button>
-								<button class="btn btn-primary" id="btn-code-submit">RUN</button>
+								{% if imap_authenticated %}						
+									<button class="btn btn-info" id="btn-code-simulate">Simulate</button>
+									<button class="btn btn-primary" id="btn-code-submit">RUN</button>
+								{% else %}
+									<button class="btn btn-info" id="btn-code-simulate" disabled>Simulate</button>
+									<button class="btn btn-primary" id="btn-code-submit" disabled>RUN</button>
+								{% endif %}
 							</div>
 						</div>
 						<div class="card-block">
