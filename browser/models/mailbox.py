@@ -54,6 +54,9 @@ class MailBox(object):
             # uid validity, uid next, and highest mod seq
             response = self._imap_client.select_folder(folder.name)
 
+            threads = self._imap_client.thread()
+            logger.info("threads %s" % threads)
+
             # our algorithm doesn't work without these
             if not ('UIDNEXT' in response and 'UIDVALIDITY' in response):
                 logger.critical("%s Missing UID Information" % folder)
