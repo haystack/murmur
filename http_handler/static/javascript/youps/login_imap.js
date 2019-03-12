@@ -67,6 +67,9 @@ $(document).ready(function() {
             editor.execCommand("autocomplete")
           }
         })
+
+        editor.getValue( "import re, spacy, datetime, arrow" );
+        editor.markText({line:0,ch:0},{line:2,ch:1},{readOnly:true});
         
         // Intialize accordin listener
         $(editor_elem).parents(".editor-container").prepend(`<div class="container-namespace panel panel-info">
@@ -254,11 +257,12 @@ $(document).ready(function() {
         }, 500);
     });
     
-
+    // Switch to different tabs
     $(".nav-tabs").on("click", "a", function (e) {
         e.preventDefault();
         if (!$(this).hasClass('add-tab')) {
             $(this).tab('show');
+            // TODO change to value of mode dropdown
         }
     })
     .on("click", "span.close", function () { // delete tab/mode

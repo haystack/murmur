@@ -2,6 +2,10 @@
   overflow-y: scroll;height: 200px;background:#47697F;padding: 10px;
 }
 
+.tab-content {
+  background: white;
+}
+
 .error {
     color: red;
 }
