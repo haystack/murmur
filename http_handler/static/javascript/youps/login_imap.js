@@ -38,6 +38,46 @@ $(document).ready(function() {
         
     }
 
+    function append_new_accordion(type) {
+        if(type == "new_message") {
+            // TODO mode id 
+            acc = `<div class="panel panel-success">
+                <div class="panel-heading panel-collapsed">
+                    <h3 class="panel-title">
+                        <span class="fa-layers fa-fw fa-2x"> 
+                                <i class="far fa-envelope"></i>
+                                <span class="fa-layers-counter" style="background:Tomato">NEW</span>
+                        </span>
+                        New message <span class="preview-namespace"></span></h3>
+                    <span class="pull-right"></span>
+                </div>
+                <div class="panel-body" style="display:none;">
+                    <div class="folder-container"></div>
+                    <div class="editor-container">
+                        <textarea class="editor mode-editor" id="editor-{{mode.uid}}">
+                        </textarea>
+                </div>
+                </div>
+            </div>`
+        }
+        else if(type == "repeat_every") {
+            acc = `<div class="panel panel-warning">
+                <div class="panel-heading panel-collapsed">
+                    <h3 class="panel-title">
+                        <i class="far fa-2x fa-clock"></i> Update every <span class="preview-namespace"></span></h3>
+                    <span class="pull-right"></span>
+                </div>
+                <div class="panel-body" style="display:none;">
+                    <div class="folder-container"></div>
+                    <div class="editor-container">
+                        <textarea class="editor mode-editor" id="editor-{{mode.uid}}">
+                        </textarea>
+                </div>
+                </div>
+            </div>`
+        }
+    }
+
     function format_date() {
         var currentdate = new Date();
         var datetime = (currentdate.getMonth()+1) + "/"
@@ -631,7 +671,9 @@ $(document).ready(function() {
                             notify(res, false);
                         }
                     }
-                );
+                ).fail(function(res) {
+                    alert("Fail to load! Can you try using a different browser? 403");
+                });    
         });
 
         function run_code(is_dry_run, is_running) {
