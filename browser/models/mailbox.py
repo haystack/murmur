@@ -54,6 +54,8 @@ class MailBox(object):
             # uid validity, uid next, and highest mod seq
             response = self._imap_client.select_folder(folder.name)
 
+            capabilities = self._imap_client.capabilities()
+            logger.info("capabilities %s" % capabilities)
             threads = self._imap_client.thread()
             logger.info("threads %s" % threads)
 
