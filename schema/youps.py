@@ -118,7 +118,7 @@ class MessageSchema(models.Model):
     # the contact the message is bcced to
     bcc = models.ManyToManyField('ContactSchema', related_name='bcc_messages')
     # the thread that the message is associated with
-    thread_ = models.ForeignKey('ThreadSchema', related_name='messages', blank=True, null=True)
+    _thread = models.ForeignKey('ThreadSchema', related_name='messages', blank=True, null=True)
 
 
 
