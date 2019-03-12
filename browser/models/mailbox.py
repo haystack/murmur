@@ -55,7 +55,7 @@ class MailBox(object):
             response = self._imap_client.select_folder(folder.name)
 
             capabilities = self._imap_client.capabilities()
-            logger.info("capabilities %s" % capabilities)
+            logger.info("capabilities %s" % list(capabilities))
             threads = self._imap_client.thread()
             logger.info("threads %s" % threads)
 
