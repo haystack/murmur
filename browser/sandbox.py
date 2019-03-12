@@ -58,7 +58,7 @@ def interpret(mailbox, code, is_simulate=False):
         new_message.set_payload(body) 
             
         if not is_simulate:
-            if is_gmail(mailbox._imap_client):
+            if is_gmail(mailbox._imap_account):
                 mailbox._imap_client.append('[Gmail]/Drafts', str(new_message))
                 
             else:

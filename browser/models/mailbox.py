@@ -41,7 +41,7 @@ class MailBox(object):
         """Synchronize the mailbox with the imap server.
         """
 
-        gmail = is_gmail(self._imap_client, self._imap_account)
+        gmail = is_gmail(self._imap_account)
 
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization

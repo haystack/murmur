@@ -257,7 +257,7 @@ class Folder(object):
             last_seen_uid (int): the max uid we have stored, should be 0 if there are no messages stored.
         """
 
-        gmail = is_gmail(self._imap_client)
+        gmail = is_gmail(self._imap_account)
 
         descriptors = list(Message._descriptors) + ['X-GM-THRID'] if gmail else list(Message._descriptors)
 
@@ -309,6 +309,10 @@ class Folder(object):
             msn = message_data['SEQ']
             flags = message_data['FLAGS']
             gm_thread_id = message_data.get('X-GM-THRID') 
+
+            if gm_thread_id is not None:
+                result = self._imap_client.search(['X-GM-THRID', gm_thread_id])
+                logger.info("thread messages %s" % result)
 
             logger.debug("message %d envelope %s" % (uid, envelope))
             logger.info("GM thread id %s" % (gm_thread_id))

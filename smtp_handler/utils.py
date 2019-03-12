@@ -753,18 +753,16 @@ def codeobject_loads(s):
     r = pickle.loads(s)
     return new.code(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11])
 
-def is_gmail(_imap_client, imap_account=None):
-    # type: (IMAPClient, ImapAccount) -> bool
+def is_gmail(imap_account=None):
+    # type: (ImapAccount) -> bool
     """Use heuristic to determine if we are connected to a gmail server
 
     Returns:
         bool: true if we think we are connected to a gmail server
     """
-    isGmail = _imap_client.has_capability('X-GM-EXT-1')
-    if imap_account is not None:
-        imap_account.is_gmail = isGmail 
-        imap_account.save()
-    return isGmail
+    
+    assert isinstance(imap_account, ImapAccount)
+    return imap_account.is_gmail
 
 def encoded_str_to_utf8_str(encoded_str, original_encoding=None):
     """Convert a string in one encoding to a utf8 encoded string.
