@@ -3,7 +3,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 import typing as t  # noqa: F401 ignore unused we use it for typing
 import logging
 from message import Message
-from schema.youps import MessageSchema, FolderSchema, ContactSchema, ImapAccount  # noqa: F401 ignore unused we use it for typing
+from schema.youps import MessageSchema, FolderSchema, ContactSchema, ThreadSchema, ImapAccount  # noqa: F401 ignore unused we use it for typing
 from django.db.models import Max
 from imapclient.response_types import Address  # noqa: F401 ignore unused we use it for typing
 from email.header import decode_header
@@ -309,10 +309,11 @@ class Folder(object):
             msn = message_data['SEQ']
             flags = message_data['FLAGS']
             gm_thread_id = message_data.get('X-GM-THRID') 
-
+            thread_schema = None
             if gm_thread_id is not None:
                 result = self._imap_client.search(['X-GM-THRID', gm_thread_id])
                 logger.info("thread messages %s, current message %d" % (result, uid))
+                thread_schema = self._find_or_create_thread(gm_thread_id)
 
             logger.debug("message %d envelope %s" % (uid, envelope))
             logger.info("GM thread id %s" % (gm_thread_id))
@@ -327,7 +328,7 @@ class Folder(object):
                                            subject=self._parse_email_subject(envelope.subject),
                                            message_id=envelope.message_id,
                                            internal_date=internal_date,
-                                           gm_thread_id=gm_thread_id
+                                           thread=thread_schema
                                            )
 
             try:
@@ -357,6 +358,27 @@ class Folder(object):
                 message_schema.bcc.add(*self._find_or_create_contacts(envelope.bcc))
 
             logger.debug("%s saved new message with uid %d" % (self, uid))
+
+    def _find_or_create_thread(self, gm_thread_id):
+        # type: (int) -> ThreadSchema
+        """Return a reference to the thread schema.
+
+        Returns:
+            ThreadSchema: Thread associated with the passed in gm_thread_id
+
+        """
+
+        thread_schema = None  # type: ThreadSchema
+        try:
+            thread_schema = ThreadSchema.objects.get(
+                imap_account=self._imap_account, folder=self._schema, gm_thread_id=gm_thread_id)
+        except ThreadSchema.DoesNotExist:
+            thread_schema = ThreadSchema(
+                imap_account=self._imap_account, folder=self._schema, gm_thread_id=gm_thread_id)
+            thread_schema.save()
+            logger.debug("%s created thread %s in database" % (self, gm_thread_id))
+
+        return thread_schema
 
     def _parse_email_subject(self, subject):
         # type: (t.AnyStr) -> t.AnyStr

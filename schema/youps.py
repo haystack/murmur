@@ -117,9 +117,8 @@ class MessageSchema(models.Model):
     cc = models.ManyToManyField('ContactSchema', related_name='cc_messages')
     # the contact the message is bcced to
     bcc = models.ManyToManyField('ContactSchema', related_name='bcc_messages')
-
-    # threading for gmail, 64 bit unsigned integer stored as text
-    gm_thread_id = models.TextField(blank=True)
+    # the thread that the message is associated with
+    thread_id = models.ForeignKey('ThreadSchema', related_name='messages', blank=True, null=True)
 
 
 
@@ -165,6 +164,19 @@ class ContactSchema(models.Model):
         db_table = "youps_contact"
         # each contact is stored once per account
         unique_together = ("imap_account", "email")
+
+
+class ThreadSchema(models.Model):
+    # the primary key
+    id = models.AutoField(primary_key=True)
+    # each thread is associated with a single ImapAccount
+    imap_account = models.ForeignKey('ImapAccount')
+    # each folder is associated with a single folder
+    folder = models.ForeignKey('FolderSchema')
+    gm_thread_id = models.TextField(blank=True) 
+
+    class Meta:
+        db_table = "youps_thread"
 
 
 class MailbotMode(models.Model):
