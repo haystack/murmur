@@ -9,6 +9,7 @@ from imapclient.response_types import Address  # noqa: F401 ignore unused we use
 from email.header import decode_header
 from Queue import Queue  # noqa: F401 ignore unused we use it for typing
 from browser.models.event_data import NewMessageData
+from smtp_handler.utils import is_gmail
 
 
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -256,8 +257,12 @@ class Folder(object):
             last_seen_uid (int): the max uid we have stored, should be 0 if there are no messages stored.
         """
 
+        gmail = is_gmail(self._imap_client)
+
+        descriptors = list(Message._descriptors) + ['X-GM-THRID'] if gmail else list(Message._descriptors)
+
         fetch_data = self._imap_client.fetch(
-            '%d:*' % (last_seen_uid + 1), Message._descriptors)
+            '%d:*' % (last_seen_uid + 1), descriptors)
 
         # if there is only one item in the return field
         # and we already have it in our database
@@ -293,7 +298,13 @@ class Folder(object):
                 logger.critical('Missing ENVELOPE in message data')
                 logger.critical('Message data %s' % message_data)
                 continue
-                
+            if gmail and 'X-GM-THRID' not in message_data:
+                logger.critical('Missing X-GM-THRID in message data') 
+                logger.critical('Message data %s' % message_data)
+                continue
+            else:
+                logger.info('X-GM-THRID %s', message_data['X-GM-THRID'])
+
             # this is the date the message was received by the server
             internal_date = message_data['INTERNALDATE']  # type: datetime
             envelope = message_data['ENVELOPE']

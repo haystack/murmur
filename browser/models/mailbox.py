@@ -53,7 +53,6 @@ class MailBox(object):
             response = self._imap_client.select_folder(folder.name)
 
             if gmail:
-                # GMAIL threading
                 pass
             else:
                 capabilities = self._imap_client.capabilities()
