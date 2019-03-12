@@ -124,7 +124,9 @@
 																	<span class="fa-layers-counter" style="background:Tomato">NEW</span>
 															</span>
 															New message <span class="preview-namespace"></span></h3>
-														<span class="pull-right"></span>
+														<span class="pull-right">
+															<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+														</span>
 													</div>
 													<div class="panel-body" style="display:none;">
 														<div class="folder-container"></div>
@@ -136,7 +138,26 @@
 													</div>
 												</div>
 									  		</div>
-									{% endfor %}		
+									{% endfor %}
+									
+									<!-- editor add buttons -->
+									<div class="panel panel-success">
+											<div class="panel-heading panel-collapsed">
+												<h3 class="panel-title">
+													<span class="fa-layers fa-fw fa-2x"> 
+															<i class="far fa-envelope"></i>
+															<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+													</span>
+													New message <span class=""></span></h3>
+											</div>
+									</div>
+									<div class="panel panel-warning">
+											<div class="panel-heading panel-collapsed">
+												<h3 class="panel-title">
+													<i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
+												</h3>
+											</div>
+									</div>
 								</div>
 								
 							{% else %}

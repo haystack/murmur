@@ -49,7 +49,9 @@ $(document).ready(function() {
                                 <span class="fa-layers-counter" style="background:Tomato">NEW</span>
                         </span>
                         New message <span class="preview-namespace"></span></h3>
-                    <span class="pull-right"></span>
+                    <span class="pull-right">
+                        <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+                    </span>
                 </div>
                 <div class="panel-body" style="display:none;">
                     <div class="folder-container"></div>
@@ -65,14 +67,16 @@ $(document).ready(function() {
                 <div class="panel-heading panel-collapsed">
                     <h3 class="panel-title">
                         <i class="far fa-2x fa-clock"></i> Update every <span class="preview-namespace"></span></h3>
-                    <span class="pull-right"></span>
+                    <span class="pull-right">
+                        <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>    
+                    </span>
                 </div>
                 <div class="panel-body" style="display:none;">
                     <div class="folder-container"></div>
                     <div class="editor-container">
                         <textarea class="editor mode-editor" id="editor-{{mode.uid}}">
                         </textarea>
-                </div>
+                    </div>
                 </div>
             </div>`
         }
@@ -110,17 +114,6 @@ $(document).ready(function() {
 
         editor.getValue( "import re, spacy, datetime, arrow" );
         editor.markText({line:0,ch:0},{line:2,ch:1},{readOnly:true});
-        
-        // Intialize accordin listener
-        $(editor_elem).parents(".editor-container").prepend(`<div class="container-namespace panel panel-info">
-            <div class="panel-heading panel-collapsed">
-                <h3 class="panel-title">Packages <span class="preview-namespace"></span></h3>
-                <span class="pull-right"><i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i></span>
-            </div>
-            <div class="panel-body" style="display:none;">import re, datetime, spacy</div>
-        </div>`);
-
-        $(".preview-namespace").text( $(".container-namespace .panel-body").text().split("import ")[1].trim() );
     }
 
     function init_folder_selector($folder_container) {
@@ -392,6 +385,7 @@ $(document).ready(function() {
         }
     });
 
+    // Accordion listener
     $("#editor-container").on("click", ".panel-heading", function (e) {
         e.preventDefault();
 

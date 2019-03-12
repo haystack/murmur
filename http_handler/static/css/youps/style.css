@@ -214,6 +214,10 @@
   padding-left: 200px;
 }
 
+.editor-container .panel {
+  padding: 10px;
+}
+
 .container-namespace {
   margin-bottom: 0;
   /* border: 0; */
@@ -237,9 +241,5 @@
 
 
 .panel-title {
-  font-size: 12px;
-}
-
-.panel-body {
-  height: 50px;
+  font-size: 15px;
 }
