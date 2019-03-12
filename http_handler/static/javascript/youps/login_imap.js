@@ -532,7 +532,7 @@ $(document).ready(function() {
         document.querySelectorAll('.tab-content .CodeMirror').forEach(function(element) { 
             var id = $(element).parents('.tab-pane').attr('id').split("_")[1];
             code = element.CodeMirror.getValue(),
-            name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML,
+            name = document.querySelector(".nav.nav-tabs span[mode-id='" + id + "']").innerHTML,
             selected_folders = [];
 
             $(element).parents('.tab-pane').find(".folder-container input:checked").each(function () {

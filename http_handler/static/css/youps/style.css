@@ -209,12 +209,12 @@
   list-style-type: none;
 }
 
-.editor-container {
+#editor-container {
   width: 100%;
   padding-left: 200px;
 }
 
-.editor-container .panel {
+#editor-container .panel {
   margin: 10px;
 }
 
