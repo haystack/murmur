@@ -119,7 +119,7 @@ class MessageSchema(models.Model):
     bcc = models.ManyToManyField('ContactSchema', related_name='bcc_messages')
 
     # threading for gmail, 64 bit unsigned integer stored as text
-    gm_thread_id = models.TextField(blank==True)
+    gm_thread_id = models.TextField(blank=True)
 
 
 
