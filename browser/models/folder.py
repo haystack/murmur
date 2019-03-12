@@ -257,10 +257,9 @@ class Folder(object):
             last_seen_uid (int): the max uid we have stored, should be 0 if there are no messages stored.
         """
 
-        gmail = is_gmail(self._imap_account)
-
-        descriptors = list(Message._descriptors) + ['X-GM-THRID'] if gmail else list(Message._descriptors)
-
+        # add thread id to the descriptors if there is a thread id
+        descriptors = list(Message._descriptors) + ['X-GM-THRID'] if self._imap_account.is_gmail \
+            else list(Message._descriptors)
         fetch_data = self._imap_client.fetch(
             '%d:*' % (last_seen_uid + 1), descriptors)
 
@@ -298,16 +297,27 @@ class Folder(object):
                 logger.critical('Missing ENVELOPE in message data')
                 logger.critical('Message data %s' % message_data)
                 continue
-            if gmail and 'X-GM-THRID' not in message_data:
-                logger.critical('Missing X-GM-THRID in message data') 
+            if self._imap_account.is_gmail and 'X-GM-THRID' not in message_data:
+                logger.critical('Missing X-GM-THRID in message data')
                 logger.critical('Message data %s' % message_data)
                 continue
+
+            # check for supported thread algorithms here
+            if not self._imap_account.is_gmail:
+                capabilities = self._imap_client.capabilities()
+                capabilities = list(capabilities)
+                capabilities = filter(lambda cap: 'THREAD=' in cap, capabilities)
+                capabilities = [cap.replace('THREAD=', '') for cap in capabilities]
+                logger.critical("Add support for one of the following threading algorithms %s" % capabilities)
+                raise NotImplementedError("Unsupported threading algorithm")
 
             # this is the date the message was received by the server
             internal_date = message_data['INTERNALDATE']  # type: datetime
             envelope = message_data['ENVELOPE']
             msn = message_data['SEQ']
             flags = message_data['FLAGS']
+
+            # if we have a gm_thread_id set thread_schema to the proper thread
             gm_thread_id = message_data.get('X-GM-THRID') 
             thread_schema = None
             if gm_thread_id is not None:
@@ -316,7 +326,6 @@ class Folder(object):
                 thread_schema = self._find_or_create_thread(gm_thread_id)
 
             logger.debug("message %d envelope %s" % (uid, envelope))
-            logger.info("GM thread id %s" % (gm_thread_id))
 
             # create and save the message schema
             message_schema = MessageSchema(imap_account=self._schema.imap_account,
