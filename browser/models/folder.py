@@ -300,7 +300,7 @@ class Folder(object):
             msn = message_data['SEQ']
             flags = message_data['FLAGS']
 
-            logger.debug("message %d envelope %s" % (uid, envelope))
+            logger.info("message %d envelope %s" % (uid, envelope))
 
             # create and save the message schema
             message_schema = MessageSchema(imap_account=self._schema.imap_account,

@@ -754,7 +754,7 @@ def codeobject_loads(s):
     return new.code(r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10],r[11])
 
 def is_gmail(_imap_client):
-    # type: () -> bool
+    # type: (IMAPClient) -> bool
     """Use heuristic to determine if we are connected to a gmail server
 
     Returns:

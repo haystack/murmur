@@ -6,6 +6,7 @@ import typing as t  # noqa: F401 ignore unused we use it for typing
 from schema.youps import ImapAccount, FolderSchema, MailbotMode  # noqa: F401 ignore unused we use it for typing
 from folder import Folder
 import Queue
+from smtp_handler.utils import is_gmail
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -40,10 +41,7 @@ class MailBox(object):
         """Synchronize the mailbox with the imap server.
         """
 
-        assert len(set(self._list_selectable_folders())) == len(list(self._list_selectable_folders()))
-
-        # not sure if this is necessary we can just check for highest_mod_seq below
-        # supports_cond_store = self._supports_cond_store()
+        gmail = is_gmail(self._imap_client)
 
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
@@ -54,10 +52,16 @@ class MailBox(object):
             # uid validity, uid next, and highest mod seq
             response = self._imap_client.select_folder(folder.name)
 
-            capabilities = self._imap_client.capabilities()
-            logger.info("capabilities %s" % list(capabilities))
-            threads = self._imap_client.thread()
-            logger.info("threads %s" % threads)
+            if gmail:
+                # GMAIL threading
+                pass
+            else:
+                capabilities = self._imap_client.capabilities()
+                capabilities = list(capabilities)
+                capabilities = filter(lambda cap: 'THREAD=' in cap, capabilities)
+                capabilities = [cap.replace('THREAD=', '') for cap in capabilities]
+                logger.critical("Add support for one of the following threading algorithms %s" % capabilities)
+                raise NotImplementedError("Unsupported threading algorithm")
 
             # our algorithm doesn't work without these
             if not ('UIDNEXT' in response and 'UIDVALIDITY' in response):
