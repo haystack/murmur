@@ -193,7 +193,7 @@ def loop_sync_user_inbox():
                 logger.exception("Mailbox sync failed")
                 # TODO maybe we should email the user
                 continue
-            logger.info("Mailbox sync done: %s" % (imapAccount_email))
+            logger.debug("Mailbox sync done: %s" % (imapAccount_email))
 
             try:
                 mailbox._run_user_code()
