@@ -4,7 +4,6 @@ from schema.youps import MessageSchema  # noqa: F401 ignore unused we use it for
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 from datetime import datetime  # noqa: F401 ignore unused we use it for typing
 from browser.models.contact import Contact
-from browser.models.thread import Thread
 import logging
 from collections import Sequence
 from smtp_handler.utils import is_gmail
@@ -75,6 +74,7 @@ class Message(object):
     @property
     def thread(self):
         # type: () -> t.Optional[Thread]
+        from browser.models.thread import Thread
         if self._schema._thread is not None:
             return Thread(self._schema._thread, self._imap_client)
         return None
