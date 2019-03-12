@@ -72,6 +72,14 @@ class Message(object):
         return self._schema.subject
 
     @property
+    def thread(self):
+        # type: () -> t.Optional[Thread]
+        from browser.models.thread import Thread
+        if self._schema._thread is not None:
+            return Thread(self._schema._thread, self._imap_client)
+        return None
+
+    @property
     def date(self):
         # type: () -> datetime
         """Get the date and time that the message was sent

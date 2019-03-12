@@ -13,7 +13,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 from browser.models.event_data import NewMessageData
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
 from schema.youps import Action, TaskScheduler  # noqa: F401 ignore unused we use it for typing
-from smtp_handler.utils import codeobject_dumps, is_gmail, send_email
+from smtp_handler.utils import codeobject_dumps, send_email
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -58,7 +58,7 @@ def interpret(mailbox, code, is_simulate=False):
         new_message.set_payload(body) 
             
         if not is_simulate:
-            if is_gmail(mailbox._imap_client):
+            if mailbox._imap_account.is_gmail:
                 mailbox._imap_client.append('[Gmail]/Drafts', str(new_message))
                 
             else:
