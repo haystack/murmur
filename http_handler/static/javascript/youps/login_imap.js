@@ -9,6 +9,19 @@ $(document).ready(function() {
 
     var log_backup = "", user_status_backup = "";
 
+    // Format string
+    if (!String.prototype.format) {
+        String.prototype.format = function() {
+          var args = arguments;
+          return this.replace(/{(\d+)}/g, function(match, number) { 
+            return typeof args[number] != 'undefined'
+              ? args[number]
+              : match
+            ;
+          });
+        };
+      }
+
     function append_log( log, is_error ) {
         if(!log) return;
 
@@ -20,6 +33,70 @@ $(document).ready(function() {
         else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" )
             .addClass("info");
     }   
+
+    function create_new_tab() {
+        // Move to the newly added tab
+        $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
+
+        var modes = get_modes();
+        modes_keys = Object.keys(modes);
+
+        var id = Math.max.apply(null, modes_keys) +1 ; // avoid same ID
+        // Add tab
+        $(this).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><span> ({0})</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
+        // Add tab-pane
+        $('.tab-content').append(`<div class="tab-pane row" id="tab_{0}"> 
+                <div class="folder-container"></div>
+                <div class="editor-container">
+                    <textarea class="editor mode-editor" id="editor-{0}"></textarea>
+                </div>
+
+                <!-- new message button -->
+                <div class="panel panel-success">
+                    <div class="panel-heading panel-collapsed">
+                        <h3 class="panel-title">
+                            <span class="fa-layers fa-fw fa-2x"> 
+                                    <i class="far fa-envelope"></i>
+                                    <span class="fa-layers-counter" style="background:Tomato">NEW</span>
+                            </span>
+                            New message <span class="preview-namespace"></span></h3>
+                        <span class="pull-right">
+                            <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+                        </span>
+                    </div>
+                    <div class="panel-body" style="display:none;">
+                        <div class="folder-container"></div>
+                        <div class="editor-container">
+                            <textarea class="editor mode-editor" id="editor-{0}">
+                            </textarea>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- repeat every -->
+                <div class="panel panel-warning">
+                    <div class="panel-heading panel-collapsed">
+                        <h3 class="panel-title">
+                            <i class="far fa-2x fa-clock"></i> Update every <span class="preview-namespace"></span></h3>
+                        <span class="pull-right">
+                            <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>    
+                        </span>
+                    </div>
+                    <div class="panel-body" style="display:none;">
+                        <div class="folder-container"></div>
+                        <div class="editor-container">
+                            <textarea class="editor mode-editor" id="editor-{0}">
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>`.format(id));
+
+        init_editor( document.getElementById("editor-" + id) );    
+        init_folder_selector( $("#tab_" + id + " .folder-container") )
+
+        unsaved_tabs.push( id );
+    }
 
     function append_status_msg( msg, is_error ) {
         if(!msg) return;
@@ -36,50 +113,6 @@ $(document).ready(function() {
             spinStatusCog(true);
         });
         
-    }
-
-    function append_new_accordion(type) {
-        if(type == "new_message") {
-            // TODO mode id 
-            acc = `<div class="panel panel-success">
-                <div class="panel-heading panel-collapsed">
-                    <h3 class="panel-title">
-                        <span class="fa-layers fa-fw fa-2x"> 
-                                <i class="far fa-envelope"></i>
-                                <span class="fa-layers-counter" style="background:Tomato">NEW</span>
-                        </span>
-                        New message <span class="preview-namespace"></span></h3>
-                    <span class="pull-right">
-                        <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
-                    </span>
-                </div>
-                <div class="panel-body" style="display:none;">
-                    <div class="folder-container"></div>
-                    <div class="editor-container">
-                        <textarea class="editor mode-editor" id="editor-{{mode.uid}}">
-                        </textarea>
-                </div>
-                </div>
-            </div>`
-        }
-        else if(type == "repeat_every") {
-            acc = `<div class="panel panel-warning">
-                <div class="panel-heading panel-collapsed">
-                    <h3 class="panel-title">
-                        <i class="far fa-2x fa-clock"></i> Update every <span class="preview-namespace"></span></h3>
-                    <span class="pull-right">
-                        <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>    
-                    </span>
-                </div>
-                <div class="panel-body" style="display:none;">
-                    <div class="folder-container"></div>
-                    <div class="editor-container">
-                        <textarea class="editor mode-editor" id="editor-{{mode.uid}}">
-                        </textarea>
-                    </div>
-                </div>
-            </div>`
-        }
     }
 
     function format_date() {
@@ -312,28 +345,7 @@ $(document).ready(function() {
     $('.add-tab').click(function (e) {
         e.preventDefault();
 
-        var modes = get_modes();
-        modes_keys = Object.keys(modes);
-
-        var id = Math.max.apply(null, modes_keys) +1 ; // avoid same ID
-        // Add tab
-        $(this).closest('li').before('<li><a href="#tab_' + id + '"><span class="tab-title" mode-id=' + id + '>On meeting</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
-        // Add tab-pane
-        $('.tab-content').append(`<div class="tab-pane row" id="tab_` + id + `"> 
-                <div class="folder-container"></div>
-                <div class="editor-container">
-                    <textarea class="editor mode-editor" id="editor-` + id + `"></textarea>
-                </div>
-            </div>`);
-
-        // Move to the just added tab
-        $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
-
-        unsaved_tabs.push( id );
-
-        init_editor( document.getElementById("editor-" + id) );
-
-        init_folder_selector( $("#tab_" + id + " .folder-container") )
+        create_new_tab();
     });
 
     var editHandler = function() {

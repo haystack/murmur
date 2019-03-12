@@ -112,9 +112,9 @@
 								<div class="tab-content">
 									{% for mode in modes %}
 										{% if current_mode == mode %}
-											<div class="tab-pane row active" id="tab_{{mode.uid}}">
+											<div class="tab-pane active" id="tab_{{mode.uid}}">
 										{% else %}
-											<div class="tab-pane row" id="tab_{{mode.uid}}">
+											<div class="tab-pane" id="tab_{{mode.uid}}">
 										{% endif %}	
 												<div class="panel panel-info">
 													<div class="panel-heading panel-collapsed">
@@ -137,27 +137,27 @@
 														</div>
 													</div>
 												</div>
+
+												<!-- editor add buttons -->
+												<div class="panel panel-success">
+														<div class="panel-heading panel-collapsed">
+															<h3 class="panel-title">
+																<span class="fa-layers fa-fw fa-2x"> 
+																		<i class="far fa-envelope"></i>
+																		<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+																</span>
+																New message <span class=""></span></h3>
+														</div>
+												</div>
+												<div class="panel panel-warning">
+														<div class="panel-heading panel-collapsed">
+															<h3 class="panel-title">
+																<i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
+															</h3>
+														</div>
+												</div>
 									  		</div>
 									{% endfor %}
-									
-									<!-- editor add buttons -->
-									<div class="panel panel-success">
-											<div class="panel-heading panel-collapsed">
-												<h3 class="panel-title">
-													<span class="fa-layers fa-fw fa-2x"> 
-															<i class="far fa-envelope"></i>
-															<span class="fa-layers-counter" style="background:Tomato">NEW</span>
-													</span>
-													New message <span class=""></span></h3>
-											</div>
-									</div>
-									<div class="panel panel-warning">
-											<div class="panel-heading panel-collapsed">
-												<h3 class="panel-title">
-													<i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
-												</h3>
-											</div>
-									</div>
 								</div>
 								
 							{% else %}
@@ -172,7 +172,7 @@
 									<li><a href="#" class="add-tab">+ Add Mode</a></li>
 								</ul>
 								<div class="tab-content">
-									<div class="tab-pane row active" id="tab_0">
+									<div class="tab-pane active" id="tab_0">
 										<div class="folder-container"></div>
 										<div class="editor-container">
 											  <textarea class="editor mode-editor" id="editor-0"> 												  
@@ -184,6 +184,25 @@ def tidy_inbox():
 
 repeat(60, tidy_inbox)
 </textarea>
+										</div>
+
+										<!-- editor add buttons -->
+										<div class="panel panel-success">
+											<div class="panel-heading panel-collapsed">
+												<h3 class="panel-title">
+													<span class="fa-layers fa-fw fa-2x"> 
+														<i class="far fa-envelope"></i>
+														<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+													</span>
+													New message <span class=""></span></h3>
+											</div>
+										</div>
+										<div class="panel panel-warning">
+											<div class="panel-heading panel-collapsed">
+												<h3 class="panel-title">
+													<i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
+												</h3>
+											</div>
 										</div>
 									</div>
 								</div>
