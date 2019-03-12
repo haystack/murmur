@@ -312,7 +312,7 @@ class Folder(object):
 
             if gm_thread_id is not None:
                 result = self._imap_client.search(['X-GM-THRID', gm_thread_id])
-                logger.info("thread messages %s" % result)
+                logger.info("thread messages %s, current message %d" % (result, uid))
 
             logger.debug("message %d envelope %s" % (uid, envelope))
             logger.info("GM thread id %s" % (gm_thread_id))
