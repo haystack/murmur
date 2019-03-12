@@ -328,7 +328,7 @@ class Folder(object):
                                            subject=self._parse_email_subject(envelope.subject),
                                            message_id=envelope.message_id,
                                            internal_date=internal_date,
-                                           thread=thread_schema
+                                           _thread=thread_schema
                                            )
 
             try:
