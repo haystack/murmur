@@ -5,6 +5,25 @@ import logging
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
+# generate a new model type to store 64 bit positive integers
+class PositiveBigIntegerField(models.BigIntegerField):
+    empty_strings_allowed = False
+    description = "Big (8 byte) positive integer"
+
+    def db_type(self, connection):
+        """
+        Returns MySQL-specific column data type. Make additional checks
+        to support other backends.
+        """
+        return 'bigint UNSIGNED'
+
+    def formfield(self, **kwargs):
+        defaults = {'min_value': 0,
+                    'max_value': models.BigIntegerField.MAX_BIGINT * 2 - 1}
+        defaults.update(kwargs)
+        return super(PositiveBigIntegerField, self).formfield(**defaults)
+
+
 class ImapAccount(models.Model):
 
     # the primary key
@@ -20,6 +39,8 @@ class ImapAccount(models.Model):
     access_token = models.CharField('access_token', max_length=200, blank=True)
     refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
     is_initialized = models.BooleanField(default=False)
+
+    is_gmail = models.BooleanField(default=False)
 
     password = models.CharField('password', max_length=100, blank=True)
     host = models.CharField('host', max_length=100)
@@ -115,6 +136,10 @@ class MessageSchema(models.Model):
     cc = models.ManyToManyField('ContactSchema', related_name='cc_messages')
     # the contact the message is bcced to
     bcc = models.ManyToManyField('ContactSchema', related_name='bcc_messages')
+
+    # threading for gmail, 64 bit unsigned integer stored as text
+    gm_thread_id = PositiveBigIntegerField(null=True)
+
 
 
     @property

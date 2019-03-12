@@ -302,16 +302,16 @@ class Folder(object):
                 logger.critical('Missing X-GM-THRID in message data') 
                 logger.critical('Message data %s' % message_data)
                 continue
-            else:
-                logger.info('X-GM-THRID %s', message_data['X-GM-THRID'])
 
             # this is the date the message was received by the server
             internal_date = message_data['INTERNALDATE']  # type: datetime
             envelope = message_data['ENVELOPE']
             msn = message_data['SEQ']
             flags = message_data['FLAGS']
+            gm_thread_id = message_data.get('X-GM-THRID') 
 
-            logger.info("message %d envelope %s" % (uid, envelope))
+            logger.debug("message %d envelope %s" % (uid, envelope))
+            logger.info("GM thread id %s" % (gm_thread_id))
 
             # create and save the message schema
             message_schema = MessageSchema(imap_account=self._schema.imap_account,
@@ -323,6 +323,7 @@ class Folder(object):
                                            subject=self._parse_email_subject(envelope.subject),
                                            message_id=envelope.message_id,
                                            internal_date=internal_date,
+                                           gm_thread_id=gm_thread_id
                                            )
 
             try:
