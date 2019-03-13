@@ -38,10 +38,7 @@ $(document).ready(function() {
         // Move to the newly added tab
         $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
 
-        var modes = get_modes();
-        modes_keys = Object.keys(modes);
-
-        var id = Math.max.apply(null, modes_keys) +1 ; // avoid same ID
+        var id = $("#editor-container .tab-pane").length; // avoid same ID
         // Add tab
         $(this).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
         // Add tab-pane
@@ -171,7 +168,7 @@ $(document).ready(function() {
         </div>`;
 
         if(type == "new_message") {
-            return `<div class="panel panel-success">
+            return `<div class="{0} panel panel-success">
                 <div class="panel-heading panel-collapsed">
                     <h3 class="panel-title">
                         <span class="fa-layers fa-fw fa-2x"> 
@@ -180,17 +177,19 @@ $(document).ready(function() {
                         </span>
                         New message <span class=""></span></h3>
                 </div>
-                {0}
-            </div>`.format(editable ? editor_elem : "");
+                {1}
+            </div>`.format(editable ? "": "btn-new-editor", 
+                editable ? editor_elem : "");
         } else if (type == "repeat") {
-            return `<div class="panel panel-warning">
+            return `<div class="{0} panel panel-warning">
                 <div class="panel-heading panel-collapsed">
                     <h3 class="panel-title">
                         <i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
                     </h3>
                 </div>
-                {0}
-            </div>`.format(editable ? editor_elem : "");
+                {1}
+            </div>`.format(editable ? "": "btn-new-editor",
+                editable ? editor_elem : "");
         }
     }
 
@@ -343,8 +342,8 @@ $(document).ready(function() {
         var editor_elem = get_panel_elem($(this).attr("type"), true);
         $container.append( editor_elem );
 
-        init_editor( $container.last('textarea')[0] );
-        init_folder_selector( $container.last('.folder-container')[0] );
+        init_editor( $container.find('textarea').last()[0] );
+        init_folder_selector( $container.find('.folder-container').last()[0] );
     });
     
     // Tab name editor
