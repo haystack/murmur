@@ -205,7 +205,7 @@ class Message(object):
         initially_unread = self.is_read
         try:
             response = self._imap_client.fetch(self._uid, ['RFC822'])
-            logger.info("content respose", response)
+            logger.info("content response: %s", response)
         finally:
             # mark the message unread if it is unread
             if initially_unread:
