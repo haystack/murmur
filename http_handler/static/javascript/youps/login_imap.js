@@ -343,8 +343,8 @@ $(document).ready(function() {
         var editor_elem = get_panel_elem($(this).attr("type"), true);
         $container.append( editor_elem );
 
-        init_editor( $container.find('textarea') );
-        init_folder_selector( $container.find('.folder-container') );
+        init_editor( $container.last('textarea')[0] );
+        init_folder_selector( $container.last('.folder-container')[0] );
     });
     
     // Tab name editor
