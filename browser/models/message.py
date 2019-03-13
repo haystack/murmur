@@ -209,11 +209,11 @@ class Message(object):
             # fetch the data and extract the rfc contents
             response = self._imap_client.fetch(
                 self._uid, ['RFC822'])  # type: t.Dict[t.AnyStr, t.Any]
-            if 'RFC822' not in response:
+            if b'RFC822' not in response:
                 logger.critical("%s did not return RFC822" % self)
                 raise RuntimeError("Could not find RFC822")
             rfc_contents = email.message_from_string(
-                response.get('RFC822'))  # type: email.message.Message
+                response.get(b'RFC822'))  # type: email.message.Message
 
             text = ""
             html = ""
