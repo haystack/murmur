@@ -43,57 +43,18 @@ $(document).ready(function() {
 
         var id = Math.max.apply(null, modes_keys) +1 ; // avoid same ID
         // Add tab
-        $(this).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><span> ({0})</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
+        $(this).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
         // Add tab-pane
-        $('.tab-content').append(`<div class="tab-pane row" id="tab_{0}"> 
-                <div class="folder-container"></div>
-                <div class="editor-container">
-                    <textarea class="editor mode-editor" id="editor-{0}"></textarea>
-                </div>
+        var tab_pane_content = `<div class="tab-pane row" id="tab_{0}"> 
+            <div class='editable-new-message-container'></div>
+            <div class='editable-repeat-container'></div>
 
-                <!-- new message button -->
-                <div class="panel panel-success">
-                    <div class="panel-heading panel-collapsed">
-                        <h3 class="panel-title">
-                            <span class="fa-layers fa-fw fa-2x"> 
-                                    <i class="far fa-envelope"></i>
-                                    <span class="fa-layers-counter" style="background:Tomato">NEW</span>
-                            </span>
-                            New message <span class="preview-namespace"></span></h3>
-                        <span class="pull-right">
-                            <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
-                        </span>
-                    </div>
-                    <div class="panel-body" style="display:none;">
-                        <div class="folder-container"></div>
-                        <div class="editor-container">
-                            <textarea class="editor mode-editor" id="editor-{0}">
-                            </textarea>
-                    </div>
-                    </div>
-                </div>
-
-                <!-- repeat every -->
-                <div class="panel panel-warning">
-                    <div class="panel-heading panel-collapsed">
-                        <h3 class="panel-title">
-                            <i class="far fa-2x fa-clock"></i> Update every <span class="preview-namespace"></span></h3>
-                        <span class="pull-right">
-                            <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>    
-                        </span>
-                    </div>
-                    <div class="panel-body" style="display:none;">
-                        <div class="folder-container"></div>
-                        <div class="editor-container">
-                            <textarea class="editor mode-editor" id="editor-{0}">
-                            </textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>`.format(id));
-
-        init_editor( document.getElementById("editor-" + id) );    
-        init_folder_selector( $("#tab_" + id + " .folder-container") )
+            <!-- add a new message editor button -->
+            {1}
+            <!-- add a new repeat editor button -->
+            {2}
+        </div>`.format(id, get_panel_elem("new_message", false), get_panel_elem("repeat", false));
+        $('.tab-content').append( tab_pane_content );
 
         unsaved_tabs.push( id );
     }
@@ -193,9 +154,6 @@ $(document).ready(function() {
                 if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key], p)) } 
 
                 $ul.append($li);
-                // else {
-                //     $ul.append("<li>" + key + "</li>")
-                // }
             }
 
             return $ul;
@@ -203,6 +161,37 @@ $(document).ready(function() {
         
         u = rec_add_nested(folders_nested, "")
         $folder_container.append(u)
+    }
+
+    function get_panel_elem(type, editable) {
+        var editor_elem = `<div class="panel-body" style="display:none;">
+            <div class="folder-container"></div>
+            <div class="editor-container">
+            <textarea class="editor mode-editor" id="editor-{0}"></textarea>
+        </div>`;
+
+        if(type == "new_message") {
+            return `<div class="panel panel-success">
+                <div class="panel-heading panel-collapsed">
+                    <h3 class="panel-title">
+                        <span class="fa-layers fa-fw fa-2x"> 
+                                <i class="far fa-envelope"></i>
+                                <span class="fa-layers-counter" style="background:Tomato">NEW</span>
+                        </span>
+                        New message <span class=""></span></h3>
+                </div>
+                {0}
+            </div>`.format(editable ? editor_elem : "");
+        } else if (type == "repeat") {
+            return `<div class="panel panel-warning">
+                <div class="panel-heading panel-collapsed">
+                    <h3 class="panel-title">
+                        <i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
+                    </h3>
+                </div>
+                {0}
+            </div>`.format(editable ? editor_elem : "");
+        }
     }
 
     function guess_host( email_addr ) {
@@ -348,6 +337,17 @@ $(document).ready(function() {
         create_new_tab();
     });
 
+    // add a new editor
+    $("#editor-container").on("click", ".btn-new-editor", function() {
+        var $container = $( $(this).siblings(".editable-{0}-container".format($(this).attr("type"))) );
+        var editor_elem = get_panel_elem($(this).attr("type"), true);
+        $container.append( editor_elem );
+
+        init_editor( $container.find('textarea') );
+        init_folder_selector( $container.find('.folder-container') );
+    });
+    
+    // Tab name editor
     var editHandler = function() {
       var t = $(this);
       t.css("visibility", "hidden");
