@@ -6,6 +6,7 @@ from datetime import datetime  # noqa: F401 ignore unused we use it for typing
 from browser.models.contact import Contact
 import logging
 from collections import Sequence
+import email
 
 userLogger = logging.getLogger('youps.user')  # type: logging.Logger
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -204,13 +205,63 @@ class Message(object):
         # check if the message is initially read
         initially_unread = self.is_read
         try:
-            response = self._imap_client.fetch(self._uid, ['RFC822'])
-            logger.info("content response: %s", response)
+
+            # fetch the data and extract the rfc contents
+            response = self._imap_client.fetch(
+                self._uid, ['RFC822'])  # type: t.Dict[t.AnyStr, t.Any]
+            if 'RFC822' not in response:
+                logger.critical("%s did not return RFC822" % self)
+                raise RuntimeError("Could not find RFC822")
+            rfc_contents = email.message_from_string(
+                response.get('RFC822'))  # type: email.message.Message
+
+            text = ""
+            html = ""
+
+            # walk the message
+            for part in rfc_contents.walk():
+                # TODO respect multipart/[alternative, mixed] etc... see RFC1341
+                if part.is_multipart():
+                    continue
+
+                # for each part get the maintype and subtype
+                main_type = part.get_content_maintype()
+                sub_type = part.get_content_subtype()
+
+                # parse text types
+                if main_type == "text":
+                    text_contents = None
+                    # get the charset used to encode the message
+                    charset = part.get_content_charset()
+
+                    # get the text as encoded unicode
+                    if charset is not None:
+                        text_contents = unicode(part.get_payload(
+                            decode=True), charset, "ignore")
+                    else:
+                        logger.critical("%s no charset found on" % self)
+                        raise RuntimeError("Message had no charset")
+
+                    # extract plain text
+                    if sub_type == "plain":
+                        text += text_contents
+                    # extract html
+                    elif sub_type == "html":
+                        html += text_contents
+                    # fail otherwise
+                    else:
+                        logger.critical(
+                            "%s unsupported sub type %s" % (self, sub_type))
+                        raise NotImplementedError(
+                            "Unsupported sub type %s" % sub_type)
+
+            # return text if we have it otherwise html
+            return text if text else html
+
         finally:
             # mark the message unread if it is unread
             if initially_unread:
                 self.mark_read()
-
 
     def has_flag(self, flag):
         # type: (t.AnyStr) -> bool
