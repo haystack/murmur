@@ -85,9 +85,9 @@ class MessageSchema(models.Model):
     id = models.AutoField(primary_key=True)
     # TODO we can possibly get rid of imap_account since imap -> folder -> msg
     # each message is associated with a single ImapAccount
-    imap_account = models.ForeignKey('ImapAccount')
+    imap_account = models.ForeignKey('ImapAccount')  # type: ImapAccount
     # each message is associated with a single Folder
-    folder_schema = models.ForeignKey(FolderSchema)
+    folder_schema = models.ForeignKey(FolderSchema)  # type: FolderSchema
     # each message has a uid
     uid = models.IntegerField(default=-1)
     # the message sequence number identifies the offest of the message in the folder
