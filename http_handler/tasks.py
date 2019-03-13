@@ -201,7 +201,7 @@ def loop_sync_user_inbox():
             except Exception():
                 logger.exception("Mailbox run user code failed")
 
-            if res['imap_log']:
+            if res is not None and res.get('imap_log', ''):
                 imapAccount.execution_log = "%s\n%s" % (res['imap_log'], imapAccount.execution_log) 
                 imapAccount.save()
 
