@@ -220,15 +220,14 @@ class Message(object):
         initially_unread = self.is_read
         try:
 
-            # fetch the data and extract the rfc contents
+            # fetch the data its a dictionary from uid to data so extract the data 
             response = self._imap_client.fetch(
                 self._uid, ['RFC822'])  # type: t.Dict[t.AnyStr, t.Any]
-
             if self._uid not in response:
                 raise RuntimeError('Invalid response missing UID')
-
             response = response[self._uid]
 
+            # get the rfc data we're looking for
             if 'RFC822' not in response:
                 logger.critical('%s:%s response: %s' % (self.folder, self, pprint.pformat(response)))
                 logger.critical("%s did not return RFC822" % self)
