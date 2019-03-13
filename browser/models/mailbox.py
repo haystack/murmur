@@ -72,7 +72,7 @@ class MailBox(object):
 
     def _supports_cond_store(self):
         # type: () -> bool
-        """True if the imap server support RFC4551 which has 
+        """True if the imap server support RFC4551 which has
         things like HIGHESTMODSEQ
 
         Returns:
@@ -81,6 +81,7 @@ class MailBox(object):
         return self._imap_client.has_capability('CONDSTORE')
 
     def _run_user_code(self):
+        # type: () -> t.Optional[t.Dict[t.AnyStr, t.Any]]
         from browser.sandbox import interpret
         if self._imap_account.current_mode is not None:
             code = self._imap_account.current_mode.code
