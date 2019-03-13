@@ -195,6 +195,17 @@ class Message(object):
         return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.bcc.all()]
 
     @property
+    def folder(self):
+        # type: () -> Folder
+        """Get the Folder the message is contained in
+
+        Returns:
+            Folder: the folder that the message is contained in
+        """
+        from browser.models.folder import Folder
+        return Folder(self._schema.folder_schema, self._imap_client)
+
+    @property
     def content(self):
         # type: () -> t.AnyStr
         """Get the content of the message
@@ -202,6 +213,9 @@ class Message(object):
         Returns:
             t.AnyStr: The content of the message
         """
+
+        import pprint
+
         # check if the message is initially read
         initially_unread = self.is_read
         try:
@@ -209,7 +223,9 @@ class Message(object):
             # fetch the data and extract the rfc contents
             response = self._imap_client.fetch(
                 self._uid, ['RFC822'])  # type: t.Dict[t.AnyStr, t.Any]
+
             if b'RFC822' not in response:
+                logger.critical('%s:%s response: %s' % (self.folder, self, pprint.pformat(response)))
                 logger.critical("%s did not return RFC822" % self)
                 raise RuntimeError("Could not find RFC822")
             rfc_contents = email.message_from_string(
