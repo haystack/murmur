@@ -167,8 +167,9 @@ $(document).ready(function() {
         var editor_elem = `<div class="panel-body" style="display:none;">
             <div class="folder-container"></div>
             <div class="editor-container">
-            <textarea class="editor mode-editor">{0}\n{1}\n</textarea>
-        </div>`.format(import_str, type == "new-message" ? "def on_new_message(new_message):":"def repeat_every():"), 
+            <textarea class="editor mode-editor">{0}\n{1}\n{2}</textarea>
+        </div>`.format(import_str, type == "new-message" ? "def on_new_message(new_message):":"def repeat_every():",
+            "\tpass"), 
         pull_down_arrow = `<span class="pull-right">
             <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
         </span>`;
@@ -388,6 +389,12 @@ $(document).ready(function() {
         $container.find(".panel-heading").last().click();
 
         init_folder_selector( $($container.find('.folder-container').last()[0]) );
+    });
+
+    // remove an editor
+    $("#editor-container").on("click", ".editable-container .flex_item_left", function() {
+        // TODO
+        console.log("remove TODO");
     });
     
     // Tab name editor

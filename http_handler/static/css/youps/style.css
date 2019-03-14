@@ -226,6 +226,7 @@
   /* border: 0; */
 }
 
+.editable-container,
 .btn-new-editor {
   cursor: pointer;
 }
