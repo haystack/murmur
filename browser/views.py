@@ -24,7 +24,7 @@ from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_K
 from registration.forms import RegistrationForm
 from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
                            MuteTag, Tag, UserProfile, Post, Attachment, DoNotSendList)
-from schema.youps import ImapAccount, MailbotMode, FolderSchema, MailbotMode_Folder, EmailRule
+from schema.youps import ImapAccount, MailbotMode, FolderSchema, EmailRule
 from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
@@ -434,8 +434,8 @@ def login_imap_view(request):
 					# send their folder list
 					folders = FolderSchema.objects.filter(imap_account=imap[0]).values('name')
 					folders = [str(f['name']) for f in folders]
-					mode_folder = MailbotMode_Folder.objects.filter(imap_account=imap[0])
-					mode_folder = [[str(mf.folder.name), str(mf.mode.uid)] for mf in mode_folder]
+					# mode_folder = MailbotMode_Folder.objects.filter(imap_account=imap[0])
+					# mode_folder = [[str(mf.folder.name), str(mf.mode.uid)] for mf in mode_folder]
 
 					rules = EmailRule.objects.filter(mode__imap_account=imap[0])
 				

@@ -5,7 +5,7 @@ import string
 import traceback
 from browser.imap import GoogleOauth2
 from http_handler.settings import IMAP_SECRET
-from schema.youps import ImapAccount, MailbotMode, MailbotMode_Folder, Action, FolderSchema
+from schema.youps import ImapAccount, MailbotMode, Action, FolderSchema
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
@@ -207,14 +207,14 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
                 mailbotMode.save()
 
                 # Remove old setting to re-save it
-                mf = MailbotMode_Folder.objects.filter(mode=mailbotMode, imap_account=imapAccount).filter()
-                mf.delete()
+                # mf = MailbotMode_Folder.objects.filter(mode=mailbotMode, imap_account=imapAccount).filter()
+                # mf.delete()
 
             # Save selected folder for the mode
             for f in folders:
                 folder = FolderSchema.objects.get(imap_account=imapAccount, name=f)
-                mf = MailbotMode_Folder(mode=mailbotMode, folder=folder, imap_account=imapAccount)
-                mf.save()
+                # mf = MailbotMode_Folder(mode=mailbotMode, folder=folder, imap_account=imapAccount)
+                # mf.save()
 
 
         imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_account=imapAccount)[0]
