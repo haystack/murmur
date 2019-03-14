@@ -34,16 +34,16 @@ $(document).ready(function() {
             .addClass("info");
     }   
 
-    function create_new_tab(e) {
+    function create_new_tab(nav_bar) {
         var id = $("#editor-container .tab-pane").length; // avoid same ID
         // Add tab
-        $(e).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
+        $(nav_bar).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
 
         // Move to the newly added tab
         $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
 
         // Add tab-pane
-        var tab_pane_content = `<div class="tab-pane row" id="tab_{0}"> 
+        var tab_pane_content = `<div class='tab-pane row' id='tab_{0}'> 
             <div class='editable-new-message-container'></div>
             <div class='editable-repeat-container'></div>
 
@@ -252,11 +252,24 @@ $(document).ready(function() {
     
     document.addEventListener("mv-load", function(){   
         // Init editor & its autocomplete
-        document.querySelectorAll('textarea.editor').forEach(function(element) {
-            var mode_id = element.id.split("-")[1];
-            $('.nav-tabs li a[href="#tab_'+ mode_id +'"]').click();
 
-            init_editor(element);
+        // Open individual tab and panel
+        $('.nav-tabs li').each(function() {
+            if ( !$(this).find('span') ) return;
+
+            $(this).find('a').click();
+            $( $(this).find('a').attr('href') ).find('.panel').each(function() {
+                $(this).click();
+                init_editor( $(this).find('textarea')[0] );
+            })
+            
+        })
+        document.querySelectorAll('textarea.editor').forEach(function(element) {
+            
+            var mode_id = element.id.split("-")[1];
+            
+
+            
         });
 
         // Init folder container
@@ -333,7 +346,7 @@ $(document).ready(function() {
     $('.add-tab').click(function (e) {
         e.preventDefault();
 
-        create_new_tab(e);
+        create_new_tab(this);
     });
 
     // add a new editor
