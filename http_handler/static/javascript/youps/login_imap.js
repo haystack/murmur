@@ -40,20 +40,22 @@ $(document).ready(function() {
         // Add tab
         $(nav_bar).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
 
-        // Move to the newly added tab
-        $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
-
-        // Add tab-pane
+        // Insert tab pane first
         var tab_pane_content = `<div class='tab-pane row' id='tab_{0}'> 
             <div class='editable-new-message-container'></div>
             <div class='editable-repeat-container'></div>
-
-            <!-- add a new message editor button -->
-            {1}
-            <!-- add a new repeat editor button -->
-            {2}
-        </div>`.format(id, get_panel_elem("new-message", false), get_panel_elem("repeat", false));
+        </div>`.format(id);
         $('.tab-content').append( tab_pane_content );
+
+        // Move to the newly added tab to load style properly
+        $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
+
+        // Add elements in the tab pane
+        $('.tab-content').find('.tab-pane').last().append(
+            `<!-- add a new message editor button -->
+            {0}
+            <!-- add a new repeat editor button -->
+            {1}`.format(get_panel_elem("new-message", false), get_panel_elem("repeat", false)));
 
         unsaved_tabs.push( id );
     }
