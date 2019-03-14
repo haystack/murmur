@@ -165,41 +165,49 @@ $(document).ready(function() {
         var editor_elem = `<div class="panel-body" style="display:none;">
             <div class="folder-container"></div>
             <div class="editor-container">
-            <textarea class="editor mode-editor" id="editor-{0}">{0}<br>{1}</textarea>
+            <textarea class="editor mode-editor">{0}\n{1}\n</textarea>
         </div>`.format(import_str, type == "new-message" ? "def on_new_message(new_message):":"def repeat_every():"), 
         pull_down_arrow = `<span class="pull-right">
             <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
         </span>`;
 
         if(type == "new-message") {
-            return `<div class="{0} panel panel-success" {3}>
-                <div class="panel-heading panel-collapsed">
-                    <h3 class="panel-title">
-                        <span class="fa-layers fa-fw fa-2x"> 
-                                <i class="far fa-envelope"></i>
-                                <span class="fa-layers-counter" style="background:Tomato">NEW</span>
-                        </span>
-                        New message <span class=""></span></h3>
-                        {2}
+            return `<div class="{0} row" {1}>
+                <i class="fas fa-3x fa-{4}-circle"></i>
+                <div class="panel panel-success">
+                    <div class="panel-heading panel-collapsed">
+                        <h3 class="panel-title">
+                            <span class="fa-layers fa-fw fa-2x"> 
+                                    <i class="far fa-envelope"></i>
+                                    <span class="fa-layers-counter" style="background:Tomato">NEW</span>
+                            </span>
+                            New message <span class=""></span></h3>
+                            {2}
+                    </div>
                 </div>
-                {1}
+                {3}
             </div>`.format(editable ? "": "btn-new-editor", 
-                editable ? editor_elem : "",
+                editable ? "" : 'type="new-message"',
                 editable ? pull_down_arrow : "",
-                editable ? "" : 'type="new-message"');
-        } else if (type == "repeat") {
-            return `<div class="{0} panel panel-warning" {3}>
-                <div class="panel-heading panel-collapsed">
-                    <h3 class="panel-title">
-                        <i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
-                    </h3>
-                    {2}
-                </div>
-                {1}
-            </div>`.format(editable ? "": "btn-new-editor",
                 editable ? editor_elem : "",
+                editable ? "minus" : "plus");
+        } else if (type == "repeat") {
+            return `<div class="{0} row" {1}>
+                <i class="fas fa-3x fa-{4}-circle"></i>
+                <div class="panel panel-warning">
+                    <div class="panel-heading panel-collapsed">
+                        <h3 class="panel-title">
+                            <i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
+                        </h3>
+                        {2}
+                    </div>
+                </div>
+                {3}
+            </div>`.format(editable ? "": "btn-new-editor",
+                editable ? "" : 'type="repeat"',
                 editable? pull_down_arrow : "",
-                editable ? "" : 'type="repeat"');
+                editable ? editor_elem : "",
+                editable ? "minus" : "plus");
         }
     }
 
