@@ -12,23 +12,28 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 
 from browser.models.event_data import NewMessageData
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
-from schema.youps import Action, TaskScheduler  # noqa: F401 ignore unused we use it for typing
+from schema.youps import Action, TaskScheduler, MailbotMode, EmailRule  # noqa: F401 ignore unused we use it for typing
 from smtp_handler.utils import codeobject_dumps, is_gmail, send_email
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 
-def interpret(mailbox, code, is_simulate=False):
-    # type: (MailBox, unicode, bool) -> t.Dict[t.AnyStr, t.Any]
-
-    # assert we actually got a mailbox
-    assert isinstance(mailbox, MailBox)
-    # assert the code is unicode
-    assert isinstance(code, unicode)
-    assert mailbox.new_message_handler is not None
+def interpret(mailbox, mode, is_simulate=False):
+    # type: (MailBox, MailbotMode, bool) -> t.Dict[t.AnyStr, t.Any]
 
     # set up the default result
     res = {'status': True, 'imap_error': False, 'imap_log': ""}
+
+    if mode is None:
+        logger.warn("No mode set for interpret")
+        res['status'] = False
+        return
+
+    # assert we actually got a mailbox
+    assert isinstance(mailbox, MailBox)
+    # assert the mode is the mailboat mode
+    assert isinstance(mode, MailbotMode)
+    assert mailbox.new_message_handler is not None
 
     # get the logger for user output
     userLogger = logging.getLogger('youps.user')  # type: logging.Logger
@@ -138,26 +143,39 @@ def interpret(mailbox, code, is_simulate=False):
         # set the user logger to
         userLoggerStream = user_std_out
 
-        # define the variables accessible to the user
-        user_environ = {
-            'create_draft': create_draft,
-            'create_folder': create_folder,
-            'new_message_handler': mailbox.new_message_handler,
-            'on_message_arrival': on_message_arrival,
-            'set_interval': set_interval
-        }
+        # TODO maybe use this instead of mode.rules
+        # ers = EmailRule.objects.filter(mode=mode)
+        
+        for rule in mode.rules:
+            assert isinstance(rule, EmailRule)
+            valid_folders = rule.folders
+            code = rule.code
 
-        # execute the user's code
-        exec(code, user_environ)
 
-        # fire new message events
-        while True:
-            try:
-                event_data = mailbox.event_data_queue.get_nowait()
+            # define the variables accessible to the user
+            user_environ = {
+                'create_draft': create_draft,
+                'create_folder': create_folder,
+                'set_interval': set_interval
+            }
+
+            # execute the user's code
+            exec(code, user_environ)
+
+            # add the user's functions to the event handlers
+            if rule.type == "new-message":
+                mailbox.new_message_handler.handle(on_new_message)  # noqa: F821 on_new_message supplied by user
+            elif rule.type == "repeat":
+                pass
+                # some_handler or something += repeat_every
+
+
+            for event_data in mailbox.event_data_list:
                 if isinstance(event_data, NewMessageData):
-                    event_data.fire_event(mailbox.new_message_handler)
-            except Queue.Empty:
-                break
+                    if event_data.message._schema.folder_schema in valid_folders:
+                        event_data.fire_event(mailbox.new_message_handler)
+
+            mailbox.new_message_handler.removeAllHandles()
 
     except Exception:
         res['status'] = False

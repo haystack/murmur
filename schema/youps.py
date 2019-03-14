@@ -174,21 +174,22 @@ class EmailRule(models.Model):
     uid = models.IntegerField(default=1)
 
     type = models.CharField('rule_type', default='new-message', max_length=100)
-    code = models.TextField(null=True, blank=True)
-    mode = models.ForeignKey('MailbotMode')
+    code = models.TextField(null=True, blank=True)  # t.AnyStr
+    mode = models.ForeignKey('MailbotMode', related_name="rules")
+    folders = models.ManyToManyField(FolderSchema, related_name='rules')  # type: t.List[FolderSchema]
 
     class Meta:
         unique_together = ("uid", "mode")
 
 
-# This model is to have many-to-many relation of EmailRule and Folder
-class EmailRule_Folder(models.Model):
-    rule = models.ForeignKey('EmailRule')
-    folder = models.ForeignKey('FolderSchema')
+# # This model is to have many-to-many relation of EmailRule and Folder
+# class EmailRule_Folder(models.Model):
+#     rule = models.ForeignKey('EmailRule')
+#     folder = models.ForeignKey('FolderSchema')
 
-    class Meta:
-        db_table = "youps_emailrule_folder"
-        unique_together = ("rule", "folder")
+#     class Meta:
+#         db_table = "youps_emailrule_folder"
+#         unique_together = ("rule", "folder")
 
 class Message_Thread(models.Model):
     id = models.AutoField(primary_key=True)

@@ -231,9 +231,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         if run_request:
             logger.info("user %s run request" % imapAccount.email)
 
-            ers = EmailRule.objects.filter(mode=imapAccount.current_mode)
-            for er in ers:
-                res = interpret(MailBox(imapAccount, imap), er.code, is_test)
+            res = interpret(MailBox(imapAccount, imap), imapAccount.current_mode, is_test)
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:

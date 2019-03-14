@@ -39,6 +39,9 @@ class Event:
         for handler in self.handlers:
             handler(*args, **kwargs)
 
+    def removeAllHandles(self):
+        self.handlers = set()
+
     def getHandlerCount(self):
         return len(self.handlers)
 

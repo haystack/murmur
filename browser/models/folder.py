@@ -7,8 +7,8 @@ from schema.youps import MessageSchema, FolderSchema, ContactSchema, ImapAccount
 from django.db.models import Max
 from imapclient.response_types import Address  # noqa: F401 ignore unused we use it for typing
 from email.header import decode_header
-from Queue import Queue  # noqa: F401 ignore unused we use it for typing
 from browser.models.event_data import NewMessageData
+from browser.models.event_data import AbstractEventData
 
 
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -152,8 +152,8 @@ class Folder(object):
             self._last_seen_uid = max_uid
             logger.debug('%s updated max_uid %d' % (self, max_uid))
 
-    def _refresh_cache(self, uid_next, highest_mod_seq, event_data_queue):
-        # type: (int, int, Queue) -> None
+    def _refresh_cache(self, uid_next, highest_mod_seq, event_data_list):
+        # type: (int, int, t.List[AbstractEventData]) -> None
         """Called during normal synchronization to refresh the cache.
 
         Should get new messages and build message number to UID map for the
@@ -168,7 +168,7 @@ class Folder(object):
         # if the uid has not changed then we don't need to get new messages
         if uid_next != self._uid_next:
             # get all the descriptors for the new messages
-            self._save_new_messages(self._last_seen_uid, event_data_queue)
+            self._save_new_messages(self._last_seen_uid, event_data_list)
             # TODO maybe trigger the user
 
         # if the last seen uid is zero we haven't seen any messages
@@ -248,8 +248,8 @@ class Folder(object):
             logger.debug("%s updated highest mod seq to %d" % (self, highest_mod_seq))
 
 
-    def _save_new_messages(self, last_seen_uid, event_data_queue = None):
-        # type: (int, Queue) -> None
+    def _save_new_messages(self, last_seen_uid, event_data_list = None):
+        # type: (int, t.List[AbstractEventData]) -> None
         """Save any messages we haven't seen before
 
         Args:
@@ -322,7 +322,7 @@ class Folder(object):
                 logger.critical("number of messages returned %d" % (len(fetch_data)))
                 raise
             if last_seen_uid != 0:
-                event_data_queue.put(NewMessageData(Message(message_schema, self._imap_client)))
+                event_data_list.append(NewMessageData(Message(message_schema, self._imap_client)))
 
             logger.debug("%s finished saving new messages..:" % self)
 

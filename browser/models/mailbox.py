@@ -3,9 +3,8 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 from event import Event
 import logging
 import typing as t  # noqa: F401 ignore unused we use it for typing
-from schema.youps import ImapAccount, FolderSchema, MailbotMode  # noqa: F401 ignore unused we use it for typing
+from schema.youps import ImapAccount, FolderSchema, MailbotMode, EmailRule  # noqa: F401 ignore unused we use it for typing
 from folder import Folder
-import Queue
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -16,6 +15,8 @@ class MailBox(object):
         """Create a new instance of the client's mailbox using a connection
         to an IMAPClient.
         """
+        from browser.models.event_data import AbstractEventData
+
         self._imap_client = imap_client  # type: IMAPClient
 
         self._imap_account = imap_account  # type: ImapAccount
@@ -23,7 +24,7 @@ class MailBox(object):
         # Events
         self.new_message_handler = Event()  # type: Event
 
-        self.event_data_queue = Queue.Queue()  # type: Queue
+        self.event_data_list = []  # type: t.List[AbstractEventData]
 
     def __str__(self):
         # type: () -> t.AnyStr
@@ -68,7 +69,7 @@ class MailBox(object):
             if folder._should_completely_refresh(uid_validity):
                 folder._completely_refresh_cache()
             else:
-                folder._refresh_cache(uid_next, highest_mod_seq, self.event_data_queue)
+                folder._refresh_cache(uid_next, highest_mod_seq, self.event_data_list)
 
             # update the folder's uid next and uid validity
             folder._uid_next = uid_next
@@ -87,13 +88,10 @@ class MailBox(object):
 
     def _run_user_code(self):
         from browser.sandbox import interpret
-        if self._imap_account.current_mode is not None:
-            code = self._imap_account.current_mode.code
-            res = interpret(self, code)
-            if res['imap_log']:
-                logger.info('user output: %s' % res['imap_log'])
-            return res
-        return None
+        res = interpret(self, self._imap_account.current_mode)
+        if res['imap_log']:
+            logger.info('user output: %s' % res['imap_log'])
+        return res
 
 
     def _find_or_create_folder(self, name):
