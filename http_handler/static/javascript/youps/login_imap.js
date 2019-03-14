@@ -378,7 +378,7 @@ $(document).ready(function() {
 
     // add a new editor
     $("#editor-container").on("click", ".btn-new-editor", function() {
-        var $container = $( $(this).siblings(".editable-{0}-container".format($(this).attr("type"))) );
+        var $container = $( $(this).siblings("[type='{0}']".format($(this).attr("type"))) );
         var editor_elem = get_panel_elem($(this).attr("type"), true);
         $container.append( editor_elem );
 
