@@ -196,12 +196,16 @@ def loop_sync_user_inbox():
             logger.info("Mailbox sync done: %s" % (imapAccount_email))
 
             try:
-                mailbox._run_user_code()
+                res = mailbox._run_user_code()
             except Exception():
                 logger.exception("Mailbox run user code failed")
             
             # after sync, logout to prevent multi-connection issue
             imap.logout()
+
+            if res is not None and res.get('imap_log', ''):
+                imapAccount.execution_log = "%s\n%s" % (res['imap_log'], imapAccount.execution_log) 
+                imapAccount.save()
 
             logger.info(
                 'Sync done for %s', imapAccount_email)
