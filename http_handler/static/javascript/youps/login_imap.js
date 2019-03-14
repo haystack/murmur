@@ -258,9 +258,9 @@ $(document).ready(function() {
             if ( !$(this).find('span') ) return;
 
             $(this).find('a').click();
-            $( $(this).find('a').attr('href') ).find('.panel').each(function() {
+            $( $(this).find('a').attr('href') ).find('.panel-heading').each(function() {
                 $(this).click();
-                if ($(this).find('textarea'))
+                if ($(this).find('textarea').length)
                     init_editor( $(this).find('textarea')[0] );
             })
             
