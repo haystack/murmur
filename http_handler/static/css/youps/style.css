@@ -43,7 +43,7 @@
 }
 
 .tab-pane {
-  padding-top: 10px;
+  padding: 10px;
 }
 
 [contenteditable] {
@@ -226,7 +226,7 @@
   /* border: 0; */
 }
 
-.container-namespace .panel-heading {
+.panel-heading {
   cursor: pointer;
 }
 

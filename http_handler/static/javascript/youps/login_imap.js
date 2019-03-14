@@ -8,6 +8,7 @@ $(document).ready(function() {
         btn_shortcut_save = $("#btn-shortcut-save");
 
     var log_backup = "", user_status_backup = "";
+    var import_str = "import re, spacy, datetime, arrow"
 
     // Format string
     if (!String.prototype.format) {
@@ -164,8 +165,8 @@ $(document).ready(function() {
         var editor_elem = `<div class="panel-body" style="display:none;">
             <div class="folder-container"></div>
             <div class="editor-container">
-            <textarea class="editor mode-editor" id="editor-{0}"></textarea>
-        </div>`, 
+            <textarea class="editor mode-editor" id="editor-{0}">{0}<br>{1}</textarea>
+        </div>`.format(import_str, type == "new-message" ? "def on_new_message(new_message):":"def repeat_every():"), 
         pull_down_arrow = `<span class="pull-right">
             <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
         </span>`;
