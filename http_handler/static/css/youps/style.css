@@ -231,7 +231,6 @@
 }
 
 .btn-new-editor svg {
-  margin-left: 20px;
   margin-top: 15px;
   vertical-align: middle;
 }
@@ -278,10 +277,18 @@
   width: 100%;
 }
 .flex_item_left {
-  width: 75px;
+  width: 50px;
   text-align: center;
   /* background: #fa0; */
 }
 .flex_item_right {
   flex-grow: 1;
+}
+
+.flex_item_right .panel-title {
+  float: left;
+}
+
+i::before {
+  line-height: inherit;
 }
