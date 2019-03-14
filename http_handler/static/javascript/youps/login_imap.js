@@ -35,12 +35,13 @@ $(document).ready(function() {
     }   
 
     function create_new_tab(e) {
-        // Move to the newly added tab
-        $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
-
         var id = $("#editor-container .tab-pane").length; // avoid same ID
         // Add tab
         $(e).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
+
+        // Move to the newly added tab
+        $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
+
         // Add tab-pane
         var tab_pane_content = `<div class="tab-pane row" id="tab_{0}"> 
             <div class='editable-new-message-container'></div>
@@ -50,7 +51,7 @@ $(document).ready(function() {
             {1}
             <!-- add a new repeat editor button -->
             {2}
-        </div>`.format(id, get_panel_elem("new_message", false), get_panel_elem("repeat", false));
+        </div>`.format(id, get_panel_elem("new-message", false), get_panel_elem("repeat", false));
         $('.tab-content').append( tab_pane_content );
 
         unsaved_tabs.push( id );
