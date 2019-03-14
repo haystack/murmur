@@ -260,17 +260,11 @@ $(document).ready(function() {
             $(this).find('a').click();
             $( $(this).find('a').attr('href') ).find('.panel').each(function() {
                 $(this).click();
-                init_editor( $(this).find('textarea')[0] );
+                if ($(this).find('textarea'))
+                    init_editor( $(this).find('textarea')[0] );
             })
             
         })
-        document.querySelectorAll('textarea.editor').forEach(function(element) {
-            
-            var mode_id = element.id.split("-")[1];
-            
-
-            
-        });
 
         // Init folder container
         init_folder_selector( $(".folder-container") )
