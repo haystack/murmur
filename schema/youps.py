@@ -165,24 +165,28 @@ class MailbotMode(models.Model):
     uid = models.IntegerField()
 
     name = models.CharField('mode_name', max_length=100)
-    code = models.TextField(null=True, blank=True)
-
     imap_account = models.ForeignKey('ImapAccount')
 
     class Meta:
         unique_together = ("uid", "imap_account")
 
+class EmailRule(models.Model):
+    # the primary key
+    id = models.AutoField(primary_key=True)
 
-# This model is to have many-to-many relation of MailbotMode and Folder
-class MailbotMode_Folder(models.Model):
+    type = models.CharField('rule_type', default='new-message', max_length=100)
+    code = models.TextField(null=True, blank=True)
     mode = models.ForeignKey('MailbotMode')
+
+
+# This model is to have many-to-many relation of EmailRule and Folder
+class EmailRule_Folder(models.Model):
+    rule = models.ForeignKey('EmailRule')
     folder = models.ForeignKey('FolderSchema')
-    imap_account = models.ForeignKey('ImapAccount')
 
     class Meta:
-        db_table = "youps_mailbotmode_folder"
-        unique_together = ("mode", "folder")
-    pass
+        db_table = "youps_emailrule_folder"
+        unique_together = ("rule", "folder")
 
 class Message_Thread(models.Model):
     id = models.AutoField(primary_key=True)

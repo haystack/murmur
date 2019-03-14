@@ -117,31 +117,36 @@
 											<div class="tab-pane" id="tab_{{mode.uid}}">
 										{% endif %}	
 												<div class='editable-new-message-container'>
-													<!-- for rule in mode.rule  -->
-													<div class="panel panel-success">
-														<div class="panel-heading panel-collapsed">
-															<h3 class="panel-title">
-																<span class="fa-layers fa-fw fa-2x"> 
-																	<i class="far fa-envelope"></i>
-																	<span class="fa-layers-counter" style="background:Tomato">NEW</span>
-																</span>
-															New message <span class="preview-namespace"></span></h3>
-															<span class="pull-right">
-																<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
-															</span>
-														</div>
-														<div class="panel-body" style="display:none;">
-															<div class="folder-container"></div>
-															<div class="editor-container">
-																<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
+													{% for rule in rules %}
+														{% if rule.mode == mode and rule.type == "new-message" %}
+															<div class="panel panel-success">
+																<div class="panel-heading panel-collapsed">
+																	<h3 class="panel-title">
+																		<span class="fa-layers fa-fw fa-2x"> 
+																			<i class="far fa-envelope"></i>
+																			<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+																		</span>
+																	New message <span class="preview-namespace"></span></h3>
+																	<span class="pull-right">
+																		<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+																	</span>
+																</div>
+																<div class="panel-body" style="display:none;">
+																	<div class="folder-container"></div>
+																	<div class="editor-container">
+																		<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
 {{ mode.code }}
-																</textarea>
+																		</textarea>
+																	</div>
+																</div>
 															</div>
-														</div>
-													</div>
+														{% endif %}	
+													{% endfor %}
 												</div>
 
 												<div class='editable-repeat-container'>
+													{% for rule in rules %}
+														{% if rule.mode == mode and rule.type == "repeat" %}
 														<div class="panel panel-warning">
 															<div class="panel-heading panel-collapsed">
 																<h3 class="panel-title">
@@ -153,12 +158,14 @@
 															<div class="panel-body" style="display:none;">
 																<div class="folder-container"></div>
 																<div class="editor-container">
-																<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
+																	<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
 {{ mode.code }}
-																</textarea>
+																	</textarea>
+																</div>
 															</div>
 														</div>
-													</div>
+													{% endif %}	
+													{% endfor %}
 												</div>
 
 												<!-- editor add buttons -->
