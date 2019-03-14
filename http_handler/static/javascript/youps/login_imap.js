@@ -171,7 +171,7 @@ $(document).ready(function() {
         </span>`;
 
         if(type == "new-message") {
-            return `<div class="{0} panel panel-success">
+            return `<div class="{0} panel panel-success" {3}>
                 <div class="panel-heading panel-collapsed">
                     <h3 class="panel-title">
                         <span class="fa-layers fa-fw fa-2x"> 
@@ -184,9 +184,10 @@ $(document).ready(function() {
                 {1}
             </div>`.format(editable ? "": "btn-new-editor", 
                 editable ? editor_elem : "",
-                editable? pull_down_arrow : "");
+                editable ? pull_down_arrow : "",
+                editable ? "" : 'type="new-message"');
         } else if (type == "repeat") {
-            return `<div class="{0} panel panel-warning">
+            return `<div class="{0} panel panel-warning" {3}>
                 <div class="panel-heading panel-collapsed">
                     <h3 class="panel-title">
                         <i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
@@ -196,7 +197,8 @@ $(document).ready(function() {
                 {1}
             </div>`.format(editable ? "": "btn-new-editor",
                 editable ? editor_elem : "",
-                editable? pull_down_arrow : "");
+                editable? pull_down_arrow : "",
+                editable ? "" : 'type="repeat"');
         }
     }
 
