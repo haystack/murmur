@@ -213,7 +213,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
                 er = EmailRule(mode=mailbotMode, type=value['type'], code=code)
                 er.save()
 
-
+                # TODO  
                 # # Save selected folder for the mode
                 # for f in folders:
                 #     folder = FolderSchema.objects.get(imap_account=imapAccount, name=f)
@@ -226,8 +226,10 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
 
         if run_request:
             logger.info("user %s run request" % imapAccount.email)
-            # TODO replace this with the right search criteria 
-            res = interpret(MailBox(imapAccount, imap), imapAccount.current_mode.code, is_test)
+
+            ers = EmailRule.objects.filter(mode=imapAccount.current_mode)
+            for er in ers:
+                res = interpret(MailBox(imapAccount, imap), er.code, is_test)
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:
