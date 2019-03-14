@@ -34,13 +34,13 @@ $(document).ready(function() {
             .addClass("info");
     }   
 
-    function create_new_tab() {
+    function create_new_tab(e) {
         // Move to the newly added tab
         $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
 
         var id = $("#editor-container .tab-pane").length; // avoid same ID
         // Add tab
-        $(this).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
+        $(e).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
         // Add tab-pane
         var tab_pane_content = `<div class="tab-pane row" id="tab_{0}"> 
             <div class='editable-new-message-container'></div>
@@ -142,8 +142,7 @@ $(document).ready(function() {
         function rec_add_nested(d, path) {
             var $ul = $("<ul></ul>");
             for (var key in d) {
-                var p = ""
-                console.log(key, isDict(d[key]))
+                var p = "";
                 if (path=="") p = key;
                 else  p = path + "/" + key;
                 var $li = $("<li><input type='checkbox' value='"+ p + "'>" + '<i class="far fa-folder-open"></i> ' + key + "</li>");
@@ -167,7 +166,7 @@ $(document).ready(function() {
             <textarea class="editor mode-editor" id="editor-{0}"></textarea>
         </div>`;
 
-        if(type == "new_message") {
+        if(type == "new-message") {
             return `<div class="{0} panel panel-success">
                 <div class="panel-heading panel-collapsed">
                     <h3 class="panel-title">
@@ -333,7 +332,7 @@ $(document).ready(function() {
     $('.add-tab').click(function (e) {
         e.preventDefault();
 
-        create_new_tab();
+        create_new_tab(e);
     });
 
     // add a new editor
@@ -343,7 +342,7 @@ $(document).ready(function() {
         $container.append( editor_elem );
 
         init_editor( $container.find('textarea').last()[0] );
-        init_folder_selector( $container.find('.folder-container').last()[0] );
+        init_folder_selector( $($container.find('.folder-container').last()[0]) );
     });
     
     // Tab name editor
