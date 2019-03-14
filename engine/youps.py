@@ -203,6 +203,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
             er.delete()
 
             for value in mode['editors']:
+                uid = value['uid']
                 code = value['code'].encode('utf-8')
                 folders = value['folders']
                 print mode_id
@@ -210,7 +211,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
                 print code
                 print folders
                 
-                er = EmailRule(mode=mailbotMode, type=value['type'], code=code)
+                er = EmailRule(uid=uid, mode=mailbotMode, type=value['type'], code=code)
                 er.save()
 
                 # TODO  

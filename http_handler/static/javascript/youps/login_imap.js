@@ -176,7 +176,7 @@ $(document).ready(function() {
 
         if(type == "new-message") {
             return `<div class="{0}" {1}>
-            <div class="panel panel-success">
+            <div {2} class="panel panel-success">
                 <div class="flex_container">
                     <div class="flex_item_left"> 
                         <i class="fas fa-3x fa-{4}-circle"></i> 
@@ -190,7 +190,7 @@ $(document).ready(function() {
                             </span>
                             New message <span class=""></span>
                         </h3>
-                        {2}
+                        {5}
                     </div>
                 </div>
                 <!-- Panel body -->
@@ -198,12 +198,13 @@ $(document).ready(function() {
             </div>
         </div>`.format(editable ? "": "btn-new-editor", 
                 editable ? "" : 'type="new-message"',
-                editable ? pull_down_arrow : "",
+                editable ? "rule-id={0}".format(Math.floor(Math.random() * 10000) + 1) : "",
                 editable ? editor_elem : "",
-                editable ? "minus" : "plus");
+                editable ? "minus" : "plus",
+                editable ? pull_down_arrow : "");
         } else if (type == "repeat") {
             return `<div class="{0}" {1}>
-            <div class="panel panel-warning">
+            <div {2} class="panel panel-warning">
                 <div class="flex_container">
                     <div class="flex_item_left"> 
                         <i class="fas fa-3x fa-{4}-circle"></i> 
@@ -213,7 +214,7 @@ $(document).ready(function() {
                         <h3 class="panel-title">
                             <i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
                         </h3>
-                        {2}
+                        {5}
                     </div>
                 </div>
                 <!-- Panel body -->
@@ -221,9 +222,10 @@ $(document).ready(function() {
             </div>
         </div>`.format(editable ? "": "btn-new-editor",
                 editable ? "" : 'type="repeat"',
-                editable? pull_down_arrow : "",
+                editable ? "rule-id={0}".format(Math.floor(Math.random() * 10000) + 1) : "",
                 editable ? editor_elem : "",
-                editable ? "minus" : "plus");
+                editable ? "minus" : "plus",
+                editable? pull_down_arrow : "");
         }
     }
 
@@ -395,6 +397,8 @@ $(document).ready(function() {
     $("#editor-container").on("click", ".editable-container .flex_item_left", function() {
         // TODO
         console.log("remove TODO");
+
+        // remove editor
     });
     
     // Tab name editor
@@ -595,8 +599,8 @@ $(document).ready(function() {
             $(this).find('.CodeMirror').each( function(index, elem) {
                 var code = elem.CodeMirror.getValue();
                 var type = $(elem).parents('.editable-container').attr('type');
-
-                editors.push({"code": $.trim( code ), "type": type, "folders": selected_folders}); 
+                var uid = $(elem).parents('.panel').attr('rule-id');
+                editors.push({"uid": uid, "code": $.trim( code ), "type": type, "folders": selected_folders}); 
             })
 
             modes[id] = {

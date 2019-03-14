@@ -171,12 +171,14 @@ class MailbotMode(models.Model):
         unique_together = ("uid", "imap_account")
 
 class EmailRule(models.Model):
-    # the primary key
-    id = models.AutoField(primary_key=True)
+    uid = models.IntegerField(default=1)
 
     type = models.CharField('rule_type', default='new-message', max_length=100)
     code = models.TextField(null=True, blank=True)
     mode = models.ForeignKey('MailbotMode')
+
+    class Meta:
+        unique_together = ("uid", "mode")
 
 
 # This model is to have many-to-many relation of EmailRule and Folder
