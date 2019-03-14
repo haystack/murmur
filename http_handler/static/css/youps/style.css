@@ -42,6 +42,10 @@
     display: inline-block;
 }
 
+.tab-pane {
+  padding-top: 10px;
+}
+
 [contenteditable] {
   border: solid 1px lightgreen;
   padding: 5px;

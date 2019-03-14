@@ -165,7 +165,10 @@ $(document).ready(function() {
             <div class="folder-container"></div>
             <div class="editor-container">
             <textarea class="editor mode-editor" id="editor-{0}"></textarea>
-        </div>`;
+        </div>`, 
+        pull_down_arrow = `<span class="pull-right">
+            <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+        </span>`;
 
         if(type == "new-message") {
             return `<div class="{0} panel panel-success">
@@ -176,20 +179,24 @@ $(document).ready(function() {
                                 <span class="fa-layers-counter" style="background:Tomato">NEW</span>
                         </span>
                         New message <span class=""></span></h3>
+                        {2}
                 </div>
                 {1}
             </div>`.format(editable ? "": "btn-new-editor", 
-                editable ? editor_elem : "");
+                editable ? editor_elem : "",
+                editable? pull_down_arrow : "");
         } else if (type == "repeat") {
             return `<div class="{0} panel panel-warning">
                 <div class="panel-heading panel-collapsed">
                     <h3 class="panel-title">
                         <i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
                     </h3>
+                    {2}
                 </div>
                 {1}
             </div>`.format(editable ? "": "btn-new-editor",
-                editable ? editor_elem : "");
+                editable ? editor_elem : "",
+                editable? pull_down_arrow : "");
         }
     }
 
@@ -349,7 +356,11 @@ $(document).ready(function() {
         var editor_elem = get_panel_elem($(this).attr("type"), true);
         $container.append( editor_elem );
 
+        // open briefly to set styling
+        $container.find(".panel-heading").last().click();
         init_editor( $container.find('textarea').last()[0] );
+        $container.find(".panel-heading").last().click();
+
         init_folder_selector( $($container.find('.folder-container').last()[0]) );
     });
     
