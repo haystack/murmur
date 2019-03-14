@@ -234,18 +234,64 @@
 								</ul>
 								<div class="tab-content">
 									<div class="tab-pane active" id="tab_0">
-										<div class="folder-container"></div>
-										<div class="editor-container">
-											  <textarea class="editor mode-editor" id="editor-0"> 												  
-def tidy_inbox():
-	msgs = recent_messages(30)
-	for m in msgs:
-		if m.is_replied():
-		    m.progress = 'Done'
+										<div class='editable-container' type='new-message'>
+															<div rule-id=99999 class="panel panel-success">
+																<div class="flex_container">
+																	<div class="flex_item_left"> 
+																		<i class="fas fa-3x fa-minus-circle"></i> 
+																	</div>
 
-repeat(60, tidy_inbox)
-</textarea>
-										</div>
+																	<div class="flex_item_right panel-heading panel-collapsed">
+																		<h3 class="panel-title">
+																			<span class="fa-layers fa-fw fa-2x"> 
+																				<i class="far fa-envelope"></i>
+																				<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+																			</span>
+																		New message <span class="preview-namespace"></span></h3>
+																		<span class="pull-right">
+																			<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+																		</span>
+																	</div>
+																</div>
+																<div class="panel-body" style="display:none;">
+																	<div class="folder-container"></div>
+																	<div class="editor-container">
+																		<textarea class="editor mode-editor" id="editor-99999">
+def on_message_arrival(new_message):
+	if "ads" in new_message.subject:
+		new_message.mark_read()
+																		</textarea>
+																	</div>
+																</div>
+															</div>
+												</div>
+
+												<div class='editable-container' type='repeat'>
+														<div rule-id={{rule.id}} class="panel panel-warning">
+															<div class="flex_container">
+																<div class="flex_item_left"> 
+																	<i class="fas fa-3x fa-minus-circle"></i> 
+																</div>
+
+																<div class="flex_item_right panel-heading panel-collapsed">
+																	<h3 class="panel-title">
+																			<i class="far fa-2x fa-clock"></i> Update every <span class=""></span></h3>
+																	<span class="pull-right">
+																		<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+																	</span>
+																</div>
+															</div>
+															<div class="panel-body" style="display:none;">
+																<div class="folder-container"></div>
+																<div class="editor-container">
+																	<textarea class="editor mode-editor" id="editor-99999">
+def repeat_every():
+    pass
+																	</textarea>
+																</div>
+															</div>
+														</div>
+												</div>
 
 										<!-- editor add buttons -->
 										<div class="btn-new-editor" type="new-message">

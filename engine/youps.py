@@ -149,6 +149,9 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
     logging.debug(res)
     return res
 
+def remove_editor(user, email, mode_id, ):
+    pass
+
 def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=True):
     """This function is called everytime users hit "run", "stop" or "save" their scripts.
 
