@@ -231,6 +231,14 @@
   cursor: pointer;
 }
 
+.editable-container .flex_item_left:hover {
+  color: red;
+}
+
+.btn-new-editor .flex_item_left:hover {
+  color: green;
+}
+
 .btn-new-editor svg {
   margin-top: 15px;
   vertical-align: middle;
