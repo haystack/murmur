@@ -255,6 +255,11 @@
   width: 90%;
 }
 
+.panel-body {
+  padding: 0px;
+  padding-left: 15px;
+}
+
 .container-namespace .panel-body {
   cursor: not-allowed;
 }
@@ -281,6 +286,11 @@
   text-align: center;
   /* background: #fa0; */
 }
+
+.flex_item_left svg{
+  margin-top: 4px;
+}
+
 .flex_item_right {
   flex-grow: 1;
 }
