@@ -42,8 +42,8 @@ $(document).ready(function() {
 
         // Insert tab pane first
         var tab_pane_content = `<div class='tab-pane row' id='tab_{0}'> 
-            <div class='editable-new-message-container'></div>
-            <div class='editable-repeat-container'></div>
+            <div class='editable-container' type='new-message'></div>
+            <div class='editable-container' type='repeat'></div>
         </div>`.format(id);
         $('.tab-content').append( tab_pane_content );
 
@@ -572,24 +572,33 @@ $(document).ready(function() {
     function get_modes() {
         var modes = {};
 
-        document.querySelectorAll('.tab-content .CodeMirror').forEach(function(element) { 
-            var id = $(element).parents('.tab-pane').attr('id').split("_")[1];
-            code = element.CodeMirror.getValue(),
-            name = document.querySelector(".nav.nav-tabs span[mode-id='{0}']".format(id)).innerHTML,
-            selected_folders = [];
+        // iterate by modes 
+        $("#editor-container .tab-pane").each(function() {
+            var editors = [];
+            var selected_folders = [];
 
-            $(element).parents('.tab-pane').find(".folder-container input:checked").each(function () {
+            // get mode ID
+            var id = $(this).attr('id').split("_")[1];
+            var name = $(".nav.nav-tabs span[mode-id='{0}'].tab-title".format(id)).text();
+
+            $(this).find('.CodeMirror').each( function(index, elem) {
+                var code = elem.CodeMirror.getValue();
+                var type = $(elem).parents('.editable-container').attr('type');
+
+                editors.push({"code": $.trim( code ), "type": type}); 
+            })
+
+            $(this).find(".folder-container input:checked").each(function () {
                 selected_folders.push($(this).attr('value'));
             });
-            
 
             modes[id] = {
                 "id": id,
                 "name": $.trim( name ), 
-                "code": code,
+                "editors": editors,
                 "folders": selected_folders
             };
-        });
+        })
 
         return modes;
     }

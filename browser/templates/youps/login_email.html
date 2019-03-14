@@ -116,7 +116,7 @@
 										{% else %}
 											<div class="tab-pane" id="tab_{{mode.uid}}">
 										{% endif %}	
-												<div class='editable-new-message-container'>
+												<div class='editable-container' type='new-message'>
 													{% for rule in rules %}
 														{% if rule.mode == mode and rule.type == "new-message" %}
 															<div class="panel panel-success">
@@ -150,7 +150,7 @@
 													{% endfor %}
 												</div>
 
-												<div class='editable-repeat-container'>
+												<div class='editable-container' type='repeat'>
 													{% for rule in rules %}
 														{% if rule.mode == mode and rule.type == "repeat" %}
 														<div class="panel panel-warning">
