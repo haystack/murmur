@@ -258,3 +258,16 @@
 .panel-title {
   font-size: 15px;
 }
+
+.flex_container {
+  display: flex;
+  width: 100%;
+}
+.flex_item_left {
+  width: 75px;
+  background: #fa0;
+}
+.flex_item_right {
+  background: #fcf8e3;
+  flex-grow: 1;
+}
