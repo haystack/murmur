@@ -231,9 +231,23 @@
 }
 
 .btn-new-editor svg {
-  float:left;
   margin-left: 20px;
   margin-top: 15px;
+  vertical-align: middle;
+}
+
+/* bootstrap override */
+
+.panel-success .panel-heading {
+  color: #3c763d;
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+  }
+
+.panel-warning .panel-heading {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  border-color: #faebcc;
 }
 
 .panel-heading {
@@ -265,9 +279,9 @@
 }
 .flex_item_left {
   width: 75px;
-  background: #fa0;
+  text-align: center;
+  /* background: #fa0; */
 }
 .flex_item_right {
-  background: #fcf8e3;
   flex-grow: 1;
 }

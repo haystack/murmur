@@ -174,7 +174,7 @@ $(document).ready(function() {
         </span>`;
 
         if(type == "new-message") {
-            return `<div class="{0} row" {1}>
+            return `<div class="{0}" {1}>
             <div class="panel panel-success">
                 <div class="flex_container">
                     <div class="flex_item_left"> 
@@ -201,7 +201,7 @@ $(document).ready(function() {
                 editable ? editor_elem : "",
                 editable ? "minus" : "plus");
         } else if (type == "repeat") {
-            return `<div class="{0} row" {1}>
+            return `<div class="{0}" {1}>
             <div class="panel panel-warning">
                 <div class="flex_container">
                     <div class="flex_item_left"> 
