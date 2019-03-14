@@ -181,22 +181,41 @@
 												</div>
 
 												<!-- editor add buttons -->
-												<div class="btn-new-editor panel panel-success" type="new-message">
-														<div class="panel-heading">
-															<h3 class="panel-title">
-																<span class="fa-layers fa-fw fa-2x"> 
-																		<i class="far fa-envelope"></i>
-																		<span class="fa-layers-counter" style="background:Tomato">NEW</span>
-																</span>
-																New message <span class=""></span></h3>
+												<div class="btn-new-editor" type="new-message">
+													<div class="panel panel-success">
+														<div class="flex_container">
+															<div class="flex_item_left"> 
+																<i class="fas fa-3x fa-plus-circle"></i> 
+															</div>
+																	
+															<div class="panel-heading flex_item_right panel-collapsed">
+																<h3 class="panel-title">
+																		<span class="fa-layers fa-fw fa-2x"> 
+																			<i class="far fa-envelope"></i>
+																			<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+																		</span>
+																		New message <span class=""></span>
+																</h3>		
+															</div>
 														</div>
+													</div>
 												</div>
-												<div class="btn-new-editor panel panel-warning" type="repeat">
-														<div class="panel-heading">
-															<h3 class="panel-title">
-																<i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
-															</h3>
-														</div>
+												<div class="btn-new-editor" type="repeat">
+														<div class="panel panel-warning">
+															<div class="flex_container">
+																<div class="flex_item_left"> 
+																	<i class="fas fa-3x fa-plus-circle"></i> 
+																</div>
+																
+																<div class="panel-heading flex_item_right panel-collapsed">
+																	<h3 class="panel-title">
+																		<i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
+																	</h3>
+																	
+																</div>
+															</div>
+															<!-- Panel body -->		
+													</div>
 												</div>
 									  		</div>
 									{% endfor %}
@@ -229,23 +248,42 @@ repeat(60, tidy_inbox)
 										</div>
 
 										<!-- editor add buttons -->
-										<div class="btn-new-editor panel panel-success" type="new-message">
-												<div class="panel-heading">
-													<h3 class="panel-title">
-														<span class="fa-layers fa-fw fa-2x"> 
-																<i class="far fa-envelope"></i>
-																<span class="fa-layers-counter" style="background:Tomato">NEW</span>
-														</span>
-														New message <span class=""></span></h3>
+										<div class="btn-new-editor" type="new-message">
+												<div class="panel panel-success">
+													<div class="flex_container">
+														<div class="flex_item_left"> 
+															<i class="fas fa-3x fa-plus-circle"></i> 
+														</div>
+																
+														<div class="panel-heading flex_item_right panel-collapsed">
+															<h3 class="panel-title">
+																	<span class="fa-layers fa-fw fa-2x"> 
+																		<i class="far fa-envelope"></i>
+																		<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+																	</span>
+																	New message <span class=""></span>
+															</h3>		
+														</div>
+													</div>
 												</div>
-										</div>
-										<div class="btn-new-editor panel panel-warning" type="repeat">
-												<div class="panel-heading">
-													<h3 class="panel-title">
-														<i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
-													</h3>
+											</div>
+											<div class="btn-new-editor" type="repeat">
+													<div class="panel panel-warning">
+														<div class="flex_container">
+															<div class="flex_item_left"> 
+																<i class="fas fa-3x fa-plus-circle"></i> 
+															</div>
+															
+															<div class="panel-heading flex_item_right panel-collapsed">
+																<h3 class="panel-title">
+																	<i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
+																</h3>
+																
+															</div>
+														</div>
+														<!-- Panel body -->		
 												</div>
-										</div>
+											</div>
 									</div>
 								</div>
 							{% endif %}

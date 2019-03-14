@@ -581,22 +581,21 @@ $(document).ready(function() {
             var id = $(this).attr('id').split("_")[1];
             var name = $(".nav.nav-tabs span[mode-id='{0}'].tab-title".format(id)).text();
 
-            $(this).find('.CodeMirror').each( function(index, elem) {
-                var code = elem.CodeMirror.getValue();
-                var type = $(elem).parents('.editable-container').attr('type');
-
-                editors.push({"code": $.trim( code ), "type": type}); 
-            })
-
             $(this).find(".folder-container input:checked").each(function () {
                 selected_folders.push($(this).attr('value'));
             });
 
+            $(this).find('.CodeMirror').each( function(index, elem) {
+                var code = elem.CodeMirror.getValue();
+                var type = $(elem).parents('.editable-container').attr('type');
+
+                editors.push({"code": $.trim( code ), "type": type, "folders": selected_folders}); 
+            })
+
             modes[id] = {
                 "id": id,
                 "name": $.trim( name ), 
-                "editors": editors,
-                "folders": selected_folders
+                "editors": editors
             };
         })
 

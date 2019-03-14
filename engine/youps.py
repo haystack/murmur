@@ -5,7 +5,7 @@ import string
 import traceback
 from browser.imap import GoogleOauth2
 from http_handler.settings import IMAP_SECRET
-from schema.youps import ImapAccount, MailbotMode, Action, FolderSchema
+from schema.youps import ImapAccount, MailbotMode, Action, FolderSchema, EmailRule
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
@@ -186,35 +186,39 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         Action.objects.filter(folder__imap_account=imapAccount).delete()
         remove_periodic_task.delay( imapAccount.id )
 
-        for key, value in modes.iteritems():
-            mode_id = value['id']
-            mode_name = value['name'].encode('utf-8')
-            code = value['code'].encode('utf-8')
-            folders = value['folders']
-            print mode_id
-            print mode_name
-            print code
-            print folders
-            
+        for mode_index, mode in modes.iteritems():
+            mode_id = mode['id']
+            mode_name = mode['name'].encode('utf-8')
+
             mailbotMode = MailbotMode.objects.filter(uid=mode_id, imap_account=imapAccount)
             if not mailbotMode.exists():
-                mailbotMode = MailbotMode(uid=mode_id, name=mode_name, code=code, imap_account=imapAccount)
+                mailbotMode = MailbotMode(uid=mode_id, name=mode_name, imap_account=imapAccount)
                 mailbotMode.save()
 
             else:
                 mailbotMode = mailbotMode[0]
-                mailbotMode.code = code
-                mailbotMode.save()
 
-                # Remove old setting to re-save it
-                # mf = MailbotMode_Folder.objects.filter(mode=mailbotMode, imap_account=imapAccount).filter()
-                # mf.delete()
+            # Remove old editors to re-save it
+            er = EmailRule.objects.filter(mode=mailbotMode).filter()
+            er.delete()
 
-            # Save selected folder for the mode
-            for f in folders:
-                folder = FolderSchema.objects.get(imap_account=imapAccount, name=f)
-                # mf = MailbotMode_Folder(mode=mailbotMode, folder=folder, imap_account=imapAccount)
-                # mf.save()
+            for key, value in mode.editors.iteritems():
+                code = value['code'].encode('utf-8')
+                folders = value['folders']
+                print mode_id
+                print mode_name
+                print code
+                print folders
+                
+                er = EmailRule(mode=mailbotMode, type=value['type'], code=code)
+                er.save()
+
+
+                # # Save selected folder for the mode
+                # for f in folders:
+                #     folder = FolderSchema.objects.get(imap_account=imapAccount, name=f)
+                #     # mf = MailbotMode_Folder(mode=mailbotMode, folder=folder, imap_account=imapAccount)
+                #     # mf.save()
 
 
         imapAccount.current_mode = MailbotMode.objects.filter(uid=current_mode_id, imap_account=imapAccount)[0]
