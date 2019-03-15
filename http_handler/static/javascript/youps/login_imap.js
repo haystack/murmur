@@ -476,7 +476,7 @@ $(document).ready(function() {
         e.preventDefault();
 
         // Fire only by panel click not child
-        if(!$(e.target).is("div").parents('.input-group')) return;
+        if(!$(e.target).parents('.input-group')) return;
 
         var $this = $(this);
         if(!$this.hasClass('panel-collapsed')) { // close the panel
@@ -767,11 +767,11 @@ $(document).ready(function() {
                 });    
         });
 
-        function remove_rule(rule_id) {
+        function remove_rule(rule_uid) {
             show_loader(true);
 
             var params = {
-                'rule-id' : rule_id
+                'rule-id' : rule_uid
             };
 
             $.post('/remove_rule', params,
