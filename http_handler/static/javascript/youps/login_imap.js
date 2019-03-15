@@ -107,8 +107,8 @@ $(document).ready(function() {
           }
         })
 
-        editor.getValue( "import re, spacy, datetime, arrow" );
-        editor.markText({line:0,ch:0},{line:2,ch:1},{readOnly:true});
+        // editor.getValue( "import re, spacy, datetime, arrow" );
+        // editor.markText({line:0,ch:0},{line:2,ch:1},{readOnly:true});
     }
 
     function init_folder_selector($folder_container) {
