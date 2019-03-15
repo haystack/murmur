@@ -103,31 +103,31 @@ def interpret(mailbox, mode, is_simulate=False):
 
     from http_handler.tasks import add_periodic_task
 
-    def set_interval(interval=None, func=None):
-        if not interval:
-            raise Exception('set_interval(): requires interval (in minute)')
+    # def set_interval(interval=None, func=None):
+    #     if not interval:
+    #         raise Exception('set_interval(): requires interval (in minute)')
 
-        if interval < 1:
-            raise Exception('set_interval(): requires interval larger than 1 minute')
+    #     if interval < 1:
+    #         raise Exception('set_interval(): requires interval larger than 1 minute')
 
-        if not func or type(func).__name__ != "function":
-            raise Exception('set_interval(): requires callback function but it is %s ' % type(func).__name__)
+    #     if not func or type(func).__name__ != "function":
+    #         raise Exception('set_interval(): requires callback function but it is %s ' % type(func).__name__)
 
-        if func.func_code.co_argcount != 0:
-            raise Exception('set_interval(): your callback function should have only 0 argument, but there are %d argument(s)' % func.func_code.co_argcount)
+    #     if func.func_code.co_argcount != 0:
+    #         raise Exception('set_interval(): your callback function should have only 0 argument, but there are %d argument(s)' % func.func_code.co_argcount)
 
-        action = Action(trigger="interval", code=codeobject_dumps(func.func_code), mode=mailbox._imap_account.current_mode)
-        action.save()
-        add_periodic_task.apply_async(args=[interval, action.id], queue='default', routing_key='default.import')   
+    #     action = Action(trigger="interval", code=codeobject_dumps(func.func_code), mode=mailbox._imap_account.current_mode)
+    #     action.save()
+    #     add_periodic_task.apply_async(args=[interval, action.id], queue='default', routing_key='default.import')   
 
-        code = 'a=Action.objects.get(id=%d)\ncode_object=codeobject_loads(a.code)\ng = type(codeobject_loads)(code_object ,locals())\ng()' % action.id
-        args = ujson.dumps( [mailbox._imap_account.id, code] )
+    #     code = 'a=Action.objects.get(id=%d)\ncode_object=codeobject_loads(a.code)\ng = type(codeobject_loads)(code_object ,locals())\ng()' % action.id
+    #     args = ujson.dumps( [mailbox._imap_account.id, code] )
 
-        ptask_name = "%d_set_interval-%d" % (int(mailbox._imap_account), random.randint(1, 10000))
-        TaskScheduler.schedule_every('run_interpret', 'minutes', interval, ptask_name, args)
+    #     ptask_name = "%d_set_interval-%d" % (int(mailbox._imap_account), random.randint(1, 10000))
+    #     TaskScheduler.schedule_every('run_interpret', 'minutes', interval, ptask_name, args)
 
-        mailbox._imap_account.status_msg = mailbox._imap_account.status_msg + "[%s]set_interval(): executing every %d minutes \n" % (ptask_name, interval)
-        mailbox._imap_account.save()
+    #     mailbox._imap_account.status_msg = mailbox._imap_account.status_msg + "[%s]set_interval(): executing every %d minutes \n" % (ptask_name, interval)
+    #     mailbox._imap_account.save()
 
     def send(subject="", to="", body="", smtp=""):  # TODO add "cc", "bcc"
         if len(to) == 0:
@@ -150,6 +150,7 @@ def interpret(mailbox, mode, is_simulate=False):
         for rule in mode.rules.all():
             assert isinstance(rule, EmailRule)
             valid_folders = rule.folders.all()
+            logger.info("what is rule: %s:%s" % (type(rule), rule))
             code = rule.code
 
 
@@ -157,7 +158,7 @@ def interpret(mailbox, mode, is_simulate=False):
             user_environ = {
                 'create_draft': create_draft,
                 'create_folder': create_folder,
-                'set_interval': set_interval
+                # 'set_interval': set_interval
             }
 
             # execute the user's code
