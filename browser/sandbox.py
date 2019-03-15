@@ -165,7 +165,9 @@ def interpret(mailbox, mode, is_simulate=False):
             }
             logger.info(code)
             # execute the user's code
-            exec(code, user_environ)
+            exec(code)
+            # TODO exec cant register new function (e.g., on_message_arrival) when there is a user_env
+            # exec(code, user_environ)
 
             # add the user's functions to the event handlers
             if rule.type == "new-message":
