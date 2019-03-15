@@ -207,7 +207,7 @@ $(document).ready(function() {
             <div {2} class="panel panel-warning">
                 <div class="flex_container">
                     <div class="flex_item_left"> 
-                        <i class="fas fa-3x fa-{3}-circle"></i> 
+                        <i class="fas fa-3x fa-{3}"></i> 
                     </div>
                     
                     <div class="panel-heading flex_item_right panel-collapsed">
@@ -395,7 +395,7 @@ $(document).ready(function() {
 
     // remove an editor
     $("#editor-container").on("click", ".editable-container .flex_item_left", function() {
-        if(!$(this).siblings('.flex_item_right').hasClass(".panel-collapsed") ) // if opened
+        if(!$(this).siblings('.flex_item_right').hasClass("panel-collapsed") ) // if opened
             $(this).siblings('.flex_item_right').click(); // then close 
 
         // remove editor from the server
@@ -404,7 +404,7 @@ $(document).ready(function() {
 
         // give different visual effects
         $(this).find('svg').remove();
-        $(this).append('<i class="fas fa-trash"></i>');
+        $(this).append('<i class="fas fa-redo fa-3x"></i>');
         $(this).parents('.panel').addClass('removed');
     });
     
