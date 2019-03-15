@@ -154,9 +154,9 @@ def interpret(mailbox, mode, is_simulate=False):
         userLoggerStream = user_std_out
 
         # TODO maybe use this instead of mode.rules
-        
-        for rule in mode.rules.all():
+        for rule in EmailRule.objects.filter(mode=mode):
             assert isinstance(rule, EmailRule)
+            
             valid_folders = rule.folders.all()
             logger.info("what is rule: %s:%s" % (type(rule), rule))
             code = rule.code

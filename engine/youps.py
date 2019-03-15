@@ -202,7 +202,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
                 mailbotMode = mailbotMode[0]
 
             # Remove old editors to re-save it
-            er = EmailRule.objects.filter(mode=mailbotMode).filter()
+            er = EmailRule.objects.filter(mode=mailbotMode)
             er.delete()
 
             for value in mode['editors']:
