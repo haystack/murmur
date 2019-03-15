@@ -30,5 +30,5 @@ Run as daemon, \
 2. If you make any change to the database, you should migrate those change like this:\
 `python manage.py schemamigration schema --auto`\
 `python manage.py migrate schema`\
-3. Run [this sql script]() on the database.
+3. Run [this sql script](https://github.com/soyapark/murmur/blob/master/youps_db_sql) on the database.
 
