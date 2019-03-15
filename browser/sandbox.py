@@ -20,6 +20,9 @@ logger = logging.getLogger('youps')  # type: logging.Logger
 def interpret(mailbox, mode, is_simulate=False):
     # type: (MailBox, MailbotMode, bool) -> t.Dict[t.AnyStr, t.Any]
 
+    logger.info("FUCK FUCK FUCK FUCK FUCK FUCK FUCK FUCK")
+
+
     from schema.youps import EmailRule
     from smtp_handler.utils import is_gmail
 
@@ -36,6 +39,8 @@ def interpret(mailbox, mode, is_simulate=False):
     # assert the mode is the mailboat mode
     assert isinstance(mode, MailbotMode)
     assert mailbox.new_message_handler is not None
+
+    logger.info("FUCK FUCK FUCK FUCK FUCK FUCK FUCK FUCK")
 
     # get the logger for user output
     userLogger = logging.getLogger('youps.user')  # type: logging.Logger
@@ -101,7 +106,7 @@ def interpret(mailbox, mode, is_simulate=False):
     def on_message_arrival(func):
         mailbox.new_message_handler += func
 
-    from http_handler.tasks import add_periodic_task
+    # from http_handler.tasks import add_periodic_task
 
     # def set_interval(interval=None, func=None):
     #     if not interval:
@@ -128,6 +133,9 @@ def interpret(mailbox, mode, is_simulate=False):
 
     #     mailbox._imap_account.status_msg = mailbox._imap_account.status_msg + "[%s]set_interval(): executing every %d minutes \n" % (ptask_name, interval)
     #     mailbox._imap_account.save()
+
+    logger.info("FUCK FUCK FUCK FUCK FUCK FUCK FUCK FUCK")
+
 
     def send(subject="", to="", body="", smtp=""):  # TODO add "cc", "bcc"
         if len(to) == 0:
