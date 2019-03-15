@@ -12,7 +12,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 from browser.models.event_data import NewMessageData
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
 from schema.youps import Action, TaskScheduler, MailbotMode  # noqa: F401 ignore unused we use it for typing
-from smtp_handler.utils import codeobject_dumps, is_gmail, send_email
+from smtp_handler.utils import codeobject_dumps, send_email
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -21,6 +21,7 @@ def interpret(mailbox, mode, is_simulate=False):
     # type: (MailBox, MailbotMode, bool) -> t.Dict[t.AnyStr, t.Any]
 
     from schema.youps import EmailRule
+    from smtp_handler.utils import is_gmail
 
     # set up the default result
     res = {'status': True, 'imap_error': False, 'imap_log': ""}
