@@ -149,8 +149,36 @@ def delete_mailbot_mode(user, email, mode_id, push=True):
     logging.debug(res)
     return res
 
-def remove_editor(user, email, mode_id, ):
-    pass
+def remove_rule(user, email, rule_id):
+    """This function remove a EmailRule of user;
+
+        Args:
+            user (Model.UserProfile)
+            email (string): user's email address
+            rule_id (integer): ID of EmailRule to be deleted
+    """
+    res = {'status' : False, 'imap_error': False}
+
+    try:
+        imap_account = ImapAccount.objects.get(email=email)
+        er = EmailRule.objects.get(uid=rule_id, mode__imap_account=imap_account)
+
+        er.delete()
+
+        res['status'] = True
+    except IMAPClient.Error, e:
+        res['code'] = e
+    except ImapAccount.DoesNotExist:
+        res['code'] = "Not logged into IMAP"
+    except EmailRule.DoesNotExist:
+        res['code'] = "Error occured during deleting the editor"
+    except Exception, e:
+        # TODO add exception
+        print e
+        res['code'] = msg_code['UNKNOWN_ERROR']
+
+    logging.debug(res)
+    return res
 
 def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=True):
     """This function is called everytime users hit "run", "stop" or "save" their scripts.

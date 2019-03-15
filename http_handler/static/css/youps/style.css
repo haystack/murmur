@@ -221,6 +221,11 @@
   margin: 10px;
 }
 
+#editor-container .panel.removed {
+  margin: 10px;
+
+}
+
 .container-namespace {
   margin-bottom: 0;
   /* border: 0; */

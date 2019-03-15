@@ -179,7 +179,7 @@ $(document).ready(function() {
             <div {2} class="panel panel-success">
                 <div class="flex_container">
                     <div class="flex_item_left"> 
-                        <i class="fas fa-3x fa-{4}-circle"></i> 
+                        <i class="fas fa-3x fa-{4}-circle"></i> <i class="fas fa-trash"></i>
                     </div>
                     
                     <div class="panel-heading flex_item_right panel-collapsed">
@@ -395,10 +395,17 @@ $(document).ready(function() {
 
     // remove an editor
     $("#editor-container").on("click", ".editable-container .flex_item_left", function() {
-        // TODO
-        console.log("remove TODO");
+        if(!$(this).siblings('.flex_item_right').hasClass(".panel-collapsed") ) // if opened
+            $(this).siblings('.flex_item_right').click(); // then close 
 
-        // remove editor
+        // remove editor from the server
+        var rule_id = $(this).parents('.panel').attr('rule-id');
+        remove_rule(rule_id);
+
+        // give different visual effects
+        $(this).find('svg').removeClass("fa-minus-circle");
+        $(this).find('svg').addClass("fa-redo");
+        $(this).parents('.panel').addClass('removed');
     });
     
     // Tab name editor
@@ -743,6 +750,34 @@ $(document).ready(function() {
                     alert("Fail to load! Can you try using a different browser? 403");
                 });    
         });
+
+        function remove_rule(rule_id) {
+            show_loader(true);
+
+            var params = {
+                'rule-id' : rule_id
+            };
+
+            $.post('/remove_rule', params,
+                function(res) {
+                    show_loader(false);
+                    console.log(res);
+                    
+                    // Auth success
+                    if (res.status) {
+
+                        if (res.code) { 
+                        }
+                        else {                        
+                            notify(res, true);
+                        }
+                    }
+                    else {
+                        notify(res, false);
+                    }
+                }
+            );
+        }
 
         function run_code(is_dry_run, is_running) {
             show_loader(true);

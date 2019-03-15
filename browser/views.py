@@ -1504,6 +1504,19 @@ def fetch_execution_log(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def remove_rule(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		
+		rule_id = request.POST['rule-id']
+		res = engine.main.remove_rule(user, request.user.email, rule_id)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def run_mailbot(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
