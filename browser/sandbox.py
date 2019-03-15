@@ -1,7 +1,6 @@
 from __future__ import unicode_literals, division
 
 import logging
-import Queue
 import sys
 import typing as t  # noqa: F401 ignore unused we use it for typing
 import ujson
@@ -12,7 +11,7 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 
 from browser.models.event_data import NewMessageData
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
-from schema.youps import Action, TaskScheduler, MailbotMode, EmailRule  # noqa: F401 ignore unused we use it for typing
+from schema.youps import Action, TaskScheduler, MailbotMode  # noqa: F401 ignore unused we use it for typing
 from smtp_handler.utils import codeobject_dumps, is_gmail, send_email
 
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -20,6 +19,8 @@ logger = logging.getLogger('youps')  # type: logging.Logger
 
 def interpret(mailbox, mode, is_simulate=False):
     # type: (MailBox, MailbotMode, bool) -> t.Dict[t.AnyStr, t.Any]
+
+    from schema.youps import EmailRule
 
     # set up the default result
     res = {'status': True, 'imap_error': False, 'imap_log': ""}
@@ -144,7 +145,6 @@ def interpret(mailbox, mode, is_simulate=False):
         userLoggerStream = user_std_out
 
         # TODO maybe use this instead of mode.rules
-        # ers = EmailRule.objects.filter(mode=mode)
         
         for rule in mode.rules:
             assert isinstance(rule, EmailRule)
