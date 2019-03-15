@@ -184,6 +184,8 @@ def interpret(mailbox, mode, is_simulate=False):
             for event_data in mailbox.event_data_list:
                 if isinstance(event_data, NewMessageData):
                     if event_data.message._schema.folder_schema in valid_folders:
+                        # This is to log for users
+                        print "[%s/%s] " % (event_data.message.folder_schema.name, event_data.message.subject)
                         event_data.fire_event(mailbox.new_message_handler)
 
             mailbox.new_message_handler.removeAllHandles()

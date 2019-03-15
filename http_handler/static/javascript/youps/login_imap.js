@@ -476,7 +476,7 @@ $(document).ready(function() {
         e.preventDefault();
 
         // Fire only by panel click not child
-        if(!$(e.target).parents('.input-group')) return;
+        if($(e.target).parents('.input-group').length != 0) return;
 
         var $this = $(this);
         if(!$this.hasClass('panel-collapsed')) { // close the panel
@@ -484,13 +484,13 @@ $(document).ready(function() {
             $this.addClass('panel-collapsed');
             $this.find('.fa-chevron-down').hide();
             $this.find('.fa-chevron-up').show();
-            $this.find(".preview-namespace").show();
+            $this.find(".preview-folder").show();
         } else { // open the panel
             $this.parents('.panel').find('.panel-body').slideDown();
             $this.removeClass('panel-collapsed');
             $this.find('.fa-chevron-up').hide();
             $this.find('.fa-chevron-down').show();
-            $this.find(".preview-namespace").hide();
+            $this.find(".preview-folder").hide();
         }
     })
 
