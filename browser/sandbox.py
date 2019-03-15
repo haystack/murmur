@@ -99,8 +99,8 @@ def interpret(mailbox, mode, is_simulate=False):
 
         logger.debug("rename_folder(): Rename a folder %s to %s" % (old_name, new_name))
 
-    def on_message_arrival(func):
-        mailbox.new_message_handler += func
+    # def on_message_arrival(func):
+    #     mailbox.new_message_handler += func
 
     # from http_handler.tasks import add_periodic_task
 
@@ -170,8 +170,8 @@ def interpret(mailbox, mode, is_simulate=False):
             # add the user's functions to the event handlers
             if rule.type == "new-message":
                 mailbox.new_message_handler.handle(on_message_arrival)  # noqa: F821 on_new_message supplied by user
-            elif rule.type == "repeat":
-                pass
+            else:
+                continue
                 # some_handler or something += repeat_every
 
 
