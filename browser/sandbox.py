@@ -150,12 +150,6 @@ def interpret(mailbox, mode, is_simulate=False):
         # TODO maybe use this instead of mode.rules
         for rule in EmailRule.objects.filter(mode=mode):
             assert isinstance(rule, EmailRule)
-            
-            valid_folders = rule.folders.all()
-            valid_folders = FolderSchema.objects.filter(imap_account=mailbox._imap_account)
-            code = rule.code
-
-            
 
             # define the variables accessible to the user
             user_environ = {
@@ -164,6 +158,10 @@ def interpret(mailbox, mode, is_simulate=False):
                 'on_message_arrival': on_message_arrival
                 # 'set_interval': set_interval
             }
+
+            valid_folders = rule.folders.all()
+            valid_folders = FolderSchema.objects.filter(imap_account=mailbox._imap_account, rules=rule)
+            code = rule.code
             
 
             # add the user's functions to the event handlers
