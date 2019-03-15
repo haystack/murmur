@@ -483,7 +483,14 @@ $(document).ready(function() {
             $this.parents('.panel').find('.panel-body').slideUp();
             $this.addClass('panel-collapsed');
             $this.find('.fa-chevron-down').hide();
-            $this.find('.fa-chevron-up').show();
+						$this.find('.fa-chevron-up').show();
+						
+						var selected_folders = "";
+						$this.parents(".flex_container").siblings('.panel-body').find(".folder-container input:checked").each(function () {
+								selected_folders = $(this).attr('value');
+						});
+						$this.find(".preview-folder").text(selected_folders);
+
             $this.find(".preview-folder").show();
         } else { // open the panel
             $this.parents('.panel').find('.panel-body').slideDown();
@@ -615,6 +622,7 @@ $(document).ready(function() {
             var id = $(this).attr('id').split("_")[1];
             var name = $(".nav.nav-tabs span[mode-id='{0}'].tab-title".format(id)).text();
 
+            // TODO fix
             $(this).find(".folder-container input:checked").each(function () {
                 selected_folders.push($(this).attr('value'));
             });
