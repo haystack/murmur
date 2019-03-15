@@ -280,10 +280,10 @@
   margin-top: -15px;
 }
 
-.preview-namespace {
-  opacity: 0.5;
+.preview-folder {
+  font-size: 12px;
+  opacity: 0.8;
 }
-
 
 .panel-title {
   font-size: 15px;

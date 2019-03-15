@@ -185,7 +185,7 @@ def interpret(mailbox, mode, is_simulate=False):
                 if isinstance(event_data, NewMessageData):
                     if event_data.message._schema.folder_schema in valid_folders:
                         # This is to log for users
-                        log_format = "[ %s/subject: %s ] "% (event_data.message._schema.folder_schema.name, event_data.message._schema.subject)
+                        log_format = '[ %s/<span class="label label-info">%s</span> ] '% (event_data.message._schema.folder_schema.name, event_data.message._schema.subject)
                         print (log_format), 
                         event_data.fire_event(mailbox.new_message_handler)
 

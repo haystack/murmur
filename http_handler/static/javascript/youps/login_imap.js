@@ -485,11 +485,11 @@ $(document).ready(function() {
             $this.find('.fa-chevron-down').hide();
 						$this.find('.fa-chevron-up').show();
 						
-						var selected_folders = "";
+						var selected_folders = [];
 						$this.parents(".flex_container").siblings('.panel-body').find(".folder-container input:checked").each(function () {
-								selected_folders = $(this).attr('value');
+								selected_folders.append( $(this).attr('value') );
 						});
-						$this.find(".preview-folder").text(selected_folders);
+						$this.find(".preview-folder").text( selected_folders.join(", ") );
 
             $this.find(".preview-folder").show();
         } else { // open the panel
