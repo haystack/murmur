@@ -304,11 +304,11 @@ $(document).ready(function() {
         // Open individual tab and panel to load style properly
         $('.nav-tabs li').each(function() {
             if ( !$(this).find('span') ) return;
-
             $(this).find('a').click();
+						
+			// At each tab
             $( $(this).find('a').attr('href') ).find('.panel').each(function() {
-
-                $(this).find('.editable-container .panel-heading').click();
+			    $(this).parents('.editable-container').find('.panel-heading').click();
                 if ($(this).find('textarea').length)
                     init_editor( $(this).find('textarea')[0] );
             })
