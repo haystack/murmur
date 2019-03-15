@@ -165,8 +165,10 @@ def register_inbox(imapAccount_email):
 
 @task(name="loop_sync_user_inbox")
 def loop_sync_user_inbox():
-    logger.info('Loop sync start..')
     imapAccounts = ImapAccount.objects.filter(is_initialized=True)
+    if imapAccounts.exist():
+        logger.info('Loop sync start..')
+
     for imapAccount in imapAccounts:
         imapAccount_email = imapAccount.email
 

@@ -27,7 +27,7 @@ def interpret(mailbox, mode, is_simulate=False):
     if mode is None:
         logger.warn("No mode set for interpret")
         res['status'] = False
-        return
+        return res
 
     # assert we actually got a mailbox
     assert isinstance(mailbox, MailBox)
