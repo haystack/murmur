@@ -179,7 +179,7 @@ $(document).ready(function() {
             <div {2} class="panel panel-success">
                 <div class="flex_container">
                     <div class="flex_item_left"> 
-                        <i class="fas fa-3x fa-{4}-circle"></i> <i class="fas fa-trash"></i>
+                        <i class="fas fa-3x fa-{3}"></i>
                     </div>
                     
                     <div class="panel-heading flex_item_right panel-collapsed">
@@ -194,20 +194,20 @@ $(document).ready(function() {
                     </div>
                 </div>
                 <!-- Panel body -->
-                {3}
+                {4}
             </div>
         </div>`.format(editable ? "": "btn-new-editor", 
                 editable ? "" : 'type="new-message"',
                 editable ? "rule-id={0}".format(Math.floor(Math.random() * 10000) + 1) : "",
+                editable ? "trash" : "plus-circle",
                 editable ? editor_elem : "",
-                editable ? "minus" : "plus",
                 editable ? pull_down_arrow : "");
         } else if (type == "repeat") {
             return `<div class="{0}" {1}>
             <div {2} class="panel panel-warning">
                 <div class="flex_container">
                     <div class="flex_item_left"> 
-                        <i class="fas fa-3x fa-{4}-circle"></i> 
+                        <i class="fas fa-3x fa-{3}-circle"></i> 
                     </div>
                     
                     <div class="panel-heading flex_item_right panel-collapsed">
@@ -218,13 +218,13 @@ $(document).ready(function() {
                     </div>
                 </div>
                 <!-- Panel body -->
-                {3}
+                {4}
             </div>
         </div>`.format(editable ? "": "btn-new-editor",
                 editable ? "" : 'type="repeat"',
                 editable ? "rule-id={0}".format(Math.floor(Math.random() * 10000) + 1) : "",
+                editable ? "trash" : "plus-circle",
                 editable ? editor_elem : "",
-                editable ? "minus" : "plus",
                 editable? pull_down_arrow : "");
         }
     }
@@ -403,8 +403,8 @@ $(document).ready(function() {
         remove_rule(rule_id);
 
         // give different visual effects
-        $(this).find('svg').removeClass("fa-minus-circle");
-        $(this).find('svg').addClass("fa-redo");
+        $(this).find('svg').remove();
+        $(this).append('<i class="fas fa-trash"></i>');
         $(this).parents('.panel').addClass('removed');
     });
     

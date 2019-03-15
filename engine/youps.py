@@ -161,7 +161,7 @@ def remove_rule(user, email, rule_id):
 
     try:
         imap_account = ImapAccount.objects.get(email=email)
-        er = EmailRule.objects.get(uid=rule_id, mode__imap_account=imap_account)
+        er = EmailRule.objects.filter(uid=rule_id, mode__imap_account=imap_account)
 
         er.delete()
 
@@ -170,8 +170,6 @@ def remove_rule(user, email, rule_id):
         res['code'] = e
     except ImapAccount.DoesNotExist:
         res['code'] = "Not logged into IMAP"
-    except EmailRule.DoesNotExist:
-        res['code'] = "Error occured during deleting the editor"
     except Exception, e:
         # TODO add exception
         print e
