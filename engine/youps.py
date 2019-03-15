@@ -242,7 +242,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
                 print folders
                 
                 er = EmailRule(uid=uid, mode=mailbotMode, type=value['type'], code=code)
-                
+                er.save()
 
                 # # Save selected folder for the mode
                 for f in folders:

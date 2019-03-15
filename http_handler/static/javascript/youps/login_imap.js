@@ -188,7 +188,7 @@ $(document).ready(function() {
                                 <i class="far fa-envelope"></i>
                                 <span class="fa-layers-counter" style="background:Tomato">NEW</span>
                             </span>
-                            New message <span class=""></span>
+                            New message <span class="preview-folder"></span>
                         </h3>
                         {5}
                     </div>
@@ -224,7 +224,7 @@ $(document).ready(function() {
                                     <li><a href="#">day</a></li>
                                     </ul>
                                 </div><!-- /btn-group -->
-                            </div>
+                            </div><span class="preview-folder"></span>
                         </h3>
                         {5}
                     </div>
