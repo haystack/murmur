@@ -462,6 +462,9 @@ $(document).ready(function() {
     $("#editor-container").on("click", ".panel-heading", function (e) {
         e.preventDefault();
 
+        // Fire only by panel click not child
+        if(!$(e.target).is("div")) return;
+
         var $this = $(this);
         if(!$this.hasClass('panel-collapsed')) { // close the panel
             $this.parents('.panel').find('.panel-body').slideUp();

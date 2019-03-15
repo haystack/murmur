@@ -35,7 +35,7 @@
 		<div class="group-container">
 			<p hidden id="website-name">{{website}}</p>
 
-			<h3>YoUPS Filter Editor</h3>
+			<h3>YoUPS Rule Sandbox</h3>
 			<a href="/docs" style="float: right;margin-top: -30px;">View API docs</a>
 			<hr>
 			
@@ -122,7 +122,7 @@
 															<div rule-id={{rule.id}} class="panel panel-success">
 																<div class="flex_container">
 																	<div class="flex_item_left"> 
-																		<i class="fas fa-3x fa-minus-circle"></i> 
+																		<i class="fas fa-3x fa-trash"></i> 
 																	</div>
 
 																	<div class="flex_item_right panel-heading panel-collapsed">
@@ -156,7 +156,7 @@
 														<div rule-id={{rule.id}} class="panel panel-warning">
 															<div class="flex_container">
 																<div class="flex_item_left"> 
-																	<i class="fas fa-3x fa-minus-circle"></i> 
+																	<i class="fas fa-3x fa-trash"></i> 
 																</div>
 
 																<div class="flex_item_right panel-heading panel-collapsed">
@@ -235,10 +235,10 @@
 								<div class="tab-content">
 									<div class="tab-pane active" id="tab_0">
 										<div class='editable-container' type='new-message'>
-															<div rule-id=99999 class="panel panel-success">
+											<div rule-id=99999 class="panel panel-success">
 																<div class="flex_container">
 																	<div class="flex_item_left"> 
-																		<i class="fas fa-3x fa-minus-circle"></i> 
+																		<i class="fas fa-3x fa-trash"></i> 
 																	</div>
 
 																	<div class="flex_item_right panel-heading panel-collapsed">
@@ -264,18 +264,31 @@ def on_message_arrival(new_message):
 																	</div>
 																</div>
 															</div>
-												</div>
+										</div>
 
-												<div class='editable-container' type='repeat'>
-														<div rule-id={{rule.id}} class="panel panel-warning">
+										<div class='editable-container' type='repeat'>
+														<div rule-id=99999 class="panel panel-warning">
 															<div class="flex_container">
 																<div class="flex_item_left"> 
-																	<i class="fas fa-3x fa-minus-circle"></i> 
+																	<i class="fas fa-3x fa-trash"></i> 
 																</div>
 
 																<div class="flex_item_right panel-heading panel-collapsed">
 																	<h3 class="panel-title">
-																			<i class="far fa-2x fa-clock"></i> Update every <span class=""></span></h3>
+																		<i class="far fa-2x fa-clock" style="float:left"></i>  
+																		<span style="float:left;margin: 10px;">Update every </span>
+																		<div class="input-group" style="width: 110px;float: left;">
+																			  <input type="text" class="form-control" placeholder="1">
+																			  <div class="input-group-btn">
+																				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">hr <span class="caret"></span></button>
+																				<ul class="dropdown-menu dropdown-menu-right" role="menu">
+																				  <li><a href="#">min</a></li>
+																				  <li><a href="#">hr</a></li>
+																				  <li><a href="#">day</a></li>
+																				</ul>
+																			  </div><!-- /btn-group -->
+																		</div>						
+																	</h3>
 																	<span class="pull-right">
 																		<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
 																	</span>
@@ -291,7 +304,7 @@ def repeat_every():
 																</div>
 															</div>
 														</div>
-												</div>
+										</div>
 
 										<!-- editor add buttons -->
 										<div class="btn-new-editor" type="new-message">
