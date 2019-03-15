@@ -99,8 +99,8 @@ def interpret(mailbox, mode, is_simulate=False):
 
         logger.debug("rename_folder(): Rename a folder %s to %s" % (old_name, new_name))
 
-    # def on_message_arrival(func):
-    #     mailbox.new_message_handler += func
+    def on_message_arrival(func):
+        mailbox.new_message_handler += func
 
     # from http_handler.tasks import add_periodic_task
 
@@ -161,20 +161,24 @@ def interpret(mailbox, mode, is_simulate=False):
             user_environ = {
                 'create_draft': create_draft,
                 'create_folder': create_folder,
+                'on_message_arrival': on_message_arrival
                 # 'set_interval': set_interval
             }
-            logger.info(code)
-            # execute the user's code
-            exec(code)
-            # TODO exec cant register new function (e.g., on_message_arrival) when there is a user_env
-            # exec(code, user_environ)
+            
 
             # add the user's functions to the event handlers
             if rule.type == "new-message":
-                mailbox.new_message_handler.handle(on_message_arrival)  # noqa: F821 on_new_message supplied by user
-            else:
-                continue
-                # some_handler or something += repeat_every
+                code = code + "\non_message_arrival(on_new_message)"
+            #     mailbox.new_message_handler.handle(on_message_arrival)  # noqa: F821 on_new_message supplied by user
+            # else:
+            #     continue
+            #     # some_handler or something += repeat_every
+
+            
+            logger.info(code)
+            # execute the user's code
+            # TODO exec cant register new function (e.g., on_message_arrival) when there is a user_env
+            exec(code, user_environ)
 
 
             for event_data in mailbox.event_data_list:
