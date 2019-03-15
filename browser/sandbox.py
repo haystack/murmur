@@ -147,7 +147,7 @@ def interpret(mailbox, mode, is_simulate=False):
 
         # TODO maybe use this instead of mode.rules
         
-        for rule in mode.rules:
+        for rule in mode.rules.all():
             assert isinstance(rule, EmailRule)
             valid_folders = rule.folders
             code = rule.code
