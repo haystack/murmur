@@ -29,5 +29,6 @@ Run as daemon, \
 1. Check out a how-to-setup instruction of [Murmur](https://github.com/haystack/murmur#setup-the-database) to learn how to set up the database on a new server.
 2. If you make any change to the database, you should migrate those change like this:\
 `python manage.py schemamigration schema --auto`\
-`python manage.py migrate schema`
+`python manage.py migrate schema`\
+3. Run [this sql script]() on the database.
 
