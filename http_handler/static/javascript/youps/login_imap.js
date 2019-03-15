@@ -212,7 +212,19 @@ $(document).ready(function() {
                     
                     <div class="panel-heading flex_item_right panel-collapsed">
                         <h3 class="panel-title">
-                            <i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
+                            <i class="far fa-2x fa-clock" style="float:left"></i>  
+                            <span style="float:left;margin: 10px;">Update every </span>
+                            <div class="input-group" style="width: 110px;float: left;">
+                                <input type="text" class="form-control" placeholder="1">
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">hr <span class="caret"></span></button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <li><a href="#">min</a></li>
+                                    <li><a href="#">hr</a></li>
+                                    <li><a href="#">day</a></li>
+                                    </ul>
+                                </div><!-- /btn-group -->
+                            </div>
                         </h3>
                         {5}
                     </div>
@@ -289,13 +301,14 @@ $(document).ready(function() {
     document.addEventListener("mv-load", function(){   
         // Init editor & its autocomplete
 
-        // Open individual tab and panel
+        // Open individual tab and panel to load style properly
         $('.nav-tabs li').each(function() {
             if ( !$(this).find('span') ) return;
 
             $(this).find('a').click();
             $( $(this).find('a').attr('href') ).find('.panel').each(function() {
-                $(this).find('.panel-heading').click();
+
+                $(this).find('.editable-container .panel-heading').click();
                 if ($(this).find('textarea').length)
                     init_editor( $(this).find('textarea')[0] );
             })
@@ -463,7 +476,7 @@ $(document).ready(function() {
         e.preventDefault();
 
         // Fire only by panel click not child
-        if(!$(e.target).is("div")) return;
+        if(!$(e.target).is("div").parents('.input-group')) return;
 
         var $this = $(this);
         if(!$this.hasClass('panel-collapsed')) { // close the panel

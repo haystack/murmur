@@ -21,7 +21,7 @@ CELERY_DEFAULT_ROUTING_KEY = 'task.default'
 from datetime import timedelta
 
 CELERYBEAT_SCHEDULE = {
-    'add-every-30-seconds': {
+    'loop_sync_celery_beat': {
         'task': 'loop_sync_user_inbox',
         'schedule': timedelta(seconds=5),
         'args': (),
