@@ -41,7 +41,7 @@ $(document).ready(function() {
         $(nav_bar).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
 
         // Insert tab pane first
-        var tab_pane_content = `<div class='tab-pane row' id='tab_{0}'> 
+        var tab_pane_content = `<div class='tab-pane' id='tab_{0}'> 
             <div class='editable-container' type='new-message'></div>
             <div class='editable-container' type='repeat'></div>
         </div>`.format(id);
