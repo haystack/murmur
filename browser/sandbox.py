@@ -174,7 +174,7 @@ def interpret(mailbox, mode, is_simulate=False):
 
             # add the user's functions to the event handlers
             if rule.type == "new-message":
-                mailbox.new_message_handler.handle(on_new_message)  # noqa: F821 on_new_message supplied by user
+                mailbox.new_message_handler.handle(on_message_arrival)  # noqa: F821 on_new_message supplied by user
             elif rule.type == "repeat":
                 pass
                 # some_handler or something += repeat_every
