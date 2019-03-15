@@ -175,13 +175,17 @@ def loop_sync_user_inbox():
         try:
             logger.info('Start syncing %s ', imapAccount_email)
 
-            # authenticate with the user's imap server
-            auth_res = authenticate(imapAccount)
-            # if authentication failed we can't run anything
-            if not auth_res['status']:
-                # Stop doing loop
-                # TODO maybe we should email the user
-                return
+            try:
+                # authenticate with the user's imap server
+                auth_res = authenticate(imapAccount)
+                # if authentication failed we can't run anything
+                if not auth_res['status']:
+                    # Stop doing loop
+                    # TODO maybe we should email the user
+                    continue
+            except Exception:
+                logger.exception("Authentication failed")
+                continue
 
             # get an imapclient which is authenticated
             imap = auth_res['imap']
@@ -201,14 +205,19 @@ def loop_sync_user_inbox():
                 res = mailbox._run_user_code()
             except Exception():
                 logger.exception("Mailbox run user code failed")
+                continue
             
             # after sync, logout to prevent multi-connection issue
             imap.logout()
 
-            if res is not None and res.get('imap_log', ''):
-                imapAccount.execution_log = "%s\n%s" % (res['imap_log'], imapAccount.execution_log) 
-                imapAccount.save()
-
+            try:
+                if res is not None and res.get('imap_log', ''):
+                    imapAccount.execution_log = "%s\n%s" % (res['imap_log'], imapAccount.execution_log) 
+                    imapAccount.save()
+            except Exception():
+                logger.exception("Mailbox save user output failed")
+                continue
+                
             logger.info(
                 'Sync done for %s', imapAccount_email)
         except ImapAccount.DoesNotExist:
