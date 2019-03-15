@@ -163,7 +163,7 @@ def interpret(mailbox, mode, is_simulate=False):
                 'create_folder': create_folder,
                 # 'set_interval': set_interval
             }
-
+            logger.info(code)
             # execute the user's code
             exec(code, user_environ)
 
