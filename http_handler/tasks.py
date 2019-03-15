@@ -166,7 +166,7 @@ def register_inbox(imapAccount_email):
 @task(name="loop_sync_user_inbox")
 def loop_sync_user_inbox():
     imapAccounts = ImapAccount.objects.filter(is_initialized=True)
-    if imapAccounts.exist():
+    if imapAccounts.exists():
         logger.info('Loop sync start..')
 
     for imapAccount in imapAccounts:
@@ -217,7 +217,7 @@ def loop_sync_user_inbox():
             except Exception():
                 logger.exception("Mailbox save user output failed")
                 continue
-                
+
             logger.info(
                 'Sync done for %s', imapAccount_email)
         except ImapAccount.DoesNotExist:
