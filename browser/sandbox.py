@@ -146,12 +146,13 @@ def interpret(mailbox, mode, is_simulate=False):
         # set the user logger to
         userLoggerStream = user_std_out
 
+        from schema.youps import FolderSchema
         # TODO maybe use this instead of mode.rules
         for rule in EmailRule.objects.filter(mode=mode):
             assert isinstance(rule, EmailRule)
             
             valid_folders = rule.folders.all()
-            logger.info("what is rule: %s:%s" % (type(rule), rule))
+            valid_folders = FolderSchema.objects.filter(imap_account=mailbox._imap_account)
             code = rule.code
 
             
