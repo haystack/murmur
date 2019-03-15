@@ -149,7 +149,7 @@ def interpret(mailbox, mode, is_simulate=False):
         
         for rule in mode.rules.all():
             assert isinstance(rule, EmailRule)
-            valid_folders = rule.folders
+            valid_folders = rule.folders.all()
             code = rule.code
 
 
