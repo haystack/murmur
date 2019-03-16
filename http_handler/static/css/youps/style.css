@@ -289,6 +289,11 @@
   opacity: 0.8;
 }
 
+.panel-warning .preview-folder {
+  line-height: 300%;
+  margin: 10px;
+}
+
 .panel-title {
   font-size: 15px;
 }
