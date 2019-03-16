@@ -7,7 +7,8 @@ from browser.models.mailbox import MailBox
 from imapclient import IMAPClient
 from engine.constants import msg_code
 from smtp_handler.Pile import Pile
-from http_handler.settings import WEBSITE
+from smtp_handler.utils import send_email
+from http_handler.settings import WEBSITE, BASE_URL
 import logging
 
 # Get an instance of a logger
@@ -21,10 +22,10 @@ class Command(BaseCommand):
         
         # iterate over all the user accounts in the database
         imapAccounts = ImapAccount.objects.filter(is_initialized=False)
-        if not imapAccounts.filter(is_running=False).exists():
-            return
 
         for imapAccount in imapAccounts:
+            if imapAccount.is_running:
+                continue
             imapAccount.is_running = True
             imapAccount.save()
 
@@ -52,8 +53,12 @@ class Command(BaseCommand):
                 mailbox._run_user_code()  
             except Exception:
                 logger.exception("mailbox task running failed %s " % imapAccount.email)
-            finally: 
-                imapAccount.is_initialized = True
-                imapAccount.is_running = False
-                imapAccount.save()
-                res['status'] = True
+                send_email("Your YoUPS account is ready!", "no-reply@" + BASE_URL, 'kixlab.rally@gmail.com', "%s register inbox failed "  % imapAccount.email)
+                
+                continue
+
+            imapAccount.is_initialized = True
+            imapAccount.is_running = False
+            imapAccount.save()
+            send_email("Your YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
+            res['status'] = True
