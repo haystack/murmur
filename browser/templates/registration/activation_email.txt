@@ -1,7 +1,7 @@
 
 Activate account at {{ website | title }}:
 
-http://{{ domain }}{% url "registration_activate" activation_key %}
+{{ protocol }}://{{ domain }}{% url "registration_activate" activation_key %}
 
 Link is valid for {{ expiration_days }} days.
 

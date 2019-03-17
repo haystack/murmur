@@ -11,6 +11,7 @@ SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 _ENV_FILE_PATH = '/opt/murmur/env'
 _DEBUG_FILE_PATH = '/opt/murmur/debug'
 _WEBSITE_FILE_PATH = '/opt/murmur/website'
+_PROTOCOL_FILE_PATH = '/opt/murmur/protocol'
 
 def _get_env():
     f = open(_ENV_FILE_PATH)
@@ -47,8 +48,20 @@ def _get_website():
     
     f.close()
     return website
-    
+
 WEBSITE = _get_website()
+
+def _get_protocol():
+    f = open(_PROTOCOL_FILE_PATH)
+    protocol = f.read()
+
+    if protocol[-1] == '\n':
+        protocol = protocol[:-1]
+    
+    f.close()
+    return protocol    
+    
+PROTOCOL = _get_protocol()
 CLIENT_ID = ''
 CLIENT_SECRET = ''
 IMAP_SECRET = ''
@@ -343,6 +356,9 @@ try:
     djcelery.setup_loader()
 except Exception as e:
     print str(e)
+
+if "celeryd" in sys.argv:
+    DEBUG = False
 
 # local Settings - overriden by local_settings.py
 try:
