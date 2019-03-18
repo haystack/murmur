@@ -23,6 +23,11 @@ Run as daemon, \
 `celery multi [start|restart|stopwait] default-worker -A http_handler -l info -l INFO -Q default --pidfile=logs/default-worker.pid --logfile=logs/default-worker.log`\
 `celery -A http_handler beat --max-interval=10 -S djcelery.schedulers.DatabaseScheduler -l info --detach -f logs/beat.log`
 
+## Troubleshooting
+
+Celery has an issue of memory leak. To timely collect garbages, we have a cronjob to reboot a RabbitMQ. If the error still occurs, first inpsect `rabbitmqctl list_queues name messages messages_ready messages_unacknowledged` and `journalctl -xe`. If you see timeout error or nodedown, you should reinstall the RabbitMQ. \
+`sudo apt-get --purge autoremove rabbitmq-server`\
+`sudo apt-get install rabbitmq-server`
 
 ## Database
 
