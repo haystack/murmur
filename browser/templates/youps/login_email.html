@@ -83,15 +83,13 @@
 									</ul>
 								</div>
 								{% if imap_authenticated %}						
-									<div class="btn-group btn-toggle"> 
-											<button class="btn btn-lg btn-default">ON</button>
-											<button class="btn btn-lg btn-primary active">OFF</button>
-										  </div>
+								<button type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off">
+										<div class="handle"></div>
+									  </button>
 								{% else %}
-								<div class="btn-group btn-toggle"> 
-										<button class="btn btn-lg btn-default" disabled>ON</button>
-										<button class="btn btn-lg btn-primary active" disabled>OFF</button>
-									  </div>
+								<button type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off" disabled>
+										<div class="handle"></div>
+									  </button>
 								{% endif %}
 							</div>
 						</div>
