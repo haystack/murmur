@@ -139,6 +139,45 @@
 			}
 		]
 	},
+	"contact": {
+		"attribute": [
+			{
+				"name": "name",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "email",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "organization",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "geolocation",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			}
+			
+		],
+		"method": [
+			{
+				"name": "recent_messages",
+				"params": "",
+				"return_type": "Message []",
+				"description": "Return a list of Message from or to this contact.",
+				"example": [
+				]
+			}
+		]
+	},
 	"getter_archieve": [
 		{
 			"name": "get_content",

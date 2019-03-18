@@ -55,6 +55,7 @@
 				
 				<div class="navbar-collapse collapse">
 						<ul class="nav navbar-nav navbar-right">
+								<li><a href="/docs/">Docs</a></li>
 								{% if user.is_authenticated %}
 									<li class="dropdown dropdown-right">
 										<p id="user-full-email" style="display:none;">{{ user.email }}</p>
@@ -66,7 +67,6 @@
 									</li>
 								{% else %}
 									<li><a href="/accounts/login/?next=/editor">Login</a></li>
-									<li><a href="/accounts/register/">Register</a></li>
 								{% endif %}
 						</ul>
 				</div>
