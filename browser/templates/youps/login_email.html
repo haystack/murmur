@@ -83,11 +83,15 @@
 									</ul>
 								</div>
 								{% if imap_authenticated %}						
-									<button class="btn btn-info" id="btn-code-simulate">Simulate</button>
-									<button class="btn btn-primary" id="btn-code-submit">Apply</button>
+									<div class="btn-group btn-toggle"> 
+											<button class="btn btn-lg btn-default">ON</button>
+											<button class="btn btn-lg btn-primary active">OFF</button>
+										  </div>
 								{% else %}
-									<button class="btn btn-info" id="btn-code-simulate" disabled>Simulate</button>
-									<button class="btn btn-primary" id="btn-code-submit" disabled>Apply</button>
+								<div class="btn-group btn-toggle"> 
+										<button class="btn btn-lg btn-default" disabled>ON</button>
+										<button class="btn btn-lg btn-primary active" disabled>OFF</button>
+									  </div>
 								{% endif %}
 							</div>
 						</div>

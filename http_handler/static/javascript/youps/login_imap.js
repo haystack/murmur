@@ -283,6 +283,17 @@ $(document).ready(function() {
     // for demo; set date to now
     $(".current-date").text(format_date());
 
+    // toggle button init
+    $('.btn-toggle').click(function() {
+        $(this).find('.btn').toggleClass('active');  
+        
+        if ($(this).find('.btn-primary').size()>0) {
+            $(this).find('.btn').toggleClass('btn-primary');
+        }
+        $(this).find('.btn').toggleClass('btn-default');
+           
+    });
+
     /* Formatting function for row details - modify as you need */
 function format ( d ) {
     // `d` is the original data object for the row
