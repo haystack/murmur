@@ -326,8 +326,6 @@ i::before {
 }
 
 .btn-toggle {
-  top: 50%;
-  transform: translateY(-50%);
   margin: 0 4rem;
   padding: 0;
   position: relative;
@@ -388,31 +386,6 @@ i::before {
 }
 .btn-toggle.active:after {
   opacity: 1;
-}
-.btn-toggle.btn-sm:before,
-.btn-toggle.btn-sm:after {
-  line-height: -0.5rem;
-  color: #fff;
-  letter-spacing: 0.75px;
-  left: 0.4125rem;
-  width: 2.325rem;
-}
-.btn-toggle.btn-sm:before {
-  text-align: right;
-}
-.btn-toggle.btn-sm:after {
-  text-align: left;
-  opacity: 0;
-}
-.btn-toggle.btn-sm.active:before {
-  opacity: 0;
-}
-.btn-toggle.btn-sm.active:after {
-  opacity: 1;
-}
-.btn-toggle.btn-xs:before,
-.btn-toggle.btn-xs:after {
-  display: none;
 }
 .btn-toggle:before,
 .btn-toggle:after {
@@ -480,29 +453,4 @@ i::before {
 }
 .btn-toggle.btn-lg.active:after {
   opacity: 1;
-}
-.btn-toggle.btn-lg.btn-sm:before,
-.btn-toggle.btn-lg.btn-sm:after {
-  line-height: 0.5rem;
-  color: #fff;
-  letter-spacing: 0.75px;
-  left: 0.6875rem;
-  width: 3.875rem;
-}
-.btn-toggle.btn-lg.btn-sm:before {
-  text-align: right;
-}
-.btn-toggle.btn-lg.btn-sm:after {
-  text-align: left;
-  opacity: 0;
-}
-.btn-toggle.btn-lg.btn-sm.active:before {
-  opacity: 0;
-}
-.btn-toggle.btn-lg.btn-sm.active:after {
-  opacity: 1;
-}
-.btn-toggle.btn-lg.btn-xs:before,
-.btn-toggle.btn-lg.btn-xs:after {
-  display: none;
 }
