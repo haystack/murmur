@@ -373,37 +373,41 @@ def repeat_every():
 							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
 						</span>
 						<span id='engine-status-msg'></span> -->
-						<table id="example" class="table table-striped" style="width:100%">
+						<table id="example" class="table" style="width:100%">
 								<thead>
-										<tr>
-											<th>Sender</th>
-											<th>Subject</th>
-											<th>Deadline</th>
-											<th>Task</th>
-										</tr>
+									<tr>
+									  <th></th>
+									  <th>Sender</th>
+									  <th>Subject</th>
+									  <th>Deadline</th>
+									  <th>Task</th>
+									</tr>
 								</thead>
 								<tbody>
-										<tr>
-											<th>Dylan McKay</th>
-											<th>Wanna play Frisbee?</th>
-											<th>-</th>
-											<th>-</th>
-										</tr>
-										<tr>
-												<th>Soya</th>
-												<th>[soyapark/murmur] new data structure and msg arrival event (#81)
-													</th>
-												<th>-</th>
-												<th><ul><li>Review PR</li></ul></th>
-										</tr>
-										<tr>
-												<th>Elena Glassman</th>
-												<th>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</th>
-												<th><span class="label label-info">3/24</span></th>
-												<th>-</th>
-										</tr>
+									<tr>
+									  <td class='details-control'></td>
+									  <td>Dylan McKay</td>
+									  <td>Wanna play Frisbee?</td>
+									  <td>-</td>
+									  <td>-</td>
+									</tr>
+									<tr>
+									  <td class='details-control'></td>
+										<td>Soya</td>
+										<td>[soyapark/murmur] new data structure and msg arrival event (#81)
+										  </td>
+										<td>-</td>
+										<td><ul><li>Review PR</li></ul></td>
+									</tr>
+									<tr>
+									  <td class='details-control'></td>
+										<td>Elena Glassman</td>
+										<td>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</td>
+										<td><span class="label label-info">3/24</span></td>
+										<td>-</td>
+									</tr>
 								</tbody>
-						</table>
+							</table>
 						<span id='user-status-msg'></span>
 						<!-- <div id="console-output">
 							<p class="info">Output of your filter will be sent to your inbox. {% if not is_running %}Press a button "Apply" to apply your filter.{% endif %}</p>
@@ -526,6 +530,7 @@ print get_sender()
 
 	<script src="/static/javascript/youps/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/youps/jquery.switchButton.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.12/js/jquery.dataTables.min.js"></script>
 	
 	<script src="https://get.mavo.io/mavo.js"></script>
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
