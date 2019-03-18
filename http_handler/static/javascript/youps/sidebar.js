@@ -5,7 +5,7 @@ function sidebar_init() {
     for (i = 1; i < items.length; i++) {
         var current = items[i]
 
-        if (current.id.includes("header")) {
+        if (current.tagName == 'DIV') {
             target = current.id.replace("header", "sidebar");
 
             var sublist = document.createElement("li");
@@ -23,7 +23,7 @@ function sidebar_init() {
             sublist.appendChild(actions);
 
             document.getElementById("sidebar_container").appendChild(sublist);
-        } else if (current.tagName == 'DIV') {
+        } else if (current.tagName == 'DIV' && !current.id.includes("-")) {
             // console.log(current);
 
             var action = document.createElement("li");

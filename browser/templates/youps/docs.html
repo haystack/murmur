@@ -34,7 +34,7 @@
         <div class="group-container" style="overflow-y: scroll;">
             <p hidden id="website-name">{{website}}</p>
 
-            <h3>API docs</h3>
+            <h1>API docs</h1>
             <a href="/editor">Back to editor</a>
 			<hr>
             <main
@@ -43,22 +43,22 @@
             mv-unauthenticated-permissions="read"
             mv-autosave="0"
             mv-server-push="true">
-                <div id="message-header"> <h3> Message <a href="#message-header">¶</a></h3>   </div>
-                <span>Each one of your email message is represented as a <a href="#message-header">Message</a> instance. </span>
-                <div id="message-attr"> <h4> Attribute <a href="#message-attr">¶</a></h4>   </div>
+                <div id="message"> <h2> Message <a href="#message">¶</a></h2>   </div>
+                <span>Each one of your email message is represented as a <a href="#message">Message</a> instance. </span>
+                <div id="message-attr"> <h3> Attribute <a href="#message-attr">¶</a></h3>   </div>
                 <div property="message">
                     <div id="[name]" property="attribute" mv-multiple style="padding-top: 50px; margin-top: -50px;">
                     <h4>[name] <a href="#[name]"> ¶ </a> </h4>
                         <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
                         <p style="margin:0;"><a href="#[return_href]">[return_type]</a> [description]</p>
-                        <pre class="language-python" style="background-color: transparent;border: 0;margin:0;display:[if(example='', none, block)]">
+                        <pre class="language-python" style="background-color: transparent;border: 0;margin:0;display:[if(example=='', none, block)]">
                             <code class="language-python" property="example" mv-multiple>
                                 <!-- <h6 property="line"></g6> -->
                             </code>
                         </pre>
                     </div>
                 </div>
-                <div id="message-method"> <h4> Method <a href="#message-method">¶</a></h4>   </div>
+                <div id="message-method"> <h3> Method <a href="#message-method">¶</a></h3>   </div>
                 <div property="message">
                     <br>
                     <div id="[name]" property="method" mv-multiple style="padding-top: 50px; margin-top: -50px;">
@@ -73,7 +73,7 @@
                     </div>
                 </div>
 
-                <div id="contact-header"> <h3> Contact <a href="#getter-header">¶</a></h3>   </div>
+                <div id="contact"> <h3> Contact <a href="#contact">¶</a></h3>   </div>
                 <div id="contact-attr"> <h4> Attribute <a href="#contact-attr">¶</a></h4>   </div>
                 <div property="contact">
                         <div id="[name]" property="attribute" mv-multiple style="padding-top: 50px; margin-top: -50px;">
@@ -87,7 +87,7 @@
                             </pre>
                         </div>
                     </div>
-                <div id="contact-method"> <h4> Method <a href="#message-method">¶</a></h4>   </div>
+                <div id="contact-method"> <h4> Method <a href="#contact-method">¶</a></h4>   </div>
                 <div property="contact">
                         <br>
                     <div id="[name]" property="method" mv-multiple style="padding-top: 50px; margin-top: -50px;">
