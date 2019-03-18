@@ -6,7 +6,7 @@ function sidebar_init() {
         var current = items[i]
 
         if (current.tagName == 'DIV') {
-            target = current.id.replace("header", "sidebar");
+            target = current.id + "sidebar";
 
             var sublist = document.createElement("li");
 

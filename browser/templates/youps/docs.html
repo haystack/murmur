@@ -51,7 +51,7 @@
                     <h4>[name] <a href="#[name]"> ¶ </a> </h4>
                         <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
                         <p style="margin:0;"><a href="#[return_href]">[return_type]</a> [description]</p>
-                        <pre class="language-python" style="background-color: transparent;border: 0;margin:0;display:[if(example=='', none, block)]">
+                        <pre class="language-python" style="background-color: transparent;border: 0;margin:0;display:[if(len(example)==0, none, block)]">
                             <code class="language-python" property="example" mv-multiple>
                                 <!-- <h6 property="line"></g6> -->
                             </code>
@@ -73,7 +73,7 @@
                     </div>
                 </div>
 
-                <div id="contact"> <h3> Contact <a href="#contact">¶</a></h3>   </div>
+                <div id="contact"> <h2> Contact <a href="#contact">¶</a></h2>   </div>
                 <div id="contact-attr"> <h4> Attribute <a href="#contact-attr">¶</a></h4>   </div>
                 <div property="contact">
                         <div id="[name]" property="attribute" mv-multiple style="padding-top: 50px; margin-top: -50px;">
@@ -89,7 +89,6 @@
                     </div>
                 <div id="contact-method"> <h4> Method <a href="#contact-method">¶</a></h4>   </div>
                 <div property="contact">
-                        <br>
                     <div id="[name]" property="method" mv-multiple style="padding-top: 50px; margin-top: -50px;">
                                 <h4>[name] ([params])  <a href="#[name]"> ¶ </a> </h4>
                                     <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
@@ -122,6 +121,28 @@
                               </code>
                         </pre>
                 </div>
+            </main>
+
+            <main
+            mv-app="api"
+            mv-storage="https://github.com/soyapark/murmur"
+            mv-unauthenticated-permissions="read"
+            mv-autosave="0"
+            mv-server-push="true">
+                <div property="message">
+                    <br>
+                    <div id="[name]" property="method" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                            <h4>[name] ([params])  <a href="#[name]"> ¶ </a> </h4>
+                                <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
+                                <p style="margin:0;">[description]</p>
+                                <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
+                                    <code class="language-python" property="example" mv-multiple>
+                                        <!-- <h6 property="line"></g6> -->
+                                    </code>
+                                </pre>
+                    </div>
+                </div>
+        
             </main>
         </div>
     </div>
