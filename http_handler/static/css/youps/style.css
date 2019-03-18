@@ -1,5 +1,6 @@
 #console {
-  overflow-y: scroll;height: 200px;background:#47697F;padding: 10px;
+  overflow-y: scroll;
+  height: 500px;background:#47697F;padding: 10px;
 }
 
 #console .label{

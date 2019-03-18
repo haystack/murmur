@@ -1,6 +1,7 @@
 {% extends website|add:"/base.html" %}
 {% block customcss %}
 <link rel="stylesheet" href="/static/css/youps/libs/codemirror.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css">
 <!-- <link rel="stylesheet" href="/static/css/youps/libs/fontawesome-all.min.css"> -->
 <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
 <!-- Interactive console styles -->
@@ -398,20 +399,20 @@ def repeat_every():
 										<tr>
 												<th>Elena Glassman</th>
 												<th>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</th>
-												<th>3/24</th>
+												<th><span class="label label-info">3/24</span></th>
 												<th>-</th>
 										</tr>
 								</tbody>
 						</table>
 						<span id='user-status-msg'></span>
-						<div id="console-output">
+						<!-- <div id="console-output">
 							<p class="info">Output of your filter will be sent to your inbox. {% if not is_running %}Press a button "Apply" to apply your filter.{% endif %}</p>
 						</div>
 						{% if user.is_authenticated %}
 						{% else %}
 						
 							<p class="info"><span class='current-date'>01/09/2019 21:25:12</span> <i class="fas fa-lg fa-envelope-square"></i> [csail-related] Looking for roommates, available next month | marked as read</p>
-						{% endif %}
+						{% endif %} -->
 					  </div>
 					</div>
 
