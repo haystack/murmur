@@ -283,6 +283,8 @@ $(document).ready(function() {
     // for demo; set date to now
     $(".current-date").text(format_date());
 
+    $('#example').DataTable();
+
     // Create the sandbox:
     // window.sandbox = new Sandbox.View({
     //     el : $('#sandbox'),
