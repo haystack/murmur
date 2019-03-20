@@ -32,3 +32,4 @@ scripts/better_send_email.py
 scripts/oauth2_creds.json
 scripts/imap_interact.ini
 .history
+\.env

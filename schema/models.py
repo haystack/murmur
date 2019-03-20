@@ -309,7 +309,8 @@ class UserProfile(AbstractBaseUser):
 		"""
         Sends an email to this User.
         """	
-		send_mail(subject, message, from_email, [self.email])
+		from smtp_handler.utils import relay_mailer
+		relay_mailer.send(self.email, from_email, subject, message)
 
 	def has_perm(self, perm, obj=None):
 		"Does the user have a specific permission?"
