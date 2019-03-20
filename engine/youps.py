@@ -81,6 +81,8 @@ def login_imap(email, password, host, is_oauth):
             imapAccount.access_token = access_token
             imapAccount.refresh_token = refresh_token
 
+        imapAccount.is_gmail = imap.has_capability('X-GM-EXT-1')
+
         imapAccount.save()
 
         """this procedure is required when a new user first register to YoUPS

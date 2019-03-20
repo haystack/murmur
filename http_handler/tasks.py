@@ -8,6 +8,7 @@ from http_handler.settings import BASE_URL
 from schema.youps import Action, ImapAccount, PeriodicTask, TaskScheduler
 from smtp_handler.utils import codeobject_loads, send_email
 from datetime import timedelta
+import typing as t  # noqa: F401 ignore unused we use it for typing
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -169,6 +170,9 @@ def loop_sync_user_inbox():
     if imapAccounts.exists():
         logger.info('Loop sync start..')
 
+    logger.info('Loop sync start..')
+    imapAccounts = ImapAccount.objects.filter(is_initialized=True)  # type: t.List[ImapAccount]
+
     for imapAccount in imapAccounts:
         imapAccount_email = imapAccount.email
 
@@ -199,14 +203,14 @@ def loop_sync_user_inbox():
                 logger.exception("Mailbox sync failed")
                 # TODO maybe we should email the user
                 continue
-            logger.info("Mailbox sync done: %s" % (imapAccount_email))
+            logger.debug("Mailbox sync done: %s" % (imapAccount_email))
 
             try:
                 res = mailbox._run_user_code()
             except Exception():
                 logger.exception("Mailbox run user code failed")
                 continue
-            
+
             # after sync, logout to prevent multi-connection issue
             imap.logout()
 

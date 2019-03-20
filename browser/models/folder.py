@@ -3,12 +3,13 @@ from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typi
 import typing as t  # noqa: F401 ignore unused we use it for typing
 import logging
 from message import Message
-from schema.youps import MessageSchema, FolderSchema, ContactSchema, ImapAccount  # noqa: F401 ignore unused we use it for typing
+from schema.youps import MessageSchema, FolderSchema, ContactSchema, ThreadSchema, ImapAccount  # noqa: F401 ignore unused we use it for typing
 from django.db.models import Max
 from imapclient.response_types import Address  # noqa: F401 ignore unused we use it for typing
 from email.header import decode_header
-from browser.models.event_data import NewMessageData
-from browser.models.event_data import AbstractEventData
+from browser.models.event_data import NewMessageData, AbstractEventData
+from smtp_handler.utils import is_gmail
+
 
 
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -256,8 +257,11 @@ class Folder(object):
             last_seen_uid (int): the max uid we have stored, should be 0 if there are no messages stored.
         """
 
+        # add thread id to the descriptors if there is a thread id
+        descriptors = list(Message._descriptors) + ['X-GM-THRID'] if self._imap_account.is_gmail \
+            else list(Message._descriptors)
         fetch_data = self._imap_client.fetch(
-            '%d:*' % (last_seen_uid + 1), Message._descriptors)
+            '%d:*' % (last_seen_uid + 1), descriptors)
 
         # if there is only one item in the return field
         # and we already have it in our database
@@ -293,12 +297,33 @@ class Folder(object):
                 logger.critical('Missing ENVELOPE in message data')
                 logger.critical('Message data %s' % message_data)
                 continue
-                
+            if self._imap_account.is_gmail and 'X-GM-THRID' not in message_data:
+                logger.critical('Missing X-GM-THRID in message data')
+                logger.critical('Message data %s' % message_data)
+                continue
+
+            # check for supported thread algorithms here
+            if not self._imap_account.is_gmail:
+                capabilities = self._imap_client.capabilities()
+                capabilities = list(capabilities)
+                capabilities = filter(lambda cap: 'THREAD=' in cap, capabilities)
+                capabilities = [cap.replace('THREAD=', '') for cap in capabilities]
+                logger.critical("Add support for one of the following threading algorithms %s" % capabilities)
+                raise NotImplementedError("Unsupported threading algorithm")
+
             # this is the date the message was received by the server
             internal_date = message_data['INTERNALDATE']  # type: datetime
             envelope = message_data['ENVELOPE']
             msn = message_data['SEQ']
             flags = message_data['FLAGS']
+
+            # if we have a gm_thread_id set thread_schema to the proper thread
+            gm_thread_id = message_data.get('X-GM-THRID') 
+            thread_schema = None
+            if gm_thread_id is not None:
+                result = self._imap_client.search(['X-GM-THRID', gm_thread_id])
+                logger.debug("thread messages %s, current message %d" % (result, uid))
+                thread_schema = self._find_or_create_thread(gm_thread_id)
 
             logger.debug("message %d envelope %s" % (uid, envelope))
 
@@ -312,6 +337,7 @@ class Folder(object):
                                            subject=self._parse_email_subject(envelope.subject),
                                            message_id=envelope.message_id,
                                            internal_date=internal_date,
+                                           _thread=thread_schema
                                            )
 
             try:
@@ -341,6 +367,27 @@ class Folder(object):
                 message_schema.bcc.add(*self._find_or_create_contacts(envelope.bcc))
 
             logger.debug("%s saved new message with uid %d" % (self, uid))
+
+    def _find_or_create_thread(self, gm_thread_id):
+        # type: (int) -> ThreadSchema
+        """Return a reference to the thread schema.
+
+        Returns:
+            ThreadSchema: Thread associated with the passed in gm_thread_id
+
+        """
+
+        thread_schema = None  # type: ThreadSchema
+        try:
+            thread_schema = ThreadSchema.objects.get(
+                imap_account=self._imap_account, folder=self._schema, gm_thread_id=gm_thread_id)
+        except ThreadSchema.DoesNotExist:
+            thread_schema = ThreadSchema(
+                imap_account=self._imap_account, folder=self._schema, gm_thread_id=gm_thread_id)
+            thread_schema.save()
+            logger.debug("%s created thread %s in database" % (self, gm_thread_id))
+
+        return thread_schema
 
     def _parse_email_subject(self, subject):
         # type: (t.AnyStr) -> t.AnyStr
