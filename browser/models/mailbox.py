@@ -41,11 +41,6 @@ class MailBox(object):
         """Synchronize the mailbox with the imap server.
         """
 
-        assert len(set(self._list_selectable_folders())) == len(list(self._list_selectable_folders()))
-
-        # not sure if this is necessary we can just check for highest_mod_seq below
-        # supports_cond_store = self._supports_cond_store()
-
         # should do a couple things based on
         # https://stackoverflow.com/questions/9956324/imap-synchronization
         # and https://tools.ietf.org/html/rfc4549
@@ -78,7 +73,7 @@ class MailBox(object):
 
     def _supports_cond_store(self):
         # type: () -> bool
-        """True if the imap server support RFC4551 which has 
+        """True if the imap server support RFC4551 which has
         things like HIGHESTMODSEQ
 
         Returns:
@@ -87,6 +82,7 @@ class MailBox(object):
         return self._imap_client.has_capability('CONDSTORE')
 
     def _run_user_code(self):
+        # type: () -> t.Optional[t.Dict[t.AnyStr, t.Any]]
         from browser.sandbox import interpret
         res = interpret(self, self._imap_account.current_mode)
         if res['imap_log']:

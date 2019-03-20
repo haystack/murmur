@@ -21,6 +21,8 @@ class ImapAccount(models.Model):
     refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
     is_initialized = models.BooleanField(default=False)
 
+    is_gmail = models.BooleanField(default=False)
+
     password = models.CharField('password', max_length=100, blank=True)
     host = models.CharField('host', max_length=100)
 
@@ -83,9 +85,9 @@ class MessageSchema(models.Model):
     id = models.AutoField(primary_key=True)
     # TODO we can possibly get rid of imap_account since imap -> folder -> msg
     # each message is associated with a single ImapAccount
-    imap_account = models.ForeignKey('ImapAccount')
+    imap_account = models.ForeignKey('ImapAccount')  # type: ImapAccount
     # each message is associated with a single Folder
-    folder_schema = models.ForeignKey(FolderSchema)
+    folder_schema = models.ForeignKey(FolderSchema)  # type: FolderSchema
     # each message has a uid
     uid = models.IntegerField(default=-1)
     # the message sequence number identifies the offest of the message in the folder
@@ -115,6 +117,9 @@ class MessageSchema(models.Model):
     cc = models.ManyToManyField('ContactSchema', related_name='cc_messages')
     # the contact the message is bcced to
     bcc = models.ManyToManyField('ContactSchema', related_name='bcc_messages')
+    # the thread that the message is associated with
+    _thread = models.ForeignKey('ThreadSchema', related_name='messages', blank=True, null=True)
+
 
 
     @property
@@ -159,6 +164,19 @@ class ContactSchema(models.Model):
         db_table = "youps_contact"
         # each contact is stored once per account
         unique_together = ("imap_account", "email")
+
+
+class ThreadSchema(models.Model):
+    # the primary key
+    id = models.AutoField(primary_key=True)
+    # each thread is associated with a single ImapAccount
+    imap_account = models.ForeignKey('ImapAccount')
+    # each folder is associated with a single folder
+    folder = models.ForeignKey('FolderSchema')
+    gm_thread_id = models.TextField(blank=True) 
+
+    class Meta:
+        db_table = "youps_thread"
 
 
 class MailbotMode(models.Model):

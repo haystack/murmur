@@ -15,6 +15,7 @@ from schema.youps import Action, TaskScheduler, MailbotMode  # noqa: F401 ignore
 from smtp_handler.utils import codeobject_dumps, send_email
 from textwrap import dedent
 
+
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 
@@ -66,7 +67,7 @@ def interpret(mailbox, mode, is_simulate=False):
         new_message.set_payload(body) 
             
         if not is_simulate:
-            if is_gmail(mailbox._imap_client):
+            if mailbox._imap_account.is_gmail:
                 mailbox._imap_client.append('[Gmail]/Drafts', str(new_message))
                 
             else:
