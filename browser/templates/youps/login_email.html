@@ -82,12 +82,13 @@
 										<li><a href="#" data-value="action">Action</a></li>
 									</ul>
 								</div>
-								{% if imap_authenticated %}						
-								<button type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off">
+								{% if imap_authenticated %}		
+									<!-- https://codepen.io/aanjulena/pen/ZLZjzV  -->
+									<button type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off">
 										<div class="handle"></div>
 									  </button>
 								{% else %}
-								<button type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off" disabled>
+									<button type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off" disabled>
 										<div class="handle"></div>
 									  </button>
 								{% endif %}
