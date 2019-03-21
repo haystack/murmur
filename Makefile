@@ -7,3 +7,11 @@ update-dev:
 	./youps_reboot.sh \
 	" 
 
+.PHONY: start
+start:
+	docker-compose up --force-recreate --build
+
+.PHONY: stop
+stop:
+	docker-compose down -v
+

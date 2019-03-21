@@ -256,7 +256,6 @@ INSTALLED_APPS = (
     'south',
     'django_mobile',
     'storages',
-    'djcelery'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -343,19 +342,6 @@ LOGGING = {
     }
 }
 
-# celery settings
-try:
-    from celeryconfig import *
-except ImportError:
-    pass
-
-# celery db settings
-
-try:
-    import djcelery
-    djcelery.setup_loader()
-except Exception as e:
-    print str(e)
 
 if "celeryd" in sys.argv:
     DEBUG = False

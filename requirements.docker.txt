@@ -3,12 +3,10 @@ attrs==15.2.0
 beautifulsoup4==4.6.0
 bleach==1.4
 boto==2.45.0
-celery==3.1.25
 chardet==3.0.4
 Django==1.6.11
 django-annoying==0.8.0
 django-appconf==0.6
-django-celery==3.1.17
 django-compressor==1.4
 django-extensions==2.0.6
 django-gravatar==0.1.0

@@ -46,9 +46,6 @@ python manage.py schemamigration schema --initial;
 # apply the schema migration
 python manage.py migrate schema
 
-# apply the djcelery migration
-python manage.py migrate djcelery
-
 # alter tables to utf8
 mysql -u root -p$password <<EOF
     USE $databaseName;
