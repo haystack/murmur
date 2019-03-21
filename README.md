@@ -37,6 +37,8 @@ The server requires some setup to be run from scratch.
 4. You must have apache2 running django
 5. you must have the files in murmur-env stored in /opt/murmur
 
+**Set up the cron jobs** by enabling the cronjobs in `tasks-cron-server`. The easiest way to do this is to use `crontab -e` and paste the cron jobs.
+
 #### Database
 
 1. You can set up the initial database by running `./scripts/new_database.sh`
