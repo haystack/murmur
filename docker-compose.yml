@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASS} 
+    volumes:
+      - youps-db:/var/lib/mysql
+    restart: always
+  web:
+    build: .
+    command: bash -c "lamson start; ./scripts/new_database_unsafe.sh && cron && python manage.py runserver 0.0.0.0:8000"
+    # command: bash -c "./scripts/new_database_unsafe.sh && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/home/ubuntu/production/mailx
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - smtp 
+    environment:
+      # - DJANGO_SETTINGS_MODULE="http_handler.settings"
+      - RELAY_HOST=${RELAY_HOST} # only for local development
+      - DATABASE_NAME=${DATABASE_NAME}
+      - MYSQL_PASS=${MYSQL_PASS}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - DATABASE_HOST=${DATABASE_HOST}
+    restart: on-failure
+  smtp:
+    image: namshi/smtp 
+    expose: 
+      - 587 
+    environment:
+      - GMAIL_USER=${GMAIL_USER} 
+      - GMAIL_PASSWORD=${GMAIL_PASSWORD} 
+      - PORT=587
+    restart: always
+volumes:
+  youps-db:
