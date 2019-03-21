@@ -4,16 +4,13 @@ import logging
 import Queue
 import sys
 import typing as t  # noqa: F401 ignore unused we use it for typing
-import ujson
-import random
 from StringIO import StringIO
 from email import message
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 
 from browser.models.event_data import NewMessageData
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
-from schema.youps import Action, TaskScheduler  # noqa: F401 ignore unused we use it for typing
-from smtp_handler.utils import codeobject_dumps, send_email
+from smtp_handler.utils import send_email
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -94,33 +91,8 @@ def interpret(mailbox, code, is_simulate=False):
     def on_message_arrival(func):
         mailbox.new_message_handler += func
 
-    from http_handler.tasks import add_periodic_task
-
     def set_interval(interval=None, func=None):
-        if not interval:
-            raise Exception('set_interval(): requires interval (in minute)')
-
-        if interval < 1:
-            raise Exception('set_interval(): requires interval larger than 1 minute')
-
-        if not func or type(func).__name__ != "function":
-            raise Exception('set_interval(): requires callback function but it is %s ' % type(func).__name__)
-
-        if func.func_code.co_argcount != 0:
-            raise Exception('set_interval(): your callback function should have only 0 argument, but there are %d argument(s)' % func.func_code.co_argcount)
-
-        action = Action(trigger="interval", code=codeobject_dumps(func.func_code), mode=mailbox._imap_account.current_mode)
-        action.save()
-        add_periodic_task.apply_async(args=[interval, action.id], queue='default', routing_key='default.import')   
-
-        code = 'a=Action.objects.get(id=%d)\ncode_object=codeobject_loads(a.code)\ng = type(codeobject_loads)(code_object ,locals())\ng()' % action.id
-        args = ujson.dumps( [mailbox._imap_account.id, code] )
-
-        ptask_name = "%d_set_interval-%d" % (int(mailbox._imap_account), random.randint(1, 10000))
-        TaskScheduler.schedule_every('run_interpret', 'minutes', interval, ptask_name, args)
-
-        mailbox._imap_account.status_msg = mailbox._imap_account.status_msg + "[%s]set_interval(): executing every %d minutes \n" % (ptask_name, interval)
-        mailbox._imap_account.save()
+        pass
 
     def send(subject="", to="", body="", smtp=""):  # TODO add "cc", "bcc"
         if len(to) == 0:

@@ -3,20 +3,17 @@ import logging
 import random
 import string
 import traceback
-from browser.imap import GoogleOauth2
-from http_handler.settings import IMAP_SECRET
-from schema.youps import ImapAccount, MailbotMode, MailbotMode_Folder, Action, FolderSchema
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
 
 from browser.imap import GoogleOauth2, authenticate
-from browser.sandbox import interpret
 from browser.models.mailbox import MailBox
+from browser.sandbox import interpret
 from engine.constants import msg_code
 from http_handler.settings import IMAP_SECRET
-from http_handler.tasks import register_inbox, remove_periodic_task
-from schema.youps import Action, ImapAccount, MailbotMode
+from schema.youps import (FolderSchema, ImapAccount, MailbotMode,
+                          MailbotMode_Folder)
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -32,6 +29,7 @@ def login_imap(email, password, host, is_oauth):
             is_oauth (boolean): if the user is using oauth or not
     """
 
+    logger.info('adding new account %s' % email)
     res = {'status' : False}
 
     try:
@@ -85,24 +83,16 @@ def login_imap(email, password, host, is_oauth):
 
         imapAccount.save()
 
-        """this procedure is required when a new user first register to YoUPS
-        1) Scrape folder using IMAP list_folders() to register Folder instances belong to the user
-        2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
-        """
-        # start keeping eye on users' inbox
-        register_inbox.apply_async(args=[imapAccount.email], queue='new_user', routing_key='new_user.import')
-
         res['status'] = True
+        logger.info("added new account %s" % imapAccount.email)
 
     except IMAPClient.Error, e:
         res['code'] = e
-
     except Exception, e:
         # TODO add exception
-        print e
+        logger.exception() 
         res['code'] = msg_code['UNKNOWN_ERROR']
 
-    logging.debug(res)
     return res
 
 def fetch_execution_log(user, email, push=True):
@@ -167,7 +157,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
 
     # this log is going to stdout but not going to the logging file
     # why are django settings not being picked up
-    logger.critical("user %s has run, stop, or saved" % email)
+    logger.info("user %s has run, stop, or saved" % email)
 
     try:
         imapAccount = ImapAccount.objects.get(email=email)
@@ -179,14 +169,6 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
 
         imapAccount.is_test = is_test
         imapAccount.is_running = run_request
-
-        # TODO these don't work anymore
-        # uid = fetch_latest_email_id(imapAccount, imap)
-        # imapAccount.newest_msg_id = uid
-
-        # remove all user's tasks of this user to keep tasks up-to-date
-        Action.objects.filter(folder__imap_account=imapAccount).delete()
-        remove_periodic_task.delay( imapAccount.id )
 
         for key, value in modes.iteritems():
             mode_id = value['id']
@@ -243,10 +225,13 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         res['status'] = True
 
     except IMAPClient.Error, e:
+        logger.exception("failed while doing a user code run")
         res['code'] = e
     except ImapAccount.DoesNotExist:
+        logger.exception("failed while doing a user code run")
         res['code'] = "Not logged into IMAP"
     except FolderSchema.DoesNotExist:
+        logger.exception("failed while doing a user code run")
         logger.debug("Folder is not found, but it should exist!")
     except Exception, e:
         # TODO add exception
