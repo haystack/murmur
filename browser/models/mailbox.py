@@ -36,7 +36,7 @@ class MailBox(object):
         return "mailbox: %s" % (self._imap_account.email)
 
     def _sync(self):
-        # type: () -> None
+        # type: () -> bool 
         """Synchronize the mailbox with the imap server.
         """
 
@@ -69,6 +69,7 @@ class MailBox(object):
             folder._uid_next = uid_next
             folder._uid_validity = uid_validity
 
+        return True
 
     def _supports_cond_store(self):
         # type: () -> bool

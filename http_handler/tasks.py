@@ -7,6 +7,10 @@ from schema.youps import ImapAccount
 from smtp_handler.utils import send_email
 import typing as t  # noqa: F401 ignore unused we use it for typing
 import fcntl
+from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
+import imaplib
+
+
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 
@@ -41,30 +45,45 @@ def register_inbox():
 
         for imapAccount in ImapAccount.objects.filter(is_initialized=False):
             try:
-                logger.info('first syncing..: %s', imapAccount.email)
+                logger.info('registering inbox: %s', imapAccount.email)
 
-                # authenticate with the user's imap server
-                auth_res = authenticate(imapAccount)
-                # if authentication failed we can't run anything
-                if not auth_res['status']:
-                    # Stop doing loop
-                    # TODO maybe we should email the user
-                    continue 
+                while True:
+                    try:
+                        # authenticate with the user's imap server
+                        auth_res = authenticate(imapAccount)
+                        # if authentication failed we can't run anything
+                        if not auth_res['status']:
+                            # Stop doing loop
+                            # TODO maybe we should email the user
+                            logger.critical('register authentication failed for %s', imapAccount.email)
+                            continue 
 
-                # get an imapclient which is authenticated
-                imap = auth_res['imap']
+                        # get an imapclient which is authenticated
+                        imap = auth_res['imap']  # type: IMAPClient
 
-                # create the mailbox
-                mailbox = MailBox(imapAccount, imap)
-                # sync the mailbox with imap
-                mailbox._sync()
+
+                        # create the mailbox
+                        mailbox = MailBox(imapAccount, imap)
+                        # sync the mailbox with imap
+                        done = mailbox._sync()
+                        if done:
+                            break
+
+                    # if we catch an EOF error we continue
+                    except imaplib.IMAP4.abort:
+                        logger.exception("Caught EOF error while syncing")
+                        try:
+                            imap.logout()
+                        except Exception:
+                            logger.exception("Failure while logging out due to EOF bug")
+                        continue
+                    # if we catch any other type of exception we abort to avoid infinite loop
+                    except Exception:
+                        logger.critical("Failure while initially syncing")
+                        logger.exception("Failure while initially syncing")
+                        raise
 
                 logger.info("Mailbox sync done: %s" % (imapAccount.email))
-
-                try:
-                    mailbox._run_user_code()
-                except Exception():
-                    logger.exception("Mailbox run user code failed")
 
                 # after sync, logout to prevent multi-connection issue
                 imap.logout()
@@ -97,8 +116,7 @@ def loop_sync_user_inbox():
         if not have_lock:
             logger.info('Lock already taken %s' % lockFile)
             return
-         
-        logger.info('Loop sync start..')
+
         imapAccounts = ImapAccount.objects.filter(
             is_initialized=True)  # type: t.List[ImapAccount]
         for imapAccount in imapAccounts:
@@ -113,7 +131,8 @@ def loop_sync_user_inbox():
                 if not auth_res['status']:
                     # Stop doing loop
                     # TODO maybe we should email the user
-                    return
+                    logger.critical('authentication failed for %s' % imapAccount.email) 
+                    continue
 
                 # get an imapclient which is authenticated
                 imap = auth_res['imap']
