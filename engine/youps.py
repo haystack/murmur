@@ -5,7 +5,7 @@ import string
 import traceback
 from browser.imap import GoogleOauth2
 from http_handler.settings import IMAP_SECRET
-from schema.youps import ImapAccount, MailbotMode, Action, FolderSchema, EmailRule
+from schema.youps import ImapAccount, MailbotMode, Action, FolderSchema, EmailRule, MessageSchema
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
@@ -90,7 +90,7 @@ def login_imap(email, password, host, is_oauth):
         2) Scrape contacts using scrape_contacts to register Contacts instances belong to the user
         """
         # start keeping eye on users' inbox
-        register_inbox.apply_async(args=[imapAccount.email], queue='new_user', routing_key='new_user.import')
+        # register_inbox.apply_async(args=[imapAccount.email], queue='new_user', routing_key='new_user.import')
 
         res['status'] = True
 
@@ -305,6 +305,34 @@ def save_shortcut(user, email, shortcuts, push=True):
         res['status'] = True
 
 
+    except IMAPClient.Error, e:
+        res['code'] = e
+    except ImapAccount.DoesNotExist:
+        res['code'] = "Not logged into IMAP"
+    except Exception, e:
+        # TODO add exception
+        print e
+        res['code'] = msg_code['UNKNOWN_ERROR']
+
+    logging.debug(res)
+    return res
+
+
+def folder_recent_messages(user, email, folder_name, N=3):
+    res = {'status' : False, 'imap_error': False}
+
+    try:
+        imapAccount = ImapAccount.objects.get(email=email)
+
+        messages = MessageSchema.objects.filter(imap_account=imapAccount, folder__name=folder_name).order_by("-date")[:N]
+
+        res['messages'] = [{
+            'sender': str(m.sender.name), 
+            'subject': str(m.subject),
+            'deadline': str(m.deadline),
+            'task': str(m.task)} for m in messages]
+
+        res['status'] = True
     except IMAPClient.Error, e:
         res['code'] = e
     except ImapAccount.DoesNotExist:

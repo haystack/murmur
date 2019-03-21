@@ -110,6 +110,7 @@ urlpatterns = patterns('',
                     
     url(r'^delete_mailbot_mode', 'browser.views.delete_mailbot_mode'),
     url(r'^fetch_execution_log', 'browser.views.fetch_execution_log'),
+    url(r'^folder_recent_messages', 'browser.views.folder_recent_messages'),
     )
 
 # murmur-only patterns

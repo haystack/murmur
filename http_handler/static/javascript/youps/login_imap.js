@@ -91,6 +91,7 @@ $(document).ready(function() {
     }
 
     function init_editor(editor_elem) {
+        console.log(editor_elem);
         var editor = CodeMirror.fromTextArea(editor_elem, {
             mode: {name: "python",
                 version: 3,
@@ -303,7 +304,11 @@ function format ( d ) {
 }
 
 var table = $('#example').DataTable( {
-    
+    "bPaginate": false,
+    "bLengthChange": false,
+    "bFilter": true,
+    "bInfo": false,
+    "bAutoWidth": false,
     // "columns": [
     //     {
     //         "className":      'details-control',
@@ -351,9 +356,9 @@ $('#example tbody').on('click', 'td.details-control', function () {
      * 
      */
     
-    document.addEventListener("mv-load", function(){   
+    document.addEventListener("mv-load", function(e){   
         // Init editor & its autocomplete
-
+        console.log(e)
         // Open individual tab and panel to load style properly
         $('.nav-tabs li').each(function() {
             if ( !$(this).find('span') ) return;
@@ -362,8 +367,11 @@ $('#example tbody').on('click', 'td.details-control', function () {
 			// At each tab
             $( $(this).find('a').attr('href') ).find('.panel').each(function() {
 			    $(this).parents('.editable-container').find('.panel-heading').click();
-                if ($(this).find('textarea').length)
+                if ($(this).find('textarea').length) {
+                    console.log(this)
                     init_editor( $(this).find('textarea')[0] );
+                }
+                    
             })
             
         })
@@ -772,6 +780,26 @@ $('#example tbody').on('click', 'td.details-control', function () {
         );
         
         setTimeout(fetch_log, 2 * 1000); // 2 second
+    }
+
+    function folder_recent_messages(folder_name, N) {
+        var params = {
+            'folder_name': folder_name,
+            'N': N
+        };
+        
+        $.post('/folder_recent_messages', params,
+            function(res) {
+                // Load messages successfully 
+                if (res.status) {
+                    debugger;
+                    res['messages']
+                }
+                else {
+                    notify(res, false);
+                }
+            }
+        );
     }
 
     function validateEmail(email) {

@@ -6,9 +6,12 @@
 <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
 <!-- Interactive console styles -->
 <!-- <link rel="stylesheet" href="/static/css/youps/libs/sandbox.css" /> -->
+<link rel="stylesheet" href="https://get.mavo.io/mavo.css">
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/youps/style.css">
 <link rel="stylesheet" href="/static/css/youps/libs/jquery.switchButton.css" />
 <link rel="stylesheet" href="/static/css/youps/libs/show-hint.css" />
+
 {% endblock %}
 
 {% block content %}
@@ -148,6 +151,52 @@
 {{ rule.code }}
 																		</textarea>
 																	</div>
+																	<!-- Separte row for debugging -->
+																	<div class='debugger-container' >
+																		<div style='display:none' class='mv-data-container'>
+																			{
+																				[
+																				"task": [],
+																				"deadline": '2016-03-15'
+																				]
+																			}
+																		</div>
+																		<table id="example" class="table" style="width:100%">
+																			<thead>
+																				<tr>
+																				  <th></th>
+																				  <th>Sender</th>
+																				  <th>Subject</th>
+																				  <th>Deadline</th>
+																				  <th>Task</th>
+																				</tr>
+																			</thead>
+																			<tbody>
+																				<tr>
+																				  <td class='details-control'></td>
+																				  <td>Dylan McKay</td>
+																				  <td>Wanna play Frisbee?</td>
+																				  <td><time mv-default='2016-03-15' datetime="2016-03-15" property="deadline">15 Mar 2016</time></td>
+																				  <td>-</td>
+																				</tr>
+																				<tr>
+																				  <td class='details-control'></td>
+																					<td>Soya</td>
+																					<td>[soyapark/murmur] new data structure and msg arrival event (#81)
+																					  </td>
+																					<td><time mv-default='2016-03-15' datetime="2016-03-15" property="deadline">15 Mar 2016</time></td>
+																					<td><ul><li>Review PR</li></ul></td>
+																				</tr>
+																				<tr>
+																				  <td class='details-control'></td>
+																					<td>Elena Glassman</td>
+																					<td>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</td>
+																					<td><time mv-default='2016-03-15' datetime="2016-03-15" property="deadline">15 Mar 2016</time></td>
+																					<td>-</td>
+																				</tr>
+																			</tbody>
+																		</table>
+																	</div>
 																</div>
 															</div>
 														{% endif %}	
@@ -231,8 +280,7 @@
 																	</h3>
 																	
 																</div>
-															</div>
-															<!-- Panel body -->		
+															</div>	
 													</div>
 												</div>
 									  		</div>
@@ -253,7 +301,7 @@
 								<div class="tab-content">
 									<div class="tab-pane active" id="tab_0">
 										<div class='editable-container' type='new-message'>
-											<div rule-id=99999 class="panel panel-success">
+											<div rule-id=99998 class="panel panel-success">
 																<div class="flex_container">
 																	<div class="flex_item_left"> 
 																		<i class="fas fa-3x fa-trash"></i> 
@@ -276,12 +324,57 @@
 																<div class="panel-body" style="display:none;">
 																	<div class="folder-container"></div>
 																	<div class="editor-container">
-																		<textarea class="editor mode-editor" id="editor-99999">
+																		<textarea class="editor mode-editor" id="editor-99998">
 def on_new_message(new_message):
 	if "ads" in new_message.subject:
 		new_message.mark_read()
 																		</textarea>
 																	</div>
+																	<br>
+																	<!-- Separte row for debugging -->
+																	<div class='debugger-container' mv-app='editor' mv-storage='#mv-data-container'  class='mv-autoedit' mv-mode='edit'>
+																			<div style='display:none' id='mv-data-container' mv-expressions="none">
+																					{
+																						"task": "",
+																						"deadline": "2016-03-15"
+																					}
+																			</div>
+																			<table id="example" class="table" style="width:100%">
+																				<thead>
+																					<tr>
+																					  <th></th>
+																					  <th>Sender</th>
+																					  <th>Subject</th>
+																					  <th>Deadline</th>
+																					  <th>Task</th>
+																					</tr>
+																				</thead>
+																				<tbody>
+																					<tr>
+																					  <td class='details-control'></td>
+																					  <td>Dylan McKay</td>
+																					  <td>Wanna play Frisbee?</td>
+																					  <td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
+																					  <td><ul><li property='task' mv-multiple></li></ul></td>
+																					</tr>
+																					<!-- <tr>
+																					  <td class='details-control'></td>
+																						<td>Soya</td>
+																						<td>[soyapark/murmur] new data structure and msg arrival event (#81)
+																						  </td>
+																						<td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
+																						<td><ul><li>Review PR</li></ul></td>
+																					</tr>
+																					<tr>
+																					  <td class='details-control'></td>
+																						<td>Elena Glassman</td>
+																						<td>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</td>
+																						<td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
+																						<td>-</td>
+																					</tr> -->
+																				</tbody>
+																			</table>
+																		</div>
 																</div>
 															</div>
 										</div>
@@ -376,41 +469,7 @@ def repeat_every():
 							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
 						</span>
 						<span id='engine-status-msg'></span> -->
-						<table id="example" class="table" style="width:100%">
-								<thead>
-									<tr>
-									  <th></th>
-									  <th>Sender</th>
-									  <th>Subject</th>
-									  <th>Deadline</th>
-									  <th>Task</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-									  <td class='details-control'></td>
-									  <td>Dylan McKay</td>
-									  <td>Wanna play Frisbee?</td>
-									  <td>-</td>
-									  <td>-</td>
-									</tr>
-									<tr>
-									  <td class='details-control'></td>
-										<td>Soya</td>
-										<td>[soyapark/murmur] new data structure and msg arrival event (#81)
-										  </td>
-										<td>-</td>
-										<td><ul><li>Review PR</li></ul></td>
-									</tr>
-									<tr>
-									  <td class='details-control'></td>
-										<td>Elena Glassman</td>
-										<td>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</td>
-										<td><span class="label label-info">3/24</span></td>
-										<td>-</td>
-									</tr>
-								</tbody>
-							</table>
+						
 						<span id='user-status-msg'></span>
 						<!-- <div id="console-output">
 							<p class="info">Output of your filter will be sent to your inbox. {% if not is_running %}Press a button "Apply" to apply your filter.{% endif %}</p>
@@ -451,7 +510,7 @@ def repeat_every():
 								<br><br>
 							</div>
 							<div class="card-block" id="editor-shortcut-container">
-								<textarea class="editor shortcut-editor" id="editor-shortcut">
+								<textarea class="editor shortcut-editor" id="editor-shortcut"  mv-expressions="none">
 										{% if shortcuts_exist %}
 {{ shortcuts }}
 										{% else %}

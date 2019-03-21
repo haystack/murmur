@@ -1504,6 +1504,22 @@ def fetch_execution_log(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
+def folder_recent_messages(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+
+		# email = request.POST['email']
+		folder_name = request.POST['folder_name']
+		N = request.POST['N']
+
+		res = engine.main.folder_recent_messages(user, user.email, folder_name, N)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
 def remove_rule(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
