@@ -158,7 +158,7 @@ class Message(object):
         Returns:
             Contact: The contact in the from field of the message
         """
-        return Contact(self._schema.from_, self._imap_client)
+        return Contact(self._schema.from_m, self._imap_client)
 
     @property
     def sender(self):

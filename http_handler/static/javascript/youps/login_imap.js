@@ -33,27 +33,38 @@ $(document).ready(function() {
             if(value == "") return;
             
             value = value.split("#!@log");
-            msg_data = JSON.parse(value[0]);
+            msg_data = JSON.parse(value[0].replace(/: True/g, ': "true"').replace(/: False/g, ': "false"'));
             msg_log = value[1].replace(/\n/g , "<br>")
 
-            var log_table = `<table class="console-table table table-bordered" class="" style="width:100% ;background: white;color: black">
-                <tbody>
-                    <tr>
-                        <td style="width: 5%" class='details-control'>
-                          {0}</td>
-                        <td style="width: 15%">{1}</td>
-                        <td style="width: 15%">{2}</td>
-                        <td >{3}</td>
-                    </tr>
-                </tbody>
-            </table>`.format("", msg_data['folder'], msg_data['sender'], msg_data['subject']);
+            var log_table = `<div class='row msg-inspector' style='margin-left: 0px;'>
+                <span class='msg-log' style='float:left;'>{0}</span>
+                <div style='float:left;' class="panel panel-default">
+                    <pre class='language-python'><code>{2}</code></pre>
+                    <div id="demo-{1}" class="collapse"><pre class='language-python'><code>{3}{4}{5}{6}{7}{8}{9}{10}{11}</code></pre>
+                    </div>
+                </div>
+                <a href="#demo-{1}" class="collapsed btn btn-xs btn-info" data-toggle="collapse"><div></div></a>    
+                
+          </div><p class='row'>{12}</p>`.format(msg_data['now'] + " [YoUPS] New message arrived ", Math.floor(Math.random() * 10000) + 1, '"{0}": "{1}"'.format("subject", msg_data['subject']),
+            '{0}: "{1}" \n'.format("folder", msg_data['folder']),
+            '{0}: "{1}" \n'.format("from_", msg_data['from_']),
+            '{0}: "{1}" \n'.format("to", msg_data['to']),
+            '{0}: "{1}" \n'.format("cc", msg_data['cc']),
+            '{0}: "{1}" \n'.format("flags", msg_data['flags']),
+            '{0}: "{1}" \n'.format("date", msg_data['date']),
+            '{0}: {1} \n'.format("is_read", msg_data['is_read']? "True": "False"),
+            '{0}: {1} \n'.format("is_deleted", msg_data['is_deleted']? "True": "False"),
+            '{0}: {1}'.format("is_recent", msg_data['is_recent']? "True": "False"),
+            msg_log);
 
             if(is_error) 
                 $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" ).addClass("error");
 
-            else $( '<span>{0} | [YoUPS] New message arrived..</span>{1}'.format(msg_data['date'], log_table + msg_log) ).prependTo( "#console-output" )
+            else $( log_table  ).prependTo( "#console-output" )
                 .addClass("info");
         });
+
+        init_syntax();
 
         // var datetime = format_date();
         // $( "<p>{0}</p>".format(datetime)).prependTo( "#console-output" ).addClass("info");

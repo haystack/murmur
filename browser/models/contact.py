@@ -13,6 +13,9 @@ class Contact(object):
         # the connection to the server
         self._imap_client = imap_client  # type: IMAPClient
 
+    def __str__(self):
+        return self.name
+
     @property
     def email(self):
         # type: () -> t.AnyStr

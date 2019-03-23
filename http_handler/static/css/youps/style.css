@@ -7,6 +7,10 @@
   float: none;
 }
 
+#console p {
+  margin-left: 20px;
+}
+
 .tab-content {
   background: white;
 }
@@ -222,11 +226,11 @@
   width: 100%;
 }
 
-#editor-container .panel {
+#editor-container .tab-content .panel {
   margin: 10px;
 }
 
-#editor-container .panel.removed {
+#editor-container .tab-content .panel.removed {
   opacity: 0.5;
 }
 
@@ -458,6 +462,21 @@ td.simulated {
   background: skyblue;
 }
 
+.msg-inspector a div:after {
+  font-family:'Glyphicons Halflings';
+  content:"\e114";
+  float: right;
+  color: grey;
+}
+.msg-inspector a.collapsed div:after {
+  content:"\e080";
+}
+
+/* override prism */
+.msg-inspector pre[class*="language-"] {
+  overflow: auto;
+  margin: 0;
+}
 
 /* TODO removed after stablized.  */
 div[type='repeat'],

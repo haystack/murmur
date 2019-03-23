@@ -24,15 +24,15 @@ def interpret(mailbox, mode, is_simulate=False):
     # set up the default result
     res = {'status': True, 'imap_error': False, 'imap_log': ""}
 
-    if mode is None:
-        logger.warn("No mode set for interpret")
-        res['status'] = False
-        return res
+    # if mode is None:
+    #     logger.warn("No mode set for interpret")
+    #     res['status'] = False
+    #     return res
 
     # assert we actually got a mailbox
     assert isinstance(mailbox, MailBox)
     # assert the mode is the mailboat mode
-    assert isinstance(mode, MailbotMode)
+    # assert isinstance(mode, MailbotMode)
     assert mailbox.new_message_handler is not None
 
     # get the logger for user output
@@ -119,49 +119,63 @@ def interpret(mailbox, mode, is_simulate=False):
         userLoggerStream = user_std_out
 
         from schema.youps import FolderSchema
-        # TODO maybe use this instead of mode.rules
-        for rule in EmailRule.objects.filter(mode=mode):
-            assert isinstance(rule, EmailRule)
+        
+        # iterate through event queue
+        for event_data in mailbox.event_data_list:
+            # event for new message arrival
+            if isinstance(event_data, NewMessageData):
+                # This is to log for users
+                log_format = '%s{"now": "%s", "type": "%s", "folder": "%s", "from_": "%s", "subject": "%s", "to": "%s", "cc": "%s", "flags": "%s", "date": "%s", "is_read": %s, "is_deleted": %s, "is_recent": %s}%s' % (
+                    "#!@YoUPS", str(datetime.datetime.now().strftime("%m/%d %H:%M:%S")), 
+                    "new_message", 
+                    event_data.message.folder.name, 
+                    event_data.message.from_, 
+                    event_data.message.subject, 
+                    event_data.message.to,
+                    event_data.message.cc,
+                    event_data.message.flags,
+                    event_data.message.date, 
+                    event_data.message.is_read, 
+                    event_data.message.is_deleted, 
+                    event_data.message.is_recent, "#!@log")
+                print (log_format),
 
-            # define the variables accessible to the user
-            user_environ = {
-                'create_draft': create_draft,
-                'create_folder': create_folder,
-                'on_message_arrival': on_message_arrival
-                # 'set_interval': set_interval
-            }
+            # TODO maybe use this instead of mode.rules
+            for rule in EmailRule.objects.filter(mode=mode):
+                assert isinstance(rule, EmailRule)
 
-            valid_folders = rule.folders.all()
-            valid_folders = FolderSchema.objects.filter(imap_account=mailbox._imap_account, rules=rule)
-            code = rule.code
-            
+                # define the variables accessible to the user
+                user_environ = {
+                    'create_draft': create_draft,
+                    'create_folder': create_folder,
+                    'on_message_arrival': on_message_arrival
+                    # 'set_interval': set_interval
+                }
 
-            # add the user's functions to the event handlers
-            if rule.type == "new-message":
-                code = code + "\non_message_arrival(on_new_message)"
-            #     mailbox.new_message_handler.handle(on_message_arrival)  # noqa: F821 on_new_message supplied by user
-            # else:
-            #     continue
-            #     # some_handler or something += repeat_every
+                valid_folders = rule.folders.all()
+                valid_folders = FolderSchema.objects.filter(imap_account=mailbox._imap_account, rules=rule)
+                code = rule.code
+                
 
-            
-            logger.info(code)
-            # execute the user's code
-            # TODO exec cant register new function (e.g., on_message_arrival) when there is a user_env
-            exec(code, user_environ)
+                # add the user's functions to the event handlers
+                if rule.type == "new-message":
+                    code = code + "\non_message_arrival(on_new_message)"
+                #     mailbox.new_message_handler.handle(on_message_arrival)  # noqa: F821 on_new_message supplied by user
+                # else:
+                #     continue
+                #     # some_handler or something += repeat_every
 
-            for event_data in mailbox.event_data_list:
-                # event for new message arrival
-                if isinstance(event_data, NewMessageData):
-                    # This is to log for users
-                    log_format = '%s{"date": "%s", "type": "%s", "folder": "%s", "sender": "%s", "subject": "%s"}%s'% ("#!@YoUPS", str(datetime.datetime.now().strftime("%m/%d %H:%M:%S")), "new_message", event_data.message._schema.folder_schema.name, event_data.message._schema.sender.name, event_data.message._schema.subject, "#!@log")
-                    print (log_format), 
+                
+                logger.info(code)
+                # execute the user's code
+                # TODO exec cant register new function (e.g., on_message_arrival) when there is a user_env
+                exec(code, user_environ)
 
-                    # Conduct rules only on requested folders
-                    if event_data.message._schema.folder_schema in valid_folders:
-                        event_data.fire_event(mailbox.new_message_handler)
+                # Conduct rules only on requested folders
+                if event_data.message._schema.folder_schema in valid_folders:
+                    event_data.fire_event(mailbox.new_message_handler)
 
-            mailbox.new_message_handler.removeAllHandles()
+                mailbox.new_message_handler.removeAllHandles()
 
     except Exception:
         res['status'] = False

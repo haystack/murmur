@@ -357,7 +357,7 @@ class Folder(object):
 
             # create and save the message contacts
             if envelope.from_ is not None:
-                message_schema.from_.add(*self._find_or_create_contacts(envelope.from_))
+                message_schema.from_m = self._find_or_create_contacts(envelope.from_)[0]
             if envelope.reply_to is not None:
                 message_schema.reply_to.add(*self._find_or_create_contacts(envelope.reply_to))
             if envelope.to is not None:
