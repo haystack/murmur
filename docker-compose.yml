@@ -10,8 +10,8 @@ services:
     restart: always
   web:
     build: .
-    command: bash -c "lamson start; ./scripts/new_database_unsafe.sh && cron && python manage.py runserver 0.0.0.0:8000"
-    # command: bash -c "./scripts/new_database_unsafe.sh && python manage.py runserver 0.0.0.0:8000"
+    container_name: youps_web
+    command: bash -c "lamson start; cron && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/home/ubuntu/production/mailx
     ports:

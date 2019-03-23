@@ -21,6 +21,8 @@ html2text==2014.9.25
 html5lib==1.0b3
 IMAPClient==2.0.0
 ipaddr==2.1.11
+# ipython is used just for a nicer django shell. we don't need it
+ipython==5.8.0
 jsonfield==1.0.3
 lamson==1.3.4
 markdown2==2.3.0

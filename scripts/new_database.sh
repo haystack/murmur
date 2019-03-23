@@ -76,11 +76,6 @@ mysql -u root -p$password <<EOF
         COLLATE utf8mb4_unicode_ci;
 
     ALTER TABLE
-        schema_action
-        CONVERT TO CHARACTER SET utf8mb4
-        COLLATE utf8mb4_unicode_ci;
-
-    ALTER TABLE
         youps_contact
         CONVERT TO CHARACTER SET utf8mb4
         COLLATE utf8mb4_unicode_ci;
