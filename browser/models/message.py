@@ -156,9 +156,9 @@ class Message(object):
         """Get the Contacts the message is addressed from
 
         Returns:
-            t.List[Contact]: The contacts in the from field of the message
+            Contact: The contact in the from field of the message
         """
-        return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.from_.all()]
+        return Contact(self._schema.from_, self._imap_client)
 
     @property
     def sender(self):
@@ -166,9 +166,9 @@ class Message(object):
         """Get the Contacts the message is sent from
 
         Returns:
-            t.List[Contact]: The contacts in the sender field of the message
+            Contact: The contact in the sender field of the message
         """
-        return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.sender.all()]
+        return Contact(self._schema.sender, self._imap_client)
 
     @property
     def reply_to(self):
