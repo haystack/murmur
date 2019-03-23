@@ -1508,7 +1508,6 @@ def folder_recent_messages(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 
-		# email = request.POST['email']
 		folder_name = request.POST['folder_name']
 		N = request.POST['N']
 

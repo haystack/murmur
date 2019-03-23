@@ -235,7 +235,6 @@
   /* border: 0; */
 }
 
-.editable-container,
 .btn-new-editor {
   cursor: pointer;
 }
@@ -453,4 +452,15 @@ i::before {
 }
 .btn-toggle.btn-lg.active:after {
   opacity: 1;
+}
+
+td.simulated {
+  background: skyblue;
+}
+
+
+/* TODO removed after stablized.  */
+div[type='repeat'],
+.debugger-container {
+  display: none;
 }

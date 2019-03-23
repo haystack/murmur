@@ -21,7 +21,7 @@ from s3_storage import upload_attachments, download_attachments, download_messag
 from schema.models import *
 from smtp_handler.utils import *
 
-from engine.youps import login_imap, fetch_execution_log, delete_mailbot_mode, remove_rule, run_mailbot, save_shortcut
+from engine.youps import login_imap, fetch_execution_log, delete_mailbot_mode, folder_recent_messages, remove_rule, run_mailbot, save_shortcut
 
 def list_groups(user=None):
     groups = []

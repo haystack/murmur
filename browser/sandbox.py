@@ -2,6 +2,7 @@ from __future__ import unicode_literals, division
 
 import logging
 import sys
+import datetime
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from StringIO import StringIO
 from email import message
@@ -17,7 +18,7 @@ logger = logging.getLogger('youps')  # type: logging.Logger
 def interpret(mailbox, mode, is_simulate=False):
     # type: (MailBox, MailbotMode, bool) -> t.Dict[t.AnyStr, t.Any]
 
-    from schema.youps import EmailRule
+    from schema.youps import EmailRule, MailbotMode
     from smtp_handler.utils import is_gmail
 
     # set up the default result
@@ -149,13 +150,15 @@ def interpret(mailbox, mode, is_simulate=False):
             # TODO exec cant register new function (e.g., on_message_arrival) when there is a user_env
             exec(code, user_environ)
 
-
             for event_data in mailbox.event_data_list:
+                # event for new message arrival
                 if isinstance(event_data, NewMessageData):
+                    # This is to log for users
+                    log_format = '%s{"date": "%s", "type": "%s", "folder": "%s", "sender": "%s", "subject": "%s"}%s'% ("#!@YoUPS", str(datetime.datetime.now().strftime("%m/%d %H:%M:%S")), "new_message", event_data.message._schema.folder_schema.name, event_data.message._schema.sender.name, event_data.message._schema.subject, "#!@log")
+                    print (log_format), 
+
+                    # Conduct rules only on requested folders
                     if event_data.message._schema.folder_schema in valid_folders:
-                        # This is to log for users
-                        log_format = '[ %s/<span class="label label-info">%s</span> ] '% (event_data.message._schema.folder_schema.name, event_data.message._schema.subject)
-                        print (log_format), 
                         event_data.fire_event(mailbox.new_message_handler)
 
             mailbox.new_message_handler.removeAllHandles()

@@ -40,7 +40,7 @@
 			<p hidden id="website-name">{{website}}</p>
 
 			<h3>YoUPS Rule Sandbox</h3>
-			<a href="/docs" style="float: right;margin-top: -30px;">View API docs</a>
+			<!-- <a href="/docs" style="float: right;margin-top: -30px;">View API docs</a> -->
 			<hr>
 			
 			<form id="login-email-form">
@@ -87,7 +87,7 @@
 								</div>
 								{% if imap_authenticated %}		
 									<!-- https://codepen.io/aanjulena/pen/ZLZjzV  -->
-									<button type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off">
+									<button id='btn-code-submit' type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off">
 										<div class="handle"></div>
 									  </button>
 								{% else %}
@@ -134,11 +134,24 @@
 
 																	<div class="flex_item_right panel-heading panel-collapsed">
 																		<h3 class="panel-title">
-																			<span class="fa-layers fa-fw fa-2x"> 
+																			<span style="float:left;" class="fa-layers fa-fw fa-2x"> 
 																				<i class="far fa-envelope"></i>
 																				<span class="fa-layers-counter" style="background:Tomato">NEW</span>
 																			</span>
-																		New message <span class="preview-folder"></span></h3>
+																			<span style="float:left;margin: 10px;">Message arrived </span>
+																			<div class="input-group" style="width: 110px;float: left;">
+																				  <input type="text" class="form-control" placeholder="1">
+																				  <div class="input-group-btn">
+																					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">hr <span class="caret"></span></button>
+																					<ul class="dropdown-menu dropdown-menu-right" role="menu">
+																					  <li><a href="#">min</a></li>
+																					  <li><a href="#">hr</a></li>
+																					  <li><a href="#">day</a></li>
+																					</ul>
+																				  </div><!-- /btn-group -->
+																			</div> <span style="float:left;margin: 10px;"> ago </span>
+																			<span class="preview-folder"></span>
+																		</h3>
 																		<span class="pull-right">
 																			<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
 																		</span>
@@ -152,50 +165,50 @@
 																		</textarea>
 																	</div>
 																	<!-- Separte row for debugging -->
-																	<div class='debugger-container' >
-																		<div style='display:none' class='mv-data-container'>
-																			{
-																				[
-																				"task": [],
-																				"deadline": '2016-03-15'
-																				]
-																			}
-																		</div>
-																		<table id="example" class="table" style="width:100%">
-																			<thead>
-																				<tr>
-																				  <th></th>
-																				  <th>Sender</th>
-																				  <th>Subject</th>
-																				  <th>Deadline</th>
-																				  <th>Task</th>
-																				</tr>
-																			</thead>
-																			<tbody>
-																				<tr>
-																				  <td class='details-control'></td>
-																				  <td>Dylan McKay</td>
-																				  <td>Wanna play Frisbee?</td>
-																				  <td><time mv-default='2016-03-15' datetime="2016-03-15" property="deadline">15 Mar 2016</time></td>
-																				  <td>-</td>
-																				</tr>
-																				<tr>
-																				  <td class='details-control'></td>
-																					<td>Soya</td>
-																					<td>[soyapark/murmur] new data structure and msg arrival event (#81)
-																					  </td>
-																					<td><time mv-default='2016-03-15' datetime="2016-03-15" property="deadline">15 Mar 2016</time></td>
-																					<td><ul><li>Review PR</li></ul></td>
-																				</tr>
-																				<tr>
-																				  <td class='details-control'></td>
-																					<td>Elena Glassman</td>
-																					<td>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</td>
-																					<td><time mv-default='2016-03-15' datetime="2016-03-15" property="deadline">15 Mar 2016</time></td>
-																					<td>-</td>
-																				</tr>
-																			</tbody>
-																		</table>
+																	<div class='debugger-container' mv-app='editor2' mv-storage='#mv-data-container'  class='mv-autoedit' mv-mode='edit'>
+																			<div style='display:none' id='mv-data-container' mv-expressions="none">
+																					{
+																						"task": "",
+																						"deadline": "2016-03-15"
+																					}
+																			</div>
+																			<table id="example" class="table" style="width:100%">
+																				<thead>
+																					<tr>
+																					  <th>Simulate</th>
+																					  <th><i class="far fa-folder-open"></i></th>
+																					  <th>Sender</th>
+																					  <th>Subject</th>
+																					  <th>Deadline</th>
+																					  <th>Task</th>
+																					</tr>
+																				</thead>
+																				<tbody>
+																					<tr>
+																					  <td><i class="fas fa-search fa-2x"></i></td>
+																					  <td>Inbox</td>
+																					  <td>Dylan McKay</td>
+																					  <td>Wanna play Frisbee?</td>
+																					  <td><time mv-edit-placeholder='[$today]' property="date"></time></td>
+																					  <td><ul><li property='task' mv-multiple></li></ul></td>
+																					</tr>
+																					<!-- <tr>
+																					  <td class='details-control'></td>
+																						<td>Soya</td>
+																						<td>[soyapark/murmur] new data structure and msg arrival event (#81)
+																						  </td>
+																						<td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
+																						<td><ul><li>Review PR</li></ul></td>
+																					</tr>
+																					<tr>
+																					  <td class='details-control'></td>
+																						<td>Elena Glassman</td>
+																						<td>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</td>
+																						<td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
+																						<td>-</td>
+																					</tr> -->
+																				</tbody>
+																			</table>
 																	</div>
 																</div>
 															</div>
@@ -215,7 +228,7 @@
 																<div class="flex_item_right panel-heading panel-collapsed">
 																	<h3 class="panel-title">
 																		<i class="far fa-2x fa-clock" style="float:left"></i>  
-																		<span style="float:left;margin: 10px;">Update every </span>
+																		<span style="float:left;margin: 10px;">Run at every </span>
 																		<div class="input-group" style="width: 110px;float: left;">
 																			  <input type="text" class="form-control" placeholder="1">
 																			  <div class="input-group-btn">
@@ -261,7 +274,7 @@
 																			<i class="far fa-envelope"></i>
 																			<span class="fa-layers-counter" style="background:Tomato">NEW</span>
 																		</span>
-																		New message <span class=""></span>
+																		Create message arrival handler <span class=""></span>
 																</h3>		
 															</div>
 														</div>
@@ -276,7 +289,7 @@
 																
 																<div class="panel-heading flex_item_right panel-collapsed">
 																	<h3 class="panel-title">
-																		<i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
+																		<i class="far fa-2x fa-clock"></i> Create timed run handler <span class=""></span>
 																	</h3>
 																	
 																</div>
@@ -309,7 +322,7 @@
 
 																	<div class="flex_item_right panel-heading panel-collapsed">
 																		<h3 class="panel-title">
-																				<span class="fa-layers fa-fw fa-2x"> 
+																				<span class="fa-layers fa-fw fa-2x" style="float:left;"> 
 																					<i class="far fa-envelope"></i>
 																					<span class="fa-layers-counter" style="background:Tomato">NEW</span>
 																				</span>
@@ -336,27 +349,29 @@ def on_new_message(new_message):
 																			<div style='display:none' id='mv-data-container' mv-expressions="none">
 																					{
 																						"task": "",
-																						"deadline": "2016-03-15"
+																						"deadline": ""
 																					}
 																			</div>
 																			<table id="example" class="table" style="width:100%">
-																				<thead>
-																					<tr>
-																					  <th></th>
-																					  <th>Sender</th>
-																					  <th>Subject</th>
-																					  <th>Deadline</th>
-																					  <th>Task</th>
-																					</tr>
-																				</thead>
-																				<tbody>
-																					<tr>
-																					  <td class='details-control'></td>
-																					  <td>Dylan McKay</td>
-																					  <td>Wanna play Frisbee?</td>
-																					  <td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
-																					  <td><ul><li property='task' mv-multiple></li></ul></td>
-																					</tr>
+																					<thead>
+																							<tr>
+																							  <th>Simulate</th>
+																							  <th><i class="far fa-folder-open"></i></th>
+																							  <th>Sender</th>
+																							  <th>Subject</th>
+																							  <th>Deadline</th>
+																							  <th>Task</th>
+																							</tr>
+																						</thead>
+																						<tbody>
+																							<tr>
+																							  <td><i class="fas fa-search"></i></td>
+																							  <td>Inbox</td>
+																							  <td>Dylan McKay</td>
+																							  <td>Wanna play Frisbee?</td>
+																							  <td><time mv-edit-placeholder='[$today]' property="date"></time></td>
+																							  <td><ul><li property='task' mv-multiple></li></ul></td>
+																							</tr>
 																					<!-- <tr>
 																					  <td class='details-control'></td>
 																						<td>Soya</td>
@@ -434,7 +449,7 @@ def repeat_every():
 																		<i class="far fa-envelope"></i>
 																		<span class="fa-layers-counter" style="background:Tomato">NEW</span>
 																	</span>
-																	New message <span class=""></span>
+																	Create message arrival handler <span class=""></span>
 															</h3>		
 														</div>
 													</div>
@@ -471,18 +486,18 @@ def repeat_every():
 						<span id='engine-status-msg'></span> -->
 						
 						<span id='user-status-msg'></span>
-						<!-- <div id="console-output">
-							<p class="info">Output of your filter will be sent to your inbox. {% if not is_running %}Press a button "Apply" to apply your filter.{% endif %}</p>
+						<div id="console-output">
+							<p class="info">Output of your sandbox will be sent to your inbox. {% if not is_running %}Turn on your sandbox to apply your rule.{% endif %}</p>
 						</div>
 						{% if user.is_authenticated %}
 						{% else %}
-						
+				
 							<p class="info"><span class='current-date'>01/09/2019 21:25:12</span> <i class="fas fa-lg fa-envelope-square"></i> [csail-related] Looking for roommates, available next month | marked as read</p>
-						{% endif %} -->
+						{% endif %}
 					  </div>
 					</div>
 
-					<div class="card">
+					<!-- <div class="card">
 						<div class="card-header">
 							<h4>Shared functions</h4> 
 							You can write shared functions or code here and call them from any modes.
@@ -527,7 +542,7 @@ print get_sender()
 										{% endif %}    
 	</textarea>
 							</div>
-						  </div>
+						  </div> -->
 			  </div>
 
 			  <div id="apis-container" style="display:none;" mv-app="api" mv-storage="https://github.com/soyapark/mailbot">

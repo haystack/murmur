@@ -64,6 +64,10 @@ mysql -h $DATABASE_HOST -u root -p$MYSQL_PASS <<EOF
         CONVERT TO CHARACTER SET utf8mb4
         COLLATE utf8mb4_unicode_ci;
 
+    ALTER TABLE
+        schema_emailrule
+        CONVERT TO CHARACTER SET utf8mb4
+        COLLATE utf8mb4_unicode_ci;
 EOF
 
 # set the domain name for the site

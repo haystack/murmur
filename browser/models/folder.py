@@ -340,6 +340,9 @@ class Folder(object):
                                            _thread=thread_schema
                                            )
 
+            if envelope.sender is not None:
+                message_schema.sender = self._find_or_create_contacts(envelope.sender)[0]
+
             try:
                 message_schema.save()
             except Exception:
@@ -355,8 +358,6 @@ class Folder(object):
             # create and save the message contacts
             if envelope.from_ is not None:
                 message_schema.from_.add(*self._find_or_create_contacts(envelope.from_))
-            if envelope.sender is not None:
-                message_schema.sender.add(*self._find_or_create_contacts(envelope.sender))
             if envelope.reply_to is not None:
                 message_schema.reply_to.add(*self._find_or_create_contacts(envelope.reply_to))
             if envelope.to is not None:

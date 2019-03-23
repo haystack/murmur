@@ -7,6 +7,7 @@ from browser.models.contact import Contact
 import logging
 from collections import Sequence
 import email
+import copy
 
 userLogger = logging.getLogger('youps.user')  # type: logging.Logger
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -61,6 +62,11 @@ class Message(object):
             List(str): List of flags on the message
         """
         return self._schema.flags
+
+    def diff_attr(self, obj_instance):
+        for attr, value in self.__dict__.iteritems():
+            if getattr(self, attr) != getattr(obj_instance, attr):
+                print ("different val", attr, value)
 
     @flags.setter
     def flags(self, value):
@@ -300,6 +306,7 @@ class Message(object):
             TypeError: flags is not an iterable or a string
             TypeError: any flag is not a string
         """
+        cp_self = copy.deepcopy(self)
         ok, flags = self._check_flags(flags)
         if not ok:
             return
@@ -311,6 +318,8 @@ class Message(object):
             self._imap_client.add_flags(self._uid, flags)
         # update the local flags
         self.flags = list(set(self.flags + flags))
+
+        self.diff_attr(cp_self)
 
     def remove_flags(self, flags):
         # type: (t.Iterable[t.AnyStr]) -> None

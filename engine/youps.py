@@ -3,12 +3,6 @@ import logging
 import random
 import string
 import traceback
-<<<<<<< HEAD
-from browser.imap import GoogleOauth2
-from http_handler.settings import IMAP_SECRET
-from schema.youps import ImapAccount, MailbotMode, Action, FolderSchema, EmailRule, MessageSchema
-=======
->>>>>>> 64407f9c87261ac447c8e6e363bbb22e8b0fab1a
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
@@ -18,8 +12,7 @@ from browser.models.mailbox import MailBox
 from browser.sandbox import interpret
 from engine.constants import msg_code
 from http_handler.settings import IMAP_SECRET
-from schema.youps import (FolderSchema, ImapAccount, MailbotMode,
-                          MailbotMode_Folder)
+from schema.youps import (FolderSchema, ImapAccount, MailbotMode, MessageSchema, EmailRule)
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -95,8 +88,7 @@ def login_imap(email, password, host, is_oauth):
     except IMAPClient.Error, e:
         res['code'] = e
     except Exception, e:
-        # TODO add exception
-        logger.exception() 
+        logger.exception("Error while login %s %s " % (e, traceback.format_exc()))
         res['code'] = msg_code['UNKNOWN_ERROR']
 
     return res
@@ -321,14 +313,12 @@ def folder_recent_messages(user, email, folder_name, N=3):
     try:
         imapAccount = ImapAccount.objects.get(email=email)
 
-        messages = MessageSchema.objects.filter(imap_account=imapAccount, folder__name=folder_name).order_by("-date")[:N]
+        messages = MessageSchema.objects.filter(imap_account=imapAccount, folder_schema__name=folder_name).order_by("-date")[:N]
 
-        res['messages'] = [{
-            'sender': str(m.sender.name), 
-            'subject': str(m.subject),
-            'deadline': str(m.deadline),
-            'task': str(m.task)} for m in messages]
-
+        res['messages'] = [{"id": m.id, "folder": folder_name, "subject": m.subject, "sender": str(m.sender.name), "deadline": str(m.deadline) if m.deadline else "", "task": str(m.task)} for m in messages]
+        # 'sender': str(m.sender.name), 
+        # 'deadline': str(m.deadline),
+        # 
         res['status'] = True
     except IMAPClient.Error, e:
         res['code'] = e

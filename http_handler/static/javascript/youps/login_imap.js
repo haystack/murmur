@@ -26,13 +26,38 @@ $(document).ready(function() {
     function append_log( log, is_error ) {
         if(!log) return;
 
-        var datetime = format_date();
+        var parsed_log = log.split("#!@YoUPS");
 
-        if(is_error) 
-            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" ).addClass("error");
+        $.each( parsed_log, function( index, value ) {
+            value = $.trim(value);
+            if(value == "") return;
+            
+            value = value.split("#!@log");
+            msg_data = JSON.parse(value[0]);
+            msg_log = value[1].replace(/\n/g , "<br>")
 
-        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" )
-            .addClass("info");
+            var log_table = `<table class="console-table table table-bordered" class="" style="width:100% ;background: white;color: black">
+                <tbody>
+                    <tr>
+                        <td style="width: 5%" class='details-control'>
+                          {0}</td>
+                        <td style="width: 15%">{1}</td>
+                        <td style="width: 15%">{2}</td>
+                        <td >{3}</td>
+                    </tr>
+                </tbody>
+            </table>`.format("", msg_data['folder'], msg_data['sender'], msg_data['subject']);
+
+            if(is_error) 
+                $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" ).addClass("error");
+
+            else $( '<span>{0} | [YoUPS] New message arrived..</span>{1}'.format(msg_data['date'], log_table + msg_log) ).prependTo( "#console-output" )
+                .addClass("info");
+        });
+
+        // var datetime = format_date();
+        // $( "<p>{0}</p>".format(datetime)).prependTo( "#console-output" ).addClass("info");
+
     }   
 
     function create_new_tab(nav_bar) {
@@ -91,7 +116,6 @@ $(document).ready(function() {
     }
 
     function init_editor(editor_elem) {
-        console.log(editor_elem);
         var editor = CodeMirror.fromTextArea(editor_elem, {
             mode: {name: "python",
                 version: 3,
@@ -295,6 +319,10 @@ $(document).ready(function() {
            
     });
 
+    if(IS_RUNNING) {
+        btn_code_sumbit.addClass('active')
+    }
+
     /* Formatting function for row details - modify as you need */
 function format ( d ) {
     // `d` is the original data object for the row
@@ -309,6 +337,21 @@ var table = $('#example').DataTable( {
     "bFilter": true,
     "bInfo": false,
     "bAutoWidth": false,
+    "searching": false,
+    "columns": [
+        { "width": "40px", "orderable": false },
+        null,
+        null,
+        null,
+        { "width": "40px" },
+        null
+      ],
+    // "columnDefs": [
+    //     { "width": "40px", "targets": 0 },
+    //     { "targets": 0 },
+    //     { "targets": 0 },
+    //     { "width": "50px", "targets": 0 }
+    //   ],
     // "columns": [
     //     {
     //         "className":      'details-control',
@@ -323,9 +366,37 @@ var table = $('#example').DataTable( {
     // ],
     "order": [[1, 'asc']]
 } );
+
+// var table = $('.console-table').DataTable( {
+//     "bPaginate": false,
+//     "bLengthChange": false,
+//     "bFilter": true,
+//     "bInfo": false,
+//     "bAutoWidth": false,
+//     "searching": false,
+//     // "columnDefs": [
+//     //     { "width": "40px", "targets": 0 },
+//     //     { "targets": 0 },
+//     //     { "targets": 0 },
+//     //     { "width": "50px", "targets": 0 }
+//     //   ],
+//     "columns": [
+//         {
+//             "className":      'details-control',
+//             "orderable":      false,
+//             "data":           null,
+//             "defaultContent": ''
+//         },
+//         { "orderable": false },
+//         { "orderable": false },{ "orderable": false },
+//         { "orderable": false },
+//         { "orderable": false }
+//     ],
+//     "order": [[1, 'asc']]
+// } );
  
 // Add event listener for opening and closing details
-$('#example tbody').on('click', 'td.details-control', function () {
+$('.console-table tbody').on('click', 'td.details-control', function () {
     var tr = $(this).closest('tr');
     var row = table.row( tr );
 
@@ -358,7 +429,8 @@ $('#example tbody').on('click', 'td.details-control', function () {
     
     document.addEventListener("mv-load", function(e){   
         // Init editor & its autocomplete
-        console.log(e)
+        if(e.srcElement.id != "apis-container") return;
+
         // Open individual tab and panel to load style properly
         $('.nav-tabs li').each(function() {
             if ( !$(this).find('span') ) return;
@@ -368,7 +440,6 @@ $('#example tbody').on('click', 'td.details-control', function () {
             $( $(this).find('a').attr('href') ).find('.panel').each(function() {
 			    $(this).parents('.editable-container').find('.panel-heading').click();
                 if ($(this).find('textarea').length) {
-                    console.log(this)
                     init_editor( $(this).find('textarea')[0] );
                 }
                     
@@ -481,7 +552,49 @@ $('#example tbody').on('click', 'td.details-control', function () {
         $(this).append('<i class="fas fa-redo fa-3x"></i>');
         $(this).parents('.panel').addClass('removed');
     });
-    
+
+    // folder select listener
+    $("#editor-container").on("change", ".folder-container input:checkbox", function() {
+            if ($(this).is(':checked')) {
+                folder_recent_messages($(this).val(), 3);
+            }
+        });
+
+    // folder select listener
+    $("#editor-container").on("click", ".debugger-container .fa-search", function() {
+        // $(this).attr("msg-id") // call simulate value
+        $("td").removeClass('simulated');
+        $(this).parent().addClass("simulated");
+        
+        // Remove line widgets
+        $(".CodeMirror-linewidget").remove();
+
+        var node = document.createElement('div')
+        var display = document.createElement('div')
+        
+        node.appendChild(display)
+        
+        display.innerText = 'from: David Karger \nto: Amy Zhang, Soya Park, Luke Murray'// output
+        display.style.backgroundColor = 'lightblue'
+        display.style.padding = '5px'
+        // node.style.height = '20px'
+
+        $('body').find('.CodeMirror')[0].CodeMirror.addLineWidget(1, node)
+
+        $('body').find('.CodeMirror')[0].CodeMirror.addLineWidget(1, node)
+
+        const node2 = document.createElement('div')
+        var display = document.createElement('div')
+        
+        node2.appendChild(display)
+        
+        display.innerText = 'flags: [] -> ["should read"]'// output
+        display.style.backgroundColor = 'lightyellow'
+        display.style.padding = '5px'
+        
+        $('body').find('.CodeMirror')[0].CodeMirror.addLineWidget(2, node2)
+    }); 
+
     // Tab name editor
     var editHandler = function() {
       var t = $(this);
@@ -598,11 +711,8 @@ $('#example tbody').on('click', 'td.details-control', function () {
         checked: is_test
     });
 
-    btn_code_sumbit.click(function() {
-        if( get_running() ) { // if currently running, then stop 
-            run_code( $('#test-mode[type=checkbox]').is(":checked"), false );
-        } else run_code( $('#test-mode[type=checkbox]').is(":checked"), true );
-        
+    btn_code_sumbit.click(function() {   
+        run_code( $('#test-mode[type=checkbox]').is(":checked"), !$(this).hasClass('active') );
     });
 
     btn_incoming_save.click(function() {
@@ -714,7 +824,6 @@ $('#example tbody').on('click', 'td.details-control', function () {
         if(start_running) {
             spinStatusCog(true);
             $("#engine-status-msg").text("Your email engine is running.");
-            btn_code_sumbit.text("STOP");
             is_running = true;
         }
         
@@ -722,7 +831,6 @@ $('#example tbody').on('click', 'td.details-control', function () {
         else {
             spinStatusCog(false);
             $("#engine-status-msg").text("Your email engine is not running at the moment.");
-            btn_code_sumbit.text("Apply");
             is_running = false;
         }
     }
@@ -792,8 +900,18 @@ $('#example tbody').on('click', 'td.details-control', function () {
             function(res) {
                 // Load messages successfully 
                 if (res.status) {
-                    debugger;
-                    res['messages']
+                    var t = $('#example').DataTable();
+                    $.each( res['messages'], function( key, value ) {
+                        t.row.add( [
+                            '<i msg-id={0} class="fas fa-search fa-2x"></i>'.format(value.id),
+                            value.folder,
+                            value.sender,
+                            value.subject,
+                            '<time mv-edit-placeholder="[$today]" property="date"></time>',
+                            '<ul><li property="task" mv-multiple></li></ul>'
+                        ] ).draw( false );  
+                      });
+                              
                 }
                 else {
                     notify(res, false);
@@ -916,7 +1034,7 @@ $('#example tbody').on('click', 'td.details-control', function () {
                             set_running(false);   
                         }
                         else {
-                            append_log(res['imap_log'], false)
+                            // append_log(res['imap_log'], false)
 
                             set_running(is_running);   
                         }
