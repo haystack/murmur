@@ -1,4 +1,183 @@
 {
+	"message": {
+		"attribute": [
+			{
+				"name": "sender",
+				"return_type": "Contact",
+				"return_href": "contact",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "to",
+				"return_type": "Contact []",
+				"return_href": "contact",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "cc",
+				"return_type": "Contact []",
+				"return_href": "contact",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "bcc",
+				"return_type": "Contact []",
+				"return_href": "contact",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "subject",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "date",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "content",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "labels",
+				"return_type": "string []",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "progress",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "deadline",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "category",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "topic",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "task",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			}
+		],
+		"method": [
+			{
+				"name": "copy",
+				"params": "dst_folder",
+				"description": "Copy this email from the current folder to dst_folder. If folder dst_folder does not exist, our engine creates a new folder with the name dst_folder",
+				"example": ""
+			},
+			{
+				"name": "delete",
+				"params": "",
+				"description": "Delete this email from the currently selected folder.",
+				"example": ""
+			},
+			{
+				"name": "forward",
+				"params": "",
+				"description": "Delete this email from the currently selected folder.",
+				"example": ""
+			},
+			{
+				"name": "mark_read",
+				"params": "",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "mark_unread",
+				"params": "",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "move",
+				"params": "dst_folder",
+				"description": "Move this email to dst_folder.",
+				"example": [
+					"msg.move('conference')"
+				]
+			},
+			{
+				"name": "reply",
+				"params": "content, to=[], cc=[], bcc=[]",
+				"description": "reply to the sender and additional recipients.",
+				"example": [
+				]
+			},
+			{
+				"name": "reply_all",
+				"params": "address, to=[], cc=[], bcc=[]",
+				"description": "reply all to the sender & recipients and additional recipients",
+				"example": [
+				]
+			}
+		]
+	},
+	"contact": {
+		"attribute": [
+			{
+				"name": "name",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "email",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "organization",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			},
+			{
+				"name": "geolocation",
+				"return_type": "string",
+				"description": "",
+				"example": ""
+			}
+			
+		],
+		"method": [
+			{
+				"name": "recent_messages",
+				"params": "",
+				"return_type": "Message []",
+				"description": "Return a list of Message from or to this contact.",
+				"example": [
+				]
+			}
+		]
+	},
 	"getter_archieve": [
 		{
 			"name": "get_content",
@@ -193,44 +372,6 @@
 			],
 			"thread": "add_notes",
 			"thread_params": "flags, cond = True"
-		},
-		{
-			"name": "copy",
-			"params": "dst_folder",
-			"description": "Copy this email from the current folder to dst_folder. If folder dst_folder does not exist, our engine creates a new folder with the name dst_folder",
-			"example": "",
-			"thread": "copys",
-			"thread_params": "src_folder, dst_folder, cond = True"
-
-		},
-		{
-			"name": "delete",
-			"params": "",
-			"description": "Delete this email from the currently selected folder.",
-			"example": "",
-			"thread": "deletes",
-			"thread_params": "flags, cond = True"
-
-		},
-		{
-			"name": "mark_read",
-			"params": "is_read=True",
-			"description": "If is_read is true, then mark the email as read, otherwise mark it as unread. <br>Developers can selectively retrieve some emails of the thread by using parameter cond. cond should be a callable that returns boolean. Default value of cond is True and it will retrieve from all emails in the thread.",
-			"example": "",
-			"thread": "mark_reads",
-			"thread_params": "flags, cond = True"
-
-		},
-		{
-			"name": "move",
-			"params": "dst_folder",
-			"description": "Move this email to dst_folder.  If folder dst_folder does not exist, our engine creates a new folder with the name dst_folder",
-			"example": [
-				"move('conference')"
-			],
-			"thread": "moves",
-			"thread_params": "flags, cond = True"
-
 		},
 		{
 			"name": "remove_gmail_labels",

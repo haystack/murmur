@@ -1,4 +1,14 @@
-from schema.models import *
-from schema.youps import ImapAccount, MailbotMode, Message_Thread, MessageSchema, FolderSchema, ContactSchema, MailbotMode_Folder, Action
+from schema.models import UserProfile
+from schema.youps import (ContactSchema, EmailRule, FolderSchema, ImapAccount,
+                          MailbotMode, Message_Thread,
+                          MessageSchema)
 
-__all__ = ['UserProfile', 'ImapAccount', 'MailbotMode', 'Message_Thread', 'MessageSchema', 'FolderSchema', 'ContactSchema', 'MailbotMode_Folder', 'Action']
+__all__ = ['ContactSchema',
+            'EmailRule',
+           'FolderSchema',
+           'ImapAccount',
+           'MailbotMode',
+           'MessageSchema',
+           'Message_Thread',
+           'UserProfile',
+           ]

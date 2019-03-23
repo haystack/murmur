@@ -1,4 +1,7 @@
 # Based on https://stackoverflow.com/questions/1092531/event-system-in-python/1096614#1096614
+import logging
+
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 class Event:
     """Simple wrapper for a events
@@ -25,10 +28,13 @@ class Event:
         self.handlers = set()
 
     def handle(self, handler):
+        logger.critical('add event')
+
         self.handlers.add(handler)
         return self
 
     def unhandle(self, handler):
+        logger.critical('remove event')
         try:
             self.handlers.remove(handler)
         except Exception:
@@ -36,8 +42,13 @@ class Event:
         return self
 
     def fire(self, *args, **kwargs):
+        logger.critical('fire event')
         for handler in self.handlers:
             handler(*args, **kwargs)
+
+    def removeAllHandles(self):
+        logger.critical('remove all event')
+        self.handlers = set()
 
     def getHandlerCount(self):
         return len(self.handlers)

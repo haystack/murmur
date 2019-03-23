@@ -24,7 +24,7 @@ from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_K
 from registration.forms import RegistrationForm
 from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
                            MuteTag, Tag, UserProfile, Post, Attachment, DoNotSendList)
-from schema.youps import ImapAccount, MailbotMode, FolderSchema, MailbotMode_Folder
+from schema.youps import ImapAccount, MailbotMode, FolderSchema, EmailRule
 from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
@@ -409,6 +409,7 @@ def login_imap_view(request):
         is_initialized = False 
 	folders = []
 	mode_folder = []
+	rules = []
 
 	if request.user.id != None:
 		imap = ImapAccount.objects.filter(email=request.user.email)
@@ -433,12 +434,14 @@ def login_imap_view(request):
 					# send their folder list
 					folders = FolderSchema.objects.filter(imap_account=imap[0]).values('name')
 					folders = [str(f['name']) for f in folders]
-					mode_folder = MailbotMode_Folder.objects.filter(imap_account=imap[0])
-					mode_folder = [[str(mf.folder.name), str(mf.mode.uid)] for mf in mode_folder]
+					# mode_folder = MailbotMode_Folder.objects.filter(imap_account=imap[0])
+					# mode_folder = [[str(mf.folder.name), str(mf.mode.uid)] for mf in mode_folder]
+
+					rules = EmailRule.objects.filter(mode__imap_account=imap[0])
 				
 
 	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 'is_initialized': is_initialized,
-		'folders': folders, 'mode_folder': mode_folder,'mode_exist': mode_exist, 'modes': modes, 'current_mode': current_mode,
+		'folders': folders, 'mode_folder': mode_folder,'mode_exist': mode_exist, 'modes': modes, 'rules':rules, 'current_mode': current_mode,
 		'imap_authenticated': imap_authenticated, 'website': WEBSITE, 
 		'shortcuts_exist': shortcuts_exist, 'shortcuts': shortcuts}
 
@@ -1494,6 +1497,34 @@ def fetch_execution_log(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		
 		res = engine.main.fetch_execution_log(user, request.user.email)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def folder_recent_messages(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+
+		folder_name = request.POST['folder_name']
+		N = request.POST['N']
+
+		res = engine.main.folder_recent_messages(user, user.email, folder_name, N)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		print e
+		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def remove_rule(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		
+		rule_id = request.POST['rule-id']
+		res = engine.main.remove_rule(user, request.user.email, rule_id)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e

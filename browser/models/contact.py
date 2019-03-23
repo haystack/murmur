@@ -34,6 +34,26 @@ class Contact(object):
         return self._schema.name
 
     @property
+    def organization(self):
+        # type: () -> t.AnyStr
+        """Get the organization of this contact
+
+        Returns:
+            str: The organization associated with this contact
+        """
+        return self._schema.organization
+
+    @property
+    def geolocation(self):
+        # type: () -> t.AnyStr
+        """Get the location of this contact
+
+        Returns:
+            str: The location associated with this contact
+        """
+        return self._schema.geolocation
+
+    @property
     def messages_to(self):
         # type: () -> t.List[Message]
         """Get the Messages which are to this contact

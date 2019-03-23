@@ -10,7 +10,7 @@ from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 
-from http_handler.settings import WEBSITE
+from http_handler.settings import WEBSITE, PROTOCOL
 
 try:
     from django.contrib.auth import get_user_model
@@ -261,6 +261,7 @@ class RegistrationProfile(models.Model):
         ctx_dict = {'activation_key': self.activation_key,
                     'expiration_days': settings.ACCOUNT_ACTIVATION_DAYS,
                     'website': WEBSITE,
+                    'protocol': PROTOCOL,
                     'domain': site.domain}
         subject = render_to_string('registration/activation_email_subject.txt',
                                    ctx_dict)

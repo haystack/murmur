@@ -1,13 +1,17 @@
 {% extends website|add:"/base.html" %}
 {% block customcss %}
 <link rel="stylesheet" href="/static/css/youps/libs/codemirror.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css">
 <!-- <link rel="stylesheet" href="/static/css/youps/libs/fontawesome-all.min.css"> -->
 <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
 <!-- Interactive console styles -->
 <!-- <link rel="stylesheet" href="/static/css/youps/libs/sandbox.css" /> -->
+<link rel="stylesheet" href="https://get.mavo.io/mavo.css">
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/youps/style.css">
 <link rel="stylesheet" href="/static/css/youps/libs/jquery.switchButton.css" />
 <link rel="stylesheet" href="/static/css/youps/libs/show-hint.css" />
+
 {% endblock %}
 
 {% block content %}
@@ -35,8 +39,8 @@
 		<div class="group-container">
 			<p hidden id="website-name">{{website}}</p>
 
-			<h3>Email Rule Editor</h3>
-			<a href="/docs" style="float: right;margin-top: -30px;">View API docs</a>
+			<h3>YoUPS Rule Sandbox</h3>
+			<!-- <a href="/docs" style="float: right;margin-top: -30px;">View API docs</a> -->
 			<hr>
 			
 			<form id="login-email-form">
@@ -69,36 +73,29 @@
 				{% endif %}
 			</form>
 			<div id="editor-container">
-				<div id="status">
-				  <!-- This rule will be applied to your incoming emails.   -->
-					<div class="dropdown" style="display: inline;">
-						<label style="font-size: medium;">Select your mode: </label>
-						<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-								  Default
-								  <span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu" aria-labelledby="current_mode_dropdown">
-								  <li><a href="#" data-value="action">Action</a></li>
-								  <li><a href="#" data-value="another action">Another action</a></li>
-								  <li><a href="#" data-value="something else here">Something else here</a></li>
-								  <li><a href="#" data-value="separated link">Separated link</a></li>
-								</ul>
-					</div>
-						{% if imap_authenticated %}
-							<button class="btn btn-primary" id="btn-code-submit">RUN</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
-						{% else %}
-							<button class="btn btn-primary" id="btn-code-submit" disabled>RUN</button><div class="switch-wrapper"><input id="test-mode" type="checkbox" value="1"><div id="mode-msg" style="font-size: small;"></div></div>
-						{% endif %}
-				  
-				</div>
-		
-					<div style="padding-top: 40px;">
+					<div>
 					  <div class="card">
 						<div class="card-header">
-							<h4>Your email scripts</h4> 
-							Following rules will execute once. You can use set_interval() to periodically update attribute or execute rules based on the value of attributes.  							
-							<br>
-							<button class="btn btn-primary" id="btn-incoming-save" style="float: right;">Save</button>
+							<div id="status">
+								<div class="dropdown" style="display: inline;">
+									<label style="font-size: medium;">Mode: </label>
+									<button class="btn btn-default dropdown-toggle" type="button" id="current_mode_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" mode-id="0">Default <span class="caret"></span></button>
+									<ul class="dropdown-menu" aria-labelledby="current_mode_dropdown">
+										<!-- This will be replaced by js -->
+										<li><a href="#" data-value="action">Action</a></li>
+									</ul>
+								</div>
+								{% if imap_authenticated %}		
+									<!-- https://codepen.io/aanjulena/pen/ZLZjzV  -->
+									<button id='btn-code-submit' type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off">
+										<div class="handle"></div>
+									  </button>
+								{% else %}
+									<button type="button" class="btn btn-lg btn-toggle" data-toggle="button" aria-pressed="false" autocomplete="off" disabled>
+										<div class="handle"></div>
+									  </button>
+								{% endif %}
+							</div>
 						</div>
 						<div class="card-block">
 							{% if mode_exist %}
@@ -122,18 +119,185 @@
 								<div class="tab-content">
 									{% for mode in modes %}
 										{% if current_mode == mode %}
-											<div class="tab-pane row active" id="tab_{{mode.uid}}">
+											<div class="tab-pane active" id="tab_{{mode.uid}}">
 										{% else %}
-											<div class="tab-pane row" id="tab_{{mode.uid}}">
-										{% endif %}
-												<div class="folder-container"></div>
-												<div class="editor-container">
-														<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
-{{ mode.code }}
-														</textarea>
+											<div class="tab-pane" id="tab_{{mode.uid}}">
+										{% endif %}	
+												<div class='editable-container' type='new-message'>
+													{% for rule in rules %}
+														{% if rule.mode == mode and rule.type == "new-message" %}
+															<div rule-id={{rule.uid}} class="panel panel-success">
+																<div class="flex_container">
+																	<div class="flex_item_left"> 
+																		<i class="fas fa-3x fa-trash"></i> 
+																	</div>
+
+																	<div class="flex_item_right panel-heading panel-collapsed">
+																		<h3 class="panel-title">
+																			<span style="float:left;" class="fa-layers fa-fw fa-2x"> 
+																				<i class="far fa-envelope"></i>
+																				<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+																			</span>
+																			<span style="float:left;margin: 10px;">Message arrived </span>
+																			<div class="input-group" style="width: 110px;float: left;">
+																				  <input type="text" class="form-control" placeholder="1">
+																				  <div class="input-group-btn">
+																					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">hr <span class="caret"></span></button>
+																					<ul class="dropdown-menu dropdown-menu-right" role="menu">
+																					  <li><a href="#">min</a></li>
+																					  <li><a href="#">hr</a></li>
+																					  <li><a href="#">day</a></li>
+																					</ul>
+																				  </div><!-- /btn-group -->
+																			</div> <span style="float:left;margin: 10px;"> ago </span>
+																			<span class="preview-folder"></span>
+																		</h3>
+																		<span class="pull-right">
+																			<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+																		</span>
+																	</div>
+																</div>
+																<div class="panel-body" style="display:none;">
+																	<div class="folder-container"></div>
+																	<div class="editor-container">
+																		<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
+{{ rule.code }}
+																		</textarea>
+																	</div>
+																	<!-- Separte row for debugging -->
+																	<div class='debugger-container' mv-app='editor2' mv-storage='#mv-data-container'  class='mv-autoedit' mv-mode='edit'>
+																			<div style='display:none' id='mv-data-container' mv-expressions="none">
+																					{
+																						"task": "",
+																						"deadline": "2016-03-15"
+																					}
+																			</div>
+																			<table id="example" class="table" style="width:100%">
+																				<thead>
+																					<tr>
+																					  <th>Simulate</th>
+																					  <th><i class="far fa-folder-open"></i></th>
+																					  <th>Sender</th>
+																					  <th>Subject</th>
+																					  <th>Deadline</th>
+																					  <th>Task</th>
+																					</tr>
+																				</thead>
+																				<tbody>
+																					<tr>
+																					  <td><i class="fas fa-search fa-2x"></i></td>
+																					  <td>Inbox</td>
+																					  <td>Dylan McKay</td>
+																					  <td>Wanna play Frisbee?</td>
+																					  <td><time mv-edit-placeholder='[$today]' property="date"></time></td>
+																					  <td><ul><li property='task' mv-multiple></li></ul></td>
+																					</tr>
+																					<!-- <tr>
+																					  <td class='details-control'></td>
+																						<td>Soya</td>
+																						<td>[soyapark/murmur] new data structure and msg arrival event (#81)
+																						  </td>
+																						<td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
+																						<td><ul><li>Review PR</li></ul></td>
+																					</tr>
+																					<tr>
+																					  <td class='details-control'></td>
+																						<td>Elena Glassman</td>
+																						<td>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</td>
+																						<td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
+																						<td>-</td>
+																					</tr> -->
+																				</tbody>
+																			</table>
+																	</div>
+																</div>
+															</div>
+														{% endif %}	
+													{% endfor %}
+												</div>
+
+												<div class='editable-container' type='repeat'>
+													{% for rule in rules %}
+														{% if rule.mode == mode and rule.type == "repeat" %}
+														<div rule-id={{rule.uid}} class="panel panel-warning">
+															<div class="flex_container">
+																<div class="flex_item_left"> 
+																	<i class="fas fa-3x fa-trash"></i> 
+																</div>
+
+																<div class="flex_item_right panel-heading panel-collapsed">
+																	<h3 class="panel-title">
+																		<i class="far fa-2x fa-clock" style="float:left"></i>  
+																		<span style="float:left;margin: 10px;">Run at every </span>
+																		<div class="input-group" style="width: 110px;float: left;">
+																			  <input type="text" class="form-control" placeholder="1">
+																			  <div class="input-group-btn">
+																				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">hr <span class="caret"></span></button>
+																				<ul class="dropdown-menu dropdown-menu-right" role="menu">
+																				  <li><a href="#">min</a></li>
+																				  <li><a href="#">hr</a></li>
+																				  <li><a href="#">day</a></li>
+																				</ul>
+																			  </div><!-- /btn-group -->
+																		</div>
+																		<span class="preview-folder"></span>
+																	</h3>
+																	<span class="pull-right">
+																		<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+																	</span>
+																</div>
+															</div>
+															<div class="panel-body" style="display:none;">
+																<div class="folder-container"></div>
+																<div class="editor-container">
+																	<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
+{{ rule.code }}
+																	</textarea>
+																</div>
+															</div>
+														</div>
+													{% endif %}	
+													{% endfor %}
+												</div>
+
+												<!-- editor add buttons -->
+												<div class="btn-new-editor" type="new-message">
+													<div class="panel panel-success">
+														<div class="flex_container">
+															<div class="flex_item_left"> 
+																<i class="fas fa-3x fa-plus-circle"></i> 
+															</div>
+																	
+															<div class="panel-heading flex_item_right panel-collapsed">
+																<h3 class="panel-title">
+																		<span class="fa-layers fa-fw fa-2x"> 
+																			<i class="far fa-envelope"></i>
+																			<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+																		</span>
+																		Create message arrival handler <span class=""></span>
+																</h3>		
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="btn-new-editor" type="repeat">
+														<div class="panel panel-warning">
+															<div class="flex_container">
+																<div class="flex_item_left"> 
+																	<i class="fas fa-3x fa-plus-circle"></i> 
+																</div>
+																
+																<div class="panel-heading flex_item_right panel-collapsed">
+																	<h3 class="panel-title">
+																		<i class="far fa-2x fa-clock"></i> Create timed run handler <span class=""></span>
+																	</h3>
+																	
+																</div>
+															</div>	
+													</div>
 												</div>
 									  		</div>
-									{% endfor %}		
+									{% endfor %}
 								</div>
 								
 							{% else %}
@@ -148,34 +312,166 @@
 									<li><a href="#" class="add-tab">+ Add Mode</a></li>
 								</ul>
 								<div class="tab-content">
-									<div class="tab-pane row active" id="tab_0">
-										<div class="folder-container"></div>
-										<div class="editor-container">
-											  <textarea class="editor mode-editor" id="editor-0"> 												  
-if "csail-related" in get_subject():
-    mark_read(True)
+									<div class="tab-pane active" id="tab_0">
+										<div class='editable-container' type='new-message'>
+											<div rule-id=99998 class="panel panel-success">
+																<div class="flex_container">
+																	<div class="flex_item_left"> 
+																		<i class="fas fa-3x fa-trash"></i> 
+																	</div>
 
-## If I get a certain email, then change my email to emergency/busy mode.      
-#if "David Karger" in get_sender() and "deadline" in get_subject():
-#    set_mode(1) # change my email mode to busy mode
-
-## If it's not lunch time, then just archieve the email
-from datetime import datetime
-hour = datetime.now().hour
-if (hour < 12 or hour > 13) and "vultures" in get_sender():
-    delete()
-    
-## If there are many emails exchanged in given time span, then save it to other folder to revisit    
-def paper_related_debate(email):
-    if "paper" in email.get_subject() and "myadvisor@mit.edu" in email.get_recipients():
-        return True
-    return False
-
-interaction = get_history(get_sender(), 5, paper_related_debate)	
-if interaction['cond'] > 7:
-    move("conference")
-</textarea>
+																	<div class="flex_item_right panel-heading panel-collapsed">
+																		<h3 class="panel-title">
+																				<span class="fa-layers fa-fw fa-2x" style="float:left;"> 
+																					<i class="far fa-envelope"></i>
+																					<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+																				</span>
+																			New message <span class="preview-namespace"></span>
+																			<span class="preview-folder"></span>
+																		</h3>
+																		<span class="pull-right">
+																			<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+																		</span>
+																	</div>
+																</div>
+																<div class="panel-body" style="display:none;">
+																	<div class="folder-container"></div>
+																	<div class="editor-container">
+																		<textarea class="editor mode-editor" id="editor-99998">
+def on_new_message(new_message):
+	if "ads" in new_message.subject:
+		new_message.mark_read()
+																		</textarea>
+																	</div>
+																	<br>
+																	<!-- Separte row for debugging -->
+																	<div class='debugger-container' mv-app='editor' mv-storage='#mv-data-container'  class='mv-autoedit' mv-mode='edit'>
+																			<div style='display:none' id='mv-data-container' mv-expressions="none">
+																					{
+																						"task": "",
+																						"deadline": ""
+																					}
+																			</div>
+																			<table id="example" class="table" style="width:100%">
+																					<thead>
+																							<tr>
+																							  <th>Simulate</th>
+																							  <th><i class="far fa-folder-open"></i></th>
+																							  <th>Sender</th>
+																							  <th>Subject</th>
+																							  <th>Deadline</th>
+																							  <th>Task</th>
+																							</tr>
+																						</thead>
+																						<tbody>
+																							<tr>
+																							  <td><i class="fas fa-search"></i></td>
+																							  <td>Inbox</td>
+																							  <td>Dylan McKay</td>
+																							  <td>Wanna play Frisbee?</td>
+																							  <td><time mv-edit-placeholder='[$today]' property="date"></time></td>
+																							  <td><ul><li property='task' mv-multiple></li></ul></td>
+																							</tr>
+																					<!-- <tr>
+																					  <td class='details-control'></td>
+																						<td>Soya</td>
+																						<td>[soyapark/murmur] new data structure and msg arrival event (#81)
+																						  </td>
+																						<td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
+																						<td><ul><li>Review PR</li></ul></td>
+																					</tr>
+																					<tr>
+																					  <td class='details-control'></td>
+																						<td>Elena Glassman</td>
+																						<td>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</td>
+																						<td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
+																						<td>-</td>
+																					</tr> -->
+																				</tbody>
+																			</table>
+																		</div>
+																</div>
+															</div>
 										</div>
+
+										<div class='editable-container' type='repeat'>
+														<div rule-id=99999 class="panel panel-warning">
+															<div class="flex_container">
+																<div class="flex_item_left"> 
+																	<i class="fas fa-3x fa-trash"></i> 
+																</div>
+
+																<div class="flex_item_right panel-heading panel-collapsed">
+																	<h3 class="panel-title">
+																		<i class="far fa-2x fa-clock" style="float:left"></i>  
+																		<span style="float:left;margin: 10px;">Update every </span>
+																		<div class="input-group" style="width: 110px;float: left;">
+																			  <input type="text" class="form-control" placeholder="1">
+																			  <div class="input-group-btn">
+																				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">hr <span class="caret"></span></button>
+																				<ul class="dropdown-menu dropdown-menu-right" role="menu">
+																				  <li><a href="#">min</a></li>
+																				  <li><a href="#">hr</a></li>
+																				  <li><a href="#">day</a></li>
+																				</ul>
+																			  </div><!-- /btn-group -->
+																		</div>		
+																		<span class="preview-folder"></span>				
+																	</h3>
+																	<span class="pull-right">
+																		<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+																	</span>
+																</div>
+															</div>
+															<div class="panel-body" style="display:none;">
+																<div class="folder-container"></div>
+																<div class="editor-container">
+																	<textarea class="editor mode-editor" id="editor-99999">
+def repeat_every():
+    pass
+																	</textarea>
+																</div>
+															</div>
+														</div>
+										</div>
+
+										<!-- editor add buttons -->
+										<div class="btn-new-editor" type="new-message">
+												<div class="panel panel-success">
+													<div class="flex_container">
+														<div class="flex_item_left"> 
+															<i class="fas fa-3x fa-plus-circle"></i> 
+														</div>
+																
+														<div class="panel-heading flex_item_right panel-collapsed">
+															<h3 class="panel-title">
+																	<span class="fa-layers fa-fw fa-2x"> 
+																		<i class="far fa-envelope"></i>
+																		<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+																	</span>
+																	Create message arrival handler <span class=""></span>
+															</h3>		
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="btn-new-editor" type="repeat">
+													<div class="panel panel-warning">
+														<div class="flex_container">
+															<div class="flex_item_left"> 
+																<i class="fas fa-3x fa-plus-circle"></i> 
+															</div>
+															
+															<div class="panel-heading flex_item_right panel-collapsed">
+																<h3 class="panel-title">
+																	<i class="far fa-2x fa-clock"></i> Update every <span class=""></span>
+																</h3>
+																
+															</div>
+														</div>
+														<!-- Panel body -->		
+												</div>
+											</div>
 									</div>
 								</div>
 							{% endif %}
@@ -188,19 +484,20 @@ if interaction['cond'] > 7:
 							<span class="fa-layers-counter idle-mark" style="background:Tomato">IDLE</span>
 						</span>
 						<span id='engine-status-msg'></span> -->
+						
 						<span id='user-status-msg'></span>
 						<div id="console-output">
-							<p class="info">Output from the engine will be sent to your inbox. {% if not is_running %}Press a button "RUN" to start your engine.{% endif %}</p>
+							<p class="info">Output of your sandbox will be sent to your inbox. {% if not is_running %}Turn on your sandbox to apply your rule.{% endif %}</p>
 						</div>
 						{% if user.is_authenticated %}
 						{% else %}
-						
+				
 							<p class="info"><span class='current-date'>01/09/2019 21:25:12</span> <i class="fas fa-lg fa-envelope-square"></i> [csail-related] Looking for roommates, available next month | marked as read</p>
 						{% endif %}
 					  </div>
 					</div>
 
-					<div class="card">
+					<!-- <div class="card">
 						<div class="card-header">
 							<h4>Shared functions</h4> 
 							You can write shared functions or code here and call them from any modes.
@@ -228,7 +525,7 @@ if interaction['cond'] > 7:
 								<br><br>
 							</div>
 							<div class="card-block" id="editor-shortcut-container">
-								<textarea class="editor shortcut-editor" id="editor-shortcut">
+								<textarea class="editor shortcut-editor" id="editor-shortcut"  mv-expressions="none">
 										{% if shortcuts_exist %}
 {{ shortcuts }}
 										{% else %}
@@ -245,7 +542,7 @@ print get_sender()
 										{% endif %}    
 	</textarea>
 							</div>
-						  </div>
+						  </div> -->
 			  </div>
 
 			  <div id="apis-container" style="display:none;" mv-app="api" mv-storage="https://github.com/soyapark/mailbot">
@@ -310,6 +607,7 @@ print get_sender()
 
 	<script src="/static/javascript/youps/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/youps/jquery.switchButton.js"></script>
+
 	
 	<script src="https://get.mavo.io/mavo.js"></script>
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->

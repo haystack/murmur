@@ -1,31 +1,39 @@
-from __future__ import unicode_literals, print_function, division
+from __future__ import unicode_literals, division
 
 import logging
-import Queue
 import sys
+import datetime
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from StringIO import StringIO
-
+from email import message
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 
 from browser.models.event_data import NewMessageData
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
-from schema.youps import Action  # noqa: F401 ignore unused we use it for typing
+from smtp_handler.utils import send_email
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 
-def interpret(mailbox, code, is_test=False):
-    # type: (MailBox, unicode, bool) -> t.Dict[t.AnyStr, t.Any]
+def interpret(mailbox, mode, is_simulate=False):
+    # type: (MailBox, MailbotMode, bool) -> t.Dict[t.AnyStr, t.Any]
 
-    # assert we actually got a mailbox
-    assert isinstance(mailbox, MailBox)
-    # assert the code is unicode
-    assert isinstance(code, unicode)
-    assert mailbox.new_message_handler is not None
+    from schema.youps import EmailRule, MailbotMode
+    from smtp_handler.utils import is_gmail
 
     # set up the default result
     res = {'status': True, 'imap_error': False, 'imap_log': ""}
+
+    if mode is None:
+        logger.warn("No mode set for interpret")
+        res['status'] = False
+        return res
+
+    # assert we actually got a mailbox
+    assert isinstance(mailbox, MailBox)
+    # assert the mode is the mailboat mode
+    assert isinstance(mode, MailbotMode)
+    assert mailbox.new_message_handler is not None
 
     # get the logger for user output
     userLogger = logging.getLogger('youps.user')  # type: logging.Logger
@@ -38,8 +46,69 @@ def interpret(mailbox, code, is_test=False):
     user_std_out = StringIO()
 
     # define user methods
+    def create_draft(subject="", to_addr="", cc_addr="", bcc_addr="", body="", draft_folder="Drafts"):
+        new_message = message.Message()
+        new_message["Subject"] = subject
+            
+        if type(to_addr) == 'list':
+            to_addr = ",".join(to_addr)
+        if type(cc_addr) == 'list':
+            cc_addr = ",".join(cc_addr)
+        if type(bcc_addr) == 'list':
+            bcc_addr = ",".join(bcc_addr)
+            
+        new_message["To"] = to_addr
+        new_message["Cc"] = cc_addr
+        new_message["Bcc"] = bcc_addr
+        new_message.set_payload(body) 
+            
+        if not is_simulate:
+            if mailbox._imap_account.is_gmail:
+                mailbox._imap_client.append('[Gmail]/Drafts', str(new_message))
+                
+            else:
+                try:
+                    # if this imap service provides list capability takes advantage of it
+                    if [l[0][0] for l in mailbox._imap_client.list_folders()].index('\\Drafts'):
+                        mailbox._imap_client.append(mailbox._imap_client.list_folders()[2][2], str(new_message))
+                except Exception as e:
+                    # otherwise try to guess a name of draft folder
+                    try:
+                        mailbox._imap_client.append('Drafts', str(new_message))
+                    except IMAPClient.Error, e:
+                        try:
+                            mailbox._imap_client.append('Draft', str(new_message))
+                        except IMAPClient.Error, e:
+                            if "append failed" in e:
+                                mailbox._imap_client.append(draft_folder, str(new_message))
+
+        logger.debug("create_draft(): Your draft %s has been created" % subject)
+
+    def create_folder(folder_name):
+        if not is_simulate: 
+            mailbox._imap_client.create_folder( folder_name )
+
+        logger.debug("create_folder(): A new folder %s has been created" % folder_name)
+
+    def rename_folder(old_name, new_name):
+        if not is_simulate: 
+            mailbox._imap_client.rename_folder( old_name, new_name )
+
+        logger.debug("rename_folder(): Rename a folder %s to %s" % (old_name, new_name))
+
     def on_message_arrival(func):
         mailbox.new_message_handler += func
+
+    def set_interval(interval=None, func=None):
+        pass
+
+    def send(subject="", to="", body="", smtp=""):  # TODO add "cc", "bcc"
+        if len(to) == 0:
+            raise Exception('send(): recipient email address is not provided')
+
+        if not is_simulate:
+            send_email(subject, mailbox._imap_account.email, to, body)
+        logger.debug("send(): sent a message to  %s" % str(to))
 
     # execute user code
     try:
@@ -49,23 +118,50 @@ def interpret(mailbox, code, is_test=False):
         # set the user logger to
         userLoggerStream = user_std_out
 
-        # define the variables accessible to the user
-        user_environ = {
-            'new_message_handler': mailbox.new_message_handler,
-            'on_message_arrival': on_message_arrival
-        }
+        from schema.youps import FolderSchema
+        # TODO maybe use this instead of mode.rules
+        for rule in EmailRule.objects.filter(mode=mode):
+            assert isinstance(rule, EmailRule)
 
-        # execute the user's code
-        exec(code, user_environ)
+            # define the variables accessible to the user
+            user_environ = {
+                'create_draft': create_draft,
+                'create_folder': create_folder,
+                'on_message_arrival': on_message_arrival
+                # 'set_interval': set_interval
+            }
 
-        # fire new message events
-        while True:
-            try:
-                event_data = mailbox.event_data_queue.get_nowait()
+            valid_folders = rule.folders.all()
+            valid_folders = FolderSchema.objects.filter(imap_account=mailbox._imap_account, rules=rule)
+            code = rule.code
+            
+
+            # add the user's functions to the event handlers
+            if rule.type == "new-message":
+                code = code + "\non_message_arrival(on_new_message)"
+            #     mailbox.new_message_handler.handle(on_message_arrival)  # noqa: F821 on_new_message supplied by user
+            # else:
+            #     continue
+            #     # some_handler or something += repeat_every
+
+            
+            logger.info(code)
+            # execute the user's code
+            # TODO exec cant register new function (e.g., on_message_arrival) when there is a user_env
+            exec(code, user_environ)
+
+            for event_data in mailbox.event_data_list:
+                # event for new message arrival
                 if isinstance(event_data, NewMessageData):
-                    event_data.fire_event(mailbox.new_message_handler)
-            except Queue.Empty:
-                break
+                    # This is to log for users
+                    log_format = '%s{"date": "%s", "type": "%s", "folder": "%s", "sender": "%s", "subject": "%s"}%s'% ("#!@YoUPS", str(datetime.datetime.now().strftime("%m/%d %H:%M:%S")), "new_message", event_data.message._schema.folder_schema.name, event_data.message._schema.sender.name, event_data.message._schema.subject, "#!@log")
+                    print (log_format), 
+
+                    # Conduct rules only on requested folders
+                    if event_data.message._schema.folder_schema in valid_folders:
+                        event_data.fire_event(mailbox.new_message_handler)
+
+            mailbox.new_message_handler.removeAllHandles()
 
     except Exception:
         res['status'] = False
@@ -107,27 +203,6 @@ def interpret(mailbox, code, is_test=False):
     #         action = Action(trigger="arrival", code=codeobject_dumps(func.func_code), folder=current_folder_schema)
     #         action.save()
 
-    #     from http_handler.tasks import add_periodic_task
-
-    #     def set_interval(interval=None, func=None):
-    #         if not interval:
-    #             raise Exception('set_interval(): requires interval (in second)')
-
-    #         if interval < 1:
-    #             raise Exception('set_interval(): requires interval larger than 1 sec')
-
-    #         if not func or type(func).__name__ != "function":
-    #             raise Exception('set_interval(): requires callback function but it is %s ' % type(func).__name__)
-
-    #         if func.func_code.co_argcount != 0:
-    #             raise Exception('set_interval(): your callback function should have only 0 argument, but there are %d argument(s)' % func.func_code.co_argcount)
-
-    #         # TODO replace with the right folder
-    #         current_folder_schema = FolderSchema.objects.filter(imap_account=imap_account, name="INBOX")[0]
-    #         action = Action(trigger="interval", code=codeobject_dumps(func.func_code), folder=current_folder_schema)
-    #         action.save()
-    #         add_periodic_task.delay( interval=interval, imap_account_id=imap_account.id, action_id=action.id, search_criteria=search_creteria, folder_name=current_folder_schema.name)
-
     #     def set_timeout(delay=None, func=None):
     #         if not delay:
     #             raise Exception('set_timeout(): requires delay (in second)')
@@ -141,26 +216,7 @@ def interpret(mailbox, code, is_test=False):
     #         args = ujson.dumps( [imap_account.id, marshal.dumps(func.func_code), search_creteria, is_test, email_content] )
     #         add_periodic_task.delay( delay, args, delay * 2 - 0.5 ) # make it expire right before 2nd execution happens
 
-    #     def send(subject="", to_addr="", body=""):
-    #         if len(to_addr) == 0:
-    #             raise Exception('send(): recipient email address is not provided')
 
-    #         if not is_test:
-    #             send_email(subject, imap_account.email, to_addr, body)
-    #         logger.debug("send(): sent a message to  %s" % str(to_addr))
-
-    #     def get_content():
-    #         logger.debug("call get_content")
-    #         if email_content:
-    #             return email_content
-    #         else:
-    #             return pile.get_content()
-
-    #     def get_attachment():
-    #         pass
-
-    #     def get_attachments():
-    #         pass
 
     #     # return a list of email UIDs
     #     def search(criteria=u'ALL', charset=None, folder=None):
@@ -178,8 +234,7 @@ def interpret(mailbox, code, is_test=False):
     #         select_folder('INBOX')
     #         return imap.search(criteria, charset)
 
-    #     def create_folder(folder):
-    #         pile.create_folder(folder, is_test)
+
 
     #     def delete_folder(folder):
     #         pile.delete_folder(folder, is_test)
@@ -194,9 +249,6 @@ def interpret(mailbox, code, is_test=False):
 
     #         imap.select_folder(folder)
     #         logger.debug("Select a folder %s" % folder)
-
-    #     def rename_folder(old_name, new_name):
-    #         pile.rename_folder(old_name, new_name, is_test)
 
     #     def get_mode():
     #         if imap_account.current_mode:

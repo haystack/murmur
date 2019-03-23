@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import base64
+import logging
 import imaplib
 import json
 from optparse import OptionParser
@@ -24,6 +25,8 @@ import urllib
 import webbrowser
 from datetime import datetime, timedelta
 from http_handler.settings import WEBSITE, CLIENT_ID, CLIENT_SECRET
+
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 class GoogleOauth2():
   # The URL root for accessing Google Accounts.
@@ -56,8 +59,7 @@ class GoogleOauth2():
 
     # self.setExpiredTime( datetime.now() + timedelta(seconds=response['expires_in'] - 5) )
 
-    print ('Access Token: %s' % response['access_token'])
-    print ('Access Token Expiration Seconds: %s' % response['expires_in'])
+    logger.debug('Refresh Access Token Expiration Seconds: %s' % response['expires_in'])
 
     return response
     
@@ -69,9 +71,7 @@ class GoogleOauth2():
     self.ACCESS_TOKEN = response['access_token']
     self.setExpiredTime( datetime.now() + timedelta(seconds=response['expires_in'] - 5) )
 
-    print ('Refresh Token: %s' % response['refresh_token'])
-    print ('Access Token: %s' % response['access_token'])
-    print ('Access Token Expiration Seconds: %s' % response['expires_in'])
+    logger.debug('Access Token Expiration Seconds: %s' % response['expires_in'])
 
     return response
 

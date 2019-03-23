@@ -8,18 +8,82 @@ $(document).ready(function() {
         btn_shortcut_save = $("#btn-shortcut-save");
 
     var log_backup = "", user_status_backup = "";
+    var import_str = "import re, spacy, datetime, arrow"
+
+    // Format string
+    if (!String.prototype.format) {
+        String.prototype.format = function() {
+          var args = arguments;
+          return this.replace(/{(\d+)}/g, function(match, number) { 
+            return typeof args[number] != 'undefined'
+              ? args[number]
+              : match
+            ;
+          });
+        };
+      }
 
     function append_log( log, is_error ) {
         if(!log) return;
 
-        var datetime = format_date();
+        var parsed_log = log.split("#!@YoUPS");
 
-        if(is_error) 
-            $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" ).addClass("error");
+        $.each( parsed_log, function( index, value ) {
+            value = $.trim(value);
+            if(value == "") return;
+            
+            value = value.split("#!@log");
+            msg_data = JSON.parse(value[0]);
+            msg_log = value[1].replace(/\n/g , "<br>")
 
-        else $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" )
-            .addClass("info");
+            var log_table = `<table class="console-table table table-bordered" class="" style="width:100% ;background: white;color: black">
+                <tbody>
+                    <tr>
+                        <td style="width: 5%" class='details-control'>
+                          {0}</td>
+                        <td style="width: 15%">{1}</td>
+                        <td style="width: 15%">{2}</td>
+                        <td >{3}</td>
+                    </tr>
+                </tbody>
+            </table>`.format("", msg_data['folder'], msg_data['sender'], msg_data['subject']);
+
+            if(is_error) 
+                $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" ).addClass("error");
+
+            else $( '<span>{0} | [YoUPS] New message arrived..</span>{1}'.format(msg_data['date'], log_table + msg_log) ).prependTo( "#console-output" )
+                .addClass("info");
+        });
+
+        // var datetime = format_date();
+        // $( "<p>{0}</p>".format(datetime)).prependTo( "#console-output" ).addClass("info");
+
     }   
+
+    function create_new_tab(nav_bar) {
+        var id = $("#editor-container .tab-pane").length; // avoid same ID
+        // Add tab
+        $(nav_bar).closest('li').before('<li><a href="#tab_{0}"><span class="tab-title" mode-id={0}>On meeting</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>'.format(id));
+
+        // Insert tab pane first
+        var tab_pane_content = `<div class='tab-pane' id='tab_{0}'> 
+            <div class='editable-container' type='new-message'></div>
+            <div class='editable-container' type='repeat'></div>
+        </div>`.format(id);
+        $('.tab-content').append( tab_pane_content );
+
+        // Move to the newly added tab to load style properly
+        $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
+
+        // Add elements in the tab pane
+        $('.tab-content').find('.tab-pane').last().append(
+            `<!-- add a new message editor button -->
+            {0}
+            <!-- add a new repeat editor button -->
+            {1}`.format(get_panel_elem("new-message", false), get_panel_elem("repeat", false)));
+
+        unsaved_tabs.push( id );
+    }
 
     function append_status_msg( msg, is_error ) {
         if(!msg) return;
@@ -67,6 +131,9 @@ $(document).ready(function() {
             editor.execCommand("autocomplete")
           }
         })
+
+        // editor.getValue( "import re, spacy, datetime, arrow" );
+        // editor.markText({line:0,ch:0},{line:2,ch:1},{readOnly:true});
     }
 
     function init_folder_selector($folder_container) {
@@ -104,8 +171,7 @@ $(document).ready(function() {
         function rec_add_nested(d, path) {
             var $ul = $("<ul></ul>");
             for (var key in d) {
-                var p = ""
-                console.log(key, isDict(d[key]))
+                var p = "";
                 if (path=="") p = key;
                 else  p = path + "/" + key;
                 var $li = $("<li><input type='checkbox' value='"+ p + "'>" + '<i class="far fa-folder-open"></i> ' + key + "</li>");
@@ -113,9 +179,6 @@ $(document).ready(function() {
                 if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key], p)) } 
 
                 $ul.append($li);
-                // else {
-                //     $ul.append("<li>" + key + "</li>")
-                // }
             }
 
             return $ul;
@@ -123,6 +186,84 @@ $(document).ready(function() {
         
         u = rec_add_nested(folders_nested, "")
         $folder_container.append(u)
+    }
+
+    function get_panel_elem(type, editable) {
+        var editor_elem = `<div class="panel-body" style="display:none;">
+            <div class="folder-container"></div>
+            <div class="editor-container">
+            <textarea class="editor mode-editor">{0}\n{1}\n{2}</textarea>
+        </div>`.format(import_str, type == "new-message" ? "def on_new_message(new_message):":"def repeat_every():",
+            "\tpass"), 
+        pull_down_arrow = `<span class="pull-right">
+            <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
+        </span>`;
+
+        if(type == "new-message") {
+            return `<div class="{0}" {1}>
+            <div {2} class="panel panel-success">
+                <div class="flex_container">
+                    <div class="flex_item_left"> 
+                        <i class="fas fa-3x fa-{3}"></i>
+                    </div>
+                    
+                    <div class="panel-heading flex_item_right panel-collapsed">
+                        <h3 class="panel-title">
+                            <span class="fa-layers fa-fw fa-2x"> 
+                                <i class="far fa-envelope"></i>
+                                <span class="fa-layers-counter" style="background:Tomato">NEW</span>
+                            </span>
+                            New message <span class="preview-folder"></span>
+                        </h3>
+                        {5}
+                    </div>
+                </div>
+                <!-- Panel body -->
+                {4}
+            </div>
+        </div>`.format(editable ? "": "btn-new-editor", 
+                editable ? "" : 'type="new-message"',
+                editable ? "rule-id={0}".format(Math.floor(Math.random() * 10000) + 1) : "",
+                editable ? "trash" : "plus-circle",
+                editable ? editor_elem : "",
+                editable ? pull_down_arrow : "");
+        } else if (type == "repeat") {
+            return `<div class="{0}" {1}>
+            <div {2} class="panel panel-warning">
+                <div class="flex_container">
+                    <div class="flex_item_left"> 
+                        <i class="fas fa-3x fa-{3}"></i> 
+                    </div>
+                    
+                    <div class="panel-heading flex_item_right panel-collapsed">
+                        <h3 class="panel-title">
+                            <i class="far fa-2x fa-clock" style="float:left"></i>  
+                            <span style="float:left;margin: 10px;">Update every </span>
+                            <div class="input-group" style="width: 110px;float: left;">
+                                <input type="text" class="form-control" placeholder="1">
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">hr <span class="caret"></span></button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <li><a href="#">min</a></li>
+                                    <li><a href="#">hr</a></li>
+                                    <li><a href="#">day</a></li>
+                                    </ul>
+                                </div><!-- /btn-group -->
+                            </div><span class="preview-folder"></span>
+                        </h3>
+                        {5}
+                    </div>
+                </div>
+                <!-- Panel body -->
+                {4}
+            </div>
+        </div>`.format(editable ? "": "btn-new-editor",
+                editable ? "" : 'type="repeat"',
+                editable ? "rule-id={0}".format(Math.floor(Math.random() * 10000) + 1) : "",
+                editable ? "trash" : "plus-circle",
+                editable ? editor_elem : "",
+                editable? pull_down_arrow : "");
+        }
     }
 
     function guess_host( email_addr ) {
@@ -167,6 +308,110 @@ $(document).ready(function() {
     // for demo; set date to now
     $(".current-date").text(format_date());
 
+    // toggle button init
+    $('.btn-toggle').click(function() {
+        $(this).find('.btn').toggleClass('active');  
+        
+        if ($(this).find('.btn-primary').size()>0) {
+            $(this).find('.btn').toggleClass('btn-primary');
+        }
+        $(this).find('.btn').toggleClass('btn-default');
+           
+    });
+
+    if(IS_RUNNING) {
+        btn_code_sumbit.addClass('active')
+    }
+
+    /* Formatting function for row details - modify as you need */
+function format ( d ) {
+    // `d` is the original data object for the row
+    return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+       'Debugging result here..'+
+    '</table>';
+}
+
+var table = $('#example').DataTable( {
+    "bPaginate": false,
+    "bLengthChange": false,
+    "bFilter": true,
+    "bInfo": false,
+    "bAutoWidth": false,
+    "searching": false,
+    "columns": [
+        { "width": "40px", "orderable": false },
+        null,
+        null,
+        null,
+        { "width": "40px" },
+        null
+      ],
+    // "columnDefs": [
+    //     { "width": "40px", "targets": 0 },
+    //     { "targets": 0 },
+    //     { "targets": 0 },
+    //     { "width": "50px", "targets": 0 }
+    //   ],
+    // "columns": [
+    //     {
+    //         "className":      'details-control',
+    //         "orderable":      false,
+    //         "data":           null,
+    //         "defaultContent": ''
+    //     },
+    //     { "data": "sender" },
+    //     { "data": "subject" },
+    //     { "data": "deadline" },
+    //     { "data": "task" }
+    // ],
+    "order": [[1, 'asc']]
+} );
+
+// var table = $('.console-table').DataTable( {
+//     "bPaginate": false,
+//     "bLengthChange": false,
+//     "bFilter": true,
+//     "bInfo": false,
+//     "bAutoWidth": false,
+//     "searching": false,
+//     // "columnDefs": [
+//     //     { "width": "40px", "targets": 0 },
+//     //     { "targets": 0 },
+//     //     { "targets": 0 },
+//     //     { "width": "50px", "targets": 0 }
+//     //   ],
+//     "columns": [
+//         {
+//             "className":      'details-control',
+//             "orderable":      false,
+//             "data":           null,
+//             "defaultContent": ''
+//         },
+//         { "orderable": false },
+//         { "orderable": false },{ "orderable": false },
+//         { "orderable": false },
+//         { "orderable": false }
+//     ],
+//     "order": [[1, 'asc']]
+// } );
+ 
+// Add event listener for opening and closing details
+$('.console-table tbody').on('click', 'td.details-control', function () {
+    var tr = $(this).closest('tr');
+    var row = table.row( tr );
+
+    if ( row.child.isShown() ) {
+        // This row is already open - close it
+        row.child.hide();
+        tr.removeClass('shown');
+    }
+    else {
+        // Open this row
+        row.child( format(row.data()) ).show();
+        tr.addClass('shown');
+    }
+} );
+
     // Create the sandbox:
     // window.sandbox = new Sandbox.View({
     //     el : $('#sandbox'),
@@ -182,14 +427,25 @@ $(document).ready(function() {
      * 
      */
     
-    document.addEventListener("mv-load", function(){   
+    document.addEventListener("mv-load", function(e){   
         // Init editor & its autocomplete
-        document.querySelectorAll('textarea.editor').forEach(function(element) {
-            var mode_id = element.id.split("-")[1];
-            $('.nav-tabs li a[href="#tab_'+ mode_id +'"]').click();
+        if(e.srcElement.id != "apis-container") return;
 
-            init_editor(element);
-        });
+        // Open individual tab and panel to load style properly
+        $('.nav-tabs li').each(function() {
+            if ( !$(this).find('span') ) return;
+            $(this).find('a').click();
+						
+			// At each tab
+            $( $(this).find('a').attr('href') ).find('.panel').each(function() {
+			    $(this).parents('.editable-container').find('.panel-heading').click();
+                if ($(this).find('textarea').length) {
+                    init_editor( $(this).find('textarea')[0] );
+                }
+                    
+            })
+            
+        })
 
         // Init folder container
         init_folder_selector( $(".folder-container") )
@@ -243,11 +499,12 @@ $(document).ready(function() {
         }, 500);
     });
     
-
+    // Switch to different tabs
     $(".nav-tabs").on("click", "a", function (e) {
         e.preventDefault();
         if (!$(this).hasClass('add-tab')) {
             $(this).tab('show');
+            // TODO change to value of mode dropdown
         }
     })
     .on("click", "span.close", function () { // delete tab/mode
@@ -264,30 +521,81 @@ $(document).ready(function() {
     $('.add-tab').click(function (e) {
         e.preventDefault();
 
-        var modes = get_modes();
-        modes_keys = Object.keys(modes);
-
-        var id = Math.max.apply(null, modes_keys) +1 ; // avoid same ID
-        // Add tab
-        $(this).closest('li').before('<li><a href="#tab_' + id + '"><span class="tab-title" mode-id=' + id + '>New Tab</span><span> ('+ id +')</span><i class="fas fa-pencil-alt"></i></a> <span class="close"> x </span></li>');
-        // Add tab-pane
-        $('.tab-content').append(`<div class="tab-pane row" id="tab_` + id + `"> 
-                <div class="folder-container"></div>
-                <div class="editor-container">
-                    <textarea class="editor mode-editor" id="editor-` + id + `"></textarea>
-                </div>
-            </div>`);
-
-        // Move to the just added tab
-        $('.nav-tabs li:nth-child(' + ($('.nav-tabs li').length-1) + ') a').click();
-
-        unsaved_tabs.push( id );
-
-        init_editor( document.getElementById("editor-" + id) );
-
-        init_folder_selector( $("#tab_" + id + " .folder-container") )
+        create_new_tab(this);
     });
 
+    // add a new editor
+    $("#editor-container").on("click", ".btn-new-editor", function() {
+        var $container = $( $(this).siblings("[type='{0}']".format($(this).attr("type"))) );
+        var editor_elem = get_panel_elem($(this).attr("type"), true);
+        $container.append( editor_elem );
+
+        // open briefly to set styling
+        $container.find(".panel-heading").last().click();
+        init_editor( $container.find('textarea').last()[0] );
+        $container.find(".panel-heading").last().click();
+
+        init_folder_selector( $($container.find('.folder-container').last()[0]) );
+    });
+
+    // remove an editor
+    $("#editor-container").on("click", ".editable-container .flex_item_left", function() {
+        if(!$(this).siblings('.flex_item_right').hasClass("panel-collapsed") ) // if opened
+            $(this).siblings('.flex_item_right').click(); // then close 
+
+        // remove editor from the server
+        var rule_id = $(this).parents('.panel').attr('rule-id');
+        remove_rule(rule_id);
+
+        // give different visual effects
+        $(this).find('svg').remove();
+        $(this).append('<i class="fas fa-redo fa-3x"></i>');
+        $(this).parents('.panel').addClass('removed');
+    });
+
+    // folder select listener
+    $("#editor-container").on("change", ".folder-container input:checkbox", function() {
+            if ($(this).is(':checked')) {
+                folder_recent_messages($(this).val(), 3);
+            }
+        });
+
+    // folder select listener
+    $("#editor-container").on("click", ".debugger-container .fa-search", function() {
+        // $(this).attr("msg-id") // call simulate value
+        $("td").removeClass('simulated');
+        $(this).parent().addClass("simulated");
+        
+        // Remove line widgets
+        $(".CodeMirror-linewidget").remove();
+
+        var node = document.createElement('div')
+        var display = document.createElement('div')
+        
+        node.appendChild(display)
+        
+        display.innerText = 'from: David Karger \nto: Amy Zhang, Soya Park, Luke Murray'// output
+        display.style.backgroundColor = 'lightblue'
+        display.style.padding = '5px'
+        // node.style.height = '20px'
+
+        $('body').find('.CodeMirror')[0].CodeMirror.addLineWidget(1, node)
+
+        $('body').find('.CodeMirror')[0].CodeMirror.addLineWidget(1, node)
+
+        const node2 = document.createElement('div')
+        var display = document.createElement('div')
+        
+        node2.appendChild(display)
+        
+        display.innerText = 'flags: [] -> ["should read"]'// output
+        display.style.backgroundColor = 'lightyellow'
+        display.style.padding = '5px'
+        
+        $('body').find('.CodeMirror')[0].CodeMirror.addLineWidget(2, node2)
+    }); 
+
+    // Tab name editor
     var editHandler = function() {
       var t = $(this);
       t.css("visibility", "hidden");
@@ -337,6 +645,36 @@ $(document).ready(function() {
         }
     });
 
+    // Accordion listener
+    $("#editor-container").on("click", ".panel-heading", function (e) {
+        e.preventDefault();
+
+        // Fire only by panel click not child
+        if($(e.target).parents('.input-group').length != 0) return;
+
+        var $this = $(this);
+        if(!$this.hasClass('panel-collapsed')) { // close the panel
+            $this.parents('.panel').find('.panel-body').slideUp();
+            $this.addClass('panel-collapsed');
+            $this.find('.fa-chevron-down').hide();
+			$this.find('.fa-chevron-up').show();
+						
+			var selected_folders = [];
+			$this.parents(".flex_container").siblings('.panel-body').find(".folder-container input:checked").each(function () {
+				selected_folders.push( $(this).attr('value') );
+			});
+			$this.find(".preview-folder").text( selected_folders.join(", ") );
+
+            $this.find(".preview-folder").show();
+        } else { // open the panel
+            $this.parents('.panel').find('.panel-body').slideDown();
+            $this.removeClass('panel-collapsed');
+            $this.find('.fa-chevron-up').hide();
+            $this.find('.fa-chevron-down').show();
+            $this.find(".preview-folder").hide();
+        }
+    })
+
     // $("#password-container").hide();
     guess_host($("#user-full-email").text());
     toggle_login_mode();
@@ -373,11 +711,8 @@ $(document).ready(function() {
         checked: is_test
     });
 
-    btn_code_sumbit.click(function() {
-        if( get_running() ) { // if currently running, then stop 
-            run_code( $('#test-mode[type=checkbox]').is(":checked"), false );
-        } else run_code( $('#test-mode[type=checkbox]').is(":checked"), true );
-        
+    btn_code_sumbit.click(function() {   
+        run_code( $('#test-mode[type=checkbox]').is(":checked"), !$(this).hasClass('active') );
     });
 
     btn_incoming_save.click(function() {
@@ -449,24 +784,33 @@ $(document).ready(function() {
     function get_modes() {
         var modes = {};
 
-        document.querySelectorAll('.tab-content .CodeMirror').forEach(function(element) { 
-            var id = $(element).parents('.tab-pane').attr('id').split("_")[1];
-            code = element.CodeMirror.getValue(),
-            name = document.querySelector('.nav.nav-tabs span[mode-id="'+ id + '"]').innerHTML,
-            selected_folders = [];
+        // iterate by modes 
+        $("#editor-container .tab-pane").each(function() {
+            var editors = [];
+            var selected_folders = [];
 
-            $(element).parents('.tab-pane').find(".folder-container input:checked").each(function () {
+            // get mode ID
+            var id = $(this).attr('id').split("_")[1];
+            var name = $(".nav.nav-tabs span[mode-id='{0}'].tab-title".format(id)).text();
+
+            // TODO fix
+            $(this).find(".folder-container input:checked").each(function () {
                 selected_folders.push($(this).attr('value'));
             });
-            
+
+            $(this).find('.CodeMirror').each( function(index, elem) {
+                var code = elem.CodeMirror.getValue();
+                var type = $(elem).parents('.editable-container').attr('type');
+                var uid = $(elem).parents('.panel').attr('rule-id');
+                editors.push({"uid": uid, "code": $.trim( code ), "type": type, "folders": selected_folders}); 
+            })
 
             modes[id] = {
                 "id": id,
                 "name": $.trim( name ), 
-                "code": code,
-                "folders": selected_folders
+                "editors": editors
             };
-        });
+        })
 
         return modes;
     }
@@ -480,7 +824,6 @@ $(document).ready(function() {
         if(start_running) {
             spinStatusCog(true);
             $("#engine-status-msg").text("Your email engine is running.");
-            btn_code_sumbit.text("STOP");
             is_running = true;
         }
         
@@ -488,7 +831,6 @@ $(document).ready(function() {
         else {
             spinStatusCog(false);
             $("#engine-status-msg").text("Your email engine is not running at the moment.");
-            btn_code_sumbit.text("RUN");
             is_running = false;
         }
     }
@@ -548,6 +890,36 @@ $(document).ready(function() {
         setTimeout(fetch_log, 2 * 1000); // 2 second
     }
 
+    function folder_recent_messages(folder_name, N) {
+        var params = {
+            'folder_name': folder_name,
+            'N': N
+        };
+        
+        $.post('/folder_recent_messages', params,
+            function(res) {
+                // Load messages successfully 
+                if (res.status) {
+                    var t = $('#example').DataTable();
+                    $.each( res['messages'], function( key, value ) {
+                        t.row.add( [
+                            '<i msg-id={0} class="fas fa-search fa-2x"></i>'.format(value.id),
+                            value.folder,
+                            value.sender,
+                            value.subject,
+                            '<time mv-edit-placeholder="[$today]" property="date"></time>',
+                            '<ul><li property="task" mv-multiple></li></ul>'
+                        ] ).draw( false );  
+                      });
+                              
+                }
+                else {
+                    notify(res, false);
+                }
+            }
+        );
+    }
+
     function validateEmail(email) {
         var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(String(email).toLowerCase());
@@ -597,8 +969,38 @@ $(document).ready(function() {
                             notify(res, false);
                         }
                     }
-                );
+                ).fail(function(res) {
+                    alert("Fail to load! Can you try using a different browser? 403");
+                });    
         });
+
+        function remove_rule(rule_uid) {
+            show_loader(true);
+
+            var params = {
+                'rule-id' : rule_uid
+            };
+
+            $.post('/remove_rule', params,
+                function(res) {
+                    show_loader(false);
+                    console.log(res);
+                    
+                    // Auth success
+                    if (res.status) {
+
+                        if (res.code) { 
+                        }
+                        else {                        
+                            notify(res, true);
+                        }
+                    }
+                    else {
+                        notify(res, false);
+                    }
+                }
+            );
+        }
 
         function run_code(is_dry_run, is_running) {
             show_loader(true);
@@ -632,7 +1034,7 @@ $(document).ready(function() {
                             set_running(false);   
                         }
                         else {
-                            append_log(res['imap_log'], false)
+                            // append_log(res['imap_log'], false)
 
                             set_running(is_running);   
                         }

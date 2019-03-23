@@ -1,5 +1,6 @@
 {% extends website|add:"/base.html" %}
 {% block customcss %}
+
 <link rel="stylesheet" href="/static/css/youps/libs/codemirror.css">
 <!-- <link rel="stylesheet" href="/static/css/youps/libs/fontawesome-all.min.css"> -->
 <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"> -->
@@ -7,75 +8,120 @@
 <!-- <link rel="stylesheet" href="/static/css/youps/libs/sandbox.css" /> -->
 
 <link rel="stylesheet" href="/static/css/youps/libs/jquery.switchButton.css" />
-<link rel="stylesheet" href="https://get.mavo.io/mavo.css"/>
+<link rel="stylesheet" href="https://get.mavo.io/mavo.css" />
 <link rel="stylesheet" href="/static/css/youps/libs/prism.css">
 <link rel="stylesheet" href="/static/css/youps/style.css">
+
+<style>
+    .sidebar-list {
+        list-style-type: none;
+    }
+</style>
 
 {% endblock %}
 
 {% block content %}
-	<div class="container">
-		<div class="group-container">
-			<p hidden id="website-name">{{website}}</p>
 
-            <h3>API docs</h3>
+
+    <div class="container" style="width:280px;  position:fixed; top: 50px;">
+        <div class="group-container">
+            <ul id="sidebar_container" class="sidebar-list" style="list-style-type: none; padding-inline-start: 0px;">
+                <!-- Filled in with JS Below -->
+            </ul>
+        </div>
+    </div>
+    <div class="container" style="margin-top:0; margin-left:280px;">
+        <div class="group-container" style="overflow-y: scroll;">
+            <p hidden id="website-name">{{website}}</p>
+
+            <h1>API docs</h1>
             <a href="/editor">Back to editor</a>
 			<hr>
-            <main 
+            <main
             mv-app="api"
             mv-storage="https://github.com/soyapark/murmur"
             mv-unauthenticated-permissions="read"
             mv-autosave="0"
             mv-server-push="true">
-                <h3>Retreive metadata of an email</h3>
-                <div property="getter" mv-multiple>
-                    <h4>[name] ([params]) </h4>
-                    <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
-                    <p style="margin:0;">[description]</p>
-                    <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
-                        <code class="language-python" property="example" mv-multiple>
-                            <!-- <h6 property="line"></g6> -->
-                        </code>
-                    </pre>
+                <div clsass='should-add-to-sidebar-header' id="message"> <h2> Message <a href="#message">¶</a></h2>   </div>
+                <span>Each one of your email message is represented as a <a href="#message">Message</a> instance. </span>
+                <div property="message">
+                    <div clsass='should-add-to-sidebar' id="message-attr"> <h3> Attribute <a href="#message-attr">¶</a></h3>   </div>
+                    <div id="[name]" property="attribute" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                    <h4>[name] <a href="#[name]"> ¶ </a> </h4>
+                        <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
+                        <p style="margin:0;"><a href="#[return_href]">[return_type]</a> [description]</p>
+                        <pre class="language-python" style="background-color: transparent;border: 0;margin:0;display:[if(len(example)==0, none, block)]">
+                            <code class="language-python" property="example" mv-multiple>
+                                <!-- <h6 property="line"></g6> -->
+                            </code>
+                        </pre>
+                    </div>
+
+                    <div clsass='should-add-to-sidebar' id="message-method"> <h3> Method <a href="#message-method">¶</a></h3>   </div>
+                    <div id="[name]" property="method" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                            <h4>[name] ([params])  <a href="#[name]"> ¶ </a> </h4>
+                                <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
+                                <p style="margin:0;">[description]</p>
+                                <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
+                                    <code class="language-python" property="example" mv-multiple>
+                                        <!-- <h6 property="line"></g6> -->
+                                    </code>
+                                </pre>
+                    </div>
                 </div>
-                <br>
-                <h3>Action on an email</h3>
-                <div property="methods"  mv-multiple>
-                    <h4>[name] ([params]) </h4>
-                    <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
+
+                <div id="contact"> <h2> Contact <a href="#contact">¶</a></h2>   </div>
+                <div property="contact">
+                    <div id="contact-attr"> <h4> Attribute <a href="#contact-attr">¶</a></h4>   </div>
+                    <div id="[name]" property="attribute" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                        <h4>[name] <a href="#[name]"> ¶ </a> </h4>
+                            <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
+                            <p style="margin:0;"><a href="#[return_href]">[return_type]</a> [description]</p>
+                            <pre class="language-python" style="background-color: transparent;border: 0;margin:0;display:[if(example='', none, block)]">
+                                <code class="language-python" property="example" mv-multiple>
+                                    <!-- <h6 property="line"></g6> -->
+                                </code>
+                            </pre>
+                    </div>
+                    <div id="contact-method"> <h4> Method <a href="#contact-method">¶</a></h4>   </div>
+                    <div id="[name]" property="method" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                            <h4>[name] ([params])  <a href="#[name]"> ¶ </a> </h4>
+                                <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
+                                <p style="margin:0;">[description]</p>
+                                <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
+                                    <code class="language-python" property="example" mv-multiple>
+                                        <!-- <h6 property="line"></g6> -->
+                                    </code>
+                                </pre>
+                    </div>
+                </div>
+                
+
+                <div id="folder-header" style="padding-top: 50px; margin-top: -50px; margin-bottom: 50px"> <h3> Action on a folder <a href="folder-header">¶</a> </h3> </div>
+                <div id="[name]" property="folder" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                    <h4>[name] ([params]) <a href="#[name]"> ¶ </a></h4>
                     <p style="margin:0;">[description]</p>
                     <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
-                        <code class="language-python" property="example" mv-multiple>
-                            <!-- <h6 property="line"></g6> -->
-                          </code>
-                    </pre>
-                  </div>
-                  <br>
-                <h3>Action on a folder</h3>
-                <div property="folder"  mv-multiple>
-                        <h4>[name] ([params])</h4>
-                        <p style="margin:0;">[description]</p>
-                        <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
                             <code class="language-python" property="example" mv-multiple>
                                 <!-- <h6 property="line"></g6> -->
                               </code>
                         </pre>
                 </div>
-                <h3>Manage your email mode</h3>
-                <div property="mode"  mv-multiple>
-                        <h4>[name] ([params])</h4>
-                        <p style="margin:0;">[description]</p>
-                        <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
+                <div id="mode-header" style="padding-top: 50px; margin-top: -50px; margin-bottom: 50px"> <h3> Manage your email mode <a href="#mode-header">¶</a> </h3> </div>
+                <div id="[name]" property="mode" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                    <h4>[name] ([params])  <a href="#[name]"> ¶ </a> </h4>
+                    <p style="margin:0;">[description]</p>
+                    <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
                             <code class="language-python" property="example" mv-multiple>
                                 <!-- <h6 property="line"></g6> -->
                               </code>
                         </pre>
                 </div>
             </main>
-		</div>
+        </div>
     </div>
-	  
-	<!-- <a href="/groups/{{group_info.name}}">Back to group info page</a> -->
+
 {% endblock %}
 
 {% block customjs %}
@@ -88,29 +134,32 @@
 	<script type="text/javascript" src="/static/javascript/youps/python.js"></script>
 
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"></script>
-	
+
 	<!-- Underscore, Backbone, backbone-localStorage, jQuery -->
 	<script type="text/javascript" src="/static/javascript/youps/console/underscore.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/youps/console/backbone.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/youps/console/backbone-localStorage.min.js"></script>
-	
+
 	<!-- Some extras for the demo: -->
 	<script type="text/javascript" src="/static/javascript/youps/console/lettering.js"></script>
 	<script type="text/javascript" src="/static/javascript/youps/console/prettify.js"></script>
 	<script type="text/javascript" src="/static/javascript/youps/console/DAT.GUI.min.js"></script>
 
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
-    
+
     <script type="text/javascript" src="/static/javascript/youps/prism.js"></script>
 	<script type="text/javascript" src="/static/javascript/youps/jquery.switchButton.js"></script>
-	
+
+    <script type="text/javascript" src="/static/javascript/youps/sidebar.js"></script>
+
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
 	<!-- <script type="text/javascript" src="/static/javascript/youps/console/sandbox-console.js"></script> -->
 
     <script src="https://get.mavo.io/mavo.js"></script>
-    
+
     <script>
         document.addEventListener("mv-load", function(){
+            sidebar_init();
             init_syntax();
         });
     </script>

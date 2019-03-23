@@ -21,6 +21,8 @@ class ImapAccount(models.Model):
     refresh_token = models.CharField('refresh_token', max_length=200, blank=True)
     is_initialized = models.BooleanField(default=False)
 
+    is_gmail = models.BooleanField(default=False)
+
     password = models.CharField('password', max_length=100, blank=True)
     host = models.CharField('host', max_length=100)
 
@@ -83,9 +85,9 @@ class MessageSchema(models.Model):
     id = models.AutoField(primary_key=True)
     # TODO we can possibly get rid of imap_account since imap -> folder -> msg
     # each message is associated with a single ImapAccount
-    imap_account = models.ForeignKey('ImapAccount')
+    imap_account = models.ForeignKey('ImapAccount')  # type: ImapAccount
     # each message is associated with a single Folder
-    folder_schema = models.ForeignKey(FolderSchema)
+    folder_schema = models.ForeignKey(FolderSchema)  # type: FolderSchema
     # each message has a uid
     uid = models.IntegerField(default=-1)
     # the message sequence number identifies the offest of the message in the folder
@@ -106,7 +108,7 @@ class MessageSchema(models.Model):
     # the contacts the message is from 
     from_ = models.ManyToManyField('ContactSchema', related_name='from_messages')
     # the contact the message was sent by, i.e. if a program sends a message for someone else
-    sender = models.ManyToManyField('ContactSchema', related_name='sender_messages')
+    sender = models.ForeignKey('ContactSchema')
     # if a reply is sent it should be sent to these contacts
     reply_to = models.ManyToManyField('ContactSchema', related_name='reply_to_messages')
     # the contact the message is to
@@ -115,6 +117,9 @@ class MessageSchema(models.Model):
     cc = models.ManyToManyField('ContactSchema', related_name='cc_messages')
     # the contact the message is bcced to
     bcc = models.ManyToManyField('ContactSchema', related_name='bcc_messages')
+    # the thread that the message is associated with
+    _thread = models.ForeignKey('ThreadSchema', related_name='messages', blank=True, null=True)
+
 
 
     @property
@@ -161,28 +166,48 @@ class ContactSchema(models.Model):
         unique_together = ("imap_account", "email")
 
 
+class ThreadSchema(models.Model):
+    # the primary key
+    id = models.AutoField(primary_key=True)
+    # each thread is associated with a single ImapAccount
+    imap_account = models.ForeignKey('ImapAccount')
+    # each folder is associated with a single folder
+    folder = models.ForeignKey('FolderSchema')
+    gm_thread_id = models.TextField(blank=True) 
+
+    class Meta:
+        db_table = "youps_thread"
+
+
 class MailbotMode(models.Model):
     uid = models.IntegerField()
 
     name = models.CharField('mode_name', max_length=100)
-    code = models.TextField(null=True, blank=True)
-
     imap_account = models.ForeignKey('ImapAccount')
 
     class Meta:
         unique_together = ("uid", "imap_account")
 
+class EmailRule(models.Model):
+    uid = models.IntegerField(default=1)
 
-# This model is to have many-to-many relation of MailbotMode and Folder
-class MailbotMode_Folder(models.Model):
-    mode = models.ForeignKey('MailbotMode')
-    folder = models.ForeignKey('FolderSchema')
-    imap_account = models.ForeignKey('ImapAccount')
+    type = models.CharField('rule_type', default='new-message', max_length=100)
+    code = models.TextField(null=True, blank=True)  # t.AnyStr
+    mode = models.ForeignKey('MailbotMode', related_name="rules")
+    folders = models.ManyToManyField(FolderSchema, related_name='rules')  # type: t.List[FolderSchema]
 
     class Meta:
-        db_table = "youps_mailbotmode_folder"
-        unique_together = ("mode", "folder")
-    pass
+        unique_together = ("uid", "mode")
+
+
+# # This model is to have many-to-many relation of EmailRule and Folder
+# class EmailRule_Folder(models.Model):
+#     rule = models.ForeignKey('EmailRule')
+#     folder = models.ForeignKey('FolderSchema')
+
+#     class Meta:
+#         db_table = "youps_emailrule_folder"
+#         unique_together = ("rule", "folder")
 
 class Message_Thread(models.Model):
     id = models.AutoField(primary_key=True)
@@ -198,71 +223,3 @@ class Message_Thread(models.Model):
     class Meta:
         db_table = "youps_threads"
         unique_together = ("id", "imap_account")
-
-# This model is to store callback functions for set_interval() and on_message_arrival() etc
-class Action(models.Model):
-    id = models.AutoField(primary_key=True)
-    
-    trigger = models.CharField('trigger', max_length=100, blank=True) # e.g., arrival, interval, flag_changed 
-    code = models.TextField(null=True, blank=True) # stringified code object
-    folder = models.ForeignKey('FolderSchema')
-
-from djcelery.models import PeriodicTask, IntervalSchedule
-from datetime import datetime
-
-# This model is to store callback functions for set_interval() and on_message_arrival() etc
-class Action(models.Model):
-    id = models.AutoField(primary_key=True)
-    
-    trigger = models.CharField('trigger', max_length=100, blank=True) # e.g., arrival, interval, flag_changed 
-    code = models.TextField(null=True, blank=True) # stringified code object
-    folder = models.ForeignKey('FolderSchema')
-
-# We use this model to interact with Celery to handle dynamic periodic tasks
-class TaskScheduler(models.Model):
-    periodic_task = models.ForeignKey(PeriodicTask)
-
-    @staticmethod
-    def schedule_every(task_name, period, every, ptask_name=None, args=None, kwargs=None, expires=None):
-        """ schedules a task by name every "every" "period". So an example call would be:
-        TaskScheduler('mycustomtask', 'seconds', 30, [1,2,3]) 
-        that would schedule your custom task to run every 30 seconds with the arguments 1,2 and 3 passed to the actual task. """
-        permissible_periods = ['days', 'hours', 'minutes', 'seconds']
-        if period not in permissible_periods:
-            raise Exception('Invalid period specified')
-        # create the periodic task and the interval
-        if ptask_name is None:
-            ptask_name = "%s_%s" % (task_name, datetime.now()) # create some name for the period task
-        interval_schedules = IntervalSchedule.objects.filter(period=period, every=every)
-        if interval_schedules: # just check if interval schedules exist like that already and reuse em
-            interval_schedule = interval_schedules[0]
-        else: # create a brand new interval schedule
-            interval_schedule = IntervalSchedule()
-            interval_schedule.every = every # should check to make sure this is a positive int
-            interval_schedule.period = period
-            interval_schedule.save()
-        ptask = PeriodicTask(name=ptask_name, task=task_name, interval=interval_schedule, expires=expires)
-        if args:
-            ptask.args = args
-        if kwargs:
-            ptask.kwargs = kwargs
-        ptask.save()
-        return TaskScheduler.objects.create(periodic_task=ptask)
-
-    def stop(self):
-        """pauses the task"""
-        ptask = self.periodic_task
-        ptask.enabled = False
-        ptask.save()
-
-    def start(self):
-        """starts the task"""
-        ptask = self.periodic_task
-        ptask.enabled = True
-        ptask.save()
-
-    def terminate(self):
-        self.stop()
-        ptask = self.periodic_task
-        self.delete()
-        ptask.delete()

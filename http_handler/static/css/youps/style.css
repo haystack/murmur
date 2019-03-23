@@ -1,5 +1,14 @@
 #console {
-  overflow-y: scroll;height: 200px;background:#47697F;padding: 10px;
+  overflow-y: scroll;
+  height: 500px;background:#47697F;padding: 10px;
+}
+
+#console .label{
+  float: none;
+}
+
+.tab-content {
+  background: white;
 }
 
 .error {
@@ -36,6 +45,10 @@
 }
 .nav-tabs > li:hover > span {
     display: inline-block;
+}
+
+.tab-pane {
+  padding: 10px;
 }
 
 [contenteditable] {
@@ -181,6 +194,10 @@
   }
 }
 
+#status {
+  float:right;
+}
+
 #console {
   margin-bottom: 90px;
 }
@@ -193,15 +210,257 @@
 }
 
 .folder-container > ul {
-  list-style-type: none;
   margin-top: 8px;
+  padding-left: 0px;
 }
 
 .folder-container ul {
   list-style-type: none;
 }
 
-.editor-container {
+#editor-container {
   width: 100%;
-  padding-left: 200px;
+}
+
+#editor-container .panel {
+  margin: 10px;
+}
+
+#editor-container .panel.removed {
+  opacity: 0.5;
+}
+
+.container-namespace {
+  margin-bottom: 0;
+  /* border: 0; */
+}
+
+.btn-new-editor {
+  cursor: pointer;
+}
+
+.editable-container .flex_item_left:hover {
+  color: red;
+}
+
+.btn-new-editor .flex_item_left:hover {
+  color: green;
+}
+
+.btn-new-editor svg {
+  vertical-align: middle;
+}
+
+/* bootstrap override */
+
+.panel-success .panel-heading {
+  color: #3c763d;
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+  }
+
+.panel-warning .panel-heading {
+  color: #8a6d3b;
+  background-color: #fcf8e3;
+  border-color: #faebcc;
+}
+
+.panel-heading {
+  cursor: pointer;
+  float: left;
+  width: 90%;
+}
+
+.panel-body {
+  padding: 0px;
+  padding-left: 15px;
+}
+
+.container-namespace .panel-body {
+  cursor: not-allowed;
+}
+
+.container-namespace .pull-right {
+  margin-top: -15px;
+}
+
+.preview-folder {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.panel-warning .preview-folder {
+  line-height: 300%;
+  margin: 10px;
+}
+
+.panel-title {
+  font-size: 15px;
+}
+
+.flex_container {
+  display: flex;
+  width: 100%;
+}
+.flex_item_left {
+  width: 50px;
+  text-align: center;
+  /* background: #fa0; */
+}
+
+.flex_item_left svg{
+  margin-top: 4px;
+}
+
+.flex_item_right {
+  flex-grow: 1;
+}
+
+.flex_item_right .panel-title {
+  float: left;
+}
+
+i::before {
+  line-height: inherit;
+}
+
+.btn-toggle {
+  margin: 0 4rem;
+  padding: 0;
+  position: relative;
+  border: none;
+  height: 1.5rem;
+  width: 3rem;
+  border-radius: 1.5rem;
+  color: #6b7381;
+  background: #bdc1c8;
+}
+.btn-toggle:focus,
+.btn-toggle.focus,
+.btn-toggle:focus.active,
+.btn-toggle.focus.active {
+  outline: none;
+}
+.btn-toggle:before,
+.btn-toggle:after {
+  line-height: 1.5rem;
+  width: 4rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: absolute;
+  bottom: 0;
+  transition: opacity 0.25s;
+}
+.btn-toggle:before {
+  content: "Off";
+  left: -4rem;
+}
+.btn-toggle:after {
+  content: "On";
+  right: -4rem;
+  opacity: 0.5;
+}
+.btn-toggle > .handle {
+  position: absolute;
+  top: 0.1875rem;
+  left: 0.1875rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 1.125rem;
+  background: #fff;
+  transition: left 0.25s;
+}
+.btn-toggle.active {
+  transition: background-color 0.25s;
+}
+.btn-toggle.active > .handle {
+  left: 1.6875rem;
+  transition: left 0.25s;
+}
+.btn-toggle.active:before {
+  opacity: 0.5;
+}
+.btn-toggle.active:after {
+  opacity: 1;
+}
+.btn-toggle:before,
+.btn-toggle:after {
+  color: #6b7381;
+}
+.btn-toggle.active {
+  background-color: #29b5a8;
+}
+.btn-toggle.btn-lg {
+  margin: 0 5rem;
+  padding: 0;
+  position: relative;
+  border: none;
+  height: 2.5rem;
+  width: 5rem;
+  border-radius: 2.5rem;
+}
+.btn-toggle.btn-lg:focus,
+.btn-toggle.btn-lg.focus,
+.btn-toggle.btn-lg:focus.active,
+.btn-toggle.btn-lg.focus.active {
+  outline: none;
+}
+.btn-toggle.btn-lg:before,
+.btn-toggle.btn-lg:after {
+  line-height: 2.5rem;
+  width: 5rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: absolute;
+  bottom: 0;
+  transition: opacity 0.25s;
+}
+.btn-toggle.btn-lg:before {
+  content: "Off";
+  left: -5rem;
+}
+.btn-toggle.btn-lg:after {
+  content: "On";
+  right: -5rem;
+  opacity: 0.5;
+}
+.btn-toggle.btn-lg > .handle {
+  position: absolute;
+  top: 0.3125rem;
+  left: 0.3125rem;
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 1.875rem;
+  background: #fff;
+  transition: left 0.25s;
+}
+.btn-toggle.btn-lg.active {
+  transition: background-color 0.25s;
+}
+.btn-toggle.btn-lg.active > .handle {
+  left: 2.8125rem;
+  transition: left 0.25s;
+}
+.btn-toggle.btn-lg.active:before {
+  opacity: 0.5;
+}
+.btn-toggle.btn-lg.active:after {
+  opacity: 1;
+}
+
+td.simulated {
+  background: skyblue;
+}
+
+
+/* TODO removed after stablized.  */
+div[type='repeat'],
+.debugger-container {
+  display: none;
 }
