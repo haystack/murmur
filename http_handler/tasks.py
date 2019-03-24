@@ -2,7 +2,7 @@ import logging
 
 from browser.imap import authenticate
 from browser.models.mailbox import MailBox
-from http_handler.settings import BASE_URL
+from http_handler.settings import BASE_URL, PROTOCOL
 from schema.youps import ImapAccount
 from smtp_handler.utils import send_email
 import typing as t  # noqa: F401 ignore unused we use it for typing
@@ -93,7 +93,7 @@ def register_inbox():
                 send_email("Your YoUPS account is ready!",
                            "no-reply@" + BASE_URL,
                            imapAccount.email,
-                           "Start writing your automation rule here! " + BASE_URL)
+                           "Start writing your automation rule here! %s://%s" % (PROTOCOL, BASE_URL))
 
                 logger.info(
                     'Register done for %s', imapAccount.email)
