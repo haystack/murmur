@@ -33,7 +33,7 @@ $(document).ready(function() {
             if(value == "") return;
             
             value = value.split("#!@log");
-            msg_data = JSON.parse(value[0].replace(/: True/g, ': "true"').replace(/: False/g, ': "false"'));
+            msg_data = JSON.parse(value[0].replace(/: True/g, ': true').replace(/: False/g, ': false'));
             msg_log = value[1].replace(/\n/g , "<br>")
 
             var log_table = `<div class='row msg-inspector' style='margin-left: 0px;'>
@@ -45,7 +45,7 @@ $(document).ready(function() {
                 </div>
                 <a href="#demo-{1}" class="collapsed btn btn-xs btn-info" data-toggle="collapse"><div></div></a>    
                 
-          </div><p class='row'>{12}</p>`.format(msg_data['now'] + " [YoUPS] New message arrived ", Math.floor(Math.random() * 10000) + 1, '"{0}": "{1}"'.format("subject", msg_data['subject']),
+          </div><p class='row'>{12}</p>`.format(msg_data['now'] + " [YoUPS] New message arrived ", Math.floor(Math.random() * 10000) + 1, '{0}: "{1}"'.format("subject", msg_data['subject']),
             '{0}: "{1}" \n'.format("folder", msg_data['folder']),
             '{0}: "{1}" \n'.format("from_", msg_data['from_']),
             '{0}: "{1}" \n'.format("to", msg_data['to']),
