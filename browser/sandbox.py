@@ -125,7 +125,7 @@ def interpret(mailbox, mode, is_simulate=False):
             # event for new message arrival
             if isinstance(event_data, NewMessageData):
                 # This is to log for users
-                log_format = '%s{"now": "%s", "type": "%s", "folder": "%s", "from_": "%s", "subject": "%s", "to": "%s", "cc": "%s", "flags": "%s", "date": "%s", "is_read": %s, "is_deleted": %s, "is_recent": %s}%s' % (
+                log_format = '%s{"now": "%s", "type": "%s", "folder": "%s", "from_": "%s", "subject": "%s", "to": %s, "cc": %s, "flags": %s, "date": "%s", "is_read": %s, "is_deleted": %s, "is_recent": %s}%s' % (
                     "#!@YoUPS", str(datetime.datetime.now().strftime("%m/%d %H:%M:%S")), 
                     "new_message", 
                     event_data.message.folder.name, 
