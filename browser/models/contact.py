@@ -2,6 +2,9 @@ from __future__ import unicode_literals, print_function, division
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 from schema.youps import ContactSchema  # noqa: F401 ignore unused we use it for typing
+import logging
+
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 class Contact(object):
 
@@ -14,7 +17,10 @@ class Contact(object):
         self._imap_client = imap_client  # type: IMAPClient
 
     def __str__(self):
-        return self.name
+        return self.name or self.email
+
+    def __repr__(self):
+        return repr("<Contact object %s>" % str(self.name or self.email))
 
     @property
     def email(self):

@@ -3,6 +3,7 @@ from __future__ import unicode_literals, division
 import logging
 import sys
 import datetime
+import ast
 import typing as t  # noqa: F401 ignore unused we use it for typing
 from StringIO import StringIO
 from email import message
@@ -125,19 +126,38 @@ def interpret(mailbox, mode, is_simulate=False):
             # event for new message arrival
             if isinstance(event_data, NewMessageData):
                 # This is to log for users
-                log_format = '%s{"now": "%s", "type": "%s", "folder": "%s", "from_": "%s", "subject": "%s", "to": %s, "cc": %s, "flags": %s, "date": "%s", "is_read": %s, "is_deleted": %s, "is_recent": %s}%s' % (
-                    "#!@YoUPS", str(datetime.datetime.now().strftime("%m/%d %H:%M:%S")), 
+                # new_msg = {
+                #     "timestamp": "%s", 
+                #     "type": "%s", 
+                #     "folder": "%s", 
+                #     "from_": "%s", 
+                #     "subject": "%s", 
+                #     "to": %s, 
+                #     "cc": %s, 
+                #     "flags": %s, 
+                #     "date": "%s", 
+                #     "deadline": "%s", 
+                #     "is_read": %s, 
+                #     "is_deleted": %s, 
+                #     "is_recent": %s
+                # }
+
+                log_format = '%s{"timestamp": "%s", "type": "%s", "folder": "%s", "from_": "%s", "subject": "%s", "to": %s, "cc": %s, "flags": %s, "date": "%s", "deadline": "%s", "is_read": %s, "is_deleted": %s, "is_recent": %s}%s' % (
+                    "#!@YoUPS", str(datetime.datetime.now().strftime("%m/%d %H:%M:%S,%f")), 
                     "new_message", 
                     event_data.message.folder.name, 
                     event_data.message.from_, 
                     event_data.message.subject, 
                     event_data.message.to,
                     event_data.message.cc,
-                    event_data.message.flags,
-                    event_data.message.date, 
+                    [f.encode('utf8', 'replace') for f in event_data.message.flags],
+                    event_data.message.date,
+                    event_data.message.deadline, 
                     event_data.message.is_read, 
                     event_data.message.is_deleted, 
                     event_data.message.is_recent, "#!@log")
+                logger.info(event_data.message.to)
+                logger.info(event_data.message.cc)
                 print (log_format),
 
             # TODO maybe use this instead of mode.rules
@@ -166,13 +186,14 @@ def interpret(mailbox, mode, is_simulate=False):
                 #     # some_handler or something += repeat_every
 
                 
-                logger.info(code)
+                logger.debug(code)
                 # execute the user's code
-                # TODO exec cant register new function (e.g., on_message_arrival) when there is a user_env
+                # exec cant register new function (e.g., on_message_arrival) when there is a user_env
                 exec(code, user_environ)
 
                 # Conduct rules only on requested folders
                 if event_data.message._schema.folder_schema in valid_folders:
+                    # TODO maybe user log here that event has been fired
                     event_data.fire_event(mailbox.new_message_handler)
 
                 mailbox.new_message_handler.removeAllHandles()
@@ -185,7 +206,22 @@ def interpret(mailbox, mode, is_simulate=False):
         # set the stdout back to what it was
         sys.stdout = sys.__stdout__
         userLoggerStream = sys.__stdout__
-        res['imap_log'] = user_std_out.getvalue() + res['imap_log']
+
+        new_log = {}
+        # Parse log output (string) to Json. Later, this will be appended to the user's execution log
+        for log in user_std_out.getvalue().split("#!@YoUPS"):
+            if len(log.strip()) == 0:
+                continue
+            logger.debug(log)
+            logger.debug( log.split("#!@log") )
+            msg_data, execution_log = log.split("#!@log")
+            msg_data = ast.literal_eval( msg_data )
+
+            msg_data['log'] = execution_log
+            new_log[msg_data['timestamp']] = msg_data
+
+        logger.debug(new_log)
+        res['imap_log'] = new_log
         user_std_out.close()
         return res
 

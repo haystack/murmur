@@ -193,7 +193,7 @@ def setup_moderation_post(group_name):
     return mail
 
 def send_email(subject, from_addr, to_addr, body_plain=None, body_html=None):
-    mail = MurmurMailResponse(From = from_addr, Subject = subject)
+    mail = MurmurMailResponse(From = from_addr, To = to_addr, Subject = subject)
     if body_plain:
         mail.Body = body_plain
     if body_html:

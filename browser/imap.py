@@ -66,11 +66,11 @@ def authenticate(imap_account):
                 logger.error("cannot renew token for non-oauth account")
                 res['code'] = "Can't authenticate your email"
         except IMAPClient.Error, e:
-            logger.exception("failed to authenticate email")
+            logger.exception("IMAPClient.Error - failed to authenticate email")
             res['imap_error'] = e
             res['code'] = "Can't authenticate your email"
         except Exception, e:
-            logger.exception("failed to authenticate email")
+            logger.exception("Unknown exception %s failed to authenticate email" %e)
             # TODO add exception
             res['imap_error'] = e
             res['code'] = msg_code['UNKNOWN_ERROR']

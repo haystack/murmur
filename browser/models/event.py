@@ -28,13 +28,10 @@ class Event:
         self.handlers = set()
 
     def handle(self, handler):
-        logger.critical('add event')
-
         self.handlers.add(handler)
         return self
 
     def unhandle(self, handler):
-        logger.critical('remove event')
         try:
             self.handlers.remove(handler)
         except Exception:
@@ -42,7 +39,6 @@ class Event:
         return self
 
     def fire(self, *args, **kwargs):
-        logger.critical('fire event')
         for handler in self.handlers:
             handler(*args, **kwargs)
 

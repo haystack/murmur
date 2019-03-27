@@ -23,20 +23,22 @@ $(document).ready(function() {
         };
       }
 
-    function append_log( log, is_error ) {
-        if(!log) return;
+    function append_log( msg_log, is_error ) {
+        if(!msg_log) return;
 
-        var parsed_log = log.split("#!@YoUPS");
+            // value = value.split("#!@log");
+            var sorted = [];
+            for(var key in msg_log) {
+                sorted[sorted.length] = key;
+            }
+            sorted.sort();
+            // sorted.reverse(); // recent msg at top
 
-        $.each( parsed_log, function( index, value ) {
-            value = $.trim(value);
-            if(value == "") return;
-            
-            value = value.split("#!@log");
-            msg_data = JSON.parse(value[0].replace(/: True/g, ': true').replace(/: False/g, ': false'));
-            msg_log = value[1].replace(/\n/g , "<br>")
-
-            var log_table = `<div class='row msg-inspector' style='margin-left: 0px;'>
+            var t = $('#console-table').DataTable();
+            $.each(sorted, function(index, timestamp) {                
+                msg_data = msg_log[timestamp]
+          
+                var log_table = `<div class='row msg-inspector' style='margin-left: 0px;'>
                 <span class='msg-log' style='float:left;'>{0}</span>
                 <div style='float:left;' class="panel panel-default">
                     <pre class='language-python'><code>{2}</code></pre>
@@ -45,24 +47,33 @@ $(document).ready(function() {
                 </div>
                 <a href="#demo-{1}" class="collapsed btn btn-xs btn-info" data-toggle="collapse"><div></div></a>    
                 
-          </div><p class='row'>{12}</p>`.format(msg_data['now'] + " [YoUPS] New message arrived ", Math.floor(Math.random() * 10000) + 1, '{0}: "{1}"'.format("subject", msg_data['subject']),
-            '{0}: "{1}" \n'.format("folder", msg_data['folder']),
-            '{0}: "{1}" \n'.format("from_", msg_data['from_']),
-            '{0}: "{1}" \n'.format("to", msg_data['to']),
-            '{0}: "{1}" \n'.format("cc", msg_data['cc']),
-            '{0}: "{1}" \n'.format("flags", msg_data['flags']),
-            '{0}: "{1}" \n'.format("date", msg_data['date']),
-            '{0}: {1} \n'.format("is_read", msg_data['is_read']? "True": "False"),
-            '{0}: {1} \n'.format("is_deleted", msg_data['is_deleted']? "True": "False"),
-            '{0}: {1}'.format("is_recent", msg_data['is_recent']? "True": "False"),
-            msg_log);
+            </div><p class='row'>{12}</p>`.format("", Math.floor(Math.random() * 10000) + 1, '{0}: "{1}"'.format("subject", msg_data['subject']),
+                '{0}: "{1}" \n'.format("folder", msg_data['folder']),
+                '{0}: "{1}" \n'.format("from_", msg_data['from_']),
+                '{0}: [{1}] \n'.format("to", msg_data['to']),
+                '{0}: [{1}] \n'.format("cc", msg_data['cc']),
+                '{0}: [{1}] \n'.format("flags", msg_data['flags']),
+                '{0}: "{1}" \n'.format("date", msg_data['date']),
+                '{0}: {1} \n'.format("is_read", msg_data['is_read']? "True": "False"),
+                '{0}: {1} \n'.format("is_deleted", msg_data['is_deleted']? "True": "False"),
+                '{0}: {1}'.format("is_recent", msg_data['is_recent']? "True": "False"),
+                msg_data['log']);
 
-            if(is_error) 
-                $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).prependTo( "#console-output" ).addClass("error");
 
-            else $( log_table  ).prependTo( "#console-output" )
-                .addClass("info");
-        });
+                    t.row.add( [
+                        timestamp,
+                        "",
+                        msg_data['from_'],
+                        log_table,
+                        ""
+                    ] ).draw( false );  
+
+            //     if(is_error) 
+            //         $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).appendTo( "#console-output" ).addClass("error");
+
+            //     else $( log_table  ).prependTo( "#console-output" )
+            //         .addClass("info");
+            });
 
         init_syntax();
 
@@ -126,14 +137,23 @@ $(document).ready(function() {
         return datetime;
     }
 
+    function makeMarker() {
+        var marker = document.createElement("div");
+        marker.style.color = "#822";
+        marker.style.width = "10px";
+        marker.innerHTML = "●";
+        return marker;
+      }
+
     function init_editor(editor_elem) {
         var editor = CodeMirror.fromTextArea(editor_elem, {
-            mode: {name: "python",
-                version: 3,
-                singleLineStringErrors: false},
+            // mode: {name: "python",
+            //     version: 2,
+            //     singleLineStringErrors: false},
             lineNumbers: true,
-            indentUnit: 4,
-            matchBrackets: true
+            // matchBrackets: true,
+            // indentUnit: 4,
+            gutters: ["CodeMirror-linenumbers", "breakpoints"]
         });
 
         var arrows = [13, 27, 37, 38, 39, 40];
@@ -142,6 +162,14 @@ $(document).ready(function() {
             editor.execCommand("autocomplete")
           }
         })
+
+        // Add debugging interfaces 
+        editor.on("gutterClick", function(cm, n) {
+            var info = cm.lineInfo(n);
+            cm.setGutterMarker(n, "breakpoints", info.gutterMarkers ? null : makeMarker());
+          });
+          
+          
 
         // editor.getValue( "import re, spacy, datetime, arrow" );
         // editor.markText({line:0,ch:0},{line:2,ch:1},{readOnly:true});
@@ -204,7 +232,8 @@ $(document).ready(function() {
             <div class="folder-container"></div>
             <div class="editor-container">
             <textarea class="editor mode-editor">{0}\n{1}\n{2}</textarea>
-        </div>`.format(import_str, type == "new-message" ? "def on_new_message(new_message):":"def repeat_every():",
+        </div>
+        <div class='debugger-container' mv-app='editor2' mv-storage='#mv-data-container'  class='mv-autoedit' mv-mode='edit'>Recent messages from your selected folder(s): </div>`.format(import_str, type == "new-message" ? "def on_new_message(new_message):":"def repeat_every():",
             "\tpass"), 
         pull_down_arrow = `<span class="pull-right">
             <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
@@ -352,8 +381,6 @@ var table = $('#example').DataTable( {
     "columns": [
         { "width": "40px", "orderable": false },
         null,
-        null,
-        null,
         { "width": "40px" },
         null
       ],
@@ -378,33 +405,27 @@ var table = $('#example').DataTable( {
     "order": [[1, 'asc']]
 } );
 
-// var table = $('.console-table').DataTable( {
-//     "bPaginate": false,
-//     "bLengthChange": false,
-//     "bFilter": true,
-//     "bInfo": false,
-//     "bAutoWidth": false,
-//     "searching": false,
-//     // "columnDefs": [
-//     //     { "width": "40px", "targets": 0 },
-//     //     { "targets": 0 },
-//     //     { "targets": 0 },
-//     //     { "width": "50px", "targets": 0 }
-//     //   ],
-//     "columns": [
-//         {
-//             "className":      'details-control',
-//             "orderable":      false,
-//             "data":           null,
-//             "defaultContent": ''
-//         },
-//         { "orderable": false },
-//         { "orderable": false },{ "orderable": false },
-//         { "orderable": false },
-//         { "orderable": false }
-//     ],
-//     "order": [[1, 'asc']]
-// } );
+var table = $('#console-table').DataTable( {
+    "bPaginate": false,
+    "bLengthChange": false,
+    "bFilter": true,
+    "bInfo": false,
+    "bAutoWidth": false,
+    // "columnDefs": [
+    //     { "width": "40px", "targets": 0 },
+    //     { "targets": 0 },
+    //     { "targets": 0 },
+    //     { "width": "50px", "targets": 0 }
+    //   ],
+    "columns": [
+        { "width": "40px" },
+        { "orderable": false },
+        { "orderable": false },
+        { "orderable": false },
+        { "orderable": false }
+    ],
+    "order": [[1, 'asc']]
+} );
  
 // Add event listener for opening and closing details
 $('.console-table tbody').on('click', 'td.details-control', function () {
@@ -873,8 +894,14 @@ $('.console-table tbody').on('click', 'td.details-control', function () {
                 if (res.status) {
                     // Update execution log
                     if( log_backup != res['imap_log']){
-                        $("#console-output").html("");
-                        append_log(res['imap_log'], false);
+                        // $("#console-output").html("");
+                        old_log = JSON.parse(log_backup == '' ? '{}':log_backup.
+                            replace(/: True/g, ': true').replace(/: False/g, ': false').replace(/\'/g, '"').replace(/\</g, '&lt;').replace(/\>/g, '&gt;'));
+                        msg_log = JSON.parse(res['imap_log'].replace(/: True/g, ': true').replace(/: False/g, ': false').replace(/\'/g, '"').replace(/\</g, '&lt;').replace(/\>/g, '&gt;'));
+                    
+                        var new_msg_key = $(Object.keys(msg_log)).not(Object.keys(old_log)).get();
+                        
+                        append_log(new_msg_key.reduce((a, c) => ({ ...a, [c]: msg_log[c] }), {}), false);
                     }
                     
                     log_backup = res['imap_log'];
@@ -913,15 +940,28 @@ $('.console-table tbody').on('click', 'td.details-control', function () {
                 if (res.status) {
                     var t = $('#example').DataTable();
                     $.each( res['messages'], function( key, value ) {
+                        var log_table = `<div class='row msg-inspector' style='margin-left: 0px;'>
+                            <span class='msg-log' style='float:left;'>{0}</span>
+                            <div style='float:left;' class="panel panel-default">
+                                <pre class='language-python'><code>{2}</code></pre>
+                                <div id="demo-{1}" class="collapse"><pre class='language-python'><code>{3}{4}</code></pre>
+                                </div>
+                            </div>
+                            <a href="#demo-{1}" class="collapsed btn btn-xs btn-info" data-toggle="collapse"><div></div></a>    
+                            
+                    </div><!-- <p class='row'></p> -->`.format("", Math.floor(Math.random() * 10000) + 1, '{0}: "{1}"'.format("subject", value.subject),
+                        '{0}: "{1}" \n'.format("folder", value.folder),
+                        '{0}: "{1}" \n'.format("from_", value.sender));
+
                         t.row.add( [
                             '<i msg-id={0} class="fas fa-search fa-2x"></i>'.format(value.id),
-                            value.folder,
-                            value.sender,
-                            value.subject,
+                            log_table,
                             '<time mv-edit-placeholder="[$today]" property="date"></time>',
                             '<ul><li property="task" mv-multiple></li></ul>'
                         ] ).draw( false );  
                       });
+
+                      init_syntax();
                               
                 }
                 else {

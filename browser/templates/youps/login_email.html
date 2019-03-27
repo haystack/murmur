@@ -177,22 +177,20 @@
 																				<thead>
 																					<tr>
 																					  <th>Simulate</th>
-																					  <th><i class="far fa-folder-open"></i></th>
-																					  <th>Sender</th>
-																					  <th>Subject</th>
+																					  <th>Message</th>
 																					  <th>Deadline</th>
 																					  <th>Task</th>
 																					</tr>
 																				</thead>
 																				<tbody>
-																					<tr>
+																					<!-- <tr>
 																					  <td><i class="fas fa-search fa-2x"></i></td>
 																					  <td>Inbox</td>
 																					  <td>Dylan McKay</td>
 																					  <td>Wanna play Frisbee?</td>
 																					  <td><time mv-edit-placeholder='[$today]' property="date"></time></td>
 																					  <td><ul><li property='task' mv-multiple></li></ul></td>
-																					</tr>
+																					</tr> -->
 																					<!-- <tr>
 																					  <td class='details-control'></td>
 																						<td>Soya</td>
@@ -354,40 +352,15 @@ def on_new_message(new_message):
 																					}
 																			</div>
 																			<table id="example" class="table" style="width:100%">
-																					<thead>
-																							<tr>
-																							  <th>Simulate</th>
-																							  <th><i class="far fa-folder-open"></i></th>
-																							  <th>Sender</th>
-																							  <th>Subject</th>
-																							  <th>Deadline</th>
-																							  <th>Task</th>
-																							</tr>
-																						</thead>
-																						<tbody>
-																							<tr>
-																							  <td><i class="fas fa-search"></i></td>
-																							  <td>Inbox</td>
-																							  <td>Dylan McKay</td>
-																							  <td>Wanna play Frisbee?</td>
-																							  <td><time mv-edit-placeholder='[$today]' property="date"></time></td>
-																							  <td><ul><li property='task' mv-multiple></li></ul></td>
-																							</tr>
-																					<!-- <tr>
-																					  <td class='details-control'></td>
-																						<td>Soya</td>
-																						<td>[soyapark/murmur] new data structure and msg arrival event (#81)
-																						  </td>
-																						<td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
-																						<td><ul><li>Review PR</li></ul></td>
-																					</tr>
+																				<thead>
 																					<tr>
-																					  <td class='details-control'></td>
-																						<td>Elena Glassman</td>
-																						<td>[csail-related] Job Posting: XYZ Robotics is Hiring (Boston)</td>
-																						<td><time datetime="2016-03-15" property="date">15 Mar 2016</time></td>
-																						<td>-</td>
-																					</tr> -->
+																					  <th>Simulate</th>
+																					  <th>Message</th>
+																					  <th>Deadline</th>
+																					  <th>Task</th>
+																					</tr>
+																				</thead>
+																				<tbody>
 																				</tbody>
 																			</table>
 																		</div>
@@ -487,8 +460,22 @@ def repeat_every():
 						<span id='engine-status-msg'></span> -->
 						
 						<span id='user-status-msg'></span>
+						<table id="console-table" class="table" style="width:100%">
+							<thead>
+								<tr>
+								  <th>Timestamp</th>
+								  <th>Trigger</th>
+								  <th>Sender</th>
+								  <th>Message</th>
+								  <th>Result</th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
 						<div id="console-output">
 							<p class="info">Output of your sandbox will be sent to your inbox. {% if not is_running %}Turn on your sandbox to apply your rule.{% endif %}</p>
+
 						</div>
 						{% if user.is_authenticated %}
 						{% else %}

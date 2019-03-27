@@ -11,6 +11,10 @@
   margin-left: 20px;
 }
 
+#console input {
+  color: black;
+}
+
 .tab-content {
   background: white;
 }
@@ -291,6 +295,8 @@
 .preview-folder {
   font-size: 12px;
   opacity: 0.8;
+  margin-top: 10px;
+  float: left;
 }
 
 .panel-warning .preview-folder {
