@@ -51,6 +51,11 @@
   text-indent: -30px;
   white-space: normal;
 }
+
+.jsonpanel.contact .pair.simple {
+  max-width: 100px;
+}
+
 /* line 64, ../sass/jsonpanel.scss */
 .jsonpanel .pair .val:after {
   content: ",";
@@ -67,6 +72,11 @@
   text-overflow: ellipsis;
   vertical-align: top;
 }
+
+.jsonpanel.contact .val-inner {
+  max-width: 100px;
+}
+
 /* line 81, ../sass/jsonpanel.scss */
 .jsonpanel .expander {
   display: block;
@@ -103,7 +113,7 @@
 }
 /* line 118, ../sass/jsonpanel.scss */
 .jsonpanel .expanded > .panel {
-  margin-left: 2em;
+  margin-left: 0.5em;
 }
 /* line 123, ../sass/jsonpanel.scss */
 .jsonpanel .boolean {

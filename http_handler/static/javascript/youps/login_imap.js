@@ -32,41 +32,28 @@ $(document).ready(function() {
                 sorted[sorted.length] = key;
             }
             sorted.sort();
-            // sorted.reverse(); // recent msg at top
+            // sorted.reverse(); // 
 
             var t = $('#console-table').DataTable();
             $.each(sorted, function(index, timestamp) {                
                 Message = msg_log[timestamp]
-          
-                var log_table = `<div class='row msg-inspector' style='margin-left: 0px;'>
-                <span class='msg-log' style='float:left;'>{0}</span>
-                <div style='float:left;' class="panel panel-default">
-                    <pre class='language-python'><code>{2}</code></pre>
-                    <div id="demo-{1}" class="collapse"><pre class='language-python'><code>{3}{4}{5}{6}{7}{8}{9}{10}{11}</code></pre>
-                    </div>
-                </div>
-                <a href="#demo-{1}" class="collapsed btn btn-xs btn-info" data-toggle="collapse"><div></div></a>    
-                
-            </div><p class='row'>{12}</p>`.format("", Math.floor(Math.random() * 10000) + 1, '{0}: "{1}"'.format("subject", Message['subject']),
-                '{0}: "{1}" \n'.format("folder", Message['folder']),
-                '{0}: "{1}" \n'.format("from_", Message['from_']),
-                '{0}: [{1}] \n'.format("to", Message['to']),
-                '{0}: [{1}] \n'.format("cc", Message['cc']),
-                '{0}: [{1}] \n'.format("flags", Message['flags']),
-                '{0}: "{1}" \n'.format("date", Message['date']),
-                '{0}: {1} \n'.format("is_read", Message['is_read']? "True": "False"),
-                '{0}: {1} \n'.format("is_deleted", Message['is_deleted']? "True": "False"),
-                '{0}: {1}'.format("is_recent", Message['is_recent']? "True": "False"),
-                Message['log']);
 
                 var json_panel_id = Math.floor(Math.random() * 10000) + 1;
                 t.row.add( [
-                        timestamp,
+                        timestamp.split(",")[0],
                         "",
-                        Message['from_'],
+                        '<div class="jsonpanel contact" id="jsonpanel-from-{0}"></div>'.format(json_panel_id),
                         '<div class="jsonpanel" id="jsonpanel-{0}"></div>'.format(json_panel_id),
                         ""
                 ] ).draw( false );  
+
+                $('#jsonpanel-from-' + json_panel_id).jsonpanel({
+                    data: {
+                        Contact : Message['from_']
+                    }
+                });
+
+                $('#jsonpanel-from-' + json_panel_id + " .val-inner").text('{0}: "{1}", '.format("name", Message['from_']['name']) + '{0}: "{1}", '.format("email", Message['from_']['email']));
 
                 
                 $('#jsonpanel-' + json_panel_id).jsonpanel({
@@ -76,8 +63,9 @@ $(document).ready(function() {
                 });
 
                 $("#jsonpanel-" + json_panel_id + " .val-inner").text( '{0}: "{1}", '.format("subject", Message['subject']) + '{0}: "{1}",'.format("from_", Message['from_']) +  '{0}: "{1}"'.format("folder", Message['folder']),);
-                
-                
+            
+            // recent msg at top
+            $("#console-table").DataTable().order([0, 'des']).draw();    
 
             //     if(is_error) 
             //         $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).appendTo( "#console-output" ).addClass("error");
@@ -85,8 +73,6 @@ $(document).ready(function() {
             //     else $( log_table  ).prependTo( "#console-output" )
             //         .addClass("info");
             });
-
-        init_syntax();
 
         // var datetime = format_date();
         // $( "<p>{0}</p>".format(datetime)).prependTo( "#console-output" ).addClass("info");

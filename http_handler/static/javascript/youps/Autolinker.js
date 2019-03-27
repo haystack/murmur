@@ -18,7 +18,6 @@
 	// } else {
 	// 	root.Autolinker = factory();   // Finally, define as a browser global if no module loader.
 	// }
-	debugger;
 	root.Autolinker = factory();   // Finally, define as a browser global if no module loader
 }( this, function() {
 	

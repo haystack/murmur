@@ -125,39 +125,61 @@ def interpret(mailbox, mode, is_simulate=False):
         for event_data in mailbox.event_data_list:
             # event for new message arrival
             if isinstance(event_data, NewMessageData):
-                # This is to log for users
-                # new_msg = {
-                #     "timestamp": "%s", 
-                #     "type": "%s", 
-                #     "folder": "%s", 
-                #     "from_": "%s", 
-                #     "subject": "%s", 
-                #     "to": %s, 
-                #     "cc": %s, 
-                #     "flags": %s, 
-                #     "date": "%s", 
-                #     "deadline": "%s", 
-                #     "is_read": %s, 
-                #     "is_deleted": %s, 
-                #     "is_recent": %s
-                # }
+                from_field = {
+                    "name": event_data.message.from_.name,
+                    "email": event_data.message.from_.email,
+                    "organization": event_data.message.from_.organization,
+                    "geolocation": event_data.message.from_.geolocation
+                }
 
-                log_format = '%s{"timestamp": "%s", "type": "%s", "folder": "%s", "from_": "%s", "subject": "%s", "to": %s, "cc": %s, "flags": %s, "date": "%s", "deadline": "%s", "is_read": %s, "is_deleted": %s, "is_recent": %s}%s' % (
-                    "#!@YoUPS", str(datetime.datetime.now().strftime("%m/%d %H:%M:%S,%f")), 
-                    "new_message", 
-                    event_data.message.folder.name, 
-                    event_data.message.from_, 
-                    event_data.message.subject, 
-                    event_data.message.to,
-                    event_data.message.cc,
-                    [f.encode('utf8', 'replace') for f in event_data.message.flags],
-                    event_data.message.date,
-                    event_data.message.deadline, 
-                    event_data.message.is_read, 
-                    event_data.message.is_deleted, 
-                    event_data.message.is_recent, "#!@log")
-                logger.info(event_data.message.to)
-                logger.info(event_data.message.cc)
+                to_field = [{
+                    "name": t.name,
+                    "email": t.email,
+                    "organization": t.organization,
+                    "geolocation": t.geolocation
+                } for t in event_data.message.to]
+
+                cc_field = [{
+                    "name": t.name,
+                    "email": t.email,
+                    "organization": t.organization,
+                    "geolocation": t.geolocation
+                } for t in event_data.message.cc]
+
+                # This is to log for users
+                new_msg = {
+                    "timestamp": str(datetime.datetime.now().strftime("%m/%d %H:%M:%S,%f")), 
+                    "type": "new_message", 
+                    "folder": event_data.message.folder.name, 
+                    "from_": from_field, 
+                    "subject": event_data.message.subject, 
+                    "to": to_field,
+                    "cc": cc_field,
+                    "flags": [f.encode('utf8', 'replace') for f in event_data.message.flags],
+                    "date": str(event_data.message.date),
+                    "deadline": event_data.message.deadline, 
+                    "is_read": event_data.message.is_read, 
+                    "is_deleted": event_data.message.is_deleted, 
+                    "is_recent": event_data.message.is_recent
+                }
+                
+                # log_format = '%s{"timestamp": "%s", "type": "%s", "folder": "%s", "from_": "%s", "subject": "%s", "to": %s, "cc": %s, "flags": %s, "date": "%s", "deadline": "%s", "is_read": %s, "is_deleted": %s, "is_recent": %s}%s' % (
+                #     "#!@YoUPS", str(datetime.datetime.now().strftime("%m/%d %H:%M:%S,%f")), 
+                #     "new_message", 
+                #     event_data.message.folder.name, 
+                #     event_data.message.from_, 
+                #     event_data.message.subject, 
+                #     event_data.message.to,
+                #     event_data.message.cc,
+                #     [f.encode('utf8', 'replace') for f in event_data.message.flags],
+                #     event_data.message.date,
+                #     event_data.message.deadline, 
+                #     event_data.message.is_read, 
+                #     event_data.message.is_deleted, 
+                #     event_data.message.is_recent, "#!@log")
+                # logger.info(event_data.message.to)
+                # logger.info(event_data.message.cc)
+                log_format = "%s%s%s" % ("#!@YoUPS", new_msg, "#!@log")
                 print (log_format),
 
             # TODO maybe use this instead of mode.rules
@@ -213,9 +235,10 @@ def interpret(mailbox, mode, is_simulate=False):
             if len(log.strip()) == 0:
                 continue
             logger.debug(log)
-            logger.debug( log.split("#!@log") )
+            logger.info( log.split("#!@log") )
             msg_data, execution_log = log.split("#!@log")
-            msg_data = ast.literal_eval( msg_data )
+            logger.info( msg_data.encode('utf8', 'replace') )
+            msg_data = ast.literal_eval( msg_data.encode('utf8', 'replace') )
 
             msg_data['log'] = execution_log
             new_log[msg_data['timestamp']] = msg_data
