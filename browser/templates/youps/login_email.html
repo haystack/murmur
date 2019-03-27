@@ -9,10 +9,11 @@
 <link rel="stylesheet" href="https://get.mavo.io/mavo.css">
 <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/youps/libs/prism.css">
-<link rel="stylesheet" href="/static/css/youps/style.css">
 <link rel="stylesheet" href="/static/css/youps/libs/jquery.switchButton.css" />
 <link rel="stylesheet" href="/static/css/youps/libs/show-hint.css" />
-
+<link rel="stylesheet" type="text/css" href="/static/css/youps/libs/qunit.css">
+<link rel="stylesheet" href="/static/css/youps/libs/jsonpanel.css">
+<link rel="stylesheet" href="/static/css/youps/style.css">
 {% endblock %}
 
 {% block content %}
@@ -600,6 +601,13 @@ print get_sender()
 	<script src="https://get.mavo.io/mavo.js"></script>
 	<!-- The JS Sandbox Console script (requires underscore, backbone and jquery): -->
 	<!-- <script type="text/javascript" src="/static/javascript/youps/console/sandbox-console.js"></script> -->
+
+	<!-- JSON Formatter -->
+	<script src="/static/javascript/youps/qunit.js"></script>
+    <script src="/static/javascript/youps/blanket.min.js"></script>
+	<script src="/static/javascript/youps/Autolinker.js"></script>
+	<script src="/static/javascript/youps/jsonpanel.js"></script>
+	<script src="/static/javascript/youps/tests.js"></script>
 
 	<script type="text/javascript" src="/static/javascript/youps/login_imap.js"></script>
 {% endblock %}

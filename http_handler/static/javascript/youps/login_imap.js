@@ -36,7 +36,7 @@ $(document).ready(function() {
 
             var t = $('#console-table').DataTable();
             $.each(sorted, function(index, timestamp) {                
-                msg_data = msg_log[timestamp]
+                Message = msg_log[timestamp]
           
                 var log_table = `<div class='row msg-inspector' style='margin-left: 0px;'>
                 <span class='msg-log' style='float:left;'>{0}</span>
@@ -47,26 +47,37 @@ $(document).ready(function() {
                 </div>
                 <a href="#demo-{1}" class="collapsed btn btn-xs btn-info" data-toggle="collapse"><div></div></a>    
                 
-            </div><p class='row'>{12}</p>`.format("", Math.floor(Math.random() * 10000) + 1, '{0}: "{1}"'.format("subject", msg_data['subject']),
-                '{0}: "{1}" \n'.format("folder", msg_data['folder']),
-                '{0}: "{1}" \n'.format("from_", msg_data['from_']),
-                '{0}: [{1}] \n'.format("to", msg_data['to']),
-                '{0}: [{1}] \n'.format("cc", msg_data['cc']),
-                '{0}: [{1}] \n'.format("flags", msg_data['flags']),
-                '{0}: "{1}" \n'.format("date", msg_data['date']),
-                '{0}: {1} \n'.format("is_read", msg_data['is_read']? "True": "False"),
-                '{0}: {1} \n'.format("is_deleted", msg_data['is_deleted']? "True": "False"),
-                '{0}: {1}'.format("is_recent", msg_data['is_recent']? "True": "False"),
-                msg_data['log']);
+            </div><p class='row'>{12}</p>`.format("", Math.floor(Math.random() * 10000) + 1, '{0}: "{1}"'.format("subject", Message['subject']),
+                '{0}: "{1}" \n'.format("folder", Message['folder']),
+                '{0}: "{1}" \n'.format("from_", Message['from_']),
+                '{0}: [{1}] \n'.format("to", Message['to']),
+                '{0}: [{1}] \n'.format("cc", Message['cc']),
+                '{0}: [{1}] \n'.format("flags", Message['flags']),
+                '{0}: "{1}" \n'.format("date", Message['date']),
+                '{0}: {1} \n'.format("is_read", Message['is_read']? "True": "False"),
+                '{0}: {1} \n'.format("is_deleted", Message['is_deleted']? "True": "False"),
+                '{0}: {1}'.format("is_recent", Message['is_recent']? "True": "False"),
+                Message['log']);
 
-
-                    t.row.add( [
+                var json_panel_id = Math.floor(Math.random() * 10000) + 1;
+                t.row.add( [
                         timestamp,
                         "",
-                        msg_data['from_'],
-                        log_table,
+                        Message['from_'],
+                        '<div class="jsonpanel" id="jsonpanel-{0}"></div>'.format(json_panel_id),
                         ""
-                    ] ).draw( false );  
+                ] ).draw( false );  
+
+                
+                $('#jsonpanel-' + json_panel_id).jsonpanel({
+                    data: {
+                        Message : Message
+                    }
+                });
+
+                $("#jsonpanel-" + json_panel_id + " .val-inner").text( '{0}: "{1}", '.format("subject", Message['subject']) + '{0}: "{1}",'.format("from_", Message['from_']) +  '{0}: "{1}"'.format("folder", Message['folder']),);
+                
+                
 
             //     if(is_error) 
             //         $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).appendTo( "#console-output" ).addClass("error");
