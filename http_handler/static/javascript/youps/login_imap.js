@@ -479,12 +479,13 @@ $('.console-table tbody').on('click', 'td.details-control', function () {
         // Init folder container
         init_folder_selector( $(".folder-container") )
 
-        // Load mode - folder selection
-        $(".tab-pane").each(function() {
-            var mode_id = $(this).attr('id').split("_")[1];
-            for(var i=0; i < mode_folder.length ; i++) {
-                if(mode_folder[i][1] == mode_id) {
-                    $(this).find('.folder-container input[value="'+ mode_folder[i][0] + '"]').prop( "checked", true );
+        // Load EditorRule - folder selection
+        $("div[rule-id]").each(function() {
+            var emailrule_id = $(this).attr('rule-id');
+
+            for(var i=0; i < RULE_FOLDER.length ; i++) {
+                if(RULE_FOLDER[i][1] == emailrule_id) {
+                    $(this).find('.folder-container input[value="'+ RULE_FOLDER[i][0] + '"]').prop( "checked", true );
                 }
             }
         }) 

@@ -43,7 +43,6 @@ class Event:
             handler(*args, **kwargs)
 
     def removeAllHandles(self):
-        logger.critical('remove all event')
         self.handlers = set()
 
     def getHandlerCount(self):

@@ -408,7 +408,7 @@ def login_imap_view(request):
 	shortcuts_exist = False
         is_initialized = False 
 	folders = []
-	mode_folder = []
+	email_rule_folder = []
 	rules = []
 
 	if request.user.id != None:
@@ -438,10 +438,12 @@ def login_imap_view(request):
 					# mode_folder = [[str(mf.folder.name), str(mf.mode.uid)] for mf in mode_folder]
 
 					rules = EmailRule.objects.filter(mode__imap_account=imap[0])
+					for rule in rules:
+						email_rule_folder = [[f.name.encode('utf8', 'replace'), int(rule.uid)] for f in rule.folders.all()]
 				
 
 	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 'is_initialized': is_initialized,
-		'folders': folders, 'mode_folder': mode_folder,'mode_exist': mode_exist, 'modes': modes, 'rules':rules, 'current_mode': current_mode,
+		'folders': folders, 'rule_folder': email_rule_folder,'mode_exist': mode_exist, 'modes': modes, 'rules':rules, 'current_mode': current_mode,
 		'imap_authenticated': imap_authenticated, 'website': WEBSITE, 
 		'shortcuts_exist': shortcuts_exist, 'shortcuts': shortcuts}
 

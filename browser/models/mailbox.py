@@ -86,8 +86,8 @@ class MailBox(object):
         # type: () -> t.Optional[t.Dict[t.AnyStr, t.Any]]
         from browser.sandbox import interpret
         res = interpret(self, self._imap_account.current_mode)
-        if res['imap_log']:
-            logger.info('user output: %s' % res['imap_log'])
+        # if res['imap_log']:
+        #     logger.info('user output: %s' % res['imap_log'])
         return res
 
 

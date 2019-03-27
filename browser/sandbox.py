@@ -162,23 +162,6 @@ def interpret(mailbox, mode, is_simulate=False):
                     "is_deleted": event_data.message.is_deleted, 
                     "is_recent": event_data.message.is_recent
                 }
-                
-                # log_format = '%s{"timestamp": "%s", "type": "%s", "folder": "%s", "from_": "%s", "subject": "%s", "to": %s, "cc": %s, "flags": %s, "date": "%s", "deadline": "%s", "is_read": %s, "is_deleted": %s, "is_recent": %s}%s' % (
-                #     "#!@YoUPS", str(datetime.datetime.now().strftime("%m/%d %H:%M:%S,%f")), 
-                #     "new_message", 
-                #     event_data.message.folder.name, 
-                #     event_data.message.from_, 
-                #     event_data.message.subject, 
-                #     event_data.message.to,
-                #     event_data.message.cc,
-                #     [f.encode('utf8', 'replace') for f in event_data.message.flags],
-                #     event_data.message.date,
-                #     event_data.message.deadline, 
-                #     event_data.message.is_read, 
-                #     event_data.message.is_deleted, 
-                #     event_data.message.is_recent, "#!@log")
-                # logger.info(event_data.message.to)
-                # logger.info(event_data.message.cc)
                 log_format = "%s%s%s" % ("#!@YoUPS", new_msg, "#!@log")
                 print (log_format),
 
@@ -201,6 +184,7 @@ def interpret(mailbox, mode, is_simulate=False):
 
                 # add the user's functions to the event handlers
                 if rule.type == "new-message":
+                    logger.info(code)
                     code = code + "\non_message_arrival(on_new_message)"
                 #     mailbox.new_message_handler.handle(on_message_arrival)  # noqa: F821 on_new_message supplied by user
                 # else:
@@ -208,7 +192,7 @@ def interpret(mailbox, mode, is_simulate=False):
                 #     # some_handler or something += repeat_every
 
                 
-                logger.debug(code)
+                
                 # execute the user's code
                 # exec cant register new function (e.g., on_message_arrival) when there is a user_env
                 exec(code, user_environ)
@@ -235,9 +219,9 @@ def interpret(mailbox, mode, is_simulate=False):
             if len(log.strip()) == 0:
                 continue
             logger.debug(log)
-            logger.info( log.split("#!@log") )
+            logger.debug( log.split("#!@log") )
             msg_data, execution_log = log.split("#!@log")
-            logger.info( msg_data.encode('utf8', 'replace') )
+            logger.debug( msg_data.encode('utf8', 'replace') )
             msg_data = ast.literal_eval( msg_data.encode('utf8', 'replace') )
 
             msg_data['log'] = execution_log

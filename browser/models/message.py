@@ -141,6 +141,8 @@ class Message(object):
         Returns:
             bool: True if the message has been read
         """
+        # logger.info('caller name: %s', inspect.stack())
+        logger.info('caller name: %s %d' % (inspect.stack()[1][3], inspect.stack()[1][2]))
         return '\\Seen' in self.flags
 
     @property
