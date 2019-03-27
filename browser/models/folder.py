@@ -357,7 +357,7 @@ class Folder(object):
 
             # create and save the message contacts
             if envelope.from_ is not None:
-                message_schema.from_.add(*self._find_or_create_contacts(envelope.from_))
+                message_schema.from_m = self._find_or_create_contacts(envelope.from_)[0]
             if envelope.reply_to is not None:
                 message_schema.reply_to.add(*self._find_or_create_contacts(envelope.reply_to))
             if envelope.to is not None:
@@ -427,10 +427,17 @@ class Folder(object):
             try:
                 contact_schema = ContactSchema.objects.get(
                     imap_account=self._imap_account, email=email)
+                
+                # if previously name is not saved and if we get a name this time, then save the name to the contact
+                if name and not contact_schema.name:
+                    contact_schema.name = name
+                    contact_schema.save()
+                    
             except ContactSchema.DoesNotExist:
                 contact_schema = ContactSchema(
                     imap_account=self._imap_account, email=email, name=name)
                 contact_schema.save()
                 logger.debug("created contact %s in database" % name)
+
             contact_schemas.append(contact_schema)
         return contact_schemas

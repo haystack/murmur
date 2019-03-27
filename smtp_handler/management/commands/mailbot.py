@@ -8,7 +8,7 @@ from imapclient import IMAPClient
 from engine.constants import msg_code
 from smtp_handler.Pile import Pile
 from smtp_handler.utils import send_email
-from http_handler.settings import WEBSITE, BASE_URL
+from http_handler.settings import WEBSITE, BASE_URL, PROTOCOL
 import logging
 
 # Get an instance of a logger
@@ -53,12 +53,12 @@ class Command(BaseCommand):
                 mailbox._run_user_code()  
             except Exception:
                 logger.exception("mailbox task running failed %s " % imapAccount.email)
-                send_email("Your YoUPS account is ready!", "no-reply@" + BASE_URL, 'kixlab.rally@gmail.com', "%s register inbox failed "  % imapAccount.email)
+                send_email("Your YoUPS account is ready!", "no-reply@" + BASE_URL, 'kixlab.rally@gmail.com', "%s register inbox failed " % imapAccount.email)
                 
                 continue
 
             imapAccount.is_initialized = True
             imapAccount.is_running = False
             imapAccount.save()
-            send_email("Your YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! " + BASE_URL)
+            send_email("Your YoUPS account is ready!", "no-reply@" + BASE_URL, imapAccount.email, "Start writing your automation rule here! %s://%s" % (PROTOCOL, BASE_URL))
             res['status'] = True

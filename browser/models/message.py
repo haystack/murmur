@@ -8,6 +8,7 @@ import logging
 from collections import Sequence
 import email
 import copy
+import inspect 
 
 userLogger = logging.getLogger('youps.user')  # type: logging.Logger
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -26,10 +27,17 @@ class Message(object):
 
         # the connection to the server
         self._imap_client = imap_client  # type: IMAPClient
+        logger.info( 'caller name:', inspect.stack()[1][3] )
 
     def __str__(self):
         # type: () -> t.AnyStr
         return "Message %d" % self._uid
+
+    def _before(self):
+        pass
+
+    def _after(self):
+        pass
 
     @property
     def _uid(self):
@@ -79,6 +87,22 @@ class Message(object):
         # this method to update only our local copy
         # users update the server using add_flags or one of the aliases
         self._schema.flags = value
+        self._schema.save()
+
+    @property
+    def deadline(self):
+        # type: () -> t.AnyStr
+        """Get the user-defined deadline of the message
+
+        Returns:
+            str: The deadline
+        """
+        return self._schema.deadline
+
+    @deadline.setter
+    def deadline(self, value):
+        # type: (t.AnyStr) -> None
+        self._schema.deadline = value
         self._schema.save()
 
     @property
@@ -148,6 +172,7 @@ class Message(object):
         Returns:
             t.List[Contact]: The contacts in the to field of the message
         """
+        
         return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.to.all()]
 
     @property
@@ -156,9 +181,9 @@ class Message(object):
         """Get the Contacts the message is addressed from
 
         Returns:
-            t.List[Contact]: The contacts in the from field of the message
+            Contact: The contact in the from field of the message
         """
-        return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.from_.all()]
+        return Contact(self._schema.from_m, self._imap_client)
 
     @property
     def sender(self):
@@ -166,9 +191,9 @@ class Message(object):
         """Get the Contacts the message is sent from
 
         Returns:
-            t.List[Contact]: The contacts in the sender field of the message
+            Contact: The contact in the sender field of the message
         """
-        return [Contact(contact_schema, self._imap_client) for contact_schema in self._schema.sender.all()]
+        return Contact(self._schema.sender, self._imap_client)
 
     @property
     def reply_to(self):
@@ -287,7 +312,7 @@ class Message(object):
         finally:
             # mark the message unread if it is unread
             if initially_unread:
-                self.mark_read()
+                self.mark_read() 
 
     def has_flag(self, flag):
         # type: (t.AnyStr) -> bool

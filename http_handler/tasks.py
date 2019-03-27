@@ -2,13 +2,14 @@ import logging
 
 from browser.imap import authenticate
 from browser.models.mailbox import MailBox
-from http_handler.settings import BASE_URL
+from http_handler.settings import BASE_URL, PROTOCOL
 from schema.youps import ImapAccount
 from smtp_handler.utils import send_email
 import typing as t  # noqa: F401 ignore unused we use it for typing
 import fcntl
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
 import imaplib
+import json, ast
 
 
 logger = logging.getLogger('youps')  # type: logging.Logger
@@ -93,7 +94,7 @@ def register_inbox():
                 send_email("Your YoUPS account is ready!",
                            "no-reply@" + BASE_URL,
                            imapAccount.email,
-                           "Start writing your automation rule here! " + BASE_URL)
+                           "Start writing your automation rule here! %s://%s" % (PROTOCOL, BASE_URL))
 
                 logger.info(
                     'Register done for %s', imapAccount.email)
@@ -154,8 +155,12 @@ def loop_sync_user_inbox():
                     logger.exception("Mailbox run user code failed")
 
                 if res is not None and res.get('imap_log', ''):
-                    imapAccount.execution_log = "%s\n%s" % (
-                        res['imap_log'], imapAccount.execution_log)
+                    log_decoded = json.loads(imapAccount.execution_log) if len(imapAccount.execution_log) else {}
+                    log_decoded.update( res['imap_log'] )
+
+                    imapAccount.execution_log = json.dumps(log_decoded)
+                    # imapAccount.execution_log = "%s\n%s" % (
+                    #     res['imap_log'], imapAccount.execution_log)
                     imapAccount.save()
 
                 # after sync, logout to prevent multi-connection issue

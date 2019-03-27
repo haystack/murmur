@@ -105,10 +105,10 @@ class MessageSchema(models.Model):
     message_id = models.TextField()
     # the date when the message was received
     internal_date = models.DateTimeField()
-    # the contacts the message is from 
-    from_ = models.ManyToManyField('ContactSchema', related_name='from_messages')
+    # the contact the message is from 
+    from_m = models.ForeignKey('ContactSchema', null=True, related_name='from_messages')
     # the contact the message was sent by, i.e. if a program sends a message for someone else
-    sender = models.ForeignKey('ContactSchema', null=True)
+    sender = models.ForeignKey('ContactSchema', null=True, related_name='sender_messages')
     # if a reply is sent it should be sent to these contacts
     reply_to = models.ManyToManyField('ContactSchema', related_name='reply_to_messages')
     # the contact the message is to
