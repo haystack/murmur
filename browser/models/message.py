@@ -19,6 +19,7 @@ class Message(object):
     # the descriptors we are cacheing for each message
     _descriptors = ['FLAGS', 'INTERNALDATE',
                     'RFC822.SIZE', 'ENVELOPE']  # type: t.List[t.Text]
+    _user_level_func = ['on_new_message']
 
     def __init__(self, message_schema, imap_client):
         # type: (MessageSchema, IMAPClient) -> Message
@@ -142,7 +143,12 @@ class Message(object):
             bool: True if the message has been read
         """
         # logger.info('caller name: %s', inspect.stack())
-        logger.info('caller name: %s %d' % (inspect.stack()[1][3], inspect.stack()[1][2]))
+        caller_line_no = inspect.stack()[1][2]
+        caller_func_name = inspect.stack()[1][3]
+
+        if caller_func_name in self.caller_func_name:
+            pass
+        # logger.info('caller name: %s %d' % (, )
         return '\\Seen' in self.flags
 
     @property

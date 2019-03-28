@@ -36,7 +36,8 @@ $(document).ready(function() {
 
             var t = $('#console-table').DataTable();
             $.each(sorted, function(index, timestamp) {                
-                Message = msg_log[timestamp]
+                Message = msg_log[timestamp];
+                _message_data = Message;
 
                 var json_panel_id = Math.floor(Math.random() * 10000) + 1;
                 t.row.add( [
@@ -47,13 +48,17 @@ $(document).ready(function() {
                         ""
                 ] ).draw( false );  
 
+                
+
                 $('#jsonpanel-from-' + json_panel_id).jsonpanel({
                     data: {
-                        Contact : Message['from_']
+                        Contact :  Message['from_']
                     }
                 });
 
-                $('#jsonpanel-from-' + json_panel_id + " .val-inner").text('{0}: "{1}", '.format("name", Message['from_']['name']) + '{0}: "{1}", '.format("email", Message['from_']['email']));
+                // set contact object preview 
+                $('#jsonpanel-from-' + json_panel_id + " .val-inner").text(
+                    '"{0}", '.format(Message['from_']['name']) + '"{0}", '.format(Message['from_']['email'])  + '"{0}", '.format(Message['from_']['organization'])  + '"{0}", '.format(Message['from_']['geolocation'])  );
 
                 
                 $('#jsonpanel-' + json_panel_id).jsonpanel({
@@ -62,11 +67,17 @@ $(document).ready(function() {
                     }
                 });
 
-                $("#jsonpanel-" + json_panel_id + " .val-inner").text( '{0}: "{1}", '.format("subject", Message['subject']) + '{0}: "{1}",'.format("from_", Message['from_']) +  '{0}: "{1}"'.format("folder", Message['folder']),);
-            
-            // recent msg at top
-            $("#console-table").DataTable().order([0, 'des']).draw();    
+                // set msg object preview 
+                var preview_msg = '{0}: "{1}", '.format("subject", Message['subject']) +  '{0}: "{1}", '.format("folder", Message['folder']);
+                for (var key in Message) {
+                    if (Message.hasOwnProperty(key)) {
+                        preview_msg += '{0}: "{1}", '.format(key, Message[key])
+                    }
+                }
+                console.log(preview_msg);
+                $("#jsonpanel-" + json_panel_id + " .val-inner").text( preview_msg );
 
+            // $("#console-table").DataTable().row( $tableRow ).invalidate().draw();
             //     if(is_error) 
             //         $( "<p>" + datetime + log.replace(/\n/g , "<br>") + "</p>" ).appendTo( "#console-output" ).addClass("error");
 
@@ -74,9 +85,11 @@ $(document).ready(function() {
             //         .addClass("info");
             });
 
+            // recent msg at top
+            $("#console-table").DataTable().order([0, 'des']).draw();   
+
         // var datetime = format_date();
         // $( "<p>{0}</p>".format(datetime)).prependTo( "#console-output" ).addClass("info");
-
     }   
 
     function create_new_tab(nav_bar) {
@@ -360,86 +373,88 @@ $(document).ready(function() {
         btn_code_sumbit.addClass('active')
     }
 
+    
+
     /* Formatting function for row details - modify as you need */
-function format ( d ) {
-    // `d` is the original data object for the row
-    return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
-       'Debugging result here..'+
-    '</table>';
-}
-
-var table = $('#example').DataTable( {
-    "bPaginate": false,
-    "bLengthChange": false,
-    "bFilter": true,
-    "bInfo": false,
-    "bAutoWidth": false,
-    "searching": false,
-    "columns": [
-        { "width": "40px", "orderable": false },
-        null,
-        { "width": "40px" },
-        null
-      ],
-    // "columnDefs": [
-    //     { "width": "40px", "targets": 0 },
-    //     { "targets": 0 },
-    //     { "targets": 0 },
-    //     { "width": "50px", "targets": 0 }
-    //   ],
-    // "columns": [
-    //     {
-    //         "className":      'details-control',
-    //         "orderable":      false,
-    //         "data":           null,
-    //         "defaultContent": ''
-    //     },
-    //     { "data": "sender" },
-    //     { "data": "subject" },
-    //     { "data": "deadline" },
-    //     { "data": "task" }
-    // ],
-    "order": [[1, 'asc']]
-} );
-
-var table = $('#console-table').DataTable( {
-    "bPaginate": false,
-    "bLengthChange": false,
-    "bFilter": true,
-    "bInfo": false,
-    "bAutoWidth": false,
-    // "columnDefs": [
-    //     { "width": "40px", "targets": 0 },
-    //     { "targets": 0 },
-    //     { "targets": 0 },
-    //     { "width": "50px", "targets": 0 }
-    //   ],
-    "columns": [
-        { "width": "40px" },
-        { "orderable": false },
-        { "orderable": false },
-        { "orderable": false },
-        { "orderable": false }
-    ],
-    "order": [[1, 'asc']]
-} );
- 
-// Add event listener for opening and closing details
-$('.console-table tbody').on('click', 'td.details-control', function () {
-    var tr = $(this).closest('tr');
-    var row = table.row( tr );
-
-    if ( row.child.isShown() ) {
-        // This row is already open - close it
-        row.child.hide();
-        tr.removeClass('shown');
+    function format ( d ) {
+        // `d` is the original data object for the row
+        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+        'Debugging result here..'+
+        '</table>';
     }
-    else {
-        // Open this row
-        row.child( format(row.data()) ).show();
-        tr.addClass('shown');
-    }
-} );
+
+    var table = $('#example').DataTable( {
+        "bPaginate": false,
+        "bLengthChange": false,
+        "bFilter": true,
+        "bInfo": false,
+        "bAutoWidth": false,
+        "searching": false,
+        "columns": [
+            { "width": "40px", "orderable": false },
+            null,
+            { "width": "40px" },
+            null
+        ],
+        // "columns": [
+        //     {
+        //         "className":      'details-control',
+        //         "orderable":      false,
+        //         "data":           null,
+        //         "defaultContent": ''
+        //     },
+        //     { "data": "sender" },
+        //     { "data": "subject" },
+        //     { "data": "deadline" },
+        //     { "data": "task" }
+        // ],
+        "order": [[1, 'asc']]
+    } );
+
+    var table = $('#console-table').DataTable( {
+        "bPaginate": false,
+        "bLengthChange": false,
+        "bFilter": true,
+        "bInfo": false,
+        "bAutoWidth": false,
+        "columnDefs": [
+            { "type": "html-input", "targets": [2, 3] }
+        ],
+        "columns": [
+            { "width": "40px" },
+            { "orderable": false },
+            { "orderable": false },
+            { "orderable": false },
+            { "orderable": false }
+        ],
+        "order": [[1, 'asc']],
+        "drawCallback": function( settings ) {
+            
+        }
+    } );
+
+    var _message_data, _contact_data; // This global variable to pass around the row data
+    $.fn.dataTableExt.ofnSearch['html-input'] = function(el) {
+        // Fire after a row is drew
+        return JSON.stringify(_message_data);
+    };
+    
+    // Add event listener for opening and closing details
+    $('.console-table tbody').on('click', 'td.details-control', function () {
+        var tr = $(this).closest('tr');
+        var row = table.row( tr );
+
+        if ( row.child.isShown() ) {
+            // This row is already open - close it
+            row.child.hide();
+            tr.removeClass('shown');
+        }
+        else {
+            // Open this row
+            row.child( format(row.data()) ).show();
+            tr.addClass('shown');
+        }
+    } );
 
     // Create the sandbox:
     // window.sandbox = new Sandbox.View({
