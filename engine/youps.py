@@ -218,13 +218,14 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
             # Remove old editors to re-save it
             # TODO  dont remove it
             er = EmailRule.objects.filter(mode=mailbotMode)
+            logger.debug("deleting er editor run request")
             er.delete()
 
             for value in mode['editors']:
                 uid = value['uid']
                 code = value['code'].encode('utf-8')
                 folders = value['folders']
-                print mode_id
+                logger.info("saving editor %s run request" % uid)
                 print mode_name
                 print code
                 print folders
@@ -235,6 +236,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
                 # # Save selected folder for the mode
                 for f in folders:
                     folder = FolderSchema.objects.get(imap_account=imapAccount, name=f)
+                    logger.info("saving folder to the editor %s run request" % folder.name)
                     er.folders.add(folder)
 
                 er.save()

@@ -4,7 +4,6 @@ $(document).ready(function() {
         btn_login = $("#btn-login"),
         btn_test_run = $("#btn-test-run"),
         btn_code_sumbit = $("#btn-code-submit"),
-        btn_incoming_save = $("#btn-incoming-save"),
         btn_shortcut_save = $("#btn-shortcut-save");
 
     var log_backup = "", user_status_backup = "";
@@ -74,7 +73,6 @@ $(document).ready(function() {
                         preview_msg += '{0}: "{1}", '.format(key, Message[key])
                     }
                 }
-                console.log(preview_msg);
                 $("#jsonpanel-" + json_panel_id + " .val-inner").text( preview_msg );
 
             // $("#console-table").DataTable().row( $tableRow ).invalidate().draw();
@@ -246,6 +244,7 @@ $(document).ready(function() {
         <div class='debugger-container' mv-app='editor2' mv-storage='#mv-data-container'  class='mv-autoedit' mv-mode='edit'>Recent messages from your selected folder(s): </div>`.format(import_str, type == "new-message" ? "def on_new_message(new_message):":"def repeat_every():",
             "\tpass"), 
         pull_down_arrow = `<span class="pull-right">
+            <button class='btn-default btn-incoming-save'>Save</button>
             <i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
         </span>`;
 
@@ -760,9 +759,9 @@ $(document).ready(function() {
         run_code( $('#test-mode[type=checkbox]').is(":checked"), !$(this).hasClass('active') );
     });
 
-    btn_incoming_save.click(function() {
-        run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running() ); 
-    });
+    $("body").on("click", ".btn-incoming-save", function() {
+        run_code( $('#test-mode[type=checkbox]').is(":checked"), btn_code_sumbit.hasClass('active') ); 
+    })
 
     btn_shortcut_save.click(function() {
         save_shortcut();
@@ -832,21 +831,23 @@ $(document).ready(function() {
         // iterate by modes 
         $("#editor-container .tab-pane").each(function() {
             var editors = [];
-            var selected_folders = [];
 
             // get mode ID
             var id = $(this).attr('id').split("_")[1];
             var name = $(".nav.nav-tabs span[mode-id='{0}'].tab-title".format(id)).text();
 
-            // TODO fix
-            $(this).find(".folder-container input:checked").each(function () {
-                selected_folders.push($(this).attr('value'));
-            });
-
+            // iterate by editor 
             $(this).find('.CodeMirror').each( function(index, elem) {
+                if( $(elem).parents('.panel').hasClass('removed') ) return;
                 var code = elem.CodeMirror.getValue();
                 var type = $(elem).parents('.editable-container').attr('type');
                 var uid = $(elem).parents('.panel').attr('rule-id');
+
+                var selected_folders = [];
+                $(elem).parents('.panel').find(".folder-container input:checked").each(function () {
+                    selected_folders.push($(this).attr('value'));
+                });
+
                 editors.push({"uid": uid, "code": $.trim( code ), "type": type, "folders": selected_folders}); 
             })
 

@@ -439,7 +439,8 @@ def login_imap_view(request):
 
 					rules = EmailRule.objects.filter(mode__imap_account=imap[0])
 					for rule in rules:
-						email_rule_folder = [[f.name.encode('utf8', 'replace'), int(rule.uid)] for f in rule.folders.all()]
+						for f in rule.folders.all():
+							email_rule_folder.append( [f.name.encode('utf8', 'replace'), int(rule.uid)]  )
 				
 
 	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 'is_initialized': is_initialized,
