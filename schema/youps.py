@@ -95,10 +95,8 @@ class MessageSchema(models.Model):
     # the flags associated with the message
     _flags = models.TextField(db_column="flags")
 
-
-
     # the date when the message was sent
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField(null=True, blank=True)
     # the subject of the message
     subject = models.TextField(null=True, blank=True)
     # the id of the message
@@ -192,6 +190,8 @@ class EmailRule(models.Model):
     uid = models.IntegerField(default=1)
 
     type = models.CharField('rule_type', default='new-message', max_length=100)
+    # user-defined name
+    name = models.CharField('rule_name', default='Handling new messages', max_length=100)
     code = models.TextField(null=True, blank=True)  # t.AnyStr
     mode = models.ForeignKey('MailbotMode', related_name="rules")
     folders = models.ManyToManyField(FolderSchema, related_name='rules')  # type: t.List[FolderSchema]

@@ -19,14 +19,17 @@ class Message(object):
     # the descriptors we are cacheing for each message
     _descriptors = ['FLAGS', 'INTERNALDATE',
                     'RFC822.SIZE', 'ENVELOPE']  # type: t.List[t.Text]
+    _user_level_func = ['on_new_message']
 
-    def __init__(self, message_schema, imap_client):
+    def __init__(self, message_schema, imap_client, is_simulate=False):
         # type: (MessageSchema, IMAPClient) -> Message
 
         self._schema = message_schema  # type: MessageSchema
 
         # the connection to the server
         self._imap_client = imap_client  # type: IMAPClient
+        
+        self.is_simulate = is_simulate  # type: bool
         logger.info( 'caller name:', inspect.stack()[1][3] )
 
     def __str__(self):
@@ -86,8 +89,9 @@ class Message(object):
         # it shouldn't update the server though since we are using
         # this method to update only our local copy
         # users update the server using add_flags or one of the aliases
-        self._schema.flags = value
-        self._schema.save()
+        if not self.is_simulate:
+            self._schema.flags = value
+            self._schema.save()
 
     @property
     def deadline(self):
@@ -102,8 +106,9 @@ class Message(object):
     @deadline.setter
     def deadline(self, value):
         # type: (t.AnyStr) -> None
-        self._schema.deadline = value
-        self._schema.save()
+        if not self.is_simulate:
+            self._schema.deadline = value
+            self._schema.save()
 
     @property
     def subject(self):
@@ -141,6 +146,13 @@ class Message(object):
         Returns:
             bool: True if the message has been read
         """
+        # logger.info('caller name: %s', inspect.stack())
+        caller_line_no = inspect.stack()[1][2]
+        caller_func_name = inspect.stack()[1][3]
+
+        if caller_func_name in self._user_level_func:
+            pass
+        # logger.info('caller name: %s %d' % (, )
         return '\\Seen' in self.flags
 
     @property
@@ -332,17 +344,19 @@ class Message(object):
             TypeError: any flag is not a string
         """
         cp_self = copy.deepcopy(self)
+
         ok, flags = self._check_flags(flags)
         if not ok:
             return
 
-        # TODO the add methods return flags we should use those values instead of doing the work ourself
-        if self._schema.imap_account.is_gmail:
-            self._imap_client.add_gmail_labels(self._uid, flags)
-        else:
-            self._imap_client.add_flags(self._uid, flags)
-        # update the local flags
-        self.flags = list(set(self.flags + flags))
+        if not self.is_simulate:
+            # TODO the add methods return flags we should use those values instead of doing the work ourself
+            if self._schema.imap_account.is_gmail:
+                self._imap_client.add_gmail_labels(self._uid, flags)
+            else:
+                self._imap_client.add_flags(self._uid, flags)
+            # update the local flags
+            self.flags = list(set(self.flags + flags))
 
         self.diff_attr(cp_self)
 
@@ -357,39 +371,46 @@ class Message(object):
         ok, flags = self._check_flags()
         if not ok:
             return
-        # TODO the remove methods return flags we should use those values instead of doing the work ourself
-        if self._schema.imap_account.is_gmail:
-            self._imap_client.remove_gmail_labels(self._uid, flags)
-        else:
-            self._imap_client.remove_flags(self._uid, flags)
-        # update the local flags
-        self.flags = set(self.flags) - set(flags)
+        
+        if not self.is_simulate:
+            # TODO the remove methods return flags we should use those values instead of doing the work ourself
+            if self._schema.imap_account.is_gmail:
+                self._imap_client.remove_gmail_labels(self._uid, flags)
+            else:
+                self._imap_client.remove_flags(self._uid, flags)
+            # update the local flags
+            self.flags = set(self.flags) - set(flags)
 
     def copy(self, dst_folder):
         # type: (t.AnyStr) -> None
         """Copy the message to another folder.
         """
         self._check_folder(dst_folder)
+        
         if not self._is_message_already_in_dst_folder(dst_folder):
-            self._imap_client.copy(self._uid, dst_folder)
+            if not self.is_simulate:
+                self._imap_client.copy(self._uid, dst_folder)
 
     def delete(self):
         # type: () -> None
         """Mark a message as deleted, the imap server will move it to the deleted messages.
         """
-        self.add_flags('\\Deleted')
+        if not self.is_simulate:
+            self.add_flags('\\Deleted')
 
     def mark_read(self):
         # type: () -> None
         """Mark a message as read.
         """
-        self.add_flags('\\Seen')
+        if not self.is_simulate:
+            self.add_flags('\\Seen')
 
     def mark_unread(self):
         # type: () -> None
         """Mark a message as unread
         """
-        self.remove_flags('\\Seen')
+        if not self.is_simulate:
+            self.remove_flags('\\Seen')
 
     def move(self, dst_folder):
         # type: (t.AnyStr) -> None
@@ -397,7 +418,8 @@ class Message(object):
         """
         self._check_folder(dst_folder)
         if not self._is_message_already_in_dst_folder(dst_folder):
-            self._imap_client.move(self._uid, dst_folder)
+            if not self.is_simulate:
+                self._imap_client.move(self._uid, dst_folder)
 
     def _is_message_already_in_dst_folder(self, dst_folder):
         if dst_folder == self._schema.folder_schema.name:

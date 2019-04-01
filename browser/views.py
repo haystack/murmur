@@ -1,4 +1,4 @@
-import base64, json, logging
+import base64, json, logging,traceback
 
 from annoying.decorators import render_to
 from boto.s3.connection import S3Connection
@@ -26,6 +26,9 @@ from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, Member
                            MuteTag, Tag, UserProfile, Post, Attachment, DoNotSendList)
 from schema.youps import ImapAccount, MailbotMode, FolderSchema, EmailRule
 from smtp_handler.utils import *
+import logging
+
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
@@ -408,7 +411,7 @@ def login_imap_view(request):
 	shortcuts_exist = False
         is_initialized = False 
 	folders = []
-	mode_folder = []
+	email_rule_folder = []
 	rules = []
 
 	if request.user.id != None:
@@ -438,10 +441,13 @@ def login_imap_view(request):
 					# mode_folder = [[str(mf.folder.name), str(mf.mode.uid)] for mf in mode_folder]
 
 					rules = EmailRule.objects.filter(mode__imap_account=imap[0])
+					for rule in rules:
+						for f in rule.folders.all():
+							email_rule_folder.append( [f.name.encode('utf8', 'replace'), int(rule.uid)]  )
 				
 
 	return {'user': request.user, 'is_test': is_test, 'is_running': is_running, 'is_initialized': is_initialized,
-		'folders': folders, 'mode_folder': mode_folder,'mode_exist': mode_exist, 'modes': modes, 'rules':rules, 'current_mode': current_mode,
+		'folders': folders, 'rule_folder': email_rule_folder,'mode_exist': mode_exist, 'modes': modes, 'rules':rules, 'current_mode': current_mode,
 		'imap_authenticated': imap_authenticated, 'website': WEBSITE, 
 		'shortcuts_exist': shortcuts_exist, 'shortcuts': shortcuts}
 
@@ -1511,8 +1517,8 @@ def folder_recent_messages(request):
 		folder_name = request.POST['folder_name']
 		N = request.POST['N']
 
-		res = engine.main.folder_recent_messages(user, user.email, folder_name, N)
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		# res = engine.main.folder_recent_messages(user, user.email, folder_name, N)
+		return HttpResponse(None, content_type="application/json")
 	except Exception, e:
 		print e
 		logging.debug(e)
@@ -1546,6 +1552,21 @@ def run_mailbot(request):
 	except Exception, e:
 		print e
 		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def run_simulate_on_messages(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		
+		folder_name = request.POST['folder_name']
+		N = request.POST['N']
+		code = request.POST['user_code']
+		
+		res = engine.main.run_simulate_on_messages(user, request.user.email, folder_name, N, code)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		logger.exception("Error simulating login %s %s " % (e, traceback.format_exc()))
 		return HttpResponse(request_error, content_type="application/json")
 		
 @login_required

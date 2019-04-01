@@ -3,6 +3,7 @@ import logging
 import random
 import string
 import traceback
+import datetime
 
 from Crypto.Cipher import AES
 from imapclient import IMAPClient
@@ -13,6 +14,7 @@ from browser.sandbox import interpret
 from engine.constants import msg_code
 from http_handler.settings import IMAP_SECRET
 from schema.youps import (FolderSchema, ImapAccount, MailbotMode, MessageSchema, EmailRule)
+from browser.models.message import Message  # noqa: F401 ignore unused we use it for typing
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
@@ -186,6 +188,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
     # why are django settings not being picked up
     logger.info("user %s has run, stop, or saved" % email)
 
+    imap = None
+
     try:
         imapAccount = ImapAccount.objects.get(email=email)
         auth_res = authenticate( imapAccount )
@@ -218,13 +222,14 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
             # Remove old editors to re-save it
             # TODO  dont remove it
             er = EmailRule.objects.filter(mode=mailbotMode)
+            logger.debug("deleting er editor run request")
             er.delete()
 
             for value in mode['editors']:
                 uid = value['uid']
                 code = value['code'].encode('utf-8')
                 folders = value['folders']
-                print mode_id
+                logger.info("saving editor %s run request" % uid)
                 print mode_name
                 print code
                 print folders
@@ -235,6 +240,7 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
                 # # Save selected folder for the mode
                 for f in folders:
                     folder = FolderSchema.objects.get(imap_account=imapAccount, name=f)
+                    logger.info("saving folder to the editor %s run request" % folder.name)
                     er.folders.add(folder)
 
                 er.save()
@@ -250,7 +256,8 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
 
             # if the code execute well without any bug, then save the code to DB
             if not res['imap_error']:
-                res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log'])
+                pass
+                # res['imap_log'] = ("[TEST MODE] Your rule is successfully installed. It won't take actual action but simulate your rule. %s \n" + res['imap_log']) if is_test else ("Your rule is successfully installed. \n" + res['imap_log'])
         #         now = datetime.now()
         #         now_format = now.strftime("%m/%d/%Y %H:%M:%S") + " "
         #         res['imap_log'] = now_format + res['imap_log']
@@ -278,6 +285,113 @@ def run_mailbot(user, email, current_mode_id, modes, is_test, run_request, push=
         print e
         print (traceback.format_exc())
         res['code'] = msg_code['UNKNOWN_ERROR']
+    finally:
+        imap.logout()
+
+    logging.debug(res)
+    return res
+
+def run_simulate_on_messages(user, email, folder_name, N=3, code=''):
+    """This function is called to evaluate user's code on messages
+
+        Args:
+            user (Model.UserProfile)
+            email (string): user's email address
+            folder_name (string): name of a folder to extract messages 
+            N (int): number of recent messages
+            code (string): code to be simulated
+    """
+    res = {'status' : False, 'imap_error': False, 'imap_log': ""}
+    logger = logging.getLogger('youps')  # type: logging.Logger
+
+    # this log is going to stdout but not going to the logging file
+    # why are django settings not being picked up
+    logger.info("user %s has requested simulation" % email)
+
+    imapAccount = None
+    imap = None
+
+    try:
+        imapAccount = ImapAccount.objects.get(email=email)
+        auth_res = authenticate( imapAccount )
+        if not auth_res['status']:
+            raise ValueError('Something went wrong during authentication. Refresh and try again!')
+
+        imap = auth_res['imap']  # noqa: F841 ignore unused
+    except Exception, e:
+        logger.exception("failed while logging into imap")
+        res['code'] = "Fail to access your IMAP account"
+        return
+
+    try:
+        res['messages'] = {}
+
+        imapAccount = ImapAccount.objects.get(email=email)
+
+        messages = MessageSchema.objects.filter(imap_account=imapAccount, folder_schema__name=folder_name).order_by("-date")[:N]
+        imap.select_folder( folder_name )
+
+        for message_schema in messages:
+            imap_res = interpret(MailBox(imapAccount, imap), None, is_simulate=True, simulate_info={'code': code, 'msg-id': message_schema.id})
+            logging.info(res)
+
+            message = Message(message_schema, imap)
+
+            from_field = None
+            if message_schema.from_m:
+                from_field = {
+                    "name": message.from_.name,
+                    "email": message.from_.email,
+                    "organization": message.from_.organization,
+                    "geolocation": message.from_.geolocation
+                }
+
+            to_field = [{
+                "name": t.name,
+                "email": t.email,
+                "organization": t.organization,
+                "geolocation": t.geolocation
+            } for t in message.to]
+
+            cc_field = [{
+                "name": t.name,
+                "email": t.email,
+                "organization": t.organization,
+                "geolocation": t.geolocation
+            } for t in message.cc]
+
+            # TODO attach activated line
+            # This is to log for users
+            new_msg = {
+                "timestamp": str(datetime.datetime.now().strftime("%m/%d %H:%M:%S,%f")), 
+                "type": "new_message", 
+                "folder": message.folder.name, 
+                "from_": from_field, 
+                "subject": message.subject, 
+                "to": to_field,
+                "cc": cc_field,
+                "flags": [f.encode('utf8', 'replace') for f in message.flags],
+                "date": str(message.date),
+                "deadline": message.deadline, 
+                "is_read": message.is_read, 
+                "is_deleted": message.is_deleted, 
+                "is_recent": message.is_recent
+            }
+
+            res['messages'][message_schema.id] = new_msg
+        
+        res['status'] = True
+    except ImapAccount.DoesNotExist:
+        logger.exception("failed while doing a user code run")
+        res['code'] = "Not logged into IMAP"
+    except FolderSchema.DoesNotExist:
+        logger.exception("failed while doing a user code run")
+        logger.debug("Folder is not found, but it should exist!")
+    except Exception, e:
+        logger.exception("failed while doing a user code run %s %s " % (e, traceback.format_exc()))
+        res['code'] = msg_code['UNKNOWN_ERROR']
+    finally:
+        imap.logout()
 
     logging.debug(res)
     return res
@@ -294,32 +408,6 @@ def save_shortcut(user, email, shortcuts, push=True):
         res['status'] = True
 
 
-    except IMAPClient.Error, e:
-        res['code'] = e
-    except ImapAccount.DoesNotExist:
-        res['code'] = "Not logged into IMAP"
-    except Exception, e:
-        # TODO add exception
-        print e
-        res['code'] = msg_code['UNKNOWN_ERROR']
-
-    logging.debug(res)
-    return res
-
-
-def folder_recent_messages(user, email, folder_name, N=3):
-    res = {'status' : False, 'imap_error': False}
-
-    try:
-        imapAccount = ImapAccount.objects.get(email=email)
-
-        messages = MessageSchema.objects.filter(imap_account=imapAccount, folder_schema__name=folder_name).order_by("-date")[:N]
-
-        res['messages'] = [{"id": m.id, "folder": folder_name, "subject": m.subject, "sender": str(m.sender.name), "deadline": str(m.deadline) if m.deadline else "", "task": str(m.task)} for m in messages]
-        # 'sender': str(m.sender.name), 
-        # 'deadline': str(m.deadline),
-        # 
-        res['status'] = True
     except IMAPClient.Error, e:
         res['code'] = e
     except ImapAccount.DoesNotExist:

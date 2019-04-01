@@ -136,7 +136,7 @@
 
 																	<div class="flex_item_right panel-heading panel-collapsed">
 																		<h3 class="panel-title">
-																			<span style="float:left;" class="fa-layers fa-fw fa-2x"> 
+																			<!-- <span style="float:left;" class="fa-layers fa-fw fa-2x"> 
 																				<i class="far fa-envelope"></i>
 																				<span class="fa-layers-counter" style="background:Tomato">NEW</span>
 																			</span>
@@ -150,11 +150,13 @@
 																					  <li><a href="#">hr</a></li>
 																					  <li><a href="#">day</a></li>
 																					</ul>
-																				  </div><!-- /btn-group -->
-																			</div> <span style="float:left;margin: 10px;"> ago </span>
+																				  </div><
+																			</div> <span style="float:left;margin: 10px;"> ago </span> -->
+																			<input type="text" style="float:left;border: none;background: none;border-bottom: 2px solid;" placeholder="My email rule" />
 																			<span class="preview-folder"></span>
 																		</h3>
 																		<span class="pull-right">
+																			<button class='btn-default btn-incoming-save'>Save</button>
 																			<i class="fas fa-chevron-up" style="display:none;"></i><i class="fas fa-chevron-down"></i>
 																		</span>
 																	</div>
@@ -162,6 +164,34 @@
 																<div class="panel-body" style="display:none;">
 																	<div class="folder-container"></div>
 																	<div class="editor-container">
+																		<div class='trigger'>
+																			<form class="form-inline">
+																				<div class="form-group">
+																					<span>Run following rules when there is </span>
+																					<!-- <span class="fa-layers fa-fw fa-2x"> 
+																						<i class="far fa-envelope"></i>
+																						<span class="fa-layers-counter" style="background:Tomato">NEW</span>
+																					</span> -->
+																					<span>message arrived </span>
+																				</div>
+																				<div class="input-group" style="width: 110px;">
+																						<input type="text" class="form-control" placeholder="1">
+																						<div class="input-group-btn">
+																						  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">hr <span class="caret"></span></button>
+																						  <ul class="dropdown-menu dropdown-menu-right" role="menu">
+																							<li><a href="#">min</a></li>
+																							<li><a href="#">hr</a></li>
+																							<li><a href="#">day</a></li>
+																						  </ul>
+																						</div>
+																				</div>
+																				<div class="form-group">
+																					<span>ago</span>
+																				</div>
+																			</form>
+																			
+																			
+																		</div>
 																		<textarea class="editor mode-editor" id="editor-{{mode.uid}}">
 {{ rule.code }}
 																		</textarea>
@@ -174,13 +204,14 @@
 																						"deadline": "2016-03-15"
 																					}
 																			</div>
+																			<h2>Debug console</h2>
+																			<h4>Recent messages from your selected folders to test your rules</h4>
 																			<table id="example" class="table" style="width:100%">
 																				<thead>
 																					<tr>
-																					  <th>Simulate</th>
+																					  <th>Sender</th>
 																					  <th>Message</th>
-																					  <th>Deadline</th>
-																					  <th>Task</th>
+																					  <th>Expected Result</th>
 																					</tr>
 																				</thead>
 																				<tbody>
@@ -322,11 +353,7 @@
 
 																	<div class="flex_item_right panel-heading panel-collapsed">
 																		<h3 class="panel-title">
-																				<span class="fa-layers fa-fw fa-2x" style="float:left;"> 
-																					<i class="far fa-envelope"></i>
-																					<span class="fa-layers-counter" style="background:Tomato">NEW</span>
-																				</span>
-																			New message <span class="preview-namespace"></span>
+																			<input type="text" style="border: none;background: none;border-bottom: 2px solid;" placeholder="My email rule" />
 																			<span class="preview-folder"></span>
 																		</h3>
 																		<span class="pull-right">
@@ -461,10 +488,11 @@ def repeat_every():
 						<span id='engine-status-msg'></span> -->
 						
 						<span id='user-status-msg'></span>
+						<h2>Output console</h2>
 						<table id="console-table" class="table" style="width:100%">
 							<thead>
 								<tr>
-								  <th>Timestamp</th>
+								  <th>Date</th>
 								  <th>Trigger</th>
 								  <th>Sender</th>
 								  <th>Message</th>
@@ -564,7 +592,7 @@ print get_sender()
 			IS_RUNNING = {{ is_running|yesno:"true,false" }},
 			IS_INITIALIZED = {{ is_running|yesno:"true,false" }},
 			FOLDERS = {{ folders|safe }},
-			mode_folder = {{ mode_folder|safe }},
+			RULE_FOLDER = {{ rule_folder|safe }},
 			current_mode = "{{ current_mode.name }}",
 			current_mode_id = "{{ current_mode.uid }}";
 	</script>
