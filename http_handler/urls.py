@@ -119,6 +119,7 @@ shared_patterns = [
     url(r'^login_imap', 'browser.views.login_imap'),
     url(r'^remove_rule', 'browser.views.remove_rule'),
     url(r'^run_mailbot', 'browser.views.run_mailbot'),
+    url(r'^run_simulate_on_messages', 'browser.views.run_simulate_on_messages'),
     url(r'^save_shortcut', 'browser.views.save_shortcut'),
                     
     url(r'^delete_mailbot_mode', 'browser.views.delete_mailbot_mode'),

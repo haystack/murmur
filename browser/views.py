@@ -1,4 +1,4 @@
-import base64, json, logging
+import base64, json, logging,traceback
 
 from annoying.decorators import render_to
 from boto.s3.connection import S3Connection
@@ -26,6 +26,9 @@ from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, Member
                            MuteTag, Tag, UserProfile, Post, Attachment, DoNotSendList)
 from schema.youps import ImapAccount, MailbotMode, FolderSchema, EmailRule
 from smtp_handler.utils import *
+import logging
+
+logger = logging.getLogger('youps')  # type: logging.Logger
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
@@ -1514,8 +1517,8 @@ def folder_recent_messages(request):
 		folder_name = request.POST['folder_name']
 		N = request.POST['N']
 
-		res = engine.main.folder_recent_messages(user, user.email, folder_name, N)
-		return HttpResponse(json.dumps(res), content_type="application/json")
+		# res = engine.main.folder_recent_messages(user, user.email, folder_name, N)
+		return HttpResponse(None, content_type="application/json")
 	except Exception, e:
 		print e
 		logging.debug(e)
@@ -1549,6 +1552,21 @@ def run_mailbot(request):
 	except Exception, e:
 		print e
 		logging.debug(e)
+		return HttpResponse(request_error, content_type="application/json")
+
+@login_required
+def run_simulate_on_messages(request):
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+		
+		folder_name = request.POST['folder_name']
+		N = request.POST['N']
+		code = request.POST['user_code']
+		
+		res = engine.main.run_simulate_on_messages(user, request.user.email, folder_name, N, code)
+		return HttpResponse(json.dumps(res), content_type="application/json")
+	except Exception, e:
+		logger.exception("Error simulating login %s %s " % (e, traceback.format_exc()))
 		return HttpResponse(request_error, content_type="application/json")
 		
 @login_required

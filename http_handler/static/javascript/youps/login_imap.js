@@ -148,20 +148,24 @@ $(document).ready(function() {
     function makeMarker() {
         var marker = document.createElement("div");
         marker.style.color = "#822";
-        marker.style.width = "10px";
-        marker.innerHTML = "●";
+        marker.style.fontSize = "35px";
+        marker.style.marginTop = "-15px";
+        marker.style.fontWeight = "900";
+        marker.innerHTML = "&rarr;";
         return marker;
       }
 
     function init_editor(editor_elem) {
         var editor = CodeMirror.fromTextArea(editor_elem, {
-            // mode: {name: "python",
-            //     version: 2,
-            //     singleLineStringErrors: false},
+            mode: {name: "python",
+                version: 2,
+                singleLineStringErrors: false},
             lineNumbers: true,
-            // matchBrackets: true,
-            // indentUnit: 4,
-            gutters: ["CodeMirror-linenumbers", "breakpoints"]
+            matchBrackets: true,
+            indentUnit: 4,
+            gutters: ["breakpoints"],
+            lint: true,
+            lineWrapping:'true'
         });
 
         var arrows = [13, 27, 37, 38, 39, 40];
@@ -173,15 +177,54 @@ $(document).ready(function() {
 
         // Add debugging interfaces 
         editor.on("gutterClick", function(cm, n) {
-            var info = cm.lineInfo(n);
-            cm.setGutterMarker(n, "breakpoints", info.gutterMarkers ? null : makeMarker());
+            var line_number = n +1;
+            
+            var required_new = !$(cm.getWrapperElement()).find(".CodeMirror-line:eq({0})".format(n)).hasClass('selected');
+    
+            // Update gutter and highlight the selected line
+            $(cm.getWrapperElement()).find(".CodeMirror-line").removeClass("selected");
+            $(cm.getWrapperElement()).find(".CodeMirror-gutter-wrapper").removeClass("selected");
+            $(cm.getWrapperElement()).parents(".panel[rule-id]").find('.debugger-container tr').removeClass('selected');
+
+            if(required_new) {
+                $(cm.getWrapperElement()).find(".CodeMirror-line:eq({0})".format(n)).addClass("selected");
+                $(cm.getWrapperElement()).find(".CodeMirror-gutter-wrapper:eq({0})".format(n)).addClass("selected");
+
+                // filter examples 
+                $(cm.getWrapperElement()).parents(".panel[rule-id]").find('.debugger-container tr[line-number{0}]'.format(line_number)).addClass('selected');
+            }
           });
           
-          
-
         // editor.getValue( "import re, spacy, datetime, arrow" );
         // editor.markText({line:0,ch:0},{line:2,ch:1},{readOnly:true});
     }
+
+    var debug_matched_row = [];
+
+    // gutter Hover 
+    $("body").on("mouseenter", ".CodeMirror-gutter-wrapper", function() {
+        var cm = $(this).parents('.CodeMirror')[0].CodeMirror;
+        var cnt = 0;
+        while(cm.getLine(cnt++)) {
+            var info = cm.lineInfo(cnt-1);
+            if( !info.gutterMarkers )
+                cm.setGutterMarker(cnt-1, "breakpoints", makeMarker());
+        }
+
+        var line_number = $(".CodeMirror-gutter-wrapper").index(this) + 1;
+
+        // highlight the email matched at the line
+        // add .selected temporarily to matched example messages, then will be removed when mouse leaves
+        $(this).parents(".panel[rule-id]").find('tr[line-number{0}]'.format(line_number)).addClass('hover-selected');
+    })
+
+    $("body").on("mouseleave", ".CodeMirror-gutter-wrapper", function() {
+        var line_number = $(".CodeMirror-gutter-wrapper").index(this) + 1;
+
+        // remove .selected from the matched example messages
+        var $root_elem = $(this).parents(".panel[rule-id]");
+        $root_elem.find('.debugger-container tr[line-number{0}]'.format(line_number)).removeClass('hover-selected');
+    })
 
     function init_folder_selector($folder_container) {
         // nested tree checkboxs http://jsfiddle.net/rn290ywf/
@@ -221,9 +264,15 @@ $(document).ready(function() {
                 var p = "";
                 if (path=="") p = key;
                 else  p = path + "/" + key;
-                var $li = $("<li><input type='checkbox' value='"+ p + "'>" + '<i class="far fa-folder-open"></i> ' + key + "</li>");
+                var $li;
                 
-                if( Object.keys(d[key]).length > 0 ) { $li.append(rec_add_nested(d[key], p)) } 
+                // if has children
+                if( Object.keys(d[key]).length > 0 ) { 
+                    $li = $("<li><input type='checkbox' value='"+ p + "' style='visibility:hidden;'>" + '<i class="far fa-folder-open"></i> ' + key + "</li>");
+                    $li.append(rec_add_nested(d[key], p)) } 
+                else {
+                    $li = $("<li><input type='checkbox' value='"+ p + "'>" + '<i class="far fa-folder-open"></i> ' + key + "</li>");
+                }
 
                 $ul.append($li);
             }
@@ -258,24 +307,26 @@ $(document).ready(function() {
                     
                     <div class="panel-heading flex_item_right panel-collapsed">
                         <h3 class="panel-title">
-                            <span class="fa-layers fa-fw fa-2x"> 
-                                <i class="far fa-envelope"></i>
-                                <span class="fa-layers-counter" style="background:Tomato">NEW</span>
-                            </span>
-                            New message <span class="preview-folder"></span>
+                            {4}
                         </h3>
                         {5}
                     </div>
                 </div>
                 <!-- Panel body -->
-                {4}
+                {6}
             </div>
         </div>`.format(editable ? "": "btn-new-editor", 
                 editable ? "" : 'type="new-message"',
                 editable ? "rule-id={0}".format(Math.floor(Math.random() * 10000) + 1) : "",
                 editable ? "trash" : "plus-circle",
-                editable ? editor_elem : "",
-                editable ? pull_down_arrow : "");
+                editable ? `<input type="text" style="border: none;background: none;border-bottom: 2px solid;" placeholder="My email rule" /> 
+                    <span class="preview-folder"></span>` : `<span class="fa-layers fa-fw fa-2x"> 
+                        <i class="far fa-envelope"></i>
+                        <span class="fa-layers-counter" style="background:Tomato">NEW</span>
+                    </span>
+                    Create message arrival handler <span class=""></span>`, 
+                editable ? pull_down_arrow : "",
+                editable ? editor_elem : "");
         } else if (type == "repeat") {
             return `<div class="{0}" {1}>
             <div {2} class="panel panel-warning">
@@ -392,8 +443,7 @@ $(document).ready(function() {
         "columns": [
             { "width": "40px", "orderable": false },
             null,
-            { "width": "40px" },
-            null
+            { "width": "300px" }
         ],
         // "columns": [
         //     {
@@ -500,6 +550,7 @@ $(document).ready(function() {
             for(var i=0; i < RULE_FOLDER.length ; i++) {
                 if(RULE_FOLDER[i][1] == emailrule_id) {
                     $(this).find('.folder-container input[value="'+ RULE_FOLDER[i][0] + '"]').prop( "checked", true );
+                    run_simulate_on_messages(RULE_FOLDER[i][0], 5, this);
                 }
             }
         }) 
@@ -599,16 +650,53 @@ $(document).ready(function() {
 
     // folder select listener
     $("#editor-container").on("change", ".folder-container input:checkbox", function() {
-            if ($(this).is(':checked')) {
-                folder_recent_messages($(this).val(), 3);
-            }
-        });
+        var editor_rule_container = $(this).parents('div[rule-id]');
 
-    // folder select listener
-    $("#editor-container").on("click", ".debugger-container .fa-search", function() {
+        if ($(this).is(':checked')) {
+            run_simulate_on_messages($(this).val(), 5, editor_rule_container);
+        }
+        else { // remove from the table
+                var dt_elem = $(this).parents('.panel-body').find('.debugger-container table')[0];
+                dt = $( dt_elem ).DataTable();
+
+                $.each($(dt_elem).find('tr[folder="{0}"]'.format($(this).val())), function(index, elem) {
+                    dt.row( elem ).remove().draw();
+                })
+        }
+
+        // // Reload test results from the server
+        // var msg_id = [];
+        // $.each( $(this).parents('div[rule-id]').find(".debugger-container tr"), function(index, elem) {
+        //     if($(elem).attr('msg-id'))
+        //         msg_id.push( $(elem).attr('msg-id') )
+            
+        // })
+    });
+
+    // folder selector nested check
+    $.extend($.expr[':'], {
+        unchecked: function (obj) {
+            return ((obj.type == 'checkbox' || obj.type == 'radio') && !$(obj).is(':checked'));
+        }
+    });
+
+    $('#editor-container').on('change', '.folder-container input:checkbox', function() {
+        // change children's value
+        $(this).siblings('ul').find('input:checkbox').prop('checked', $(this).prop("checked"));
+
+        for (var i = $('.folder-container').find('ul').length - 1; i >= 0; i--) {
+            // find parents value
+            $('.folder-container').find('ul:eq(' + i + ')').parents('li').find('> input').prop('checked', function () {
+                return $(this).siblings('ul').find('input:unchecked').length === 0 ? true : false;
+            });
+        }
+    });
+
+    // debugging inspector
+    $("#editor-container").on("click", ".debugger-container .detail-inspect", function() {
         // $(this).attr("msg-id") // call simulate value
-        $("td").removeClass('simulated');
-        $(this).parent().addClass("simulated");
+        $(this).parents("table").find("button").removeClass("detail-viewing");
+        $(this).addClass("detail-viewing");
         
         // Remove line widgets
         $(".CodeMirror-linewidget").remove();
@@ -619,7 +707,7 @@ $(document).ready(function() {
         node.appendChild(display)
         
         display.innerText = 'from: David Karger \nto: Amy Zhang, Soya Park, Luke Murray'// output
-        display.style.backgroundColor = 'lightblue'
+        display.style.backgroundColor = 'lightgray'
         display.style.padding = '5px'
         // node.style.height = '20px'
 
@@ -671,30 +759,12 @@ $(document).ready(function() {
         run_code( $('#test-mode[type=checkbox]').is(":checked"), get_running());
     })
 
-    $.extend($.expr[':'], {
-        unchecked: function (obj) {
-            return ((obj.type == 'checkbox' || obj.type == 'radio') && !$(obj).is(':checked'));
-        }
-    });
-
-    $('#editor-container').on('change', '.folder-container input:checkbox', function() {
-        // change children's value
-        $(this).siblings('ul').find('input:checkbox').prop('checked', $(this).prop("checked"));
-
-        for (var i = $('.folder-container').find('ul').length - 1; i >= 0; i--) {
-            // find parents value
-            $('.folder-container').find('ul:eq(' + i + ')').parents('li').find('> input').prop('checked', function () {
-                return $(this).siblings('ul').find('input:unchecked').length === 0 ? true : false;
-            });
-        }
-    });
-
     // Accordion listener
     $("#editor-container").on("click", ".panel-heading", function (e) {
         e.preventDefault();
 
         // Fire only by panel click not child
-        if($(e.target).parents('.input-group').length != 0) return;
+        if($(e.target).parents('.input-group').length != 0 || $(e.target).is('button')) return;
 
         var $this = $(this);
         if(!$this.hasClass('panel-collapsed')) { // close the panel
@@ -760,6 +830,7 @@ $(document).ready(function() {
     });
 
     $("body").on("click", ".btn-incoming-save", function() {
+        // save the code to DB
         run_code( $('#test-mode[type=checkbox]').is(":checked"), btn_code_sumbit.hasClass('active') ); 
     })
 
@@ -911,8 +982,8 @@ $(document).ready(function() {
                         // $("#console-output").html("");
                         old_log = JSON.parse(log_backup == '' ? '{}':log_backup.
                             replace(/: True/g, ': true').replace(/: False/g, ': false').replace(/\'/g, '"').replace(/\</g, '&lt;').replace(/\>/g, '&gt;'));
-                        msg_log = JSON.parse(res['imap_log'].replace(/: True/g, ': true').replace(/: False/g, ': false').replace(/\'/g, '"').replace(/\</g, '&lt;').replace(/\>/g, '&gt;'));
-                    
+                        // msg_log = JSON.parse(res['imap_log'].replace(/: True/g, ': true').replace(/: False/g, ': false').replace(/\'/g, '"').replace(/\</g, '&lt;').replace(/\>/g, '&gt;'));
+                        msg_log = JSON.parse(res['imap_log'])
                         var new_msg_key = $(Object.keys(msg_log)).not(Object.keys(old_log)).get();
                         
                         append_log(new_msg_key.reduce((a, c) => ({ ...a, [c]: msg_log[c] }), {}), false);
@@ -940,49 +1011,6 @@ $(document).ready(function() {
         );
         
         setTimeout(fetch_log, 2 * 1000); // 2 second
-    }
-
-    function folder_recent_messages(folder_name, N) {
-        var params = {
-            'folder_name': folder_name,
-            'N': N
-        };
-        
-        $.post('/folder_recent_messages', params,
-            function(res) {
-                // Load messages successfully 
-                if (res.status) {
-                    var t = $('#example').DataTable();
-                    $.each( res['messages'], function( key, value ) {
-                        var log_table = `<div class='row msg-inspector' style='margin-left: 0px;'>
-                            <span class='msg-log' style='float:left;'>{0}</span>
-                            <div style='float:left;' class="panel panel-default">
-                                <pre class='language-python'><code>{2}</code></pre>
-                                <div id="demo-{1}" class="collapse"><pre class='language-python'><code>{3}{4}</code></pre>
-                                </div>
-                            </div>
-                            <a href="#demo-{1}" class="collapsed btn btn-xs btn-info" data-toggle="collapse"><div></div></a>    
-                            
-                    </div><!-- <p class='row'></p> -->`.format("", Math.floor(Math.random() * 10000) + 1, '{0}: "{1}"'.format("subject", value.subject),
-                        '{0}: "{1}" \n'.format("folder", value.folder),
-                        '{0}: "{1}" \n'.format("from_", value.sender));
-
-                        t.row.add( [
-                            '<i msg-id={0} class="fas fa-search fa-2x"></i>'.format(value.id),
-                            log_table,
-                            '<time mv-edit-placeholder="[$today]" property="date"></time>',
-                            '<ul><li property="task" mv-multiple></li></ul>'
-                        ] ).draw( false );  
-                      });
-
-                      init_syntax();
-                              
-                }
-                else {
-                    notify(res, false);
-                }
-            }
-        );
     }
 
     function validateEmail(email) {
@@ -1115,6 +1143,144 @@ $(document).ready(function() {
                     }
                     else {
                         notify(res, false);
+                    }
+                }
+            );
+        }
+
+        // function folder_recent_messages(folder_name, N, code="") {
+        //     var params = {
+                
+        //     };
+            
+        //     $.post('/folder_recent_messages', params,
+        //         function(res) {
+        //             // Load messages successfully 
+        //             if (res.status) {
+        //                 var t = $('#example').DataTable();
+    
+        //                 $.each( res['messages'], function( msg_id, value ) {
+        //                     var Message = value;
+    
+        //                     var json_panel_id = Math.floor(Math.random() * 10000) + 1;
+    
+        //                     var added_row = t.row.add( [
+        //                         '<div class="jsonpanel contact" id="jsonpanel-from-{0}"></div>'.format(json_panel_id),
+        //                         '<div class="jsonpanel" id="jsonpanel-{0}"></div>'.format(json_panel_id),
+        //                         'No action  <button msg-id={0} class="detail-inspect">detail</button>'.format(msg_id)
+        //                     ] ).draw( false ).node();
+        //                     $( added_row ).attr('folder', Message['folder'])
+        //                         .attr('msg-id', msg_id);
+    
+        //                     $('#jsonpanel-from-' + json_panel_id).jsonpanel({
+        //                         data: {
+        //                             Contact :  Message['from_'] || []
+        //                         }
+        //                     });
+            
+        //                     // set contact object preview 
+        //                     // $('#jsonpanel-from-' + json_panel_id + " .val-inner").text(
+        //                     //     '"{0}", '.format(Message['from_']['name']) + '"{0}", '.format(Message['from_']['email'])  + '"{0}", '.format(Message['from_']['organization'])  + '"{0}", '.format(Message['from_']['geolocation'])  );
+            
+                            
+        //                     $('#jsonpanel-' + json_panel_id).jsonpanel({
+        //                         data: {
+        //                             Message : Message
+        //                         }
+        //                     });
+            
+        //                     // set msg object preview 
+        //                     var preview_msg = '{0}: "{1}", '.format("subject", Message['subject']) +  '{0}: "{1}", '.format("folder", Message['folder']);
+        //                     for (var key in Message) {
+        //                         if (Message.hasOwnProperty(key)) {
+        //                             preview_msg += '{0}: "{1}", '.format(key, Message[key])
+        //                         }
+        //                     }
+        //                     $("#jsonpanel-" + json_panel_id + " .val-inner").text( preview_msg );
+        //                   });
+                        
+        //                   if(code)
+        //                       run_simulate_on_messages(code, Object.keys(res['messages']));
+        //             }
+        //             else {
+        //                 notify(res, false);
+        //             }
+        //         }
+        //     );
+        // }
+
+        function run_simulate_on_messages(folder_name, N, editor_rule_container) {
+            show_loader(true);
+            
+
+            var params = {
+                'folder_name': folder_name,
+                'N': N,
+                'user_code': $.trim( $(editor_rule_container).find('.CodeMirror')[0].CodeMirror.getValue() )
+                // TODO if message_ids is not given, run simulation on recent messages on folders
+                // 'message_ids': JSON.stringify(msgs_id)
+            };
+
+            $.post('/run_simulate_on_messages', params,
+                function(res) {
+                    show_loader(false);
+                    console.log(res);
+                    
+                    // get simulation result
+                    if (res.status) {
+                        var t = $( $(editor_rule_container).find('.debugger-container table')[0] ).DataTable();
+    
+                        $.each( res['messages'], function( msg_id, value ) {
+                            var Message = value;
+    
+                            var json_panel_id = Math.floor(Math.random() * 10000) + 1;
+    
+                            var added_row = t.row.add( [
+                                '<div class="jsonpanel contact" id="jsonpanel-from-{0}"></div>'.format(json_panel_id),
+                                '<div class="jsonpanel" id="jsonpanel-{0}"></div>'.format(json_panel_id),
+                                '{1}  <button msg-id={0} class="detail-inspect"></button>'.format(msg_id, json_panel_id % 2 == 0? "flags: [] -> ['should read']": "No action")
+                            ] ).draw( false ).node();
+
+                            $( added_row ).attr('folder', Message['folder'])
+                                .attr('msg-id', msg_id)
+                                .attr('line-number2', 1);
+                                
+                                // .attr('line-number{0}', 1); // TODO add activated line
+
+                            $( added_row ).find("td:eq(2)").addClass(json_panel_id % 2 == 0? "warning":"");
+                            if(json_panel_id % 2 == 0) $( added_row ).attr('line-number3', 1);
+                            //n==2 ? [1,2,3,6,9] : [3,6];
+                            // $("#example tr").removeClass("unmatched");
+                            // $.each(unmatched_row, function(index, val) {
+                            //     $("#example tr:eq({0})".format(val)).addClass("unmatched");
+                            // })         
+    
+                            $('#jsonpanel-from-' + json_panel_id).jsonpanel({
+                                data: {
+                                    Contact :  Message['from_'] || []
+                                }
+                            });
+            
+                            // set contact object preview 
+                            // $('#jsonpanel-from-' + json_panel_id + " .val-inner").text(
+                            //     '"{0}", '.format(Message['from_']['name']) + '"{0}", '.format(Message['from_']['email'])  + '"{0}", '.format(Message['from_']['organization'])  + '"{0}", '.format(Message['from_']['geolocation'])  );
+            
+                            
+                            $('#jsonpanel-' + json_panel_id).jsonpanel({
+                                data: {
+                                    Message : Message
+                                }
+                            });
+            
+                            // set msg object preview 
+                            var preview_msg = '{0}: "{1}", '.format("subject", Message['subject']) +  '{0}: "{1}", '.format("folder", Message['folder']);
+                            for (var key in Message) {
+                                if (Message.hasOwnProperty(key)) {
+                                    preview_msg += '{0}: "{1}", '.format(key, Message[key])
+                                }
+                            }
+                            $("#jsonpanel-" + json_panel_id + " .val-inner").text( preview_msg );
+                          });      
                     }
                 }
             );

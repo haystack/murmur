@@ -8,15 +8,17 @@ import typing as t  # noqa: F401 ignore unused we use it for typing
 from StringIO import StringIO
 from email import message
 from imapclient import IMAPClient  # noqa: F401 ignore unused we use it for typing
+from schema.youps import MessageSchema  # noqa: F401 ignore unused we use it for typing
 
 from browser.models.event_data import NewMessageData
 from browser.models.mailbox import MailBox  # noqa: F401 ignore unused we use it for typing
+from browser.models.message import Message
 from smtp_handler.utils import send_email
 
 logger = logging.getLogger('youps')  # type: logging.Logger
 
 
-def interpret(mailbox, mode, is_simulate=False):
+def interpret(mailbox, mode, is_simulate=False, simulate_info={}):
     # type: (MailBox, MailbotMode, bool) -> t.Dict[t.AnyStr, t.Any]
 
     from schema.youps import EmailRule, MailbotMode
@@ -121,88 +123,99 @@ def interpret(mailbox, mode, is_simulate=False):
 
         from schema.youps import FolderSchema
         
-        # iterate through event queue
-        for event_data in mailbox.event_data_list:
-            # event for new message arrival
-            if isinstance(event_data, NewMessageData):
-                from_field = {
-                    "name": event_data.message.from_.name,
-                    "email": event_data.message.from_.email,
-                    "organization": event_data.message.from_.organization,
-                    "geolocation": event_data.message.from_.geolocation
-                }
+        # define the variables accessible to the user
+        user_environ = {
+            'create_draft': create_draft,
+            'create_folder': create_folder,
+            'on_message_arrival': on_message_arrival
+            # 'set_interval': set_interval
+        }
 
-                to_field = [{
-                    "name": t.name,
-                    "email": t.email,
-                    "organization": t.organization,
-                    "geolocation": t.geolocation
-                } for t in event_data.message.to]
+        # simulate request. normally from UI
+        if is_simulate:
+            code = simulate_info['code']
+            message_schema = MessageSchema.objects.filter(id=simulate_info['msg-id'])
+            for m_schema in message_schema:
+                new_message = Message(m_schema, mailbox._imap_client, is_simulate=True)            
 
-                cc_field = [{
-                    "name": t.name,
-                    "email": t.email,
-                    "organization": t.organization,
-                    "geolocation": t.geolocation
-                } for t in event_data.message.cc]
-
-                # This is to log for users
-                new_msg = {
-                    "timestamp": str(datetime.datetime.now().strftime("%m/%d %H:%M:%S,%f")), 
-                    "type": "new_message", 
-                    "folder": event_data.message.folder.name, 
-                    "from_": from_field, 
-                    "subject": event_data.message.subject, 
-                    "to": to_field,
-                    "cc": cc_field,
-                    "flags": [f.encode('utf8', 'replace') for f in event_data.message.flags],
-                    "date": str(event_data.message.date),
-                    "deadline": event_data.message.deadline, 
-                    "is_read": event_data.message.is_read, 
-                    "is_deleted": event_data.message.is_deleted, 
-                    "is_recent": event_data.message.is_recent
-                }
-                log_format = "%s%s%s" % ("#!@YoUPS", new_msg, "#!@log")
-                print (log_format),
-
-            # TODO maybe use this instead of mode.rules
-            for rule in EmailRule.objects.filter(mode=mode):
-                assert isinstance(rule, EmailRule)
-
-                # define the variables accessible to the user
-                user_environ = {
-                    'create_draft': create_draft,
-                    'create_folder': create_folder,
-                    'on_message_arrival': on_message_arrival
-                    # 'set_interval': set_interval
-                }
-
-                valid_folders = rule.folders.all()
-                valid_folders = FolderSchema.objects.filter(imap_account=mailbox._imap_account, rules=rule)
-                code = rule.code
-                
-
-                # add the user's functions to the event handlers
-                if rule.type == "new-message":
-                    logger.info(code)
-                    code = code + "\non_message_arrival(on_new_message)"
-                #     mailbox.new_message_handler.handle(on_message_arrival)  # noqa: F821 on_new_message supplied by user
-                # else:
-                #     continue
-                #     # some_handler or something += repeat_every
-
-                
-                
                 # execute the user's code
                 # exec cant register new function (e.g., on_message_arrival) when there is a user_env
-                exec(code, user_environ)
+                user_environ['new_message'] = new_message
+                exec(code + "\non_new_message(new_message)", user_environ)    
 
-                # Conduct rules only on requested folders
-                if event_data.message._schema.folder_schema in valid_folders:
-                    # TODO maybe user log here that event has been fired
-                    event_data.fire_event(mailbox.new_message_handler)
+        # regular loading from event queue
+        else:
+            # iterate through event queue
+            for event_data in mailbox.event_data_list:
+                # event for new message arrival
+                if isinstance(event_data, NewMessageData):
+                    from_field = {
+                        "name": event_data.message.from_.name,
+                        "email": event_data.message.from_.email,
+                        "organization": event_data.message.from_.organization,
+                        "geolocation": event_data.message.from_.geolocation
+                    }
 
-                mailbox.new_message_handler.removeAllHandles()
+                    to_field = [{
+                        "name": t.name,
+                        "email": t.email,
+                        "organization": t.organization,
+                        "geolocation": t.geolocation
+                    } for t in event_data.message.to]
+
+                    cc_field = [{
+                        "name": t.name,
+                        "email": t.email,
+                        "organization": t.organization,
+                        "geolocation": t.geolocation
+                    } for t in event_data.message.cc]
+
+                    # This is to log for users
+                    new_msg = {
+                        "timestamp": str(datetime.datetime.now().strftime("%m/%d %H:%M:%S,%f")), 
+                        "type": "new_message", 
+                        "folder": event_data.message.folder.name, 
+                        "from_": from_field, 
+                        "subject": event_data.message.subject, 
+                        "to": to_field,
+                        "cc": cc_field,
+                        "flags": [f.encode('utf8', 'replace') for f in event_data.message.flags],
+                        "date": str(event_data.message.date),
+                        "deadline": event_data.message.deadline, 
+                        "is_read": event_data.message.is_read, 
+                        "is_deleted": event_data.message.is_deleted, 
+                        "is_recent": event_data.message.is_recent
+                    }
+                    log_format = "%s%s%s" % ("#!@YoUPS", new_msg, "#!@log")
+                    print (log_format),
+
+                # TODO maybe use this instead of mode.rules
+                for rule in EmailRule.objects.filter(mode=mode):
+                    assert isinstance(rule, EmailRule)
+
+                    valid_folders = rule.folders.all()
+                    valid_folders = FolderSchema.objects.filter(imap_account=mailbox._imap_account, rules=rule)
+                    code = rule.code
+                    
+
+                    # add the user's functions to the event handlers
+                    if rule.type == "new-message":
+                        logger.info(code)
+                        code = code + "\non_message_arrival(on_new_message)"
+                    # else:
+                    #     continue
+                    #     # some_handler or something += repeat_every
+
+                    # execute the user's code
+                    # exec cant register new function (e.g., on_message_arrival) when there is a user_env
+                    exec(code, user_environ)
+
+                    # Conduct rules only on requested folders
+                    if event_data.message._schema.folder_schema in valid_folders:
+                        # TODO maybe user log here that event has been fired
+                        event_data.fire_event(mailbox.new_message_handler)
+
+                    mailbox.new_message_handler.removeAllHandles()
 
     except Exception:
         res['status'] = False
@@ -213,22 +226,29 @@ def interpret(mailbox, mode, is_simulate=False):
         sys.stdout = sys.__stdout__
         userLoggerStream = sys.__stdout__
 
-        new_log = {}
-        # Parse log output (string) to Json. Later, this will be appended to the user's execution log
-        for log in user_std_out.getvalue().split("#!@YoUPS"):
-            if len(log.strip()) == 0:
-                continue
-            logger.debug(log)
-            logger.debug( log.split("#!@log") )
-            msg_data, execution_log = log.split("#!@log")
-            logger.debug( msg_data.encode('utf8', 'replace') )
-            msg_data = ast.literal_eval( msg_data.encode('utf8', 'replace') )
+        # if it is simulate don't save to db
+        if is_simulate:
+            logger.info(user_std_out.getvalue())
+        
+        # save logs to db
+        else:
+            new_log = {}
+            # Parse log output (string) to Json. Later, this will be appended to the user's execution log
+            for log in user_std_out.getvalue().split("#!@YoUPS"):
+                if len(log.strip()) == 0:
+                    continue
+                logger.debug(log)
+                logger.debug( log.split("#!@log") )
+                msg_data, execution_log = log.split("#!@log")
+                logger.debug( msg_data.encode('utf8', 'replace') )
+                msg_data = ast.literal_eval( msg_data.encode('utf8', 'replace') )
 
-            msg_data['log'] = execution_log
-            new_log[msg_data['timestamp']] = msg_data
+                msg_data['log'] = execution_log
+                new_log[msg_data['timestamp']] = msg_data
 
-        logger.debug(new_log)
-        res['imap_log'] = new_log
+            logger.debug(new_log)
+            res['imap_log'] = new_log
+
         user_std_out.close()
         return res
 

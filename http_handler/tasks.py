@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.sites.models import Site
 from browser.imap import authenticate
 from browser.models.mailbox import MailBox
 from http_handler.settings import BASE_URL, PROTOCOL
@@ -91,10 +92,12 @@ def register_inbox():
 
                 imapAccount.is_initialized = True
                 imapAccount.save()
+
+                site = Site.objects.get_current()
                 send_email("Your YoUPS account is ready!",
                            "no-reply@" + BASE_URL,
                            imapAccount.email,
-                           "Start writing your automation rule here! %s://%s" % (PROTOCOL, BASE_URL))
+                           "Start writing your automation rule here! %s://%s" % (PROTOCOL, site.domain))
 
                 logger.info(
                     'Register done for %s', imapAccount.email)
