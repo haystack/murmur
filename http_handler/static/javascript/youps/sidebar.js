@@ -1,40 +1,71 @@
 function sidebar_init() {
-    var items = document.getElementsByTagName("main")[0].children;
+    /* USAGE
+     *   - Divs to be added to the sidebar need the class `add-sidebar`
+     *   - Another class specifies the level [`header`, `sub-header`, `value`]
+     *      - Each level will fall into the list of the last higher level
+     *      - `header` and `sub-header` use the innerHTML
+     *      - `value` uses the id of the div
+     */
+
+    var items = document.getElementsByClassName("add-sidebar")
+    var header = ""
     var target = ""
 
-    for (i = 1; i < items.length; i++) {
+    for (i = 0; i < items.length; i++) {
         var current = items[i]
 
-        if (current.tagName == 'DIV') {
-            target = current.id + "sidebar";
+        if (current.classList.contains("header")) {
 
-            var sublist = document.createElement("li");
+            header = current.id + "sidebar";
 
-            var header_ref = document.createElement("a");
+            let sublist = document.createElement("li");
+            let header_ref = document.createElement("a");
             header_ref.href = "#" + current.id;
-            var text = current.children[0].innerHTML;
-            var end = text.indexOf("<a");
+
+            let text = current.children[0].innerHTML;
+            let end = text.indexOf("<a");
             header_ref.innerHTML = text.substring(0, end);
             sublist.appendChild(header_ref);
 
-            var actions = document.createElement("ul");
-            actions.id = target;
+            let actions = document.createElement("ul");
+            actions.id = header;
             actions.className = "sidebar-list";
             sublist.appendChild(actions);
 
             document.getElementById("sidebar_container").appendChild(sublist);
-        } else if (current.tagName == 'DIV' && !current.id.includes("-")) {
-            // console.log(current);
+        }
 
-            var action = document.createElement("li");
+        if (current.classList.contains("sub-header")) {
 
-            var action_href = document.createElement("a");
+            target = current.id + "sidebar";
+
+            let sublist = document.createElement("li");
+            let header_ref = document.createElement("a");
+            header_ref.href = "#" + current.id;
+
+            let text = current.children[0].innerHTML;
+            let end = text.indexOf("<a");
+            header_ref.innerHTML = text.substring(0, end);
+            sublist.appendChild(header_ref);
+
+            let actions = document.createElement("ul");
+            actions.id = target;
+            actions.className = "sidebar-list";
+            sublist.appendChild(actions);
+
+            document.getElementById(header).appendChild(sublist);
+        }
+
+
+        if (current.classList.contains("value")) {
+            let action = document.createElement("li");
+
+            let action_href = document.createElement("a");
             action_href.href = "#" + current.id;
             action_href.innerHTML = current.id;
             action.appendChild(action_href);
 
             document.getElementById(target).appendChild(action);
-
         }
     }
 }
