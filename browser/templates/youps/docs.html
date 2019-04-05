@@ -43,11 +43,11 @@
             mv-unauthenticated-permissions="read"
             mv-autosave="0"
             mv-server-push="true">
-                <div clsass='should-add-to-sidebar-header' id="message"> <h2> Message <a href="#message">¶</a></h2>   </div>
+                <div class='add-sidebar header' id="message"> <h2> Message <a href="#message">¶</a></h2>   </div>
                 <span>Each one of your email message is represented as a <a href="#message">Message</a> instance. </span>
                 <div property="message">
-                    <div clsass='should-add-to-sidebar' id="message-attr"> <h3> Attribute <a href="#message-attr">¶</a></h3>   </div>
-                    <div id="[name]" property="attribute" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                    <div class='add-sidebar sub-header' id="message-attr"> <h3> Attribute <a href="#message-attr">¶</a></h3>   </div>
+                    <div id="[name]" class='add-sidebar value' property="attribute" mv-multiple>
                     <h4>[name] <a href="#[name]"> ¶ </a> </h4>
                         <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
                         <p style="margin:0;"><a href="#[return_href]">[return_type]</a> [description]</p>
@@ -58,8 +58,8 @@
                         </pre>
                     </div>
 
-                    <div clsass='should-add-to-sidebar' id="message-method"> <h3> Method <a href="#message-method">¶</a></h3>   </div>
-                    <div id="[name]" property="method" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                    <div class='add-sidebar sub-header' id="message-method"> <h3> Method <a href="#message-method">¶</a></h3>   </div>
+                    <div id="[name]" class='add-sidebar value' property="method" mv-multiple>
                             <h4>[name] ([params])  <a href="#[name]"> ¶ </a> </h4>
                                 <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
                                 <p style="margin:0;">[description]</p>
@@ -71,10 +71,10 @@
                     </div>
                 </div>
 
-                <div id="contact"> <h2> Contact <a href="#contact">¶</a></h2>   </div>
+                <div id="contact" class='add-sidebar header'> <h2> Contact <a href="#contact">¶</a></h2>   </div>
                 <div property="contact">
-                    <div id="contact-attr"> <h4> Attribute <a href="#contact-attr">¶</a></h4>   </div>
-                    <div id="[name]" property="attribute" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                    <div id="contact-attr" class='add-sidebar sub-header'> <h4> Attribute <a href="#contact-attr">¶</a></h4>   </div>
+                    <div id="[name]" class='add-sidebar value' property="attribute" mv-multiple>
                         <h4>[name] <a href="#[name]"> ¶ </a> </h4>
                             <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
                             <p style="margin:0;"><a href="#[return_href]">[return_type]</a> [description]</p>
@@ -84,8 +84,8 @@
                                 </code>
                             </pre>
                     </div>
-                    <div id="contact-method"> <h4> Method <a href="#contact-method">¶</a></h4>   </div>
-                    <div id="[name]" property="method" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+                    <div id="contact-method" class='add-sidebar sub-header'> <h4> Method <a href="#contact-method">¶</a></h4>   </div>
+                    <div id="[name]" class='add-sidebar value' property="method" mv-multiple>
                             <h4>[name] ([params])  <a href="#[name]"> ¶ </a> </h4>
                                 <!-- <h4>[name] ([params]) / [thread] ([thread_params])</h4> -->
                                 <p style="margin:0;">[description]</p>
@@ -96,10 +96,10 @@
                                 </pre>
                     </div>
                 </div>
-                
 
-                <div id="folder-header" style="padding-top: 50px; margin-top: -50px; margin-bottom: 50px"> <h3> Action on a folder <a href="folder-header">¶</a> </h3> </div>
-                <div id="[name]" property="folder" mv-multiple style="padding-top: 50px; margin-top: -50px;">
+
+                <div id="folder-header"  class='add-sidebar header' style="margin-bottom: 50px"> <h3> Action on a folder <a href="folder-header">¶</a> </h3> </div>
+                <div id="[name]" property="folder" mv-multiple >
                     <h4>[name] ([params]) <a href="#[name]"> ¶ </a></h4>
                     <p style="margin:0;">[description]</p>
                     <pre class="language-python" style="background-color: transparent;border: 0;margin:0;">
@@ -108,7 +108,7 @@
                               </code>
                         </pre>
                 </div>
-                <div id="mode-header" style="padding-top: 50px; margin-top: -50px; margin-bottom: 50px"> <h3> Manage your email mode <a href="#mode-header">¶</a> </h3> </div>
+                <div id="mode-header"  class='add-sidebar header' style="padding-top: 50px; margin-top: -50px; margin-bottom: 50px"> <h3> Manage your email mode <a href="#mode-header">¶</a> </h3> </div>
                 <div id="[name]" property="mode" mv-multiple style="padding-top: 50px; margin-top: -50px;">
                     <h4>[name] ([params])  <a href="#[name]"> ¶ </a> </h4>
                     <p style="margin:0;">[description]</p>

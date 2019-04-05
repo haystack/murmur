@@ -59,6 +59,11 @@
   padding: 10px;
 }
 
+.add-sidebar {
+    padding-top: 50px;
+    margin-top: -50px;
+}
+
 [contenteditable] {
   border: solid 1px lightgreen;
   padding: 5px;
@@ -534,6 +539,3 @@ div[type='repeat'] {
 #example tr.unmatched{
   opacity: 0.5;
 }
-
- 
-
