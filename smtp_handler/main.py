@@ -2,7 +2,6 @@ import logging, time, base64
 from lamson.routing import route, stateless
 from config.settings import relay
 from http_handler.settings import WEBSITE
-from schema.models import *
 from lamson.mail import MailResponse
 from email.utils import *
 from email import message_from_string
@@ -120,8 +119,11 @@ def admins(message, group_name=None, host=None):
         return
 
     elif WEBSITE == 'murmur':
+        from schema.models import Group, MemberGroup
+
         group_name = group_name.lower()
         name, sender_addr = parseaddr(message['From'].lower())
+        from schema.models import Group, MemberGroup
 
         try:
             group = Group.objects.get(name=group_name)
@@ -166,6 +168,8 @@ def subscribe(message, group_name=None, host=None):
         return
 
     elif WEBSITE == 'murmur':
+        from schema.models import UserProfile, Group
+
         group = None
         group_name = group_name.lower()
         name, addr = parseaddr(message['from'].lower())
@@ -210,6 +214,8 @@ def unsubscribe(message, group_name=None, host=None):
         return
 
     elif WEBSITE == 'murmur':
+        from schema.models import UserProfile
+
         group = None
         group_name = group_name.lower()
         name, addr = parseaddr(message['from'].lower())
@@ -269,6 +275,7 @@ def info(message, group_name=None, host=None):
         relay.deliver(mail)
 
 def handle_post_murmur(message, group, host, verified):
+    from schema.models import UserProfile, Thread, MemberGroup, Following, FollowTag, Mute, MuteTag, ForwardingList
 
     # just setting up a bunch of variables with values we'll use
     email_message = message_from_string(str(message))
@@ -279,7 +286,7 @@ def handle_post_murmur(message, group, host, verified):
     sender_addr = sender_addr.lower()
     if not sender_name:
         sender_name = None
-    else:
+    else: 
         sn = sender_name.split(" ")
         print "sender name", sender_name
         if len(sn) > 0:
@@ -709,6 +716,8 @@ def handle_post(message, address=None, host=None):
 
     verified = isSenderVerified(message)
     
+    from schema.models import Group
+
     group_name = address
     try:
         group = Group.objects.get(name=group_name)
