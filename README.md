@@ -62,7 +62,7 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 #### run murmur server
 * If running email server: `lamson start`
 	+ ⚠️ If it is not running without any error msg or throws `connection refused` error, then check your email port being used by other services (e.g., `netstat -peanut | grep ":587"`) and check logs at logs/lamson.err. If the port is being used, use another port or kill the process using the port.   
-* Webserver: `python manage.py runserver 0.0.0.0:8000`
+* Webserver: `python manage.py runserver 0.0.0.0:8000` (check [here](https://www.digitalocean.com/community/tutorials/how-to-serve-django-applications-with-apache-and-mod_wsgi-on-ubuntu-16-04) for details)
 
 #### enable daily digest feature
 * `crontab -e` and add a line `0 */24 * * * python ABSOLUTE_DIRECTORY/manage.py digest`
