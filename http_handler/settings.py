@@ -225,7 +225,7 @@ INSTALLED_APPS = (
     
     #third party apps
     'registration',
-    'south',
+    # 'south',
     'django_mobile',
     'storages'
 )

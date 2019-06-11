@@ -15,7 +15,7 @@ from http_handler.settings import WEBSITE
 try:
     from django.contrib.auth import get_user_model
     User = get_user_model()
-except ImportError:
+except Exception:
     from schema.models import UserProfile as User
 
 try:
