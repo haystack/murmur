@@ -73,7 +73,8 @@ LOGIN_REDIRECT_URL = "/"
 
 EMAIL_HOST = 'localhost'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_PORT = 25
+# Don't forget to route incoming flow to port 25 -> EMAIL_PORT
+EMAIL_PORT = 1025
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = False
@@ -243,14 +244,55 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse'
         }
     },
+    # custom formatters used to describe the logs
+    'formatters': {
+        # this formatter just includes the message
+        'custom.brief' : {
+            'format': '%(message)s'
+        },
+        # this formatter is for the user
+        'custom.user' : {
+            'format': '%(asctime)s %(levelname)-8s %(funcName)s %(message)s'
+        },
+        # this formatter includes the time, log level, logger name, and message
+        'custom.precise' : {
+            'format' : '%(asctime)s %(levelname)-8s %(name)-15s %(message)s',
+            'datefmt' : '%Y-%m-%d %H:%M:%S''format'
+        },
+        # this formatter includes file name and line number info
+        'custom.debug': {
+            'format': '%(asctime)s %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        }
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        # this handler logs to a file
+        'custom.file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            # TODO change this to relative path
+            'filename': '/home/ubuntu/murmur/logs/murmur.log',
+            'formatter': 'custom.debug'
+        },
+        # this handler logs to the console
+        'custom.console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,  # Default is stderr
+            'formatter': 'custom.user'
         }
     },
     'loggers': {
+        'murmur': {
+            'handlers': ['custom.file'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',

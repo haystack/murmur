@@ -20,6 +20,8 @@ Murmur Mail Interface Handler
 @date: Oct 20, 2012
 '''
 
+logger = logging.getLogger('murmur')  # type: logging.Logger
+
 GROUP_OR_SQUAD = {'murmur' : 'group', 'squadbox' : 'squad'}
 
 @route("(address)@(host)", address="all", host=HOST)
@@ -27,7 +29,7 @@ GROUP_OR_SQUAD = {'murmur' : 'group', 'squadbox' : 'squad'}
 def all(message, address=None, host=None):
     # no public groups to list on squadbox. 
     if WEBSITE == 'squadbox':
-        logging.debug("Ignored message to all@%s, no public groups to list" % HOST)
+        logger.debug("Ignored message to all@%s, no public groups to list" % HOST)
         return
 
     elif WEBSITE == 'murmur':
@@ -49,7 +51,7 @@ def all(message, address=None, host=None):
 def create(message, group_name=None, host=None):
     # at least for now, for now we don't need this
     if WEBSITE == 'squadbox':
-        logging.debug("Ignored message to create group via email, not used in Squadbox")
+        logger.debug("Ignored message to create group via email, not used in Squadbox")
         return
 
     elif WEBSITE == 'murmur':
@@ -70,7 +72,7 @@ def create(message, group_name=None, host=None):
 def activate(message, group_name=None, host=None):
 
     if WEBSITE == 'squadbox':
-        logging.debug("Ignoring activation message in squadbox")
+        logger.debug("Ignoring activation message in squadbox")
         return
 
     group = None
@@ -90,7 +92,7 @@ def activate(message, group_name=None, host=None):
 def deactivate(message, group_name=None, host=None):
 
     if WEBSITE == 'squadbox':
-        logging.debug("Ignoring deactivation message in squadbox")
+        logger.debug("Ignoring deactivation message in squadbox")
         return
 
     group = None
@@ -115,7 +117,7 @@ def admins(message, group_name=None, host=None):
     # created the group. having the +admins route would just be 
     # a way to circumvent moderation / serves no purpose as of now
     if WEBSITE == 'squadbox':
-        logging.debug("Ignoring message to admin")
+        logger.debug("Ignoring message to admin")
         return
 
     elif WEBSITE == 'murmur':
@@ -145,14 +147,14 @@ def admins(message, group_name=None, host=None):
 
             admins = MemberGroup.objects.filter(group=group, admin=True)
 
-            logging.debug(admins)
+            logger.debug(admins)
 
             for a in admins:
                 email = a.member.email
                 relay.deliver(mail, To = email)
 
         except Exception, e:
-            logging.debug(e)
+            logger.debug(e)
             send_error_email(group_name, e, sender_addr, ADMIN_EMAILS)  
             return
 
@@ -164,7 +166,7 @@ def subscribe(message, group_name=None, host=None):
     # people will never be able to subscribe to a squadbox
     # group themselves; they must be added by the admin. 
     if WEBSITE == 'squadbox':
-        logging.debug("No subscribing via email in Squadbox")
+        logger.debug("No subscribing via email in Squadbox")
         return
 
     elif WEBSITE == 'murmur':
@@ -210,7 +212,7 @@ def subscribe(message, group_name=None, host=None):
 def unsubscribe(message, group_name=None, host=None):
 
     if WEBSITE == 'squadbox':
-        logging.debug("No unsubscribing via email in Squadbox")
+        logger.debug("No unsubscribing via email in Squadbox")
         return
 
     elif WEBSITE == 'murmur':
@@ -249,7 +251,7 @@ def info(message, group_name=None, host=None):
     # for now I'm not sure what we would have here, 
     # but we can change this later on.
     if WEBSITE == 'squadbox':
-        logging.debug("No group info sent via email in Squadbox")
+        logger.debug("No group info sent via email in Squadbox")
         return
 
     elif WEBSITE == 'murmur':
@@ -328,7 +330,7 @@ def handle_post_murmur(message, group, host, verified):
 
     # if this looks like a double-post, ignore it
     if check_duplicate(message, group, sender_addr):
-        logging.debug("ignoring duplicate")
+        logger.debug("ignoring duplicate")
         return
 
     msg_id = message['Message-ID']
@@ -390,7 +392,7 @@ def handle_post_murmur(message, group, host, verified):
 
         s3_res = upload_message(message, post_id, msg_id)
         if not s3_res['status']:
-            logging.debug("Error uploading original post to s3; continuing anyway")
+            logger.debug("Error uploading original post to s3; continuing anyway")
 
         subject = get_subject(message, res, group.name)
         mail = setup_post(message['From'], subject, group.name)
@@ -483,7 +485,7 @@ def handle_post_murmur(message, group, host, verified):
 
 
         except Exception, e:
-            logging.debug(e)
+            logger.debug(e)
             send_error_email(group.name, e, None, ADMIN_EMAILS)
             
             # try to deliver mail even without footers
@@ -492,7 +494,7 @@ def handle_post_murmur(message, group, host, verified):
             relay.deliver(mail, To = to_send)
                 
     except Exception, e:
-        logging.debug(e)
+        logger.debug(e)
         send_error_email(group.name, e, None, ADMIN_EMAILS)
         return
         
@@ -508,7 +510,7 @@ def handle_post_squadbox(message, group, host, verified):
 
     # if this looks like a double-post, ignore it
     if check_duplicate(message, group, sender_addr):
-        logging.debug("ignoring duplicate")
+        logger.debug("ignoring duplicate")
         return
     
     subj = message['Subject'].strip()
@@ -541,7 +543,7 @@ def handle_post_squadbox(message, group, host, verified):
     if not group.active:
         status = 'A'
         reason = 'deactivated'
-        logging.debug("Squad deactivated; automatically approving message")
+        logger.debug("Squad deactivated; automatically approving message")
     else:
 
         # first try whitelist/blacklist
@@ -559,13 +561,13 @@ def handle_post_squadbox(message, group, host, verified):
                 # case 1 
                 if group.auto_approve_after_first:
                     reason = 'auto approve on'
-                    logging.debug('Sender approved for this thread previously; automatically approving post')
+                    logger.debug('Sender approved for this thread previously; automatically approving post')
                 # case 2
                 else:
                     reason = "mod off for sender-thread"
                     
             else:
-                logging.debug('Post needs to be moderated')
+                logger.debug('Post needs to be moderated')
 
 
     # should refactor logic to check for this first, but for now
@@ -574,24 +576,24 @@ def handle_post_squadbox(message, group, host, verified):
     if len(attachments) > 0 and not group.allow_attachments:
         status = 'R'
         reason = 'no attachments'
-        logging.debug("squad does not allow attachments")
+        logger.debug("squad does not allow attachments")
 
 
     moderators = MemberGroup.objects.filter(group=group, moderator=True)
     if not moderators.exists():
         status = 'A'
         reason = 'no mods'
-        logging.debug("Squad has no moderators")
+        logger.debug("Squad has no moderators")
 
     elif moderators.filter(member__email=sender_addr).exists():
         status = 'A'
         reason = 'is mod'
-        logging.debug('Message is from a moderator')
+        logger.debug('Message is from a moderator')
 
     elif MemberGroup.objects.filter(group=group, member__email=sender_addr, admin=True).exists():
         status = 'A'
         reason = 'is owner'
-        logging.debug('Message is from owner')
+        logger.debug('Message is from owner')
 
     # if pending or rejected, we need to put it in the DB 
     if status in ['P', 'R']:
@@ -613,7 +615,7 @@ def handle_post_squadbox(message, group, host, verified):
 
         res = upload_message(message, post_id, msg_id)
         if not res['status']:
-            logging.debug("Error uploading original post to s3; continuing anyway")
+            logger.debug("Error uploading original post to s3; continuing anyway")
 
     # one of following is true: 
     # 1) sender is whitelisted
@@ -633,13 +635,13 @@ def handle_post_squadbox(message, group, host, verified):
         if status == 'A':
             try:
                 mail_service = build_services(admin)['mail']
-                logging.debug("MAIL SERVICE:", mail_service)
+                logger.debug("MAIL SERVICE:", mail_service)
                 updated_count = untrash_message(mail_service, sender_addr, subj)
                 if updated_count > 0:
-                    logging.debug("untrashed count: %s" % updated_count)
+                    logger.debug("untrashed count: %s" % updated_count)
                     return 
             except Exception, e:
-                logging.error("error untrashing msg: %s" % e)
+                logger.error("error untrashing msg: %s" % e)
                 pass
 
         new_subj = subj
@@ -667,7 +669,7 @@ def handle_post_squadbox(message, group, host, verified):
         res = get_or_generate_filter_hash(admin, group.name)
         if res['status']:
             mail['List-Id'] = '%s@%s' % (res['hash'], BASE_URL)
-            logging.error("updated list id to %s" % mail['List-Id'])
+            logger.error("updated list id to %s" % mail['List-Id'])
 
         relay.deliver(mail)
 
@@ -683,7 +685,7 @@ def handle_post_squadbox(message, group, host, verified):
             outgoing_msg['message-id'] = base64.b64encode(group.name + str(datetime.now())).lower() + '@' + BASE_URL
 
             relay.deliver(outgoing_msg, To=least_recent.member.email)
-            logging.debug("sending msg to moderator %s" % least_recent.member.email)
+            logger.debug("sending msg to moderator %s" % least_recent.member.email)
 
             least_recent.last_emailed = datetime.now(pytz.utc)
             least_recent.save()
@@ -960,9 +962,9 @@ def send_account_info(message, address=None, host=None):
     activation_str = ("account activation on %s" % WEBSITE).lower()
     reset_str = ("password reset on %s" % WEBSITE).lower()
 
-    logging.debug(message['Subject'])
-    logging.debug(message['To'])
-    logging.debug(message['From'])
+    logger.debug(message['Subject'])
+    logger.debug(message['To'])
+    logger.debug(message['From'])
 
     if message['From'].encode('utf-8') == NO_REPLY and (activation_str in subj_string or reset_str in subj_string):
         
