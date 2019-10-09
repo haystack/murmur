@@ -6,7 +6,7 @@ Murmur
 
 Murmur uses Django with a MySQL backend (you can replace with any other backend Django supports). For email, we use postfix along with the python lamson library.
 
-### Installation Instructions
+### Web Installation Instructions
   
 #### Install MySQL Server
 
@@ -44,10 +44,6 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 * edit file /opt/murmur/website with single word containing "murmur" or "squadbox" to direct to the respective landing page
 * If using Google integration, create a Google API project and enable the Gmail, People and Contacts APIs; generate an Oauth2 client_secrets.json file for this project and put this in the /gmail_setup/ directory
 
-#### if setting up a local email server (not necessary to run webserver)
-* configure your relay_server (postfix or something else) in config/settings.py
-* use port other than 25 (default is currently set at 587)
-
 #### setup the database 
 * (optional: only during new database setup) change root password by: `set PASSWORD = PASSWORD('newPassword');`
 * `mysql -u root -p`
@@ -60,9 +56,31 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 * Then do fake migration:  `python manage.py migrate schema 0001 --fake`
 
 #### run murmur server
-* If running email server: `lamson start`
-	+ ⚠️ If it is not running without any error msg or throws `connection refused` error, then check your email port being used by other services (e.g., `netstat -peanut | grep ":587"`) and check logs at logs/lamson.err. If the port is being used, use another port or kill the process using the port.   
 * Webserver: `python manage.py runserver 0.0.0.0:8000` (check [here](https://www.digitalocean.com/community/tutorials/how-to-serve-django-applications-with-apache-and-mod_wsgi-on-ubuntu-16-04) for details)
+
+### Email Instructions
+ 
+Setting for relay & outgoing server is in config/settings.py (Double check you open firewall for the ports)
+
+#### Postfix setting (if you are using postfix as a relay system)
+
+If you are using Postfix, you should update two postfix files:
+
+1. master.cf: add a line `RELAY PORT YOU SPECIFIED at config/settings.py      inet  n       -       n      -       -       smtpd`
+2. main.cf: 
+```
+mydestination =
+local_recipient_maps =
+local_transport = error: local mail delivery disabled
+relay_domains = YOUR DOMAIN NAME
+relay_transport = smtp:127.0.0.1:[RECEIVER PORT YOU SPECIFIED at config/settings.py]
+```
+
+Then reboot Postfix. 
+
+#### run murmur server
+* If running email server: `lamson start`
+	+ ⚠️ If it is not running without any error msg or throws `connection refused` error, then check your email port being used by other services (e.g., `netstat -peanut | grep ":8825"`) and check logs at logs/lamson.err. If the port is being used, use another port or kill the process using the port.  
 
 #### enable daily digest feature
 * `crontab -e` and add a line `0 */24 * * * python ABSOLUTE_DIRECTORY/manage.py digest`
