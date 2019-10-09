@@ -66,7 +66,7 @@ Setting for relay & outgoing server is in config/settings.py (Double check you o
 
 If you are using Postfix, you should update two postfix files:
 
-1. master.cf: add a line `RELAY PORT YOU SPECIFIED at config/settings.py      inet  n       -       n      -       -       smtpd`
+1. master.cf: add a line `RELAY_PORT_YOU_SPECIFIED at config/settings.py      inet  n       -       n      -       -       smtpd`
 2. main.cf: 
 ```
 mydestination =
