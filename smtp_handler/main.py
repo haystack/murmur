@@ -23,6 +23,8 @@ Murmur Mail Interface Handler
 
 GROUP_OR_SQUAD = {'murmur' : 'group', 'squadbox' : 'squad'}
 
+logger = logging.getLogger('murmur') 
+
 @route("(address)@(host)", address="all", host=HOST)
 @stateless
 def all(message, address=None, host=None):
@@ -120,7 +122,7 @@ def admins(message, group_name=None, host=None):
         return
 
     elif WEBSITE == 'murmur':
-        group_name = group_name.lower()
+    group_name = group_name.lower()
         name, sender_addr = parseaddr(message['From'].lower())
 
         try:
@@ -522,6 +524,8 @@ def handle_post_squadbox(message, group, host, verified):
         return
 
     attachments = res['attachments']
+
+    logger.debug("Done checking attachments")
 
     msg_text = get_body(email_message)
     msg_text = check_html_and_plain(msg_text, message_is_reply)
