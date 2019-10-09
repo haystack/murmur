@@ -241,16 +241,17 @@ def get_new_body(message_text, ps_blurb, plain_or_html):
 
 	text = message_text[plain_or_html]
 
-	if isinstance(text, unicode):
-		logging.debug("it's unicode, no need to change")
-		new_body = text + ps_blurb
+	encoded=''
+    # this is text, so encode it in canonical form
+    for body_charset in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
+        try:
+            encoded = text.encode(body_charset)
+        except UnicodeError:
+            pass
+        else:
+            break
 
-	else:
-		logging.debug("not unicode, convert using utf-8")
-		converted_text = unicode(text, "utf-8", "ignore")
-		new_body = converted_text + ps_blurb
-
-	return new_body
+	return encoded + ps_blurb
 
 		
 def get_direct_recips(email_message):

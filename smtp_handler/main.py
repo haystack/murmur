@@ -122,7 +122,7 @@ def admins(message, group_name=None, host=None):
         return
 
     elif WEBSITE == 'murmur':
-    group_name = group_name.lower()
+        group_name = group_name.lower()
         name, sender_addr = parseaddr(message['From'].lower())
 
         try:
@@ -359,6 +359,8 @@ def handle_post_murmur(message, group, host, verified):
         res = get_attachments(email_message)
         check = check_attachments(res, group.allow_attachments)
 
+        logger.debug("Done checking attachments")
+
         if not check['status']:
             send_error_email(group.name, check['error'], sender_addr, ADMIN_EMAILS)
             return
@@ -487,7 +489,7 @@ def handle_post_murmur(message, group, host, verified):
             relay.deliver(mail, To = to_send)
                 
     except Exception, e:
-        logging.debug(e)
+        logger.debug(e)
         send_error_email(group.name, e, None, ADMIN_EMAILS)
         return
         
@@ -524,8 +526,6 @@ def handle_post_squadbox(message, group, host, verified):
         return
 
     attachments = res['attachments']
-
-    logger.debug("Done checking attachments")
 
     msg_text = get_body(email_message)
     msg_text = check_html_and_plain(msg_text, message_is_reply)

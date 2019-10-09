@@ -277,13 +277,6 @@ LOGGING = {
             # TODO change this to relative path
             'filename': '/home/ubuntu/murmur/logs/murmur.log',
             'formatter': 'custom.debug'
-        },
-        # this handler logs to the console
-        'custom.console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout,  # Default is stderr
-            'formatter': 'custom.user'
         }
     },
     'loggers': {
