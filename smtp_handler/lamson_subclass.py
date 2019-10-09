@@ -341,20 +341,34 @@ class MurmurMIMEPart(MIMEBase):
         MIMEBase.__init__(self, self.maintype, self.subtype, **params)
 
     def add_text(self, content):
+        encoded=''
         # this is text, so encode it in canonical form
-        try:
-            encoded = content.encode('ascii')
-            charset = 'ascii'
-        except UnicodeError:
-            encoded = content.encode('utf-8')
-            charset = 'utf-8'
+        for body_charset in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
+            try:
+                encoded = content.encode(body_charset)
+            except UnicodeError:
+                pass
+            else:
+                break
 
-        self.set_payload(encoded, charset=charset)
+        self.set_payload(encoded, charset=body_charset)
 
     def add_html(self, content):
-        content = content.encode('utf-8')
-        encoded = quopri.encodestring(content)
-        self.set_payload(encoded, charset='utf-8')
+        try:
+            encoded = quopri.encodestring(content)
+            self.set_payload(encoded, charset='utf-8')
+        except: 
+            encoded=''
+            # this is text, so encode it in canonical form
+            for body_charset in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
+                try:
+                    encoded = content.encode(body_charset)
+                except UnicodeError:
+                    pass
+                else:
+                    break
+
+            self.set_payload(encoded, charset=body_charset)
 
     def extract_payload(self, mail):
         if mail.body == None: return  # only None, '' is still ok
