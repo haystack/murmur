@@ -61,14 +61,14 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 
 ### Email Instructions
  
-Setting for relay & outgoing server is in config/settings.py (Double check you open firewall for the ports)
+Setting for relay & outgoing server is in `config/settings.py` (Double check you open firewall for the ports)
 
 #### Postfix setting (if you are using postfix as a relay system)
 
 If you are using Postfix, you should update two postfix files:
 
-1. master.cf: add a line `RELAY_PORT_YOU_SPECIFIED at config/settings.py      inet  n       -       n      -       -       smtpd`
-2. main.cf: 
+1. `master.cf`: add a line `RELAY_PORT_YOU_SPECIFIED_at_config/settings.py      inet  n       -       n      -       -       smtpd`
+2. `main.cf`: 
 ```
 mydestination =
 local_recipient_maps =
