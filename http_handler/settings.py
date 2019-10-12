@@ -272,7 +272,7 @@ LOGGING = {
         },
         # this handler logs to a file
         'custom.file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             # TODO change this to relative path
             'filename': '/home/ubuntu/murmur/logs/murmur.log',
