@@ -211,6 +211,7 @@ def post_list(request):
 		active_group = {'name': request.GET.get('group_name')}
 		if active_group['name']:
 			group = Group.objects.get(name=active_group['name'])
+			active_group['description'] = group.description
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
 			
 			if not group.public:
