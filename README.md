@@ -43,6 +43,7 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 * create file /opt/murmur/debug with single word containing "true" or "false" to turn on debug mode
 * edit file /opt/murmur/website with single word containing "murmur" or "squadbox" to direct to the respective landing page
 * If using Google integration, create a Google API project and enable the Gmail, People and Contacts APIs; generate an Oauth2 client_secrets.json file for this project and put this in the /gmail_setup/ directory
+* Run [this command](https://github.com/haystack/murmur/blob/master/mysql_encoding) at mysql
 
 #### setup the database 
 * (optional: only during new database setup) change root password by: `set PASSWORD = PASSWORD('newPassword');`
@@ -60,14 +61,14 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 
 ### Email Instructions
  
-Setting for relay & outgoing server is in config/settings.py (Double check you open firewall for the ports)
+Setting for relay & outgoing server is in `config/settings.py` (Double check you open firewall for the ports)
 
 #### Postfix setting (if you are using postfix as a relay system)
 
 If you are using Postfix, you should update two postfix files:
 
-1. master.cf: add a line `RELAY_PORT_YOU_SPECIFIED at config/settings.py      inet  n       -       n      -       -       smtpd`
-2. main.cf: 
+1. `master.cf`: add a line `RELAY_PORT_YOU_SPECIFIED_at_config/settings.py      inet  n       -       n      -       -       smtpd`
+2. `main.cf`: 
 ```
 mydestination =
 local_recipient_maps =

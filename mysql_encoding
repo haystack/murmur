@@ -1,0 +1,9 @@
+ALTER TABLE
+murmur_threads
+CONVERT TO CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+ALTER TABLE
+murmur_posts
+CONVERT TO CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
