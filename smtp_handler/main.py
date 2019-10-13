@@ -328,9 +328,10 @@ def handle_post_murmur(message, group, host, verified):
 
     msg_id = message['Message-ID']
     msg_text = get_body(email_message)
+    logger.debug(msg_text)
     message_is_reply = (message['Subject'][0:4].lower() == "re: ")
     msg_text = check_html_and_plain(msg_text, message_is_reply)
-
+    
     if msg_text['plain'].startswith('unsubscribe\n') or msg_text['plain'] == 'unsubscribe':
         unsubscribe(message, group_name = group.name, host = HOST)
         return
@@ -480,7 +481,7 @@ def handle_post_murmur(message, group, host, verified):
 
 
         except Exception, e:
-            logging.debug(e)
+            logger.debug(e)
             send_error_email(group.name, e, None, ADMIN_EMAILS)
             
             # try to deliver mail even without footers

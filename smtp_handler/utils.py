@@ -241,17 +241,19 @@ def get_new_body(message_text, ps_blurb, plain_or_html):
 
 	text = message_text[plain_or_html]
 
-	encoded=''
+	encoded=text
     # this is text, so encode it in canonical form
 	for body_charset in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
 		try:
-			encoded = text.encode(body_charset)
-		except UnicodeError:
+			decoded = text.decode(body_charset)
+			decoded = decoded + ps_blurb
+			encoded = decoded.encode(body_charset)
+		except Exception:
 			pass
 		else:
 			break
 
-	return encoded + ps_blurb
+	return encoded
 
 		
 def get_direct_recips(email_message):
