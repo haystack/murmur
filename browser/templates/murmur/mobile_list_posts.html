@@ -94,7 +94,9 @@
 					<a href="/groups/{{ active_group.name }}"><button type="button">View Group Info</button></a>
 					<BR><BR>
 					<input type="text" class="default-text" value="Search within posts" title="Search within posts"/>
-		    	
+				{% elif not is_member %}
+					<a href="/accounts/login/"><button type="button">Join the list</button></a>
+					<a href="/accounts/register/">Don't have a Murmur account yet?</a>
 				{% else %}
 				<i>You are not in any groups yet. <a href="/group_list">Join or create a new group.</a>
 				</i>

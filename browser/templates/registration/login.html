@@ -9,6 +9,7 @@
 		{{ form.as_p }}
 		<br />
 		<input type="submit" class="btn btn-primary" value="Log In" />
+		<input type="hidden" name="next" value="{{ next }}" />
 	</form>
 	<br />
 	<P><a href="{% url "auth_password_reset" %}">Reset Password</a></p>

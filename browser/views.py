@@ -150,7 +150,7 @@ def posts(request):
 			return HttpResponseRedirect(global_settings.LOGIN_URL)
 		
 		
-
+# One that being used for listing group at the moment
 @render_to(WEBSITE+'/mobile_list_posts.html')
 def post_list(request):
 	tag_info = None
@@ -202,7 +202,7 @@ def post_list(request):
 					tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
 					
 			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group, "tag_info": tag_info, 
-						"member_info": member_info}
+						"member_info": member_info, 'is_member': is_member}
 		else:
 			return redirect('/404?e=member')
 	else:
