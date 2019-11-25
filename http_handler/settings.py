@@ -202,7 +202,7 @@ ROOT_URLCONF = 'http_handler.urls'
 WSGI_APPLICATION = 'http_handler.wsgi.application'
 
 TEMPLATE_DIRS = (
-    "/home/ubuntu/production/mailx/browser/templates"
+    PROJECT_DIR + "browser/templates"
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -286,7 +286,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             # TODO change this to relative path
-            'filename': '/home/ubuntu/production/mailx/logs/murmur.log',
+            'filename': PROJECT_DIR + 'logs/murmur.log',
             'formatter': 'custom.debug'
         }
     },
