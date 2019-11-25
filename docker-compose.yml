@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASS}
+    volumes:
+      - youps-db:/var/lib/mysql
+    restart: always
+  web:
+    build: .
+    container_name: murmur_web
+    command: bash -c "lamson start; cron && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/home/ubuntu/production/mailx
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - smtp 
+    environment:
+      - RELAY_HOST=${RELAY_HOST} # only for local development
+      - DATABASE_NAME=${DATABASE_NAME}
+      - MYSQL_PASS=${MYSQL_PASS}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - DATABASE_HOST=${DATABASE_HOST}
+    restart: on-failure
+  smtp:
+    image: namshi/smtp 
+    expose: 
+      - 587 
+    environment:
+      - GMAIL_USER=${GMAIL_USER} 
+      - GMAIL_PASSWORD=${GMAIL_PASSWORD} 
+      - PORT=587
+    restart: always
+volumes:
+  youps-db:

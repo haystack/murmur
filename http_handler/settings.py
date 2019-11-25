@@ -12,40 +12,50 @@ _DEBUG_FILE_PATH = '/opt/murmur/debug'
 _WEBSITE_FILE_PATH = '/opt/murmur/website'
 
 def _get_env():
-    f = open(_ENV_FILE_PATH)
-    env = f.read()
+    try: 
+        f = open(_ENV_FILE_PATH)
+        env = f.read()
 
-    if env[-1] == '\n':
-        env = env[:-1]
-    
-    f.close()
-    return env
+        if env[-1] == '\n':
+            env = env[:-1]
+        
+        f.close()
+        return env
+    except Exception:
+        return "local"
+
 ENV = _get_env() 
 
 def _get_debug():
-    f = open(_DEBUG_FILE_PATH)
-    debug = f.read()
+    try:
+        f = open(_DEBUG_FILE_PATH)
+        debug = f.read()
 
-    if debug[-1] == '\n':
-        debug = debug[:-1]
-    
-    f.close()
-    if debug == 'true':
+        if debug[-1] == '\n':
+            debug = debug[:-1]
+        
+        f.close()
+        if debug == 'true':
+            return True
+        else:
+            return False
+    except Exception:
         return True
-    else:
-        return False
     
 DEBUG = _get_debug()
 
 def _get_website():
-    f = open(_WEBSITE_FILE_PATH)
-    website = f.read()
+    try:
+        f = open(_WEBSITE_FILE_PATH)
+        website = f.read()
 
-    if website[-1] == '\n':
-        website = website[:-1]
-    
-    f.close()
-    return website
+        if website[-1] == '\n':
+            website = website[:-1]
+        
+        f.close()
+        return website
+    except Exception:
+        return "murmur"
     
 WEBSITE = _get_website()
 
@@ -192,6 +202,7 @@ ROOT_URLCONF = 'http_handler.urls'
 WSGI_APPLICATION = 'http_handler.wsgi.application'
 
 TEMPLATE_DIRS = (
+    "/home/ubuntu/production/mailx/browser/templates"
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -275,7 +286,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             # TODO change this to relative path
-            'filename': '/home/ubuntu/murmur/logs/murmur.log',
+            'filename': '/home/ubuntu/production/mailx/logs/murmur.log',
             'formatter': 'custom.debug'
         }
     },

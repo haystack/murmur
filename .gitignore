@@ -20,3 +20,7 @@ schema/migrations/*
 gmail_setup/client_secrets.json
 
 sandbox/
+
+env/
+
+.env
