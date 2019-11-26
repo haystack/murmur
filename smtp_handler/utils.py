@@ -1,4 +1,4 @@
-import email, re, time, hashlib, random, dkim, pytz
+import logging,email, re, time, hashlib, random, dkim, pytz
 from lamson.server import Relay
 from config.settings import *
 from lamson_subclass import MurmurMailResponse
@@ -17,6 +17,8 @@ Murmur Mail Utils and Constants
 @author: Anant Bhardwaj
 @date: Oct 20, 2012
 '''
+
+logger = logging.getLogger('murmur')
 
 HOST = BASE_URL
 NO_REPLY = DEFAULT_FROM_EMAIL
@@ -46,7 +48,7 @@ UNMUTE_TAG_ADDR = 'http://%s/unmute_tag_get?tag=' % (HOST)
 MUTE_ADDR = 'http://%s/mute?tid=' % (HOST)
 UNMUTE_ADDR = 'http://%s/unmute?tid=' % (HOST)
 
-UPVOTE_ADDR = 'http://%s/upvote_get?tid=%s&post_id=%s' 
+UPVOTE_ADDR = 'http://%s/upvote_get?tid=%s&post_id=%s'
 
 SUBSCRIBE_ADDR = 'http://%s/subscribe_get?group_name=%s'
 UNSUBSCRIBE_ADDR = 'http://%s/unsubscribe_get?group_name=%s'
@@ -72,14 +74,14 @@ relay_mailer = Relay(host=relay_config['host'], port=relay_config['port'], debug
 ALLOWED_MIMETYPES = ["image/jpeg", "image/bmp", "image/gif", "image/png", "application/pdf", "application/mspowerpoint",
 					"application/x-mspowerpoint", "application/powerpoint", "application/vnd.ms-powerpoint",
 					"application/msword", "text/plain", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-					"application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+					"application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 					"application/vnd.openxmlformats-officedocument.presentationml.presentation", "application/pkcs7-signature"]
 
 ALLOWED_MIMETYPES_STR = 'images (JPEG, BMP, GIF, PNG), PDFs, and Microsoft Office (Word, Excel, Powerpoint) files'
 
 MAX_ATTACHMENT_SIZE = 10000000
 
-# for creating squadbox ps 
+# for creating squadbox ps
 SQUADBOX_REASONS = {
 	'whitelist' : "This message was auto-approved because the sender %s is on your whitelist.",
 	'blacklist' : "This message was auto-rejected because the sender %s is on your blacklist.",
@@ -88,9 +90,9 @@ SQUADBOX_REASONS = {
 	'moderator approved' : "This message was approved by your moderator %s.",
 	'moderator rejected' : "This message was rejected by your moderator %s.",
 	'auto approve on' : "This message was auto-approved because a previous post from %s \
-						to this thread was approved.", 
+						to this thread was approved.",
 	'mod off for sender-thread' : "This message was auto-approved because you've turned moderation off \
-							for posts by %s to this thread.", 
+							for posts by %s to this thread.",
 	'is mod' : "This message was auto-approved because it's from one of your moderators.",
 }
 
@@ -137,15 +139,15 @@ SQUAD_PAGE_LINK = '%s/groups/%s'
 SQUAD_SETTINGS_LINK = SQUAD_PAGE_LINK + '/edit_group_info'
 
 def setup_post(From, Subject, group_name):
-	
+
 	post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
 
-	mail = MurmurMailResponse(From = From, 
-						To = post_addr, 
+	mail = MurmurMailResponse(From = From,
+						To = post_addr,
 						Subject = Subject)
 
 	mail.update({
-		"Sender": post_addr, 
+		"Sender": post_addr,
 		"Reply-To": post_addr,
 		"List-Id": post_addr,
 		"List-Unsubscribe": "<mailto:%s+unsubscribe@%s>" % (group_name, HOST),
@@ -153,15 +155,15 @@ def setup_post(From, Subject, group_name):
 		"List-Post": "<mailto:%s>" % (group_name + '@' + HOST),
 		"List-Help": "<mailto:help@%s>" % HOST,
 		"List-Subscribe": "<mailto:%s+subscribe@%s>" % (group_name, HOST),
-		"Return-Path": post_addr, 
+		"Return-Path": post_addr,
 		"Precedence": 'list',
 	})
-	
+
 	return mail
 
 def setup_moderation_post(group_name):
 
-	subject = 'New posts to Squadbox squad %s require approval' % group_name 
+	subject = 'New posts to Squadbox squad %s require approval' % group_name
 	to = '%s Moderators <%s+mods@%s>' % (group_name, group_name, HOST)
 	from_addr = 'Squadbox Notifications <%s+notifications@%s>' % (group_name, HOST)
 
@@ -186,7 +188,7 @@ def setup_moderation_post(group_name):
 
 	mail.Html = html_body + html_ps_blurb
 	mail.Body = plain_body + plain_ps_blurb
-	
+
 	return mail
 
 def send_email(subject, from_addr, to_addr, body_plain=None, body_html=None):
@@ -229,7 +231,7 @@ def get_subject(message, msg_res, group_name):
 		subj_tag = ''
 		for tag in msg_res['tags']:
 			subj_tag += '[%s]' % tag['name']
-			
+
 		trunc_subj = re.sub("\[.*?\]", "", message['Subject'])
 		subject = '[%s]%s %s' %(group_name, subj_tag, trunc_subj)
 	else:
@@ -242,9 +244,10 @@ def get_new_body(message_text, ps_blurb, plain_or_html):
 	text = message_text[plain_or_html]
 
 	encoded=text
-    # this is text, so encode it in canonical form
+    	# this is text, so encode it in canonical form
 	for body_charset in 'US-ASCII', 'ISO-8859-1', 'UTF-8':
 		try:
+			logger.debug(body_charset)
 			decoded = text.decode(body_charset)
 			decoded = decoded + ps_blurb
 			encoded = decoded.encode(body_charset)
@@ -253,9 +256,11 @@ def get_new_body(message_text, ps_blurb, plain_or_html):
 		else:
 			break
 
+	logger.debug(encoded)
+
 	return encoded
 
-		
+
 def get_direct_recips(email_message):
 	tos = email_message.get_all('to', [])
 	ccs = email_message.get_all('cc', [])
@@ -271,7 +276,7 @@ def get_direct_recips(email_message):
 def get_attachments(email_message):
 	res = {'attachments': [],
 		   'error': ''}
-	
+
 	for part in email_message.walk():
 
 		disposition = part.get('content-disposition')
@@ -300,7 +305,7 @@ def get_attachments(email_message):
 			res['error'] = 'One or more attachments was an unsupported filetype. We support %s.' % ALLOWED_MIMETYPES_STR
 
 	return res
-	
+
 
 def get_body(email_message):
 
@@ -332,17 +337,17 @@ def remove_plain_ps(body):
 
 def _insert_plain_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	tag_str = 'Tags: | '
-	
+
 	if tags.count() == 0:
 		return ''
-	
+
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_tags = []
 		for f in tag_following:
 			follow_tags.append(f.tag.name)
 			unfollow_tag_email = 'mailto:%s' % (group.name + '+' + f.tag.name + UNFOLLOW_TAG_SUFFIX + '@' + HOST)
 			tag_str += 'Unfollow %s<%s> | ' % (f.tag.name, unfollow_tag_email)
-		
+
 		for tag in tags:
 			if tag.name not in follow_tags:
 				follow_tag_email = 'mailto:%s' % (group.name + '+' + tag.name + FOLLOW_TAG_SUFFIX + '@' + HOST)
@@ -353,7 +358,7 @@ def _insert_plain_tag_line(group, tags, membergroup, tag_following, tag_muting):
 			mute_tags.append(f.tag.name)
 			unmute_tag_email = 'mailto:%s' % (group.name + '+' + f.tag.name + UNMUTE_TAG_SUFFIX + '@' + HOST)
 			tag_str += 'Unmute %s<%s> | ' % (f.tag.name, unmute_tag_email)
-		
+
 		for tag in tags:
 			if tag.name not in mute_tags:
 				mute_tag_email = 'mailto:%s' % (group.name + '+' + tag.name + MUTE_TAG_SUFFIX + '@' + HOST)
@@ -362,16 +367,16 @@ def _insert_plain_tag_line(group, tags, membergroup, tag_following, tag_muting):
 
 def _insert_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	tag_str = 'Tags: | '
-	
+
 	if tags.count() == 0:
 		return ''
-	
+
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_tags = []
 		for f in tag_following:
 			follow_tags.append(f.tag.name)
 			tag_str += '<a href="%s%s&group=%s">Unfollow %s</a> | ' % (UNFOLLOW_TAG_ADDR, f.tag.name, group.name, f.tag.name)
-		
+
 		for tag in tags:
 			if tag.name not in follow_tags:
 				tag_str += ' <a href="%s%s&group=%s">Follow %s</a> |' % (FOLLOW_TAG_ADDR, tag.name, group.name, tag.name)
@@ -380,7 +385,7 @@ def _insert_tag_line(group, tags, membergroup, tag_following, tag_muting):
 		for f in tag_muting:
 			mute_tags.append(f.tag.name)
 			tag_str += '<a href="%s%s&group=%s">Unmute %s</a> | ' % (UNMUTE_TAG_ADDR, f.tag.name, group.name, f.tag.name)
-		
+
 		for tag in tags:
 			if tag.name not in mute_tags:
 				tag_str += ' <a href="%s%s&group=%s">Mute %s</a> |' % (MUTE_TAG_ADDR, tag.name, group.name, tag.name)
@@ -432,7 +437,7 @@ def ps_squadbox(sender, reason, squad_name, squad_auto_approve, subject, mod_ema
 			content += MOD_OFF[HTML] % (sender, mod_off)
 
 	elif reason == 'moderator rejected':
-		content %= mod_email 
+		content %= mod_email
 
 	elif reason in ['no mods', 'is mod']:
 		content += EDIT_WL_BL_MODS[HTML] % squad_link
@@ -464,11 +469,11 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	content += '<a href="%s">Link to Post</a> | ' % (permalink)
 	upvote_addr = UPVOTE_ADDR % (HOST, tid, post_id)
 	content += '<a href="%s">Upvote Post</a><BR><BR>' % (upvote_addr)
-	
+
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_addr = '%s%s' % (FOLLOW_ADDR, tid)
 		unfollow_addr = '%s%s' % (UNFOLLOW_ADDR, tid)
-		
+
 		if following:
 			content += 'You\'re currently following this thread. <a href="%s">Un-Follow thread</a>.<BR>' % (unfollow_addr)
 		else:
@@ -496,7 +501,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 					content += 'You\'re currently muting the tag %s. <BR>' % (tag_names[0])
 			else:
 				content += 'You\'re currently receiving emails to this thread. <a href="%s">Mute thread</a>.<BR>' % (mute_addr)
-		
+
 	content += _insert_tag_line(group, tags, membergroup, tag_following, tag_muting)
 
 	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
@@ -524,12 +529,12 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 
 	tid = thread.id
 	group_name = group.name
-	
+
 	permalink = PERMALINK_POST % (HOST, tid, post_id)
 	content += 'Link to Post<%s>\n\n' % (permalink)
 	upvote_addr = 'mailto:%s' % (group_name + '+' + str(post_id) + UPVOTE_SUFFIX + '@' + HOST)
 	content += 'Upvote Post<%s>\n\n' % (upvote_addr)
-	
+
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + FOLLOW_SUFFIX + '@' + HOST)
 		unfollow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + UNFOLLOW_SUFFIX + '@' + HOST)
@@ -562,9 +567,9 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 					content += 'You\'re currently muting the tag %s. \n' % (tag_names[0])
 			else:
 				content += 'You\'re currently receiving emails to this thread. Mute thread<%s>.\n' % (mute_addr)
-		
+
 	content += _insert_plain_tag_line(group, tags, membergroup, tag_following, tag_muting)
-	
+
 	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
 	if membergroup.no_emails:
 		content += "\n\nYou are set to receive no emails from this group, except for the threads you follow. \nChange your settings<%s>" % (addr)
@@ -575,9 +580,9 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 
 	unsubscribe_addr = UNSUBSCRIBE_ADDR % (HOST, group.name)
 	content += '\n\nUnsubscribe<%s>' % unsubscribe_addr
-		
+
 	body = '%s%s%s' % (PLAIN_SUBHEAD, content, PLAIN_SUBTAIL)
-	
+
 	return body
 
 def isSenderVerified(message):
@@ -663,11 +668,11 @@ def check_duplicate(message, group, sender_addr):
 		logging.debug("Already received post with same msg-id to this group")
 		return True
 
-	# or di we get one with same sender and subject in the last ten minutes? 
-	# (this might happen if we get a post via multiple mailing lists, for example, 
+	# or di we get one with same sender and subject in the last ten minutes?
+	# (this might happen if we get a post via multiple mailing lists, for example,
 	# and the mailing list changes the ID.)
 	ten_minutes_ago = datetime.now(pytz.utc) + timedelta(minutes=-10)
-	existing_post_recent = Post.objects.filter(poster_email=sender_addr, group=group, 
+	existing_post_recent = Post.objects.filter(poster_email=sender_addr, group=group,
 									subject=message['Subject'], timestamp__gte = ten_minutes_ago)
 	if existing_post_recent.exists():
 		logging.debug("Post with same sender and subject sent to this group < 10 min ago")
@@ -705,11 +710,11 @@ def fix_headers(message, mail):
 
 	# a message's own ID shouldn't show up in its references. commenting out for now.
 	# elif 'message-id' in message:
-	# 	mail['References'] = message['message-id']	
+	# 	mail['References'] = message['message-id']
 
-	# a message can't be in reply to itself. if it's a reply to a previous message and needs 
+	# a message can't be in reply to itself. if it's a reply to a previous message and needs
 	# this header, then that value is contained in the received message's in-reply-to. so
-	# we should just copy it over if it exists, and that's it. commenting out for now. 
+	# we should just copy it over if it exists, and that's it. commenting out for now.
 
 	# if 'in-reply-to' not in message:
 	# 	mail["In-Reply-To"] = message['message-id']
