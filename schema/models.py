@@ -26,7 +26,7 @@ class Post(models.Model):
 	# if the author is null, then the person who wrote the message isn't actually
 	# a member of this group on Murmur, and it was likely received via a list that
 	# fwds to this Murmur group
-	poster_email = models.EmailField(max_length=255, null=True)
+	poster_email = models.EmailField(max_length=100, null=True)
 
 	# often "from" header is Firstname LastName <person@website.com>. if so, save that name.
 	poster_name = models.CharField(max_length=50, null=True)
@@ -198,7 +198,7 @@ class MemberGroupPending(models.Model):
 
 class ForwardingList(models.Model):
 	id = models.AutoField(primary_key=True)
-	email = models.EmailField(verbose_name='email address',max_length=255)
+	email = models.EmailField(verbose_name='email address',max_length=100)
 	timestamp = models.DateTimeField(auto_now=True)
 	group = models.ForeignKey('Group')
 	url = models.URLField(null=True, blank=True)
@@ -236,7 +236,7 @@ class Group(models.Model):
 class WhiteOrBlacklist(models.Model):
 	id = models.AutoField(primary_key=True)
 	group = models.ForeignKey('Group')
-	email = models.EmailField(max_length=255)
+	email = models.EmailField(max_length=100)
 
 	# only one of the following can be true
 	whitelist = models.BooleanField(default=False)
@@ -275,7 +275,7 @@ class MyUserManager(BaseUserManager):
 class UserProfile(AbstractBaseUser):
 	email = models.EmailField(
         verbose_name='email address',
-        max_length=255,
+        max_length=100,
         unique=True,
     )
 	first_name = models.CharField('first name', max_length=30, blank=True)
@@ -318,26 +318,6 @@ class UserProfile(AbstractBaseUser):
 	def is_staff(self):
 		"Is the user a member of staff?"
 		return self.is_admin
-
-class ImapAccount(models.Model):
-	newest_msg_id = models.IntegerField(default=-1)
-
-	email = models.EmailField(
-        verbose_name='email address',
-        max_length=255,
-        unique=True,
-    )
-	password = models.CharField('password', max_length=100, blank=True)
-	host = models.CharField('host', max_length=100)
-
-	is_oauth = models.BooleanField(default=False)
-	access_token = models.CharField('access_token', max_length=100, blank=True)
-	refresh_token = models.CharField('refresh_token', max_length=100, blank=True)
-	
-	arrive_action = models.CharField('access_token', max_length=1000, blank=True)
-	custom_action = models.CharField('custom_action', max_length=1000, blank=True)
-	timer_action = models.CharField('timer_action', max_length=1000, blank=True)
-	repeat_action = models.CharField('repeat_action', max_length=1000, blank=True)
 
 class Following(models.Model):
 	id = models.AutoField(primary_key=True)
