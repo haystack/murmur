@@ -111,11 +111,23 @@ $(document).ready(function(){
 	// var btn_undo_admin = $("#btn-undo-admin");
 	// var btn_undo_mod = $("#btn-undo-mod");
 	var btn_delete_group = $("#btn-delete-group");
+	var btn_subscribe_group = $("#btn-subscribe-group");
 
 	var toDelete = "";
 	var toDeleteList = [];
 	var toAdmin = "";
 	var toMod = "";
+
+	btn_subscribe_group.click(function() {
+		var group_name = $("#group_name").text();
+		var params = {'group_name' : group_name};
+		$.post('/subscribe_group', params, function(res){
+			if (res.status) {
+				location.reload();
+			}
+			notify(res, true);
+		});
+	})
 
 	edit_members_table_del=
 		function(params){
