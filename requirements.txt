@@ -36,5 +36,5 @@ pyspf==2.0.11
 ipaddr==2.1.11
 pydns==2.3.6
 beautifulsoup4==4.6.0
-requests==2.18.4
+requests==2.20.0
 jsonfield==1.0.3
