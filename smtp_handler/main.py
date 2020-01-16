@@ -368,6 +368,7 @@ def handle_post_murmur(message, group, host, verified):
 
         attachments = res['attachments']
 
+        logger.info("%s from %s is %s" %(message['Subject'], sender_addr, "reply" if message_is_reply else "post"))
         if message_is_reply:
             post_subject = "Re: " + re.sub("\[.*?\]", "", message['Subject'][4:]).strip()
             insert_func = insert_reply

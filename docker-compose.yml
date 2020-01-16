@@ -11,7 +11,7 @@ services:
   web:
     build: .
     container_name: murmur_web
-    command: bash -c "lamson start; cron && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "lamson start --FORCE & cron; python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/home/ubuntu/production/mailx
     ports:
@@ -29,11 +29,13 @@ services:
   smtp:
     image: namshi/smtp 
     expose: 
-      - 587 
+      - 587-8825 
+    ports:
+      - "8825"
     environment:
       - GMAIL_USER=${GMAIL_USER} 
       - GMAIL_PASSWORD=${GMAIL_PASSWORD} 
-      - PORT=587
+      - PORT=8825
     restart: always
 volumes:
   youps-db:

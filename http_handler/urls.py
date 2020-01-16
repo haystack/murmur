@@ -105,7 +105,7 @@ urlpatterns = patterns('',
 if WEBSITE == 'murmur':
     new_patterns = [
                     url(r'^about', 'browser.views.about'),
-                    url(r'^posts$', 'browser.views.posts'),
+                    url(r'^posts$', 'browser.views.post_list'),
    
                     url(r'^unsubscribe_get', 'browser.views.unsubscribe_get'),
                     url(r'^subscribe_get', 'browser.views.subscribe_get'),
