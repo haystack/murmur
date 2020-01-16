@@ -91,66 +91,8 @@ def index(request):
 		if WEBSITE == 'murmur':
 			return HttpResponseRedirect('/posts')
 		elif WEBSITE == 'squadbox':
-			return HttpResponseRedirect('/my_group_list')
-	
-	
-@render_to(WEBSITE+'/posts.html')
-def posts(request):
-	if request.user.is_authenticated():
-		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = Group.objects.filter(membergroup__member=user).values("name")
+			return HttpResponseRedirect('/my_group_list')		
 		
-		thread_id = request.GET.get('tid')
-		if thread_id:
-			try:
-				group_name = Thread.objects.get(id=thread_id).group.name
-			except Thread.DoesNotExist:
-				pass
-			active_group = load_groups(request, groups, user, group_name=group_name)
-		else:
-			active_group = load_groups(request, groups, user)
-		
-		if active_group['active']:
-			group = Group.objects.get(name=active_group['name'])
-			active_group['description'] = group.description
-			member = MemberGroup.objects.filter(member=user, group=group)
-			if member.count() > 0:
-				is_member = True
-
-		# not a member of any groups
-		if not active_group['active']:
-			return HttpResponseRedirect('/group_list')
-		elif group.public or is_member:
-			return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
-			# if request.flavour == "mobile":
-			# 	return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
-			# else:
-			# 	if is_member:
-			# 		request.session['active_group'] = active_group['name']
-			# 		return page_info
-			# 	else:
-			# 		return HttpResponseRedirect('/post_list?group_name=%s' % (active_group['name']))
-		else:
-			if len(groups) == 0:
-				return HttpResponseRedirect('/group_list')
-			else:
-				return redirect('/404?e=member')
-		
-	else:
-		user = None
-		groups = []
-		active_group = request.GET.get('group_name')
-		if active_group:
-			group = Group.objects.get(name=active_group)
-			if group.public:
-				return HttpResponseRedirect('/post_list?group_name=%s' % (active_group))
-			else:
-				return redirect('/404?e=member')
-		else:
-			return HttpResponseRedirect(global_settings.LOGIN_URL)
-		
-		
-# One that being used for listing group at the moment
 @render_to(WEBSITE+'/mobile_list_posts.html')
 def post_list(request):
 	tag_info = None

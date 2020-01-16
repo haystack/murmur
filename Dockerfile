@@ -1,7 +1,10 @@
 FROM python:2
 ENV PYTHONUNBUFFERED 1
-RUN apt-get update && apt-get install -y mysql-client cron && rm -rf /var/lib/apt
-RUN apt-get update && rm -rf /var/lib/apt
+RUN apt-get update && apt-get install -y \
+    telnet \
+    default-mysql-client \
+    cron && \
+    rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /home/ubuntu/production/mailx
 WORKDIR /home/ubuntu/production/mailx
 COPY ./murmur-env/. /opt/murmur/
