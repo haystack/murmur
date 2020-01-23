@@ -1,6 +1,45 @@
 {% extends "murmur/base.html" %}
 
 {% block customcss %}
+
+<style>
+  #mySharedown {
+    display: none;
+  }
+
+  #mySharedown.show {
+    display: block;
+  }
+
+  .sharedown-content {
+    width: 100%;
+    background-color: thistle;
+    color: white;
+    /* height: 50px; */
+    position: relative;
+    /* top: 100%; */
+  }
+
+  .filter-tag-box {
+    left: 60%;
+    /* top:0; */
+    margin-top: -30px;
+    width: 300px;
+    position: absolute;
+    background-color: whitesmoke;
+    height: 60px;
+  }
+
+  .sharebtn {
+    cursor: pointer;
+    width: 50px;
+    left: 100%;
+    position: absolute;
+    margin-left: -60px;
+    top: 20px;
+    background-color: turquoise;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -8,162 +47,195 @@
 <div class="container">
   <div class="group-container">
 
-		<div id="post-column-area-wrapper">
-		<div id="post-column-area">
-			<div id="main-area">
-				<div class="main-area-content">
-					{% if member_info.admin %}
-						<span class="admin label">Admin</span>
-					{% endif %}
-					{% if member_info.moderator %}
-						<span class="mod label">Mod</span>
-					{% endif %}
-					
-				<div style="display:none;" id="group_name">{{ active_group.name }}</div>
-				<h1>{{ active_group.name }}</h1>
-				{% if active_group.description %}
-					<i>{{ active_group.description }}</i>
-					<br>
-				{% endif %}
-				<br>
-				
-				{% if tag_info %}
-					<strong>All tags: </strong><BR>
-					<table>
-					{% for tag in tag_info %}
-						<tr style="border-bottom: 1px solid #bbbbbb; border-top: 1px solid #bbbbbb;">
-							<td style="padding-right: 20px;">
-								<h4><label class="label2" id="tag_{{ forloop.counter0 }}" style="background-color: #{{ tag.color }}">{{ tag.name }}</label> </h4>
-							</td>
-							<td style="padding-right: 20px;">
-								<small>
-									{{ tag.num_p }} 
-									{% if tag.num_p == 1 %} 
-										post 
-									{% else %}
-										posts
-									{% endif %}
-								</small>
-							</td>
-							
-							<td>
-								{% if member_info %}
-									{% if member_info.no_emails or not member_info.always_follow_thread %}
-										{% if tag.followed %}
-											<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unsubscribe this tag</label>
-										{% else %}
-											<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Subscribe this tag</label>
-										{% endif %}
-									{% else %}
-										{% if tag.muted %}
-											<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unsubscribe this tag</label>
-										{% else %}
-											<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Subscribe this tag</label>
-										{% endif %}
-									{% endif %}
-								{% endif %}
-							</td>
-						</tr>
-					{% endfor %}
-					</table>
-					
-				{% else %}
-					There are no tags. You can tag an email by adding it to the subject with <strong>[Tag]</strong> or anywhere in the body with <strong>#tag</strong>.
-				{% endif %}
-				<P></P><BR>
-				<div>
-					{% if member_info %}
-						{% if member_info.no_emails %}
-							You are currently set to <b>receive no emails</b> from this group, except those you follow. <br />You can follow individual threads or all threads with a specific tag.
-						{% elif member_info.always_follow_thread %}
-							You are currently set to <b>receive all emails</b> from this group, except those you mute. <br />You can mute individual threads or threads with a specific tag.
-						{% else %}
-							You are currently set to <b>receive the first email of each thread</b> from this group, except those you follow. <br />You can follow individual threads or all threads with a specific tag.
-						{% endif %}
-						<BR>
-						<a href="/groups/{{active_group.name}}/edit_my_settings">Change your settings.</a>
-					{% endif %}
-				</div>
-				</div>
-			</div>
+    <div id="post-column-area-wrapper">
+      <div id="post-column-area">
+        <div id="main-area">
+          <div class="main-area-content">
+            {% if member_info.admin %}
+            <span class="admin label">Admin</span>
+            {% endif %}
+            {% if member_info.moderator %}
+            <span class="mod label">Mod</span>
+            {% endif %}
 
-			<div class="post-list-container">
-				{% if active_group.name != "No Groups Yet" and is_member%}
-					<a href="/groups/{{ active_group.name }}/create_post"><button type="button">+ New Post</button></a>
-					<a href="/groups/{{ active_group.name }}"><button type="button">View Group Info</button></a>
-					<BR><BR>
-					<input type="text" class="default-text" value="Search within posts" title="Search within posts"/>
-				{% elif not is_member %}
-					{% if user.is_authenticated %}
-						<button type="button" id="btn-subscribe-group">Join the list</button>
-					{% else %}
-						<a href="/accounts/login/?next=/groups/{{ active_group.name }}">
-							<button type="button">Join the list</button>
-						</a>
+            <div style="display:none;" id="group_name">{{ active_group.name }}</div>
+            <h1>{{ active_group.name }}</h1>
+            {% if active_group.description %}
+            <i>{{ active_group.description }}</i>
+            <br>
+            {% endif %}
+            <br>
 
-					{% endif %}	
-							
-					<a href="/accounts/register/">Don't have a Murmur account yet?</a>
-				{% else %}
-				<i>You are not in any groups yet. <a href="/group_list">Join or create a new group.</a>
-				</i>
-				{% endif %}
-			<BR><BR>
-			</div>
-		
-			<ul id="post-list-table">
-				{% for post in posts.threads %}
-				<a href="/thread?group_name={{ active_group.name }}&tid={{ post.thread_id }}">
-					<li class="row-item" id="{{ post.thread_id }}">
-						<div class="left-column-area-metadata">
-							<span class="gray">{{ post.timestamp|date:"n/j/Y" }}</span>
-							<span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
-							<span class="unread">{{ post.num_replies }}</span> <br>
-						</div>
-						<div class="middle-column-area-content">
-							<span class="strong">{{ post.post.subject }}</span>
-							<br />
-							<span class="strong-gray">{{ post.post.from }}</span><br />
-							<span class="blurb ellipsis">{{ post.post.text|striptags }}
-							</span>
-						</div>
-													
-						{% if post.tags|length > 0 %}
-							<div>
-								{% for tag in post.tags %}
-									<span class="label2" style="background-color: #{{tag.color}}; float: right; position: relative; top: 5px;">{{tag.name}}</span>
-								{% endfor %}
-							</div>
-						{% endif %}
-						
-						<div>
-						<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
+            {% if tag_info %}
+            <strong>All tags: </strong><BR>
+            <table>
+              {% for tag in tag_info %}
+              <tr style="border-bottom: 1px solid #bbbbbb; border-top: 1px solid #bbbbbb;">
+                <td style="padding-right: 20px;">
+                  <h4><label class="label2" id="tag_{{ forloop.counter0 }}"
+                      style="background-color: #{{ tag.color }}">{{ tag.name }}</label> </h4>
+                </td>
+                <td style="padding-right: 20px;">
+                  <small>
+                    {{ tag.num_p }}
+                    {% if tag.num_p == 1 %}
+                    post
+                    {% else %}
+                    posts
+                    {% endif %}
+                  </small>
+                </td>
 
-						{% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
-							{% if post.following %}
-								<span class="label2 following" style="background-color: #3D7AA6;">Following</span>
-							{% endif %}
-						{% else %}
-							{% if post.muting %}
-								<span class="label2 muted" style="background-color: #3D7AA6;">Muted</span>
-							{% endif %}
-						{% endif %}
-						</div>
+                <td>
+                  {% if member_info %}
+                  {% if member_info.no_emails or not member_info.always_follow_thread %}
+                  {% if tag.followed %}
+                  <label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unsubscribe this
+                    tag</label>
+                  {% else %}
+                  <label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Subscribe this tag</label>
+                  {% endif %}
+                  {% else %}
+                  {% if tag.muted %}
+                  <label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unsubscribe this
+                    tag</label>
+                  {% else %}
+                  <label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Subscribe this tag</label>
+                  {% endif %}
+                  {% endif %}
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </table>
 
-					</li>
-				</a>
-			{% endfor %}
-			</ul>
-			{% if posts.threads|length > 6 %}
-			<div id="loading"><img src="static/images/spinner.gif" width="16px" /> Loading more posts...</div>
-			<div id="nomoreposts" style="display:none;">No more posts to show</div>
-			{% else %}
-			<div id="nomoreposts">No more posts to show</div>
-			{% endif %}
-			<div id="scroll_trigger"></div>
-		</div>
-		</div>
+            {% else %}
+            There are no tags. You can tag an email by adding it to the subject with <strong>[Tag]</strong> or anywhere
+            in the body with <strong>#tag</strong>.
+            {% endif %}
+            <P></P><BR>
+            <div>
+              {% if member_info %}
+              {% if member_info.no_emails %}
+              You are currently set to <b>receive no emails</b> from this group, except those you follow. <br />You can
+              follow individual threads or all threads with a specific tag.
+              {% elif member_info.always_follow_thread %}
+              You are currently set to <b>receive all emails</b> from this group, except those you mute. <br />You can
+              mute individual threads or threads with a specific tag.
+              {% else %}
+              You are currently set to <b>receive the first email of each thread</b> from this group, except those you
+              follow. <br />You can follow individual threads or all threads with a specific tag.
+              {% endif %}
+              <BR>
+              <a href="/groups/{{active_group.name}}/edit_my_settings">Change your settings.</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="post-list-container">
+          {% if active_group.name != "No Groups Yet" and is_member%}
+          <a href="/groups/{{ active_group.name }}/create_post"><button type="button">+ New Post</button></a>
+          <a href="/groups/{{ active_group.name }}"><button type="button">View Group Info</button></a>
+
+
+          <div class="filter-tag-box">
+            <input id="selectedTagsArr" type="hidden"></input>
+            <div style="height:50px;width:200px;font:16px/26px Georgia, Garamond, Serif;overflow:auto;">
+              {% for tag in tag_info %}
+
+              <label class="label2" id="tag_{{ forloop.counter0 }}"
+                style="background-color: #{{ tag.color }}; cursor: pointer;">{{ tag.name }}</label>
+              {% endfor %}
+            </div>
+            <p onclick="shareVis()" class="sharebtn">&nbsp Add</p>
+            <div id="mySharedown" class="sharedown-content">
+              <div>
+                {% for tag in tag_info %}
+                <div onclick="chooseOption('{{tag.name}}')" id={{tag.name}}>{{tag.name}}</div>
+                {% endfor %}
+              </div>
+              <!-- <div id="foo"></div> -->
+            </div>
+          </div>
+
+          <BR><BR>
+          <input type="text" class="default-text" value="Search within posts" title="Search within posts" />
+          {% elif not is_member %}
+          {% if user.is_authenticated %}
+          <button type="button" id="btn-subscribe-group">Join the list</button>
+          {% else %}
+          <a href="/accounts/login/?next=/groups/{{ active_group.name }}">
+            <button type="button">Join the list</button>
+          </a>
+
+          {% endif %}
+
+          <a href="/accounts/register/">Don't have a Murmur account yet?</a>
+          {% else %}
+          <i>You are not in any groups yet. <a href="/group_list">Join or create a new group.</a>
+          </i>
+          {% endif %}
+          <BR><BR>
+        </div>
+
+        <ul id="post-list-table">
+          {% for post in posts.threads %}
+          <a href="/thread?group_name={{ active_group.name }}&tid={{ post.thread_id }}">
+            <li class="row-item" id="{{ post.thread_id }}">
+              <div class="left-column-area-metadata">
+                <span class="gray">{{ post.timestamp|date:"n/j/Y" }}</span>
+                <span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
+                <span class="unread">{{ post.num_replies }}</span> <br>
+              </div>
+              <div class="middle-column-area-content">
+                <span class="strong">{{ post.post.subject }}</span>
+                <br />
+                <span class="strong-gray">{{ post.post.from }}</span><br />
+                <span class="blurb ellipsis">{{ post.post.text|striptags }}
+                </span>
+              </div>
+
+              {% if post.tags|length > 0 %}
+              <div>
+                {% for tag in post.tags %}
+                <span class="label2"
+                  style="background-color: #{{tag.color}}; float: right; position: relative; top: 5px;">{{tag.name}}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+              <div>
+                <span class="label2"
+                  style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
+
+                {% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
+                {% if post.following %}
+                <span class="label2 following" style="background-color: #3D7AA6;">Following</span>
+                {% endif %}
+                {% else %}
+                {% if post.muting %}
+                <span class="label2 muted" style="background-color: #3D7AA6;">Muted</span>
+                {% endif %}
+                {% endif %}
+              </div>
+
+            </li>
+          </a>
+          {% endfor %}
+        </ul>
+        {% if posts.threads|length > 6 %}
+        <div id="loading"><img src="static/images/spinner.gif" width="16px" /> Loading more posts...</div>
+        <div id="nomoreposts" style="display:none;">No more posts to show</div>
+        {% else %}
+        <div id="nomoreposts">No more posts to show</div>
+        {% endif %}
+        <div id="scroll_trigger"></div>
+      </div>
+    </div>
   </div>
+  <input type="hidden" id="myVar" name="variable" value="{{ tag_info }}">
+
 </div>
 
 {% endblock %}
@@ -175,5 +247,63 @@
 <script type="text/javascript" src="/static/javascript/third-party/typeahead.js/typeahead.jquery.min.js"></script>
 <script type="text/javascript" src="/static/javascript/third-party/typeahead.js/bloodhound.min.js"></script>
 <script type="text/javascript" src="/static/javascript/murmur/main.js"></script>
-{% endblock %}
+<script>
 
+//select tags
+  let selectedTags = []
+  function chooseOption(tagName) {
+    if (selectedTags.includes(tagName)) {
+      selectedTags = selectedTags.filter(function (item) {
+        return item !== tagName
+      })
+      document.getElementById("selectedTagsArr").value =JSON.stringify(selectedTags);
+      document.getElementById("selectedTagsArr")
+      document.getElementById(tagName).style.color = "white";
+
+
+    } else {
+      selectedTags.push(tagName);
+      document.getElementById("selectedTagsArr").value = JSON.stringify(selectedTags);
+      console.log("selected", document.getElementById("selectedTagsArr"))
+      document.getElementById(tagName).style.color = "blue";
+    }
+  }
+  // Add the contents of options[0] to #foo:
+  let show = false;
+  function shareVis() {
+    if (!show) {
+      document.getElementById("mySharedown").classList.add("show");
+    } else {
+      document.getElementById("mySharedown").classList.remove("show");
+    }
+    show = !show;
+    //document.getElementById("mySharedown").className = "sharedown-content show";
+  }
+
+//Hide the dropdown menu when clicked outside
+  window.onclick = function (event) {
+    if (
+      !(
+        event.target.matches(".sharebtn") ||
+        event.target.matches(".sharedown-content")
+      )
+    ) {
+      var sharedowns = document.getElementsByClassName("sharedown-content");
+      var i;
+      for (i = 0; i < sharedowns.length; i++) {
+        var openSharedown = sharedowns[i];
+        if (openSharedown.classList.contains("show")) {
+          openSharedown.classList.remove("show");
+        }
+      }
+    }
+  };
+
+  document
+    .getElementById("mySharedown")
+    .addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
+
+</script>
+{% endblock %}
