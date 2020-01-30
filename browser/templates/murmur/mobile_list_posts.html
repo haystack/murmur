@@ -143,16 +143,17 @@
             <input id="selectedTagsArr" type="hidden"></input>
             <div style="height:50px;width:200px;font:16px/26px Georgia, Garamond, Serif;overflow:auto;">
               {% for tag in tag_info %}
-
-              <label class="label2" id="tag_{{ forloop.counter0 }}"
-                style="background-color: #{{ tag.color }}; cursor: pointer;">{{ tag.name }}</label>
+              
+              <label class="label2" id="list-{{tag.name}}"
+              style="background-color: #{{ tag.color }}; display: none;">{{ tag.name }}</label>
+             
               {% endfor %}
             </div>
             <p onclick="shareVis()" class="sharebtn">&nbsp Add</p>
             <div id="mySharedown" class="sharedown-content">
               <div>
                 {% for tag in tag_info %}
-                <div onclick="chooseOption('{{tag.name}}')" id={{tag.name}}>{{tag.name}}</div>
+                <div onclick="chooseOption('{{tag.name}}')" id="dropdown-{{tag.name}}" style="cursor:pointer;margin-left: 30px;">{{tag.name}}</div>
                 {% endfor %}
               </div>
               <!-- <div id="foo"></div> -->
@@ -256,16 +257,15 @@
       selectedTags = selectedTags.filter(function (item) {
         return item !== tagName
       })
-      document.getElementById("selectedTagsArr").value =JSON.stringify(selectedTags);
-      document.getElementById("selectedTagsArr")
-      document.getElementById(tagName).style.color = "white";
+      document.getElementById("dropdown-"+tagName).style.color = "white";
+      document.getElementById("list-"+tagName).style.display = "none";
+
 
 
     } else {
       selectedTags.push(tagName);
-      document.getElementById("selectedTagsArr").value = JSON.stringify(selectedTags);
-      console.log("selected", document.getElementById("selectedTagsArr"))
-      document.getElementById(tagName).style.color = "blue";
+      document.getElementById("dropdown-"+tagName).style.color = "blue";
+      document.getElementById("list-"+tagName).style.display = null;
     }
   }
   // Add the contents of options[0] to #foo:
