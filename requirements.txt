@@ -3,7 +3,7 @@ Jinja2==2.7.3
 MarkupSafe==0.23
 mysqlclient==1.4.6
 South==1.0.1
-bleach==1.4
+bleach==3.1.2
 chardet==2.3.0
 django-annoying==0.8.0
 django-appconf==0.6
