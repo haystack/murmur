@@ -6,6 +6,19 @@ Murmur
 
 Murmur uses Django with a MySQL backend (you can replace with any other backend Django supports). For email, we use postfix along with the python lamson library.
 
+
+#### setup the database 
+* (optional: only during new database setup) change root password by: `set PASSWORD = PASSWORD('newPassword');`
+* `mysql -u root -p`
+* `create database murmur;`
+* Give privileges to the user that will access the database from django: `grant all privileges ON murmur.* TO admin@localhost;`
+
+## Running Docker
+ 
+TODO for Raxel
+
+## Not Running Docker i.e. on the server
+
 ### Web Installation Instructions
   
 #### Install MySQL Server
@@ -45,11 +58,7 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 * If using Google integration, create a Google API project and enable the Gmail, People and Contacts APIs; generate an Oauth2 client_secrets.json file for this project and put this in the /gmail_setup/ directory
 * Run [this command](https://github.com/haystack/murmur/blob/master/mysql_encoding) at mysql
 
-#### setup the database 
-* (optional: only during new database setup) change root password by: `set PASSWORD = PASSWORD('newPassword');`
-* `mysql -u root -p`
-* `create database murmur;`
-* Give privileges to the user that will access the database from django: `grant all privileges ON murmur.* TO admin@localhost;`
+
 
 #### install schema and create superuser
 * `python manage.py syncdb`and create superuser
