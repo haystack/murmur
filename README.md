@@ -6,6 +6,39 @@ Murmur
 
 Murmur uses Django with a MySQL backend (you can replace with any other backend Django supports). For email, we use postfix along with the python lamson library.
 
+#### Private File
+
+Please contact us for an example of the private file. You cannot run the program without it.
+
+#### setup the database 
+* change the root mysql account to one written in private file.
+* make sure you can log in to mysql with the password in the command line: `mysql -u root -p`
+
+## Running Docker
+
+**Recommended to use Linux**
+ 
+### Linux 
+
+#### Set Up
+
+To install the Docker Engine select your [Linux distribution](https://docs.docker.com/engine/install/#server) and follow the instructions to install. 
+
+Currently you need a gmail account in order for Murmur to send verification emails, such as registration confirmation. In order for Murmur to log in to your gmail account you need to [enable less secure logins](https://support.google.com/accounts/answer/6010255?hl=en).
+
+Next set up the environment variables. The only variables you should need to set are your gmail username and password.
+
+1. `cp .env.example .env`
+2. Fill in the correct values in `.env` for your gmail account. Make sure to enable insecure logins on gmail. 
+3. Use `make` to create the database and create a superuser account to login
+4. Check it out on `localhost:8000
+
+#### Starting and Stopping Docker 
+
+In order to stop docker you can simply run `make stop` and run `make start` to start it up again.
+
+## Not Running Docker i.e. on the server
+
 ### Web Installation Instructions
   
 #### Install MySQL Server
@@ -46,7 +79,6 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 * Run [this command](https://github.com/haystack/murmur/blob/master/mysql_encoding) at mysql
 
 #### setup the database 
-* (optional: only during new database setup) change root password by: `set PASSWORD = PASSWORD('newPassword');`
 * `mysql -u root -p`
 * `create database murmur;`
 * Give privileges to the user that will access the database from django: `grant all privileges ON murmur.* TO admin@localhost;`
