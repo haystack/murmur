@@ -6,22 +6,19 @@ Murmur
 
 Murmur uses Django with a MySQL backend (you can replace with any other backend Django supports). For email, we use postfix along with the python lamson library.
 
+#### Private File
+
+Please contact us for an example of the private file. You cannot run the program without it.
 
 #### setup the database 
-* (optional: only during new database setup) change root password by: `set PASSWORD = PASSWORD('newPassword');`
-* `mysql -u root -p`
-* `create database murmur;`
-* Give privileges to the user that will access the database from django: `grant all privileges ON murmur.* TO admin@localhost;`
+* change the root mysql account to one written in private file.
+* make sure you can log in to mysql with the password in the command line: `mysql -u root -p`
 
 ## Running Docker
 
 **Recommended to use Linux**
  
 ### Linux 
-
-#### Private File
-
-Please contact us for an example of the private file. You cannot run the program without it.
 
 #### Set Up
 
@@ -33,11 +30,10 @@ Next set up the environment variables. The only variables you should need to set
 
 1. `cp .env.example .env`
 2. Fill in the correct values in `.env` for your gmail account. Make sure to enable insecure logins on gmail. 
-3. Now you can start the application using `make start` 
-4. Use `make` to create the database and create a superuser account to login
-5. Check it out on `localhost:8000
+3. Use `make` to create the database and create a superuser account to login
+4. Check it out on `localhost:8000
 
-#### Stopping Docker 
+#### Starting and Stopping Docker 
 
 In order to stop docker you can simply run `make stop` and run `make start` to start it up again.
 
@@ -82,7 +78,10 @@ In order to stop docker you can simply run `make stop` and run `make start` to s
 * If using Google integration, create a Google API project and enable the Gmail, People and Contacts APIs; generate an Oauth2 client_secrets.json file for this project and put this in the /gmail_setup/ directory
 * Run [this command](https://github.com/haystack/murmur/blob/master/mysql_encoding) at mysql
 
-
+#### setup the database 
+* `mysql -u root -p`
+* `create database murmur;`
+* Give privileges to the user that will access the database from django: `grant all privileges ON murmur.* TO admin@localhost;`
 
 #### install schema and create superuser
 * `python manage.py syncdb`and create superuser
