@@ -316,6 +316,7 @@ def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, 
     logging.debug(res)
     return res
 
+
 def get_group_settings(group_name, user):
     res = {'status':False}
     
@@ -628,9 +629,12 @@ def unsubscribe_group(group_name, user):
     res = {'status':False}
     try:
         group = Group.objects.get(name=group_name)
-        membergroup = MemberGroup.objects.get(group=group, member=user)
-        membergroup.delete()
-        res['status'] = True
+        membergroups = MemberGroup.objects.filter(group=group)
+        membergroup = membergroups.get(member=user)
+
+        if confirm_unsubscribe(membergroups,user):
+            membergroup.delete()
+            res['status'] = True
     except Group.DoesNotExist:
         res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
     except MemberGroup.DoesNotExist:
@@ -639,6 +643,18 @@ def unsubscribe_group(group_name, user):
         res['code'] = msg_code['UNKNOWN_ERROR']
     logging.debug(res)
     return res
+
+def confirm_unsubscribe(membergroups, user):
+    res = True
+    admins = []
+
+    for m in membergroups:
+        if m.admin:
+            admins.append(m.member.email.encode("utf-8"))
+    if len(admins) == 1 and user.email in admins:
+        res = False
+    return res
+
 
 def group_info(group_name, user):
     res = {'status':False}
