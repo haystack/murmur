@@ -629,10 +629,10 @@ def unsubscribe_group(group_name, user):
     res = {'status':False, 'unsubscribe':False}
     try:
         group = Group.objects.get(name=group_name)
-        membergroup = MemberGroup.objects.filter(group=group)
+        membergroups = MemberGroup.objects.filter(group=group)
 
-        if check_unsubscribe(membergroup,user):
-            membergroup.get(member=user).delete()
+        if check_unsubscribe(membergroups,user):
+            membergroups.get(member=user).delete()
             res['status'] = True
             res['unsubscribe'] = True
     except Group.DoesNotExist:
@@ -644,23 +644,19 @@ def unsubscribe_group(group_name, user):
     logging.debug(res)
     return res
 
-def check_unsubscribe(membergroup, user):
+def check_unsubscribe(membergroups, user):
     """Checks whether or not a user can unsubscribe from a mailing list
 
     Args:
-        membergroup(MemberGroup): a MemberGroup instance of a user who tries to unsubscribe
+        membergroups(MemberGroup): MemberGroup instances of users in the group user tries to unsubscribe in
         user(UserProfile):a UserProfile instance of the user trying to unsubscribe from membergroup
 
     Returns:
-        True: if the user is not the last remaining admin in the membergroup
-        False: if the user is the last remainign admin in the membergroup
+        True: if the user is not the last remaining admin in the membergroups
+        False: if the user is the last remaining admin in the membergroups
     """
     can_unsubscribe = True
-    admins = []
-
-    for m in membergroup:
-        if m.admin:
-            admins.append(m.member.email.encode("utf-8"))
+    admins = membergroups.filter(admin=True).values_list('member__email',flat=True)
     if len(admins) == 1 and user.email in admins:
         can_unsubscribe = False
     return can_unsubscribe
