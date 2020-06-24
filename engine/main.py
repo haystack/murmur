@@ -633,8 +633,9 @@ def unsubscribe_group(group_name, user):
 
         if check_unsubscribe(membergroup,user):
             membergroup.get(member=user).delete()
-            res['status'] = True
             res['unsubscribe'] = True
+            
+        res['status'] = True
     except Group.DoesNotExist:
         res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
     except MemberGroup.DoesNotExist:
