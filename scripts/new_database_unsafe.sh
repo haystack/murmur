@@ -28,10 +28,11 @@ EOF
 } && \
 
 # create the initial tables
-python manage.py syncdb && \
+# python manage.py syncdb && \
 
 # create the initial schema migration with south
-python manage.py schemamigration schema --initial && \
+# python manage.py schemamigration schema --initial && \
+python manage.py makemigrations schema && \
 
 # TODO call it later
 # migrate django app tables, allow latency. 
