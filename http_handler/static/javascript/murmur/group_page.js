@@ -166,15 +166,14 @@ $(document).ready(function(){
 	btn_unsubscribe_group.click(function(){
 		var params = {'group_name' : group_name};
 		$.post('/unsubscribe_group', params, function(res){
-			if (res.status) {
+			if (res.status && res.unsubscribe) {
 				member = false;
 				fix_visibility();
 				$(".member").hide();
 				var aPos = members_table.fnGetPosition($(".my_row").get(0)); 
 				members_table.fnDeleteRow(aPos);
-			} else if (!res.status && res.code === undefined) {
+			} else {
 				alert("Cannot unsubscribe from mailing list since you're the only remaining admin. Please assign another member as admin or delete the mailing list.");
-				return;
 			}
 			notify(res, true);
 		});
