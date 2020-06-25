@@ -201,7 +201,7 @@ ROOT_URLCONF = 'http_handler.urls'
 WSGI_APPLICATION = 'http_handler.wsgi.application'
 
 TEMPLATE_DIRS = (
-    PROJECT_DIR + "browser/templates"
+    PROJECT_DIR + "browser/templates",
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -235,7 +235,6 @@ INSTALLED_APPS = (
     
     #third party apps
     'registration',
-    'south',
     'django_mobile',
     'storages'
 )
