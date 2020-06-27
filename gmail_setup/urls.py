@@ -1,8 +1,7 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import url
 from . import views
  
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'authorize', views.auth, name='auth'),
     url(r'callback', views.auth_return, name='return'),
@@ -10,4 +9,4 @@ urlpatterns = patterns(
     url(r'initial_filters', views.initial_filters, name='initial_filters'),
     url(r'done', views.index, name='done'),
     url(r'forget', views.deauth, name='forget'),
-)
+]

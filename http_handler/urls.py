@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 from django.views.generic.base import TemplateView
 from browser.views import *
@@ -11,9 +11,8 @@ from registration.forms import MurmurPasswordResetForm
 
 website_context = {'website' : WEBSITE}
 
-# shared URL patterns 
-urlpatterns = patterns('',
-
+#shared URL patterns 
+urlpatterns = [
     url(r'^$', 'browser.views.index'),
     url(r'^lamson_status', 'browser.views.lamson_status'),
     url(r'^settings', 'browser.views.settings'),
@@ -99,76 +98,76 @@ urlpatterns = patterns('',
 
     url(r'^activate_group', 'browser.views.activate_group'),
     url(r'^deactivate_group', 'browser.views.deactivate_group'),
-    )
+]
 
 # murmur-only patterns
 if WEBSITE == 'murmur':
     new_patterns = [
-                    url(r'^about', 'browser.views.about'),
-                    url(r'^posts$', 'browser.views.post_list'),
-   
-                    url(r'^unsubscribe_get', 'browser.views.unsubscribe_get'),
-                    url(r'^subscribe_get', 'browser.views.subscribe_get'),
+        url(r'^about', 'browser.views.about'),
+        url(r'^posts$', 'browser.views.post_list'),
 
-                    url(r'^post_list', 'browser.views.post_list'),
-                    url(r'^pub_group_list', 'browser.views.pub_group_list'),
-                    url(r'^group_list', 'browser.views.group_list'),
-                    url(r'^groups/(?P<group_name>[\w-]+)/add_list', 'browser.views.add_list_view'),
-                    url(r'^groups/(?P<group_name>[\w-]+)/create_post', 'browser.views.my_group_create_post_view'),
-                    url(r'^my_groups', 'browser.views.my_groups'),
-                    url(r'^list_my_groups', 'browser.views.list_my_groups'), 
+        url(r'^unsubscribe_get', 'browser.views.unsubscribe_get'),
+        url(r'^subscribe_get', 'browser.views.subscribe_get'),
 
-                    url(r'^load_post', 'browser.views.load_post'),
-                    url(r'^load_thread', 'browser.views.load_thread'),
+        url(r'^post_list', 'browser.views.post_list'),
+        url(r'^pub_group_list', 'browser.views.pub_group_list'),
+        url(r'^group_list', 'browser.views.group_list'),
+        url(r'^groups/(?P<group_name>[\w-]+)/add_list', 'browser.views.add_list_view'),
+        url(r'^groups/(?P<group_name>[\w-]+)/create_post', 'browser.views.my_group_create_post_view'),
+        url(r'^my_groups', 'browser.views.my_groups'),
+        url(r'^list_my_groups', 'browser.views.list_my_groups'), 
 
-                    url(r'^list_posts', 'browser.views.list_posts'),
-                    url(r'^refresh_posts', 'browser.views.refresh_posts'),
-                    
-                    url(r'^insert_post', 'browser.views.insert_post'), 
-                    url(r'^insert_reply', 'browser.views.insert_reply'),
-                     
-                    url(r'^upvote_get', 'browser.views.upvote_get'),
-                    url(r'^unupvote_get', 'browser.views.unupvote_get'),
+        url(r'^load_post', 'browser.views.load_post'),
+        url(r'^load_thread', 'browser.views.load_thread'),
 
-                    url(r'^upvote', 'browser.views.upvote'),
-                    url(r'^unupvote', 'browser.views.unupvote'),
-                     
-                    url(r'^follow_tag_get', 'browser.views.follow_tag_get'),
-                    url(r'^unfollow_tag_get', 'browser.views.unfollow_tag_get'),
-                     
-                    url(r'^mute_tag_get', 'browser.views.mute_tag_get'),
-                    url(r'^unmute_tag_get', 'browser.views.unmute_tag_get'),
-                     
-                    url(r'^follow_tag', 'browser.views.follow_tag'),
-                    url(r'^unfollow_tag', 'browser.views.unfollow_tag'),
-                     
-                    url(r'^mute_tag', 'browser.views.mute_tag'),
-                    url(r'^unmute_tag', 'browser.views.unmute_tag'),
-                     
-                    url(r'^follow_thread', 'browser.views.follow_thread'),
-                    url(r'^unfollow_thread', 'browser.views.unfollow_thread'),
-                     
-                    url(r'^mute_thread', 'browser.views.mute_thread'),
-                    url(r'^unmute_thread', 'browser.views.unmute_thread'),
-                     
-                    url(r'^follow', 'browser.views.follow_thread_get'),
-                    url(r'^unfollow', 'browser.views.unfollow_thread_get'),
+        url(r'^list_posts', 'browser.views.list_posts'),
+        url(r'^refresh_posts', 'browser.views.refresh_posts'),
+        
+        url(r'^insert_post', 'browser.views.insert_post'), 
+        url(r'^insert_reply', 'browser.views.insert_reply'),
+            
+        url(r'^upvote_get', 'browser.views.upvote_get'),
+        url(r'^unupvote_get', 'browser.views.unupvote_get'),
 
-                    url(r'^mute', 'browser.views.mute_thread_get'),
-                    url(r'^unmute', 'browser.views.unmute_thread_get'),
+        url(r'^upvote', 'browser.views.upvote'),
+        url(r'^unupvote', 'browser.views.unupvote'),
+            
+        url(r'^follow_tag_get', 'browser.views.follow_tag_get'),
+        url(r'^unfollow_tag_get', 'browser.views.unfollow_tag_get'),
+            
+        url(r'^mute_tag_get', 'browser.views.mute_tag_get'),
+        url(r'^unmute_tag_get', 'browser.views.unmute_tag_get'),
+            
+        url(r'^follow_tag', 'browser.views.follow_tag'),
+        url(r'^unfollow_tag', 'browser.views.unfollow_tag'),
+            
+        url(r'^mute_tag', 'browser.views.mute_tag'),
+        url(r'^unmute_tag', 'browser.views.unmute_tag'),
+            
+        url(r'^follow_thread', 'browser.views.follow_thread'),
+        url(r'^unfollow_thread', 'browser.views.unfollow_thread'),
+            
+        url(r'^mute_thread', 'browser.views.mute_thread'),
+        url(r'^unmute_thread', 'browser.views.unmute_thread'),
+            
+        url(r'^follow', 'browser.views.follow_thread_get'),
+        url(r'^unfollow', 'browser.views.unfollow_thread_get'),
 
-                    url(r'^add_list', 'browser.views.add_list'),
-                    url(r'^delete_list', 'browser.views.delete_list'),
-                    
-                    url(r'^adjust_list_can_post', 'browser.views.adjust_list_can_post'),
-                    url(r'^adjust_list_can_receive', 'browser.views.adjust_list_can_receive'),
+        url(r'^mute', 'browser.views.mute_thread_get'),
+        url(r'^unmute', 'browser.views.unmute_thread_get'),
 
-                    url(r'^login_email', 'browser.views.login_imap_view'),
-                    url(r'^login_imap', 'browser.views.login_imap'),
-                    url(r'^groups/(?P<group_name>[\w-]+)/add_donotsend', 'browser.views.add_dissimulate_view'),
-                    url(r'^edit_donotsend', 'browser.views.edit_donotsend'),
-                    url(r'^donotsend_list', 'browser.views.donotsend_list'),
-                    ]
+        url(r'^add_list', 'browser.views.add_list'),
+        url(r'^delete_list', 'browser.views.delete_list'),
+        
+        url(r'^adjust_list_can_post', 'browser.views.adjust_list_can_post'),
+        url(r'^adjust_list_can_receive', 'browser.views.adjust_list_can_receive'),
+
+        url(r'^login_email', 'browser.views.login_imap_view'),
+        url(r'^login_imap', 'browser.views.login_imap'),
+        url(r'^groups/(?P<group_name>[\w-]+)/add_donotsend', 'browser.views.add_dissimulate_view'),
+        url(r'^edit_donotsend', 'browser.views.edit_donotsend'),
+        url(r'^donotsend_list', 'browser.views.donotsend_list'),
+    ]
 
     urlpatterns.extend(new_patterns)
 
@@ -176,31 +175,31 @@ if WEBSITE == 'murmur':
 elif WEBSITE == 'squadbox': 
 
     new_patterns = [
-                    url(r'^mod_queue/(?P<group_name>[\w-]+)', 'browser.views.mod_queue'),
+        url(r'^mod_queue/(?P<group_name>[\w-]+)', 'browser.views.mod_queue'),
 
-                    # url(r'^approve_get', 'browser.views.approve_get'),
-                    # url(r'^reject_get', 'browser.views.reject_get'),
+        # url(r'^approve_get', 'browser.views.approve_get'),
+        # url(r'^reject_get', 'browser.views.reject_get'),
 
-                    url(r'^approve_post', 'browser.views.approve_post'),
-                    url(r'^reject_post', 'browser.views.reject_post'),
+        url(r'^approve_post', 'browser.views.approve_post'),
+        url(r'^reject_post', 'browser.views.reject_post'),
 
-                    url(r'^delete_posts', 'browser.views.delete_posts'),
-                    url(r'^delete_post', 'browser.views.delete_post'),
+        url(r'^delete_posts', 'browser.views.delete_posts'),
+        url(r'^delete_post', 'browser.views.delete_post'),
 
-                    url(r'^whitelist_get', 'browser.views.whitelist_get'),
-                    url(r'^whitelist', 'browser.views.whitelist'),
-                    url(r'^groups/(?P<group_name>[\w-]+)/add_whitelist', 'browser.views.add_whitelist_view'),
+        url(r'^whitelist_get', 'browser.views.whitelist_get'),
+        url(r'^whitelist', 'browser.views.whitelist'),
+        url(r'^groups/(?P<group_name>[\w-]+)/add_whitelist', 'browser.views.add_whitelist_view'),
 
-                    url(r'^unblacklist_unwhitelist', 'browser.views.unblacklist_unwhitelist'),
+        url(r'^unblacklist_unwhitelist', 'browser.views.unblacklist_unwhitelist'),
 
-                    url(r'^blacklist_get', 'browser.views.blacklist_get'),
-                    url(r'^blacklist', 'browser.views.blacklist'),
-                    url(r'^groups/(?P<group_name>[\w-]+)/add_blacklist', 'browser.views.add_blacklist_view'),
+        url(r'^blacklist_get', 'browser.views.blacklist_get'),
+        url(r'^blacklist', 'browser.views.blacklist'),
+        url(r'^groups/(?P<group_name>[\w-]+)/add_blacklist', 'browser.views.add_blacklist_view'),
 
-                    url(r'^groups/(?P<group_name>[\w-]+)/rejected', 'browser.views.rejected'),
-                    url(r'^rejected_thread$', 'browser.views.rejected_thread'),
+        url(r'^groups/(?P<group_name>[\w-]+)/rejected', 'browser.views.rejected'),
+        url(r'^rejected_thread$', 'browser.views.rejected_thread'),
 
-                    url(r'^moderate_user_for_thread_get', 'browser.views.moderate_user_for_thread_get'),
-                    ]
+        url(r'^moderate_user_for_thread_get', 'browser.views.moderate_user_for_thread_get'),
+    ]
 
     urlpatterns.extend(new_patterns)

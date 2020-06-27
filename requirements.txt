@@ -1,5 +1,5 @@
-Django==1.7
-Jinja2==2.7.3
+Django==1.8
+Jinja2==2.10.3
 MarkupSafe==0.23
 mysqlclient==1.4.6
 bleach==1.4
@@ -9,7 +9,7 @@ django-appconf==0.6
 django-compressor==1.4
 django-gravatar==0.1.0
 django-mobile==0.4.0
-django-registration==1.0
+django-registration==2.0
 html2text==2014.9.25
 html5lib==1.0b3
 ipython==2.3.0
