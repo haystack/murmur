@@ -27,6 +27,7 @@ services:
       - DATABASE_HOST=${DATABASE_HOST}
       - GMAIL_USER=${GMAIL_USER} 
       - GMAIL_PASSWORD=${GMAIL_PASSWORD} 
+      - GMAIL_PORT=${GMAIL_PORT}
     restart: on-failure
   smtp:
     image: namshi/smtp 
