@@ -83,10 +83,10 @@ def error(request):
 def index(request):
 	homepage = "%s/home.html" % WEBSITE
 	if not request.user.is_authenticated():
-		return render_to_response(homepage,
-					  			{'form': AuthenticationForm(),
-					  			'reg_form': RegistrationForm()},
-					   			context=RequestContext(request))
+		return render(request, 
+						homepage,
+						{'form': AuthenticationForm(),
+						'reg_form': RegistrationForm()})
 	else:
 		if WEBSITE == 'murmur':
 			return HttpResponseRedirect('/posts')
