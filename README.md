@@ -31,7 +31,7 @@ Next set up the environment variables. The only variables you should need to set
 1. `cp .env.example .env`
 2. Fill in the correct values in `.env` for your gmail account. Make sure to enable insecure logins on gmail. 
 3. Use `make` to create the database and create a superuser account to login
-4. Check it out on `localhost:8000
+4. Check it out on `localhost:8000`
 
 #### Starting and Stopping Docker 
 
