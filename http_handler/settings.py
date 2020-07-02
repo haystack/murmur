@@ -59,6 +59,11 @@ def _get_website():
     
 WEBSITE = _get_website()
 
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 8825
+
 try:
     execfile(SITE_ROOT + '/../private.py')
 except IOError:
@@ -79,11 +84,8 @@ else:
 
 LOGIN_REDIRECT_URL = "/"
 
-EMAIL_HOST = 'localhost'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_USE_TLS = False
+EMAIL_USE_TLS = True
 DEFAULT_EMAIL = 'no-reply@' + BASE_URL
 DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
