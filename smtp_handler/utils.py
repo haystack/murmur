@@ -20,7 +20,7 @@ Murmur Mail Utils and Constants
 
 logger = logging.getLogger('murmur')
 
-HOST = BASE_URL
+HOST = "localhost" if "localhost" in BASE_URL else BASE_URL
 NO_REPLY = DEFAULT_FROM_EMAIL
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
