@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.db import models
 from django.utils.http import urlquote
 from jsonfield import JSONField
-from oauth2client.django_orm import FlowField, CredentialsField
+from oauth2client.contrib.django_orm import FlowField, CredentialsField
 
 from http_handler import settings
 from http_handler.settings import AUTH_USER_MODEL

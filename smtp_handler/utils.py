@@ -295,7 +295,7 @@ def get_attachments(email_message):
 
 				res['attachments'].append({'content': part_data,
 										   'mime': content_type,
-										   'filename': part.get_filename(),
+										   'filename': part.generate_filename(),
 										   'disposition': disposition,
 										   'id': content_id})
 			else:

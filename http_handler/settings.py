@@ -177,9 +177,6 @@ TEMPLATES = [
             # Don't forget to use absolute paths, not relative paths.
         ],
         'OPTIONS': {
-            'context_processors': [
-                'django_mobile.context_processors.flavour',
-            ],
             # List of callables that know how to import templates from various sources.
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
@@ -189,20 +186,17 @@ TEMPLATES = [
     },
 ]
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
+TEMPLATE_LOADERS = TEMPLATES[0]['OPTIONS']['loaders']
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
-    'django_mobile.middleware.MobileDetectionMiddleware',
-    'django_mobile.middleware.SetFlavourMiddleware',
-    
-)
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
 ROOT_URLCONF = 'http_handler.urls'
 
@@ -237,8 +231,7 @@ INSTALLED_APPS = (
     
     #third party apps
     'registration',
-    'django_mobile',
-    'storages'
+    'storages',
 )
 
 # A sample logging configuration. The only tangible logging
