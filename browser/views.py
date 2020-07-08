@@ -96,6 +96,7 @@ def index(request):
 @render_to(WEBSITE+'/mobile_list_posts.html')
 def post_list(request):
 	tag_info = None
+	group = None
 
 	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
@@ -113,7 +114,7 @@ def post_list(request):
 
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
 			
-		if group.public or is_member:
+		if group and group.public or is_member:
 			if is_member:
 				request.session['active_group'] = group_name
 				

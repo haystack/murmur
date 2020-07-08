@@ -20,6 +20,8 @@ from s3_storage import upload_attachments, download_attachments, download_messag
 from schema.models import *
 from smtp_handler.utils import *
 
+logger = logging.getLogger('murmur')
+
 def list_groups(user=None):
     groups = []
     pub_groups = Group.objects.filter(Q(public=True, active=True)).order_by('name')
