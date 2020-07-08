@@ -27,11 +27,6 @@ cd /home/ubuntu/production/mailx && \
 EOF
 } && \
 
-# create the initial tables
-# python manage.py syncdb && \
-
-# create the initial schema migration with south
-# python manage.py schemamigration schema --initial && \
 python manage.py makemigrations schema && \
 
 # TODO call it later
@@ -41,6 +36,9 @@ python manage.py migrate --noinput && \
 
 # apply the schema migration
 python manage.py migrate schema && \
+
+# sync with registration db
+python manage.py migrate --run-syncdb
 
 # alter tables to utf8
 { mysql -h $DATABASE_HOST -u root -p$MYSQL_PASS <<EOF
