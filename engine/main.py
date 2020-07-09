@@ -1273,14 +1273,11 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
             #users that always follow threads in this group. minus those that muted
             recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
             
-            dissimulate = DoNotSendList.objects.filter(group=group, user=group_members)
+            dissimulate = DoNotSendList.objects.filter(group=group)
             # remove dissimulated user from the recipient list
-            print(tag_objs)
             if dissimulate.count() > 0:
-                print(tag_objs)
                 for d in dissimulate:
                     recipients = [recip for recip in recipients if recip != d.donotsend_user.email]
-            print(tag_objs)
             res['status'] = True
             res['recipients'] = list(set(recipients))
             res['tags'] = []
@@ -1300,7 +1297,6 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
         res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 
     except:
-        logging.debug(sys.exc_info())
         res['code'] = msg_code['UNKNOWN_ERROR']
         
     logging.debug(res)
