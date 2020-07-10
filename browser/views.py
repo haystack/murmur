@@ -1587,15 +1587,6 @@ def unmute_thread(request):
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
-def murmur_acct(request, acct_func=None, template_name=None):
-	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
-	groups_links = get_groups_links_from_roles(user, groups)
-
-	context = {'groups': groups, 'groups_links' : groups_links, 'user': request.user, 'website' : WEBSITE, 'group_page' : True} 
-	return acct_func(request, template_name=template_name, extra_context=context)
-
-@login_required
 def serve_attachment(request, hash_filename):
 
 	if request.user.is_authenticated:

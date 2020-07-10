@@ -1,5 +1,15 @@
 from django.conf.urls import include, url
-from django.contrib.auth import views as auth_views
+from django.urls import reverse_lazy
+from django.contrib.auth.views import (
+    LoginView,
+    LogoutView,
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordChangeView,
+    PasswordChangeDoneView,
+    PasswordResetConfirmView,
+    PasswordResetCompleteView
+)
 from django.views.generic.base import TemplateView
 from browser.views import *
 from browser import views
@@ -44,35 +54,32 @@ urlpatterns = [
     url(r'^groups/(?P<group_name>[\w-]+)/edit_my_settings', views.my_group_settings_view),
 
     url(r'^gmail_setup/', include('gmail_setup.urls', namespace="oauth2")),
-     
-    #override the registration default urls - bug with django 1.6
-    url(r'^accounts/password/change/$',
-                    murmur_acct,
-                    {'acct_func': auth_views.password_change, 'template_name': 'registration/password_change_form.html'},
-                    name='password_change',
-                    ),
-    url(r'^accounts/password/change/done/$',
-                    murmur_acct,
-                    {'acct_func': auth_views.password_change_done, 'template_name': 'registration/password_change_done.html'},
-                    name='password_change_done',
-                    ),
-    url(r'^accounts/password/reset/$',
-                    auth_views.password_reset,
-                    {'password_reset_form' : MurmurPasswordResetForm,
-                    'extra_context' : website_context},
-                    name='password_reset'),
-    url(r'^accounts/password/reset/done/$',
-                    auth_views.password_reset_done,
-                    {'extra_context' : website_context},
-                    name='password_reset_done'),
-    url(r'^accounts/password/reset/complete/$',
-                    auth_views.password_reset_complete,
-                    {'extra_context' : website_context},
-                    name='password_reset_complete'),
-    url(r'^accounts/password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-                    auth_views.password_reset_confirm,
-                    {'extra_context' : website_context},
-                    name='password_reset_confirm'),
+
+    url(r'^accounts/login/$', LoginView.as_view(template_name='registration/login.html', 
+            extra_context=website_context), 
+            name='login'),
+    url(r'^accounts/logout/$', LogoutView.as_view(template_name='registration/logout.html', 
+            extra_context=website_context, next_page=reverse_lazy('login')), 
+            name='logout'),
+    url(r'^accounts/password_change/$', PasswordChangeView.as_view(template_name='registration/password_change_form.html',
+            extra_context=website_context),  
+            name='password_change'),
+    url(r'^accounts/password_change/done/$', PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html', 
+            extra_context=website_context), 
+            name='password_change_done'),
+    url(r'^accounts/password_reset/$', PasswordResetView.as_view(form_class=MurmurPasswordResetForm, 
+            extra_context=website_context),
+            name='password_reset'),
+    url(r'^accounts/password_reset/done/$', PasswordResetDoneView.as_view(template_name="registration/password_reset_done.html",
+            extra_context=website_context), 
+            name='password_reset_done'),
+    url(r'^accounts/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$', PasswordResetConfirmView.as_view(template_name="registration/password_reset_confirm.html",
+            extra_context=website_context), 
+            name='password_reset_confirm'),
+    url(r'^accounts/rest/done/$', PasswordResetCompleteView.as_view(template_name="registration/password_reset_complete.html",
+            extra_context=website_context),  
+            name='password_reset_complete'),
+
                        
     url(r'^attachment/(?P<hash_filename>[0-9A-Za-z_]+)', views.serve_attachment),
 
