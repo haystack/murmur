@@ -79,7 +79,7 @@ In order to stop docker you can simply run `make stop` and run `make start` to s
 #### setup the database 
 * `mysql -u root -p`
 * `create database murmur;`
-* Give privileges to the user that will access the database from django: `grant all privileges ON murmur.* TO admin@localhost;`
+* Give privileges to the user that will access the database from django: `grant all privileges ON murmur.* TO root@localhost;`
 
 #### install schema and create superuser
 * `python manage.py syncdb`and create superuser
