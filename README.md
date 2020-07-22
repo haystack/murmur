@@ -84,9 +84,10 @@ In order to stop docker you can simply run `make stop` and run `make start` to s
 * Give privileges to the user that will access the database from django: `grant all privileges ON murmur.* TO admin@localhost;`
 
 #### install schema and create superuser
-* `python manage.py syncdb`and create superuser
-* Convert schema app to be managed by South: `python manage.py schemamigration schema --initial`
-* Then do fake migration:  `python manage.py migrate schema 0001 --fake`
+* Create new migrations: `python manage.py makemigrations schema`
+* Apply the migrations:  `python manage.py migrate --noinput` && `python manage.py migrate schema`
+* Sync registration schema: `python manage.py migrate --run-syncdb`
+* Create superuser `python manage.py createsuperuser`
 
 #### run murmur server
 * Webserver: `python manage.py runserver 0.0.0.0:8000` (check [here](https://www.digitalocean.com/community/tutorials/how-to-serve-django-applications-with-apache-and-mod_wsgi-on-ubuntu-16-04) for details)
