@@ -9,7 +9,7 @@
 <div class="container">
   <div class="group-container">
   	
-  	<a href="/create_new_group"><button type="button">Create New Group</button></a>
+  	<a href="/create_new_group"><button class="mb-3" type="button">Create New Group</button></a>
   	<br />
   	
      <h3>Explore Public Groups</h3>
@@ -46,17 +46,17 @@
 						<td><a href="/groups/{{ group.name }}">{{group.name}}</a></td>
 						<td><span class="italic-med">{{ group.desc }}</span></td>
 						{% if group.admin %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 							{% else %}
 							<th></th>
 						{% endif %}
 						{% if group.mod %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 							{% else %}
 							<th></th>
 						{% endif %}
 						{% if group.member %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 							{% else %}
 							<th></th>
 						{% endif %}

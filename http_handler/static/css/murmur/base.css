@@ -335,11 +335,11 @@ textarea {
 }
 
 
-#murmur-header ul {
+/* #murmur-header ul {
     list-style-type: none;
     padding-left: 0px;
     margin-left: 0px;
-}
+} */
 
 #left-column-area-wrapper ul {
     list-style-type: none;
@@ -388,8 +388,6 @@ textarea {
 	margin-bottom:10px;
 }
 
-.
-
 .reply{
         margin-top:10px;
         margin-bottom:10px;
@@ -397,11 +395,6 @@ textarea {
 	
 #groups-table .row-item {
 	cursor: pointer;
-}
-
-#murmur-header li {
-	margin-left: 10px;
-	margin-right: 10px;
 }
 
 #left-column-area-wrapper li {

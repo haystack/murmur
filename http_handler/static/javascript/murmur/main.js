@@ -604,10 +604,10 @@ $(document).ready(function(){
 				content += '<span class="strong">' + res.groups[i].name + '</span>';
 				
 				if (res.groups[i].admin == true)
-					content += '<span class="admin label">Admin</span>';
+					content += '<span class="admin label text-light rounded-sm">Admin</span>';
 				
 				if (res.groups[i].mod == true)
-					content += '<span class="mod label">Mod</span>';
+					content += '<span class="mod label text-light rounded-sm">Mod</span>';
 				
 				content += '<br /><span class="italic-med">' + res.groups[i].desc + '</span>';
 				

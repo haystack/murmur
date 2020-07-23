@@ -46,17 +46,17 @@
 						<td><a href="/groups/{{ group.name }}">{{group.name}}</a></td>
 						<td><span class="italic-med">{{ group.desc }}</span></td>
 						{% if group.admin %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 							{% else %}
 							<th></th>
 						{% endif %}
 						{% if group.mod %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 							{% else %}
 							<th></th>
 						{% endif %}
 						{% if group.member %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+							<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 							{% else %}
 							<th></th>
 						{% endif %}

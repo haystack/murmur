@@ -28,6 +28,8 @@ from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
+logger = logging.getLogger('murmur')
+
 if WEBSITE == 'murmur':
 	group_or_squad = 'group'
 elif WEBSITE == 'squadbox':
@@ -63,8 +65,9 @@ def error(request):
 
 	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 
 			'groups_links' : groups_links, 'website': WEBSITE}
-	
+	logger.debug(res)
 	error = request.GET.get('e')
+
 	if error == 'gname':
 		res['error'] = '%s is not a valid group name.' % request.GET['name']
 	elif error == 'admin':
@@ -101,11 +104,12 @@ def post_list(request):
 	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-		
+
 		active_group = load_groups(request, groups, user)
 		is_member = False
 		group_name = request.GET.get('group_name')
-		
+
+		logger.debug(active_group)
 
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
@@ -113,12 +117,14 @@ def post_list(request):
 			group_name = active_group['name']
 
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
-			
+		
+		if active_group['name'] == 'No Groups Yet':
+			return redirect('/group_list')
+		
 		if group and group.public or is_member:
 			if is_member:
 				request.session['active_group'] = group_name
 				
-			
 			res = {'status':False}
 			try:
 				threads = Thread.objects.filter(group=group)

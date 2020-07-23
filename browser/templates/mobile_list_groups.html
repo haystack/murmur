@@ -28,7 +28,7 @@
 						<li class="row-item" id="{{ group.name }}">
 							<span class="strong">{{ group.name }}</span>
 							{% if group.admin %}
-								<span class="admin label">
+								<span class="admin label text-light rounded-sm">
 								{% if website == 'murmur' %}
 								Admin
 								{% elif website == 'squadbox' %}
@@ -37,7 +37,7 @@
 								</span>
 							{% endif %}
 							{% if group.mod %}
-								<span class="mod label">
+								<span class="mod label text-light rounded-sm">
 								{% if website == 'murmur' %}
 								Mod
 								{% elif website == 'squadbox' %}
