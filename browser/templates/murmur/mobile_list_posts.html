@@ -51,14 +51,6 @@
     background-color:#0da4e0
   }
 
-  .tag-delete-btn {
-    cursor: pointer;
-    color:white; 
-  }
-  .tag-delete-btn:hover {
-    cursor: pointer;
-    color:red; 
-  }
 </style>
 {% endblock %}
 
@@ -92,8 +84,14 @@
               {% for tag in tag_info %}
               <tr style="border-bottom: 1px solid #bbbbbb; border-top: 1px solid #bbbbbb;">
                 <td style="padding-right: 20px;">
-                  <h4><label class="label2" id="tag_{{ forloop.counter0 }}"
-                      style="background-color: #{{ tag.color }}">{{ tag.name }}</label> </h4>
+                  <details class="mt-2">
+                    <summary>
+                      <h4 class="d-inline-block">
+                        <label class="label2 display-4" id="tag_{{ forloop.counter0 }}" style="background-color: #{{ tag.color }}">{{ tag.name }}</label>
+                      </h4>
+                    </summary>
+                    <p>Tag Description</p>
+                  </details>
                 </td>
                 <td style="padding-right: 20px;">
                   <small>

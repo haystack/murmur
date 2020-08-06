@@ -65,7 +65,6 @@ def error(request):
 
 	res = {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 
 			'groups_links' : groups_links, 'website': WEBSITE}
-	logger.debug(res)
 	error = request.GET.get('e')
 
 	if error == 'gname':
@@ -104,12 +103,10 @@ def post_list(request):
 	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
-
+		
 		active_group = load_groups(request, groups, user)
 		is_member = False
 		group_name = request.GET.get('group_name')
-
-		logger.debug(active_group)
 
 		if active_group['active']:
 			group = Group.objects.get(name=active_group['name'])
@@ -450,7 +447,7 @@ def my_group_settings_view(request, group_name):
 		return redirect('/404?e=gname&name=%s' % group_name)
 	except MemberGroup.DoesNotExist:
 		return redirect('/404?e=member')
-	
+
 @render_to(WEBSITE+"/create_post.html")
 @login_required
 def my_group_create_post_view(request, group_name):
@@ -459,8 +456,11 @@ def my_group_create_post_view(request, group_name):
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		try:
 			group = Group.objects.get(name=group_name)
+			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p').values('name', 'color')
+			tag_lists = map(engine.main.encode_tags,tag_info)
+			tag_data = {'tags' : tag_lists}
 			member = MemberGroup.objects.get(member=user, group=group)
-			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, "tag_data": json.dumps(tag_data)}
 		except Group.DoesNotExist:
 			return redirect('/404?e=gname&name=%s' % group_name)
 		except MemberGroup.DoesNotExist:

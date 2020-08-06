@@ -1,5 +1,4 @@
-import string
-import random
+import string, random, logging
 
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from bleach import clean
@@ -54,6 +53,8 @@ ALLOWED_ATTRIBUTES = {
 }
 
 ALLOWED_STYLES = ['border-style', 'border-width', 'float', 'height', 'margin', 'width', 'max-width']
+
+logger = logging.getLogger('murmur')
 
 
 def load_groups(request, groups, user, group_name=None):

@@ -2075,5 +2075,20 @@ def call_perspective_api(text):
     return res
 
 
+def encode_tags(tag):
+    """Encodes each tag's unicode to utf-8, used for selecting tags when posting
+
+    Args:
+       tag: a dict with name and color keys that represent a tag
+
+    Returns:
+        The utf-8 encoded tag dict
+    """
+    tag['name'] = tag['name'].encode()
+    tag['color'] = tag['color'].encode()
+    return tag
+
+
+
 
 

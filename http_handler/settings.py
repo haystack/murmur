@@ -103,7 +103,7 @@ DATABASES = {
     }
 }
 
-ALLOWED_HOSTS = [BASE_URL]
+ALLOWED_HOSTS = [BASE_URL,'localhost']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
