@@ -1297,6 +1297,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
         res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 
     except:
+        logging.debug("UNKNOWN_ERROR: " + str(sys.exc_info()))
         res['code'] = msg_code['UNKNOWN_ERROR']
         
     logging.debug(res)

@@ -556,25 +556,37 @@ blockquote {
 	color: red;
 }
 
-.tag-input-container {
-	/*the container must be positioned relative:*/
-	position: relative;
-	display: inline-block;
-	flex-grow: 100;
-}
-
 .tag-input-list {
 	display: inline-flex;
+	box-sizing: content-box;
+	min-height: 2.3em;
 	background-color: #fff;
 	border: 1px solid #447EAC;
 	flex-flow: row wrap;
 	list-style-type: none;
-	padding: 0.2em;
+	padding: 0;
 	cursor: text;
 }
 
 .tag-input-list:focus-within {
 	outline: 1px ridge #447EAC;
+}
+
+.tag-input-container {
+	/*the container must be positioned relative:*/
+	position: relative;
+	display: inline-block;
+	flex-grow: 1;
+}
+
+.tag-input {
+	width: 100%;
+	height: 100%;
+	border: none;
+}
+
+.tag-input:focus {
+	outline: none;
 }
 
 .tag-items {
@@ -608,53 +620,28 @@ blockquote {
 	background-color: #DDDDDD;
 }
 
-.subject-input-list {
-	display: flex;
+.tag-subject-container {
+	display: inline-flex;
 	flex-flow: row wrap;
-	background-color: #fff;
-	border: 1px solid #447EAC;
-	list-style-type: none;
-	padding: 0.2em;
-	cursor: text;
-}
-
-.subject-input-list:focus-within {
-	outline: 1px ridge #447EAC;
-}
-
-.subject-input-container {
-	display: inline-block;
-	flex-grow: 100;
-}
-
-.subject-input {
 	width: 100%;
-	border: none;
 }
 
-.subject-input:focus {
-	outline: none;
-}
-
-.tag-input {
-	width: 100%;
-	border: none;
-}
-
-.tag-input:focus {
-	outline: none;
+.post-tag-container {
+	display: flex;
+	max-width: 40%;
+	flex-flow: column wrap;
 }
 
 .tag-label-input {
 	display: inline-block;
-	padding: .2em .6em .3em;
+	padding: .2em .6em .2em;
 	font-weight: 700;
 	color: #fff;
 	text-align: center;
 	white-space: nowrap;
 	border-radius: .25em;
 	margin: 0.2em;
-	align-self: center;
+	flex-basis: content;
 }
 
 .tag-label-autocomplete {
@@ -678,9 +665,28 @@ blockquote {
 	color:red; 
 }
 
-.add-tag-btn {
-	background-color: #3D7AA6;
-	color: #FFF;
-	border: #447EAC solid thin;
-	padding: 5px 10px 5px 10px;
+.subject-container {
+	display: flex;
+	flex-flow: column wrap;
+	flex-grow: 1;
+}
+
+.subject-input {
+	border: 1px solid #447EAC;
+	height: 2.4em;
+	padding-top: 0.2em;
+	line-height: 1.5em;
+	resize: none;
+}
+
+.subject-input:focus-within {
+	outline: 1px ridge #447EAC;
+}
+
+/* 767px breakpoint to have tag and subject inputs side by in iPad screen but not break in screen widths smaller than this */
+@media only screen and (max-width: 767px) { 
+	.tag-subject-container {
+		display: flex;
+		flex-flow: column wrap;
+	}
 }

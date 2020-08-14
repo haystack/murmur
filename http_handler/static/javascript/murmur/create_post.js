@@ -2,20 +2,19 @@ $(document).ready(function(){
 	
 	CKEDITOR.replace( 'new-post-text' );
 			
-	let userName = $.trim($('#user_email').text()),
-		tagInput = $("#tagInput").get(0);
-		post = $("#btn-post");
-		subjectInput = $("#new-post-subject").get(0);
-		tags = django_tag_data["tags"];
-		tagInputList = $(".tag-input-list").get(0);
-		subjectInputList = $(".subject-input-list").get(0);
-		tagInputTagSet = new Set();
-		subjectTagSet = new Set();
-	
+	const userName = $.trim($('#user_email').text());
+			tagInput = $("#tagInput").get(0);
+			post = $("#btn-post");
+			subjectInput = $("#new-post-subject").get(0);
+			subjectInputHeight = 38;
+			tags = django_tag_data["tags"];
+			tagInputList = $(".tag-input-list").get(0);
+			tagInputTagSet = new Set();
+			
 	insert_post = 
 		function(params){
 			let subjectText = $("#new-post-subject").val();
-			subjectTagSet.forEach((tagName) => subjectText = "[" + tagName + "]" + subjectText.substr(0)) 
+			tagInputTagSet.forEach((tagName) => subjectText = "[" + tagName + "]" + subjectText.substr(0)) 
 			params.msg_text = CKEDITOR.instances['new-post-text'].getData();
 			params.subject = subjectText
             params.group_name = $("#new-post-to").text();
@@ -32,33 +31,13 @@ $(document).ready(function(){
 				}
 			);	
 		};
+
 	
 	bind_buttons();
 	autocomplete(tagInput,tags);
 
-	$("#addTag").click(function(e) {
-		let tagsToAdd = tagInputList.querySelectorAll("li[id$='-tag-input']");
+	subjectInput.addEventListener("input", resizeInput, false);
 
-		tagsToAdd.forEach(function(tag) {
-			let tagName = tag.getAttribute("data-tagName");
-				tagColor = tag.getAttribute("data-tagColor");
-
-			if (!subjectTagSet.has(tagName)) {
-				tagInputItem = document.createElement("LI");
-				tagInputItem.setAttribute("id", tagName + "-tag-subject")
-				tagInputItem.setAttribute("class", "tag-label-input")
-				tagInputItem.setAttribute("style", "background-color: #" + tagColor + ";");
-				tagInputItem.innerHTML = tagName;
-	
-				let tagInputDeleteBtn = createDeleteTagBtn(tagName, "subject");
-	
-				tagInputItem.appendChild(tagInputDeleteBtn);
-				subjectInputList.insertBefore(tagInputItem, subjectInputList.children[subjectInputList.children.length-1]);
-				subjectTagSet.add(tagName);
-			}
-		});
-	})
-			
 	function bind_buttons() {
  		post.unbind("click");
  		
@@ -67,7 +46,6 @@ $(document).ready(function(){
  		let add_post = bind(insert_post, params);
 		
 		post.click(add_post);
-		
 	}
 
 });
@@ -191,7 +169,7 @@ function autocomplete(inp, arr) {
 
 	// Makes item active throw
 	function addActive(items) {
-		if (!items) return false;
+		if (items.length === 0) return false;
 		removeActive(items);
 
 		if (currentFocus >= items.length) currentFocus = 0;
@@ -221,31 +199,38 @@ function autocomplete(inp, arr) {
 	$(document).click((e) => closeAllLists(e.target));
 }
 
-// Create delete tag button on tag labels based on input location (subject or add tag)
-function createDeleteTagBtn(tagName, location) {
-	// Add delete tag to tag label
+// Create delete tag button on tag labels in tag input
+function createDeleteTagBtn(tagName) {
+	// Add delete tag button to tag label
 	tagInputDeleteBtn = document.createElement("SPAN");
 	tagInputDeleteBtn.setAttribute("data-tagName",tagName);
 	tagInputDeleteBtn.setAttribute("class","tag-delete-btn ml-1");
 	tagInputDeleteBtn.innerHTML = "x";
 
 	tagInputDeleteBtn.addEventListener("click", function(e) {
-		deleteTag(this.getAttribute("data-tagName"), location);
+		deleteTag(this.getAttribute("data-tagName"));
 
-		// Delete tags from respective sets
-		if (location === "input") tagInputTagSet.delete(tagName);
-		else if (location === "subject") subjectTagSet.delete(tagName);
+		// Delete tags from tag input set
+		tagInputTagSet.delete(tagName);
 	});
 
 	return tagInputDeleteBtn;
 }
 
 // Deletes the tag label associated to delete button
-function deleteTag(tagName, location) {
-	let tag = document.getElementById(tagName + "-tag-" + location);
+function deleteTag(tagName) {
+	let tag = document.getElementById(tagName + "-tag-input");
 	tag.remove()
 }
 
-
+function resizeInput() {
+	if (subjectInput.value == '') {
+		subjectInput.setAttribute("style", "height:" + subjectInputHeight + "px;overflow-y:hidden;");
+	} else {
+		subjectInput.setAttribute("style", "height:" + (subjectInput.scrollHeight) + "px;overflow-y:hidden;");
+		subjectInput.style.height = "auto";
+		subjectInput.style.height = (subjectInput.scrollHeight) + "px";
+	}
+  }
 	
 	
