@@ -1,6 +1,6 @@
 {% extends "murmur/base.html" %}
 {% block customcss %}
-	<link href="/static/css/third-party/datatable.css" rel="stylesheet">
+	<link href="/static/DataTables/datatables.min.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
 	<div class="container">
@@ -96,7 +96,7 @@
 					<button type="button" id="btn-add-members">Add Members</button>
 					<button type="button" id="btn-del-members">Delete Members</button>
 					<button type="button" id="btn-set-admin">Set as Admin</button>
-					<button type="button" id="btn-set-mod">Set as Moderator</button>
+					<button type="button" id="btn-set-mod" class="mb-3">Set as Moderator</button>
 				{% else %}
 					<button type="button" id="btn-add-members" style="display: none;">Add Members</button>
 				{% endif %}
@@ -185,7 +185,7 @@
 					<hr />
 					<h3>Associated Mailing Lists</h3>
 					
-					<button type="button" id="btn-add-list">Add List</button>
+					<button type="button" id="btn-add-list" class="mb-3">Add List</button>
 					<select id='actionSelect'>
 						<option value='label' selected="true">Other actions</option>
 						<option value="deleteList">Delete</option>

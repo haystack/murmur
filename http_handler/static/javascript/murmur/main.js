@@ -34,12 +34,14 @@ $(document).ready(function(){
 	/* Dynamic Table Definitions */	
 	
 	members_table = $('#members-table').dataTable({
-			"aoColumns": [
-				{ 'bSortable': false, },
+			"columns": [
+				{ 'orderable': false, },
 				null,
 				null,
 				null
-			]
+			],
+			"order": [[1, "asc"]],
+			responsive: true
 		});
 
 	/* Default blur effect in textbox */
