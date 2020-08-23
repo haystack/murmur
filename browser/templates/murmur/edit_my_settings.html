@@ -70,6 +70,42 @@
 		<div id="edit-emails">
 	{% endif %}
 
+	<article id="tag-subscription-area">
+		<h3>Tag Subscription</h3>
+		<hr />
+		<label class="d-block" for="blockMode">
+			<input class="mr-1" type="radio" id="blockMode" name="tagMode" value="blockMode" checked>
+			Send me all except the following blocked tags
+		</label>
+		<label class="d-block" for="subscribeMode">
+			<input class="mr-1" type="radio" id="subscribeMode" name="tagMode" value="subscribeMode">
+			Send me nothing except the following subscribed tags
+		</label>
+		<table id="tag-subscription-table" class="display" cellspacing="0" width="100%">
+			<thead>
+				<tr>
+					<th>Tag</th>
+					<th>Description</th>
+					<th>Num Posts</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% if tag_info %}
+					{% for tag in tag_info %}
+						<tr class="my_row">
+							<!-- Tag, Description, Number of Posts -->
+							<td><label class="tag inactive" id="tag_{{ forloop.counter0 }}" style="background-color: #{{ tag.color }}">{{ tag.name }}</label></td>
+							<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed nulla et nulla fermentum molestie.</td>
+							<td><span>{{ tag.num_p }} post(s)</span></td>
+						</tr>
+					{% endfor %}
+				{% else %}
+						<tr></tr>
+				{% endif %}							
+			</tbody>
+		</table>	
+	</article>
+
 	<div id='donotsent-list-area'>
 		<h3>My do-not-send list of this group</h3> 
 		<hr />

@@ -1,19 +1,40 @@
 $(document).ready(function(){
 	
-	var user_name = $.trim($('#user_email').text());
-	var group_name = $.trim($("#group-name").text());
-	
-	var btn_add_dissimulate = $("#btn-add-dissimulate"),
+	let user_name = $.trim($('#user_email').text());
+	 	group_name = $.trim($("#group-name").text());
+		btn_add_dissimulate = $("#btn-add-dissimulate"),
 		btn_delete_dissimulate = $("#btn-delete-dissimulate");
+		btn_save_settings = $("#btn-save-settings");
+		btn_cancel_settings = $("#btn-cancel-settings");
+		tags = $(".tag");
+		modeInput = $('input[name="tagMode"]');
 
-	var btn_save_settings = $("#btn-save-settings");
-	var btn_cancel_settings = $("#btn-cancel-settings");
-	
-	var donotsend_members_table = $('#donotsend-members-table').dataTable({
+
+	let donotsend_members_table = $('#donotsend-members-table').DataTable({
 		"columns": [ { 'orderable': false}, null],
 		"order": [[1, "asc"]],
 		responsive: true
 	});
+
+	let tag_subscription_table = $("#tag-subscription-table").DataTable({
+		reponsive: true
+	})
+
+	tags.each((index,elem) => {
+		elem.addEventListener("click", function() {
+			const mode = $('input[name="tagMode"]:checked').val();
+
+			if (mode == "blockMode") {
+				// Blocking tag actions
+			} else if (mode == "subscribeMode") {
+				// Subscibing tag actions
+			}
+			elem.classList.toggle("inactive");
+		})
+	});
+
+	// Toggles visibility of tags based on tag mode change
+	modeInput.change(function() { tags.each((index,elem) => {elem.classList.toggle("inactive")}); });
 
 	toggle_edit_emails();
 	

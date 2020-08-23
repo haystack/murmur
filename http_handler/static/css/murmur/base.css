@@ -683,6 +683,22 @@ blockquote {
 	outline: 1px ridge #447EAC;
 }
 
+.tag {
+	display: inline-block;
+	padding: .2em .6em .3em;
+	font-weight: 700;
+	color: #fff;
+	text-align: center;
+	white-space: nowrap;
+	border-radius: .25em;
+	margin-right: 0.2em;
+	cursor: pointer;
+}
+
+.inactive {
+	opacity: 25%;
+}
+
 /* 767px breakpoint to have tag and subject inputs side by in iPad screen but not break in screen widths smaller than this */
 @media only screen and (max-width: 767px) { 
 	.tag-subject-container {

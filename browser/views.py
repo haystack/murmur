@@ -443,9 +443,10 @@ def my_group_settings_view(request, group_name):
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.get(member=user, group=group)
 		donotsends = DoNotSendList.objects.filter(group=group, user=user)   
-
+		tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
+		
 		return {'user': request.user, 'groups': groups, 'group_info': group, 'settings': membergroup, 
-			'group_page': True, 'website' : WEBSITE, 'donotsend_info': donotsends}
+			'tag_info' : tag_info, 'group_page': True, 'website' : WEBSITE, 'donotsend_info': donotsends}
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 	except MemberGroup.DoesNotExist:
