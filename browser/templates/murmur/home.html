@@ -49,8 +49,15 @@
   	
   	<form method="POST" action="{% url "auth_login" %}">
 		{% csrf_token %}
-		<h3>Login</h3>
-		{{ form.as_p }}
+      <h3>Login</h3>
+      <label for="id_username" class="d-block">
+         Email address: 
+         {{ form.username }}
+      </label>
+      <label for="id_password" class="d-block">
+         Password: 
+         {{ form.password }}
+      </label>
 		<a href="{% url "auth_password_reset" %}">Forgot your password?</a>
 		<br /><br />
 		<input type="submit" class="btn btn-primary" value="Log In" />
@@ -61,12 +68,21 @@
    <p>
        <form method='post' action="{% url "registration_register" %}">
         	{% csrf_token %}
-        	
-		<h3>Register Account</h3>
-		Create an account to join or start a group!<br />
-		<br />
-        {{ reg_form.as_p }}
-
+         <h3>Register Account</h3>
+         Create an account to join or start a group!<br />
+         <br />
+         <label for="id_email" class="d-block">
+            E-mail:
+            {{ reg_form.email }}
+         </label>
+         <label for="id_password1" class="d-block">
+            Password:
+            {{ reg_form.password1 }}
+         </label>
+         <label for="id_password2" class="d-block">
+            Password (again):
+            {{ reg_form.password2 }}
+         </label>
         <input type="submit" class="btn btn-primary" value="Register!" />
 
         </form>
