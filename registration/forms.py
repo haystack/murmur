@@ -34,11 +34,9 @@ class RegistrationForm(forms.Form):
 
     """
     required_css_class = 'required'
-    email = forms.EmailField(label=_("E-mail"))
-    password1 = forms.CharField(widget=forms.PasswordInput,
-                                label=_("Password"))
-    password2 = forms.CharField(widget=forms.PasswordInput,
-                                label=_("Password (again)"))
+    email = forms.EmailField()
+    password1 = forms.CharField(widget=forms.PasswordInput)
+    password2 = forms.CharField(widget=forms.PasswordInput)
 
     def clean(self):
         """
