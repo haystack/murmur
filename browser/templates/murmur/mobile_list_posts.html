@@ -51,6 +51,72 @@
     background-color:#0da4e0
   }
 
+  .post-list-item {
+    display: block;
+    flex-flow: column wrap;
+  }
+
+  .post-item-main {
+    display: flex;
+    flex-flow: row wrap;
+  }
+
+  .post-item-footer {
+    display: inline-flex;
+    flex-flow: row wrap;
+  }
+
+  .left-column-area-content {
+    float: left;
+    text-align: left;
+  }
+
+  .right-column-area-content {
+    float: inline-end;
+    text-align: right;
+  }
+
+  .post-tags-subject {
+    display: inline-flex;
+    flex-flow: row wrap;
+    align-items: flex-start;
+    max-width: 50vw;
+  }
+
+  .tag-container {
+    display: inline-flex;
+    flex-flow: row nowrap;
+  }
+
+  .post-subject {
+    font-weight: bold;
+    align-self: baseline;
+  }
+
+  /* 767px breakpoint to have tag and subject inputs side by in iPad screen but not break in screen widths smaller than this */
+  @media only screen and (max-width: 767px) { 
+    .tag-container {
+      display: flex;
+      flex-flow: column wrap;
+    }
+
+    .post-tags-subject {
+      display: flex;
+      flex-flow: column wrap;
+      align-items: flex-start;
+    }
+
+    /* .post-list-item {
+      display: flex;
+      flex-flow: column wrap;
+    } */
+    
+    .right-column-area-content {
+      float: left;
+      text-align: left;
+    }
+  }
+
 </style>
 {% endblock %}
 
@@ -222,43 +288,43 @@
           {% for post in posts.threads %}
           <a href="/thread?group_name={{ active_group.name }}&tid={{ post.thread_id }}">
             <li class="row-item" id="{{ post.thread_id }}">
-              <div class="left-column-area-metadata">
-                <span class="gray">{{ post.timestamp|date:"n/j/Y" }}</span>
-                <span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
-                <span class="unread">{{ post.num_replies }}</span> <br>
-              </div>
-              <div class="middle-column-area-content">
-                <span class="strong">{{ post.post.subject }}</span>
-                <br />
-                <span class="strong-gray">{{ post.post.from }}</span><br />
-                <span class="blurb ellipsis">{{ post.post.text|striptags }}
-                </span>
-              </div>
-
-              {% if post.tags|length > 0 %}
-              <div class="tag-container">
-                {% for tag in post.tags %}
-                <span class="label2"
-                  style="background-color: #{{tag.color}}; float: right; position: relative; top: 5px;">{{tag.name}}</span>
-                {% endfor %}
-              </div>
-              {% endif %}
-
-              <div>
-                <span class="label2"
-                  style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
-
-                {% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
-                {% if post.following %}
-                <span class="label2 following" style="background-color: #3D7AA6;">Following</span>
-                {% endif %}
-                {% else %}
-                {% if post.muting %}
-                <span class="label2 muted" style="background-color: #3D7AA6;">Muted</span>
-                {% endif %}
-                {% endif %}
-              </div>
-
+              <article class="post-list-item">
+                <div class="post-list-main">
+                  <div class="left-column-area-content">
+                    <div class="post-tags-subject">
+                      {% if post.tags|length > 0 %}
+                        <div class="tag-container mr-1">
+                          {% for tag in post.tags %}
+                          <span class="label2"
+                            style="background-color: #{{tag.color}}; float: left; position: relative; top: 5px;">{{tag.name}}</span>
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                      <span class="post-subject">{{ post.post.subject }}</span>
+                    </div>
+                    <p class="strong-gray m-0 mt-1">{{ post.post.from }}</p>
+                    <p class="blurb ellipsis m-0 mt-1">{{ post.post.text|striptags }}</p>
+                  </div>
+                  <div class="right-column-area-content">
+                    <p class="gray m-0">{{ post.timestamp|date:"n/j/Y" }}</p>
+                    <p class="gray m-0">{{ post.timestamp|date:"h:i A" }}</p>
+                    <div>
+                      <span class="label2 mr-2 p-1"
+                        style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
+                      <span class="unread p">{{ post.num_replies }}</span> 
+                    </div>
+                  </div>
+                </div>
+                  {% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
+                  {% if post.following %}
+                  <span class="label2 following" style="background-color: #3D7AA6;">Following</span>
+                  {% endif %}
+                  {% else %}
+                  {% if post.muting %}
+                  <span class="label2 muted" style="background-color: #3D7AA6;">Muted</span>
+                  {% endif %}
+                  {% endif %}
+              </article> 
             </li>
           </a>
           {% endfor %}

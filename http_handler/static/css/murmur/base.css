@@ -278,7 +278,7 @@ hr{
 .left-column-area-content .ellipsis{
 	display:block;
 	white-space: nowrap;
-	max-width: 220px;
+	max-width: 40vw;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
@@ -447,11 +447,13 @@ textarea {
 	top: 48px;
 }
 
-#post-list-table {
+#post-list-table, #group-list-table {
 	list-style-type: none;
+	padding: 0px;
+	width: 100%;
 }
 
-#post-list-table .row-item{
+#post-list-table .row-item, #group-list-table .row-item {
 	background: white;
 	padding: 15px;
         border-bottom: #ccc solid 1px;
@@ -460,21 +462,17 @@ textarea {
 	cursor: default;
 }
 
-#post-list-table .row-item:hover {
+#post-list-table .row-item:hover, #group-list-table .row-item:hover {
 	cursor: hand;
 	cursor: pointer;
 	background: #FFF7CE!important;
 }
 
-#post-list-table .row-item.selected {
+#post-list-table .row-item.selected, #group-list-table .row-item.selected {
 	background: #FFF7CE!important;
 }
 
-#post-list-table {
-	padding: 0px;
-}
-
-#post-list-table a {
+#post-list-table a, #group-list-table a {
 	text-decoration: none;
 	color: #000000;
 }
@@ -483,7 +481,7 @@ textarea {
 	width: 200px;
 }
 
-.table, #post-list-table{
+.table {
 	width: 100%;
 }
 

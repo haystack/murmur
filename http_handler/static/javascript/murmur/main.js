@@ -400,7 +400,7 @@ $(document).ready(function(){
 						var upvotes = parseInt($('#post-' + post_id).children('.label2').text().substring(1)) + 1;
 						$('#post-' + post_id).children('.label2').text('+' + upvotes);
 						$('#post-' + post_id).children('.label2').css({'background-color': 'lightyellow'});
-						$('#post-' + post_id).children('small').children().eq(0).replaceWith('<a style="cursor: pointer" onclick="unupvote(\'' + post_id + '\', \'' + thread_id + '\'); return false;">Undo +1 Post</a>');
+						$('#post-' + post_id).children('small').children().eq(0).replaceWith('<a href="#" style="cursor: pointer" onclick="unupvote(\'' + post_id + '\', \'' + thread_id + '\'); return false;">Undo +1 Post</a>');
                     	var thread_votes = parseInt($('#' + thread_id).find('.upvotes').text().substring(1)) + 1;
                     	$('#' + thread_id).find('.upvotes').text('+' + thread_votes);
                     }
@@ -418,7 +418,7 @@ $(document).ready(function(){
 						var upvotes = parseInt($('#post-' + post_id).children('.label2').text().substring(1)) - 1;
 						$('#post-' + post_id).children('.label2').text('+' + upvotes);
 						$('#post-' + post_id).children('.label2').css({'background-color': '#ffffff'});
-						$('#post-' + post_id).children('small').children().eq(0).replaceWith('<a style="cursor: pointer" onclick="upvote(\'' + post_id + '\', \'' + thread_id + '\'); return false;">+1 Post</a>');
+						$('#post-' + post_id).children('small').children().eq(0).replaceWith('<a href="#" style="cursor: pointer" onclick="upvote(\'' + post_id + '\', \'' + thread_id + '\'); return false;">+1 Post</a>');
                     	var thread_votes = parseInt($('#' + thread_id).find('.upvotes').text().substring(1)) - 1;
                     	$('#' + thread_id).find('.upvotes').text('+' + thread_votes);
                     }
@@ -1062,7 +1062,7 @@ $(document).ready(function(){
 		if (res.post.liked == true) {
 			content += '<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.post.likes + '</span>';
 			content += ' <small>  | ';
-			content += '<a style="cursor: pointer" onclick="unupvote(\'' + res.post.id + '\', \'' + res.thread_id + '\'); return false;">Undo +1 Post</a> ';
+			content += '<a href="#" style="cursor: pointer" onclick="unupvote(\'' + res.post.id + '\', \'' + res.thread_id + '\'); return false;">Undo +1 Post</a> ';
 		} else {
 			content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.post.likes + '</span>';
 			content += ' <small>  | ';
@@ -1090,7 +1090,7 @@ $(document).ready(function(){
 		      	if (res.replies[i].liked == true) {
 		      		content += '<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.replies[i].likes + '</span>';
 		      		content += ' <small>  | ';
-					content += '<a style="cursor: pointer" onclick="unupvote(\'' + res.replies[i].id + '\', \'' + res.thread_id + '\'); return false;">Undo +1 Post</a> ';
+					content += '<a href="#" style="cursor: pointer" onclick="unupvote(\'' + res.replies[i].id + '\', \'' + res.thread_id + '\'); return false;">Undo +1 Post</a> ';
 				} else {
 					content += '<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+' + res.replies[i].likes + '</span>';
 		      		content += ' <small>  | ';
