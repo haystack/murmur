@@ -84,6 +84,7 @@
 		<table id="tag-subscription-table" class="display" cellspacing="0" width="100%">
 			<thead>
 				<tr>
+					<th>Select</th>
 					<th>Tag</th>
 					<th>Description</th>
 					<th>Num Posts</th>
@@ -93,7 +94,8 @@
 				{% if tag_info %}
 					{% for tag in tag_info %}
 						<tr class="my_row">
-							<!-- Tag, Description, Number of Posts -->
+							<!-- Select, Tag, Description, Number of Posts -->
+							<td><input class="checkbox checkbox-user" type="checkbox" id ={{ tag.id }}></td>
 							<td><label class="tag inactive" id="tag_{{ forloop.counter0 }}" style="background-color: #{{ tag.color }}">{{ tag.name }}</label></td>
 							<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed nulla et nulla fermentum molestie.</td>
 							<td><span>{{ tag.num_p }} post(s)</span></td>

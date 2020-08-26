@@ -6,9 +6,11 @@ $(document).ready(function(){
 		btn_delete_dissimulate = $("#btn-delete-dissimulate");
 		btn_save_settings = $("#btn-save-settings");
 		btn_cancel_settings = $("#btn-cancel-settings");
-		tags = $(".tag");
+		selectRows = $(".my_row");
 		modeInput = $('input[name="tagMode"]');
-
+		selectTags = $(".checkbox");
+		tags = $(".tag");
+		swapping = false;
 
 	let donotsend_members_table = $('#donotsend-members-table').DataTable({
 		"columns": [ { 'orderable': false}, null],
@@ -17,24 +19,40 @@ $(document).ready(function(){
 	});
 
 	let tag_subscription_table = $("#tag-subscription-table").DataTable({
-		reponsive: true
-	})
+		"columns": [ { 'orderable': false}, null, null, null],
+		"order": [[1, "asc"]],
+		responsive: true
 
-	tags.each((index,elem) => {
+	})
+	selectRows.each((index, elem) => {
+		elem.addEventListener("click", (e) => {elem.firstElementChild.firstElementChild.click()});
+	});
+
+	selectTags.each((index, elem) => {
 		elem.addEventListener("click", function() {
 			const mode = $('input[name="tagMode"]:checked').val();
-
-			if (mode == "blockMode") {
-				// Blocking tag actions
-			} else if (mode == "subscribeMode") {
-				// Subscibing tag actions
+			const tag = elem.parentNode.nextElementSibling.firstElementChild;
+			
+			if (!swapping) {
+				if (mode == "blockMode") {
+					// Blocking tag actions
+				} else if (mode == "subscribeMode") {
+					// Subscibing tag actions
+				}
 			}
-			elem.classList.toggle("inactive");
+			elem.toggleAttribute("checked");
+			tag.classList.toggle("inactive");
+			swapping = false;
 		})
 	});
 
 	// Toggles visibility of tags based on tag mode change
-	modeInput.change(function() { tags.each((index,elem) => {elem.classList.toggle("inactive")}); });
+	modeInput.change(function() {
+		selectTags.each((index, elem) => {
+			swapping = true;
+			elem.click()
+		});
+	});
 
 	toggle_edit_emails();
 	

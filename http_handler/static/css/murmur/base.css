@@ -340,14 +340,6 @@ textarea {
     margin-left: 0px;
 }
 
-
-
-.left-column-area-content{
-      margin-right:75px;
-      padding:0;
-}
-
-
 .strong-gray{
 	color: #737373;
 	font-weight: bold;
@@ -454,12 +446,13 @@ textarea {
 }
 
 #post-list-table .row-item, #group-list-table .row-item {
+	display: inline-block;
 	background: white;
 	padding: 15px;
-        border-bottom: #ccc solid 1px;
-        vertical-align: middle;
+	vertical-align: middle;
 	border-bottom: 1px solid #ccc;
 	cursor: default;
+	width: 100%;
 }
 
 #post-list-table .row-item:hover, #group-list-table .row-item:hover {
@@ -695,6 +688,10 @@ blockquote {
 
 .inactive {
 	opacity: 25%;
+}
+
+.my_row {
+	cursor: pointer;
 }
 
 /* 767px breakpoint to have tag and subject inputs side by in iPad screen but not break in screen widths smaller than this */
