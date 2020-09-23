@@ -562,3 +562,8 @@ blockquote {
 .not-verified {
 	color: red;
 }
+
+/* Set a fixed length in the main log in page */
+.home-right input {
+	width: 179px;
+}
