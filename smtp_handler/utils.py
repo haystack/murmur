@@ -341,7 +341,7 @@ def _insert_plain_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	if tags.count() == 0:
 		return ''
 
-	if membergroup.no_emails or not membergroup.always_follow_thread:
+	if membergroup.no_emails or not membergroup.all_emails:
 		follow_tags = []
 		for f in tag_following:
 			follow_tags.append(f.tag.name)
@@ -371,7 +371,7 @@ def _insert_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	if tags.count() == 0:
 		return ''
 
-	if membergroup.no_emails or not membergroup.always_follow_thread:
+	if membergroup.no_emails or not membergroup.all_emails:
 		follow_tags = []
 		for f in tag_following:
 			follow_tags.append(f.tag.name)
@@ -470,7 +470,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	upvote_addr = UPVOTE_ADDR % (HOST, tid, post_id)
 	content += '<a href="%s">Upvote Post</a><BR><BR>' % (upvote_addr)
 
-	if membergroup.no_emails or not membergroup.always_follow_thread:
+	if membergroup.no_emails or not membergroup.all_emails:
 		follow_addr = '%s%s' % (FOLLOW_ADDR, tid)
 		unfollow_addr = '%s%s' % (UNFOLLOW_ADDR, tid)
 
@@ -507,7 +507,7 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
 	if membergroup.no_emails:
 		content += "<BR><BR>You are set to receive no emails from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>" % (addr)
-	elif membergroup.always_follow_thread:
+	elif membergroup.all_emails:
 		content += "<BR><BR>You are set to receive all emails from this group, except for the threads you mute. <BR>You can change the setting to receive fewer emails from this mailing list. <BR><a href=\"%s\">Change your settings</a>" % (addr)
 	else:
 		content += "<BR><BR>You are set to receive only the 1st email from this group, except for the threads you follow. <BR><a href=\"%s\">Change your settings</a>" % (addr)
@@ -535,7 +535,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	upvote_addr = 'mailto:%s' % (group_name + '+' + str(post_id) + UPVOTE_SUFFIX + '@' + HOST)
 	content += 'Upvote Post<%s>\n\n' % (upvote_addr)
 
-	if membergroup.no_emails or not membergroup.always_follow_thread:
+	if membergroup.no_emails or not membergroup.all_emails:
 		follow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + FOLLOW_SUFFIX + '@' + HOST)
 		unfollow_addr = 'mailto:%s' % (group_name + '+' + str(tid) + UNFOLLOW_SUFFIX + '@' + HOST)
 
@@ -573,7 +573,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 	addr = EDIT_SETTINGS_ADDR % (HOST, group.name)
 	if membergroup.no_emails:
 		content += "\n\nYou are set to receive no emails from this group, except for the threads you follow. \nChange your settings<%s>" % (addr)
-	elif membergroup.always_follow_thread:
+	elif membergroup.all_emails:
 		content += "\n\nYou are set to receive all emails from this group, except for the threads you mute. \nYou can change the setting to receive fewer emails from this mailing list. \nChange your settings<%s>" % (addr)
 	else:
 		content += "\n\nYou are set to receive only the 1st email from this group, except for the threads you follow. \nChange your settings<%s>" % (addr)

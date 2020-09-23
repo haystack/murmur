@@ -3,7 +3,7 @@ $(document).ready(function(){
 	CKEDITOR.replace( 'new-post-text' );
 			
 	const userName = $.trim($('#user_email').text());
-			tagInput = $("#tagInput").get(0);
+			tagInput = $("#tag-input").get(0);
 			post = $("#btn-post");
 			subjectInput = $("#new-post-subject").get(0);
 			subjectInputHeight = 38;
@@ -13,7 +13,7 @@ $(document).ready(function(){
 			
 	insert_post = 
 		function(params){
-			let subjectText = $("#new-post-subject").val();
+			let subjectText = $("#tag-input").val() + $("#new-post-subject").val();
 			tagInputTagSet.forEach((tagName) => subjectText = "[" + tagName + "]" + subjectText.substr(0)) 
 			params.msg_text = CKEDITOR.instances['new-post-text'].getData();
 			params.subject = subjectText

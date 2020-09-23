@@ -325,7 +325,7 @@ def get_group_settings(group_name, user):
     try:
         group = Group.objects.get(name=group_name)
         membergroup = MemberGroup.objects.get(group=group, member=user)
-        res['following'] = membergroup.always_follow_thread
+        res['following'] = membergroup.all_emails
         res['no_emails'] = membergroup.no_emails
         res['upvote_emails'] = membergroup.upvote_emails
         res['receive_attachments'] = membergroup.receive_attachments
@@ -341,25 +341,53 @@ def get_group_settings(group_name, user):
     logging.debug(res)
     return res
 
-def edit_group_settings(group_name, following, upvote_emails, receive_attachments, no_emails, digest, user):
+def edit_group_settings(group_name, mail_delivery, notification_settings, receive_attachments, tag_blocking_mode, muted_tags, user,):
     res = {'status':False}
     
     try:
         group = Group.objects.get(name=group_name)
         membergroup = MemberGroup.objects.get(group=group, member=user)
-        membergroup.always_follow_thread = following
-        membergroup.upvote_emails = upvote_emails
+        membergroup.all_emails = mail_delivery['all_emails']
+        if not mail_delivery['all_emails'] and not mail_delivery['digest'] and not mail_delivery['no_emails']:
+            membergroup.first_emails = True
+        else:
+            membergroup.first_emails = False
+        membergroup.digest = mail_delivery['digest']
+        membergroup.no_emails = mail_delivery['no_emails']
         membergroup.receive_attachments = receive_attachments
-        membergroup.no_emails = no_emails
-        membergroup.digest = digest
+        membergroup.upvote_emails = notification_settings['upvote_emails']
+        membergroup.group_invite_emails = notification_settings['group_invite_emails']
+        membergroup.admin_emails = notification_settings['admin_emails']
+        membergroup.mod_emails = notification_settings['mod_emails']
+        membergroup.tag_blocking_mode = tag_blocking_mode
         membergroup.save()
+
+        tags = Tag.objects.filter(group=group)
+        mute_tags = MuteTag.objects.filter(user=user, group=group)
+        mute_tags_names = mute_tags.values_list("tag__name", flat=True)
+        muted_tags = set(muted_tags)
+
+        for mute_tag in mute_tags_names:
+            mute_tag_instance = mute_tags.get(tag__name=mute_tag)
+
+            if mute_tag not in muted_tags:
+                mute_tag_instance.delete()
+
+        for tag in muted_tags:
+            tag_obj = tags.get(name=tag)
+            mute_tag, created = MuteTag.objects.get_or_create(user=user, group=group, tag=tag_obj)
         
         res['status'] = True
     except Group.DoesNotExist:
         res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
     except MemberGroup.DoesNotExist:
         res['code'] = msg_code['NOT_MEMBER']
-    except:
+    except Tag.DoesNotExist:
+        res['code'] = msg_code['TAG_NOT_FOUND_ERROR']
+    except MuteTag.DoesNotExist:
+        res['code'] = msg_code['MUTE_TAGS_NOT_FOUND']
+    except Exception, e:
+        logger.debug(e)
         res['code'] = msg_code['UNKNOWN_ERROR']
     
     logging.debug(res)
@@ -759,7 +787,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
             member_group = MemberGroup.objects.filter(member=u, group=group)
             if member_group.exists():
                 res['member_group'] = {'no_emails': member_group[0].no_emails,
-                                       'always_follow_thread': member_group[0].always_follow_thread}
+                                       'all_emails': member_group[0].all_emails}
 
         posts = Post.objects.filter(thread = t).select_related()
         replies = []
@@ -865,7 +893,7 @@ def load_thread(t, user=None, member=None):
         if member:
             is_member = True
             no_emails = member.no_emails
-            always_follow = member.always_follow_thread
+            all_emails = member.all_emails
     
     #if WEBSITE == 'murmur':
     posts = Post.objects.filter(thread = t) 
@@ -1064,9 +1092,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
                 if not mute_tag:
                     recipients.append(m.member.email)
             else:
-                follow_tag = FollowTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
-                if follow_tag:
-                    recipients.append(m.member.email)
+                recipients.append(m.member.email)
         
         if user:
             recipients.append(user.email)
@@ -1093,7 +1119,7 @@ def insert_post_web(group_name, subject, message_text, user):
             res['status'] = True
             
             res['member_group'] = {'no_emails': user_member[0].no_emails,
-                                   'always_follow_thread': user_member[0].always_follow_thread}
+                                   'all_emails': user_member[0].all_emails}
     
             post_info = {'msg_id': p.msg_id,
                          'thread_id': thread.id,
@@ -1251,8 +1277,8 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
                     f = Following(user=user, thread=thread)
                     f.save()
                 
-            member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True, no_emails=False)
-            always_follow_members = [member_group.member.email for member_group in member_recip]
+            member_recip = MemberGroup.objects.filter(group=group, all_emails=True, no_emails=False)
+            always_follow_members = {member_group.member.email for member_group in member_recip} # changed to set for faster lookup
             
             #users that have muted the thread and are set to always follow
             muted = Mute.objects.filter(thread=thread).select_related()
@@ -1268,7 +1294,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
                 muted_emails.extend([m.user.email for m in muted_tag if m.user.email in always_follow_members])
 
                 #users following the tag
-                follow_tag = FollowTag.objects.filter(group=group, tag__in=tag_objs).select_related()
+                follow_tag = tag_objs.exclude(id__in=mute_tag)
                 recipients.extend([f.user.email for f in follow_tag if f.user.email not in always_follow_members])
             #users that always follow threads in this group. minus those that muted
             recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
@@ -2085,8 +2111,12 @@ def encode_tags(tag):
     Returns:
         The utf-8 encoded tag dict
     """
-    tag['name'] = tag['name'].encode()
-    tag['color'] = tag['color'].encode()
+
+    if 'name' in tag and 'color' in tag:
+        tag['name'] = tag['name'].encode()
+        tag['color'] = tag['color'].encode()
+    else:
+        tag = tag.encode()
     return tag
 
 

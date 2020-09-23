@@ -131,19 +131,6 @@ class Tag(models.Model):
 	
 	class Meta:
 		unique_together = ("name", "group")
-		
-class FollowTag(models.Model):
-	id = models.AutoField(primary_key=True)
-	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-	group = models.ForeignKey('Group', on_delete=models.CASCADE)
-	tag = models.ForeignKey('Tag', on_delete=models.CASCADE)
-	timestamp = models.DateTimeField(auto_now=True)
-	
-	def __unicode__(self):
-		return '%s follows tag %s' % (self.user.email, self.tag.name)
-	
-	class Meta:
-		unique_together = ("user", "tag")
 
 class MuteTag(models.Model):
 	id = models.AutoField(primary_key=True)
@@ -165,15 +152,19 @@ class MemberGroup(models.Model):
 	group = models.ForeignKey('Group', on_delete=models.CASCADE)
 	timestamp = models.DateTimeField(auto_now=True)
 	admin = models.BooleanField(default=False)
-	moderator = models.BooleanField(default=False)
+	all_emails = models.BooleanField(default=True)
+	digest = models.BooleanField(default=False)
 	no_emails = models.BooleanField(default=False)
-	always_follow_thread = models.BooleanField(default=True)
-	upvote_emails = models.BooleanField(default=True)
+	moderator = models.BooleanField(default=False)
 	receive_attachments = models.BooleanField(default=True)
+	upvote_emails = models.BooleanField(default=True)
+	group_invite_emails = models.BooleanField(default=True)
+	admin_emails = models.BooleanField(default=True)
+	mod_emails = models.BooleanField(default=True)
 	last_emailed = models.DateTimeField(null=True)
 	gmail_filter_hash = models.CharField(max_length=40, null=True)
 	last_updated_hash = models.DateTimeField(auto_now_add=True)
-	digest = models.BooleanField(default=False)
+	tag_blocking_mode = models.BooleanField(default=True)
 	
 	def __unicode__(self):
 		return '%s - %s' % (self.member.email, self.group.name)

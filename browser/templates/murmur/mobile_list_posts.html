@@ -100,11 +100,6 @@
       flex-flow: column wrap;
       align-items: flex-start;
     }
-
-    /* .post-list-item {
-      display: flex;
-      flex-flow: column wrap;
-    } */
     
     .right-column-area-content {
       float: left;
@@ -167,7 +162,7 @@
 
                 <td>
                   {% if member_info %}
-                  {% if member_info.no_emails or not member_info.always_follow_thread %}
+                  {% if member_info.no_emails or not member_info.all_emails %}
                   {% if tag.followed %}
                   <label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unsubscribe this
                     tag</label>
@@ -200,7 +195,7 @@
               {% if member_info.no_emails %}
               You are currently set to <b>receive no emails</b> from this group, except those you follow. <br />You can
               follow individual threads or all threads with a specific tag.
-              {% elif member_info.always_follow_thread %}
+              {% elif member_info.all_emails %}
               You are currently set to <b>receive all emails</b> from this group, except those you mute. <br />You can
               mute individual threads or threads with a specific tag.
               {% else %}
@@ -308,17 +303,17 @@
                         style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
                       <span class="unread p">{{ post.num_replies }}</span> 
                     </div>
+                    {% if posts.member_group.no_emails or not posts.member_group.all_emails %}
+                      {% if post.following %}
+                      <p class="label2 following" style="background-color: #3D7AA6;">Following</p>
+                      {% endif %}
+                    {% else %}
+                      {% if post.muting %}
+                      <p class="label2 muted" style="background-color: #3D7AA6;">Muted</p>
+                      {% endif %}
+                    {% endif %}
                   </div>
                 </div>
-                  {% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
-                  {% if post.following %}
-                  <span class="label2 following" style="background-color: #3D7AA6;">Following</span>
-                  {% endif %}
-                  {% else %}
-                  {% if post.muting %}
-                  <span class="label2 muted" style="background-color: #3D7AA6;">Muted</span>
-                  {% endif %}
-                  {% endif %}
               </article> 
             </li>
           </a>

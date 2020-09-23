@@ -12,6 +12,7 @@ from django.template.context_processors import csrf
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db.models.aggregates import Count
+from django.db.models import F
 from django.http import *
 from django.shortcuts import get_object_or_404, redirect, render_to_response, render
 from django.template.context import RequestContext
@@ -22,12 +23,9 @@ import engine.main
 from engine.constants import *
 from http_handler.settings import WEBSITE, AWS_STORAGE_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 from registration.forms import RegistrationForm
-from schema.models import (FollowTag, ForwardingList, Group, MemberGroup, MemberGroupPending,
+from schema.models import (ForwardingList, Group, MemberGroup, MemberGroupPending,
                            MuteTag, Tag, UserProfile, Post, Attachment, DoNotSendList)
 from smtp_handler.utils import *
-
-
-logger = logging.getLogger('murmur')
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
@@ -134,7 +132,7 @@ def post_list(request):
 			except Exception, e:
 				print e
 				res['code'] = msg_code['UNKNOWN_ERROR']
-			logging.debug(res)
+			logger.debug(res)
 
 			member_info = None
 
@@ -148,7 +146,7 @@ def post_list(request):
 				
 				for tag in tag_info:
 					tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
-					tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
+					tag.followed = not tag.muted
 					
 			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group, "tag_info": tag_info, 
 						"member_info": member_info, 'is_member': is_member}
@@ -444,9 +442,14 @@ def my_group_settings_view(request, group_name):
 		membergroup = MemberGroup.objects.get(member=user, group=group)
 		donotsends = DoNotSendList.objects.filter(group=group, user=user)   
 		tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
+		muted_tags = MuteTag.objects.filter(user=user, group=group)
+		followed_tags = tag_info.exclude(mutetag__in=muted_tags).values_list("name", flat=True)
+		followed_tags_list = map(engine.main.encode_tags, followed_tags)
+		muted_tags_list = map(engine.main.encode_tags, muted_tags.values_list("tag__name", flat=True))
+		tag_subscription_data = { 'followed': followed_tags_list, 'muted': muted_tags_list}
 		
-		return {'user': request.user, 'groups': groups, 'group_info': group, 'settings': membergroup, 
-			'tag_info' : tag_info, 'group_page': True, 'website' : WEBSITE, 'donotsend_info': donotsends}
+		return {'user': request.user, 'groups': groups, 'group_info': group, 'settings': membergroup, 'tag_info' : tag_info, 
+			'tag_subscription': tag_subscription_data, 'group_page': True, 'website' : WEBSITE, 'donotsend_info': donotsends}
 	except Group.DoesNotExist:
 		return redirect('/404?e=gname&name=%s' % group_name)
 	except MemberGroup.DoesNotExist:
@@ -479,7 +482,7 @@ def list_my_groups(request):
 		res = engine.main.list_my_groups(user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @render_to(WEBSITE+"/edit_create_group.html")
@@ -535,7 +538,7 @@ def edit_group_info(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -546,7 +549,7 @@ def edit_members(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -557,7 +560,7 @@ def edit_donotsend(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -567,7 +570,7 @@ def delete_group(request):
 		res = engine.main.delete_group(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -585,7 +588,7 @@ def create_group(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -597,7 +600,7 @@ def get_group_settings(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
@@ -605,16 +608,21 @@ def get_group_settings(request):
 def edit_group_settings(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		following = request.POST['following'] == 'yes'
-		upvote_emails = request.POST['upvote_emails'] == 'true'
-		receive_attachments = request.POST['receive_attachments'] == 'true'
-		no_emails = request.POST['no_emails'] == 'true'
+		all_emails = request.POST['all_emails'] == 'true'
 		digest = request.POST['digest'] == 'true'
-		res = engine.main.edit_group_settings(request.POST['group_name'], following, upvote_emails, receive_attachments, no_emails, digest, user)
+		no_emails = request.POST['no_emails'] == 'true'
+		mail_delivery = { 'all_emails': all_emails, 'digest': digest, 'no_emails': no_emails }
+		receive_attachments = request.POST['receive_attachments'] == 'true'
+		upvote_emails = request.POST['upvote_emails'] == 'true'
+		group_invite_emails = request.POST['group_invite_emails'] == 'true'
+		admin_emails = request.POST['admin_emails'] == 'true'
+		mod_emails = request.POST['mod_emails'] == 'true'
+		notification_settings = { 'upvote_emails': upvote_emails, 'group_invite_emails': group_invite_emails, 'admin_emails': admin_emails, 'mod_emails': mod_emails }
+		tag_blocking_mode = request.POST['tag_blocking_mode'] == 'true'
+		muted_tags = json.loads(request.POST['muted_tags_data'])['muted_tags']
+		res = engine.main.edit_group_settings(request.POST['group_name'], mail_delivery, notification_settings, receive_attachments, tag_blocking_mode, muted_tags, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		print e
-		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
@@ -626,7 +634,7 @@ def activate_group(request):
 		res = engine.main.activate_group(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
@@ -638,7 +646,7 @@ def deactivate_group(request):
 		res = engine.main.deactivate_group(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
@@ -650,7 +658,7 @@ def add_members(request):
 		res = engine.main.add_members(request.POST['group_name'], request.POST['emails'], add_as_mods, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -668,7 +676,7 @@ def add_list(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -679,7 +687,7 @@ def delete_list(request):
 		return HttpResponse(json.dumps(res), content_type='application/json')
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -693,7 +701,7 @@ def adjust_list_can_post(request):
 		return HttpResponse(json.dumps(res), content_type='application/json')
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -707,7 +715,7 @@ def adjust_list_can_receive(request):
 		return HttpResponse(json.dumps(res), content_type='application/json')
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 def subscribe_group(request):
@@ -726,7 +734,7 @@ def subscribe_group(request):
 	
 
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 	
 
@@ -737,7 +745,7 @@ def unsubscribe_group(request):
 		res = engine.main.unsubscribe_group(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
@@ -749,7 +757,7 @@ def group_info(request):
 		res['admin_email'] = request.POST['group_name'] + '+admins@' + HOST
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -760,7 +768,7 @@ def donotsend_info(request):
 		res = engine.main.donotsend_info(request.POST['group_name'], user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -774,7 +782,7 @@ def list_posts(request):
 		res['group_name'] = group_name
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		print e
 		return HttpResponse(request_error, content_type="application/json")
 
@@ -789,7 +797,7 @@ def refresh_posts(request):
 		res = engine.main.list_posts(group_name=group_name, user=user, timestamp_str = request.POST['timestamp'])
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except  Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
@@ -799,7 +807,7 @@ def load_post(request):
 		res = engine.main.load_post(group_name=None, thread_id = request.POST['thread_id'], msg_id=request.POST['msg_id'])
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -809,7 +817,7 @@ def load_thread(request):
 		res = engine.main.load_thread(t)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -846,38 +854,35 @@ def insert_post(request):
 		t = Thread.objects.get(id=res['thread_id'])
 		
 		if len(to_send) > 0:
-			logging.debug('Insert post to : ' + str(to_send))
+			logger.debug('Insert post to : ' + str(to_send))
 			recips = UserProfile.objects.filter(email__in=to_send)
 			membergroups = MemberGroup.objects.filter(group=g, member__in=recips)
 			
 			followings = Following.objects.filter(thread=t, user__in=recips)
 			mutings = Mute.objects.filter(thread=t, user__in=recips)
 			
-			tag_followings = FollowTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
 			tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
-			
+			tag_followings = Tag.objects.filter(group=g).exclude(id__in=tag_mutings)
 			
 			for recip in recips:
 				membergroup = membergroups.filter(member=recip)[0]
 				following = followings.filter(user=recip).exists()
 				muting = mutings.filter(user=recip).exists()
-				tag_following = tag_followings.filter(user=recip)
 				tag_muting = tag_mutings.filter(user=recip)
 
 				original_group = None
 				if request.POST.__contains__('original_group'):
 					original_group = request.POST['original_group'] + '@' + HOST
 
-				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], False, original_group)
+				ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_followings, tag_muting, res['tag_objs'], False, original_group)
 				mail.Html = msg_text + ps_blurb	
 				
-				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], False, original_group)
+				ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_followings, tag_muting, res['tag_objs'], False, original_group)
 				mail.Body = html2text(msg_text) + ps_blurb	
 			
 				relay_mailer.deliver(mail, To = recip.email)
 
 		fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
-
 		for l in fwding_lists:
 
 			footer_html = html_forwarded_blurb(g.name, l.email)
@@ -904,8 +909,7 @@ def insert_post(request):
 		del res['tag_objs']
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 		
 	
@@ -965,7 +969,7 @@ def insert_reply(request):
 			g = Group.objects.get(name=group_name)
 			t = Thread.objects.get(id=res['thread_id'])
 			
-			logging.debug('TO LIST: ' + str(to_send))
+			logger.debug('TO LIST: ' + str(to_send))
 			
 			if len(to_send) > 0:
 				
@@ -975,20 +979,19 @@ def insert_reply(request):
 				followings = Following.objects.filter(thread=t, user__in=recips)
 				mutings = Mute.objects.filter(thread=t, user__in=recips)
 				
-				tag_followings = FollowTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
 				tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+				tag_followings = Tag.objects.filter(group=g).exclude(id__in=tag_mutings)
 				
 				for recip in recips:
 					membergroup = membergroups.filter(member=recip)[0]
 					following = followings.filter(user=recip).exists()
 					muting = mutings.filter(user=recip).exists()
-					tag_following = tag_followings.filter(user=recip)
 					tag_muting = tag_mutings.filter(user=recip)
 
-					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], False, original_list_email=original_group)
+					ps_blurb = html_ps(g, t, res['post_id'], membergroup, following, muting, tag_followings, tag_muting, res['tag_objs'], False, original_list_email=original_group)
 					mail.Html = msg_text + ps_blurb	
 					
-					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_following, tag_muting, res['tag_objs'], False, original_list_email=original_group)
+					ps_blurb = plain_ps(g, t, res['post_id'], membergroup, following, muting, tag_followings, tag_muting, res['tag_objs'], False, original_list_email=original_group)
 					mail.Body = html2text(msg_text) + ps_blurb
 				
 					relay_mailer.deliver(mail, To = recip.email)
@@ -1023,7 +1026,7 @@ def insert_reply(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print sys.exc_info()
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 	
 @render_to(WEBSITE+"/follow_tag.html")
@@ -1165,7 +1168,7 @@ def upvote(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 	
 @login_required
@@ -1176,7 +1179,7 @@ def unupvote(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 
@@ -1344,7 +1347,7 @@ def whitelist(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 	
 @login_required
@@ -1358,7 +1361,7 @@ def blacklist(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1372,7 +1375,7 @@ def donotsend_list(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1387,7 +1390,7 @@ def login_imap(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1401,7 +1404,7 @@ def unblacklist_unwhitelist(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @render_to("approve_reject.html")
@@ -1445,7 +1448,7 @@ def approve_post(request):
 			return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1461,7 +1464,7 @@ def reject_post(request):
 			return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1472,7 +1475,7 @@ def delete_post(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1488,7 +1491,7 @@ def delete_posts(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1505,7 +1508,7 @@ def follow_thread(request):
 										content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1515,7 +1518,7 @@ def unfollow_thread(request):
 		res = engine.main.unfollow_thread(request.POST['thread_id'], user=user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1527,7 +1530,7 @@ def follow_tag(request):
 			return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1539,7 +1542,7 @@ def unfollow_tag(request):
 			return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1551,7 +1554,7 @@ def mute_tag(request):
 			return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1563,7 +1566,7 @@ def unmute_tag(request):
 			return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1580,7 +1583,7 @@ def mute_thread(request):
 										content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1591,7 +1594,7 @@ def unmute_thread(request):
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
 		print e
-		logging.debug(e)
+		logger.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
 
 @login_required
@@ -1612,15 +1615,15 @@ def serve_attachment(request, hash_filename):
 				return HttpResponse('/404?e=member')
 
 		except Attachment.DoesNotExist:
-			logging.debug("No attachment with hash filename %s" % hash_filename)
+			logger.debug("No attachment with hash filename %s" % hash_filename)
 			return HttpResponseRedirect('/404')
 
 		except Post.DoesNotExist:
-			logging.debug("No post with msg id %s" % attachment.msg_id)
+			logger.debug("No post with msg id %s" % attachment.msg_id)
 			return HttpResponseRedirect('/404')
 
 		except Exception, e:
-			logging.debug("Error serving attachment: %s" % e)
+			logger.debug("Error serving attachment: %s" % e)
 			return HttpResponseRedirect('/404')
 	else:
 		return redirect(global_settings.LOGIN_URL)
@@ -1641,8 +1644,8 @@ def mod_queue(request, group_name):
 
 		res = engine.main.load_pending_posts(user, group_name)
 
-		logging.debug("RES:")
-		logging.debug(res)
+		logger.debug("RES:")
+		logger.debug(res)
 
 		if not res['status']:
 			redirect('/404')
