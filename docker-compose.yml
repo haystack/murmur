@@ -33,6 +33,7 @@ services:
     ports:
       - "8825"
     environment:
+      - RELAY_HOST=${RELAY_HOST}
       - GMAIL_USER=${GMAIL_USER} 
       - GMAIL_PASSWORD=${GMAIL_PASSWORD} 
       - PORT=8825
