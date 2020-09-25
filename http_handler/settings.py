@@ -79,12 +79,10 @@ else:
 
 LOGIN_REDIRECT_URL = "/"
 
-EMAIL_HOST = 'localhost'
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_USE_TLS = False
-DEFAULT_EMAIL = 'no-reply@' + BASE_URL
+EMAIL_USE_TLS = True
+DEFAULT_EMAIL = 'no-reply@' + "localhost"  if "localhost" in BASE_URL else BASE_URL
 DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
 
