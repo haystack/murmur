@@ -1,5 +1,5 @@
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/haystack/murmur?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Django version](https://img.shields.io/badge/django-1.6-blue.svg)](https://docs.djangoproject.com/en/2.2/releases/1.6/) [![python version](https://img.shields.io/badge/python-2.7-yellowgreen.svg)](https://www.python.org/download/releases/2.7/)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/haystack/murmur?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Django version](https://img.shields.io/badge/Django-1.10-blue)](https://docs.djangoproject.com/en/3.0/releases/1.10/) [![python version](https://img.shields.io/badge/python-2.7-yellowgreen.svg)](https://www.python.org/download/releases/2.7/)
 
 Murmur
 =
@@ -10,9 +10,14 @@ Murmur uses Django with a MySQL backend (you can replace with any other backend 
 
 Please contact us for an example of the private file. You cannot run the program without it.
 
+#### Install MySQL Server
+
 #### setup the database 
 * change the root mysql account to one written in private file.
 * make sure you can log in to mysql with the password in the command line: `mysql -u root -p`
+
+#### Install Git and clone this repository
+* `git clone https://github.com/haystack/murmur.git`
 
 ## Running Docker
 
@@ -38,13 +43,6 @@ Next set up the environment variables. The only variables you should need to set
 In order to stop docker you can simply run `make stop` and run `make start` to start it up again.
 
 ## Not Running Docker i.e. on the server
-
-### Web Installation Instructions
-  
-#### Install MySQL Server
-
-#### Install Git and clone this repository
-* `git clone https://github.com/haystack/murmur.git`
 
 #### install required linux packages if on linux
 * `sudo apt-get install libmysqlclient-dev python-dev`
@@ -81,7 +79,7 @@ In order to stop docker you can simply run `make stop` and run `make start` to s
 #### setup the database 
 * `mysql -u root -p`
 * `create database murmur;`
-* Give privileges to the user that will access the database from django: `grant all privileges ON murmur.* TO admin@localhost;`
+* Give privileges to the user that will access the database from django: `grant all privileges ON murmur.* TO root@localhost;`
 
 #### install schema and create superuser
 * `python manage.py syncdb`and create superuser

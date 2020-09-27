@@ -20,7 +20,7 @@ Murmur Mail Utils and Constants
 
 logger = logging.getLogger('murmur')
 
-HOST = BASE_URL
+HOST = "localhost" if "localhost" in BASE_URL else BASE_URL
 NO_REPLY = DEFAULT_FROM_EMAIL
 POST_SUFFIX = '__post__'
 FOLLOW_SUFFIX = '__follow__'
@@ -35,7 +35,7 @@ UPVOTE_SUFFIX = '__upvote__'
 DOWNVOTE_SUFFIX = '__downvote__'
 FETCH_SUFFIX = '__fetch__'
 
-ADMIN_EMAILS = ['axz@mit.edu', 'kmahar@mit.edu']
+ADMIN_EMAILS = ['soya@mit.edu']
 
 FOLLOW_ADDR = 'http://%s/follow?tid=' % (HOST)
 UNFOLLOW_ADDR = 'http://%s/unfollow?tid=' % (HOST)

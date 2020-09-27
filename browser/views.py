@@ -75,6 +75,8 @@ def error(request):
 		res['error'] = 'You do not have permission to visit this page.'
 	elif error == 'thread':
 		res['error'] = 'This thread no longer exists.'
+	elif error == 'request_login':
+		res['error'] = "This group is private. Please log in to view the posts."
 	else:
 		res['error'] = 'Unknown error.'
 	return res
@@ -157,7 +159,7 @@ def post_list(request):
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
 			
 			if not group.public:
-				return redirect('/404?e=member')
+				return redirect('/404?e=request_login')
 			else:
 				res = engine.main.list_posts(group_name=request.GET.get('group_name'), format_datetime=False, return_replies=False)
 				return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group, "tag_info": tag_info}
