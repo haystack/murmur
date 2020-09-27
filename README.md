@@ -34,7 +34,7 @@ Currently you need a gmail account in order for Murmur to send verification emai
 Next set up the environment variables. The only variables you should need to set are your gmail username and password.
 
 1. `cp .env.example .env`
-2. Fill in the correct values in `.env` for your gmail account. Make sure to enable insecure logins on gmail. 
+2. Fill in the correct values in `.env` for your gmail account. Put your gmail address and a google app password.
 3. Use `make` to create the database and create a superuser account to login
 4. Check it out on `localhost:8000
 
