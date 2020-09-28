@@ -808,6 +808,7 @@ def load_thread(request):
 @login_required
 def insert_post(request):
 	try:
+		logger.debug("insert post")
 		user = get_object_or_404(UserProfile, email=request.user.email)
 
 		group_name = request.POST['group_name']
