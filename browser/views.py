@@ -28,6 +28,8 @@ from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
+logger = logging.getLogger('murmur')
+
 if WEBSITE == 'murmur':
 	group_or_squad = 'group'
 elif WEBSITE == 'squadbox':
@@ -866,6 +868,7 @@ def insert_post(request):
 				mail.Body = html2text(msg_text) + ps_blurb	
 			
 				relay_mailer.deliver(mail, To = recip.email)
+				logger.debug("Send email to " + recip.email)
 
 		fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
 
