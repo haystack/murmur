@@ -304,7 +304,6 @@ class UserProfile(AbstractBaseUser):
 		"""
         Sends an email to this User.
         """	
-		send_mail(subject, message, from_email, [self.email])
 		from smtp_handler.utils import relay_mailer
 		from lamson.mail import MailResponse
 		mail = MailResponse(From = DEFAULT_FROM_EMAIL, To = self.email, Subject = subject, Body = message)
