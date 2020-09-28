@@ -6,7 +6,7 @@ from jsonfield import JSONField
 from oauth2client.contrib.django_orm import FlowField, CredentialsField
 
 from http_handler import settings
-from http_handler.settings import AUTH_USER_MODEL
+from http_handler.settings import AUTH_USER_MODEL, DEFAULT_FROM_EMAIL
 
 class Post(models.Model):
 	id = models.AutoField(primary_key=True)
@@ -305,6 +305,10 @@ class UserProfile(AbstractBaseUser):
         Sends an email to this User.
         """	
 		send_mail(subject, message, from_email, [self.email])
+		from smtp_handler.utils import relay_mailer
+		from lamson.mail import MailResponse
+		mail = MailResponse(From = DEFAULT_FROM_EMAIL, To = self.email, Subject = subject, Body = message)
+		relay_mailer.deliver(mail, To=self.email)
 
 	def has_perm(self, perm, obj=None):
 		"Does the user have a specific permission?"

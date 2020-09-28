@@ -18,7 +18,7 @@ from django.template import loader
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils.translation import ugettext_lazy as _
-from http_handler.settings import WEBSITE
+from http_handler.settings import WEBSITE, DEFAULT_FROM_EMAIL
 import logging
 
 logger = logging.getLogger('murmur')
@@ -154,9 +154,9 @@ class MurmurPasswordResetForm(PasswordResetForm):
             # Email subject *must not* contain newlines
             subject = ''.join(subject.splitlines())
             email = loader.render_to_string(email_template_name, c)
-            
+
             from smtp_handler.utils import relay_mailer
             from lamson.mail import MailResponse
-            mail = MailResponse(From = from_email, To = user.email, Subject = subject, Body = email)
+            mail = MailResponse(From = DEFAULT_FROM_EMAIL, To = user.email, Subject = subject, Body = email)
             relay_mailer.deliver(mail, To=user.email)
 
