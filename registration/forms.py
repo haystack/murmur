@@ -13,12 +13,15 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.sites.models import get_current_site
+from django.contrib.sites.shortcuts import get_current_site
 from django.template import loader
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils.translation import ugettext_lazy as _
-from http_handler.settings import WEBSITE
+from http_handler.settings import WEBSITE, DEFAULT_FROM_EMAIL
+import logging
+
+logger = logging.getLogger('murmur')
 
 class RegistrationForm(forms.Form):
     """
@@ -113,12 +116,15 @@ class MurmurPasswordResetForm(PasswordResetForm):
     def save(self, domain_override=None,
              subject_template_name='registration/password_reset_subject.txt',
              email_template_name='registration/password_reset_email.html',
+             extra_email_context=None, html_email_template_name="",
              use_https=False, token_generator=default_token_generator,
              from_email=None, request=None):
         """
         Generates a one-use only link for resetting password and sends to the
         user.
         """
+        logger.info("reset form")
+
         from django.core.mail import send_mail
         UserModel = get_user_model()
         email = self.cleaned_data["email"]
@@ -148,5 +154,9 @@ class MurmurPasswordResetForm(PasswordResetForm):
             # Email subject *must not* contain newlines
             subject = ''.join(subject.splitlines())
             email = loader.render_to_string(email_template_name, c)
-            send_mail(subject, email, from_email, [user.email])
+
+            from smtp_handler.utils import relay_mailer
+            from lamson.mail import MailResponse
+            mail = MailResponse(From = DEFAULT_FROM_EMAIL, To = user.email, Subject = subject, Body = email)
+            relay_mailer.deliver(mail, To=user.email)
 

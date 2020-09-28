@@ -22,12 +22,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.sites.models import get_current_site
-from django.core.urlresolvers import reverse
-from django.shortcuts import render, render_to_response
-from oauth2client import xsrfutil
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+from django.shortcuts import render
+from oauth2client.contrib import xsrfutil
 from oauth2client.client import flow_from_clientsecrets
-from oauth2client.django_orm import Storage
+from oauth2client.contrib.django_orm import Storage
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 

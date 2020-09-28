@@ -106,11 +106,9 @@
 							<tr>
 								<th>Select</th>
 								<th>Email</th>
-								{% if flavour != "mobile" %}
-									<th>Joined</th>
-									<th>Admin</th>
-									<th>Moderator</th>
-								{% endif %}
+								<th>Joined</th>
+								<th>Admin</th>
+								<th>Moderator</th>
 							</tr>
 						</thead>
 						
@@ -118,11 +116,9 @@
 						<tr>
 							<th>Select</th>
 							<th>Email</th>
-							{% if flavour != "mobile" %}
-								<th>Joined</th>
-								<th>Admin</th>
-								<th>Moderator</th>
-							{% endif %}
+							<th>Joined</th>
+							<th>Admin</th>
+							<th>Moderator</th>
 						</tr>
 						</tfoot>
 						
@@ -138,23 +134,6 @@
 										{% if group_info.admin %}
 											<td><input class="checkbox checkbox-user" type="checkbox" id ={{ member.id }}></td>
 											<td>{{ member.email }}</td>
-											{% if flavour != "mobile" %}
-												<td>{{ member.joined }}</td>
-												{% if member.admin %}
-													<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-												{% else %}
-													<th></th>
-												{% endif %}
-												{% if member.mod %}
-													<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-												{% else %}
-													<th></th>
-												{% endif %}
-											{% endif %}
-										</tr>
-									{% else %}
-										<td>{{ member.email }}</td>
-										{% if flavour != "mobile" %}
 											<td>{{ member.joined }}</td>
 											{% if member.admin %}
 												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
@@ -166,6 +145,19 @@
 											{% else %}
 												<th></th>
 											{% endif %}
+										</tr>
+									{% else %}
+										<td>{{ member.email }}</td>
+										<td>{{ member.joined }}</td>
+										{% if member.admin %}
+											<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+										{% else %}
+											<th></th>
+										{% endif %}
+										{% if member.mod %}
+											<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+										{% else %}
+											<th></th>
 										{% endif %}
 									</tr>
 								{% endif %}
@@ -174,18 +166,16 @@
 								<tr>
 									<td></td>
 									<td><i>{{ member.email }} (pending)</i></td>
-										{% if flavour != "mobile" %}
-											<td>{{ member.joined }}</td>
-											{% if member.admin %}
-												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-											{% else %}
-												<th></th>
-											{% endif %}
-											{% if member.mod %}
-												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-											{% else %}
-												<th></th>
-											{% endif %}
+										<td>{{ member.joined }}</td>
+										{% if member.admin %}
+											<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+										{% else %}
+											<th></th>
+										{% endif %}
+										{% if member.mod %}
+											<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+										{% else %}
+											<th></th>
 										{% endif %}
 								</tr>
 							{% endfor %}
@@ -210,11 +200,10 @@
 							<tr>
 								<th>Select</th>
 								<th>Email</th>
-								{% if flavour != "mobile" %}
-									<th>Added</th>
-									<th>Can Post</th>
-									<th>Can Receive</th>
-									<th>List URL</th>
+								<th>Added</th>
+								<th>Can Post</th>
+								<th>Can Receive</th>
+								<th>List URL</th>
 								</tr>
 							</thead>
 							
@@ -222,11 +211,10 @@
 							<tr>
 								<th>Select</th>
 								<th>Email</th>
-								{% if flavour != "mobile" %}
-									<th>Added</th>
-									<th>Can Post</th>
-									<th>Can Receive</th>
-									<th>List URL</th>
+								<th>Added</th>
+								<th>Can Post</th>
+								<th>Can Receive</th>
+								<th>List URL</th>
 								{% endif %}
 							</tr>
 							</tfoot>
@@ -237,34 +225,31 @@
 									<tr>
 										<td><input class="checkbox checkbox-list" type="checkbox" id ={{ l.email }}></td>
 										<td>{{ l.email }}</td>
-										{% if flavour != "mobile" %}
-											<td>{{ l.added }}</td>
-											<th>
-												{% if l.can_post %}
-													<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-												{% endif %}
-											</th>
-											<th>
-												{% if l.can_receive %}
-													<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-												{% endif %}
-											</th>
+										
+										<td>{{ l.added }}</td>
+										<th>
+											{% if l.can_post %}
+												<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+											{% endif %}
+										</th>
+										<th>
+											{% if l.can_receive %}
+												<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+											{% endif %}
+										</th>
+										
+										<td>
+											{% if l.url != None %}
+												<a href=//{{l.url}}>{{ l.url }}</a>
+											{% endif %}
+										</td>
 											
-											<td>
-												{% if l.url != None %}
-													<a href=//{{l.url}}>{{ l.url }}</a>
-												{% endif %}
-											</td>
-											
-										{% endif %}
 									</tr>
 								{% endfor %}
 							</tbody>
 						</table>
-				{% endif %}
 				</div>
 			</div>
-		{% endif %}
 	{% endblock %}
 	{% block customjs %}
 		<script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>

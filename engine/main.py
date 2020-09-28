@@ -1268,16 +1268,17 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
                 #users following the tag
                 follow_tag = FollowTag.objects.filter(group=group, tag__in=tag_objs).select_related()
                 recipients.extend([f.user.email for f in follow_tag if f.user.email not in always_follow_members])
-
             #users that always follow threads in this group. minus those that muted
             recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
-
+            
             dissimulate = DoNotSendList.objects.filter(group=group, user=group_members)
             # remove dissimulated user from the recipient list
+            print(tag_objs)
             if dissimulate.count() > 0:
+                print(tag_objs)
                 for d in dissimulate:
                     recipients = [recip for recip in recipients if recip != d.donotsend_user.email]
-
+            print(tag_objs)
             res['status'] = True
             res['recipients'] = list(set(recipients))
             res['tags'] = []

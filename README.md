@@ -1,5 +1,5 @@
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/haystack/murmur?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Django version](https://img.shields.io/badge/Django-1.8-blue)](https://docs.djangoproject.com/en/3.0/releases/1.8/) [![python version](https://img.shields.io/badge/python-2.7-yellowgreen.svg)](https://www.python.org/download/releases/2.7/)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/haystack/murmur?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Django version](https://img.shields.io/badge/Django-1.10-blue)](https://docs.djangoproject.com/en/3.0/releases/1.10/) [![python version](https://img.shields.io/badge/python-2.7-yellowgreen.svg)](https://www.python.org/download/releases/2.7/)
 
 Murmur
 =
@@ -36,7 +36,7 @@ Next set up the environment variables. The only variables you should need to set
 1. `cp .env.example .env`
 2. Fill in the correct values in `.env` for your gmail account. Put your gmail address and a google app password.
 3. Use `make` to create the database and create a superuser account to login
-4. Check it out on `localhost:8000
+4. Check it out on `localhost:8000`
 
 #### Starting and Stopping Docker 
 

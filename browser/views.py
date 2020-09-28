@@ -28,6 +28,8 @@ from smtp_handler.utils import *
 
 request_error = json.dumps({'code': msg_code['REQUEST_ERROR'],'status':False})
 
+logger = logging.getLogger('murmur')
+
 if WEBSITE == 'murmur':
 	group_or_squad = 'group'
 elif WEBSITE == 'squadbox':
@@ -52,7 +54,7 @@ def about(request):
 
 @render_to('404.html')
 def error(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		groups_links = get_groups_links_from_roles(user, groups)
@@ -84,7 +86,7 @@ def error(request):
 
 def index(request):
 	homepage = "%s/home.html" % WEBSITE
-	if not request.user.is_authenticated():
+	if not request.user.is_authenticated:
 		return render(request, 
 						homepage,
 						{'form': AuthenticationForm(),
@@ -99,7 +101,7 @@ def index(request):
 def post_list(request):
 	tag_info = None
 
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		
@@ -180,7 +182,7 @@ def thread(request):
 	
 	group = thread.group
 	
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		groups_links = get_groups_links_from_roles(user, groups)
@@ -239,7 +241,7 @@ def rejected_thread(request):
 	
 	group = thread.group
 	
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		mg = MemberGroup.objects.filter(member=user, group=group)
 		if mg.exists() and (mg[0].admin or mg[0].moderator):
@@ -275,15 +277,9 @@ def settings(request):
 @render_to(WEBSITE+"/groups.html")
 @login_required
 def my_groups(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		return HttpResponseRedirect('/my_group_list')
-		# if request.flavour == "mobile":
-		# 	return HttpResponseRedirect('/my_group_list')
-		# else:
-		# 	groups = Group.objects.filter(membergroup__member=user).values("name")
-		# 	info = engine.main.check_admin(user,groups)
-		# 	return {'user': request.user, 'groups': groups, 'group_page': True, 'my_groups': True, 'info':info}	
 	else:
 		return HttpResponseRedirect(global_settings.LOGIN_URL)
 
@@ -335,10 +331,7 @@ def group_list(request):
 		user = None
 		groups = []
 	pub_groups = engine.main.list_groups(user)
-	if request.flavour == "mobile":
-		return HttpResponseRedirect('/pub_group_list')
-	else:
-		return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
+	return {'user': request.user, 'groups': groups, 'pub_groups': pub_groups, 'group_page': True}
 
 @render_to(WEBSITE+"/login_email.html")
 @login_required
@@ -458,7 +451,7 @@ def my_group_settings_view(request, group_name):
 @render_to(WEBSITE+"/create_post.html")
 @login_required
 def my_group_create_post_view(request, group_name):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		try:
@@ -712,7 +705,7 @@ def adjust_list_can_receive(request):
 
 def subscribe_group(request):
 	try:
-		if request.user.is_authenticated():
+		if request.user.is_authenticated:
 		
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			res = engine.main.subscribe_group(request.POST['group_name'], user)
@@ -782,7 +775,7 @@ def list_posts(request):
 def refresh_posts(request):
 	try:
 		group_name = request.POST.get('active_group')
-		if request.user.is_authenticated():
+		if request.user.is_authenticated:
 			user = get_object_or_404(UserProfile, email=request.user.email)
 		else:
 			user = None
@@ -815,6 +808,7 @@ def load_thread(request):
 @login_required
 def insert_post(request):
 	try:
+		logger.debug("insert post")
 		user = get_object_or_404(UserProfile, email=request.user.email)
 
 		group_name = request.POST['group_name']
@@ -875,6 +869,7 @@ def insert_post(request):
 				mail.Body = html2text(msg_text) + ps_blurb	
 			
 				relay_mailer.deliver(mail, To = recip.email)
+				logger.debug("Send email to " + recip.email)
 
 		fwding_lists = ForwardingList.objects.filter(group=g, can_receive=True)
 
@@ -942,6 +937,8 @@ def insert_reply(request):
 
 		res = engine.main.insert_reply(group_name, 'Re: ' + orig_subject, msg_text, user, user.email, msg_id, True, forwarding_list=original_group_object, thread_id=thread_id)
 
+		print(res)
+		
 		if(res['status']):
 			to_send =  res['recipients']
 			post_addr = '%s <%s>' %(group_name, group_name + '@' + HOST)
@@ -1029,7 +1026,7 @@ def insert_reply(request):
 @render_to(WEBSITE+"/follow_tag.html")
 @login_required
 def follow_tag_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		
@@ -1046,7 +1043,7 @@ def follow_tag_get(request):
 @render_to(WEBSITE+"/follow_tag.html")
 @login_required
 def unfollow_tag_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		
@@ -1063,7 +1060,7 @@ def unfollow_tag_get(request):
 @render_to(WEBSITE+"/follow_tag.html")
 @login_required
 def mute_tag_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		
@@ -1080,7 +1077,7 @@ def mute_tag_get(request):
 @render_to(WEBSITE+"/follow_tag.html")
 @login_required
 def unmute_tag_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		
@@ -1099,7 +1096,7 @@ def unmute_tag_get(request):
 @render_to(WEBSITE+"/follow_thread.html")
 @login_required
 def follow_thread_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		
@@ -1114,7 +1111,7 @@ def follow_thread_get(request):
 @render_to(WEBSITE+"/follow_thread.html")
 @login_required
 def unfollow_thread_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		
@@ -1129,7 +1126,7 @@ def unfollow_thread_get(request):
 @render_to(WEBSITE+"/follow_thread.html")
 @login_required
 def mute_thread_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		
@@ -1144,7 +1141,7 @@ def mute_thread_get(request):
 @render_to(WEBSITE+"/follow_thread.html")
 @login_required
 def unmute_thread_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 
@@ -1185,7 +1182,7 @@ def unupvote(request):
 def unsubscribe_get(request):
 	group_name = request.GET.get('group_name')
 
-	if not request.user.is_authenticated():
+	if not request.user.is_authenticated:
 		return redirect(global_settings.LOGIN_URL + '?next=/unsubscribe_get?group_name=' + group_name)
 
 	if WEBSITE == 'murmur':
@@ -1222,7 +1219,7 @@ def subscribe_get(request):
 	group_name = request.GET.get('group_name')
 	email_param = request.GET.get('email')
 
-	if not request.user.is_authenticated() and not email_param:
+	if not request.user.is_authenticated and not email_param:
 		return redirect(global_settings.LOGIN_URL + '?next=/subscribe_get?group_name=' + group_name)
 
 	if WEBSITE == 'murmur':
@@ -1242,7 +1239,7 @@ def subscribe_get(request):
 	if not g.public:
 		return redirect('/404?e=perm')
 
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.subscribe_group(group_name, user)
@@ -1277,7 +1274,7 @@ def subscribe_get(request):
 @render_to(WEBSITE+"/upvote.html")
 @login_required
 def upvote_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		post_id = request.GET.get('post_id')
@@ -1291,7 +1288,7 @@ def upvote_get(request):
 @render_to(WEBSITE+"/upvote.html")
 @login_required
 def unupvote_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 
@@ -1306,7 +1303,7 @@ def unupvote_get(request):
 @render_to("whitelist.html")
 @login_required
 def blacklist_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.GET.get('group_name')
@@ -1321,7 +1318,7 @@ def blacklist_get(request):
 @render_to("whitelist.html")
 @login_required
 def whitelist_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
 		group_name = request.GET.get('group_name')
@@ -1407,7 +1404,7 @@ def unblacklist_unwhitelist(request):
 @render_to("approve_reject.html")
 @login_required
 def approve_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		group_name = request.GET.get('group_name')
 		post_id = request.GET.get('post_id')
@@ -1422,7 +1419,7 @@ def approve_get(request):
 @render_to("approve_reject.html")
 @login_required
 def reject_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		group_name = request.GET.get('group_name')
 		post_id = request.GET.get('post_id')
@@ -1437,7 +1434,7 @@ def reject_get(request):
 @login_required
 def approve_post(request):
 	try:
-		if request.user.is_authenticated():
+		if request.user.is_authenticated:
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			group_name = request.POST['group_name']
 			post_id = request.POST['post_id']
@@ -1451,7 +1448,7 @@ def approve_post(request):
 @login_required
 def reject_post(request):
 	try:
-		if request.user.is_authenticated():
+		if request.user.is_authenticated:
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			group_name = request.POST['group_name']
 			post_id = request.POST['post_id']
@@ -1494,7 +1491,7 @@ def delete_posts(request):
 @login_required
 def follow_thread(request):
 	try:
-		if request.user.is_authenticated():
+		if request.user.is_authenticated:
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			res = engine.main.follow_thread(request.POST['thread_id'], user=user)
 			return HttpResponse(json.dumps(res), content_type="application/json")
@@ -1521,7 +1518,7 @@ def unfollow_thread(request):
 @login_required
 def follow_tag(request):
 	try:
-		if request.user.is_authenticated():
+		if request.user.is_authenticated:
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			res = engine.main.follow_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
 			return HttpResponse(json.dumps(res), content_type="application/json")
@@ -1533,7 +1530,7 @@ def follow_tag(request):
 @login_required
 def unfollow_tag(request):
 	try:
-		if request.user.is_authenticated():
+		if request.user.is_authenticated:
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			res = engine.main.unfollow_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
 			return HttpResponse(json.dumps(res), content_type="application/json")
@@ -1545,7 +1542,7 @@ def unfollow_tag(request):
 @login_required
 def mute_tag(request):
 	try:
-		if request.user.is_authenticated():
+		if request.user.is_authenticated:
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			res = engine.main.mute_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
 			return HttpResponse(json.dumps(res), content_type="application/json")
@@ -1557,7 +1554,7 @@ def mute_tag(request):
 @login_required
 def unmute_tag(request):
 	try:
-		if request.user.is_authenticated():
+		if request.user.is_authenticated:
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			res = engine.main.unmute_tag(request.POST['tag_name'], request.POST['group_name'], user=user)
 			return HttpResponse(json.dumps(res), content_type="application/json")
@@ -1569,7 +1566,7 @@ def unmute_tag(request):
 @login_required
 def mute_thread(request):
 	try:
-		if request.user.is_authenticated():
+		if request.user.is_authenticated:
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			res = engine.main.mute_thread(request.POST['thread_id'], user=user)
 			return HttpResponse(json.dumps(res), content_type="application/json")
@@ -1606,7 +1603,7 @@ def murmur_acct(request, acct_func=None, template_name=None):
 @login_required
 def serve_attachment(request, hash_filename):
 
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		try:
 			user = get_object_or_404(UserProfile, email=request.user.email)
 			attachment = Attachment.objects.get(hash_filename=hash_filename)
@@ -1637,7 +1634,7 @@ def serve_attachment(request, hash_filename):
 
 @render_to('squadbox/mod_queue.html')
 def mod_queue(request, group_name):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 
 		mgs = MemberGroup.objects.filter(member=user, group__name=group_name)
@@ -1678,7 +1675,7 @@ def subscribe_confirm(request, token):
 
 @render_to('squadbox/rejected.html')
 def rejected(request, group_name):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		res = engine.main.load_rejected_posts(user, group_name)
 		if not res['status']:
@@ -1694,7 +1691,7 @@ def rejected(request, group_name):
 @render_to("squadbox/moderate_user_thread.html")
 @login_required
 def moderate_user_for_thread_get(request):
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		group_name = request.GET.get('group_name')
 		subject = request.GET.get('subject')

@@ -59,6 +59,11 @@ def _get_website():
     
 WEBSITE = _get_website()
 
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 8825
+
 try:
     execfile(SITE_ROOT + '/../private.py')
 except IOError:
@@ -81,8 +86,7 @@ LOGIN_REDIRECT_URL = "/"
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = True
-DEFAULT_EMAIL = 'no-reply@' + "localhost"  if "localhost" in BASE_URL else BASE_URL
+DEFAULT_EMAIL = 'no-reply@' + ("localhost"  if "localhost" in BASE_URL else BASE_URL)
 DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
 
@@ -173,34 +177,26 @@ TEMPLATES = [
             # Don't forget to use absolute paths, not relative paths.
         ],
         'OPTIONS': {
-            'context_processors': [
-                'django_mobile.context_processors.flavour',
-            ],
             # List of callables that know how to import templates from various sources.
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
-                # 'django_mobile.loader.Loader',
-                # 'django.template.loaders.eggs.Loader',
             ]
         },
     },
 ]
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
+TEMPLATE_LOADERS = TEMPLATES[0]['OPTIONS']['loaders']
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
-    'django_mobile.middleware.MobileDetectionMiddleware',
-    'django_mobile.middleware.SetFlavourMiddleware',
-    
-)
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
 ROOT_URLCONF = 'http_handler.urls'
 
@@ -235,8 +231,7 @@ INSTALLED_APPS = (
     
     #third party apps
     'registration',
-    'django_mobile',
-    'storages'
+    'storages',
 )
 
 # A sample logging configuration. The only tangible logging
