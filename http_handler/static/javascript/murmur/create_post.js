@@ -18,15 +18,22 @@ $(document).ready(function(){
 			tags = django_tag_data["tags"];
 			tagInputList = $(".tag-input-list").get(0);
 			tagInputTagSet = new Set();
+			tagInfo = []
 			
 	insert_post = 
 		function(params){
 			let subjectText = $("#tag-input").val() + $("#new-post-subject").val();
-			tagInputTagSet.forEach((tagName) => subjectText = "[" + tagName + "]" + subjectText.substr(0)) 
+			tagInputTagSet.forEach((tagName) => {
+				let tagElement = document.getElementById(tagName+"-tag-input");
+					tagColor = tagElement.getAttribute("data-tagColor");
+				subjectText = "[" + tagName + "]" + subjectText.substr(0);
+				tagInfo.push({"name": tagName, "color": tagColor});
+			});
 			params.msg_text = CKEDITOR.instances['new-post-text'].getData();
 			params.subject = subjectText
             params.group_name = $("#new-post-to").text();
 			params.poster_email = params.requester_email;
+			params.tag_info = JSON.stringify(tagInfo);
 			$.post('/insert_post', params, 
 				function(res){
 					notify(res, true);
@@ -80,53 +87,32 @@ function notify(res, on_success){
 
 // AUTOCOMPLETE
 function autocomplete() {
-	let currentFocus = 0;
+	let currentFocus = -1;
 
 	displayTags(tagInput.value);
-	addActive(getItems(tagInput.id));
+	addActive([]);
 
 	tagInput.addEventListener("input", function(e) { // Listen to user input changes
-		currentFocus = 0;
+		if (this.value.length === 0) currentFocus = -1;
+		else currentFocus = 0;
 		displayTags(this.value);
 		let items = getItems(this.id);
 		addActive(items);
 	});
 	
-	tagInput.addEventListener("keydown", function(e) {
-		let items = getItems(this.id);
-
-		if (e.keyCode == 40) { // DOWN arrow key 
-			e.preventDefault();
-			currentFocus++;
-			addActive(items);
-		} else if (e.keyCode == 38) { // UP arrow key
-			e.preventDefault();
-			currentFocus--;
-			addActive(items);
-		} else if (e.keyCode == 13) { // ENTER key simulates click on list item
-			e.preventDefault();
-			if (currentFocus > -1) {
-				if (items) items[currentFocus].click();
-		  	}
-		} else if (e.keyCode == 9) { // TAB key simulates click on list item
-			if (tagInput.value.length > 0) e.preventDefault(); // If no input for adding tag, then allow default tagging to navigate
-				
-			if (currentFocus > -1) {
-				if (items) items[currentFocus].click();
-			}
-		} 
-	});
+	tagInput.addEventListener("keydown", handleTagInputKeys);
 
 	// Gets the current autcomplete items
 	function getItems(inputId) {
 		let items = document.getElementById(inputId + "autocomplete-list");
 		if (items) items = items.getElementsByTagName("LI");
+		else items = []
 		return items
 	}
 
 	// Makes item active throw
 	function addActive(items) {
-		if (items.length === 0) return false;
+		if (items.length === 0 || (currentFocus == -1 && items.length === 0)) return false;
 		removeActive(items);
 
 		if (currentFocus >= items.length) currentFocus = 0;
@@ -142,8 +128,49 @@ function autocomplete() {
 		}
 	}
 
+	// Handles key presses for the tag input
+	function handleTagInputKeys(e) {
+		let items = getItems(tagInput.id);
+		console.log(currentFocus);
+		if (e.keyCode == 40) { // DOWN arrow key 
+			e.preventDefault();
+			currentFocus++;
+			addActive(items);
+		} else if (e.keyCode == 38) { // UP arrow key
+			e.preventDefault();
+			currentFocus--;
+			addActive(items);
+		} else if (e.keyCode == 13) { // ENTER key simulates click on list item
+			e.preventDefault();
+			if (items.length > 0 && currentFocus > -1) {
+				if (items) items[currentFocus].click();
+			} else if (tagInput.value.length > 0 && items.length == 0) { // check if no autocomplete suggestions -> meaning new tag creation
+				let newTagName = tagInput.value;
+					newTagColor = generateRandomColor();
+				tagInput.value = "";
+				addTagToInput(newTagName, newTagColor);
+			}
+		} else if (e.keyCode == 9) { // TAB key simulates click on list item
+			if (currentFocus > -1) e.preventDefault(); // If no input for adding tag, then allow default tagging to navigate
+			if (items.length > 0 && currentFocus > -1) {
+				if (items) items[currentFocus].click();
+			} else if (tagInput.value.length > 0 && items.length == 0) { // check if no autocomplete suggestions -> meaning new tag creation
+				let newTagName = tagInput.value;
+					newTagColor = generateRandomColor();
+				tagInput.value = "";
+				addTagToInput(newTagName, newTagColor);
+			}
+			currentFocus = -1;
+			closeAllLists();
+		}
+		console.log(currentFocus);
+	}
+
   	// Close lists when someone clicks out of input
-	$(document).click((e) => closeAllLists(e.target));
+	$(document).click((e) => {
+		currentFocus = -1;
+		closeAllLists(e.target);
+	});
 }
 
 function displayTags(val=null) {
@@ -175,28 +202,40 @@ function displayTags(val=null) {
 					let tagName = this.getAttribute("data-tagName");
 						tagColor = this.getAttribute("data-tagColor");
 					tagInput.value = "";
-				
-					// Add tag label to tag input list
-					tagInputItem = document.createElement("LI");
-					tagInputItem.setAttribute("id", tagName + "-tag-input")
-					tagInputItem.setAttribute("data-tagName",tagName);
-					tagInputItem.setAttribute("data-tagColor",tagColor);
-					tagInputItem.setAttribute("class", "tag-label-input")
-					tagInputItem.setAttribute("style", "background-color: #" + tagColor + ";");
-					tagInputItem.innerHTML = tagName;
-
-					// Add delete tag to tag label
-					let tagInputDeleteBtn = createDeleteTagBtn(tagName, "input");
-					tagInputItem.appendChild(tagInputDeleteBtn);
-
-					tagInputList.insertBefore(tagInputItem, tagInputList.children[tagInputList.children.length-1]);
-					tagInputTagSet.add(tagName);
-					closeAllLists();
+					addTagToInput(tagName, tagColor);
 				});
 					autocompleteList.appendChild(autocompleteItem);
 				}
 		}
 	}
+}
+
+function addTagToInput(tagName, tagColor) {
+	// Add tag label to tag input list
+	tagInputItem = document.createElement("LI");
+	tagInputItem.setAttribute("id", tagName + "-tag-input")
+	tagInputItem.setAttribute("data-tagName",tagName);
+	tagInputItem.setAttribute("data-tagColor",tagColor);
+	tagInputItem.setAttribute("class", "tag-label-input")
+	tagInputItem.setAttribute("style", "background-color: #" + tagColor + ";");
+	tagInputItem.innerHTML = tagName;
+
+	// Add delete tag to tag label
+	let tagInputDeleteBtn = createDeleteTagBtn(tagName, "input");
+	tagInputItem.appendChild(tagInputDeleteBtn);
+
+	tagInputList.insertBefore(tagInputItem, tagInputList.children[tagInputList.children.length-1]);
+	tagInputTagSet.add(tagName);
+	closeAllLists();
+}
+
+// Generates random colors that valid and are not pure white
+function generateRandomColor() {
+	let randomColor = Math.floor(Math.random()*16777215).toString(16);
+    if(randomColor.length != 6 || randomColor == "ffffff"){ // In any case, the color code is invalid or pure white
+        randomColor = generateRandomColor();
+    }
+    return randomColor;
 }
 
 

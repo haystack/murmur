@@ -826,10 +826,9 @@ def insert_post(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 
 		group_name = request.POST['group_name']
-		
 		msg_text = request.POST['msg_text']
-		
-		res = engine.main.insert_post_web(group_name, request.POST['subject'], msg_text, user)
+		tag_info = json.loads(request.POST['tag_info'])
+		res = engine.main.insert_post_web(group_name, request.POST['subject'], tag_info, msg_text, user)
 		
 		subj_tag = ''
 		for tag in res['tags']:

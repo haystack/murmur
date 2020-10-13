@@ -677,7 +677,7 @@ blockquote {
 .tag {
 	display: inline-block;
 	padding: .2em .6em .3em;
-	font-weight: 700;
+	font-weight: bolder;
 	color: #fff;
 	text-align: center;
 	white-space: nowrap;
@@ -688,6 +688,10 @@ blockquote {
 
 .inactive {
 	opacity: 25%;
+}
+
+.blocked {
+	text-decoration-line: line-through;
 }
 
 .my_row {

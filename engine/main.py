@@ -1023,16 +1023,17 @@ def delete_post(user, post_id, thread_id):
     logging.debug(res)
     return res
 
-def _create_tag(group, thread, name):
+def _create_tag(group, thread, name, color=None):
     t, created = Tag.objects.get_or_create(group=group, name=name)
     if created:
-        r = lambda: random.randint(0,255)
-        color = '%02X%02X%02X' % (r(),r(),r())
+        if color is None:
+            r = lambda: random.randint(0,255)
+            color = '%02X%02X%02X' % (r(),r(),r())
         t.color = color
         t.save()
     tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
-def _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
+def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
 
     try:
         message_text = message_text.decode("utf-8")
@@ -1061,16 +1062,14 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
             del res['status']
             perspective_data = res
 
-    p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
+    p = Post(msg_id=msg_id, author=user, poster_email=sender_addr, forwarding_list=forwarding_list, 
             subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, 
             poster_name=sender_name, verified_sender=verified, perspective_data=perspective_data)
     p.save()
-    
     if WEBSITE == 'murmur':
-        for match in re.findall(r"[^[]*\[([^]]*)\]", subject):
-            if match.lower() != group.name:
-                _create_tag(group, thread, match)
-
+        tag_info = map(encode_tags, tag_info)
+        for tag in tag_info:
+            _create_tag(group, thread, tag['name'], tag['color'])
         tags = list(extract_hash_tags(message_text))
         for tag in tags:
             if tag.lower() != group.name:
@@ -1106,7 +1105,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
     
     return p, thread, recipients, tags, tag_objs
 
-def insert_post_web(group_name, subject, message_text, user):
+def insert_post_web(group_name, subject, tag_info, message_text, user):
     res = {'status':False}
     thread = None
 
@@ -1115,7 +1114,7 @@ def insert_post_web(group_name, subject, message_text, user):
         user_member = MemberGroup.objects.filter(group=group, member=user)
         if user_member.exists():
             msg_id = base64.b64encode(user.email + str(datetime.now())).lower() + '@' + BASE_URL
-            p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id, verified=True)
+            p, thread, recipients, tags, tag_objs = _create_post(group, subject, tag_info, message_text, user, user.email, msg_id, verified=True)
             res['status'] = True
             
             res['member_group'] = {'no_emails': user_member[0].no_emails,
