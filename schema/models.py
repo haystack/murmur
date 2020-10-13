@@ -145,18 +145,23 @@ class MuteTag(models.Model):
 	class Meta:
 		unique_together = ("user", "tag")
 
-
+# A table for a member of a mailing list group
 class MemberGroup(models.Model):
 	id = models.AutoField(primary_key=True)
 	member = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-	group = models.ForeignKey('Group', on_delete=models.CASCADE)
+	group = models.ForeignKey('Group', on_delete=models.CASCADE) # the group associated to member
 	timestamp = models.DateTimeField(auto_now=True)
-	admin = models.BooleanField(default=False)
+	# admin, moderator are whether the member is an admin or mod, respectively
+	admin = models.BooleanField(default=False) 
+	moderator = models.BooleanField(default=False)
+	# The following all_emails, digest, and no_emails are based on what member saves as their mail delivery preference in 
+	# settings for group. The default is to receive all_emails and first email selection is the case where these 3 are false
 	all_emails = models.BooleanField(default=True)
 	digest = models.BooleanField(default=False)
 	no_emails = models.BooleanField(default=False)
-	moderator = models.BooleanField(default=False)
 	receive_attachments = models.BooleanField(default=True)
+	# The following upvote_emails, group_invite_emails, admin_emails, and mod_emails are based on what member selects as 
+	# types of notifications they want for group. The default is for member to receive all these notifications for group
 	upvote_emails = models.BooleanField(default=True)
 	group_invite_emails = models.BooleanField(default=True)
 	admin_emails = models.BooleanField(default=True)
