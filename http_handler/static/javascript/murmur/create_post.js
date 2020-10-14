@@ -22,29 +22,35 @@ $(document).ready(function(){
 			
 	insert_post = 
 		function(params){
-			let subjectText = $("#tag-input").val() + $("#new-post-subject").val();
-			tagInputTagSet.forEach((tagName) => {
-				let tagElement = document.getElementById(tagName+"-tag-input");
-					tagColor = tagElement.getAttribute("data-tagColor");
-				subjectText = "[" + tagName + "]" + subjectText.substr(0);
-				tagInfo.push({"name": tagName, "color": tagColor});
-			});
-			params.msg_text = CKEDITOR.instances['new-post-text'].getData();
-			params.subject = subjectText
-            params.group_name = $("#new-post-to").text();
-			params.poster_email = params.requester_email;
-			params.tag_info = JSON.stringify(tagInfo);
-			$.post('/insert_post', params, 
-				function(res){
-					notify(res, true);
-					
-					if(res.status){
-						setTimeout(function () {
-                    		window.location.href = "/post_list?group_name=" + params.group_name;
-                  		}, 600);
+			console.log(tagInputTagSet.length);
+			console.log(tagInput.value.length);
+			if (tagInputTagSet.size == 0 && tagInput.value.length > 0) {
+				alert("Please press enter/tab after tag in tag input to add/create tag or remove any input if no tags desired.");
+			} else {
+				let subjectText = $("#new-post-subject").val();
+				tagInputTagSet.forEach((tagName) => {
+					let tagElement = document.getElementById(tagName+"-tag-input");
+						tagColor = tagElement.getAttribute("data-tagColor");
+					subjectText = "[" + tagName + "]" + subjectText.substr(0);
+					tagInfo.push({"name": tagName, "color": tagColor});
+				});
+				params.msg_text = CKEDITOR.instances['new-post-text'].getData();
+				params.subject = subjectText
+				params.group_name = $("#new-post-to").text();
+				params.poster_email = params.requester_email;
+				params.tag_info = JSON.stringify(tagInfo);
+				$.post('/insert_post', params, 
+					function(res){
+						notify(res, true);
+						
+						if(res.status){
+							setTimeout(function () {
+								window.location.href = "/post_list?group_name=" + params.group_name;
+							}, 600);
+						}
 					}
-				}
-			);	
+				);
+		  	}	
 		};
 
 	
@@ -131,7 +137,6 @@ function autocomplete() {
 	// Handles key presses for the tag input
 	function handleTagInputKeys(e) {
 		let items = getItems(tagInput.id);
-		console.log(currentFocus);
 		if (e.keyCode == 40) { // DOWN arrow key 
 			e.preventDefault();
 			currentFocus++;
@@ -163,7 +168,6 @@ function autocomplete() {
 			currentFocus = -1;
 			closeAllLists();
 		}
-		console.log(currentFocus);
 	}
 
   	// Close lists when someone clicks out of input
