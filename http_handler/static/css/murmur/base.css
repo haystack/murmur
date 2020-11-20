@@ -25,10 +25,15 @@ hr{
 	color: #000000
 }
 
-.container-home {
-	 width: 800px;
+#container-home {
+	 width: 800px; 
 	 margin: 0 auto;
-	 height: 100%;
+	 background-color: #f8f8f8;
+}
+
+#welcome {
+	color: #447EAC;
+	font-weight: bold;
 }
 
 @media (min-width: 768px) and (max-width: 1000px) {
@@ -521,10 +526,9 @@ blockquote {
 }
 
 #image-attrib {
-	position: relative;
+	position: absolute;
   	bottom: 0;
-  	right: 0;
-  	padding: 10px;
+	right: 0;
 }
 
 .paginate_disabled_previous, .paginate_disabled_next {
@@ -707,5 +711,15 @@ blockquote {
 	.tag-subject-container {
 		display: flex;
 		flex-flow: column wrap;
+	}
+	#container-home {
+		width: fit-content;
+	}
+	#links {
+		display: flex;
+		flex-direction: column;
+	}
+	#image-attrib {
+		position: relative;
 	}
 }

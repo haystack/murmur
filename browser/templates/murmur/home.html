@@ -14,90 +14,23 @@
 
 {% block content %}
 
-<div class="container-home">
-
-  <div class="home-left">
-  	
-     <h3>Welcome to Murmur.</h3>
-     
-     <h5>We're re-imagining mailing lists and community discourse for the age of social media.</h5>
-
-     Though mailing list software has changed little in the past 40 years, social media and other community sites have changed drastically.
-     <br />
-     <br />
-     Murmur introduces new features to the mailing list so that you can communicate with your
-     group in the way that you desire, through email or the web. 
-     <br />
-     <br />
-     And as a community, members can collectively organize and moderate the discussion to satisfy the 
-     varied needs and concerns of their cohorts.
-     
-     <br />
-     <br />
-     <a href="/about">Learn More</a>
-     
-     <br />
-     <br />
-     <a href="/groups/murmur-discuss">Join our Murmur list to keep informed about Murmur</a>
-     
-     <br />
-     <br />
-     <a href="/group_list">Explore All Public Groups</a>
-
-  </div>
-  <div class="home-right">
-  	
-  	<form method="POST" action="{% url "auth_login" %}">
-		{% csrf_token %}
-      <h3>Login</h3>
-      <label for="id_username" class="d-block">
-         Email address: 
-         {{ form.username }}
-      </label>
-      <label for="id_password" class="d-block">
-         Password: 
-         {{ form.password }}
-      </label>
-		<a href="{% url "auth_password_reset" %}">Forgot your password?</a>
-		<br /><br />
-		<input type="submit" class="btn btn-primary" value="Log In" />
-	</form>
-	<br />
-	
-   
-   <p>
-       <form method='post' action="{% url "registration_register" %}">
-        	{% csrf_token %}
-         <h3>Register Account</h3>
-         Create an account to join or start a group!<br />
-         <br />
-         <label for="id_email" class="d-block">
-            E-mail:
-            {{ reg_form.email }}
-         </label>
-         <label for="id_password1" class="d-block">
-            Password:
-            {{ reg_form.password1 }}
-         </label>
-         <label for="id_password2" class="d-block">
-            Password (again):
-            {{ reg_form.password2 }}
-         </label>
-        <input type="submit" class="btn btn-primary" value="Register!" />
-
-        </form>
-  </p>
-  </div>
-  
-
+<div id="container-home" class="d-flex flex-column mt-5">
+   <div id="intro" class="mx-5 mt-5 mb-3">
+     <h1 id="welcome">Welcome to Murmur</h1>
+     <h4 id="mission">We're re-imagining mailing lists and community discourse for the age of social media.</h4>
+   </div>
+   <div id="description" class="mx-5 mb-3">
+      <p>Though mailing list software has changed little in the past 40 years, social media and other community sites have changed drastically.</p>
+      <p>Murmur introduces new features to the mailing list so that you can communicate with your group in the way that you desire, through email or the web.</p>
+      <p>And as a community, members can collectively organize and moderate the discussion to satisfy the varied needs and concerns of their cohorts.</p> 
+   </div>
+   <div id="links" class="font-weight-bold mx-5 mb-5">
+      <a href="/about" class="mr-3">Learn More</a>
+      <a href="/groups/murmur-discuss" class="mr-3">Join our Murmur list</a>
+      <a href="/group_list">Explore All Public Groups</a>
+   </div>
 </div>
-
-  
- <div id="image-attrib">
-
- </div>
-	
-
+ <div id="image-attrib"></div>
 
 {% endblock %}
 
