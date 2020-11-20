@@ -11,19 +11,20 @@ $(document).ready(function(){
 	});
 
 	const userName = $.trim($('#user_email').text());
+			tagInputContainer = $(".tag-input-container").get(0);
 			tagInput = $("#tag-input").get(0);
 			post = $("#btn-post");
 			subjectInput = $("#new-post-subject").get(0);
 			subjectInputHeight = 38;
 			tags = django_tag_data["tags"];
-			tagInputList = $(".tag-input-list").get(0);
+			tagInputList = $("#tag-input-list").get(0);
 			tagInputTagSet = new Set();
-			tagInfo = []
+			tagInfo = [];
+			currentAutocompleteFocus = -1;
+			currentTagFocus = -1; // negative index of tag input item currently focused ex: [tag1,tag2,tag3,{tagInput}], {} = focused
 			
 	insert_post = 
 		function(params){
-			console.log(tagInputTagSet.length);
-			console.log(tagInput.value.length);
 			if (tagInputTagSet.size == 0 && tagInput.value.length > 0) {
 				alert("Please press enter/tab after tag in tag input to add/create tag or remove any input if no tags desired.");
 			} else {
@@ -55,10 +56,18 @@ $(document).ready(function(){
 
 	
 	bind_buttons();
-	tagInput.addEventListener('focus', (event) => {
-		autocomplete(tagInput,tags);    
+
+	/* Listener for tag input box to autocomplete once it clicked and focused on */
+	tagInput.addEventListener("focus", (event) => {
+		currentTagFocus = -1;
+		removeActiveTags(getTagItems());
+		autocomplete();    
 	});
 
+	/* Listener for tag input box to handle key press actions (e.g. navigating autocomplete tags, navigating added tags) */
+	tagInput.addEventListener("keydown", handleTagInputKeys);
+
+	/* Listener for subject line to resize according to the size of the text */
 	subjectInput.addEventListener("input", resizeInput, false);
 
 	function bind_buttons() {
@@ -93,86 +102,22 @@ function notify(res, on_success){
 
 // AUTOCOMPLETE
 function autocomplete() {
-	let currentFocus = -1;
-
-	displayTags(tagInput.value);
-	addActive([]);
+	displayTags(tagInput.value); // Displays all tags when input string is empty (i.e. "")
+	addActiveAutocomplete([]); // Initially no autocomplete tag item is active/highlighted
 
 	tagInput.addEventListener("input", function(e) { // Listen to user input changes
-		if (this.value.length === 0) currentFocus = -1;
-		else currentFocus = 0;
+		if (this.value.length === 0) currentAutocompleteFocus = -1;
+		else currentAutocompleteFocus = 0;
 		displayTags(this.value);
-		let items = getItems(this.id);
-		addActive(items);
+		let autocompleteItems = getAutocompleteItems(this.id);
+			tagItems = getTagItems();
+		addActiveAutocomplete(autocompleteItems);
+		addActiveTags(tagItems);
 	});
-	
-	tagInput.addEventListener("keydown", handleTagInputKeys);
-
-	// Gets the current autcomplete items
-	function getItems(inputId) {
-		let items = document.getElementById(inputId + "autocomplete-list");
-		if (items) items = items.getElementsByTagName("LI");
-		else items = []
-		return items
-	}
-
-	// Makes item active throw
-	function addActive(items) {
-		if (items.length === 0 || (currentFocus == -1 && items.length === 0)) return false;
-		removeActive(items);
-
-		if (currentFocus >= items.length) currentFocus = 0;
-		if (currentFocus < 0) currentFocus = (items.length - 1);
-		
-		items[currentFocus].setAttribute("id","autocomplete-active");
-	}
-
-	// Remove active class from autocomplete items
-	function removeActive(items) {
-		for (var i = 0; i < items.length; i++) {
-			items[i].removeAttribute("id");
-		}
-	}
-
-	// Handles key presses for the tag input
-	function handleTagInputKeys(e) {
-		let items = getItems(tagInput.id);
-		if (e.keyCode == 40) { // DOWN arrow key 
-			e.preventDefault();
-			currentFocus++;
-			addActive(items);
-		} else if (e.keyCode == 38) { // UP arrow key
-			e.preventDefault();
-			currentFocus--;
-			addActive(items);
-		} else if (e.keyCode == 13) { // ENTER key simulates click on list item
-			e.preventDefault();
-			if (items.length > 0 && currentFocus > -1) {
-				if (items) items[currentFocus].click();
-			} else if (tagInput.value.length > 0 && items.length == 0) { // check if no autocomplete suggestions -> meaning new tag creation
-				let newTagName = tagInput.value;
-					newTagColor = generateRandomColor();
-				tagInput.value = "";
-				addTagToInput(newTagName, newTagColor);
-			}
-		} else if (e.keyCode == 9) { // TAB key simulates click on list item
-			if (currentFocus > -1) e.preventDefault(); // If no input for adding tag, then allow default tagging to navigate
-			if (items.length > 0 && currentFocus > -1) {
-				if (items) items[currentFocus].click();
-			} else if (tagInput.value.length > 0 && items.length == 0) { // check if no autocomplete suggestions -> meaning new tag creation
-				let newTagName = tagInput.value;
-					newTagColor = generateRandomColor();
-				tagInput.value = "";
-				addTagToInput(newTagName, newTagColor);
-			}
-			currentFocus = -1;
-			closeAllLists();
-		}
-	}
 
   	// Close lists when someone clicks out of input
 	$(document).click((e) => {
-		currentFocus = -1;
+		currentAutocompleteFocus = -1;
 		closeAllLists(e.target);
 	});
 }
@@ -184,10 +129,9 @@ function displayTags(val=null) {
 	autocompleteList.setAttribute("id", tagInput.id + "autocomplete-list");
 	autocompleteList.setAttribute("class", "tag-items");
 	tagInput.parentNode.appendChild(autocompleteList);
-
 	for (let i = 0; i < tags.length; i++) {
 		if (!val || tags[i]['name'].substr(0, val.length).toUpperCase() == val.toUpperCase()) { // Check if input value matches each word
-			if (!tagInputTagSet.has(tags[i]['name'])){
+			if (!tagInputTagSet.has(tags[i]['name'])) { // only autocomplete tags not already added
 				// Add autocomplete item container to list 
 				autocompleteItem = document.createElement("LI");
 				autocompleteItem.setAttribute("data-tagName", tags[i]['name']);
@@ -216,13 +160,22 @@ function displayTags(val=null) {
 
 function addTagToInput(tagName, tagColor) {
 	// Add tag label to tag input list
-	tagInputItem = document.createElement("LI");
+	let tagInputItem = document.createElement("LI");
 	tagInputItem.setAttribute("id", tagName + "-tag-input")
 	tagInputItem.setAttribute("data-tagName",tagName);
 	tagInputItem.setAttribute("data-tagColor",tagColor);
 	tagInputItem.setAttribute("class", "tag-label-input")
 	tagInputItem.setAttribute("style", "background-color: #" + tagColor + ";");
+	tagInputItem.setAttribute("tabindex", 0);
 	tagInputItem.innerHTML = tagName;
+	tagInputItem.addEventListener("keydown", handleTagInputKeys);
+	// Click event for focusing on tags in input
+	tagInputItem.addEventListener("click", function () { 
+		let tagItems = getTagItems(); // [tags] + [inputElement]
+		// ex: tagItems = [tag1,tag2,tag3,input] => target: tag3, index: 2 (-2) => -2 (tagFocus) = 2 (indexOf) - 4 (tagItems.length) as desired
+		currentTagFocus = tagItems.indexOf(this) - tagItems.length;
+		addActiveTags(tagItems);
+	});
 
 	// Add delete tag to tag label
 	let tagInputDeleteBtn = createDeleteTagBtn(tagName, "input");
@@ -253,9 +206,10 @@ function createDeleteTagBtn(tagName) {
 
 	tagInputDeleteBtn.addEventListener("click", function(e) {
 		deleteTag(this.getAttribute("data-tagName"));
-
-		// Delete tags from tag input set
-		tagInputTagSet.delete(tagName);
+		// Prevents event propagation up DOM tree so parent's (tag container) click event doesn't occur
+		e.stopPropagation();
+		tagInputTagSet.delete(tagName); // Delete tags from tag input set
+		tagInput.focus();
 	});
 
 	return tagInputDeleteBtn;
@@ -274,6 +228,138 @@ function resizeInput() {
 		subjectInput.setAttribute("style", "height:" + (subjectInput.scrollHeight) + "px;overflow-y:hidden;");
 		subjectInput.style.height = "auto";
 		subjectInput.style.height = (subjectInput.scrollHeight) + "px";
+	}
+}
+
+// Gets the current autcomplete items
+function getAutocompleteItems(inputId) {
+	let items = document.getElementById(inputId + "autocomplete-list");
+	if (items) items = items.getElementsByTagName("LI");
+	else items = []
+	return items
+}
+
+// Gets the current tag items
+function getTagItems() {
+	let items = document.getElementById("tag-input-list");
+	if (items) {
+		items = [...items.getElementsByClassName("tag-label-input")];
+		if (items.length > 0) items.push(tagInputContainer);
+	} else items = [];
+	return items
+}
+
+// Makes item active in autocomplete dropdown
+function addActiveAutocomplete(items) {
+	if (items.length === 0 || (currentAutocompleteFocus == -1 && items.length === 0)) return false;
+	removeActiveAutocomplete(items);
+
+	if (currentAutocompleteFocus >= items.length) currentAutocompleteFocus = 0;
+	if (currentAutocompleteFocus < 0) currentAutocompleteFocus = (items.length - 1);
+
+	items[currentAutocompleteFocus].setAttribute("id","autocomplete-active");
+}
+
+// Remove active class from autocomplete items
+function removeActiveAutocomplete(items) {
+	for (var i = 0; i < items.length; i++) {
+		items[i].removeAttribute("id");
+	}
+}
+
+// Makes item active in added tagged
+function addActiveTags(items) {
+	removeActiveTags(items);
+	if (currentTagFocus >= -1) { // focus input from tags to (typing) input
+		currentTagFocus = -1;
+		$("#tag-input").focus();
+	} else { // blur input (typing) in tag input if on tag and not entering input
+		$("#tag-input").blur();
+		closeAllLists();
+	}
+	if (items.length === 0 || currentTagFocus === -1) return false;
+
+	if (Math.abs(currentTagFocus) >= items.length) currentTagFocus = -items.length;
+	items[items.length+currentTagFocus].focus();
+	items[items.length+currentTagFocus].classList.add("tag-focus");
+}
+
+// Remove active class from tag items
+function removeActiveTags(items) {
+	for (var i = 0; i < items.length; i++) {
+		items[i].blur();
+		items[i].classList.remove("tag-focus");
+	}
+}
+
+// Handles key presses for the tag input
+function handleTagInputKeys(e) {
+	let autocompleteItems = getAutocompleteItems(tagInput.id);
+		tagItems = getTagItems();
+	if (e.keyCode == 40) { // DOWN arrow key 
+		e.preventDefault();
+		currentAutocompleteFocus++;
+		addActiveAutocomplete(autocompleteItems);
+	} else if (e.keyCode == 38) { // UP arrow key
+		e.preventDefault();
+		currentAutocompleteFocus--;
+		addActiveAutocomplete(autocompleteItems);
+	} else if (e.keyCode == 37) { // LEFT arrow key
+		if (tagItems.length > 0 && tagInput.value.length === 0) {
+			e.preventDefault();
+			currentTagFocus--;
+			addActiveTags(tagItems);
+		}
+	} else if (e.keyCode == 39) { // RIGHT arrow key
+		if (tagItems.length > 0 && tagInput.value.length === 0) {
+			e.preventDefault();
+			currentTagFocus++;
+			addActiveTags(tagItems);
+		}
+	} else if(e.keyCode == 8) { // DELETE arrow key
+		if (tagItems.length > 0 && currentTagFocus < -1) {
+			e.preventDefault();
+			deleteSelectedTag(tagItems);
+		} else if (currentTagFocus === -1) {
+			currentTagFocus--;
+			addActiveTags(tagItems);
+		}
+	} else if (e.keyCode == 13) { // ENTER key simulates click on list item
+		e.preventDefault();
+		if (autocompleteItems.length > 0 && currentAutocompleteFocus > -1) {
+			if (autocompleteItems) autocompleteItems[currentAutocompleteFocus].click();
+		} else if (tagInput.value.length > 0 && autocompleteItems.length == 0) { // check if no autocomplete suggestions -> meaning new tag creation
+			let newTagName = tagInput.value;
+				newTagColor = generateRandomColor();
+			tagInput.value = "";
+			addTagToInput(newTagName, newTagColor);
+		}
+	} else if (e.keyCode == 9) { // TAB or SHIFT key simulates click on list item
+		removeActiveTags(tagItems);
+		currentTagFocus = -1;
+		if (currentAutocompleteFocus > -1) e.preventDefault(); // If no input for adding tag, then allow default tagging to navigate
+		if (autocompleteItems.length > 0 && currentAutocompleteFocus > -1) {
+			if (autocompleteItems) autocompleteItems[currentAutocompleteFocus].click();
+		} else if (tagInput.value.length > 0 && autocompleteItems.length == 0) { // check if no autocomplete suggestions -> meaning new tag creation
+			let newTagName = tagInput.value;
+				newTagColor = generateRandomColor();
+			tagInput.value = "";
+			addTagToInput(newTagName, newTagColor);
+		}
+		currentAutocompleteFocus = -1;
+		closeAllLists();
+	}
+
+	function deleteSelectedTag(tagItems) {
+		removeActiveTags(tagItems);
+		if (Math.abs(currentTagFocus) > tagItems.length) currentTagFocus = -tagItems.length; // handles index beyond first tag elem
+		// ex: tagItems = [tag1,tag2,tag3,input] => target: tag3, index: 2 (-2) => 4 (tagItems.length) + -2 (tagFocus) = 2 as desired
+		let tag = tagItems[tagItems.length+currentTagFocus];
+		tag.remove();
+		tagInputTagSet.delete(tag.getAttribute("data-tagName"));
+		tagItems.splice(tagItems.length+currentTagFocus, 1); // recountruct tag input items after removal
+		if (tagItems.length === 1) currentTagFocus = -1; // if only one item left, most be tag input elem which needs tagFocus = -1
+		addActiveTags(tagItems); // focus next item in the list
 	}
 }
 	

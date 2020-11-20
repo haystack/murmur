@@ -547,7 +547,7 @@ blockquote {
 	color: red;
 }
 
-.tag-input-list {
+#tag-input-list {
 	display: inline-flex;
 	box-sizing: content-box;
 	min-height: 2.3em;
@@ -559,7 +559,7 @@ blockquote {
 	cursor: text;
 }
 
-.tag-input-list:focus-within {
+#tag-input-list:focus-within {
 	outline: 1px ridge #447EAC;
 }
 
@@ -609,6 +609,10 @@ blockquote {
 #autocomplete-active {
 	/*when navigating through the items using the arrow keys:*/
 	background-color: #DDDDDD;
+}
+
+.tag-focus {
+	outline: 4px solid #447EAC;
 }
 
 .tag-subject-container {
