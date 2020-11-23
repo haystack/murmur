@@ -13,85 +13,55 @@
 	{% endblock %}
 
 {% block content %}
-
-<div class="container-home">
-  <div class="home-left">
-    <h4>We're re-imagining mailing lists and community discourse for the age of social media.</h4>
-	<p>Murmur is a new tool for group communication that blends concepts from mailing lists, forums, and social media.
+<div id="container-about" class="container-fluid mt-5">
+	<div id="about-left" class="m-5">
+		<h4>We're re-imagining mailing lists and community discourse for the age of social media.</h4>
+		<p>Murmur is a new tool for group communication that blends concepts from mailing lists, forums, and social media.
 		Now members can choose how they receive emails and collaboratively moderate discussion.</p>
-	<p>Murmur is a research project from the <a href="http://haystack.csail.mit.edu">Haystack Group</a> at <a href="http://csail.mit.edu">MIT CSAIL</a>.</p>
+		<p class="mb-5">Murmur is a research project from the <a href="http://haystack.csail.mit.edu">Haystack Group</a> at <a href="http://csail.mit.edu">MIT CSAIL</a>.</p>
      
-     
-	<h4>Publications</h4>
-	<div class="d-inline-block mb-2">
-		<span>Amy X. Zhang, Mark S. Ackerman, David R. Karger.</span>
+		<h4>Publications</h4>
+		<p class="mb-4">Amy X. Zhang, Mark S. Ackerman, David R. Karger.
 		<span class="strong">Mailing Lists: Why Are They Still Here, What’s Wrong With Them, and How Can We Fix Them?</span>
-		<span>In Proceedings of the ACM Conference on Human Factors in Computing Systems
-			(CHI 2015). Seoul, Korea. April 2015.</span>
+		In Proceedings of the ACM Conference on Human Factors in Computing Systems
+			(CHI 2015). Seoul, Korea. April 2015.</p>
+		<div id="pub-links" class="mb-5">
+			<a href="http://people.csail.mit.edu/axz/papers/mailinglists.pdf"><button class="btn btn-xs btn-primary mr-1 mb-1">PDF</button></a>
+			<a href="http://people.csail.mit.edu/axz/mailinglists.html"><button class="btn btn-xs btn-primary mr-1 mb-1">Slides</button></a>
+			<a href="http://haystack.csail.mit.edu/blog/2015/05/05/mailing-lists-why-are-they-still-here-whats-wrong-with-them-and-how-can-we-fix-them/"><button class="btn btn-xs btn-primary mr-1 mb-1">Blog Post</button></a>
+		</div>
+		<h4>Code</h4>
+		<p>Check out our <a href="https://github.com/haystack/murmur">Github page</a> to run your own version, report an issue, see what we're currently
+		working on, or get involved!</p>
+		<p>Still curious about Murmur? Then
+		<a href="/group_list">explore some public groups</a>!</p>
 	</div>
-
-	<a href="http://people.csail.mit.edu/axz/papers/mailinglists.pdf"><button class="btn btn-xs btn-primary">PDF</button></a>
-	<a href="http://people.csail.mit.edu/axz/mailinglists.html"><button class="btn btn-xs btn-primary">Slides</button></a>
-	<a href="http://haystack.csail.mit.edu/blog/2015/05/05/mailing-lists-why-are-they-still-here-whats-wrong-with-them-and-how-can-we-fix-them/"><button class="btn btn-xs btn-primary">Blog Post</button></a>
-	
-	
-	<br />
-	<br />
-	<h4>Code</h4>
-	<p>Check out our <a href="https://github.com/haystack/murmur">Github page</a> to run your own version, report an issue, see what we're currently
-	working on, or get involved!</p>
-	<p>Still curious about Murmur? Then
-	<a href="/group_list">explore some public groups</a>!</p>
-
-
-     
-     
-   
-    </div>
-    
-    
-  <div class="home-right">
-	  
-	<div style="text-align: center;">
-	  	<h4>Our Research Team</h4>
-		<img class="img-circle" src="https://raw.githubusercontent.com/haystack/website/master/images/people/KakaoTalk_Photo_2017-11-22-17-47-17.jpeg" width=70><BR>
-	     <h5>Soya Park</h5>
-	     Ph.D. Student,
-	     Haystack Group<br />
-	     MIT CSAIL<br />
-	     <a href="http://people.csail.mit.edu/soya">website</a>
-	
-	     <br />
-	     <br />
-	  <img class="img-circle" src="http://people.csail.mit.edu/axz/img/pic2.jpg" width=70><BR>
-	     <h5>Amy X. Zhang</h5>
-	     Ph.D.,
-	     Haystack and UID Group<br />
-	     MIT CSAIL<br />
-	     <a href="http://people.csail.mit.edu/axz">website</a>
-		
-	     <br />
-	     <br />
-	     <img class="img-circle" src="https://raw.githubusercontent.com/haystack/website/master/images/people/david-karger.jpg" width=70><BR>
-	     <h5>David Karger</h5>
-	     Professor, Haystack Group<br />
-	     MIT CSAIL<br />
-	      <a href="http://people.csail.mit.edu/karger">website</a>
-	    
-	     <br />
-	     <br />
-	     </div>
-  </div>
-  
-
+	<div id="about-right" class="mr-5 my-5">
+		<h4>Research Team</h4>
+		<div id="soya" class="mb-4">
+			<img class="rounded-circle mb-2" src="https://raw.githubusercontent.com/haystack/website/master/images/people/KakaoTalk_Photo_2017-11-22-17-47-17.jpeg" width=70><BR>
+			<h5 class="m-0">Soya Park</h5>
+			<p class="m-0">Ph.D. Student, Haystack Group</p>
+			<p class="m-0">MIT CSAIL</p>
+			<p class="m-0"><a href="http://people.csail.mit.edu/soya">website</a></p>
+		</div>
+		<div id="amy" class="mb-4">
+			<img class="rounded-circle mb-2" src="http://people.csail.mit.edu/axz/img/pic2.jpg" width=70><BR>
+			<h5 class="m-0">Amy X. Zhang</h5>
+			<p class="m-0">Ph.D., Haystack and UID Group</p>
+			<p class="m-0">MIT CSAIL</p>
+			<p class="m-0"><a href="http://people.csail.mit.edu/axz">website</a></p>
+		</div>
+		<div id="david">
+			<img class="rounded-circle mb-2" src="https://raw.githubusercontent.com/haystack/website/master/images/people/david-karger.jpg" width=70><BR>
+			<h5 class="m-0">David Karger</h5>
+			<p class="m-0">Professor, Haystack Group</p>
+			<p class="m-0">MIT CSAIL</p>
+			<p class="m-0"><a href="http://people.csail.mit.edu/karger">website</a></p>
+		</div>
+	</div>
 </div>
-
-  
- <div id="image-attrib">
-
- </div>
-	
-
+<div id="image-attrib"></div>
 
 {% endblock %}
 
