@@ -708,10 +708,6 @@ blockquote {
 	opacity: 25%;
 }
 
-.blocked {
-	text-decoration-line: line-through;
-}
-
 .my_row {
 	cursor: pointer;
 }

@@ -8,7 +8,7 @@ $(document).ready(function(){
 		btn_cancel_settings = $("#btn-cancel-settings");
 		selectRows = $(".my_row");
 		modeInput = $('input[name="tag-mode"]');
-		selectTags = $('input[data-type="tag-select"]');
+		selectTags = $('img[data-type="tag-select"]'); // select elements (block/check icons)
 		selectTagsSet = new Set(selectTags.toArray());
 		tags = $(".tag");
 		followedTags = new Set(tag_subscription["followed"]);
@@ -17,15 +17,17 @@ $(document).ready(function(){
 	
 	getSavedTagSubscription();
 
+	// Gray out notifications and tag subscription section to indicate no emails will be sent
 	if ($('#no-emails').is(":checked")) {
 		$('#notifications-area').addClass("gray");
 		$('#tag-subscription-area').addClass("gray");
-		$('input[type=checkbox][name=notifications]').removeAttr("checked");
+		$('img[data-type="tag-select"]').classList.add("inactive");
 	}
-
-	$('input[type=radio][name=mail-delivery]').change(function() {
-		let notifications = $('#notifications-area').addClass("gray");
-			tagSubscription = $('#tag-subscription-area').addClass("gray");
+	
+	// Remove gray from notifications and tag subscription section if email delivery changes
+	$('input[type=radio][name=email-delivery]').change(function() {
+		let notifications = $('#notifications-area');
+			tagSubscription = $('#tag-subscription-area');
 		if ($('#no-emails').is(":checked")) {
 			notifications.addClass("gray");
 			tagSubscription.addClass("gray");
@@ -49,18 +51,21 @@ $(document).ready(function(){
 
 	})
 
+	// Click listener for the whole row to be clickable and toggle blocking/subscribing
 	selectRows.each((index, elem) => {
 		elem.addEventListener("click", (e) => {
+			console.log(elem.firstElementChild.firstElementChild);
 			if (!selectTagsSet.has(e.target)) elem.firstElementChild.firstElementChild.click()
 		});
 	});
-
+	
+	// Select column with block and checkmark icons to select rows
 	selectTags.each((index, elem) => {
 		elem.addEventListener("click", function() {
 			const mode = $('input[name="tag-mode"]:checked').val();
 			const tag = elem.parentNode.nextElementSibling.firstElementChild;
 			elem.toggleAttribute("checked");
-			tag.classList.toggle("inactive");
+			elem.classList.toggle("inactive");
 
 			if (!swapping) {
 				const isSelected = elem.hasAttribute("checked")
@@ -78,7 +83,13 @@ $(document).ready(function(){
 	
 	// Toggles visibility of tags based on tag mode change
 	modeInput.change(function() {
+		const mode = $('input[name="tag-mode"]:checked').val();
 		selectTags.each((index, elem) => {
+			if (mode == "block-mode") {
+				elem.setAttribute("src", "/static/css/third-party/images/block.svg");
+			} else if (mode == "subscribe-mode") {
+				elem.setAttribute("src", "/static/css/third-party/images/check.svg");
+			}
 			swapping = true;
 			elem.click()
 		});
@@ -222,6 +233,7 @@ function notify(res, on_success){
 	}
 }
 
+// Updates UI based on saved user tag subscription settings
 function getSavedTagSubscription() {
 	const mode = $('input[name="tag-mode"]:checked').val();
 	if (mode == "block-mode") {
@@ -229,7 +241,7 @@ function getSavedTagSubscription() {
 			const tag = elem.parentNode.nextElementSibling.firstElementChild;
 			if (mutedTags.has(tag.innerHTML)) {
 				elem.toggleAttribute("checked");
-				tag.classList.toggle("inactive");
+				elem.classList.toggle("inactive");
 			}
 		})
 	} else if (mode == "subscribe-mode") {
@@ -237,7 +249,7 @@ function getSavedTagSubscription() {
 			const tag = elem.parentNode.nextElementSibling.firstElementChild;
 			if (followedTags.has(tag.innerHTML)) {
 				elem.toggleAttribute("checked");
-				tag.classList.toggle("inactive");
+				elem.classList.toggle("inactive");
 			}
 		})
 	}

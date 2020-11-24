@@ -11,14 +11,14 @@
 	
 	<h3>Edit My Settings for <span id="group-name">{{ group_info.name }}</span></h3>
     <form id="group-settings-form" class="mt-4 mb-4">
-		<article id="mail-delivery-area">
-			<h4>Mail Delivery</h4>
+		<article id="email-delivery-area">
+			<h4>Email Delivery</h4>
 			<hr />
 			<label for="all-emails">
 				{% if settings.all_emails %}
-					<input class="" type="radio" id="all-emails" name="mail-delivery" value="all-emails" checked>
+					<input class="" type="radio" id="all-emails" name="email-delivery" value="all-emails" checked>
 				{% else %}
-					<input class="" type="radio" id="all-emails" name="mail-delivery" value="all-emails">
+					<input class="" type="radio" id="all-emails" name="email-delivery" value="all-emails">
 				{% endif %}
 				All emails
 			</label>
@@ -27,9 +27,9 @@
 				width="16" height="16" title="You will be emailed all emails on this list unless you mute a thread">
 			<label for="first-emails">
 				{% if not settings.all_emails and not settings.digest and not settings.no_emails %}
-					<input class="" type="radio" id="first-emails" name="mail-delivery" value="first-emails" checked>
+					<input class="" type="radio" id="first-emails" name="email-delivery" value="first-emails" checked>
 				{% else %}
-					<input class="" type="radio" id="first-emails" name="mail-delivery" value="first-emails">
+					<input class="" type="radio" id="first-emails" name="email-delivery" value="first-emails">
 				{% endif %}
 				First emails
 			</label>
@@ -38,17 +38,17 @@
 				width="16" height="16" title="You will only be emailed replies in a thread if you explicitly follow the thread. You also automatically follow a thread if you start the thread or contribute a post at any point in the thread">
 			<label class="mr-5" for="digest-emails">
 				{% if settings.digest %}
-					<input class="mr-1" type="radio" id="digest-emails" name="mail-delivery" value="digest-emails" checked>
+					<input class="mr-1" type="radio" id="digest-emails" name="email-delivery" value="digest-emails" checked>
 				{% else %}
-					<input class="mr-1" type="radio" id="digest-emails" name="mail-delivery" value="digest-emails">
+					<input class="mr-1" type="radio" id="digest-emails" name="email-delivery" value="digest-emails">
 				{% endif %}
 				Digest emails
 			</label>
 			<label for="no-emails">
 				{% if settings.no_emails %}
-					<input class="" type="radio" id="no-emails" name="mail-delivery" value="no-emails" checked>
+					<input class="" type="radio" id="no-emails" name="email-delivery" value="no-emails" checked>
 				{% else %}
-					<input class="" type="radio" id="no-emails" name="mail-delivery" value="no-emails">
+					<input class="" type="radio" id="no-emails" name="email-delivery" value="no-emails">
 				{% endif %}
 				No emails
 			</label>
@@ -136,7 +136,11 @@
 						{% for tag in tag_info %}
 							<tr class="my_row">
 								<!-- Select, Tag, Description, Number of Posts -->
-								<td><input class="checkbox checkbox-user" type="checkbox" data-type="tag-select" id ={{ tag.id }}></td>
+								{% if settings.tag_blocking_mode %}
+									<td><img src="/static/css/third-party/images/block.svg" class="inactive" data-type="tag-select" id ={{ tag.id }}></td>
+								{% else %}
+									<td><img src="/static/css/third-party/images/check.svg" class="inactive" data-type="tag-select" id ={{ tag.id }}></td>
+								{% endif %}
 								<td><label class="tag" id="tag_{{ forloop.counter0 }}" style="background-color: #{{ tag.color }}">{{ tag.name }}</label></td>
 								<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed nulla et nulla fermentum molestie.</td>
 								<td><span>{{ tag.num_p }} post(s)</span></td>
