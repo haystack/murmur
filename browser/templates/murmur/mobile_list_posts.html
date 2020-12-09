@@ -79,7 +79,11 @@
             {% endif %}
 
             <div style="display:none;" id="group_name">{{ active_group.name }}</div>
-            <h1>{{ active_group.name }}</h1>
+            {% if active_group.friendly_name != '' %}
+              <h1>{{ active_group.friendly_name }}</h1>
+            {% else %}
+              <h1>{{ active_group.name }}</h1>
+            {% endif %} 
             {% if active_group.description %}
             <i>{{ active_group.description }}</i>
             <br>
@@ -287,7 +291,7 @@
 <script type="text/javascript" src="/static/javascript/third-party/ckeditor/ckeditor.js"></script>
 <script type="text/javascript" src="/static/javascript/third-party/typeahead.js/typeahead.jquery.min.js"></script>
 <script type="text/javascript" src="/static/javascript/third-party/typeahead.js/bloodhound.min.js"></script>
-<script type="text/javascript" src="/static/javascript/murmur/main.js"></script>
+<script type="text/javascript" src="/static/javascript/murmur/mobile_list_posts"></script>
 <script>
 
   //select tags

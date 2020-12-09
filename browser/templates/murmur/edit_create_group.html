@@ -16,8 +16,13 @@
 	</span>
 	<br>
 	{% if edit_page %}
-		<input id="group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;" value="{{group_info.name}}">
-		</input>
+		{% if group_info.friendly_name != '' %}
+			<input id="group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;" value="{{group_info.friendly_name}}">
+			</input>
+		{% else %}
+			<input id="group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;" value="{{group_info.name}}">
+			</input>
+		{% endif %}
 	{% else %}
 		<input id="group-name" maxlength="20" type="text" style="width: 100%; box-sizing: border-box;">
 		</input>

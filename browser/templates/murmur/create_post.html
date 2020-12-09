@@ -7,12 +7,15 @@
 
 <div class="container">
   <div class="group-container">
-	
-	<h3>Send Post to <span id="group-name">{{ group_info.name }}</span></h3><hr />
+		{% if group_info.friendly_name != '' %}   
+			<h3>Send Post to <span id="group-name">{{ group_info.friendly_name }}</span></h3><hr />
+		{% else %}
+			<h3>Send Post to <span id="group-name">{{ group_info.name }}</span></h3><hr />
+		{% endif %}
    		<span class="strong">
    			To : 
    		</span>
-   		<span id="new-post-to">{{ group_info.name }}</span>
+		<a href="mailto:{{admin_address}}" target="_newtab">{{admin_address}}</a>
    		<br>
    		<span class="strong">
    			Subject : 

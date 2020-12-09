@@ -12,7 +12,8 @@ $(document).ready(function() {
     btn_save_settings.click(function() {
         var params = {
             'old_group_name': old_group_name,
-            'new_group_name': $("#group-name").val(),
+            'new_group_name': $("#group-name").val().replaceAll(' ','_'),
+            'new_friendly_name': $("#group-name").val(),
             'group_desc': $("#group-description").val(),
             'attach': $('input[name=attach]:checked', "#group-form").val(),
         }

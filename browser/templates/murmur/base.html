@@ -58,10 +58,18 @@
           	
           	{% if not group_page %}
 	            <li class="dropdown dropdown-left">
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="active_group">{{ active_group.name }}</span><span class="caret"></span></a>
+					{% if active_group.friendly_name != '' %}
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="active_group">{{ active_group.friendly_name }}</span><span class="caret"></span></a>
+					{% else %}
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="active_group">{{ active_group.name }}</span><span class="caret"></span></a>
+					{% endif %}
 	              <ul class="dropdown-menu" role="menu">
-	              	{% for group in groups %}
-	                	<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
+					  {% for group in groups %}
+					  	{% if group.friendly_name != '' %}
+							<li><a href="/posts?group_name={{ group.name }}">{{ group.friendly_name }}</a></li>
+						{% else %}
+							<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
+						{% endif %}
 					{% endfor %}
 	                <li class="divider"></li>
 	                <li><a href="/my_groups">Manage my groups</a></li>
@@ -82,9 +90,13 @@
 	              	<ul class="dropdown-menu" role="menu" id="list-group-names">
 		              	{% for group in groups %}
 		              		{% if group.name == active_group %}
-		              			<li><a href="/posts?group_name={{ group.name }}"><span id="active_group">{{ group.name }}</span></a></li>
-		              		{% else %}
-		                		<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
+		              			<li><a href="/posts?group_name={{ group.name }}"><span id="active_group">{{ 'yer' }}</span></a></li>
+							{% else %}
+								{% if group.friendly_name != '' %}
+									<li><a href="/posts?group_name={{ group.name }}">{{ group.friendly_name }}</a></li>
+								{% else %}
+									<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
+								{% endif %}
 		                	{% endif %}
 						{% endfor %}
 	                <li class="divider"></li>

@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-    var group_name = $.trim($("#group-name").text()),
+    var group_name = $.trim($("#group-name").text().replaceAll(' ','_')),
         btn_add_dissimulate = $("#btn-add-dissimulate");
 
 

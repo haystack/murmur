@@ -26,7 +26,11 @@
 					<a href="{{ link }}">
 					{% endif %}
 						<li class="row-item" id="{{ group.name }}">
-							<span class="strong">{{ group.name }}</span>
+							{% if group.friendly_name != "" %}
+								<span class="strong">{{ group.friendly_name }}</span>
+							{% else %}
+								<span class="strong">{{ group.name }}</span>
+							{% endif %}
 							{% if group.admin %}
 								<span class="admin label">
 								{% if website == 'murmur' %}

@@ -103,7 +103,7 @@ def post_list(request):
 
 	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = Group.objects.filter(membergroup__member=user).values("name")
+		groups = Group.objects.filter(membergroup__member=user).values("name","friendly_name")
 		
 		active_group = load_groups(request, groups, user)
 		is_member = False
@@ -138,6 +138,7 @@ def post_list(request):
 			if active_group['active']:
 				group = Group.objects.get(name=active_group['name'])
 				active_group['description'] = group.description
+				active_group['friendly_name'] = group.friendly_name
 				member = MemberGroup.objects.filter(member=user, group=group)
 				if member.count() > 0:
 					is_member = True
@@ -146,7 +147,7 @@ def post_list(request):
 				for tag in tag_info:
 					tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
 					tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
-					
+			logger.debug('hit2')
 			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group, "tag_info": tag_info, 
 						"member_info": member_info, 'is_member': is_member}
 		else:
@@ -159,7 +160,6 @@ def post_list(request):
 			group = Group.objects.get(name=active_group['name'])
 			active_group['description'] = group.description
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
-			
 			if not group.public:
 				return redirect('/404?e=request_login')
 			else:
@@ -184,7 +184,7 @@ def thread(request):
 	
 	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = Group.objects.filter(membergroup__member=user).values("name")
+		groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
 		groups_links = get_groups_links_from_roles(user, groups)
 		
 		member_group = MemberGroup.objects.filter(member=user, group=group)
@@ -197,6 +197,10 @@ def thread(request):
 			modal_data = group.mod_rules
 		
 		active_group = load_groups(request, groups, user, group_name=group.name)
+		# want to make sure to properly display message if not active 
+		active_group['friendly_name'] = group.friendly_name if active_group['active'] else ''
+		active_group['admin_address'] = group.name + '+admins@' + HOST + '.com'
+
 		if group.public or is_member:
 			if is_member:
 				res = engine.main.load_thread(thread, user=request.user, member=member_group[0])
@@ -222,7 +226,7 @@ def thread(request):
 	else:
 		user = None
 		groups = []
-		active_group = {'name': group.name}
+		active_group = {'name': group.name, 'friendly_name': group.friendly_name, 'admin_address': group.name + '+admins@' + HOST}
 		if not group.public:
 			return HttpResponseRedirect(global_settings.LOGIN_URL)
 		else:
@@ -269,7 +273,7 @@ def rejected_thread(request):
 @login_required
 def settings(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
 	groups_links = get_groups_links_from_roles(user, groups)
 	#active_group = load_groups(request, groups, user)
 	return {'user': request.user, "groups": groups, 'groups_links': groups_links, 'website' : WEBSITE, 'group_page' : True}
@@ -305,7 +309,7 @@ def pub_group_list(request):
 def group_page(request, group_name):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = Group.objects.filter(membergroup__member=user).values("name")
+		groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
 	except Exception:
 		user = None
 		groups = []
@@ -326,7 +330,7 @@ def group_page(request, group_name):
 def group_list(request):
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = Group.objects.filter(membergroup__member=user).values("name")
+		groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
 	except Exception:
 		user = None
 		groups = []
@@ -348,7 +352,7 @@ def login_imap_view(request):
 @login_required
 def add_members_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
@@ -365,7 +369,7 @@ def add_members_view(request, group_name):
 @login_required
 def add_dissimulate_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
 
 	try:
 		group = Group.objects.get(name=group_name)
@@ -380,7 +384,7 @@ def add_dissimulate_view(request, group_name):
 @login_required
 def add_list_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
@@ -433,7 +437,7 @@ def add_blacklist_view(request, group_name):
 @login_required
 def my_group_settings_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
 	try:
 		print "fetch donotsend list"
 
@@ -453,11 +457,12 @@ def my_group_settings_view(request, group_name):
 def my_group_create_post_view(request, group_name):
 	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
-		groups = Group.objects.filter(membergroup__member=user).values("name")
+		groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
+		
 		try:
 			group = Group.objects.get(name=group_name)
 			member = MemberGroup.objects.get(member=user, group=group)
-			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True}
+			return {'user': request.user, 'groups': groups, 'group_info': group, 'group_page': True, 'admin_address' : group_name + '+admins@' + HOST}
 		except Group.DoesNotExist:
 			return redirect('/404?e=gname&name=%s' % group_name)
 		except MemberGroup.DoesNotExist:
@@ -479,7 +484,7 @@ def list_my_groups(request):
 @login_required
 def create_group_view(request):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
 	groups_links = get_groups_links_from_roles(user, groups)
 	return {'user': request.user, 'groups': groups, 'group_page': True, 
 			'website' : WEBSITE, 'group_or_squad' : group_or_squad, 
@@ -489,7 +494,7 @@ def create_group_view(request):
 @login_required
 def edit_group_info_view(request, group_name):
 	user = get_object_or_404(UserProfile, email=request.user.email)  
-	groups = Group.objects.filter(membergroup__member=user).values("name")  #defines the user and the groups this user is in.
+	groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")  #defines the user and the groups this user is in.
 	try:
 		group = Group.objects.get(name=group_name)
 		membergroup = MemberGroup.objects.filter(member=user, group=group)
@@ -510,6 +515,7 @@ def edit_group_info(request):
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		old_group_name = request.POST['old_group_name']  
 		new_group_name = request.POST['new_group_name']
+		new_friendly_name = request.POST['new_friendly_name']
 		group_desc = request.POST['group_desc'] 
 		public = request.POST['public'] == 'public'
 		attach = request.POST['attach'] == 'yes-attach'
@@ -518,7 +524,7 @@ def edit_group_info(request):
 		mod_edit = request.POST['mod_edit'] == 'true'
 		mod_rules = request.POST['mod_rules']
 		auto_approve = request.POST['auto_approve'] == 'true'
-		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, auto_approve, user) 
+		res = engine.main.edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, auto_approve, user, new_friendly_name=new_friendly_name) 
 
 		if res['status']:
 			active_group = request.session.get('active_group')
@@ -574,6 +580,7 @@ def create_group(request):
 		mod_edit_wl_bl = request.POST['mod_edit_wl_bl'] == 'true'
 		mod_rules = request.POST['mod_rules']
 		auto_approve = request.POST['auto_approve'] =='true'
+		logger.debug('create group')
 		res = engine.main.create_group(request.POST['group_name'], request.POST['group_desc'], public, attach, send_rejected, store_rejected, mod_edit_wl_bl, mod_rules, auto_approve, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:
@@ -814,6 +821,8 @@ def insert_post(request):
 		group_name = request.POST['group_name']
 		
 		msg_text = request.POST['msg_text']
+
+		friendly_name = request.POST['friendly_name']
 		
 		res = engine.main.insert_post_web(group_name, request.POST['subject'], msg_text, user)
 		
@@ -822,7 +831,7 @@ def insert_post(request):
 			subj_tag += '[%s]' % tag['name']
 			
 		stripped_subj = re.sub("\[.*?\]", "", request.POST['subject'])
-		subject = '[%s]%s %s' %(group_name, subj_tag, stripped_subj)
+		subject = '[%s]%s %s' %(friendly_name, subj_tag, stripped_subj)
 		
 		
 		msg_id = res['msg_id']
@@ -1590,11 +1599,11 @@ def unmute_thread(request):
 		print e
 		logging.debug(e)
 		return HttpResponse(request_error, content_type="application/json")
-
+# change password page
 @login_required
 def murmur_acct(request, acct_func=None, template_name=None):
 	user = get_object_or_404(UserProfile, email=request.user.email)
-	groups = Group.objects.filter(membergroup__member=user).values("name")
+	groups = Group.objects.filter(membergroup__member=user).values("name", "friendly_name")
 	groups_links = get_groups_links_from_roles(user, groups)
 
 	context = {'groups': groups, 'groups_links' : groups_links, 'user': request.user, 'website' : WEBSITE, 'group_page' : True} 

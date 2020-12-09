@@ -2,7 +2,11 @@
 
 {% block container-content %}
 	
-	<h3>Add email addresses to do-not-send for <span id="group-name">{{ group_info.name }}</span></h3>
+	{% if group_info.friendly_name != '' %}
+		<h3>Add email addresses to do-not-send for <span id="group-name">{{ group_info.friendly_name }}</span></h3>
+	{% else %}
+		<h3>Add email addresses to do-not-send for <span id="group-name">{{ group_info.name }}</span></h3>
+	{% endif %}
 	<hr>
 	
 	<form id="new-members-form">

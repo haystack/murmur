@@ -10,7 +10,8 @@ $(document).ready(function(){
 		function(params){
 			params.msg_text = CKEDITOR.instances['new-post-text'].getData();
             params.subject = $("#new-post-subject").val();
-            params.group_name = $("#new-post-to").text();
+			params.group_name = $("#group-name").text().replaceAll(' ','_');
+			params.friendly_name = $("#group-name").text();
             params.poster_email = params.requester_email;
 			$.post('/insert_post', params, 
 				function(res){

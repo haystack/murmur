@@ -1,7 +1,13 @@
 {% extends "group_container_base.html" %}
 
 {% block container-content %}
-	<h3>Add New Members to <span id="group-name">{{ group_info.name }}</span></h3>
+	<h3>Add New Members to 
+		{% if group_info.friendly_name != '' %}
+			<span id="friendly-name">{{ group_info.friendly_name }}</span>
+		{%else%}
+			<span id="friendly-name">{{ group_info.name }}</span>
+		{%endif%}
+	</h3>
 	<hr />
 	
 	<form id="new-members-form">

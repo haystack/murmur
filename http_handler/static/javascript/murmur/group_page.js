@@ -1,7 +1,7 @@
 $(document).ready(function(){
 
 	var user_name = $.trim($('#user_email').text()),
-		group_name = $.trim($("#friendly-name").text().replaceAll(' ','_')),
+		group_name = $.trim($("#group-name").text().replaceAll(' ','_')),
 		member = $.trim($(".member").text()) == "Member",
 		admin = $.trim($(".admin").text()) == "Admin",
 		mod = $.trim($(".mod").text()) == "Mod",
