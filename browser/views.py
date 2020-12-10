@@ -147,6 +147,7 @@ def post_list(request):
 				for tag in tag_info:
 					tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
 					tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
+
 			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group, "tag_info": tag_info, 
 						"member_info": member_info, 'is_member': is_member}
 		else:
@@ -159,6 +160,7 @@ def post_list(request):
 			group = Group.objects.get(name=active_group['name'])
 			active_group['description'] = group.description
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
+			
 			if not group.public:
 				return redirect('/404?e=request_login')
 			else:
