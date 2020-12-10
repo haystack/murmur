@@ -815,7 +815,6 @@ def load_thread(request):
 @login_required
 def insert_post(request):
 	try:
-		logger.debug("insert post")
 		user = get_object_or_404(UserProfile, email=request.user.email)
 
 		group_name = request.POST['group_name']
@@ -831,7 +830,7 @@ def insert_post(request):
 			subj_tag += '[%s]' % tag['name']
 			
 		stripped_subj = re.sub("\[.*?\]", "", request.POST['subject'])
-		subject = '[%s]%s %s' %(friendly_name, subj_tag, stripped_subj)
+		subject = '[%s]%s %s' %( friendly_name if friendly_name != '' else group_name, subj_tag, stripped_subj)
 		
 		
 		msg_id = res['msg_id']
