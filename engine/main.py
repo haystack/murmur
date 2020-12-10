@@ -790,6 +790,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                     url = "attachment/" + attachment.hash_filename
                     attachments.append((attachment.true_filename, url))
             
+            
             #text = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
             text = fix_html_and_img_srcs(p.msg_id, p.post, include_line_break = False)
             if text_limit:
