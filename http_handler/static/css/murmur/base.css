@@ -31,9 +31,41 @@ hr{
 	background-color: #f8f8f8;
 }
 
-#welcome {
+.title {
 	color: #447EAC;
 	font-weight: bold;
+}
+
+#demo-desc {
+	width: 1170px;
+	margin: 0 auto;
+	background-color: #f8f8f8;
+}
+
+#container-demo {
+	width: 1170px;
+	margin: 0 auto;
+	background-color: #f8f8f8;
+	justify-content: center;
+}
+
+.demo-settings {
+	background-color: #D7ECFA;
+}
+
+.demo-emails {
+	list-style-type: none;
+	padding: 0;
+}
+
+.sample-email {
+	font-weight: bold;
+	background-color: #D7ECFA;
+}
+
+.demo-sender {
+	font-weight: bold;
+	color: #447EAC;
 }
 
 #container-about {
@@ -43,13 +75,30 @@ hr{
 	background-color: #f8f8f8;
 }
 
-/* 1170px breakpoint to have about page split into rows */
-@media only screen and (max-width: 1170px) { 
+/* 800px breakpoint to have about and home sections split into rows */
+@media only screen and (max-width: 800px) { 
+	#container-home {
+		width: fit-content;
+	}
 	#container-about {
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 		width: fit-content;
+	}
+}
+
+/* 1170px breakpoint to have demo section split into rows */
+@media only screen and (max-width: 1170px) { 
+	#container-demo {
+		flex-direction: column;
+		max-width: 100%;
+	}
+	#demo-desc {
+		max-width: 100%;
+	}
+	.demo-settings {
+		max-width: 100%;
 	}
 }
 
@@ -536,7 +585,7 @@ blockquote {
 }
 
 #image-attrib {
-	position: absolute;
+	position: relative;
   	bottom: 0;
 	right: 0;
 }
@@ -718,14 +767,8 @@ blockquote {
 		display: flex;
 		flex-flow: column wrap;
 	}
-	#container-home {
-		width: fit-content;
-	}
 	#links {
 		display: flex;
 		flex-direction: column;
-	}
-	#image-attrib {
-		position: relative;
 	}
 }

@@ -1,6 +1,7 @@
 {% extends "murmur/base.html" %}
 
-	{% block customcss %}
+   {% block customcss %}
+   <link href="/static/DataTables/datatables.min.css" rel="stylesheet">
 	<style>
 		body { 
 			background: url(/static/images/murmurations/4227243_a0587ccefe_o.jpg) no-repeat center center fixed; 
@@ -16,7 +17,7 @@
 
 <div id="container-home" class="d-flex flex-column mt-5">
    <div id="intro" class="mx-5 mt-5 mb-3">
-     <h1 id="welcome">Welcome to Murmur</h1>
+     <h1 id="welcome" class="title">Welcome to Murmur</h1>
      <h4 id="mission">We're re-imagining mailing lists and community discourse for the age of social media.</h4>
    </div>
    <div id="description" class="mx-5 mb-3">
@@ -30,7 +31,10 @@
       <a href="/group_list">Explore All Public Groups</a>
    </div>
 </div>
- <div id="image-attrib"></div>
+{% include "murmur/demo.html" %}    
+
+<div id="image-attrib"></div>
+
 
 {% endblock %}
 

@@ -106,20 +106,20 @@
 			{% if settings.tag_blocking_mode %}
 				<label class="d-block" for="block-mode">
 					<input class="mr-1" type="radio" id="block-mode" name="tag-mode" value="block-mode" checked>
-					Send me all except the following blocked tags
+					Send me all emails except the following blocked tags
 				</label>
 				<label class="d-block mb-3" for="subscribe-mode">
 					<input class="mr-1" type="radio" id="subscribe-mode" name="tag-mode" value="subscribe-mode">
-					Send me nothing except the following subscribed tags
+					Send me no emails except the following subscribed tags
 				</label>
 			{% else %}
 				<label class="d-block" for="block-mode">
 					<input class="mr-1" type="radio" id="block-mode" name="tag-mode" value="block-mode">
-					Send me all except the following blocked tags
+					Send me all emails except the following blocked tags
 				</label>
 				<label class="d-block mb-3" for="subscribe-mode">
 					<input class="mr-1" type="radio" id="subscribe-mode" name="tag-mode" value="subscribe-mode" checked>
-					Send me nothing except the following subscribed tags
+					Send me no emails except the following subscribed tags
 				</label>
 			{% endif %}
 			<table id="tag-subscription-table" class="display" cellspacing="0" width="100%">
@@ -137,9 +137,9 @@
 							<tr class="my_row">
 								<!-- Select, Tag, Description, Number of Posts -->
 								{% if settings.tag_blocking_mode %}
-									<td><img src="/static/css/third-party/images/block.svg" class="inactive" data-type="tag-select" id ={{ tag.id }}></td>
+									<td align="center"><img src="/static/css/third-party/images/block.svg" class="inactive" data-type="tag-select" id ={{ tag.id }}></td>
 								{% else %}
-									<td><img src="/static/css/third-party/images/check.svg" class="inactive" data-type="tag-select" id ={{ tag.id }}></td>
+									<td align="center"><img src="/static/css/third-party/images/check.svg" class="inactive" data-type="tag-select" id ={{ tag.id }}></td>
 								{% endif %}
 								<td><label class="tag" id="tag_{{ forloop.counter0 }}" style="background-color: #{{ tag.color }}">{{ tag.name }}</label></td>
 								<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed nulla et nulla fermentum molestie.</td>

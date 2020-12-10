@@ -9,8 +9,8 @@ $(document).ready(function(){
 		selectRows = $(".my_row");
 		modeInput = $('input[name="tag-mode"]');
 		selectTags = $('img[data-type="tag-select"]'); // select elements (block/check icons)
+		tags = $(".tag").toArray().map(e => e.innerHTML);
 		selectTagsSet = new Set(selectTags.toArray());
-		tags = $(".tag");
 		followedTags = new Set(tag_subscription["followed"]);
 		mutedTags = new Set(tag_subscription["muted"]);
 		swapping = false;
@@ -47,14 +47,31 @@ $(document).ready(function(){
 	let tag_subscription_table = $("#tag-subscription-table").DataTable({
 		"columns": [ { 'orderable': false}, null, null, null],
 		"order": [[1, "asc"]],
-		responsive: true
+		responsive: {
+			details: {
+				type: 'column',
+				target: 'tr'
+			}
+		},
+	});
 
-	})
+	let tag_demo_table = $("#tag-demo-table").DataTable({
+		"columns": [ { 'orderable': false}, null, null, null],
+		"order": [[1, "asc"]],
+		responsive: {
+			details: {
+				type: 'column',
+				target: 'tr'
+			}
+		},
+		searching: false,
+		paginate: false,
+		info: false,
+	});
 
 	// Click listener for the whole row to be clickable and toggle blocking/subscribing
 	selectRows.each((index, elem) => {
 		elem.addEventListener("click", (e) => {
-			console.log(elem.firstElementChild.firstElementChild);
 			if (!selectTagsSet.has(e.target)) elem.firstElementChild.firstElementChild.click()
 		});
 	});
@@ -115,7 +132,6 @@ $(document).ready(function(){
 			params.mod_emails = $('#mod-emails').is(":checked");
 			params.muted_tags_data = JSON.stringify({ "muted_tags" : Array.from(mutedTags) });
 			params.tag_blocking_mode = (mode === "block-mode") ? true : false
-			console.log(params);
 			$.post('/edit_group_settings', params, 
 				function(res){
 					notify(res, true);
@@ -182,7 +198,6 @@ $(document).ready(function(){
 
 	btn_delete_dissimulate.click(function() {
 		if (confirm("Are you sure you want to delete the selected users from your do-not-send list?")) {
-			console.log("deleted")
 			var params = {'group_name' : group_name, 
 							'toAdmin' : '',
 							'toMod' : '',
