@@ -36,7 +36,8 @@ def list_groups(user=None):
                 mod = membergroup[0].moderator
             
         groups.append({'name':g.name, 
-                       'desc': escape(g.description), 
+                       'friendly_name':g.friendly_name, 
+                       'desc': escape(g.description),  
                        'member': member, 
                        'admin': admin, 
                        'mod': mod,
@@ -152,7 +153,8 @@ def list_my_groups(user):
         res['status'] = True
         res['groups'] = []
         for mg in membergroup:
-            res['groups'].append({'name':mg.group.name, 
+            res['groups'].append({'name':mg.group.name,
+                                  'friendly_name':mg.group.friendly_name,  
                                   'desc': escape(mg.group.description), 
                                   'admin': mg.admin, 
                                   'mod': mg.moderator})
@@ -255,7 +257,9 @@ def edit_donotsend_table(group_name, toDelete, user):
 
 def create_group(group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit_wl_bl, mod_rules, auto_approve, requester):
     res = {'status':False}
-    
+
+    # friendly name has spaces
+    friendly_name = group_name.replace('_',' ')
     
     if not re.match('^[\w-]+$', group_name) is not None:
         res['code'] = msg_code['INCORRECT_GROUP_NAME']
@@ -274,7 +278,7 @@ def create_group(group_name, group_desc, public, attach, send_rejected, store_re
         res['code'] = msg_code['DUPLICATE_ERROR']
         
     except Group.DoesNotExist:
-        group = Group(name=group_name, active=True, public=public, allow_attachments=attach, send_rejected_tagged=send_rejected, 
+        group = Group(name=group_name, friendly_name=friendly_name, active=True, public=public, allow_attachments=attach, send_rejected_tagged=send_rejected, 
             show_rejected_site=store_rejected, description=group_desc, mod_rules=mod_rules, mod_edit_wl_bl=mod_edit_wl_bl,
             auto_approve_after_first=auto_approve)
         group.save()
@@ -293,12 +297,15 @@ def create_group(group_name, group_desc, public, attach, send_rejected, store_re
     logging.debug(res)
     return res
 
-def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, auto_approve, user):
+def edit_group_info(old_group_name, new_group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit, mod_rules, auto_approve, user, new_friendly_name = ''):
     res = {'status':False}  
     try:
         group = Group.objects.get(name=old_group_name)
         if len(new_group_name) > 0:
+            # name has no spaces 
             group.name = new_group_name
+            # friendly name has spaces
+            group.friendly_name = new_friendly_name
         group.description = group_desc
         group.public = public
         group.allow_attachments = attach
@@ -887,7 +894,7 @@ def load_thread(t, user=None, member=None):
         for attachment in Attachment.objects.filter(msg_id=p.msg_id):
             url = "attachment/" + attachment.hash_filename
             attachments.append((attachment.true_filename, url))
-
+            
         post_dict = {
                     'id': str(p.id),
                     'msg_id': p.msg_id, 

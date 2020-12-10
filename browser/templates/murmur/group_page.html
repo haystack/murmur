@@ -5,7 +5,7 @@
 {% block content %}
 	<div class="container">
 		<div class="group-container">
-			
+
 			{% if group_info.subscribed %}
 				<span class="member label">Member</span>
 			{% else %}
@@ -24,7 +24,14 @@
 				<span class="mod label" style="display: none;"></span>
 			{% endif %}
 			
-			<h3><span id="group-name">{{ group_info.group.name }}</span></h3>
+			<h3>
+				{% if group_info.group.friendly_name == "" %}
+					<span id="group-name">{{ group_info.group.name }}</span>
+				{% else %}
+					<span id="group-name">{{ group_info.group.friendly_name }}</span>
+				{% endif %}
+			</h3>
+
 			<hr/>
 			{% if group_info.group.description == "" %}
 				<span class="italic-med">No description</span>

@@ -6,7 +6,7 @@ $(document).ready(function() {
     btn_create_group.click(function() {
 
         var params = {
-            'group_name' : $("#group-name").val(),
+            'group_name' : $("#group-name").val().replaceAll(' ','_'),
             'group_desc' : $("#group-description").val(),
             'send_rejected_tagged' : true,
             'store_rejected' : true,

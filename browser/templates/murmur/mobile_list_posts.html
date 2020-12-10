@@ -79,7 +79,11 @@
             {% endif %}
 
             <div style="display:none;" id="group_name">{{ active_group.name }}</div>
-            <h1>{{ active_group.name }}</h1>
+            {% if active_group.friendly_name != '' %}
+              <h1>{{ active_group.friendly_name }}</h1>
+            {% else %}
+              <h1>{{ active_group.name }}</h1>
+            {% endif %} 
             {% if active_group.description %}
             <i>{{ active_group.description }}</i>
             <br>

@@ -8,17 +8,25 @@
 <div class="container">
   <div class="group-container">
 	
-     <h3>Add New Associated Mailing List to <span id="group-name">{{ group_info.name }}</span></h3>
-
-     <hr />
+	{% if group_info.friendly_name != '' %}
+     	<h3>Add New Associated Mailing List to <span id="group-name">{{ group_info.friendly_name }}</span></h3>
+	{% else %}
+		<h3>Add New Associated Mailing List to <span id="group-name">{{ group_info.name }}</span></h3>
+	{% endif %}
+     <hr/>
         <form id="new-list-form">
 			<span class="strong">List email address: </span> <br />
 	        <input id="new-list-email" type="text" size="40"></input><br/>
 	        <span class="strong">List URL (optional): </span> <br />
 	        <input id="new-list-url" type="text" size="40"></input><br/> 
-	        <br/>
-			<input type="checkbox" id="can_post"> Allow emails from the above mailing list to be posted to {{ group_info.name }}<br/>
-			<input type="checkbox" id="can_receive"> Forward posts from {{ group_info.name }} to the above mailing list<br/>
+			<br/>
+			{% if group_info.friendly_name != '' %}
+				<input type="checkbox" id="can_post"> Allow emails from the above mailing list to be posted to {{ group_info.friendly_name }}<br/>
+				<input type="checkbox" id="can_receive"> Forward posts from {{ group_info.friendly_name }} to the above mailing list<br/>
+			{% else %}
+				<input type="checkbox" id="can_post"> Allow emails from the above mailing list to be posted to {{ group_info.name }}<br/>
+				<input type="checkbox" id="can_receive"> Forward posts from {{ group_info.name }} to the above mailing list<br/>
+			{% endif %}
 	        <br /> <br />
 			<button type="button" id="btn-add-list" style="margin-top:10px;">Add List</button>
 		</form>

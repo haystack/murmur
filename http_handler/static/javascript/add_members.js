@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
     var website = $("#website-name").text();
-    var group_name = $.trim($("#group-name").text());
+    var group_name = $.trim($("#friendly-name").text().replace(' ','_'));
 
     var btn_add_members = $("#btn-add-members");
 

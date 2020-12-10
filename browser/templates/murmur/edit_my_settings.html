@@ -8,8 +8,11 @@
 
 <div class="container">
   <div class="group-container">
-	
-	<h3>Edit My Settings for <span id="group-name">{{ group_info.name }}</span></h3><hr /><br />
+	{% if group_info.friendly_name != '' %}
+		<h3>Edit My Settings for <span id="group_name">{{ group_info.friendly_name }}</span></h3><hr /><br />
+	{% else %}
+		<h3>Edit My Settings for <span id="group_name">{{ group_info.name }}</span></h3><hr /><br />
+	{% endif %}
     <form id="group-settings-form">
 
 
