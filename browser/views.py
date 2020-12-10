@@ -1708,3 +1708,51 @@ def moderate_user_for_thread_get(request):
 				'active_group' : active_group, 'active_group_role' : role, 'groups' : groups}
 	else:
 		return redirect(global_settings.LOGIN_URL + '?next=/approve_get?group_name=%s&post_id=%s' % (group_name, post_id))
+
+def list_group(request):
+    groups_dic = engine.main.list_groups()
+    groups = groups_dic['groups']
+    number = len(groups)
+    
+    for i in range(number):
+        field_1 = groups[i]['name']
+        field_2 = groups[i]['desc']
+        field_3 = groups[i]['member']
+        field_4 = groups[i]['admin']
+        field_5 = groups[i]['mod']
+        field_6 = groups[i]['created']
+        field_7 = groups[i]['count']
+        j = Test_model(test_field_1=field_1,test_field_2=field_2,test_field_3=field_3,test_field_4=field_4,test_field_5=field_5,test_field_6=field_6,test_field_7=field_7)
+        j.save()
+    
+    fields = j._meta.get_fields()[1:]
+    return render(request, 'list_groups.html', {'fields':fields})
+
+@render_to("/list_groups/ajax")
+def process_ajax(request):
+
+    draw = request.GET['draw']
+    start = int(request.GET['start'])
+    length = int(request.GET['length'])
+    order_column = int(request.GET['order[0][column]'])
+    order_direction = '' if request.GET['order[0][dir]'] == 'desc' else '-'
+    column = [i.name for n, i in enumerate(j._meta.get_fields()) if n == order_column][0]
+    global_search = request.GET['search[value]']
+    all_objects = j.objects.all()
+
+    columns = [i.name for i in j._meta.get_fields()][1:]
+    objects = []
+
+    for i in all_objects.order_by(order_direction + column)[start:start + length].values():
+        ret = [i[j] for j in columns]
+        objects.append(ret)
+        
+    filtered_count = all_objects.count()
+    total_count = j.objects.count()
+    
+    return JsonResponse({
+        "sEcho": draw,
+        "iTotalRecords": total_count,
+        "iTotalDisplayRecords": filtered_count,
+        "aaData": objects,
+    })

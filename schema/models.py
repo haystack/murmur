@@ -368,3 +368,13 @@ class FlowModel(models.Model):
 class CredentialsModel(models.Model):
     id = models.ForeignKey(AUTH_USER_MODEL, primary_key=True, on_delete=models.CASCADE)
     credential = CredentialsField()
+
+
+class Test_model(models.Model):
+	test_field_1 = ''
+	test_field_2 = ''
+	test_field_3 = ''
+	test_field_4 = ''
+	test_field_5 = ''
+	test_field_6 = ''
+	test_field_7 = ''

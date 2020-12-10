@@ -21,17 +21,39 @@ $(document).ready(function(){
 						btn_delete_members, btn_add_list, action_select, btn_delete_group];
 
 	if (admin) {
-		var members_table = $('#members-table').dataTable({
-			"aoColumns": [ { 'bSortable': false}, null, null, null, null]
-		}),
-			lists_table = $('#lists-table').dataTable({
-			"aoColumns": [ { 'bSortable': false}, null, null, null, null, null]
-		});
-
-	} else {
-		var members_table = $('#members-table').dataTable({}),
+		var members_table = $('#members-table').DataTable({
+				"processing": true,
+				"serverSide": true,
+				'bDestroy': true,
+				"ajax": {
+					url: "list_groups/ajax/",
+					"data": function (d) {
+					},
+					dataSrc: function (json) {
+						console.log(json)
+						return json.aaData
+					}
+				}
+			})	
+	} 
+	
+	else {
+		var members_table = $('#members-table').DataTable({
+					"processing": true,
+					"serverSide": true,
+					'bDestroy': true,
+					"ajax": {
+						url: "list_groups/ajax/",
+						"data": function (d) {
+						},
+						dataSrc: function (json) {
+							console.log(json)
+							return json.aaData
+						}
+					}
+				}),
 			lists_table = $('#lists-table').dataTable({});
-	}
+			}
 
 	delete_group =
 	    function(params) {

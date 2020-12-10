@@ -33,14 +33,21 @@ $(document).ready(function(){
 
 	/* Dynamic Table Definitions */	
 	
-	members_table = $('#members-table').dataTable({
-			"aoColumns": [
-				{ 'bSortable': false, },
-				null,
-				null,
-				null
-			]
-		});
+	members_table = $('#members-table').DataTable({
+		"processing": true,
+		"serverSide": true,
+		'bDestroy': true,
+		"ajax": {
+			url: "list_groups/ajax/",
+			"data": function (d) {
+			},
+			dataSrc: function (json) {
+				console.log(json)
+				return json.aaData
+			}
+		}
+	})	
+
 
 	/* Default blur effect in textbox */
 	

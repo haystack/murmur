@@ -13,7 +13,70 @@
   	<br />
   	
      <h3>Explore Public Groups</h3>
-     <hr />
+		<hr />
+		<head>
+			<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+		
+			{# datatables.js #}
+			<script type="text/javascript" charset="utf8"
+					src="http://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+			<link rel="stylesheet" type="text/css" href="http://cdn.datatables.net/1.10.10/css/jquery.dataTables.css">
+		
+			{# Bootstrap #}
+			<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet"/>
+			<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+			<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+			<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+		
+		
+			{# test_project helpers #}
+			<style type="text/css">
+				.nav.sidebar a {
+					border-right: 1px solid white;
+					padding: 5px 10px;
+				}
+		
+				.nav.sidebar a.active {
+					font-weight: bold;
+					background-color: #f0f0f0;
+					border-color: #428bca;
+				}
+		
+				.nav.sidebar li.divider {
+					margin: 0.5em;
+					border-top: 1px solid #dfdfdf;
+				}
+			</style>
+		
+		</head>
+		<body>
+		<script type="text/javascript" charset="utf8">
+		
+			$(document).ready(function () {
+				$('#members-table').DataTable({
+					"processing": true,
+					"serverSide": true,
+					'bDestroy': true,
+					"ajax": {
+						url: "list_groups/ajax/",
+						"data": function (d) {console.log(json)
+							return json.aaData},
+						dataSrc: function (json) {
+							console.log(json)
+							return json.aaData
+						}
+					}
+				})
+			})
+		</script>
+		
+		<div style="float:right">
+		
+		
+		</div>
+		<hr style="width:100%">
+		<div>
+
 		<div>
 			<table id="members-table" class="display" cellspacing="0" width="100%">
 				<thead>
@@ -67,7 +130,7 @@
 				</tbody>
 			</table>	
 
-
+		<body>
 		</div>
   </div>
 </div>
@@ -80,5 +143,6 @@
 <script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>
 
 {% endblock %}
+
 
 
