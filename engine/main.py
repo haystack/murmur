@@ -894,6 +894,7 @@ def load_thread(t, user=None, member=None):
         for attachment in Attachment.objects.filter(msg_id=p.msg_id):
             url = "attachment/" + attachment.hash_filename
             attachments.append((attachment.true_filename, url))
+            
         post_dict = {
                     'id': str(p.id),
                     'msg_id': p.msg_id, 
