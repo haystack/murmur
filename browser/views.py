@@ -147,7 +147,6 @@ def post_list(request):
 				for tag in tag_info:
 					tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
 					tag.followed = tag.followtag_set.filter(user=user, group=group).exists()
-			logger.debug('hit2')
 			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group, "tag_info": tag_info, 
 						"member_info": member_info, 'is_member': is_member}
 		else:
@@ -580,7 +579,6 @@ def create_group(request):
 		mod_edit_wl_bl = request.POST['mod_edit_wl_bl'] == 'true'
 		mod_rules = request.POST['mod_rules']
 		auto_approve = request.POST['auto_approve'] =='true'
-		logger.debug('create group')
 		res = engine.main.create_group(request.POST['group_name'], request.POST['group_desc'], public, attach, send_rejected, store_rejected, mod_edit_wl_bl, mod_rules, auto_approve, user)
 		return HttpResponse(json.dumps(res), content_type="application/json")
 	except Exception, e:

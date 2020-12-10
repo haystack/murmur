@@ -90,8 +90,8 @@
 	              	<ul class="dropdown-menu" role="menu" id="list-group-names">
 		              	{% for group in groups %}
 		              		{% if group.name == active_group %}
-		              			<li><a href="/posts?group_name={{ group.name }}"><span id="active_group">{{ 'yer' }}</span></a></li>
-							{% else %}
+							  <li><a href="/posts?group_name={{ group.name }}"><span id="active_group">{{ group.name }}</span></a></li>
+							  {% else %}
 								{% if group.friendly_name != '' %}
 									<li><a href="/posts?group_name={{ group.name }}">{{ group.friendly_name }}</a></li>
 								{% else %}

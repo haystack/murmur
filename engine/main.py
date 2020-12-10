@@ -36,7 +36,7 @@ def list_groups(user=None):
                 mod = membergroup[0].moderator
             
         groups.append({'name':g.name, 
-                       'friendly_name':g.friendly_name, # should i do this
+                       'friendly_name':g.friendly_name, 
                        'desc': escape(g.description),  
                        'member': member, 
                        'admin': admin, 
@@ -259,8 +259,6 @@ def create_group(group_name, group_desc, public, attach, send_rejected, store_re
     res = {'status':False}
     # friendly name has spaces
     friendly_name = group_name.replace('_',' ')
-    logger.debug(group_name)
-
     
     if not re.match('^[\w-]+$', group_name) is not None:
         res['code'] = msg_code['INCORRECT_GROUP_NAME']
@@ -895,7 +893,6 @@ def load_thread(t, user=None, member=None):
         for attachment in Attachment.objects.filter(msg_id=p.msg_id):
             url = "attachment/" + attachment.hash_filename
             attachments.append((attachment.true_filename, url))
-        logger.debug(p.timestamp)
         post_dict = {
                     'id': str(p.id),
                     'msg_id': p.msg_id, 
@@ -906,7 +903,7 @@ def load_thread(t, user=None, member=None):
                     'liked': user_liked,
                     'subject': escape(p.subject), 
                     'text' : fix_html_and_img_srcs(p.msg_id, p.post),
-                    'timestamp': p.timestamp,
+                    'timestamp': format_date_time(p.timestamp),
                     'attachments': attachments,
                     'verified': p.verified_sender,
                     'who_moderated' : p.who_moderated,
@@ -1086,7 +1083,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
     
     return p, thread, recipients, tags, tag_objs
 
-def insert_post_web(group_name, subject, message_text, user, friendly_name=''):
+def insert_post_web(group_name, subject, message_text, user):
     res = {'status':False}
     thread = None
 
