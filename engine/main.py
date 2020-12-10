@@ -257,6 +257,7 @@ def edit_donotsend_table(group_name, toDelete, user):
 
 def create_group(group_name, group_desc, public, attach, send_rejected, store_rejected, mod_edit_wl_bl, mod_rules, auto_approve, requester):
     res = {'status':False}
+
     # friendly name has spaces
     friendly_name = group_name.replace('_',' ')
     
@@ -789,7 +790,6 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
                 for attachment in Attachment.objects.filter(msg_id=p.msg_id):
                     url = "attachment/" + attachment.hash_filename
                     attachments.append((attachment.true_filename, url))
-            
             
             #text = clean(p.post, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, styles=ALLOWED_STYLES)
             text = fix_html_and_img_srcs(p.msg_id, p.post, include_line_break = False)
