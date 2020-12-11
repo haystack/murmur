@@ -19,4 +19,7 @@ template_config = {'dir': 'smtp_handler', 'module': 'templates'}
 # hook django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "http_handler.settings")
 
+import django
+django.setup()
+
 # the config/boot.py will turn these values into variables set in settings

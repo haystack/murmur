@@ -35,7 +35,7 @@ UPVOTE_SUFFIX = '__upvote__'
 DOWNVOTE_SUFFIX = '__downvote__'
 FETCH_SUFFIX = '__fetch__'
 
-ADMIN_EMAILS = ['axz@mit.edu', 'kmahar@mit.edu']
+ADMIN_EMAILS = ['soya@mit.edu']
 
 FOLLOW_ADDR = 'http://%s/follow?tid=' % (HOST)
 UNFOLLOW_ADDR = 'http://%s/unfollow?tid=' % (HOST)

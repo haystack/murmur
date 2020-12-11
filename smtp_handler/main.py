@@ -698,7 +698,7 @@ handler_funcs = {
 def handle_post(message, address=None, host=None):
 
     # restart the db connection
-    django.db.close_connection()
+    django.db.close_old_connections()
 
     if '+' in address and '__' in address:
         return
