@@ -32,10 +32,10 @@
 <div id="main-area">
 	<div class="main-area-content">
 		{% if member_info.admin %}
-			<span class="admin label">Admin</span>
+			<span class="admin label text-light rounded-sm">Admin</span>
 		{% endif %}
 		{% if member_info.moderator %}
-			<span class="mod label">Mod</span>
+			<span class="mod label text-light rounded-sm">Mod</span>
 		{% endif %}
 		
 		
@@ -66,7 +66,7 @@
 				</td>
 				
 				<td>
-					{% if member_info.no_emails or not member_info.always_follow_thread %}
+					{% if member_info.no_emails or not member_info.all_emails %}
 						{% if tag.followed %}
 							<label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unfollow this tag</label>
 						{% else %}
@@ -91,7 +91,7 @@
 	<div>
 		{% if member_info.no_emails %}
 			You are currently set to <b>receive no emails</b> from this group, except those you follow. <br />You can follow individual threads or all threads with a specific tag.
-		{% elif member_info.always_follow_thread %}
+		{% elif member_info.all_emails %}
 			You are currently set to <b>receive all emails</b> from this group, except those you mute. <br />You can mute individual threads or threads with a specific tag.
 		{% else %}
 			You are currently set to <b>receive the first email of each thread</b> from this group, except those you follow. <br />You can follow individual threads or all threads with a specific tag.

@@ -37,11 +37,9 @@ class RegistrationForm(forms.Form):
 
     """
     required_css_class = 'required'
-    email = forms.EmailField(label=_("E-mail"))
-    password1 = forms.CharField(widget=forms.PasswordInput,
-                                label=_("Password"))
-    password2 = forms.CharField(widget=forms.PasswordInput,
-                                label=_("Password (again)"))
+    email = forms.EmailField()
+    password1 = forms.CharField(widget=forms.PasswordInput)
+    password2 = forms.CharField(widget=forms.PasswordInput)
 
     def clean(self):
         """
@@ -118,7 +116,7 @@ class MurmurPasswordResetForm(PasswordResetForm):
              email_template_name='registration/password_reset_email.html',
              extra_email_context=None, html_email_template_name="",
              use_https=False, token_generator=default_token_generator,
-             from_email=None, request=None):
+             from_email=None, request=None, *args, **kwargs):
         """
         Generates a one-use only link for resetting password and sends to the
         user.

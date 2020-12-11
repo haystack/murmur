@@ -278,7 +278,7 @@ hr{
 .left-column-area-content .ellipsis{
 	display:block;
 	white-space: nowrap;
-	max-width: 220px;
+	max-width: 40vw;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
@@ -317,7 +317,7 @@ input, select{
 	border: #447EAC solid thin;
 }
 
-button, input[type="button"], input[type="submit"]{
+button, input[type="button"], input[type="submit"] {
 	background-color: #3D7AA6;
 	color: #FFF;
 	border: #447EAC solid thin;
@@ -334,26 +334,11 @@ textarea {
 	height:50px;
 }
 
-
-#murmur-header ul {
-    list-style-type: none;
-    padding-left: 0px;
-    margin-left: 0px;
-}
-
 #left-column-area-wrapper ul {
     list-style-type: none;
     padding-left: 0px;
     margin-left: 0px;
 }
-
-
-
-.left-column-area-content{
-      margin-right:75px;
-      padding:0;
-}
-
 
 .strong-gray{
 	color: #737373;
@@ -371,7 +356,7 @@ textarea {
 
 .unread{
 	background-color: #D7ECFA;
-        color: #3D7AA6;
+    color: #3D7AA6;
 	text-align:center;
 	width: 20px;
 	display: inline-block;
@@ -388,8 +373,6 @@ textarea {
 	margin-bottom:10px;
 }
 
-.
-
 .reply{
         margin-top:10px;
         margin-bottom:10px;
@@ -397,11 +380,6 @@ textarea {
 	
 #groups-table .row-item {
 	cursor: pointer;
-}
-
-#murmur-header li {
-	margin-left: 10px;
-	margin-right: 10px;
 }
 
 #left-column-area-wrapper li {
@@ -461,34 +439,33 @@ textarea {
 	top: 48px;
 }
 
-#post-list-table {
+#post-list-table, #group-list-table {
 	list-style-type: none;
+	padding: 0px;
+	width: 100%;
 }
 
-#post-list-table .row-item{
+#post-list-table .row-item, #group-list-table .row-item {
+	display: inline-block;
 	background: white;
 	padding: 15px;
-        border-bottom: #ccc solid 1px;
-        vertical-align: middle;
+	vertical-align: middle;
 	border-bottom: 1px solid #ccc;
 	cursor: default;
+	width: 100%;
 }
 
-#post-list-table .row-item:hover {
+#post-list-table .row-item:hover, #group-list-table .row-item:hover {
 	cursor: hand;
 	cursor: pointer;
 	background: #FFF7CE!important;
 }
 
-#post-list-table .row-item.selected {
+#post-list-table .row-item.selected, #group-list-table .row-item.selected {
 	background: #FFF7CE!important;
 }
 
-#post-list-table {
-	padding: 0px;
-}
-
-#post-list-table a {
+#post-list-table a, #group-list-table a {
 	text-decoration: none;
 	color: #000000;
 }
@@ -497,7 +474,7 @@ textarea {
 	width: 200px;
 }
 
-.table, #post-list-table{
+.table {
 	width: 100%;
 }
 
@@ -568,4 +545,159 @@ blockquote {
 
 .not-verified {
 	color: red;
+}
+
+.tag-input-list {
+	display: inline-flex;
+	box-sizing: content-box;
+	min-height: 2.3em;
+	background-color: #fff;
+	border: 1px solid #447EAC;
+	flex-flow: row wrap;
+	list-style-type: none;
+	padding: 0;
+	cursor: text;
+}
+
+.tag-input-list:focus-within {
+	outline: 1px ridge #447EAC;
+}
+
+.tag-input-container {
+	/*the container must be positioned relative:*/
+	position: relative;
+	display: inline-block;
+	flex-grow: 1;
+}
+
+.tag-input {
+	width: 100%;
+	height: 100%;
+	border: none;
+}
+
+.tag-input:focus {
+	outline: none;
+}
+
+.tag-items {
+	position: absolute;
+	z-index: 99;
+	top: 100%;
+	left: 0;
+	right: 0;
+	list-style-type: none;
+	padding: 0;
+	border: 1px solid #d4d4d4;
+}
+  
+.tag-items .tag-item {
+	display: inline-block;
+	padding: 10px;
+	cursor: pointer;
+	background-color: #fff;
+	border-bottom: 1px solid #d4d4d4;
+	min-width: 100%;
+	width: auto;
+}
+
+.tag-items .tag-item:hover {
+	/*when hovering an titem:*/
+	background-color: #e9e9e9;
+}
+
+#autocomplete-active {
+	/*when navigating through the items using the arrow keys:*/
+	background-color: #DDDDDD;
+}
+
+.tag-subject-container {
+	display: inline-flex;
+	flex-flow: row wrap;
+	width: 100%;
+}
+
+.post-tag-container {
+	display: flex;
+	max-width: 40%;
+	flex-flow: column wrap;
+}
+
+.tag-label-input {
+	display: inline-block;
+	padding: .2em .6em .2em;
+	font-weight: 700;
+	color: #fff;
+	text-align: center;
+	white-space: nowrap;
+	border-radius: .25em;
+	margin: 0.2em;
+	flex-basis: content;
+}
+
+.tag-label-autocomplete {
+	display: inline-block;
+	padding: .2em .6em .3em;
+	font-weight: 700;
+	color: #fff;
+	text-align: center;
+	white-space: nowrap;
+	border-radius: .25em;
+	margin-right: 0.2em;
+}
+
+.tag-delete-btn {
+	cursor: pointer;
+	color:white; 
+}
+
+.tag-delete-btn:hover {
+	cursor: pointer;
+	color:red; 
+}
+
+.subject-container {
+	display: flex;
+	flex-flow: column wrap;
+	flex-grow: 1;
+}
+
+.subject-input {
+	border: 1px solid #447EAC;
+	height: 2.4em;
+	padding-top: 0.2em;
+	line-height: 1.5em;
+	resize: none;
+}
+
+.subject-input:focus-within {
+	outline: 1px ridge #447EAC;
+}
+
+.tag {
+	display: inline-block;
+	padding: .2em .6em .3em;
+	font-weight: 700;
+	color: #fff;
+	text-align: center;
+	white-space: nowrap;
+	border-radius: .25em;
+	margin-right: 0.2em;
+	cursor: pointer;
+}
+
+.inactive {
+	opacity: 25%;
+}
+
+.my_row {
+	cursor: pointer;
+}
+
+/* 767px breakpoint to have tag and subject inputs side by in iPad screen but not break in screen widths smaller than this */
+@media only screen and (max-width: 767px) { 
+	.tag-subject-container {
+		display: flex;
+		flex-flow: column wrap;
+	}
 }

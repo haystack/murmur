@@ -9,12 +9,12 @@ under:
 
 * User logout at ``logout/``.
 
-* The two-step password change at ``password/change/`` and
-  ``password/change/done/``.
+* The two-step password change at ``password_change/`` and
+  ``password_change/done/``.
 
-* The four-step password reset at ``password/reset/``,
-  ``password/reset/confirm/``, ``password/reset/complete/`` and
-  ``password/reset/done/``.
+* The four-step password reset at ``password_reset/``,
+  ``reset/``, ``reset/done`` and
+  ``password_reset_done/``.
 
 The default registration backend already has an ``include()`` for
 these URLs, so under the default setup it is not necessary to manually
@@ -24,45 +24,33 @@ consult a specific backend's documentation for details.
 """
 
 from django.conf.urls import url
-
-from django.contrib.auth import views as auth_views
-from browser.views import murmur_acct
+from django.urls import reverse_lazy
+from django.contrib.auth.views import (
+    LoginView,
+    LogoutView,
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordChangeView,
+    PasswordChangeDoneView,
+    PasswordResetConfirmView,
+    PasswordResetCompleteView
+)
 
 from http_handler.settings import WEBSITE
 
+website_context = {'website' : WEBSITE}
+
 urlpatterns = [
-    url(r'^login/$',
-        auth_views.login,
-        {'template_name': 'registration/login.html',
-        'extra_context' : {'website' : WEBSITE},
-        },
-        name='auth_login'),
-    url(r'^logout/$',
-        auth_views.logout,
-        {'template_name': 'registration/logout.html',
-        'extra_context' : {'website' : WEBSITE},
-        },
-        name='auth_logout'),
-    url(r'^password/change/$',
-        murmur_acct,
-        {'acct_func': auth_views.password_change}, 
-        name='auth_password_change',
-        ),
-    url(r'^password/change/done/$',
-        murmur_acct,
-        {'acct_func': auth_views.password_change_done},
-        name='auth_password_change_done',
-        ),
-    url(r'^password/reset/$',
-        auth_views.password_reset,
-        name='auth_password_reset'),
-    url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-        auth_views.password_reset_confirm,
-        name='auth_password_reset_confirm'),
-    url(r'^password/reset/complete/$',
-        auth_views.password_reset_complete,
-        name='auth_password_reset_complete'),
-    url(r'^password/reset/done/$',
-        auth_views.password_reset_done,
-        name='auth_password_reset_done'),
+    url(r'^login/$', LoginView.as_view(template_name='registration/login.html', 
+            extra_context=website_context), 
+            name='auth_login'),
+    url(r'^logout/$', LogoutView.as_view(template_name='registration/logout.html', 
+            extra_context=website_context, next_page=reverse_lazy('login')), 
+            name='auth_logout'),
+    url(r'^password_change/$', PasswordChangeView.as_view(), name='auth_password_change'),
+    url(r'^password_change/done/$', PasswordChangeDoneView.as_view(), name='auth_password_change_done'),
+    url(r'^password_reset/$', PasswordResetView.as_view(), name='auth_password_reset'),
+    url(r'^password_reset/done/$', PasswordResetDoneView.as_view(), name='auth_password_reset_done'),
+    url(r'^reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$', PasswordResetConfirmView.as_view(), name='auth_password_reset_confirm'),
+    url(r'^rest/done/$', PasswordResetCompleteView.as_view(), name='auth_password_reset_complete'),
 ]

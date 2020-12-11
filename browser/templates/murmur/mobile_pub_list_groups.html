@@ -31,13 +31,13 @@
 						<li class="row-item" id="{{ group.name }}">
 							<span class="strong">{{ group.name }}</span>
 							{% if group.member %}
-								<span class="member label">Member</span>
+								<span class="member label text-light rounded-sm">Member</span>
 							{% endif %}
 							{% if group.admin %}
-								<span class="admin label">Admin</span>
+								<span class="admin label text-light rounded-sm">Admin</span>
 							{% endif %}
 							{% if group.mod %}
-								<span class="mod label">Mod</span>
+								<span class="mod label text-light rounded-sm">Mod</span>
 							{% endif %}
 							<br>
 							<span class="italic-med">{{ group.desc }}</span></li>
