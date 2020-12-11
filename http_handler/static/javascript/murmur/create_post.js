@@ -320,7 +320,7 @@ function handleTagInputKeys(e) {
 		if (tagItems.length > 0 && currentTagFocus < -1) {
 			e.preventDefault();
 			deleteSelectedTag(tagItems);
-		} else if (currentTagFocus === -1) {
+		} else if (currentTagFocus === -1 && tagInput.value.length < 1) {
 			currentTagFocus--;
 			addActiveTags(tagItems);
 		}
