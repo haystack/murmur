@@ -83,7 +83,7 @@
 							No Groups Yet
 						</a>
 						{% endif %}
-						<div class="dropdown-menu" aria-labelledby="navbarGroupDropdown">
+						<div class="dropdown-menu" id="list-group-names" aria-labelledby="navbarGroupDropdown">
 							{% for group in groups %}
 								{% if group.name == active_group %}
 									<a class="dropdown-item" href="/posts?group_name={{ group.name }}"><span id="active_group">{{ group.name }}</span></a>
@@ -117,7 +117,7 @@
 				<ul class="nav navbar-nav ml-auto">
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							{{ user.email|truncatechars:24 }}
+							<span id="user_email">{{ user.email|truncatechars:24 }}</span>
 						</a>
 						<div class="dropdown-menu" aria-labelledby="navbarUserDropdown">
 							<a class="dropdown-item" href="/settings">Settings</a>
@@ -155,7 +155,7 @@
 	<script type="text/javascript" src="/static/javascript/third-party/noty/jquery.noty.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/noty/layouts/topRight.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/noty/themes/default.js"></script>
-	<script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="/static/DataTables/datatables.min.js"></script>
 	
 	{% block customjs %}
 	

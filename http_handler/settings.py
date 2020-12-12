@@ -84,9 +84,9 @@ else:
 
 LOGIN_REDIRECT_URL = "/"
 
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = True
-DEFAULT_EMAIL = 'no-reply@' + "localhost"  if "localhost" in BASE_URL else BASE_URL
+DEFAULT_EMAIL = 'no-reply@' + ("localhost"  if "localhost" in BASE_URL else BASE_URL)
 DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
 
@@ -103,7 +103,7 @@ DATABASES = {
     }
 }
 
-ALLOWED_HOSTS = ['murmur-dev.csail.mit.edu', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [BASE_URL,'localhost']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
