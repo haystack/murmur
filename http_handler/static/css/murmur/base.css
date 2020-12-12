@@ -547,6 +547,12 @@ blockquote {
 	color: red;
 }
 
+
+/* Set a fixed length in the main log in page */
+.home-right input {
+	width: 179px;
+}
+
 .tag-input-list {
 	display: inline-flex;
 	box-sizing: content-box;
@@ -701,3 +707,4 @@ blockquote {
 		flex-flow: column wrap;
 	}
 }
+
