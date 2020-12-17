@@ -1512,12 +1512,9 @@ def follow_tag(tag_name, group_name, user=None, email=None):
         if email:
             user = UserProfile.objects.get(email=email)
         tag = Tag.objects.get(name=tag_name, group=g)
-        tag_follow = FollowTag.objects.get(tag=tag, user=user)
-        res['tag_name'] = tag_name
-        res['status'] = True
-    except FollowTag.DoesNotExist:
-        f = FollowTag(tag=tag, group=g, user=user)
-        f.save()
+        
+        logger.exception("TODO check this behavior")
+        
         res['tag_name'] = tag_name
         res['status'] = True
     except Tag.DoesNotExist:
@@ -1535,11 +1532,9 @@ def unfollow_tag(tag_name, group_name, user=None, email=None):
         if email:
             user = UserProfile.objects.get(email=email)
         tag = Tag.objects.get(name=tag_name, group=g)
-        tag_follow = FollowTag.objects.get(tag=tag, user=user)
-        tag_follow.delete()
-        res['tag_name'] = tag_name
-        res['status'] = True
-    except FollowTag.DoesNotExist:
+        
+        logger.exception("TODO check this behavior")
+        
         res['tag_name'] = tag_name
         res['status'] = True
     except Tag.DoesNotExist:
