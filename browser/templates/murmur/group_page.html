@@ -1,27 +1,27 @@
 {% extends "murmur/base.html" %}
 {% block customcss %}
-	<link href="/static/css/third-party/datatable.css" rel="stylesheet">
+	<link href="/static/DataTables/datatables.min.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
 	<div class="container">
 		<div class="group-container">
 			
 			{% if group_info.subscribed %}
-				<span class="member label">Member</span>
+				<span class="member label text-light rounded-sm">Member</span>
 			{% else %}
 				<span class="member label" style="display: none;"></span>
 			{% endif %}
 			
 			{% if group_info.admin %}
-				<span class="admin label">Admin</span>
+				<span class="admin label text-light rounded-sm">Admin</span>
 			{% else %}
-				<span class="admin label" style="display: none;"></span>
+				<span class="admin label text-light rounded-sm" style="display: none;"></span>
 			{% endif %}
 			
 			{% if group_info.moderator %}
-				<span class="mod label">Mod</span>
+				<span class="mod label text-light rounded-sm">Mod</span>
 			{% else %}
-				<span class="mod label" style="display: none;"></span>
+				<span class="mod label text-light rounded-sm" style="display: none;"></span>
 			{% endif %}
 			
 			<h3><span id="group-name">{{ group_info.group.name }}</span></h3>
@@ -96,7 +96,7 @@
 					<button type="button" id="btn-add-members">Add Members</button>
 					<button type="button" id="btn-del-members">Delete Members</button>
 					<button type="button" id="btn-set-admin">Set as Admin</button>
-					<button type="button" id="btn-set-mod">Set as Moderator</button>
+					<button type="button" id="btn-set-mod" class="mb-3">Set as Moderator</button>
 				{% else %}
 					<button type="button" id="btn-add-members" style="display: none;">Add Members</button>
 				{% endif %}
@@ -136,12 +136,12 @@
 											<td>{{ member.email }}</td>
 											<td>{{ member.joined }}</td>
 											{% if member.admin %}
-												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+												<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 											{% else %}
 												<th></th>
 											{% endif %}
 											{% if member.mod %}
-												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+												<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 											{% else %}
 												<th></th>
 											{% endif %}
@@ -150,12 +150,12 @@
 										<td>{{ member.email }}</td>
 										<td>{{ member.joined }}</td>
 										{% if member.admin %}
-											<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+											<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 										{% else %}
 											<th></th>
 										{% endif %}
 										{% if member.mod %}
-											<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+											<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 										{% else %}
 											<th></th>
 										{% endif %}
@@ -168,12 +168,12 @@
 									<td><i>{{ member.email }} (pending)</i></td>
 										<td>{{ member.joined }}</td>
 										{% if member.admin %}
-											<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+											<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 										{% else %}
 											<th></th>
 										{% endif %}
 										{% if member.mod %}
-											<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+											<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 										{% else %}
 											<th></th>
 										{% endif %}
@@ -185,7 +185,7 @@
 					<hr />
 					<h3>Associated Mailing Lists</h3>
 					
-					<button type="button" id="btn-add-list">Add List</button>
+					<button type="button" id="btn-add-list" class="mb-3">Add List</button>
 					<select id='actionSelect'>
 						<option value='label' selected="true">Other actions</option>
 						<option value="deleteList">Delete</option>

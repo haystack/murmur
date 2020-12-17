@@ -59,7 +59,7 @@ $(document).ready(function(){
 						var upvotes = parseInt($('#post-' + post_id).children('.label2').text().substring(1)) + 1;
 						$('#post-' + post_id).children('.label2').text('+' + upvotes);
 						$('#post-' + post_id).children('.label2').css({'background-color': 'lightyellow'});
-						$('#post-' + post_id).children('small').children().eq(0).replaceWith('<a style="cursor: pointer" onclick="unupvote(\'' + post_id + '\', \'' + thread_id + '\'); return false;">Undo +1 Post</a>');
+						$('#post-' + post_id).children('small').children().eq(0).replaceWith('<a href="#" style="cursor: pointer" onclick="unupvote(\'' + post_id + '\', \'' + thread_id + '\'); return false;">Undo +1 Post</a>');
                     }
 					notify(res, true);
 				}
@@ -75,7 +75,7 @@ $(document).ready(function(){
 						var upvotes = parseInt($('#post-' + post_id).children('.label2').text().substring(1)) - 1;
 						$('#post-' + post_id).children('.label2').text('+' + upvotes);
 						$('#post-' + post_id).children('.label2').css({'background-color': '#ffffff'});
-						$('#post-' + post_id).children('small').children().eq(0).replaceWith('<a style="cursor: pointer" onclick="upvote(\'' + post_id + '\', \'' + thread_id + '\'); return false;">+1 Post</a>');
+						$('#post-' + post_id).children('small').children().eq(0).replaceWith('<a href="#" style="cursor: pointer" onclick="upvote(\'' + post_id + '\', \'' + thread_id + '\'); return false;">+1 Post</a>');
                     }
 					notify(res, true);
 				}

@@ -70,12 +70,12 @@
 					<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ thread.post.likes }}</span>
 					<small>
 					 | 
-					<a style="cursor: pointer" onclick="unupvote('{{ thread.post.id }}', '{{ thread.thread_id }}'); return false;">Undo +1 Post</a> | 
+					<a href="#" style="cursor: pointer" onclick="unupvote('{{ thread.post.id }}', '{{ thread.thread_id }}'); return false;">Undo +1 Post</a> | 
 				{% else %}
 					<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ thread.post.likes }}</span>
 					<small>
 					 | 
-					<a style="cursor: pointer" onclick="upvote('{{ thread.post.id }}', '{{ thread.thread_id }}'); return false;">+1 Post</a> | 
+					<a href="#" style="cursor: pointer" onclick="upvote('{{ thread.post.id }}', '{{ thread.thread_id }}'); return false;">+1 Post</a> | 
 				{% endif %}
 				
 				<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{thread.post.id}}">Permalink</a>

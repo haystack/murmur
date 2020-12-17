@@ -419,8 +419,8 @@ def handle_post_murmur(message, group, host, verified):
                 followings = Following.objects.filter(thread=t, user__in=recips)
                 mutings = Mute.objects.filter(thread=t, user__in=recips)
 
-                tag_followings = FollowTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
                 tag_mutings = MuteTag.objects.filter(group=g, tag__in=res['tag_objs'], user__in=recips)
+                tag_followings = Tag.objects.filter(group=g).exclude(id__in=tag_mutings)
 
                 for recip in recips:
 
@@ -441,7 +441,7 @@ def handle_post_murmur(message, group, host, verified):
                     membergroup = membergroups.filter(member=recip)[0]
                     following = followings.filter(user=recip).exists()
                     muting = mutings.filter(user=recip).exists()
-                    tag_following = tag_followings.filter(user=recip)
+                    tag_following = tag_followings.filter()
                     tag_muting = tag_mutings.filter(user=recip)
 
                     has_attachments = len(attachments) > 0
@@ -698,8 +698,7 @@ handler_funcs = {
 def handle_post(message, address=None, host=None):
 
     # restart the db connection
-    # deprecated at django18
-    # django.db.close_connection()
+    django.db.close_old_connections()
 
     if '+' in address and '__' in address:
         return

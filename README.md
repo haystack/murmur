@@ -34,6 +34,7 @@ Next set up the environment variables. The only variables you should need to set
 * change the root mysql account to one written in `.env`
 * make sure you can log in to mysql with the password in the command line: `mysql -u root -p`
 
+
 #### Starting and Stopping Docker 
 
 In order to stop docker you can simply run `make stop` and run `make start` to start it up again.
