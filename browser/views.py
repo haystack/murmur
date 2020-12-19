@@ -1712,35 +1712,6 @@ def moderate_user_for_thread_get(request):
 @render_to("/list_groups/ajax")
 def process_ajax(request):
 
-    draw = request.GET['draw']
-    start = int(request.GET['start'])
-    length = int(request.GET['length'])
-    order_column = int(request.GET['order[0][column]'])
-    order_direction = '' if request.GET['order[0][dir]'] == 'desc' else '-'
-    column = [i.name for n, i in enumerate(j._meta.get_fields()) if n == order_column][0]
-    global_search = request.GET['search[value]']
-    all_objects = j.objects.all()
-
-    columns = [i.name for i in j._meta.get_fields()][1:]
-    objects = []
-
-    for i in all_objects.order_by(order_direction + column)[start:start + length].values():
-        ret = [i[j] for j in columns]
-        objects.append(ret)
-        
-    filtered_count = all_objects.count()
-    total_count = j.objects.count()
-    
-    return JsonResponse({
-        "sEcho": draw,
-        "iTotalRecords": total_count,
-        "iTotalDisplayRecords": filtered_count,
-        "aaData": objects,
-    })
-
-@render_to(WEBSITE+"/group_page.js")
-def process_ajax(request):
-
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 	except Exception:
