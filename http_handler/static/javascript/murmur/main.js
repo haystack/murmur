@@ -36,6 +36,7 @@ $(document).ready(function(){
 	members_table = $('#members-table').DataTable({
 		"processing": true,
 		"serverSide": true,
+<<<<<<< Updated upstream
 		'bDestroy': true,
 		"ajax": {
 			url: "list_groups/ajax/",
@@ -48,6 +49,42 @@ $(document).ready(function(){
 		}
 	})	
 
+=======
+		"ajax": {
+			url: "/delta/list_groups/ajax/",
+			dataSrc: function (json) {
+					var return_data = new Array();
+					for(var i=0;i< json.aaData.length; i++){
+						
+						if (json.aaData[i][2] = 'true') {var member = '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>'} else {var member = ''}
+						if (json.aaData[i][3] = 'true') {var adminis = '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>'} else {var adminis = ''}
+						if (json.aaData[i][4] = 'true') {var mod = '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>'} else {var mod = ''}
+
+						if (json.aaData[i][0].includes(json.global)) {
+							return_data.push({
+								'name': '<a href="/groups/' + json.aaData[i][0] + '">' + json.aaData[i][0] + '</a>',
+								'desc': json.aaData[i][1],
+								'member' : member,
+								'admin' : adminis,
+								'mod' : mod,
+								'created' : json.aaData[i][5],
+								'count' : json.aaData[i][6]
+					  })}
+					}
+					return return_data;
+				  }
+				},
+			"columns": [
+				  {'data': 'name'},
+				  {'data': 'desc'},
+				  {'data': 'admin'},
+				  {'data': 'mod'},
+				  {'data': 'member'},
+				  {'data': 'created'},
+				  {'data': 'count'}
+				]
+			  })
+>>>>>>> Stashed changes
 
 	/* Default blur effect in textbox */
 	

@@ -4,12 +4,13 @@
 	<link href="/static/css/third-party/datatable.css" rel="stylesheet">
 {% endblock %}
 
-{% block content %}
+
+{% block customjs %}
 
 <div class="container">
   <div class="group-container">
   	
-  	<a href="/create_new_group"><button type="button">Create New Group</button></a>
+  	<a href="/create_new_group"><button class="mb-3" type="button">Create New Group</button></a>
   	<br />
   	
      <h3>Explore Public Groups</h3>
@@ -78,6 +79,12 @@
 		<div>
 
 		<div>
+
+			<script type="text/javascript" charset="utf8"
+					src="http://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+
+			<script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>
+
 			<table id="members-table" class="display" cellspacing="0" width="100%">
 				<thead>
 					<tr>
@@ -102,32 +109,7 @@
 						<th>Num Members</th>
 					</tr>
 				</tfoot>
-				
-				<tbody>
-					{% for group in pub_groups %}
-					<tr>
-						<td><a href="/groups/{{ group.name }}">{{group.name}}</a></td>
-						<td><span class="italic-med">{{ group.desc }}</span></td>
-						{% if group.admin %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-							{% else %}
-							<th></th>
-						{% endif %}
-						{% if group.mod %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-							{% else %}
-							<th></th>
-						{% endif %}
-						{% if group.member %}
-							<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-							{% else %}
-							<th></th>
-						{% endif %}
-						<th>{{ group.created }}</th>
-						<th>{{ group.count }}</th>
-					</tr>
-					{% endfor %}
-				</tbody>
+			
 			</table>	
 
 		<body>
@@ -138,6 +120,7 @@
 {% endblock %}
 
 
+<<<<<<< Updated upstream
 {% block customjs %}
 
 <script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>
@@ -146,3 +129,5 @@
 
 
 
+=======
+>>>>>>> Stashed changes
