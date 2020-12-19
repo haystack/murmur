@@ -4,7 +4,8 @@
 	<link href="/static/DataTables/datatables.min.css" rel="stylesheet">
 {% endblock %}
 
-{% block content %}
+
+{% block customjs %}
 
 <div class="container">
   <div class="group-container">
@@ -15,6 +16,12 @@
      <h3>Explore Public Groups</h3>
      <hr />
 		<div>
+
+			<script type="text/javascript" charset="utf8"
+					src="http://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+
+			<script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>
+
 			<table id="members-table" class="display" cellspacing="0" width="100%">
 				<thead>
 					<tr>
@@ -39,6 +46,7 @@
 						<th>Num Members</th>
 					</tr>
 				</tfoot>
+<<<<<<< Updated upstream
 				
 				<tbody>
 					{% for group in pub_groups %}
@@ -65,6 +73,9 @@
 					</tr>
 					{% endfor %}
 				</tbody>
+=======
+			
+>>>>>>> Stashed changes
 			</table>	
 
 
@@ -74,11 +85,5 @@
 
 {% endblock %}
 
-
-{% block customjs %}
-
-<script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>
-
-{% endblock %}
 
 
