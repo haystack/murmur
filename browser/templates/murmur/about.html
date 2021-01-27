@@ -14,48 +14,35 @@
 
 {% block content %}
 
-{% if flavour != "mobile" %}
 <div class="container-home">
-{% else %}
-<div class="container">
-{% endif %}
-{% if flavour != "mobile" %}
   <div class="home-left">
-  	{% else %}
-  	<div class="home-left-mobile">
-  	{% endif %}
-  	
+    <h4>We're re-imagining mailing lists and community discourse for the age of social media.</h4>
+	<p>Murmur is a new tool for group communication that blends concepts from mailing lists, forums, and social media.
+		Now members can choose how they receive emails and collaboratively moderate discussion.</p>
+	<p>Murmur is a research project from the <a href="http://haystack.csail.mit.edu">Haystack Group</a> at <a href="http://csail.mit.edu">MIT CSAIL</a>.</p>
      
-     <h4>We're re-imagining mailing lists and community discourse for the age of social media.</h4>
+     
+	<h4>Publications</h4>
+	<div class="d-inline-block mb-2">
+		<span>Amy X. Zhang, Mark S. Ackerman, David R. Karger.</span>
+		<span class="strong">Mailing Lists: Why Are They Still Here, What’s Wrong With Them, and How Can We Fix Them?</span>
+		<span>In Proceedings of the ACM Conference on Human Factors in Computing Systems
+			(CHI 2015). Seoul, Korea. April 2015.</span>
+	</div>
 
-	Murmur is a new tool for group communication that blends concepts from mailing lists, forums, and social media.
-	Now members can choose how they receive emails and collaboratively moderate discussion.
-	<br /><br />
-	Murmur is a research project from the <a href="http://haystack.csail.mit.edu">Haystack Group</a> at <a href="http://csail.mit.edu">MIT CSAIL</a>.
-     <br />
-     <br />
-     
-     
-          <h4>Publications</h4>
-     Amy X. Zhang, Mark S. Ackerman, David R. Karger.
-     <span class="strong">Mailing Lists: Why Are They Still Here, What’s Wrong With Them, and How Can We Fix Them?</span>
-     In Proceedings of the ACM Conference on Human Factors in Computing Systems
-	 (CHI 2015). Seoul, Korea. April 2015. <br />
-	 <a href="http://people.csail.mit.edu/axz/papers/mailinglists.pdf"><button class="btn btn-xs">PDF</button></a>
-	 <a href="http://people.csail.mit.edu/axz/mailinglists.html"><button class="btn btn-xs">Slides</button></a>
-	 <a href="http://haystack.csail.mit.edu/blog/2015/05/05/mailing-lists-why-are-they-still-here-whats-wrong-with-them-and-how-can-we-fix-them/"><button class="btn btn-xs">Blog Post</button></a>
-	 
-     
-     <br />
-     <br />
-     <h4>Code</h4>
-     Check out our <a href="https://github.com/haystack/murmur">Github page</a> to run your own version, report an issue, see what we're currently
-     working on, or get involved!
-     <br />
-     <br />
-     <br />
-     Still curious about Murmur? Then
-     <a href="/group_list">explore some public groups</a>!
+	<a href="http://people.csail.mit.edu/axz/papers/mailinglists.pdf"><button class="btn btn-xs btn-primary">PDF</button></a>
+	<a href="http://people.csail.mit.edu/axz/mailinglists.html"><button class="btn btn-xs btn-primary">Slides</button></a>
+	<a href="http://haystack.csail.mit.edu/blog/2015/05/05/mailing-lists-why-are-they-still-here-whats-wrong-with-them-and-how-can-we-fix-them/"><button class="btn btn-xs btn-primary">Blog Post</button></a>
+	
+	
+	<br />
+	<br />
+	<h4>Code</h4>
+	<p>Check out our <a href="https://github.com/haystack/murmur">Github page</a> to run your own version, report an issue, see what we're currently
+	working on, or get involved!</p>
+	<p>Still curious about Murmur? Then
+	<a href="/group_list">explore some public groups</a>!</p>
+
 
      
      
@@ -63,13 +50,8 @@
     </div>
     
     
-{% if flavour != "mobile" %}
   <div class="home-right">
-  	{% else %}
-  	<div class="home-right-mobile">
-  	{% endif %}
-  	
-  
+	  
 	<div style="text-align: center;">
 	  	<h4>Our Research Team</h4>
 		<img class="img-circle" src="https://raw.githubusercontent.com/haystack/website/master/images/people/KakaoTalk_Photo_2017-11-22-17-47-17.jpeg" width=70><BR>

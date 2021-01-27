@@ -59,6 +59,11 @@ def _get_website():
     
 WEBSITE = _get_website()
 
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 8825
+
 try:
     execfile(SITE_ROOT + '/../private.py')
 except IOError:
@@ -77,16 +82,11 @@ else:
     BASE_URL = 'localhost:8000'
     MYSQL = MYSQL_LOCAL
 
-TEMPLATE_DEBUG = DEBUG
-
 LOGIN_REDIRECT_URL = "/"
 
-EMAIL_HOST = 'localhost'
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_USE_TLS = False
-DEFAULT_EMAIL = 'no-reply@' + BASE_URL
+DEFAULT_EMAIL = 'no-reply@' + ("localhost"  if "localhost" in BASE_URL else BASE_URL)
 DEFAULT_FROM_EMAIL = DEFAULT_EMAIL
 
 
@@ -102,6 +102,8 @@ DATABASES = {
         'OPTIONS': {'charset': 'utf8mb4'},
     }
 }
+
+ALLOWED_HOSTS = [BASE_URL,'localhost']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -167,45 +169,41 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'fr&amp;qg*+c!z6q_^v6o1kzd6lxj-3m3q-=oku8f52*c+@)+1hnx+'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django_mobile.loader.Loader',
-    
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            PROJECT_DIR + "browser/templates",
+            # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+            # Always use forward slashes, even on Windows.
+            # Don't forget to use absolute paths, not relative paths.
+        ],
+        'OPTIONS': {
+            # List of callables that know how to import templates from various sources.
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ]
+        },
+    },
+]
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django_mobile.context_processors.flavour',
-    
-)
+TEMPLATE_LOADERS = TEMPLATES[0]['OPTIONS']['loaders']
 
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
-    'django_mobile.middleware.MobileDetectionMiddleware',
-    'django_mobile.middleware.SetFlavourMiddleware',
-    
-)
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
 ROOT_URLCONF = 'http_handler.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'http_handler.wsgi.application'
-
-TEMPLATE_DIRS = (
-    PROJECT_DIR + "browser/templates",
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
 
 # one week activation window after a user signs up for an account
 ACCOUNT_ACTIVATION_DAYS = 7
@@ -235,8 +233,7 @@ INSTALLED_APPS = (
     
     #third party apps
     'registration',
-    'django_mobile',
-    'storages'
+    'storages',
 )
 
 # A sample logging configuration. The only tangible logging

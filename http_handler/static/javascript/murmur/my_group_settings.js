@@ -1,16 +1,87 @@
 $(document).ready(function(){
 	
-	var user_name = $.trim($('#user_email').text());
-	var group_name = $.trim($("#group-name").text());
-	
-	var btn_add_dissimulate = $("#btn-add-dissimulate"),
+	let user_name = $.trim($('#user_email').text());
+	 	group_name = $.trim($("#group-name").text());
+		btn_add_dissimulate = $("#btn-add-dissimulate"),
 		btn_delete_dissimulate = $("#btn-delete-dissimulate");
-
-	var btn_save_settings = $("#btn-save-settings");
-	var btn_cancel_settings = $("#btn-cancel-settings");
+		btn_save_settings = $("#btn-save-settings");
+		btn_cancel_settings = $("#btn-cancel-settings");
+		selectRows = $(".my_row");
+		modeInput = $('input[name="tag-mode"]');
+		selectTags = $('input[data-type="tag-select"]');
+		selectTagsSet = new Set(selectTags.toArray());
+		tags = $(".tag");
+		followedTags = new Set(tag_subscription["followed"]);
+		mutedTags = new Set(tag_subscription["muted"]);
+		swapping = false;
 	
-	var donotsend_members_table = $('#donotsend-members-table').dataTable({
-		"aoColumns": [ { 'bSortable': false}, null]
+	getSavedTagSubscription();
+
+	if ($('#no-emails').is(":checked")) {
+		$('#notifications-area').addClass("gray");
+		$('#tag-subscription-area').addClass("gray");
+		$('input[type=checkbox][name=notifications]').removeAttr("checked");
+	}
+
+	$('input[type=radio][name=mail-delivery]').change(function() {
+		let notifications = $('#notifications-area').addClass("gray");
+			tagSubscription = $('#tag-subscription-area').addClass("gray");
+		if ($('#no-emails').is(":checked")) {
+			notifications.addClass("gray");
+			tagSubscription.addClass("gray");
+			$('input[type=checkbox][name=notifications]').removeAttr("checked");
+		} else {
+			notifications.removeClass("gray");
+			tagSubscription.removeClass("gray");
+		}
+	});
+
+	let donotsend_members_table = $('#donotsend-members-table').DataTable({
+		"columns": [ { 'orderable': false}, null],
+		"order": [[1, "asc"]],
+		responsive: true
+	});
+
+	let tag_subscription_table = $("#tag-subscription-table").DataTable({
+		"columns": [ { 'orderable': false}, null, null, null],
+		"order": [[1, "asc"]],
+		responsive: true
+
+	})
+
+	selectRows.each((index, elem) => {
+		elem.addEventListener("click", (e) => {
+			if (!selectTagsSet.has(e.target)) elem.firstElementChild.firstElementChild.click()
+		});
+	});
+
+	selectTags.each((index, elem) => {
+		elem.addEventListener("click", function() {
+			const mode = $('input[name="tag-mode"]:checked').val();
+			const tag = elem.parentNode.nextElementSibling.firstElementChild;
+			elem.toggleAttribute("checked");
+			tag.classList.toggle("inactive");
+
+			if (!swapping) {
+				const isSelected = elem.hasAttribute("checked")
+				if (mode == "block-mode") {
+					if (isSelected) mutedTags.add(tag.innerHTML);
+					else mutedTags.delete(tag.innerHTML);
+				} else if (mode == "subscribe-mode") {
+					if (isSelected) mutedTags.delete(tag.innerHTML);
+					else mutedTags.add(tag.innerHTML);
+				}
+			}
+			swapping = false;
+		})
+	});
+	
+	// Toggles visibility of tags based on tag mode change
+	modeInput.change(function() {
+		selectTags.each((index, elem) => {
+			swapping = true;
+			elem.click()
+		});
 	});
 
 	toggle_edit_emails();
@@ -22,11 +93,18 @@ $(document).ready(function(){
 	
 	edit_group_settings =
 		function(params){
-			params.upvote_emails = $('#ck-upvote-emails').is(":checked");
-			params.receive_attachments = $('#ck-receive-attachments').is(":checked");
-			params.no_emails = $('#ck-no-email').is(":checked");
-			params.following = $('input[name=following]:checked', '#group-settings-form').val();
-			params.digest = $('#ck-digest').is(":checked");
+			const mode = $('input[name="tag-mode"]:checked').val();
+			params.all_emails = $('#all-emails').is(":checked");
+			params.digest = $('#digest-emails').is(":checked");
+			params.no_emails = $('#no-emails').is(":checked");
+			params.receive_attachments = $('#receive-attachments').is(":checked");
+			params.upvote_emails = $('#upvote-emails').is(":checked");
+			params.group_invite_emails = $('#group-invite-emails').is(":checked");
+			params.admin_emails = $('#admin-emails').is(":checked");
+			params.mod_emails = $('#mod-emails').is(":checked");
+			params.muted_tags_data = JSON.stringify({ "muted_tags" : Array.from(mutedTags) });
+			params.tag_blocking_mode = (mode === "block-mode") ? true : false
+			console.log(params);
 			$.post('/edit_group_settings', params, 
 				function(res){
 					notify(res, true);
@@ -141,6 +219,27 @@ function notify(res, on_success){
 		if(on_success){
 			noty({text: "Success!", dismissQueue: true, timeout:2000, force: true, type:'success', layout: 'topRight'});
 		}
+	}
+}
+
+function getSavedTagSubscription() {
+	const mode = $('input[name="tag-mode"]:checked').val();
+	if (mode == "block-mode") {
+		selectTags.each((index,elem) => {
+			const tag = elem.parentNode.nextElementSibling.firstElementChild;
+			if (mutedTags.has(tag.innerHTML)) {
+				elem.toggleAttribute("checked");
+				tag.classList.toggle("inactive");
+			}
+		})
+	} else if (mode == "subscribe-mode") {
+		selectTags.each((index,elem) => {
+			const tag = elem.parentNode.nextElementSibling.firstElementChild;
+			if (followedTags.has(tag.innerHTML)) {
+				elem.toggleAttribute("checked");
+				tag.classList.toggle("inactive");
+			}
+		})
 	}
 }
 	

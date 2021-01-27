@@ -1,6 +1,6 @@
 from apiclient.discovery import build
 import httplib2, logging, re, time
-from oauth2client.django_orm import Storage
+from oauth2client.contrib.django_orm import Storage
 
 from http_handler.settings import BASE_URL
 from schema.models import CredentialsModel

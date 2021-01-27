@@ -94,7 +94,7 @@ class RegistrationManager(models.Manager):
 
         return new_user
         
-    create_inactive_user = transaction.commit_on_success(create_inactive_user)
+    create_inactive_user = transaction.atomic(create_inactive_user)
 
     def create_profile(self, user):
         """
@@ -194,7 +194,7 @@ class RegistrationProfile(models.Model):
     except Exception:
         from schema.models import UserProfile as User
 
-    user = models.ForeignKey(User, unique=True, verbose_name=_('user'))
+    user = models.ForeignKey(User, unique=True, verbose_name=_('user'), on_delete=models.CASCADE)
     activation_key = models.CharField(_('activation key'), max_length=40)
     
     objects = RegistrationManager()
@@ -210,7 +210,7 @@ class RegistrationProfile(models.Model):
                 User = get_user_model()
             except ImportError:
                 from schema.models import UserProfile as User
-            self.user = models.ForeignKey(User, unique=True, verbose_name=_('user'))
+            self.user = models.ForeignKey(User, unique=True, verbose_name=_('user'), on_delete=models.CASCADE)
 
         return self.user
 

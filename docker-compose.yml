@@ -25,14 +25,16 @@ services:
       - MYSQL_PASS=${MYSQL_PASS}
       - DOMAIN_NAME=${DOMAIN_NAME}
       - DATABASE_HOST=${DATABASE_HOST}
+      - GMAIL_USER=${GMAIL_USER} 
+      - GMAIL_PASSWORD=${GMAIL_PASSWORD} 
+      - GMAIL_PORT=${GMAIL_PORT}
     restart: on-failure
   smtp:
     image: namshi/smtp 
     expose: 
-      - 587-8825 
-    ports:
-      - "8825"
+      - 587-8825
     environment:
+      - RELAY_HOST=${RELAY_HOST}
       - GMAIL_USER=${GMAIL_USER} 
       - GMAIL_PASSWORD=${GMAIL_PASSWORD} 
       - PORT=8825
