@@ -1,4 +1,4 @@
-import logging, time, base64
+import logging, time, base64, sys, traceback
 from lamson.routing import route, stateless
 from config.settings import relay
 from http_handler.settings import WEBSITE
@@ -484,7 +484,10 @@ def handle_post_murmur(message, group, host, verified):
 
         except Exception, e:
             logger.debug(e)
-            send_error_email(group.name, e, None, ADMIN_EMAILS)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            err_msg = "%s %s %s" % (exc_type, exc_tb.tb_lineno, str(e))
+
+            send_error_email(group.name, err_msg, None, ADMIN_EMAILS)
 
             # try to deliver mail even without footers
             mail.Html = msg_text['html']
@@ -493,7 +496,10 @@ def handle_post_murmur(message, group, host, verified):
 
     except Exception, e:
         logger.debug(e)
-        send_error_email(group.name, e, None, ADMIN_EMAILS)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        err_msg = "%s %s %s" % (exc_type, exc_tb.tb_lineno, str(e))
+
+        send_error_email(group.name, err_msg, None, ADMIN_EMAILS)
         return
 
 def handle_post_squadbox(message, group, host, verified):

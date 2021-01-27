@@ -344,9 +344,9 @@ def _insert_plain_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_tags = []
 		for f in tag_following:
-			follow_tags.append(f.tag.name)
-			unfollow_tag_email = 'mailto:%s' % (group.name + '+' + f.tag.name + UNFOLLOW_TAG_SUFFIX + '@' + HOST)
-			tag_str += 'Unfollow %s<%s> | ' % (f.tag.name, unfollow_tag_email)
+			follow_tags.append(f.name)
+			unfollow_tag_email = 'mailto:%s' % (group.name + '+' + f.name + UNFOLLOW_TAG_SUFFIX + '@' + HOST)
+			tag_str += 'Unfollow %s<%s> | ' % (f.name, unfollow_tag_email)
 
 		for tag in tags:
 			if tag.name not in follow_tags:
@@ -355,9 +355,9 @@ def _insert_plain_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	else:
 		mute_tags = []
 		for f in tag_muting:
-			mute_tags.append(f.tag.name)
-			unmute_tag_email = 'mailto:%s' % (group.name + '+' + f.tag.name + UNMUTE_TAG_SUFFIX + '@' + HOST)
-			tag_str += 'Unmute %s<%s> | ' % (f.tag.name, unmute_tag_email)
+			mute_tags.append(f.name)
+			unmute_tag_email = 'mailto:%s' % (group.name + '+' + f.name + UNMUTE_TAG_SUFFIX + '@' + HOST)
+			tag_str += 'Unmute %s<%s> | ' % (f.name, unmute_tag_email)
 
 		for tag in tags:
 			if tag.name not in mute_tags:
@@ -374,8 +374,8 @@ def _insert_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	if membergroup.no_emails or not membergroup.always_follow_thread:
 		follow_tags = []
 		for f in tag_following:
-			follow_tags.append(f.tag.name)
-			tag_str += '<a href="%s%s&group=%s">Unfollow %s</a> | ' % (UNFOLLOW_TAG_ADDR, f.tag.name, group.name, f.tag.name)
+			follow_tags.append(f.name)
+			tag_str += '<a href="%s%s&group=%s">Unfollow %s</a> | ' % (UNFOLLOW_TAG_ADDR, f.name, group.name, f.name)
 
 		for tag in tags:
 			if tag.name not in follow_tags:
@@ -383,8 +383,8 @@ def _insert_tag_line(group, tags, membergroup, tag_following, tag_muting):
 	else:
 		mute_tags = []
 		for f in tag_muting:
-			mute_tags.append(f.tag.name)
-			tag_str += '<a href="%s%s&group=%s">Unmute %s</a> | ' % (UNMUTE_TAG_ADDR, f.tag.name, group.name, f.tag.name)
+			mute_tags.append(f.name)
+			tag_str += '<a href="%s%s&group=%s">Unmute %s</a> | ' % (UNMUTE_TAG_ADDR, f.name, group.name, f.name)
 
 		for tag in tags:
 			if tag.name not in mute_tags:
@@ -478,12 +478,12 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 			content += 'You\'re currently following this thread. <a href="%s">Un-Follow thread</a>.<BR>' % (unfollow_addr)
 		else:
 			if tag_following.count() > 0:
-				tag_names = [f.tag.name for f in tag_following]
+				tag_names = [f.name for f in tag_following]
 				if len(tag_names) > 1:
 					n_str = ', '.join(tag_names)
-					content += 'You\'re currently following the tags %s. <BR>' % (n_str)
+					content += 'You\'re currently following the tags: %s. <BR>' % (n_str)
 				else:
-					content += 'You\'re currently following the tag %s. <BR>' % (tag_names[0])
+					content += 'You\'re currently following the tag: %s. <BR>' % (tag_names[0])
 			else:
 				content += 'You currently aren\'t receiving any replies to this thread. <a href="%s">Follow thread</a>.<BR>' % (follow_addr)
 	else:
@@ -493,12 +493,12 @@ def html_ps(group, thread, post_id, membergroup, following, muting, tag_followin
 			content += 'You\'re currently muting this thread. <a href="%s">Un-Mute thread</a>.<BR>' % (unmute_addr)
 		else:
 			if tag_muting.count() > 0:
-				tag_names = [f.tag.name for f in tag_muting]
+				tag_names = [f.name for f in tag_muting]
 				if len(tag_names) > 1:
 					n_str = ', '.join(tag_names)
-					content += 'You\'re currently muting the tags %s. <BR>' % (n_str)
+					content += 'You\'re currently muting the tags: %s. <BR>' % (n_str)
 				else:
-					content += 'You\'re currently muting the tag %s. <BR>' % (tag_names[0])
+					content += 'You\'re currently muting the tag: %s. <BR>' % (tag_names[0])
 			else:
 				content += 'You\'re currently receiving emails to this thread. <a href="%s">Mute thread</a>.<BR>' % (mute_addr)
 
@@ -543,7 +543,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 			content += 'You\'re currently following this thread. Un-Follow thread<%s>.\n' % (unfollow_addr)
 		else:
 			if tag_following.count() > 0:
-				tag_names = [m.tag.name for m in tag_muting]
+				tag_names = [m.name for m in tag_muting]
 				if len(tag_names) > 1:
 					n_str = ', '.join(tag_names)
 					content += 'You\'re currently following the tags %s. \n' % (n_str)
@@ -559,7 +559,7 @@ def plain_ps(group, thread, post_id, membergroup, following, muting, tag_followi
 			content += 'You\'re currently muting this thread. Un-Mute thread<%s>.\n' % (unmute_addr)
 		else:
 			if tag_muting.count() > 0:
-				tag_names = [m.tag.name for m in tag_muting]
+				tag_names = [m.name for m in tag_muting]
 				if len(tag_names) > 1:
 					n_str = ', '.join(tag_names)
 					content += 'You\'re currently muting the tags %s. \n' % (n_str)
