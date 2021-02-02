@@ -20,11 +20,11 @@ $(document).ready(function(){
 	var admin_buttons = [btn_add_members, btn_edit_group_info, btn_set_admin, btn_set_mod, 
 						btn_delete_members, btn_add_list, action_select, btn_delete_group];
 
-						var members_table = $('#members-table').DataTable({
+	var members_table = $('#members-table').DataTable({
 							"processing": true,
 							"serverSide": true,
 							"ajax": {
-								url: "/delta/list_groups/ajax/",
+								url: "/delta/pub_groups_pagination/table_ajax_call/",
 								dataSrc: function (json) {
 										var return_data = new Array();
 										for(var i=0;i< json.aaData.length; i++){
@@ -56,7 +56,7 @@ $(document).ready(function(){
 									  {'data': 'created'},
 									  {'data': 'count'}
 									]
-								  });
+								  });					
 
 	if (admin) {
 			lists_table = $('#lists-table').dataTable({

@@ -1709,8 +1709,13 @@ def moderate_user_for_thread_get(request):
 	else:
 		return redirect(global_settings.LOGIN_URL + '?next=/approve_get?group_name=%s&post_id=%s' % (group_name, post_id))
 
-@render_to("/list_groups/ajax")
-def process_ajax(request):
+@render_to("/pub_groups_pagination/table_ajax_call")
+def pub_groups_pagination(request):
+
+	"""
+	Handles ajax request for Public Groups Page DataTable, and returns the group 
+	data in the specified boundaries. 
+	"""
 
 	try:
 		user = get_object_or_404(UserProfile, email=request.user.email)

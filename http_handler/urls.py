@@ -117,7 +117,7 @@ if WEBSITE == 'murmur':
         url(r'^groups/(?P<group_name>[\w-]+)/create_post', views.my_group_create_post_view),
         url(r'^my_groups', views.my_groups),
         url(r'^list_my_groups', views.list_my_groups),
-        url(r'/list_groups/ajax/', views.process_ajax), 
+        url(r'/pub_groups_pagination/table_ajax_call/', views.pub_groups_pagination), 
 
         url(r'^load_post', views.load_post),
         url(r'^load_thread', views.load_thread),
