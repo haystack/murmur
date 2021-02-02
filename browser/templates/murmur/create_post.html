@@ -9,18 +9,22 @@
   <div class="group-container">
 	
 	<h3>Send Post to <span id="group-name">{{ group_info.name }}</span></h3><hr />
-   		<span class="strong">
-   			To : 
-   		</span>
-   		<span id="new-post-to">{{ group_info.name }}</span>
-   		<br>
-   		<span class="strong">
-   			Subject : 
-   		</span>
-   		<br>
-		<input id="new-post-subject" type="text" style="width: 100%; box-sizing: border-box;"></input> <br /> <br />
+		<p class="mb-2"><span class="strong">To : </span><span id="new-post-to">{{ group_info.name }}</span></p>
+		<div class="tag-subject-container mb-3">
+			<div class="post-tag-container">
+				<p class="strong mb-1">Tags : </p>
+				<ul id="tag-input-list" class="m-0 mr-2">
+					<li class="tag-input-container">
+						<input id="tag-input" class="tag-input" type="text" name="tags" placeholder="Add tags">
+					</li>
+				</ul>
+			</div>
+			<div class="subject-container">
+				<p class="strong mb-1">Subject : </p>
+				<textarea id="new-post-subject" class="subject-input"></textarea>
+			</div>
+		</div>
 		<textarea id="new-post-text" style="height:150px;"></textarea>
-		
    		<button type="button" id="btn-post" style="margin-top:10px;">Post</button>
    		<a href="/post_list?group_name={{ group_info.name }}"><button type="button" style="margin-top:10px;">Cancel</button></a>
    
@@ -32,5 +36,8 @@
 {% block customjs %}
 	<script type="text/javascript" src="/static/javascript/third-party/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/ckeditor/ckeditor.js"></script>
+	<script type="text/javascript">
+		django_tag_data = {{ tag_data|safe }};
+	</script>
 	<script type="text/javascript" src="/static/javascript/murmur/create_post.js"></script>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends "squadbox/base.html" %}
 {% block customcss %}
-	<link href="/static/css/third-party/datatable.css" rel="stylesheet">
+	<link href="/static/DataTables/datatables.min.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
 <span id='mod-can-edit' style='display:none'>{{ group_info.group.mod_edit_wl_bl }}</span>
@@ -99,9 +99,7 @@
 					<tr>
 						<th>Select</th>
 						<th>Email</th>
-						{% if flavour != "mobile" %}
-							<th>Joined</th>
-						{% endif %}
+						<th>Joined</th>
 					</tr>
 				</thead>
 				
@@ -111,9 +109,7 @@
 							<tr>
 							<td><input class="checkbox checkbox-user" type="checkbox" id ={{ member.id }}></td>
 							<td>{{ member.email }}</td>
-							{% if flavour != "mobile" %}
 							<td>{{ member.joined }}</td>
-							{% endif %}
 						{% endif %}
 					{% endfor %}
 
@@ -121,9 +117,7 @@
 						<tr>
 							<td></td>
 							<td><i>{{ member.email }} (pending)</i></td>
-							{% if flavour != "mobile" %}
-								<td>{{ member.joined }}</td>
-							{% endif %}
+							<td>{{ member.joined }}</td>
 						</tr>
 					{% endfor %}
 				</tbody>
@@ -143,9 +137,7 @@
 							<th>Select</th>
 						{% endif %}
 						<th>Email</th>
-						{% if flavour != "mobile" %}
-							<th>Added</th>
-						{% endif %}
+						<th>Added</th>
 					</tr>
 				</thead>
 				
@@ -156,9 +148,7 @@
 								<td><input class="checkbox checkbox-whitelist" type="checkbox" id ={{ w.email }}></td>
 							{% endif %}
 							<td>{{ w.email }}</td>
-							{% if flavour != "mobile" %}
-								<td>{{ w.timestamp }}</td>
-							{% endif %}
+							<td>{{ w.timestamp }}</td>
 						</tr>
 					{% endfor %}
 				</tbody>
@@ -177,9 +167,7 @@
 					<tr>
 						<th>Select</th>
 						<th>Email</th>
-						{% if flavour != "mobile" %}
-							<th>Added</th>
-						{% endif %}
+						<th>Added</th>
 					</tr>
 				</thead>
 						
@@ -188,9 +176,7 @@
 						<tr>
 							<td><input class="checkbox checkbox-blacklist" type="checkbox" id ={{ b.email }}></td>
 							<td>{{ b.email }}</td>
-							{% if flavour != "mobile" %}
-								<td>{{ b.timestamp }}</td>
-							{% endif %}
+							<td>{{ b.timestamp }}</td>
 						</tr>
 					{% endfor %}
 				</tbody>

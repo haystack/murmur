@@ -1,27 +1,27 @@
 {% extends "murmur/base.html" %}
 {% block customcss %}
-	<link href="/static/css/third-party/datatable.css" rel="stylesheet">
+	<link href="/static/DataTables/datatables.min.css" rel="stylesheet">
 {% endblock %}
 {% block content %}
 	<div class="container">
 		<div class="group-container">
 			
 			{% if group_info.subscribed %}
-				<span class="member label">Member</span>
+				<span class="member label text-light rounded-sm">Member</span>
 			{% else %}
 				<span class="member label" style="display: none;"></span>
 			{% endif %}
 			
 			{% if group_info.admin %}
-				<span class="admin label">Admin</span>
+				<span class="admin label text-light rounded-sm">Admin</span>
 			{% else %}
-				<span class="admin label" style="display: none;"></span>
+				<span class="admin label text-light rounded-sm" style="display: none;"></span>
 			{% endif %}
 			
 			{% if group_info.moderator %}
-				<span class="mod label">Mod</span>
+				<span class="mod label text-light rounded-sm">Mod</span>
 			{% else %}
-				<span class="mod label" style="display: none;"></span>
+				<span class="mod label text-light rounded-sm" style="display: none;"></span>
 			{% endif %}
 			
 			<h3><span id="group-name">{{ group_info.group.name }}</span></h3>
@@ -96,7 +96,7 @@
 					<button type="button" id="btn-add-members">Add Members</button>
 					<button type="button" id="btn-del-members">Delete Members</button>
 					<button type="button" id="btn-set-admin">Set as Admin</button>
-					<button type="button" id="btn-set-mod">Set as Moderator</button>
+					<button type="button" id="btn-set-mod" class="mb-3">Set as Moderator</button>
 				{% else %}
 					<button type="button" id="btn-add-members" style="display: none;">Add Members</button>
 				{% endif %}
@@ -106,11 +106,9 @@
 							<tr>
 								<th>Select</th>
 								<th>Email</th>
-								{% if flavour != "mobile" %}
-									<th>Joined</th>
-									<th>Admin</th>
-									<th>Moderator</th>
-								{% endif %}
+								<th>Joined</th>
+								<th>Admin</th>
+								<th>Moderator</th>
 							</tr>
 						</thead>
 						
@@ -118,11 +116,9 @@
 						<tr>
 							<th>Select</th>
 							<th>Email</th>
-							{% if flavour != "mobile" %}
-								<th>Joined</th>
-								<th>Admin</th>
-								<th>Moderator</th>
-							{% endif %}
+							<th>Joined</th>
+							<th>Admin</th>
+							<th>Moderator</th>
 						</tr>
 						</tfoot>
 						
@@ -138,34 +134,30 @@
 										{% if group_info.admin %}
 											<td><input class="checkbox checkbox-user" type="checkbox" id ={{ member.id }}></td>
 											<td>{{ member.email }}</td>
-											{% if flavour != "mobile" %}
-												<td>{{ member.joined }}</td>
-												{% if member.admin %}
-													<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-												{% else %}
-													<th></th>
-												{% endif %}
-												{% if member.mod %}
-													<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-												{% else %}
-													<th></th>
-												{% endif %}
-											{% endif %}
-										</tr>
-									{% else %}
-										<td>{{ member.email }}</td>
-										{% if flavour != "mobile" %}
 											<td>{{ member.joined }}</td>
 											{% if member.admin %}
-												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+												<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 											{% else %}
 												<th></th>
 											{% endif %}
 											{% if member.mod %}
-												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
+												<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
 											{% else %}
 												<th></th>
 											{% endif %}
+										</tr>
+									{% else %}
+										<td>{{ member.email }}</td>
+										<td>{{ member.joined }}</td>
+										{% if member.admin %}
+											<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
+										{% else %}
+											<th></th>
+										{% endif %}
+										{% if member.mod %}
+											<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
+										{% else %}
+											<th></th>
 										{% endif %}
 									</tr>
 								{% endif %}
@@ -174,18 +166,16 @@
 								<tr>
 									<td></td>
 									<td><i>{{ member.email }} (pending)</i></td>
-										{% if flavour != "mobile" %}
-											<td>{{ member.joined }}</td>
-											{% if member.admin %}
-												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-											{% else %}
-												<th></th>
-											{% endif %}
-											{% if member.mod %}
-												<th><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></th>
-											{% else %}
-												<th></th>
-											{% endif %}
+										<td>{{ member.joined }}</td>
+										{% if member.admin %}
+											<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
+										{% else %}
+											<th></th>
+										{% endif %}
+										{% if member.mod %}
+											<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
+										{% else %}
+											<th></th>
 										{% endif %}
 								</tr>
 							{% endfor %}
@@ -195,7 +185,7 @@
 					<hr />
 					<h3>Associated Mailing Lists</h3>
 					
-					<button type="button" id="btn-add-list">Add List</button>
+					<button type="button" id="btn-add-list" class="mb-3">Add List</button>
 					<select id='actionSelect'>
 						<option value='label' selected="true">Other actions</option>
 						<option value="deleteList">Delete</option>
@@ -210,11 +200,10 @@
 							<tr>
 								<th>Select</th>
 								<th>Email</th>
-								{% if flavour != "mobile" %}
-									<th>Added</th>
-									<th>Can Post</th>
-									<th>Can Receive</th>
-									<th>List URL</th>
+								<th>Added</th>
+								<th>Can Post</th>
+								<th>Can Receive</th>
+								<th>List URL</th>
 								</tr>
 							</thead>
 							
@@ -222,11 +211,10 @@
 							<tr>
 								<th>Select</th>
 								<th>Email</th>
-								{% if flavour != "mobile" %}
-									<th>Added</th>
-									<th>Can Post</th>
-									<th>Can Receive</th>
-									<th>List URL</th>
+								<th>Added</th>
+								<th>Can Post</th>
+								<th>Can Receive</th>
+								<th>List URL</th>
 								{% endif %}
 							</tr>
 							</tfoot>
@@ -237,34 +225,31 @@
 									<tr>
 										<td><input class="checkbox checkbox-list" type="checkbox" id ={{ l.email }}></td>
 										<td>{{ l.email }}</td>
-										{% if flavour != "mobile" %}
-											<td>{{ l.added }}</td>
-											<th>
-												{% if l.can_post %}
-													<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-												{% endif %}
-											</th>
-											<th>
-												{% if l.can_receive %}
-													<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-												{% endif %}
-											</th>
+										
+										<td>{{ l.added }}</td>
+										<th>
+											{% if l.can_post %}
+												<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+											{% endif %}
+										</th>
+										<th>
+											{% if l.can_receive %}
+												<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+											{% endif %}
+										</th>
+										
+										<td>
+											{% if l.url != None %}
+												<a href=//{{l.url}}>{{ l.url }}</a>
+											{% endif %}
+										</td>
 											
-											<td>
-												{% if l.url != None %}
-													<a href=//{{l.url}}>{{ l.url }}</a>
-												{% endif %}
-											</td>
-											
-										{% endif %}
 									</tr>
 								{% endfor %}
 							</tbody>
 						</table>
-				{% endif %}
 				</div>
 			</div>
-		{% endif %}
 	{% endblock %}
 	{% block customjs %}
 		<script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>
