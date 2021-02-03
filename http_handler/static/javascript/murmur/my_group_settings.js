@@ -1,21 +1,22 @@
+import { addRowSelect, handleTagChanges, handleModeChanges } from './modules/tag_subscription.js';
+
 $(document).ready(function(){
-	
-	let user_name = $.trim($('#user_email').text());
-	 	group_name = $.trim($("#group-name").text());
+	let user_name = $.trim($('#user_email').text()),
+	 	group_name = $.trim($("#group-name").text()),
 		btn_add_dissimulate = $("#btn-add-dissimulate"),
-		btn_delete_dissimulate = $("#btn-delete-dissimulate");
-		btn_save_settings = $("#btn-save-settings");
-		btn_cancel_settings = $("#btn-cancel-settings");
-		selectRows = $(".my_row");
-		modeInput = $('input[name="tag-mode"]');
-		selectTags = $('img[data-type="tag-select"]'); // select elements (block/check icons)
-		tags = $(".tag").toArray().map(e => e.innerHTML);
-		selectTagsSet = new Set(selectTags.toArray());
-		followedTags = new Set(tag_subscription["followed"]);
-		mutedTags = new Set(tag_subscription["muted"]);
+		btn_delete_dissimulate = $("#btn-delete-dissimulate"),
+		btn_save_settings = $("#btn-save-settings"),
+		btn_cancel_settings = $("#btn-cancel-settings"),
+		selectRows = $(".my_row"),
+		modeInput = $('input[name="tag-mode"]'),
+		selectedTags = $('img[data-type="tag-select"]'), // select elements (block/check icons)
+		tags = $(".tag").toArray().map(e => e.innerHTML),
+		selectedTagsSet = new Set(selectedTags.toArray()),
+		followedTags = new Set(tag_subscription["followed"]),
+		mutedTags = new Set(tag_subscription["muted"]),
 		swapping = false;
 	
-	getSavedTagSubscription();
+	getSavedTagSubscription(selectedTags, mutedTags, followedTags);
 
 	// Gray out notifications and tag subscription section to indicate no emails will be sent
 	if ($('#no-emails').is(":checked")) {
@@ -55,63 +56,15 @@ $(document).ready(function(){
 		},
 	});
 
-	let tag_demo_table = $("#tag-demo-table").DataTable({
-		"columns": [ { 'orderable': false}, null, null, null],
-		"order": [[1, "asc"]],
-		responsive: {
-			details: {
-				type: 'column',
-				target: 'tr'
-			}
-		},
-		searching: false,
-		paginate: false,
-		info: false,
-	});
-
 	// Click listener for the whole row to be clickable and toggle blocking/subscribing
-	selectRows.each((index, elem) => {
-		elem.addEventListener("click", (e) => {
-			if (!selectTagsSet.has(e.target)) elem.firstElementChild.firstElementChild.click()
-		});
-	});
+	addRowSelect(selectRows, selectedTagsSet);
 	
-	// Select column with block and checkmark icons to select rows
-	selectTags.each((index, elem) => {
-		elem.addEventListener("click", function() {
-			const mode = $('input[name="tag-mode"]:checked').val();
-			const tag = elem.parentNode.nextElementSibling.firstElementChild;
-			elem.toggleAttribute("checked");
-			elem.classList.toggle("inactive");
+	// Select column with block/checkmark icons to select rows
+	handleTagChanges(selectedTags, tags, mutedTags, followedTags, swapping);
 
-			if (!swapping) {
-				const isSelected = elem.hasAttribute("checked")
-				if (mode == "block-mode") {
-					if (isSelected) mutedTags.add(tag.innerHTML);
-					else mutedTags.delete(tag.innerHTML);
-				} else if (mode == "subscribe-mode") {
-					if (isSelected) mutedTags.delete(tag.innerHTML);
-					else mutedTags.add(tag.innerHTML);
-				}
-			}
-			swapping = false;
-		})
-	});
-	
 	// Toggles visibility of tags based on tag mode change
-	modeInput.change(function() {
-		const mode = $('input[name="tag-mode"]:checked').val();
-		selectTags.each((index, elem) => {
-			if (mode == "block-mode") {
-				elem.setAttribute("src", "/static/css/third-party/images/block.svg");
-			} else if (mode == "subscribe-mode") {
-				elem.setAttribute("src", "/static/css/third-party/images/check.svg");
-			}
-			swapping = true;
-			elem.click()
-		});
-	});
-
+	handleModeChanges(modeInput, selectedTags, swapping);
+	
 	toggle_edit_emails();
 	
 	$('#ck-no-email').change(function() {
@@ -119,7 +72,7 @@ $(document).ready(function(){
     });
 	
 	
-	edit_group_settings =
+	let edit_group_settings =
 		function(params){
 			const mode = $('input[name="tag-mode"]:checked').val();
 			params.all_emails = $('#all-emails').is(":checked");
@@ -143,7 +96,7 @@ $(document).ready(function(){
 	bind_buttons();
 	
 	function toggle_edit_emails() {
-		no_emails = $('#ck-no-email').is(":checked");
+		let no_emails = $('#ck-no-email').is(":checked");
 		if (no_emails) {
 			$('#edit-emails').css({"color": "gray"});
 			$('#rdo-follow').attr('disabled', true);
@@ -162,9 +115,9 @@ $(document).ready(function(){
 	}
 			
 	function bind_buttons() {
-		var params = {'group_name': group_name};
+		let params = {'group_name': group_name};
  		
-		var save_settings = bind(edit_group_settings, params);
+		let save_settings = bind(edit_group_settings, params);
 
 		btn_save_settings.unbind("click");
 		btn_cancel_settings.unbind("click");
@@ -249,10 +202,10 @@ function notify(res, on_success){
 }
 
 // Updates UI based on saved user tag subscription settings
-function getSavedTagSubscription() {
+function getSavedTagSubscription(selectedTags, mutedTags, followedTags) {
 	const mode = $('input[name="tag-mode"]:checked').val();
 	if (mode == "block-mode") {
-		selectTags.each((index,elem) => {
+		selectedTags.each((index,elem) => {
 			const tag = elem.parentNode.nextElementSibling.firstElementChild;
 			if (mutedTags.has(tag.innerHTML)) {
 				elem.toggleAttribute("checked");
@@ -260,7 +213,7 @@ function getSavedTagSubscription() {
 			}
 		})
 	} else if (mode == "subscribe-mode") {
-		selectTags.each((index,elem) => {
+		selectedTags.each((index,elem) => {
 			const tag = elem.parentNode.nextElementSibling.firstElementChild;
 			if (followedTags.has(tag.innerHTML)) {
 				elem.toggleAttribute("checked");

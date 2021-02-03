@@ -122,35 +122,7 @@
 					Send me no emails except the following subscribed tags
 				</label>
 			{% endif %}
-			<table id="tag-subscription-table" class="display" cellspacing="0" width="100%">
-				<thead>
-					<tr>
-						<th>Select</th>
-						<th>Tag</th>
-						<th>Description</th>
-						<th>Num Posts</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% if tag_info %}
-						{% for tag in tag_info %}
-							<tr class="my_row">
-								<!-- Select, Tag, Description, Number of Posts -->
-								{% if settings.tag_blocking_mode %}
-									<td align="center"><img src="/static/css/third-party/images/block.svg" class="inactive" data-type="tag-select" id ={{ tag.id }}></td>
-								{% else %}
-									<td align="center"><img src="/static/css/third-party/images/check.svg" class="inactive" data-type="tag-select" id ={{ tag.id }}></td>
-								{% endif %}
-								<td><label class="tag" id="tag_{{ forloop.counter0 }}" style="background-color: #{{ tag.color }}">{{ tag.name }}</label></td>
-								<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed nulla et nulla fermentum molestie.</td>
-								<td><span>{{ tag.num_p }} post(s)</span></td>
-							</tr>
-						{% endfor %}
-					{% else %}
-							<tr></tr>
-					{% endif %}							
-				</tbody>
-			</table>	
+			{% include "./modules/tag_subscription_table.html" with tag_info=tag_info settings=settings %} 	
 		</article>
 		<article id='donotsent-list-area' class="mt-4">
 			<h3>My do-not-send list of this group</h3> 
@@ -194,7 +166,7 @@
 	<script type="text/javascript">
 		tag_subscription = {{ tag_subscription|safe }};
 	</script>
-	<script type="text/javascript" src="/static/javascript/murmur/my_group_settings.js"></script>
+	<script type="module" src="/static/javascript/murmur/my_group_settings.js"></script>
 {% endblock %}
 
 
