@@ -80,7 +80,7 @@ def group_info_page(user, group_name):
                                     })
 
             for mp in MemberGroupPending.objects.filter(group=group):
-                res['members_pending'].append({ 'id':mp.id,
+                res['members_pending'].append({ 'id': mp.id,
                                                 'email': mp.member.email,
                                                 'admin': False,
                                                 'mod': False, 
@@ -169,6 +169,7 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
     try:
         group = Group.objects.get(name=group_name)
         membergroups = MemberGroup.objects.filter(group=group).select_related()
+        membergroupspending = MemberGroupPending.objects.filter(group=group).select_related()
         toDelete_list = toDelete.split(',')
         toAdmin_list = toAdmin.split(',')
         toMod_list = toMod.split(',')
@@ -203,6 +204,12 @@ def edit_members_table(group_name, toDelete, toAdmin, toMod, user):
             if membergroup.id in toDelete_realList:
                 membergroup.delete()
                 email_on_role_change("delete", membergroup.group.name, membergroup.member.email)
+
+        for membergrouppending in membergroupspending:
+            if membergrouppending.id in toDelete_realList:
+                membergrouppending.delete()
+                email_on_role_change("delete", membergrouppending.group.name, membergrouppending.member.email)
+
         for membergroup in membergroups:
             if membergroup.id in toAdmin_realList:
                 membergroup.admin = True

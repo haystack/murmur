@@ -133,6 +133,7 @@
 										
 										{% if group_info.admin %}
 											<td><input class="checkbox checkbox-user" type="checkbox" id ={{ member.id }}></td>
+											
 											<td>{{ member.email }}</td>
 											<td>{{ member.joined }}</td>
 											{% if member.admin %}
@@ -164,7 +165,10 @@
 							{% endfor %}
 							{% for member in group_info.members_pending %}
 								<tr>
-									<td></td>
+										
+									{% if group_info.admin %}
+										<td><input class="checkbox checkbox-user" type="checkbox" id ={{ member.id }}></td>
+									{% endif %}
 									<td><i>{{ member.email }} (pending)</i></td>
 										<td>{{ member.joined }}</td>
 										{% if member.admin %}
