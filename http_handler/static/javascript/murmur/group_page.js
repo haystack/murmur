@@ -20,7 +20,7 @@ $(document).ready(function(){
 	var admin_buttons = [btn_add_members, btn_edit_group_info, btn_set_admin, btn_set_mod, 
 						btn_delete_members, btn_add_list, action_select, btn_delete_group];
 
-	var members_table = $('#members-table').DataTable({
+	var pubgroups_table = $('#pubgroups-table').DataTable({
 							"processing": true,
 							"serverSide": true,
 							"ajax": {
@@ -56,16 +56,30 @@ $(document).ready(function(){
 									  {'data': 'created'},
 									  {'data': 'count'}
 									]
-								  });					
-
+								  });		
+	
 	if (admin) {
-			lists_table = $('#lists-table').dataTable({
-			"aoColumns": [ { 'bSortable': false}, null, null, null, null, null]
+		var members_table = $('#members-table').DataTable({
+			"columns": [ { 'orderable': false}, null, null, null, null],
+			"order": [[1, "asc"]],
+			responsive: true
+		}),
+			lists_table = $('#lists-table').DataTable({
+			"columns": [ { 'orderable': false}, null, null, null, null, null],
+			"order": [[1, "asc"]],
+			responsive: true
 		});
 
 	} else {
-			lists_table = $('#lists-table').dataTable({});
-	}
+		var members_table = $('#members-table').DataTable({
+			"order": [[1, "asc"]],
+			responsive: true
+		}),
+			lists_table = $('#lists-table').DataTable({
+				"order": [[1, "asc"]],
+				responsive: true
+			});
+	}						  
 
 	delete_group =
 	    function(params) {
