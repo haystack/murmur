@@ -3,10 +3,11 @@ files */
 
 export function replaceSpace(group_name) {
     let friendly_name = '';
-    let char_ = '';
+    let char = '';
     for(let i = 0; i < group_name.length; i ++) {
         char_ = group_name[i]; 
-        friendly_name += char_ == ' ' ? '_' : char_;
+        friendly_name += char == ' ' ? '_' : char;
     }
     return friendly_name;
 }
+
