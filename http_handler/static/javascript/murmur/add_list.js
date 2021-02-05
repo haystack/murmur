@@ -1,6 +1,5 @@
 $(document).ready(function(){
-	
-	var group_name = $.trim($("#group-name").text().replaceAll(' ','_'));
+	var group_name = $.trim($("#group-name").text());
 	var user_name = $.trim($("#user-name").text());
 	var btn_add_list = $("#btn-add-list");
 	
