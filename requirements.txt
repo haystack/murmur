@@ -1,4 +1,4 @@
-Django==1.10
+Django==1.11
 Jinja2==2.10.3
 MarkupSafe==0.23
 mysqlclient==1.4.6
@@ -17,7 +17,7 @@ lockfile==0.10.2
 markdown2==2.3.0
 mock==1.0.1
 nose==1.3.4
-python-daemon==1.6.1
+python-daemon==2.2.0
 python-modargs==1.7
 six==1.8.0
 wsgiref==0.1.2

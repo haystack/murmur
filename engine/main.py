@@ -20,6 +20,8 @@ from s3_storage import upload_attachments, download_attachments, download_messag
 from schema.models import *
 from smtp_handler.utils import *
 
+logger = logging.getLogger('murmur')
+
 def list_groups(user=None):
     groups = []
     pub_groups = Group.objects.filter(Q(public=True, active=True)).order_by('name')
@@ -323,7 +325,7 @@ def get_group_settings(group_name, user):
     try:
         group = Group.objects.get(name=group_name)
         membergroup = MemberGroup.objects.get(group=group, member=user)
-        res['following'] = membergroup.always_follow_thread
+        res['following'] = membergroup.all_emails
         res['no_emails'] = membergroup.no_emails
         res['upvote_emails'] = membergroup.upvote_emails
         res['receive_attachments'] = membergroup.receive_attachments
@@ -339,25 +341,53 @@ def get_group_settings(group_name, user):
     logging.debug(res)
     return res
 
-def edit_group_settings(group_name, following, upvote_emails, receive_attachments, no_emails, digest, user):
+def edit_group_settings(group_name, mail_delivery, notification_settings, receive_attachments, tag_blocking_mode, muted_tags, user,):
     res = {'status':False}
     
     try:
         group = Group.objects.get(name=group_name)
         membergroup = MemberGroup.objects.get(group=group, member=user)
-        membergroup.always_follow_thread = following
-        membergroup.upvote_emails = upvote_emails
+        membergroup.all_emails = mail_delivery['all_emails']
+        if not mail_delivery['all_emails'] and not mail_delivery['digest'] and not mail_delivery['no_emails']:
+            membergroup.first_emails = True
+        else:
+            membergroup.first_emails = False
+        membergroup.digest = mail_delivery['digest']
+        membergroup.no_emails = mail_delivery['no_emails']
         membergroup.receive_attachments = receive_attachments
-        membergroup.no_emails = no_emails
-        membergroup.digest = digest
+        membergroup.upvote_emails = notification_settings['upvote_emails']
+        membergroup.group_invite_emails = notification_settings['group_invite_emails']
+        membergroup.admin_emails = notification_settings['admin_emails']
+        membergroup.mod_emails = notification_settings['mod_emails']
+        membergroup.tag_blocking_mode = tag_blocking_mode
         membergroup.save()
+
+        tags = Tag.objects.filter(group=group)
+        mute_tags = MuteTag.objects.filter(user=user, group=group)
+        mute_tags_names = mute_tags.values_list("tag__name", flat=True)
+        muted_tags = set(muted_tags)
+
+        for mute_tag in mute_tags_names:
+            mute_tag_instance = mute_tags.get(tag__name=mute_tag)
+
+            if mute_tag not in muted_tags:
+                mute_tag_instance.delete()
+
+        for tag in muted_tags:
+            tag_obj = tags.get(name=tag)
+            mute_tag, created = MuteTag.objects.get_or_create(user=user, group=group, tag=tag_obj)
         
         res['status'] = True
     except Group.DoesNotExist:
         res['code'] = msg_code['GROUP_NOT_FOUND_ERROR']
     except MemberGroup.DoesNotExist:
         res['code'] = msg_code['NOT_MEMBER']
-    except:
+    except Tag.DoesNotExist:
+        res['code'] = msg_code['TAG_NOT_FOUND_ERROR']
+    except MuteTag.DoesNotExist:
+        res['code'] = msg_code['MUTE_TAGS_NOT_FOUND']
+    except Exception, e:
+        logger.debug(e)
         res['code'] = msg_code['UNKNOWN_ERROR']
     
     logging.debug(res)
@@ -757,7 +787,7 @@ def list_posts_page(threads, group, res, user=None, format_datetime=True, return
             member_group = MemberGroup.objects.filter(member=u, group=group)
             if member_group.exists():
                 res['member_group'] = {'no_emails': member_group[0].no_emails,
-                                       'always_follow_thread': member_group[0].always_follow_thread}
+                                       'all_emails': member_group[0].all_emails}
 
         posts = Post.objects.filter(thread = t).select_related()
         replies = []
@@ -863,7 +893,7 @@ def load_thread(t, user=None, member=None):
         if member:
             is_member = True
             no_emails = member.no_emails
-            always_follow = member.always_follow_thread
+            all_emails = member.all_emails
     
     #if WEBSITE == 'murmur':
     posts = Post.objects.filter(thread = t) 
@@ -993,16 +1023,17 @@ def delete_post(user, post_id, thread_id):
     logging.debug(res)
     return res
 
-def _create_tag(group, thread, name):
+def _create_tag(group, thread, name, color=None):
     t, created = Tag.objects.get_or_create(group=group, name=name)
     if created:
-        r = lambda: random.randint(0,255)
-        color = '%02X%02X%02X' % (r(),r(),r())
+        if color is None:
+            r = lambda: random.randint(0,255)
+            color = '%02X%02X%02X' % (r(),r(),r())
         t.color = color
         t.save()
     tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
-def _create_post(group, subject, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
+def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
 
     try:
         message_text = message_text.decode("utf-8")
@@ -1031,16 +1062,14 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
             del res['status']
             perspective_data = res
 
-    p = Post(msg_id=msg_id, author=user, poster_email = sender_addr, forwarding_list = forwarding_list, 
+    p = Post(msg_id=msg_id, author=user, poster_email=sender_addr, forwarding_list=forwarding_list, 
             subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, 
             poster_name=sender_name, verified_sender=verified, perspective_data=perspective_data)
     p.save()
-    
     if WEBSITE == 'murmur':
-        for match in re.findall(r"[^[]*\[([^]]*)\]", subject):
-            if match.lower() != group.name:
-                _create_tag(group, thread, match)
-
+        tag_info = map(encode_tags, tag_info)
+        for tag in tag_info:
+            _create_tag(group, thread, tag['name'], tag['color'])
         tags = list(extract_hash_tags(message_text))
         for tag in tags:
             if tag.lower() != group.name:
@@ -1062,9 +1091,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
                 if not mute_tag:
                     recipients.append(m.member.email)
             else:
-                follow_tag = FollowTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
-                if follow_tag:
-                    recipients.append(m.member.email)
+                recipients.append(m.member.email)
         
         if user:
             recipients.append(user.email)
@@ -1078,7 +1105,7 @@ def _create_post(group, subject, message_text, user, sender_addr, msg_id, verifi
     
     return p, thread, recipients, tags, tag_objs
 
-def insert_post_web(group_name, subject, message_text, user):
+def insert_post_web(group_name, subject, tag_info, message_text, user):
     res = {'status':False}
     thread = None
 
@@ -1087,11 +1114,11 @@ def insert_post_web(group_name, subject, message_text, user):
         user_member = MemberGroup.objects.filter(group=group, member=user)
         if user_member.exists():
             msg_id = base64.b64encode(user.email + str(datetime.now())).lower() + '@' + BASE_URL
-            p, thread, recipients, tags, tag_objs = _create_post(group, subject, message_text, user, user.email, msg_id, verified=True)
+            p, thread, recipients, tags, tag_objs = _create_post(group, subject, tag_info, message_text, user, user.email, msg_id, verified=True)
             res['status'] = True
             
             res['member_group'] = {'no_emails': user_member[0].no_emails,
-                                   'always_follow_thread': user_member[0].always_follow_thread}
+                                   'all_emails': user_member[0].all_emails}
     
             post_info = {'msg_id': p.msg_id,
                          'thread_id': thread.id,
@@ -1249,8 +1276,8 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
                     f = Following(user=user, thread=thread)
                     f.save()
                 
-            member_recip = MemberGroup.objects.filter(group=group, always_follow_thread=True, no_emails=False)
-            always_follow_members = [member_group.member.email for member_group in member_recip]
+            member_recip = MemberGroup.objects.filter(group=group, all_emails=True, no_emails=False)
+            always_follow_members = {member_group.member.email for member_group in member_recip} # changed to set for faster lookup
             
             #users that have muted the thread and are set to always follow
             muted = Mute.objects.filter(thread=thread).select_related()
@@ -1266,19 +1293,16 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
                 muted_emails.extend([m.user.email for m in muted_tag if m.user.email in always_follow_members])
 
                 #users following the tag
-                follow_tag = FollowTag.objects.filter(group=group, tag__in=tag_objs).select_related()
+                follow_tag = tag_objs.exclude(id__in=mute_tag)
                 recipients.extend([f.user.email for f in follow_tag if f.user.email not in always_follow_members])
             #users that always follow threads in this group. minus those that muted
             recipients.extend([m.member.email for m in member_recip if m.member.email not in muted_emails])
             
-            dissimulate = DoNotSendList.objects.filter(group=group, user=group_members)
+            dissimulate = DoNotSendList.objects.filter(group=group)
             # remove dissimulated user from the recipient list
-            print(tag_objs)
             if dissimulate.count() > 0:
-                print(tag_objs)
                 for d in dissimulate:
                     recipients = [recip for recip in recipients if recip != d.donotsend_user.email]
-            print(tag_objs)
             res['status'] = True
             res['recipients'] = list(set(recipients))
             res['tags'] = []
@@ -1298,7 +1322,7 @@ def insert_reply(group_name, subject, message_text, user, sender_addr, msg_id, v
         res['code'] = msg_code['POST_NOT_FOUND_ERROR']
 
     except:
-        logging.debug(sys.exc_info())
+        logging.debug("UNKNOWN_ERROR: " + str(sys.exc_info()))
         res['code'] = msg_code['UNKNOWN_ERROR']
         
     logging.debug(res)
@@ -1488,12 +1512,9 @@ def follow_tag(tag_name, group_name, user=None, email=None):
         if email:
             user = UserProfile.objects.get(email=email)
         tag = Tag.objects.get(name=tag_name, group=g)
-        tag_follow = FollowTag.objects.get(tag=tag, user=user)
-        res['tag_name'] = tag_name
-        res['status'] = True
-    except FollowTag.DoesNotExist:
-        f = FollowTag(tag=tag, group=g, user=user)
-        f.save()
+        
+        logger.exception("TODO check this behavior")
+        
         res['tag_name'] = tag_name
         res['status'] = True
     except Tag.DoesNotExist:
@@ -1511,11 +1532,9 @@ def unfollow_tag(tag_name, group_name, user=None, email=None):
         if email:
             user = UserProfile.objects.get(email=email)
         tag = Tag.objects.get(name=tag_name, group=g)
-        tag_follow = FollowTag.objects.get(tag=tag, user=user)
-        tag_follow.delete()
-        res['tag_name'] = tag_name
-        res['status'] = True
-    except FollowTag.DoesNotExist:
+        
+        logger.exception("TODO check this behavior")
+        
         res['tag_name'] = tag_name
         res['status'] = True
     except Tag.DoesNotExist:
@@ -2075,6 +2094,25 @@ def call_perspective_api(text):
         res['status'] = True
 
     return res
+
+
+def encode_tags(tag):
+    """Encodes each tag's unicode to utf-8, used for selecting tags when posting
+
+    Args:
+       tag: a dict with name and color keys that represent a tag
+
+    Returns:
+        The utf-8 encoded tag dict
+    """
+
+    if 'name' in tag and 'color' in tag:
+        tag['name'] = tag['name'].encode()
+        tag['color'] = tag['color'].encode()
+    else:
+        tag = tag.encode()
+    return tag
+
 
 
 

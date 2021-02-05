@@ -57,13 +57,22 @@ mysql -u root -p$password <<EOF
 EOF
 
 # create the initial tables
-python manage.py syncdb;
-
-# create the initial schema migration with south
+python manage.py makemigrations schema;
+# Convert schema app  
 python manage.py schemamigration schema --initial;
 
-# apply the schema migration
+# Apply the migrations:  
+python manage.py migrate --noinput
 python manage.py migrate schema
+
+# Then do fake migration:
+python manage.py migrate schema 0001 --fake	
+
+# Sync registration schema: 
+python manage.py migrate --run-syncdb
+
+# Create superuser 
+python manage.py createsuperuser
 
 # alter tables to utf8
 mysql -u root -p$password <<EOF

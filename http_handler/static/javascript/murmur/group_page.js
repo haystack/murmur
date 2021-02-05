@@ -81,6 +81,7 @@ $(document).ready(function(){
 			});
 	}						  
 
+
 	delete_group =
 	    function(params) {
 	    	warningMessage = "Are you sure? This will delete the group including all emails ever sent within this group in the archive."

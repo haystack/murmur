@@ -10,8 +10,8 @@
 	{% block customcss %}
 	{% endblock %}
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-	
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		
 	<link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'> 
 	
 	<link rel="apple-touch-icon" sizes="57x57" href="/static/images/favicon/apple-touch-icon-57x57.png">
@@ -40,88 +40,107 @@
 </head>
 
 <body>
-	
-<div id="murmur-header" class="navbar navbar-default navbar-fixed-top navlook" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-        	<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" id="logo" href="/"><img class="icon" src="/static/images/favicon/favicon-194x194.png">Murmur</a>
-        </div>
-        {% if user.is_authenticated %}
-        <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-          	
-          	{% if not group_page %}
-	            <li class="dropdown dropdown-left">
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="active_group">{{ active_group.name }}</span><span class="caret"></span></a>
-	              <ul class="dropdown-menu" role="menu">
-	              	{% for group in groups %}
-	                	<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
-					{% endfor %}
-	                <li class="divider"></li>
-	                <li><a href="/my_groups">Manage my groups</a></li>
-	                <li><a href="/group_list">Join/create new groups</a></li>
-	              </ul>
-	            </li>
-	            
-	            <li><a href="/my_groups">My Groups</a></li>
-	            <li><a href="/group_list">Explore Groups</a></li>
-	        
-            {% else %}
-            	<li class="dropdown dropdown-left">
-            	{% if groups %}
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>View Posts</span><span class="caret"></span></a>
-	            {% else %}
-	              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span>No Groups Yet</span><span class="caret"></span></a>
-	            {% endif %}
-	              	<ul class="dropdown-menu" role="menu" id="list-group-names">
-		              	{% for group in groups %}
-		              		{% if group.name == active_group %}
-		              			<li><a href="/posts?group_name={{ group.name }}"><span id="active_group">{{ group.name }}</span></a></li>
-		              		{% else %}
-		                		<li><a href="/posts?group_name={{ group.name }}">{{ group.name }}</a></li>
-		                	{% endif %}
-						{% endfor %}
-	                <li class="divider"></li>
-	                <li><a href="/my_groups">Manage my groups</a></li>
-	                <li><a href="/group_list">Join/create new groups</a></li>
-	              </ul>
-	            </li>
-            	{% if my_groups %}
-            		<li class="active"><a href="/my_groups">My Groups</a></li>
-            		<li><a href="/group_list">Explore Groups</a></li>
-            	{% else %}
-            		<li><a href="/my_groups">My Groups</a></li>
-            		<li class="active"><a href="/group_list">Explore Groups</a></li>
+
+	<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top" role="navigation">
+		<div class="container">
+			<a class="navbar-brand" id="logo" href="/"><img class="icon" src="/static/images/favicon/favicon-194x194.png">Murmur</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			{% if user.is_authenticated %}
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="nav navbar-nav">
+
+				{% if not group_page %}
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="navbarGroupDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span id="active_group">{{ active_group.name }}</span>
+						</a>
+						<div class="dropdown-menu" aria-labelledby="navbarGroupDropdown">
+							{% for group in groups %}
+								<a class="dropdown-item" href="/posts?group_name={{ group.name }}">{{ group.name }}</a>
+							{% endfor %}
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="/my_groups">Manage my groups</a>
+							<a class="dropdown-item" href="/my_groups">Join/create new groups</a>
+						</div>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/my_groups">My Groups</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/group_list">Explore Groups</a>
+					</li>
+				</ul>
+				{% else %}
+					<li class="nav-item dropdown">
+						{% if groups %}
+						<a class="nav-link dropdown-toggle" href="#" id="navbarNoGroupDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							View Posts
+						</a>
+						{% else %}
+						<a class="nav-link dropdown-toggle" href="#" id="navbarNoGroupDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							No Groups Yet
+						</a>
+						{% endif %}
+						<div class="dropdown-menu" id="list-group-names" aria-labelledby="navbarGroupDropdown">
+							{% for group in groups %}
+								{% if group.name == active_group %}
+									<a class="dropdown-item" href="/posts?group_name={{ group.name }}"><span id="active_group">{{ group.name }}</span></a>
+								{% else %}
+									<a class="dropdown-item" href="/posts?group_name={{ group.name }}">{{ group.name }}</a>
+								{% endif %}
+							{% endfor %}
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="/my_groups">Manage my groups</a>
+							<a class="dropdown-item" href="/my_groups">Join/create new groups</a>
+						</div>
+					</li>
+					</li>
+					{% if my_groups %}
+						<li class="nav-item active">
+							<a class="nav-link" href="/my_groups">My Groups</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="/group_list">Explore Groups</a>
+						</li>
+					{% else %}
+						<li class="nav-item">
+							<a class="nav-link" href="/my_groups">My Groups</a>
+						</li>
+						<li class="nav-item active">
+							<a class="nav-link" href="/group_list">Explore Groups</a>
+						</li>
+					{% endif %}
+				</ul>
 				{% endif %}
-            {% endif %}
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li class="dropdown dropdown-right">
-            	<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="user_email">{{ user.email|truncatechars:24 }}</span><span class="caret"></span></a>
-              <ul class="dropdown-menu" role="menu">
-                <li><a href="/settings">Settings</a></li>
-                <li><a href="/accounts/logout">Logout</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div><!--/.nav-collapse -->
-        
-        {% else %}
-        <div class="navbar-collapse collapse">
-        	<ul class="nav navbar-nav navbar-right">
-        		<li><a href="/accounts/login/">Login</a></li>
-        		<li><a href="/accounts/register/">Register</a></li>
-        	</ul>
-        </div>
-        {% endif %}
-      </div>
-    </div>
+				<ul class="nav navbar-nav ml-auto">
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span id="user_email">{{ user.email|truncatechars:24 }}</span>
+						</a>
+						<div class="dropdown-menu" aria-labelledby="navbarUserDropdown">
+							<a class="dropdown-item" href="/settings">Settings</a>
+							<a class="dropdown-item" href="/accounts/logout">Logout</a>
+						</div>
+					</li>
+				</ul>
+		</div>
+			
+			{% else %}
+			<div id="navbarNav" class="collapse navbar-collapse">
+				<ul class="navbar-nav ml-auto">
+					<li class="nav-item"> 
+						<a class="nav-link" href="/accounts/login/">Login</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="/accounts/register/">Register</a>
+					</li>
+				</ul>
+			</div>
+			{% endif %}
+		</div>
+	</nav>
 	
 
 	{% block content %}
@@ -136,7 +155,7 @@
 	<script type="text/javascript" src="/static/javascript/third-party/noty/jquery.noty.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/noty/layouts/topRight.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/noty/themes/default.js"></script>
-	<script type="text/javascript" src="/static/javascript/third-party/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="/static/DataTables/datatables.min.js"></script>
 	
 	{% block customjs %}
 	

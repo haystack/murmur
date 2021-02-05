@@ -51,14 +51,62 @@
     background-color:#0da4e0
   }
 
-  .tag-delete-btn {
-    cursor: pointer;
-    color:white; 
+  .post-item-main {
+    display: flex;
+    flex-flow: row wrap;
   }
-  .tag-delete-btn:hover {
-    cursor: pointer;
-    color:red; 
+
+  .post-item-footer {
+    display: inline-flex;
+    flex-flow: row wrap;
   }
+
+  .left-column-area-content {
+    float: left;
+    text-align: left;
+  }
+
+  .right-column-area-content {
+    float: inline-end;
+    text-align: right;
+  }
+
+  .post-tags-subject {
+    display: inline-flex;
+    flex-flow: row wrap;
+    align-items: flex-start;
+    max-width: 50vw;
+  }
+
+  .tag-container {
+    display: inline-flex;
+    flex-flow: row nowrap;
+  }
+
+  .post-subject {
+    font-weight: bold;
+    align-self: baseline;
+  }
+
+  /* 767px breakpoint to have tag and subject inputs side by in iPad screen but not break in screen widths smaller than this */
+  @media only screen and (max-width: 767px) { 
+    .tag-container {
+      display: flex;
+      flex-flow: column wrap;
+    }
+
+    .post-tags-subject {
+      display: flex;
+      flex-flow: column wrap;
+      align-items: flex-start;
+    }
+    
+    .right-column-area-content {
+      float: left;
+      text-align: left;
+    }
+  }
+
 </style>
 {% endblock %}
 
@@ -72,10 +120,10 @@
         <div id="main-area">
           <div class="main-area-content">
             {% if member_info.admin %}
-            <span class="admin label">Admin</span>
+            <span class="admin label text-light rounded-sm">Admin</span>
             {% endif %}
             {% if member_info.moderator %}
-            <span class="mod label">Mod</span>
+            <span class="mod label text-light rounded-sm">Mod</span>
             {% endif %}
 
             <div style="display:none;" id="group_name">{{ active_group.name }}</div>
@@ -92,8 +140,14 @@
               {% for tag in tag_info %}
               <tr style="border-bottom: 1px solid #bbbbbb; border-top: 1px solid #bbbbbb;">
                 <td style="padding-right: 20px;">
-                  <h4><label class="label2" id="tag_{{ forloop.counter0 }}"
-                      style="background-color: #{{ tag.color }}">{{ tag.name }}</label> </h4>
+                  <details class="mt-2">
+                    <summary>
+                      <h4 class="d-inline-block">
+                        <label class="label2 display-4" id="tag_{{ forloop.counter0 }}" style="background-color: #{{ tag.color }}">{{ tag.name }}</label>
+                      </h4>
+                    </summary>
+                    <p>Tag Description</p>
+                  </details>
                 </td>
                 <td style="padding-right: 20px;">
                   <small>
@@ -108,7 +162,7 @@
 
                 <td>
                   {% if member_info %}
-                  {% if member_info.no_emails or not member_info.always_follow_thread %}
+                  {% if member_info.no_emails or not member_info.all_emails %}
                   {% if tag.followed %}
                   <label class="label3 tag_follow_mute" id="tag_{{ forloop.counter0 }}_button">Unsubscribe this
                     tag</label>
@@ -141,7 +195,7 @@
               {% if member_info.no_emails %}
               You are currently set to <b>receive no emails</b> from this group, except those you follow. <br />You can
               follow individual threads or all threads with a specific tag.
-              {% elif member_info.always_follow_thread %}
+              {% elif member_info.all_emails %}
               You are currently set to <b>receive all emails</b> from this group, except those you mute. <br />You can
               mute individual threads or threads with a specific tag.
               {% else %}
@@ -222,43 +276,43 @@
           {% for post in posts.threads %}
           <a href="/thread?group_name={{ active_group.name }}&tid={{ post.thread_id }}">
             <li class="row-item" id="{{ post.thread_id }}">
-              <div class="left-column-area-metadata">
-                <span class="gray">{{ post.timestamp|date:"n/j/Y" }}</span>
-                <span class="gray">{{ post.timestamp|date:"h:i A" }}</span>
-                <span class="unread">{{ post.num_replies }}</span> <br>
-              </div>
-              <div class="middle-column-area-content">
-                <span class="strong">{{ post.post.subject }}</span>
-                <br />
-                <span class="strong-gray">{{ post.post.from }}</span><br />
-                <span class="blurb ellipsis">{{ post.post.text|striptags }}
-                </span>
-              </div>
-
-              {% if post.tags|length > 0 %}
-              <div class="tag-container">
-                {% for tag in post.tags %}
-                <span class="label2"
-                  style="background-color: #{{tag.color}}; float: right; position: relative; top: 5px;">{{tag.name}}</span>
-                {% endfor %}
-              </div>
-              {% endif %}
-
-              <div>
-                <span class="label2"
-                  style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
-
-                {% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
-                {% if post.following %}
-                <span class="label2 following" style="background-color: #3D7AA6;">Following</span>
-                {% endif %}
-                {% else %}
-                {% if post.muting %}
-                <span class="label2 muted" style="background-color: #3D7AA6;">Muted</span>
-                {% endif %}
-                {% endif %}
-              </div>
-
+              <article class="post-list-item">
+                <div class="post-list-main">
+                  <div class="left-column-area-content">
+                    <div class="post-tags-subject">
+                      {% if post.tags|length > 0 %}
+                        <div class="tag-container mr-1">
+                          {% for tag in post.tags %}
+                          <span class="label2"
+                            style="background-color: #{{tag.color}}; float: left; position: relative; top: 5px;">{{tag.name}}</span>
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                      <span class="post-subject">{{ post.post.subject }}</span>
+                    </div>
+                    <p class="strong-gray m-0 mt-1">{{ post.post.from }}</p>
+                    <p class="blurb ellipsis m-0 mt-1">{{ post.post.text|striptags }}</p>
+                  </div>
+                  <div class="right-column-area-content">
+                    <p class="gray m-0">{{ post.timestamp|date:"n/j/Y" }}</p>
+                    <p class="gray m-0">{{ post.timestamp|date:"h:i A" }}</p>
+                    <div>
+                      <span class="label2 mr-2 p-1"
+                        style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
+                      <span class="unread p">{{ post.num_replies }}</span> 
+                    </div>
+                    {% if posts.member_group.no_emails or not posts.member_group.all_emails %}
+                      {% if post.following %}
+                      <p class="label2 following" style="background-color: #3D7AA6;">Following</p>
+                      {% endif %}
+                    {% else %}
+                      {% if post.muting %}
+                      <p class="label2 muted" style="background-color: #3D7AA6;">Muted</p>
+                      {% endif %}
+                    {% endif %}
+                  </div>
+                </div>
+              </article> 
             </li>
           </a>
           {% endfor %}

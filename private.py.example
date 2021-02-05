@@ -1,0 +1,25 @@
+import os
+CLIENT_SECRETS_JSON = {"web":{"client_id":"UPDATE_WITH_YOUR_GOOGLE_app.apps.googleusercontent.com","project_id":"murmur-dev","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://accounts.google.com/o/oauth2/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"CLIENT_SECRET","redirect_uris":["CALLBACK_URL"]}}
+
+AWS_STORAGE_BUCKET_NAME = 'YOUR_AWS_NAME'
+AWS_ACCESS_KEY_ID = 'YOUR_AWS_ID'
+AWS_SECRET_ACCESS_KEY = 'YOUR_AWS_SECRET'
+
+PERSPECTIVE_KEY = 'YOUR_PERSPECTIVE_KEY'
+
+MYSQL_LOCAL = {
+    'NAME' : os.getenv('DATABASE_NAME'),
+    'USER' : 'root',
+    'PASSWORD' : os.getenv('MYSQL_PASS'),
+    'HOST' : os.getenv('DATABASE_HOST', 'localhost'),
+}
+
+MYSQL_DEV = MYSQL_LOCAL
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = os.getenv('GMAIL_USER')
+EMAIL_HOST_PASSWORD = os.getenv('GMAIL_PASSWORD')
+EMAIL_PORT = os.getenv('GMAIL_PORT')
+
+PROJECT_DIR = '/home/ubuntu/production/mailx/'

@@ -56,7 +56,7 @@
 						<div>
 						<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ post.likes }}</span>
 
-						{% if posts.member_group.no_emails or not posts.member_group.always_follow_thread %}
+						{% if posts.member_group.no_emails or not posts.member_group.all_emails %}
 							{% if post.following %}
 								<span class="label2 following" style="background-color: #3D7AA6;">Following</span>
 							{% endif %}
