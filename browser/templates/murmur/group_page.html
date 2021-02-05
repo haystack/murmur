@@ -23,12 +23,12 @@
 			{% else %}
 				<span class="mod label" style="display: none;"></span>
 			{% endif %}
-			
+			<p hidden id="group-name">{{group_info.group.name}}</p>
 			<h3>
 				{% if group_info.group.friendly_name == "" %}
-					<span id="group-name">{{ group_info.group.name }}</span>
+					<span id="group-friendly-name">{{ group_info.group.name }}</span>
 				{% else %}
-					<span id="group-name">{{ group_info.group.friendly_name }}</span>
+					<span id="group-friendly-name">{{ group_info.group.friendly_name }}</span>
 				{% endif %}
 			</h3>
 

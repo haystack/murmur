@@ -1,8 +1,8 @@
 $(document).ready(function(){
 	
 	var user_name = $.trim($('#user_email').text());
-	var group_name = $.trim($("#group_name").text().replaceAll(' ','_'));
-	
+	var group_name = $.trim($("#group-name").text());
+		
 	var btn_add_dissimulate = $("#btn-add-dissimulate"),
 		btn_delete_dissimulate = $("#btn-delete-dissimulate");
 

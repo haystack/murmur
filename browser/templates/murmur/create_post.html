@@ -8,9 +8,9 @@
 <div class="container">
   <div class="group-container">
 		{% if group_info.friendly_name != '' %}   
-			<h3>Send Post to <span id="group-name">{{ group_info.friendly_name }}</span></h3><hr />
+			<h3>Send Post to <span id="friendly-group-name">{{ group_info.friendly_name }}</span></h3><hr />
 		{% else %}
-			<h3>Send Post to <span id="group-name">{{ group_info.name }}</span></h3><hr />
+			<h3>Send Post to <span id="friendly-group-name">{{ group_info.name }}</span></h3><hr />
 		{% endif %}
    		<span class="strong">
    			To : 

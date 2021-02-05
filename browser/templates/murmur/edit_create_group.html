@@ -95,8 +95,8 @@
 {% block customjs %}
 	<script type="text/javascript" src="/static/javascript/notify.js"></script>
 	{% if edit_page %}
-		<script type="text/javascript" src="/static/javascript/edit_group_info.js"></script>
+		<script type="module" src="/static/javascript/edit_group_info.js"></script>
 	{% else %}
-		<script type="text/javascript" src="/static/javascript/create_group.js"></script>
+		<script type="module" src="/static/javascript/create_group.js"></script>
 	{% endif %}
 {% endblock %}

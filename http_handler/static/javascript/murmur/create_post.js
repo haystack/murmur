@@ -10,8 +10,8 @@ $(document).ready(function(){
 		function(params){
 			params.msg_text = CKEDITOR.instances['new-post-text'].getData();
             params.subject = $("#new-post-subject").val();
-			params.group_name = $("#group-name").text().replaceAll(' ','_');
-			params.friendly_name = $("#group-name").text();
+			params.group_name = $("#new-post-to").text();
+			params.friendly_name = $("#friendly-group-name").text();
             params.poster_email = params.requester_email;
 			$.post('/insert_post', params, 
 				function(res){
@@ -27,7 +27,7 @@ $(document).ready(function(){
 		};
 		
 	bind_buttons();
-			
+
 	function bind_buttons() {
  		post.unbind("click");
  		
