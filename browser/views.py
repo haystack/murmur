@@ -1708,3 +1708,57 @@ def moderate_user_for_thread_get(request):
 				'active_group' : active_group, 'active_group_role' : role, 'groups' : groups}
 	else:
 		return redirect(global_settings.LOGIN_URL + '?next=/approve_get?group_name=%s&post_id=%s' % (group_name, post_id))
+
+@render_to("/pub_groups_pagination/table_ajax_call")
+def pub_groups_pagination(request):
+
+	"""
+	Handles ajax request for Public Groups Page DataTable, and returns the group 
+	data in the specified boundaries. 
+	"""
+
+	try:
+		user = get_object_or_404(UserProfile, email=request.user.email)
+	except Exception:
+		user = None
+
+	public = engine.main.list_groups(user)
+	
+	draw = request.GET['draw']
+	start = int(request.GET['start'])
+	length = int(request.GET['length'])
+	order_column = int(request.GET['order[0][column]'])
+	
+	columns = ['name','desc','member','admin','mod','created','count']
+
+	order_direction = True if request.GET['order[0][dir]'] == 'desc' else False
+	column = [i for n, i in enumerate(columns) if n == order_column][0]
+	global_search = request.GET['search[value]']
+	all_objects = public
+	
+	objects = []
+
+	def element(group):
+		return group[column]
+	
+	all_objects.sort(key=element,reverse=order_direction)
+
+	for i in all_objects[start:start + length]:
+		ret = []
+		for j in columns:
+			if j == 'created':
+				ret.append(i[j].strftime("%B %d %Y, %I:%M %p"))
+			else:
+				ret.append(i[j])
+		objects.append(ret)
+		
+	filtered_count = len(all_objects)
+	total_count = len(all_objects)
+
+	return JsonResponse({
+		"sEcho": draw,
+		'global': global_search,
+		"iTotalRecords": total_count,
+		"iTotalDisplayRecords": filtered_count,
+		"aaData": objects,
+		})

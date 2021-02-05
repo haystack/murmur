@@ -20,6 +20,44 @@ $(document).ready(function(){
 	var admin_buttons = [btn_add_members, btn_edit_group_info, btn_set_admin, btn_set_mod, 
 						btn_delete_members, btn_add_list, action_select, btn_delete_group];
 
+	var pubgroups_table = $('#pubgroups-table').DataTable({
+							"processing": true,
+							"serverSide": true,
+							"ajax": {
+								url: "/delta/pub_groups_pagination/table_ajax_call/",
+								dataSrc: function (json) {
+										var return_data = new Array();
+										for(var i=0;i< json.aaData.length; i++){
+											
+											if (json.aaData[i][2] = 'true') {var member = '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>'} else {var member = ''}
+											if (json.aaData[i][3] = 'true') {var adminis = '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>'} else {var adminis = ''}
+											if (json.aaData[i][4] = 'true') {var mod = '<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>'} else {var mod = ''}
+				
+											if (json.aaData[i][0].includes(json.global)) {
+												return_data.push({
+													'name': '<a href="/groups/' + json.aaData[i][0] + '">' + json.aaData[i][0] + '</a>',
+													'desc': json.aaData[i][1],
+													'member' : member,
+													'admin' : adminis,
+													'mod' : mod,
+													'created' : json.aaData[i][5],
+													'count' : json.aaData[i][6]
+										  })}
+										}
+										return return_data;
+									  }
+									},
+								"columns": [
+									  {'data': 'name'},
+									  {'data': 'desc'},
+									  {'data': 'admin'},
+									  {'data': 'mod'},
+									  {'data': 'member'},
+									  {'data': 'created'},
+									  {'data': 'count'}
+									]
+								  });		
+	
 	if (admin) {
 		var members_table = $('#members-table').DataTable({
 			"columns": [ { 'orderable': false}, null, null, null, null],
@@ -41,7 +79,8 @@ $(document).ready(function(){
 				"order": [[1, "asc"]],
 				responsive: true
 			});
-	}
+	}						  
+
 
 	delete_group =
 	    function(params) {

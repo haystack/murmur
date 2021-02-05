@@ -4,7 +4,8 @@
 	<link href="/static/DataTables/datatables.min.css" rel="stylesheet">
 {% endblock %}
 
-{% block content %}
+
+{% block customjs %}
 
 <div class="container">
   <div class="group-container">
@@ -15,7 +16,13 @@
      <h3>Explore Public Groups</h3>
      <hr />
 		<div>
-			<table id="members-table" class="display" cellspacing="0" width="100%">
+
+			<script type="text/javascript" charset="utf8"
+					src="http://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+
+			<script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>
+
+			<table id="pubgroups-table" class="display" cellspacing="0" width="100%">
 				<thead>
 					<tr>
 						<th>Group Name</th>
@@ -39,32 +46,6 @@
 						<th>Num Members</th>
 					</tr>
 				</tfoot>
-				
-				<tbody>
-					{% for group in pub_groups %}
-					<tr>
-						<td><a href="/groups/{{ group.name }}">{{group.name}}</a></td>
-						<td><span class="italic-med">{{ group.desc }}</span></td>
-						{% if group.admin %}
-							<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
-							{% else %}
-							<th></th>
-						{% endif %}
-						{% if group.mod %}
-							<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
-							{% else %}
-							<th></th>
-						{% endif %}
-						{% if group.member %}
-							<th><img src="/static/css/third-party/images/check.svg" alt="" width="32" height="32" title="check"></th>
-							{% else %}
-							<th></th>
-						{% endif %}
-						<th>{{ group.created }}</th>
-						<th>{{ group.count }}</th>
-					</tr>
-					{% endfor %}
-				</tbody>
 			</table>	
 
 
@@ -73,12 +54,4 @@
 </div>
 
 {% endblock %}
-
-
-{% block customjs %}
-
-<script type="text/javascript" src="/static/javascript/murmur/group_page.js"></script>
-
-{% endblock %}
-
 

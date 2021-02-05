@@ -30,19 +30,18 @@ $(document).ready(function(){
 		}
 	};
  
-
 	/* Dynamic Table Definitions */	
 	
 	members_table = $('#members-table').dataTable({
-			"columns": [
-				{ 'orderable': false, },
-				null,
-				null,
-				null
-			],
-			"order": [[1, "asc"]],
-			responsive: true
-		});
+		"columns": [
+			{ 'orderable': false, },
+			null,
+			null,
+			null
+		],
+		"order": [[1, "asc"]],
+		responsive: true
+	});
 
 	/* Default blur effect in textbox */
 	
