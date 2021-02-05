@@ -2,12 +2,11 @@
 files */
 
 export function replaceSpace(group_name) {
-    let friendly_name = ' ';
+    let friendly_name = '';
+    let char_ = '';
     for(let i = 0; i < group_name.length; i ++) {
-        if (group_name[i] == ' ') {
-            friendly_name += '_';
-        }
-        friendly_name += group_name[i];
+        char_ = group_name[i]; 
+        friendly_name += char_ == ' ' ? '_' : char_;
     }
     return friendly_name;
 }
