@@ -1,9 +1,8 @@
 $(document).ready(function() {
 
-    var group_name = $.trim($("#group-name").text().replaceAll(' ','_')),
+    var group_name = $.trim($("#group-name").text()),
         btn_add_dissimulate = $("#btn-add-dissimulate");
-
-
+        
         btn_add_dissimulate.click(function() {
         var params = {
             'group_name': group_name,
