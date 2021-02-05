@@ -20,7 +20,6 @@ $(document).ready(function(){
 	var admin_buttons = [btn_add_members, btn_edit_group_info, btn_set_admin, btn_set_mod, 
 						btn_delete_members, btn_add_list, action_select, btn_delete_group];
 
-	console.log(group_name);
 	if (admin) {
 		var members_table = $('#members-table').dataTable({
 			"aoColumns": [ { 'bSortable': false}, null, null, null, null]
