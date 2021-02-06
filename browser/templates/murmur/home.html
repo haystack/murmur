@@ -2,39 +2,48 @@
 
    {% block customcss %}
    <link href="/static/DataTables/datatables.min.css" rel="stylesheet">
-	<style>
-		body { 
-			background: url(/static/images/murmurations/4227243_a0587ccefe_o.jpg) no-repeat center center fixed; 
-			-webkit-background-size: cover;
-			-moz-background-size: cover;
-			-o-background-size: cover;
-			background-size: cover;
-		}
-		</style>
 	{% endblock %}
 
 {% block content %}
 
-<div id="container-home" class="d-flex flex-column mt-5">
-   <div id="intro" class="mx-5 mt-5 mb-3">
-     <h1 id="welcome" class="title">Welcome to Murmur</h1>
-     <h4 id="mission">We're re-imagining mailing lists and community discourse for the age of social media.</h4>
-   </div>
-   <div id="description" class="mx-5 mb-3">
-      <p>Though mailing list software has changed little in the past 40 years, social media and other community sites have changed drastically.</p>
-      <p>Murmur introduces new features to the mailing list so that you can communicate with your group in the way that you desire, through email or the web.</p>
-      <p>And as a community, members can collectively organize and moderate the discussion to satisfy the varied needs and concerns of their cohorts.</p> 
-   </div>
-   <div id="links" class="font-weight-bold mx-5 mb-5">
-      <a href="/about" class="mr-3">Learn More</a>
-      <a href="/groups/murmur-discuss" class="mr-3">Join our Murmur list</a>
-      <a href="/group_list">Explore All Public Groups</a>
-   </div>
-</div>
-{% include "./modules/demo.html" %}    
 
-<div id="image-attrib"></div>
+<section id="intro">
+   <h1 id="intro-heading" class="mx-3">Welcome to Murmur</h1>
+   <p id="intro-subheading" class="mx-3">We're re-imagining mailing lists and community discourse for the age of social media</p>
+   <a id="call-to-action" href="/accounts/register/">
+      <button id="cta-btn" class="btn btn-primary">Try Out Smart Mailing List</button>
+   </a>
+</section>
+<section id="features">
+   {% include "./modules/demo.html" %}  
+</section>  
 
+<!-- <div id="image-attrib"></div> -->
+<footer>
+   <article class="footer-about">
+      <h5 class="txt-primary">Modernizing Mailing Lists</h5>
+      <p id="footer-info">Though mailing list software has changed little in the past 40 years, social media and other community sites have changed drastically.
+         Murmur introduces new features to the mailing list so that you can communicate with your group in the way that you desire, through email or the web.
+         And as a community, members can collectively organize and moderate the discussion to satisfy the varied needs and concerns of their cohorts.
+      </p>
+   </article>
+   <div class="footer-actions">
+      <article class="footer-nav">
+         <img src="/static/images/favicon/favicon-32x32.svg" alt="Murmur's logo a open letter with sound waves" width="64" height="63">
+         <ul class="footer-links ml-5 my-0 pl-0">
+            <li><a class="footer-link text-decoration-none mr-3" href="/about">Learn More</a></li>
+            <li><a class="footer-link text-decoration-none mr-3" href="/group_list">Explore</a></li>
+            <li><a class="footer-link text-decoration-none mr-5" href="mailto:soya@mit.edu">Contact Us</a></li>
+         </ul>
+      </article>
+      <article>
+         <form class="footer-join mt-2" action="">
+            <input class="join-email p-2" type="email" placeholder="Email...">
+            <input class="join-submit p-2" type="submit" value="Join">
+         </form>
+      </article>
+   </div>
+</footer>
 
 {% endblock %}
 

@@ -6,18 +6,18 @@
 
 {% block content %}
 
-<div id="demo-desc" class="mt-5 px-4 pt-5">
-    <h1 class="title mx-5">Tag Subscription Feature</h1>
-    <p class="mx-5 mb-0">
-        Murmur gives users the ability to receive their desired content in their inbox through the tag subscription settings in every mailing list.
-        The demo shows an example of tags in a group (e.g. EECS mailing list) which can be configured in the settings as seen on the left. These 
-        personal tag preferences result in the filtering of emails that enter your inbox as seen on the right.
+<article id="feature-desc" class="mt-5">
+    <h4 class="feature-title p-2" style="background-color: indianred;">Tag Subscription</h4>
+    <h5 class="feature-heading mt-3">Filter your inbox with tags to get the inbox you desire</h5>
+    <p class="feature-subheading mt-3 mb-3">
+        Declutter your inbox through personalized tag subscription in every mailing list group. 
+        Simply select which tags you want to block or subscribe to in your settings.
     </p>
-</div>
+</article>
 <!-- Demo data (demo_info) for tags and emails can be modified in views.py index function -->
-<div id="container-demo" class="d-flex">
-    <div class="demo-settings m-5 p-4">
-        <h4>Tag Settings</h4>
+<article id="feature-demo" class="d-flex mb-5">
+    <div class="demo-settings p-4">
+        <h4 class="txt-primary">Settings</h4>
         <label class="d-block" for="block-mode">
             <input class="mr-1" type="radio" id="block-mode" name="tag-mode" value="block-mode" checked>
             Send me all emails except the following blocked tags
@@ -28,8 +28,8 @@
         </label>
         {% include "./tag_subscription_table.html" with tag_info=demo_info.tags settings=settings %}  
     </div>
-    <ul class="demo-emails m-5">
-        <h1 class="title">Inbox</h1>
+    <ul class="demo-emails p-4">
+        <h4 class="txt-primary mb-3">Inbox</h4>
         {% for email in demo_info.emails %}
             <li class="sample-email p-3 mb-2">
                 {% for tag in email.tags %}
@@ -39,7 +39,7 @@
             </li>
         {% endfor %}
     </ul>
-</div>
+</article>
 
 {% endblock %}
 
