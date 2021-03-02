@@ -62,7 +62,7 @@ hr {
 	flex-direction: column;
 	background: padding-box url(../third-party/images/home-intro-bg.svg);
 	width: 100vw;
-	height: 75vh;
+	height: 100vh;
 	justify-content: center;
 }
 
@@ -103,22 +103,25 @@ hr {
   color: #F8F8F8;
 }
 
-.come-in {
-	transform: translateY(150px);
-	animation: come-in 0.8s ease forwards;
-}
-
-.come-in:nth-child(odd) {
-	animation-duration: 0.6s;
-}
-
-@keyframes come-in {
-	to { transform: translateY(0); }
-}
-
 #feature-desc {
 	width: 66vw;
 	margin: 0 auto;
+}
+
+.translate-down {
+	transform: translateY(64px);
+}
+
+.slide-in {
+	animation: slide-in 0.8s ease forwards;
+}
+
+.slide-in:nth-child(odd) {
+	animation-duration: 0.6s; /* staggered */
+}
+
+@keyframes slide-in {
+	to { transform: translateY(0); }
 }
 
 .feature-title {
@@ -149,6 +152,7 @@ hr {
 	justify-content: center;
 	box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.25);
 	border-radius: 1em;
+	transform: translateY(64px);
 }
 
 .demo-settings {
@@ -275,6 +279,7 @@ footer {
 }
 
 .join-email {
+	width: clamp(6em, 12em + 2vw, 32em);
 	height: 3em;
 	border: none;
 	border-radius: 0.25em 0 0 0.25rem;
