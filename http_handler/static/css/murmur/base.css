@@ -60,7 +60,7 @@ hr {
 #intro {
 	display: flex;
 	flex-direction: column;
-	background: padding-box url(../third-party/images/home-intro-bg.svg);
+	background: padding-box url(../third-party/images/home-intro-bg.svg); /* Background pattern from Toptal Subtle Patterns */
 	width: 100vw;
 	height: 100vh;
 	justify-content: center;
