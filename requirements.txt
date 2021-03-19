@@ -1,5 +1,5 @@
 Django==1.11
-Jinja2==2.10.3
+Jinja2==2.11.3
 MarkupSafe==0.23
 mysqlclient==1.4.6
 bleach==1.4
