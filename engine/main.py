@@ -1077,19 +1077,23 @@ def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_
 
         tag_objs = Tag.objects.filter(tagthread__thread=thread)
         tags = list(tag_objs.values('name', 'color'))
-
         group_members = MemberGroup.objects.filter(group=group)
         recipients = []
         for m in group_members:
             # print "create post", user.email
             print "donotsend", m.member.email
             dm = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=m.member)
+            blockingMode = getattr(m, 'tag_blocking_mode')
             if dm.exists():
                continue 
             elif not m.no_emails and m.member.email != sender_addr:
-                mute_tag = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member).exists()
-                if not mute_tag:
-                    recipients.append(m.member.email)
+                muted_tags = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member)
+                if blockingMode:
+                    if not muted_tags.exists():
+                        recipients.append(m.member.email)
+                else:
+                    if len(tags) > 0 and len(muted_tags) < len(tags):
+                        recipients.append(m.member.email)
             else:
                 recipients.append(m.member.email)
         
@@ -1108,7 +1112,7 @@ def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_
 def insert_post_web(group_name, subject, tag_info, message_text, user):
     res = {'status':False}
     thread = None
-
+    
     try:
         group = Group.objects.get(name=group_name)
         user_member = MemberGroup.objects.filter(group=group, member=user)
@@ -1116,10 +1120,9 @@ def insert_post_web(group_name, subject, tag_info, message_text, user):
             msg_id = base64.b64encode(user.email + str(datetime.now())).lower() + '@' + BASE_URL
             p, thread, recipients, tags, tag_objs = _create_post(group, subject, tag_info, message_text, user, user.email, msg_id, verified=True)
             res['status'] = True
-            
             res['member_group'] = {'no_emails': user_member[0].no_emails,
                                    'all_emails': user_member[0].all_emails}
-    
+
             post_info = {'msg_id': p.msg_id,
                          'thread_id': thread.id,
                          'from': user.email,
@@ -1147,7 +1150,6 @@ def insert_post_web(group_name, subject, tag_info, message_text, user):
             res['tags'] = tags
             res['tag_objs'] = tag_objs
             res['recipients'] = recipients
-
         else:
             res['code'] = msg_code['NOT_MEMBER']
     except Group.DoesNotExist:

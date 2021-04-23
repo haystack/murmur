@@ -8,24 +8,26 @@ $(document).ready(function(){
 		btn_cancel_settings = $("#btn-cancel-settings");
 		selectRows = $(".my_row");
 		modeInput = $('input[name="tag-mode"]');
-		selectTags = $('input[data-type="tag-select"]');
+		selectTags = $('img[data-type="tag-select"]'); // select elements (block/check icons)
+		tags = $(".tag").toArray().map(e => e.innerHTML);
 		selectTagsSet = new Set(selectTags.toArray());
-		tags = $(".tag");
 		followedTags = new Set(tag_subscription["followed"]);
 		mutedTags = new Set(tag_subscription["muted"]);
 		swapping = false;
 	
 	getSavedTagSubscription();
 
+	// Gray out notifications and tag subscription section to indicate no emails will be sent
 	if ($('#no-emails').is(":checked")) {
 		$('#notifications-area').addClass("gray");
 		$('#tag-subscription-area').addClass("gray");
-		$('input[type=checkbox][name=notifications]').removeAttr("checked");
+		$('img[data-type="tag-select"]').classList.add("inactive");
 	}
-
-	$('input[type=radio][name=mail-delivery]').change(function() {
-		let notifications = $('#notifications-area').addClass("gray");
-			tagSubscription = $('#tag-subscription-area').addClass("gray");
+	
+	// Remove gray from notifications and tag subscription section if email delivery changes
+	$('input[type=radio][name=email-delivery]').change(function() {
+		let notifications = $('#notifications-area');
+			tagSubscription = $('#tag-subscription-area');
 		if ($('#no-emails').is(":checked")) {
 			notifications.addClass("gray");
 			tagSubscription.addClass("gray");
@@ -45,22 +47,42 @@ $(document).ready(function(){
 	let tag_subscription_table = $("#tag-subscription-table").DataTable({
 		"columns": [ { 'orderable': false}, null, null, null],
 		"order": [[1, "asc"]],
-		responsive: true
+		responsive: {
+			details: {
+				type: 'column',
+				target: 'tr'
+			}
+		},
+	});
 
-	})
+	let tag_demo_table = $("#tag-demo-table").DataTable({
+		"columns": [ { 'orderable': false}, null, null, null],
+		"order": [[1, "asc"]],
+		responsive: {
+			details: {
+				type: 'column',
+				target: 'tr'
+			}
+		},
+		searching: false,
+		paginate: false,
+		info: false,
+	});
 
+	// Click listener for the whole row to be clickable and toggle blocking/subscribing
 	selectRows.each((index, elem) => {
 		elem.addEventListener("click", (e) => {
 			if (!selectTagsSet.has(e.target)) elem.firstElementChild.firstElementChild.click()
 		});
 	});
-
+	
+	// Select column with block and checkmark icons to select rows
 	selectTags.each((index, elem) => {
 		elem.addEventListener("click", function() {
 			const mode = $('input[name="tag-mode"]:checked').val();
 			const tag = elem.parentNode.nextElementSibling.firstElementChild;
 			elem.toggleAttribute("checked");
-			tag.classList.toggle("inactive");
+			elem.classList.toggle("inactive");
 
 			if (!swapping) {
 				const isSelected = elem.hasAttribute("checked")
@@ -78,7 +100,13 @@ $(document).ready(function(){
 	
 	// Toggles visibility of tags based on tag mode change
 	modeInput.change(function() {
+		const mode = $('input[name="tag-mode"]:checked').val();
 		selectTags.each((index, elem) => {
+			if (mode == "block-mode") {
+				elem.setAttribute("src", "/static/css/third-party/images/block.svg");
+			} else if (mode == "subscribe-mode") {
+				elem.setAttribute("src", "/static/css/third-party/images/check.svg");
+			}
 			swapping = true;
 			elem.click()
 		});
@@ -104,7 +132,6 @@ $(document).ready(function(){
 			params.mod_emails = $('#mod-emails').is(":checked");
 			params.muted_tags_data = JSON.stringify({ "muted_tags" : Array.from(mutedTags) });
 			params.tag_blocking_mode = (mode === "block-mode") ? true : false
-			console.log(params);
 			$.post('/edit_group_settings', params, 
 				function(res){
 					notify(res, true);
@@ -171,7 +198,6 @@ $(document).ready(function(){
 
 	btn_delete_dissimulate.click(function() {
 		if (confirm("Are you sure you want to delete the selected users from your do-not-send list?")) {
-			console.log("deleted")
 			var params = {'group_name' : group_name, 
 							'toAdmin' : '',
 							'toMod' : '',
@@ -222,6 +248,7 @@ function notify(res, on_success){
 	}
 }
 
+// Updates UI based on saved user tag subscription settings
 function getSavedTagSubscription() {
 	const mode = $('input[name="tag-mode"]:checked').val();
 	if (mode == "block-mode") {
@@ -229,7 +256,7 @@ function getSavedTagSubscription() {
 			const tag = elem.parentNode.nextElementSibling.firstElementChild;
 			if (mutedTags.has(tag.innerHTML)) {
 				elem.toggleAttribute("checked");
-				tag.classList.toggle("inactive");
+				elem.classList.toggle("inactive");
 			}
 		})
 	} else if (mode == "subscribe-mode") {
@@ -237,7 +264,7 @@ function getSavedTagSubscription() {
 			const tag = elem.parentNode.nextElementSibling.firstElementChild;
 			if (followedTags.has(tag.innerHTML)) {
 				elem.toggleAttribute("checked");
-				tag.classList.toggle("inactive");
+				elem.classList.toggle("inactive");
 			}
 		})
 	}
