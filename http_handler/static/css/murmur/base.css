@@ -25,10 +25,98 @@ hr{
 	color: #000000
 }
 
-.container-home {
-	 width: 800px;
-	 margin: 0 auto;
-	 height: 100%;
+#container-home {
+	width: 800px; 
+	margin: 0 auto;
+	background-color: #f8f8f8;
+}
+
+.title {
+	color: #447EAC;
+	font-weight: bold;
+}
+
+#demo-desc {
+	width: 1170px;
+	margin: 0 auto;
+	background-color: #f8f8f8;
+}
+
+#container-demo {
+	width: 1170px;
+	margin: 0 auto;
+	background-color: #f8f8f8;
+	justify-content: center;
+}
+
+.demo-settings {
+	background-color: #D7ECFA;
+}
+
+.demo-emails {
+	list-style-type: none;
+	padding: 0;
+}
+
+.sample-email {
+	font-weight: bold;
+	background-color: #D7ECFA;
+}
+
+.demo-sender {
+	font-weight: bold;
+	color: #447EAC;
+}
+
+#container-about {
+	display: flex;
+	width: 800px;
+	margin: 0 auto;
+	background-color: #f8f8f8;
+}
+
+/* 800px breakpoint to have about and home sections split into rows */
+@media only screen and (max-width: 800px) { 
+	#container-home {
+		width: fit-content;
+	}
+	#container-about {
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		width: fit-content;
+	}
+}
+
+/* 1170px breakpoint to have demo section split into rows */
+@media only screen and (max-width: 1170px) { 
+	#container-demo {
+		flex-direction: column;
+		max-width: 100%;
+	}
+	#demo-desc {
+		max-width: 100%;
+	}
+	.demo-settings {
+		max-width: 100%;
+	}
+}
+
+/* 270px breakpoint to links under Publications section in rows */
+@media only screen and (max-width: 270px) { 
+	#pub-links {
+		display: flex;
+		flex-direction: column;
+	}
+}
+
+#about-left {
+	width: 100%;
+}
+
+#about-right {
+	width: fit-content;
+	text-align: center;
 }
 
 @media (min-width: 768px) and (max-width: 1000px) {
@@ -45,30 +133,6 @@ hr{
         float:none;
     }
 }
-
-.home-left, .home-right, .home-left-mobile, .home-right-mobile {
-	
-	float: left;
-	margin-top:30px; 
-	padding:30px; 
-	margin-left: 10px;
-	margin-right: 10px;
-	vertical-align:top;
-	background-color: #f8f8f8;
-
-}
-
-.home-left, .home-right {
-	min-width: 380px;
-	max-width: 380px;
-}
-
-.home-left-mobile, .home-right-mobile {
-	min-width: 320px;
-	max-width: 320px;
-}
-
-
 
 .navbar-default .navbar-brand {
 	color: #000000;
@@ -523,8 +587,7 @@ blockquote {
 #image-attrib {
 	position: relative;
   	bottom: 0;
-  	right: 0;
-  	padding: 10px;
+	right: 0;
 }
 
 .paginate_disabled_previous, .paginate_disabled_next {
@@ -694,19 +757,19 @@ blockquote {
 	opacity: 25%;
 }
 
-.blocked {
-	text-decoration-line: line-through;
-}
-
 .my_row {
 	cursor: pointer;
 }
 
-/* 767px breakpoint to have tag and subject inputs side by in iPad screen but not break in screen widths smaller than this */
-@media only screen and (max-width: 767px) { 
+/* 768px breakpoint to have tag and subject inputs side by in iPad screen but not break in screen widths smaller than this */
+@media only screen and (max-width: 768px) { 
 	.tag-subject-container {
 		display: flex;
 		flex-flow: column wrap;
+	}
+	#links {
+		display: flex;
+		flex-direction: column;
 	}
 }
 
