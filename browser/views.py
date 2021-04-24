@@ -86,10 +86,24 @@ def error(request):
 def index(request):
 	homepage = "%s/home.html" % WEBSITE
 	if not request.user.is_authenticated:
+		# Hard coded info for demo, separated between tag and email example data
+		demo_tags = [{'color': '87CEEB', 'name': 'Courses', 'desc': 'New course annoucements and logistics related to EECS courses', 'num_p': '1' }, 
+					{'color': '008B8B', 'name': 'Jobs', 'desc': 'Any job related content such as internships, info sessions, career fair, etc.', 'num_p': '2' },
+					{'color': 'CD853F', 'name': 'UROPs', 'desc': 'UROP open positions announcements', 'num_p': '1' },
+					{'color': 'F08080', 'name': 'Talks', 'desc': 'Talks by professors, guests speakers, companies, etc.', 'num_p': '1' }
+		]
+		demo_emails = [{ 'tags': [{ 'color': '87CEEB', 'name': 'Courses'}], 'subject': 'MAS.S65 Next generation devices for Nanoelectronics and Biotechnology' },
+					{ 'tags': [{ 'color': 'F08080', 'name': 'Talks'}, { 'color': '008B8B', 'name': 'Jobs'}], 'subject': 'Tech Talk - Accessibility in Gaming hosted by Activison' },
+					{ 'tags': [], 'subject': 'Participate in a Drinking Water Study & Win a Reusable Water Bottle' },
+					{ 'tags': [{ 'color': 'CD853F', 'name': 'UROPs'}], 'subject': 'MIT Media Lab, Remote Fall UROP Opportunities in Lifelong Kindergarten Group' },
+					{ 'tags': [{ 'color': '008B8B', 'name': 'Jobs'}], 'subject': 'Google Privacy Engineer Internship Opportunity' }
+		]
 		return render(request, 
 						homepage,
 						{'form': AuthenticationForm(),
-						'reg_form': RegistrationForm()})
+						'reg_form': RegistrationForm(), 
+						'demo_info': { 'tags': demo_tags, 'emails': demo_emails},
+						'settings': { 'tag_blocking_mode': True } })
 	else:
 		if WEBSITE == 'murmur':
 			return HttpResponseRedirect('/posts')
