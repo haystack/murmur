@@ -1034,7 +1034,6 @@ def _create_tag(group, thread, name, color=None):
     tagthread,_ = TagThread.objects.get_or_create(thread=thread, tag=t)
 
 def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_id, verified, attachments=None, forwarding_list=None, post_status=None, sender_name=None):
-
     try:
         message_text = message_text.decode("utf-8")
     except Exception, _:
@@ -1067,46 +1066,51 @@ def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_
             poster_name=sender_name, verified_sender=verified, perspective_data=perspective_data)
     p.save()
     if WEBSITE == 'murmur':
+        group_members = MemberGroup.objects.filter(group=group)
         tag_info = map(encode_tags, tag_info)
         for tag in tag_info:
-            _create_tag(group, thread, tag['name'], tag['color'])
+                _create_tag(group, thread, tag['name'], tag['color'])
         tags = list(extract_hash_tags(message_text))
         for tag in tags:
             if tag.lower() != group.name:
                 _create_tag(group, thread, tag)
-
         tag_objs = Tag.objects.filter(tagthread__thread=thread)
         tags = list(tag_objs.values('name', 'color'))
-        group_members = MemberGroup.objects.filter(group=group)
         recipients = []
-        for m in group_members:
-            # print "create post", user.email
-            print "donotsend", m.member.email
-            dm = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=m.member)
-            blockingMode = getattr(m, 'tag_blocking_mode')
-            if dm.exists():
-               continue 
-            elif not m.no_emails and m.member.email != sender_addr:
-                muted_tags = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member)
-                if blockingMode:
-                    if not muted_tags.exists():
-                        recipients.append(m.member.email)
+        is_moderated = True # TODO: check if mailing list group is moderated
+        if is_moderated:
+            moderators = list(group_members.filter(moderator=True))
+            for mod in moderators:
+                recipients.append(mod.member.email)
+        else:
+            for m in group_members:
+                # print "create post", user.email
+                print "donotsend", m.member.email
+                dm = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=m.member)
+                blockingMode = getattr(m, 'tag_blocking_mode')
+                if dm.exists():
+                    continue 
+                elif not m.no_emails and m.member.email != sender_addr:
+                    muted_tags = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member)
+                    if blockingMode:
+                        if not muted_tags.exists():
+                            recipients.append(m.member.email)
+                    else:
+                        if len(tags) > 0 and len(muted_tags) < len(tags):
+                            recipients.append(m.member.email)
                 else:
-                    if len(tags) > 0 and len(muted_tags) < len(tags):
-                        recipients.append(m.member.email)
-            else:
-                recipients.append(m.member.email)
+                    recipients.append(m.member.email)
         
-        if user:
-            recipients.append(user.email)
-            f = Following(user=user, thread=thread)
-            f.save()
+            if user:
+                recipients.append(user.email)
+                f = Following(user=user, thread=thread)
+                f.save()
 
     elif WEBSITE == 'squadbox':
         recipients = []
         tags = None
         tag_objs = None
-    
+    logger.debug(recipients)
     return p, thread, recipients, tags, tag_objs
 
 def insert_post_web(group_name, subject, tag_info, message_text, user):
