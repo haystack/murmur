@@ -1065,9 +1065,13 @@ def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_
     p = Post(msg_id=msg_id, author=user, poster_email=sender_addr, forwarding_list=forwarding_list, 
             subject=stripped_subj, post=message_text, group=group, thread=thread, status=post_status, 
             poster_name=sender_name, verified_sender=verified, perspective_data=perspective_data)
+
     p.save()
     if WEBSITE == 'murmur':
+
+        group_members = MemberGroup.objects.filter(group=group)
         tag_info = map(encode_tags, tag_info)
+
         for tag in tag_info:
             _create_tag(group, thread, tag['name'], tag['color'])
         tags = list(extract_hash_tags(message_text))
@@ -1077,25 +1081,45 @@ def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_
 
         tag_objs = Tag.objects.filter(tagthread__thread=thread)
         tags = list(tag_objs.values('name', 'color'))
-        group_members = MemberGroup.objects.filter(group=group)
         recipients = []
-        for m in group_members:
-            # print "create post", user.email
-            print "donotsend", m.member.email
-            dm = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=m.member)
-            blockingMode = getattr(m, 'tag_blocking_mode')
-            if dm.exists():
-               continue 
-            elif not m.no_emails and m.member.email != sender_addr:
-                muted_tags = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member)
-                if blockingMode:
-                    if not muted_tags.exists():
-                        recipients.append(m.member.email)
+        is_moderated = True # TODO: check if mailing list group is moderated
+
+        if is_moderated:
+            moderators = list(group_members.filter(moderator=True))
+            
+            for mod in moderators:
+                recipients.append(mod.member.email)
+            
+            try:
+                mail = MailResponse(From = sender_addr,Subject = "Post Request Pending")
+                mail.Html = 'You are receiving this message because there is a pending post request in the Murmur group %s. View post <a href="/thread?group_name={{ %s }}&tid={{%s}}">here</a>. <br />' %(group,group,p.msg_id)
+
+                for email in recipients:
+                    relay_mailer.deliver(mail, To = email)
+                    logger.debug(mail.Html)
+    
+            except Exception, e:
+                logger.debug(e)
+                send_error_email(group, e, sender_addr)
+
+        else:
+            for m in group_members:
+                # print "create post", user.email
+                print "donotsend", m.member.email
+                dm = DoNotSendList.objects.filter(group=group, user=user, donotsend_user=m.member)
+                blockingMode = getattr(m, 'tag_blocking_mode')
+                if dm.exists():
+                    continue 
+                elif not m.no_emails and m.member.email != sender_addr:
+                    muted_tags = MuteTag.objects.filter(tag__in=tag_objs, group=group, user=m.member)
+                    if blockingMode:
+                        if not muted_tags.exists():
+                            recipients.append(m.member.email)
+                    else:
+                        if len(tags) > 0 and len(muted_tags) < len(tags):
+                            recipients.append(m.member.email)
                 else:
-                    if len(tags) > 0 and len(muted_tags) < len(tags):
-                        recipients.append(m.member.email)
-            else:
-                recipients.append(m.member.email)
+                    recipients.append(m.member.email)
         
         if user:
             recipients.append(user.email)
@@ -1108,6 +1132,7 @@ def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_
         tag_objs = None
     
     return p, thread, recipients, tags, tag_objs
+
 
 def insert_post_web(group_name, subject, tag_info, message_text, user):
     res = {'status':False}
