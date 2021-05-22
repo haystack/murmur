@@ -205,7 +205,6 @@ def thread(request):
 		member_group = MemberGroup.objects.filter(member=user, group=group)
 		is_member = member_group.exists()
 
-
 		modal_data = None
 
 		if is_member and (member_group[0].moderator or member_group[0].admin):
@@ -225,9 +224,9 @@ def thread(request):
 			elif WEBSITE == 'squadbox':
 				admin = MemberGroup.objects.get(group=group, admin=True)
 				thread_to = admin.member.email
-
+			# TODO: Remove post_status
 			return {'user': request.user, 'groups': groups, 'thread': res, 'thread_to' : thread_to, 
-					'post_id': post_id, 'active_group': active_group, 'website' : WEBSITE, 
+					'post_id': post_id, 'post_status': "unapproved", 'active_group': active_group, 'website' : WEBSITE, 
 					'active_group_role' : role, 'groups_links' : groups_links, 'modal_data' : modal_data,
 					'mod_edit_wl_bl' : group.mod_edit_wl_bl}
 		else:
