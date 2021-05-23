@@ -26,10 +26,24 @@
 					{% endif %}
 				{% endif %}
 				<div>
-					<a href="/posts?group_name={{ active_group.name }}"><button type="button" style="margin: 5px;">View Posts</button></a>
-					<a href="/groups/{{ active_group.name }}"><button type="button" style="margin: 5px;">Group Info</button></a>
+					<div>
+						<a href="/posts?group_name={{ active_group.name }}"><button type="button" style="margin: 5px;">View Posts</button></a>
+						<a href="/groups/{{ active_group.name }}"><button type="button" style="margin: 5px;">Group Info</button></a>
+						<img src="/static/css/third-party/images/check.svg" class="mod-btn mr-1">
+						<img src="/static/css/third-party/images/block.svg" class="mod-btn">
+					</div>
 					<br>
-					<h3><span id="post-subject">{{ thread.post.subject }}</span></h3>
+					<h3>
+						{% if thread_tags.tags|length > 0 %}
+                        <div class="tag-container mr-1">
+                          {% for tag in thread_tags.tags %}
+                          <span class="label2 mr-2"
+                            style="background-color: #{{tag.color}}; float: left; position: relative; top: 5px;">{{tag.name}}</span>
+                          {% endfor %}
+                        </div>
+                      	{% endif %}
+						<span id="post-subject">{{ thread.post.subject }}</span>
+					</h3>
 					<span class="strong">From: </span> 
 					<span class="strong-gray" id="post-from">{{ thread.post.from }} </span>
 					{% if thread.post.verified %}
@@ -61,6 +75,15 @@
 			<div id="highlight_post">
 			{% else %}
 			<div>
+			{% endif %}
+			{% if post_status == "unapproved" %}
+				<div class="post-tag-container-mod mb-2">
+					<ul id="tag-input-list" class="m-0">
+						<li class="tag-input-container">
+							<input id="tag-input" class="tag-input" type="text" name="tags" placeholder="Add tags">
+						</li>
+					</ul>
+				</div>
 			{% endif %}
 				{% autoescape off %}{{ thread.post.text }}{% endautoescape %}
 			</div>
@@ -120,15 +143,6 @@
 					</div>
 				</div>
 			{% endfor %}
-			{% elif post_status == "unapproved" %}
-				<div class="post-tag-container">
-					<p class="strong mb-1">Tags : </p>
-					<ul id="tag-input-list" class="m-0 mr-2">
-						<li class="tag-input-container">
-							<input id="tag-input" class="tag-input" type="text" name="tags" placeholder="Add tags">
-						</li>
-					</ul>
-				</div>
 			{% endif %}
 		{% if user.is_authenticated %}
 			{% if post_status == "approved" %}
@@ -152,7 +166,13 @@
 
 
 {% block customjs %}
-	<script type="text/javascript" src="/static/javascript/murmur/thread_page.js"></script>
+	<script type="text/javascript">
+		django_tag_data = {{ tag_data|safe }};
+	</script>
+	<script type="text/javascript">
+		django_thread_tags = {{ thread_tags|safe }};
+	</script>
+	<script type="module" src="/static/javascript/murmur/thread_page.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/ckeditor/ckeditor.js"></script>
 {% endblock %}

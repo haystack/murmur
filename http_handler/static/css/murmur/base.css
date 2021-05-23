@@ -844,7 +844,6 @@ blockquote {
 
 .tag-input {
 	width: 100%;
-	height: 100%;
 	border: none;
 }
 
@@ -862,18 +861,25 @@ blockquote {
 	padding: 0;
 	border: 1px solid #d4d4d4;
 }
+
+.tag-items-mod {
+	display: flex;
+	flex-wrap: wrap;
+	list-style-type: none;
+	padding: 0;
+	border: 1px solid #d4d4d4;
+}
   
-.tag-items .tag-item {
-	display: inline-block;
+.tag-items .tag-item, .tag-items-mod .tag-item {
+	display: block;
+	box-sizing: content-box;
 	padding: 10px;
 	cursor: pointer;
 	background-color: #fff;
-	border-bottom: 1px solid #d4d4d4;
-	min-width: 100%;
 	width: auto;
 }
 
-.tag-items .tag-item:hover {
+.tag-items .tag-item:hover, .tag-items-mod .tag-item:hover {
 	/*when hovering an titem:*/
 	background-color: #e9e9e9;
 }
@@ -897,6 +903,15 @@ blockquote {
 	display: flex;
 	max-width: 40%;
 	flex-flow: column wrap;
+}
+
+.post-tag-container-mod {
+	display: flex;
+	flex-flow: column wrap;
+}
+
+.mod-btn {
+	cursor: pointer;
 }
 
 .tag-label-input {

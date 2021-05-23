@@ -129,7 +129,7 @@ def post_list(request):
 			group_name = active_group['name']
 
 			tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p')
-		
+			logger.debug(tag_info)
 		if active_group['name'] == 'No Groups Yet':
 			return redirect('/group_list')
 		
@@ -141,12 +141,10 @@ def post_list(request):
 			try:
 				threads = Thread.objects.filter(group=group)
 				threads = paginator(request.GET.get('page'), threads)
-				
 				engine.main.list_posts_page(threads, group, res, user=user, format_datetime=False, return_replies=False, text_limit=250)
 			except Exception, e:
 				print e
 				res['code'] = msg_code['UNKNOWN_ERROR']
-			logger.debug(res)
 
 			member_info = None
 
@@ -161,7 +159,7 @@ def post_list(request):
 				for tag in tag_info:
 					tag.muted = tag.mutetag_set.filter(user=user, group=group).exists()
 					tag.followed = not tag.muted
-					
+			logger.debug(res)
 			return {'user': request.user, 'groups': groups, 'posts': res, 'active_group': active_group, "tag_info": tag_info, 
 						"member_info": member_info, 'is_member': is_member}
 		else:
@@ -196,7 +194,11 @@ def thread(request):
 		return redirect('/404?e=thread')
 	
 	group = thread.group
-	
+	tag_info = Tag.objects.filter(group=group).annotate(num_p=Count('tagthread')).order_by('-num_p').values('name', 'color')
+	tag_lists = map(engine.main.encode_tags,tag_info)
+	tag_data = {'tags' : tag_lists}
+	thread_tags = {'tags' : map(engine.main.encode_tags, list(Tag.objects.filter(tagthread__thread=thread).values('name', 'color')))}
+
 	if request.user.is_authenticated:
 		user = get_object_or_404(UserProfile, email=request.user.email)
 		groups = Group.objects.filter(membergroup__member=user).values("name")
@@ -226,9 +228,10 @@ def thread(request):
 				thread_to = admin.member.email
 			# TODO: Remove post_status
 			return {'user': request.user, 'groups': groups, 'thread': res, 'thread_to' : thread_to, 
-					'post_id': post_id, 'post_status': "unapproved", 'active_group': active_group, 'website' : WEBSITE, 
-					'active_group_role' : role, 'groups_links' : groups_links, 'modal_data' : modal_data,
-					'mod_edit_wl_bl' : group.mod_edit_wl_bl}
+					'post_id': post_id, 'post_status': "unapproved", 'tag_info': tag_lists, 
+					'thread_tags': thread_tags, 'tag_data': json.dumps(tag_data), 'active_group': active_group, 
+					'website' : WEBSITE, 'active_group_role' : role, 'groups_links' : groups_links, 
+					'modal_data' : modal_data, 'mod_edit_wl_bl' : group.mod_edit_wl_bl}
 		else:
 			if active_group['active']:
 				request.session['active_group'] = None

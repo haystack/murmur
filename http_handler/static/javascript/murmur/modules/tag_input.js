@@ -1,80 +1,87 @@
 // AUTOCOMPLETE
 function autocomplete(tagInput) {
 	/* Listener for tag input box to handle key press actions (e.g. navigating autocomplete tags, navigating added tags) */
-	displayTags(tagInput.elem.value); // Displays all tags when input string is empty (i.e. "")
-	addActiveAutocomplete([], tagInput.currentAutocompleteFocus); // Initially no autocomplete tag item is active/highlighted
+	displayTags(tagInput.elem.value, tagInput); // Displays all tags when input string is empty (i.e. "")
+	addActiveListTag([], tagInput.currentAutocompleteFocus); // Initially no autocomplete tag item is active/highlighted
 
 	let doc = $(document).get(0);
 	tagInput.elem.addEventListener("input", function(e) { // Listen to user input changes
 		if (this.value.length === 0) tagInput.currentAutocompleteFocus = -1;
 		else tagInput.currentAutocompleteFocus = 0;
-		displayTags(this.value);
-		let autocompleteItems = getAutocompleteItems(this.id),
+		displayTags(this.value, tagInput);
+		let tagListItems = geTagListItems(this.id, tagInput),
 			tagItems = getTagItems(tagInput.container);
-		addActiveAutocomplete(autocompleteItems, tagInput.currentAutocompleteFocus);
+		addActiveListTag(tagListItems, tagInput);
 		addActiveTags(tagItems, tagInput);
 	});
 
-  	// Close lists when someone clicks out of input
-	doc.addEventListener("click", (e) => {
-		if (e.target != tagInput.elem) {
-			tagInput.currentAutocompleteFocus = -1;
-			closeAllLists(null, tagInput);
-		}
-	});
-
-	// Enclosed functions to pass down the variables from autocomplete call
-	function displayTags(val=null) {
-		closeAllLists(null, tagInput);
-		// Create container for list items and add to parent container 
-		let doc = $(document).get(0);
-		let autocompleteList = doc.createElement("UL");
-		autocompleteList.setAttribute("id", tagInput.elem.id + "autocomplete-list");
-		autocompleteList.setAttribute("class", "tag-items");
-		tagInput.elem.parentNode.appendChild(autocompleteList);
-		for (let i = 0; i < tagInput.tags.length; i++) {
-			if (!val || tagInput.tags[i]['name'].substr(0, val.length).toUpperCase() == val.toUpperCase()) { // Check if input value matches each word
-				if (!tagInput.set.has(tagInput.tags[i]['name'])) { // only autocomplete tags not already added
-					// Add autocomplete item container to list 
-					let autocompleteItem = doc.createElement("LI");
-					autocompleteItem.setAttribute("data-tagName", tagInput.tags[i]['name']);
-					autocompleteItem.setAttribute("data-tagColor", tagInput.tags[i]['color']);
-					autocompleteItem.setAttribute("class", "tag-item");
-	
-					// Add tag to item container
-					let tagItem = doc.createElement("DIV");
-					tagItem.setAttribute("class", "tag-label-autocomplete");
-					tagItem.setAttribute("style", "background-color: #" + tagInput.tags[i]['color'] + ";");
-					tagItem.innerHTML = tagInput.tags[i]['name'];
-	
-					autocompleteItem.appendChild(tagItem);
-					
-					autocompleteItem.addEventListener("click", function(e) { // Sets input to selected list item
-						let tagName = this.getAttribute("data-tagName"),
-							tagColor = this.getAttribute("data-tagColor");
-						tagInput.elem.value = "";
-						addTagToInput(tagName, tagColor, tagInput);
-					});
-						autocompleteList.appendChild(autocompleteItem);
-					}
+	if (tagInput.context !== "moderation") {
+		// Close lists when someone clicks out of input
+		doc.addEventListener("click", (e) => {
+			if (e.target != tagInput.elem) {
+				tagInput.currentAutocompleteFocus = -1;
+				closeAllLists(null, tagInput);
 			}
+		});
+	}
+}
+
+// Enclosed functions to pass down the variables from autocomplete call
+function displayTags(val=null, tagInput) {
+	closeAllLists(null, tagInput);
+	// Create container for list items and add to parent container 
+	let doc = $(document).get(0);
+	let tagList = doc.createElement("UL");
+	if (tagInput.context !== "moderation") {
+		tagList.setAttribute("id", tagInput.elem.id + "-autocomplete-list");
+		tagList.setAttribute("class", "tag-items");
+		tagInput.elem.parentNode.appendChild(tagList);
+	} else {
+		tagList.setAttribute("id", tagInput.elem.id + "-mod-list");
+		tagList.setAttribute("class", "tag-items-mod");
+		tagInput.elem.parentNode.parentNode.parentNode.appendChild(tagList);
+	}
+	for (let i = 0; i < tagInput.tags.length; i++) {
+		if (!val || tagInput.tags[i]['name'].substr(0, val.length).toUpperCase() == val.toUpperCase()) { // Check if input value matches each word
+			if (!tagInput.set.has(tagInput.tags[i]['name'])) { // only autocomplete tags not already added
+				// Add autocomplete item container to list 
+				let tagListItem = doc.createElement("LI");
+				tagListItem.setAttribute("data-tagName", tagInput.tags[i]['name']);
+				tagListItem.setAttribute("data-tagColor", tagInput.tags[i]['color']);
+				tagListItem.setAttribute("class", "tag-item");
+
+				// Add tag to item container
+				let tagItem = doc.createElement("DIV");
+				tagItem.setAttribute("class", "tag-label-autocomplete");
+				tagItem.setAttribute("style", "background-color: #" + tagInput.tags[i]['color'] + ";");
+				tagItem.innerHTML = tagInput.tags[i]['name'];
+
+				tagListItem.appendChild(tagItem);
+				
+				tagListItem.addEventListener("click", function(e) { // Sets input to selected list item
+					let tagName = this.getAttribute("data-tagName"),
+						tagColor = this.getAttribute("data-tagColor");
+					tagInput.elem.value = "";
+					addTagToInput(tagName, tagColor, tagInput);
+				});
+					tagList.appendChild(tagListItem);
+				}
 		}
 	}
 }
 
 // Handles key presses for the tag input
 function handleTagInputKeys(e) {
-	let autocompleteItems = getAutocompleteItems(this.elem.id),
+	let tagListItems = geTagListItems(this.elem.id, this),
 		tagItems = getTagItems(this.container);
 	if (e.keyCode == 40) { // DOWN arrow key 
 		e.preventDefault();
 		this.currentAutocompleteFocus++;
-		console.log("acfocus2: " + this.currentAutocompleteFocus);
-		addActiveAutocomplete(autocompleteItems, this);
+		addActiveListTag(tagListItems, this);
 	} else if (e.keyCode == 38) { // UP arrow key
 		e.preventDefault();
 		this.currentAutocompleteFocus--;
-		addActiveAutocomplete(autocompleteItems, this);
+		addActiveListTag(tagListItems, this);
 	} else if (e.keyCode == 37) { // LEFT arrow key
 		if (tagItems.length > 0 && this.elem.value.length === 0) {
 			e.preventDefault();
@@ -97,9 +104,11 @@ function handleTagInputKeys(e) {
 		}
 	} else if (e.keyCode == 13) { // ENTER key simulates click on list item
 		e.preventDefault();
-		if (autocompleteItems.length > 0 && this.currentAutocompleteFocus > -1) {
-			if (autocompleteItems) autocompleteItems[this.currentAutocompleteFocus].click();
-		} else if (this.elem.value.length > 0 && autocompleteItems.length == 0) { // check if no autocomplete suggestions -> meaning new tag creation
+		if (tagListItems.length > 0 && this.currentAutocompleteFocus > -1) {
+			if (tagListItems) tagListItems[this.currentAutocompleteFocus].click();
+		} else if (this.elem.value.length > 0 
+					&& tagListItems.length == 0 
+					&& this.context !== "moderation") { // check if no autocomplete suggestions -> meaning new tag creation
 			let newTagName = this.elem.value,
 				newTagColor = generateRandomColor();
 				this.elem.value = "";
@@ -109,9 +118,9 @@ function handleTagInputKeys(e) {
 		removeActiveTags(tagItems);
 		this.currentTagFocus = -1;
 		if (this.currentAutocompleteFocus > -1) e.preventDefault(); // If no input for adding tag, then allow default tagging to navigate
-		if (autocompleteItems.length > 0 && this.currentAutocompleteFocus > -1) {
-			if (autocompleteItems) autocompleteItems[this.currentAutocompleteFocus].click();
-		} else if (this.elem.value.length > 0 && autocompleteItems.length == 0) { // check if no autocomplete suggestions -> meaning new tag creation
+		if (tagListItems.length > 0 && this.currentAutocompleteFocus > -1) {
+			if (tagListItems) tagListItems[this.currentAutocompleteFocus].click();
+		} else if (this.elem.value.length > 0 && tagListItems.length == 0) { // check if no autocomplete suggestions -> meaning new tag creation
 			let newTagName = this.elem.value,
 				newTagColor = generateRandomColor();
 				this.elem.value = "";
@@ -176,6 +185,9 @@ function addTagToInput(tagName, tagColor, tagInput) {
 	tagInput.list.insertBefore(tagInputItem, tagInput.list.children[tagInput.list.children.length-1]);
 	tagInput.set.add(tagName);
 	closeAllLists(null, tagInput);
+	if (tagInput.context === "moderation") {
+		displayTags(tagInput.elem.value, tagInput);
+	}
 }
 
 function deleteSelectedTag(tagItems, tagInput) {
@@ -195,17 +207,16 @@ function deleteSelectedTag(tagItems, tagInput) {
 }
 
 // Makes item active in autocomplete dropdown
-function addActiveAutocomplete(items, tagInput) {
+function addActiveListTag(items, tagInput) {
 	if (items.length === 0 || (tagInput.currentAutocompleteFocus == -1 && items.length === 0)) return false;
-	removeActiveAutocomplete(items);
-
+	removeActiveListTag(items);
 	if (tagInput.currentAutocompleteFocus >= items.length) tagInput.currentAutocompleteFocus = 0;
 	if (tagInput.currentAutocompleteFocus < 0) tagInput.currentAutocompleteFocus = (items.length - 1);
 	items[tagInput.currentAutocompleteFocus].setAttribute("id","autocomplete-active");
 }
 
 // Remove active class from autocomplete items
-function removeActiveAutocomplete(items) {
+function removeActiveListTag(items) {
 	for (var i = 0; i < items.length; i++) {
 		items[i].removeAttribute("id");
 	}
@@ -230,9 +241,14 @@ function addActiveTags(items, tagInput) {
 }
 
 // Gets the current autcomplete items
-function getAutocompleteItems(inputId) {
+function geTagListItems(inputId, tagInput) {
 	let doc = $(document).get(0);
-	let items = doc.getElementById(inputId + "autocomplete-list");
+	let items;
+	if (tagInput.context !== "moderation") {
+		items = doc.getElementById(inputId + "-autocomplete-list");
+	} else {
+		items = doc.getElementById(inputId + "-mod-list");
+	}
 	if (items) items = items.getElementsByTagName("LI");
 	else items = []
 	return items
@@ -259,7 +275,12 @@ function removeActiveTags(items) {
 
 // Closes all lists except for selected list
 function closeAllLists(element=null, tagInput) {
-	let itemsToClose = $(".tag-items");
+	let itemsToClose;
+	if (tagInput.context !== "moderation") {
+		itemsToClose = $(".tag-items");
+	} else {
+		itemsToClose = $(".tag-items-mod");
+	}
 	for (let i = 0; i < itemsToClose.length; i++) {
 		if (element != itemsToClose[i] && element != tagInput.elem) {
 			itemsToClose[i].parentNode.removeChild(itemsToClose[i]);
@@ -276,4 +297,4 @@ function generateRandomColor() {
     return randomColor;
 }
 
-export { autocomplete, getTagItems, removeActiveTags, closeAllLists, handleTagInputKeys };
+export { autocomplete, getTagItems, removeActiveTags, closeAllLists, displayTags, addTagToInput, handleTagInputKeys };

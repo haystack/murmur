@@ -13,12 +13,15 @@ $(document).ready(function(){
 		 });
 	});
 	
-	const userName = $.trim($('#user_email').text()),
-		post = $("#btn-post"),
-		subjectInput = $("#new-post-subject").get(0),
-		subjectInputHeight = 38,
-		tagInfo = [];
+	let userName = $.trim($('#user_email').text());
+	let post = $("#btn-post");
+	let subjectInput = {
+		'elem': $("#new-post-subject").get(0),
+		'height': 38,
+	}
+	let tagInfo = [];
 	const tagInput = {
+		context: "autocomplete",
 		container: $(".tag-input-container").get(0),
 		elem: $("#tag-input").get(0),
 		tags: django_tag_data["tags"],
@@ -28,7 +31,7 @@ $(document).ready(function(){
 		currentTagFocus: -1 // negative index of tag input item currently focused ex: [tag1,tag2,tag3,{tagInput}], {} = focused
 	}
 
-	let insert_post = 
+	const insert_post = 
 		function(params){
 			if (tagInput.set.size == 0 && tagInput.elem.value.length > 0) {
 				alert("Please press enter/tab after tag in tag input to add/create tag or remove any input if no tags desired.");
@@ -36,7 +39,7 @@ $(document).ready(function(){
 				let subjectText = $("#new-post-subject").val();
 				tagInput.set.forEach((tagName) => {
 					let tagElement = document.getElementById(tagName+"-tag-input");
-						tagColor = tagElement.getAttribute("data-tagColor");
+					let tagColor = tagElement.getAttribute("data-tagColor");
 					subjectText = "[" + tagName + "]" + subjectText.substr(0);
 					tagInfo.push({"name": tagName, "color": tagColor});
 				});
@@ -72,7 +75,7 @@ $(document).ready(function(){
 	tagInput.elem.addEventListener("keydown", handleTagInputKeys.bind(tagInput));
 
 	/* Listener for subject line to resize according to the size of the text */
-	subjectInput.addEventListener("input", resizeSubjectInput, false);
+	subjectInput.elem.addEventListener("input", resizeSubjectInput.bind(subjectInput), false);
 
 	function bind_buttons() {
  		post.unbind("click");
@@ -105,12 +108,12 @@ function notify(res, on_success){
 
 // Resizes the subject input element
 function resizeSubjectInput() {
-	if (subjectInput.value == '') {
-		subjectInput.setAttribute("style", "height:" + subjectInputHeight + "px;overflow-y:hidden;");
+	if (this.elem.value == '') {
+		this.elem.setAttribute("style", "height:" + this.height + "px;overflow-y:hidden;");
 	} else {
-		subjectInput.setAttribute("style", "height:" + (subjectInput.scrollHeight) + "px;overflow-y:hidden;");
-		subjectInput.style.height = "auto";
-		subjectInput.style.height = (subjectInput.scrollHeight) + "px";
+		this.elem.setAttribute("style", "height:" + (this.elem.scrollHeight) + "px;overflow-y:hidden;");
+		this.elem.style.height = "auto";
+		this.elem.style.height = (this.elem.scrollHeight) + "px";
 	}
 }
 	
