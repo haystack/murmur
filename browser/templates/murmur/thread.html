@@ -16,7 +16,7 @@
 				<input type="hidden" id="no_emails" name="no_emails" value="{{ thread.no_emails }}" readonly>
 				<input type="hidden" id="always_follow" name="always_follow" value="{{ thread.always_follow }}" readonly>
 				{% if user.is_authenticated %}
-					{% if thread.member %}
+					{% if thread.member and post_status == "approved" %}
 						<div style="float:right">
 							<button type="button" id="btn-follow" style="margin: 5px; display: none;">Subscribe</button>
 							<button type="button" id="btn-unfollow" style="margin: 5px; display: none;">Unsubscribe</button>
@@ -26,10 +26,24 @@
 					{% endif %}
 				{% endif %}
 				<div>
-					<a href="/posts?group_name={{ active_group.name }}"><button type="button" style="margin: 5px;">View Posts</button></a>
-					<a href="/groups/{{ active_group.name }}"><button type="button" style="margin: 5px;">Group Info</button></a>
+					<div>
+						<a href="/posts?group_name={{ active_group.name }}"><button type="button" style="margin: 5px;">View Posts</button></a>
+						<a href="/groups/{{ active_group.name }}"><button type="button" style="margin: 5px;">Group Info</button></a>
+						<img src="/static/css/third-party/images/check.svg" class="mod-btn mr-1">
+						<img src="/static/css/third-party/images/block.svg" class="mod-btn">
+					</div>
 					<br>
-					<h3><span id="post-subject">{{ thread.post.subject }}</span></h3>
+					<h3>
+						{% if thread_tags.tags|length > 0 %}
+                        <div class="tag-container mr-1">
+                          {% for tag in thread_tags.tags %}
+                          <span class="label2 mr-2"
+                            style="background-color: #{{tag.color}}; float: left; position: relative; top: 5px;">{{tag.name}}</span>
+                          {% endfor %}
+                        </div>
+                      	{% endif %}
+						<span id="post-subject">{{ thread.post.subject }}</span>
+					</h3>
 					<span class="strong">From: </span> 
 					<span class="strong-gray" id="post-from">{{ thread.post.from }} </span>
 					{% if thread.post.verified %}
@@ -58,13 +72,22 @@
 			</div>
 			<hr>
 			{% if post_id == thread.post.id %}
-				<div id="highlight_post">
+			<div id="highlight_post">
 			{% else %}
 			<div>
 			{% endif %}
+			{% if post_status == "unapproved" %}
+				<div class="post-tag-container-mod mb-2">
+					<ul id="tag-input-list" class="m-0">
+						<li class="tag-input-container">
+							<input id="tag-input" class="tag-input" type="text" name="tags" placeholder="Add tags">
+						</li>
+					</ul>
+				</div>
+			{% endif %}
 				{% autoescape off %}{{ thread.post.text }}{% endautoescape %}
 			</div>
-			
+			{% if post_status == "approved" %}
 			<span id="post-{{ thread.post.id }}">
 				{% if thread.post.liked %}
 					<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ thread.post.likes }}</span>
@@ -80,59 +103,57 @@
 				
 				<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{thread.post.id}}">Permalink</a>
 				</small>
-				
 			</span>	
-			<BR>
-				<BR>
 			{% for reply in thread.replies %}
-				<div class="reply">
-					<div class="main-area-content">
-						<span class="strong">{{ reply.from }}</span> 
-						on {{ reply.timestamp }}
-						{% if reply.attachments %}
-							| Attachments:
-							{% for name, url in reply.attachments %}
-								<a href="{{url}}">{{name}}</a>
-							{% endfor %}
-						{% endif %}
-						<br>
-						
-						{% if post_id == reply.id %}
-							<div id="highlight_post">
+				<div class="main-area-content">
+					<span class="strong">{{ reply.from }}</span> 
+					on {{ reply.timestamp }}
+					{% if reply.attachments %}
+						| Attachments:
+						{% for name, url in reply.attachments %}
+							<a href="{{url}}">{{name}}</a>
+						{% endfor %}
+					{% endif %}
+					<br>
+					
+					{% if post_id == reply.id %}
+					<div id="highlight_post">
+					{% else %}
+					<div>
+					{% endif %}
+					
+						{% autoescape off %}{{ reply.text }}{% endautoescape %}
+					</div>
+					
+					<span id="post-{{ reply.id }}">
+						{% if reply.liked %}
+							<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ reply.likes }}</span>
+							<small>
+								| 
+							<a style="cursor: pointer" onclick="unupvote('{{ reply.id }}', '{{ thread.thread_id }}'); return false;">Undo +1 Post</a> | 
 						{% else %}
-						<div>
+							<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ reply.likes }}</span>
+							<small>
+								| 
+							<a style="cursor: pointer" onclick="upvote('{{ reply.id }}', '{{ thread.thread_id }}'); return false;">+1 Post</a> | 
 						{% endif %}
-						
-							{% autoescape off %}{{ reply.text }}{% endautoescape %}
-						</div>
-						
-						<span id="post-{{ reply.id }}">
-							{% if reply.liked %}
-								<span class="label2" style="background-color: lightyellow; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ reply.likes }}</span>
-								<small>
-								 | 
-								<a style="cursor: pointer" onclick="unupvote('{{ reply.id }}', '{{ thread.thread_id }}'); return false;">Undo +1 Post</a> | 
-							{% else %}
-								<span class="label2" style="background-color: #ffffff; color: #3D7AA6; border: #3D7AA6 solid 1px;">+{{ reply.likes }}</span>
-								<small>
-								 | 
-								<a style="cursor: pointer" onclick="upvote('{{ reply.id }}', '{{ thread.thread_id }}'); return false;">+1 Post</a> | 
-							{% endif %}
-							<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{reply.id}}">Permalink</a>
-							</small>
-						</span>
+						<a href="/thread?group_name={{active_group.name}}&tid={{thread.thread_id}}&post_id={{reply.id}}">Permalink</a>
+						</small>
+					</span>
 					</div>
 				</div>
 			{% endfor %}
-		</div>
+			{% endif %}
 		{% if user.is_authenticated %}
-			{% if thread.member %}
-				<div class="main-area-content">
-					<textarea id="reply-text-input"></textarea>
-					<button type="button" id="btn-reply" style="margin-top:10px;">Reply</button>
-				</div>
-			{% else %}
-				<a href="/groups/{{ active_group.name }}">You must be a member to reply.</a>
+			{% if post_status == "approved" %}
+				{% if thread.member %}
+					<div class="main-area-content">
+						<textarea id="reply-text-input"></textarea>
+						<button type="button" id="btn-reply" style="margin-top:10px;">Reply</button>
+					</div>
+				{% else %}
+					<a href="/groups/{{ active_group.name }}">You must be a member to reply.</a>
+				{% endif %}
 			{% endif %}
 		{% else %}
 			<a href="/accounts/login">Login to reply</a>
@@ -145,7 +166,13 @@
 
 
 {% block customjs %}
-	<script type="text/javascript" src="/static/javascript/murmur/thread_page.js"></script>
+	<script type="text/javascript">
+		django_tag_data = {{ tag_data|safe }};
+	</script>
+	<script type="text/javascript">
+		django_thread_tags = {{ thread_tags|safe }};
+	</script>
+	<script type="module" src="/static/javascript/murmur/thread_page.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="/static/javascript/third-party/ckeditor/ckeditor.js"></script>
 {% endblock %}

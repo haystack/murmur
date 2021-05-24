@@ -1,3 +1,5 @@
+import { autocomplete, getTagItems, removeActiveTags, displayTags, addTagToInput, handleTagInputKeys } from './modules/tag_input.js';
+
 $(document).ready(function(){
 	
 	if ($("#highlight_post").length){
@@ -7,7 +9,7 @@ $(document).ready(function(){
 	if ($('#reply-text-input').length) {
 		CKEDITOR.replace( 'reply-text-input' );
 	}
-	
+
 	var gmail_quotes = $(".gmail_quote");
     var check = "---------- Forwarded message ----------";
 	
@@ -18,6 +20,36 @@ $(document).ready(function(){
     		$(this).wrap( "<div class='accordian'></div>" );
     	}
     });
+
+	const tagInput = {
+		context: "moderation",
+		container: $(".tag-input-container").get(0),
+		elem: $("#tag-input").get(0),
+		tags: django_tag_data["tags"],
+		list: $("#tag-input-list").get(0),
+		set: new Set(), // used to more efficiently determine if a certain tag exists 
+		currentAutocompleteFocus: -1, 
+		currentTagFocus: -1 // negative index of tag input item currently focused ex: [tag1,tag2,tag3,{tagInput}], {} = focused
+	}
+	const threadTags = django_thread_tags["tags"];
+	// Initially add original poster's tags for moderation into input
+	if (threadTags.length > 0) {
+		displayTags("", tagInput);
+		for (const tag of threadTags) {
+			addTagToInput(tag.name, tag.color, tagInput);
+		}
+	} else {
+	}
+
+	/* Listener for tag input box to moderate tags once it clicked and focused on */
+	tagInput.elem.addEventListener("focus", (event) => {
+		tagInput.currentTagFocus = -1;
+		removeActiveTags(getTagItems(tagInput.container));
+		autocomplete(tagInput);    
+	});
+
+	/* Listener for tag input box to handle key press actions (e.g. navigating moderation tags, navigating added tags) */
+	tagInput.elem.addEventListener("keydown", handleTagInputKeys.bind(tagInput));
     
     
  //   var block = $( ".moz-cite-prefix" ).next();

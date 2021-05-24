@@ -1,0 +1,30 @@
+<!-- Tag subcription template table -->
+<table id="tag-subscription-table" class="display" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th>Select</th>
+            <th>Tag</th>
+            <th>Description</th>
+            <th>Num Posts</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if tag_info %}
+            {% for tag in tag_info %}
+                <tr class="my_row">
+                    <!-- Select, Tag, Description, Number of Posts -->
+                    {% if settings.tag_blocking_mode %}
+                        <td align="center"><img src="/static/css/third-party/images/block.svg" class="inactive" data-type="tag-select" id ={{ tag.id }}></td>
+                    {% else %}
+                        <td align="center"><img src="/static/css/third-party/images/check.svg" class="inactive" data-type="tag-select" id ={{ tag.id }}></td>
+                    {% endif %}
+                    <td><label class="tag" id="tag_{{ forloop.counter0 }}" style="background-color: #{{ tag.color }}">{{ tag.name }}</label></td>
+                    <td>{{ tag.desc|default:"No description"}}</td>
+                    <td><span>{{ tag.num_p }} post(s)</span></td>
+                </tr>
+            {% endfor %}
+        {% else %}
+                <tr></tr>
+        {% endif %}							
+    </tbody>
+</table>	

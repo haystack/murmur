@@ -1,0 +1,48 @@
+{% extends "murmur/base.html" %}
+
+{% block customcss %}
+<link href="/static/DataTables/datatables.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<article id="feature-desc" class="translate-down mt-5">
+    <h4 class="feature-title p-2" style="background-color: indianred;">Tag Subscription</h4>
+    <h5 class="feature-heading mt-3">Filter your inbox with tags to get the inbox you desire</h5>
+    <p class="feature-subheading mt-3 mb-3">
+        Declutter your inbox through personalized tag subscription in every mailing list group. 
+        Simply select which tags you want to block or subscribe to in your settings.
+    </p>
+</article>
+<!-- Demo data (demo_info) for tags and emails can be modified in views.py index function -->
+<article id="feature-demo" class="d-flex translate-down mb-5">
+    <div class="demo-settings p-4">
+        <h4 class="txt-primary">Settings</h4>
+        <label class="d-block" for="block-mode">
+            <input class="mr-1" type="radio" id="block-mode" name="tag-mode" value="block-mode" checked>
+            Send me all emails except the following blocked tags
+        </label>
+        <label class="d-block mb-3" for="subscribe-mode">
+            <input class="mr-1" type="radio" id="subscribe-mode" name="tag-mode" value="subscribe-mode">
+            Send me no emails except the following subscribed tags
+        </label>
+        {% include "./tag_subscription_table.html" with tag_info=demo_info.tags settings=settings %}  
+    </div>
+    <ul class="demo-emails p-4">
+        <h4 class="txt-primary mb-3">Inbox</h4>
+        {% for email in demo_info.emails %}
+            <li class="sample-email p-3 mb-2">
+                {% for tag in email.tags %}
+                    <span class="label2 mr-1" style="background-color: #{{ tag.color }};">{{ tag.name }}</span>
+                {% endfor %}
+                <span id="demo-subject">{{ email.subject }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+</article>
+
+{% endblock %}
+
+{% block customjs %}
+    <script type="module" src="/static/javascript/murmur/demo.js"></script>   
+{% endblock %}
