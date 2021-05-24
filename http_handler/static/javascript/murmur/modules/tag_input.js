@@ -64,7 +64,7 @@ function displayTags(val=null, tagInput) {
 					tagInput.elem.value = "";
 					addTagToInput(tagName, tagColor, tagInput);
 				});
-					tagList.appendChild(tagListItem);
+				tagList.appendChild(tagListItem);
 				}
 		}
 	}
@@ -184,7 +184,10 @@ function addTagToInput(tagName, tagColor, tagInput) {
 
 	tagInput.list.insertBefore(tagInputItem, tagInput.list.children[tagInput.list.children.length-1]);
 	tagInput.set.add(tagName);
-	closeAllLists(null, tagInput);
+
+	if (tagInput.context !== "moderation") {
+		closeAllLists(null, tagInput);
+	}
 	if (tagInput.context === "moderation") {
 		displayTags(tagInput.elem.value, tagInput);
 	}
@@ -192,18 +195,24 @@ function addTagToInput(tagName, tagColor, tagInput) {
 
 function deleteSelectedTag(tagItems, tagInput) {
 	removeActiveTags(tagItems);
+	let doc = $(document).get(0);
 	if (Math.abs(tagInput.currentTagFocus) > tagItems.length) {
 		tagInput.currentTagFocus = -tagItems.length; // handles index beyond first tag elem
 	}
 	// ex: tagItems = [tag1,tag2,tag3,input] => target: tag3, index: 2 (-2) => 4 (tagItems.length) + -2 (tagFocus) = 2 as desired
 	let tag = tagItems[tagItems.length+tagInput.currentTagFocus];
+	let tagName = tag.dataset.tagname;
+	let tagColor = tag.dataset.tagcolor;
 	tag.remove();
 	tagInput.set.delete(tag.getAttribute("data-tagName"));
 	tagItems.splice(tagItems.length+tagInput.currentTagFocus, 1); // recountruct tag input items after removal
 	if (tagItems.length === 1) {
-		tagInput.currentTagFocus = -1; // if only one item left, most be tag input elem which needs tagFocus = -1
+		tagInput.currentTagFocus = -1; // if only one item left, must be tag input elem which needs tagFocus = -1
 	}
 	addActiveTags(tagItems, tagInput); // focus next item in the list
+	if (tagInput.context === "moderation") {
+		displayTags("", tagInput);
+	}
 }
 
 // Makes item active in autocomplete dropdown
@@ -230,7 +239,9 @@ function addActiveTags(items, tagInput) {
 		tagInput.elem.focus();
 	} else { // blur input (typing) in tag input if on tag and not entering input
 		tagInput.elem.blur();
-		closeAllLists(null, tagInput);
+		if (tagInput.context !== "moderation") {
+			closeAllLists(null, tagInput);
+		}
 	}
 	if (items.length === 0 || tagInput.currentTagFocus === -1) return false;
 

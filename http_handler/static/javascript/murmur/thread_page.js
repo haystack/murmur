@@ -34,11 +34,11 @@ $(document).ready(function(){
 	const threadTags = django_thread_tags["tags"];
 	// Initially add original poster's tags for moderation into input
 	if (threadTags.length > 0) {
+		displayTags("", tagInput);
 		for (const tag of threadTags) {
 			addTagToInput(tag.name, tag.color, tagInput);
 		}
 	} else {
-		displayTags("", tagInput);
 	}
 
 	/* Listener for tag input box to moderate tags once it clicked and focused on */
