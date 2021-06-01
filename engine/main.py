@@ -1093,10 +1093,10 @@ def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_
             try:
                 mail = MailResponse(From = sender_addr,Subject = "Post Request Pending")
                 mail.Html = 'You are receiving this message because there is a pending post request in the Murmur group %s. View post <a href="/thread?group_name={{ %s }}&tid={{%s}}">here</a>. <br />' %(group,group,p.msg_id)
+                mail.Body = 'You are receiving this message because there is a pending post request in the Murmur group %s. View post here: "/thread?group_name={{ %s }}&tid={{%s}}".' %(group,group,p.msg_id)
 
                 for email in recipients:
                     relay_mailer.deliver(mail, To = email)
-                    logger.debug(mail.Html)
     
             except Exception, e:
                 logger.debug(e)
