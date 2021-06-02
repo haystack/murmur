@@ -1082,7 +1082,7 @@ def _create_post(group, subject, tag_info, message_text, user, sender_addr, msg_
         tag_objs = Tag.objects.filter(tagthread__thread=thread)
         tags = list(tag_objs.values('name', 'color'))
         recipients = []
-        is_moderated = True # TODO: check if mailing list group is moderated
+        is_moderated = False # TODO: check if mailing list group is moderated
 
         if is_moderated:
             moderators = list(group_members.filter(moderator=True))
